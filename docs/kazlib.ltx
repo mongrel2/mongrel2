@@ -1,0 +1,4160 @@
+%
+% $Id: docs.ltx,v 1.74.2.10 2001/07/25 03:37:05 kaz Exp $
+% $Name: kazlib_1_20 $
+%
+
+\documentclass{article}
+\usepackage{makeidx}
+\usepackage[margin=1.0in]{geometry}
+\makeatletter
+\newcommand{\defsubsection}{\@startsection
+    {subsection}
+    {2}
+    {0pt}
+    {2.0ex plus 0.1ex minus 0.05ex}
+    {-0pt}
+    {\normalfont\normalsize\bfseries}}
+\newcommand{\defsubsubsection}{\@startsection
+    {subsection}
+    {3}
+    {0ex}
+    {2.0ex plus 0.1ex minus 0.05ex}
+    {1.0ex}
+    {\normalfont\normalsize\bfseries}}
+\renewcommand{\paragraph}{\@startsection
+    {paragraph}
+    {4}
+    {0ex}
+    {2.0ex plus 0.1ex minus 0.05ex}
+    {1.0ex}
+    {\normalsize\bfseries}}
+\makeatother
+\title{Kazlib---Reusable Components\\for C Programming}
+\author{Kaz Kylheku}
+\date{Release 1.20\\July 24, 2001}
+\makeindex
+\setcounter{tocdepth}{1}
+\setcounter{secnumdepth}{4}
+\begin{document}
+\catcode`\_=11
+\def\indextype#1{\index{#1@{\tt #1} type}}
+\def\indexmacro#1{\index{#1@{\tt #1} macro}}
+\def\indexobject#1{\index{#1@{\tt #1} object}}
+\def\indexfunc#1{\index{#1@{\tt #1} function}}
+\def\indexenum#1{\index{#1@{\tt #1} enum constant}}
+\def\synopsis{\paragraph*{Synopsis}}
+\def\constraints{\paragraph*{Constraints}}
+\def\description{\paragraph*{Description}}
+\def\example{\paragraph*{Example}}
+\maketitle
+\abstract{The aim of the Kazlib project is to provide a well-documented
+programming interface featuring commonly needed programming abstractions,
+accompanied by a high quality, portable reference implementation.
+Kazlib consists of four independent components: a list module, a hash table
+module, a dictionary module and an exception handling module. The reference
+implementations of the first three of these are based on, respectively, the
+following algorithms: doubly linked circular list with sentinel node,
+extendible hashing, and red-black tree.}
+\tableofcontents
+\section{Introduction}
+This document establishes the provisions required of an implementation of the
+Kazlib library, and describes a reference implementation thereof.
+This document specifies
+\begin{itemize}
+\item the names and types of identifiers and preprocessor symbols made
+    available by each component;
+\item identifier name spaces reserved for future use by each component;
+\item the interface syntax and semantics of each component operation;
+\item the conditions required for the well-defined execution of each operation;
+\item the externally visible behavior of each component, including global
+    side effects and the effects on the subject data structures;
+
+\item and the implementation language of Kazlib.
+\end{itemize}
+Furthermore, this document describes, but does not specify
+\begin{itemize}
+\item the implementation details of structure objects manipulated by the
+    operations of each component;
+\item objects and functions that are defined by the implementation of
+    each component but are not externally visible;
+\item the algorithms and implementation details of the operations.
+\end{itemize}
+Finally, this document does {\em not\/} specify or describe
+\begin{itemize}
+\item the specific choices for parameters which may be adjusted by an
+    installation or implementation of Kazlib.
+\item the size of any data structure which will exceed the capacity of
+    a particular installation.
+\item the mechanisms or procedures for the translation of Kazlib and
+    their integration with other translation units.
+\end{itemize}
+
+\section{References}
+\label{sec:references}
+
+\begin{trivlist}
+\item ISO 9899:1990, {\it Programming Languages---C.}
+\item {\it Introduction to Algorithms}, Thomas H. Cormen, Charles E.
+Leiserson, Ronald L. Rivest, eighth printing, 1992.
+\end{trivlist}
+
+\section{Definitions and conventions}
+The following terms shall be interpreted in accordance with the definitions
+below. Other terms appearing in this document shall be defined upon their
+first mention, indicated by {\it italic\/} type. Any terms not explicitly
+defined in this document should be interpreted according to ISO 9899-1990,
+clause 3. Failing that, they should be interpreted according to other works
+listed in section \ref{sec:references}.
+\nobreak
+\defsubsection{implementation}: A library and set of C language headers
+which conforms to the specifications of this Document.
+\index{production mode}
+\indexmacro{NDEBUG}
+\defsubsection{production mode}: A mode of operating the implementation
+in such a way that maximum efficiency of execution is achieved at the expense
+of the verification of constraints. An implementation shall provide
+a production mode, which is enabled in an implementation-defined
+manner.\footnote{An implementation may have to supply a separate set of
+libraries for production and for verification use, for instance. The
+manner of selecting libraries varies with each programming environment.}  Each
+translation unit of the program which includes a Kazlib header shall ensure that the macro {\tt
+NDEBUG} is defined prior to the inclusion of that header, otherwise the
+implementation is not said to be operated in production mode.
+\index{verification mode}
+\defsubsection{verification mode}: A mode of operating the implementation in
+such a way that maximum error checking is obtained at the cost of
+execution efficiency. An implementation shall provide a verification mode, which
+is enabled in an implementation-defined manner. If any translation unit which
+includes a Kazlib header defines the macro name {\tt NDEBUG}\footnote{The
+intent is that the standard {\tt assert} macro may be exploited
+by the implementation's headers for the purpose of provisioning verification
+mode.} prior to including that header, the implementation is not said to be in
+verification mode. The least requirements of a Kazlib implementation operated
+in verification mode, is that it shall stop translation or execution of any
+program which violates a constraint. 
+\index{undefined behavior}
+\defsubsection{undefined behavior}: Behavior of a program, upon violation of a
+requirement with respect to the use of Kazlib, or upon use of corrupt or
+incorrect data, for which this document does not impose any requirements.
+Additional undefined behaviors are:
+\begin{itemize}
+\item any behavior that is undefined by the C language standard;
+\item evaluation of an object whose contents are indeterminate;
+\item a violation of any explicit constraint stated in
+this document, if that program was built using Kazlib in production
+mode;\footnote{The intent is that violations of constraints are diagnosed by
+the implementation in verification mode, and hence do not lead to undefined
+behavior.}
+\item a violation of any requirement stated in this document that
+is not designated as a constraint, and is introduced using the word
+{\it shall}; and
+\item any other construct for which no definition of behavior can be deduced
+from this document.
+\end{itemize}
+If a program invokes undefined behavior of any kind, the Kazlib implementation
+is absolved from any requirements as to what events should ensue.  The
+implementation may respond by invoking undefined behavior in the C language
+sense, or it may detect the behavior and terminate with a diagnostic message.
+\defsubsection{implementation-defined}: An adjective which, when appearing
+in the description of a feature, represents a requirement that the
+implementor must supply a definition, and document that
+definition. This adjective is applied to both behavior and to results.
+Implementation-defined behavior is behavior which depends on the
+characteristics of an implementation.\footnote{It is not considered adequate
+for the implementor to allow implementation-defined behavior to produce
+unpredictable effects or to terminate the program when such behavior is
+invoked.}  When said of a result,
+implementation-defined means that a value is successfully computed, but depends
+on the characteristics of the implementation. It is possible for the presence of a
+requirement on a program to be described as implementation-defined, giving the
+implementor a choice whether to make that requirement or not. If a program
+violates a requirement whose presence is implementation-defined, that program's
+behavior is undefined in any implementation which elects to in fact impose that
+requirement.
+\index{implementation-defined}
+\defsubsection{unpredictable result}: A successfully computed value which is
+unreliable because some procedure or data failed to satisfy a property required
+by the computation.
+\defsubsection{constraint}: A semantic restriction with which a program must
+comply. Some sections of this Document contain paragraphs under the heading
+{\it Constraints\/} which list all constraints pertaining to the described
+feature. When operated in production mode, the Kazlib implementation
+is not required to diagnose constraint violations. When operated in
+verification mode, the Kazlib implementation must halt translation or
+execution of a program which violates a constraint.
+\index{constraint}
+\defsubsection{comparison function}: A function which accepts two arguments
+\index{comparison function}
+of type \verb|const void *| and returns a value of type int based on
+a ranking comparison of these arguments, and which satisfies the following
+additional semantic properties. If the two arguments are deemed to be equal, the
+function must return zero. If the first argument is determined to have a
+greater rank than the second, a positive value is returned. Otherwise if the
+first argument is determined to have a lesser rank than the second, a negative
+value is returned. The rank is computed as if each value has associated with it
+an integer, not necessarily unique, and as if these integers are compared for ordinary equality or
+inequality when values are said to be compared.  The assignment of integers is
+up to the designer of the comparison function, and does not change between
+successive invocations of the function.\footnote{Of course, an actual
+comparison function need not assign actual integer ranks to data items, but it
+must behave as if such ranks were assigned.}
+If a comparison function is invoked in the context of an operation on some data
+structure, it shall not invoke any operation on any component of that same
+structure.\footnote{Thus, if a comparison function is invoked from, for
+instance, {\tt list_sort}, it must not call any list operations that 
+inspect or modify the list being sorted, or any of its constituent nodes.}
+\defsubsection{opaque data type}: A data type whose precise definition is
+not documented, and which is intended to be manipulated only using the
+documented interface, which consists of a set of functions.  Many data types in
+Kazlib are described as opaque. A program which bypasses the documented
+interfaces in inspecting or manipulating these data types invokes undefined
+behavior, and is not portable among Kazlib implementations.
+\defsubsection{user}: \index{user} The program which uses Kazlib.
+\defsubsection{user data}: \index{user data} Data provided by the program
+to which Kazlib stores a pointer, but otherwise does not inspect or modify.
+
+\section{Environment}
+\label{sec:environment}
+
+The translation and use of Kazlib requires a conforming, hosted implementation
+of the C language which meets the following additional minimal requirements:
+\begin{enumerate}
+\item The C implementation distinguishes external names by at least their
+initial 15 characters\footnote{The ISO 9899:1990 standard demands only that
+external names be distinguished by their initial six characters.}. External
+names that are distinct in their first 15 characters are treated by the
+implementation as distinct names.  Upper and lower case letters in external
+identifiers need not be treated as distinct.
+\item The C implementation does not claim the identifier \verb|__cplusplus|
+for its internal use as a preprocessor symbol or keyword.
+\end{enumerate}
+If Kazlib headers are used by a C++ program, the C++ implementation
+meets these additional requirements:
+\begin{enumerate}
+\item the C++ implementation identifies itself by predefining the preprocessor
+symbol \verb|__cplusplus|;
+\item the C++ implementation is be capable of linkage against
+the C implementation with which the Kazlib source files units were translated.
+\end{enumerate}
+The Kazlib headers shall not make use of any names that are claimed
+by the C++ programming language, and shall ensure that the \verb|extern "C"|
+mechanism is used for all declarations when they are included into a C++
+translation unit, or otherwise provide compatibility with C++.\footnote{The
+intent is that the Kazlib implementation could, in principle, provide 
+a separate set of headers for use with each language.}
+
+In programming environments that support the programming mechanism of multiple
+threads of execution an implementation of Kazlib may be designated as {\it
+thread safe}.  To be called thread safe, it must guarantee that the use of an
+object by one thread cannot visibly interact or interfere with the concurrent
+or interleaved use of another object by another thread. If a Kazlib
+implementation that is not thread safe is provided for an environment which
+supports threads, it shall be accompanied by documentation which describes
+the extent of this limitation.
+
+A Kazlib implementation can also be designated as being {\it async safe}.
+The minimum requirement for this designation is that an operation on an object
+can be interrupted by delivery of an asynchronous signal and from within the
+catching function for that signal, it is safe to perform an operation on
+another object.  An implementation shall document that it is async safe,
+or the extent to which it fails to be async safe.
+
+\section{General restrictions}
+
+\subsection{Headers}
+
+The Kazlib headers may be included in any order, and may be included more than
+once. Prior to the inclusion of a Kazlib header, the translation unit shall not
+define any macro name that has the same spelling as a C language keyword. The
+Kazlib headers may behave as though they include arbitrary standard C headers,
+so any requirements related to the inclusion of standard headers apply to
+Kazlib headers.  A header shall be included before the first reference to any
+of the functions, types or macros that it defines.
+
+If one or more preprocessor symbols whose names begin with the sequence
+\verb|KAZLIB_| are defined prior to the inclusion of a Kazlib header,
+the behavior is implementation-defined.
+
+\subsection{Reserved macros}
+
+A Kazlib header defines all of the macros explicitly listed in the section of
+this document that defines the contents of that header. It may also define
+additional macros that belong to the macro namespace reserved by that header.
+The translation unit that includes the header shall not \verb|#define| or
+\verb|#undef| any of these macros.
+
+A header may define function-like macros that supplement existing functions,
+provided that such macros do not cause multiple evaluation of arguments except
+as explicitly permitted, and are safe to use wherever the corresponding
+function call would be. These function-like macros may be subject to
+\verb|#undef|.\footnote{In principle, an implementation may provide, within the
+reserved namespaces, additional functions not specified in this document, and
+function-like macro equivalents of these functions. A program that uses such
+identifiers in a block or function scope should use {\tt \#undef} on these
+identifiers prior to their use.}
+
+\subsection{Reserved symbols}
+
+Each Kazlib header provides file scope declarations for the typedef names,
+struct tags, enum constants and function names listed in its corresponding
+section in this document. Moreover, each header may define additional such
+names that fall into the documented reserved namespaces.
+
+The behavior is undefined if a translation unit that includes a Kazlib header
+defines any identifier that is the same as an identifier reserved by the header
+in the same scope and namespace.\footnote{Therefore, it is permitted to redeclare
+or redefine the identifiers reserved by a previously included Kazlib header,
+provided that the declarations or definitions are in a different namespace or
+scope. Reserved names may be redeclared in a block scope, or used as
+statement labels which have function scope and are in their own namespace.}
+
+The behavior is also undefined if the program contains a definition of an
+object or function with external linkage whose name matches an external object
+of unction defined  by Kazlib component that is used as part of the
+program, or whose name is in a namespace reserved by that
+component.\footnote{This restriction exists whether or not the corresponding Kazlib
+header is included.} 
+
+Lastly, the behavior is undefined if a translation unit defines a macro whose
+name is in the space of reserved symbols of a Kazlib header that is included in
+that translation unit.
+
+\subsection{Argument aliasing}
+
+Kazlib provides functions that operate on objects of various types.  Pointers
+to objects are passed to these functions, thereby giving rise to the
+possibility of {\it aliasing}---passing of objects that wholly or partially
+overlap.  The program shall not present aliased objects to any Kazlib function.
+Objects of distinct types shall not be aliased in a function call under any
+circumstances.
+The aliasing of two or more objects of compatible type is permitted only as
+explicitly documented in the description of a function; in all such
+circumstances, only exact overlapping is permitted.\footnote{That is to say,
+where explicitly allowed, a pointer to the same object may be specified for two
+(or more) parameters of like type.}
+
+\subsection{Object initialization}
+
+The Kazlib opaque data types can only be initialized with the initialization
+functions provided by the Kazlib library, or by implementation-defined
+initialization functions.\footnote{Of course, the use of implementation-defined
+functions results in programs that are not portable among library
+implementations.} An opaque object that is initialized by a method other than
+by being passed to an appropriate initialization function, or that is not
+initialized at all, has indeterminate contents.  A pointer to an object having
+indeterminate contents may be passed to an initialization function; the object
+then has well-determined contents.
+
+An object whose initialization function is capable of indicating failure is
+considered indeterminate if the attempt to initialize that object using that
+function does in fact fail. The program shall not attempt to deinitialize such
+an object. The implementation shall reclaim any resources that were allocated
+for an object whose initialization failed. This reclamation need
+not be immediate, but may be delayed; however, the delay shall not
+give rise to the possibility of resource leaks in any correct program.
+
+Those objects for which deinitialization operations are defined should be
+subject to these operations when these objects are no longer needed.  Failure
+to apply the deinitialization functions may result in the leakage of resources.
+
+\subsection{Object copying}
+
+Certain data types may be sensitive to their own location in memory.  This
+means that copying their values by assignment or \verb|memcpy| results in the
+copy having an indeterminate value which cannot be used.  All opaque types in
+Kazlib are assumed to have this property; copying the value of an opaquely
+typed object to another suitably typed object causes the destination
+object to have indeterminate contents. 
+
+\section{List component}
+
+The List component provides a set of functions, macros and type declarations
+which together provide a library for maintaining a possibly empty ordered set
+of elements, called a {\it list}. This list has the following properties:
+\index{List}\begin{enumerate}
+\item If the list is not empty, a first and last element can be identified.
+    In a list having only one element, that one element is both the first and
+    last element.
+\item Each element that is not the last element has another element as its
+    {\it successor}.
+    \index{successor!of a list element}
+    \index{List!successor of an element}
+\item Each element that is not the first element has a {\it
+    predecessor}.
+    \index{predecessor!of a list element}
+    \index{List!predecessor of an element}
+\item No element is the predecessor or successor of more than one element.
+\item If one element is the successor of another, the other is necessarily the
+    predecessor of the first.
+\item Each element is associated with arbitrary {\it satellite\/} data.
+\end{enumerate}
+The {\it size} of a list, also known as the {\it list count}, is simply the
+number of elements contained in it.\index{size!of a list}\index{List!count}
+
+A list imposes a maximum value on the number of nodes that may be in it
+simultaneously. This is known as the list's {\it capacity}. A list that
+has the maximum number of nodes is said to be full.
+
+\subsection{Interface}
+
+\subsubsection{The {\tt list.h} header}
+
+Each C or C++ translation unit that is to use the functionality of
+the List component shall include the header \verb|list.h|. This header
+shall contain declarations of types and external functions, and definitions of
+macros.
+The following typedef names shall be defined:\index{List!typedef names}
+\index{typedefs!defined by List}
+\begin{verbatim}
+    list_t                      listcount_t
+    lnode_t                     lnodepool_t
+\end{verbatim}
+In addition, the following structure tags may be defined:\index{List!tag names}
+\index{tags!defined by List}
+\begin{verbatim}
+    struct list_t
+    struct lnode_t
+    struct lnodepool_t
+\end{verbatim}
+The following external function names shall be declared:
+\index{List!function names}\index{functions!defined by List}
+\begin{verbatim}
+    list_append                 list_prev                          
+    list_contains               list_process                       
+    list_count                  list_return_nodes                  
+    list_create                 list_sort                          
+    list_del_first              list_find
+    list_del_last               list_transfer                      
+    list_delete                 list_verify                        
+    list_destroy                lnode_borrow                       
+    list_destroy_nodes          lnode_create                       
+    list_extract                lnode_destroy                      
+    list_first                  lnode_get                          
+    list_init                   lnode_init                         
+    list_ins_after              lnode_is_in_a_list                 
+    list_ins_before             lnode_pool_create                  
+    list_is_sorted              lnode_pool_destroy                 
+    list_isempty                lnode_pool_init                    
+    list_isfull                 lnode_pool_isempty                 
+    list_last                   lnode_pool_isfrom                  
+    list_merge                  lnode_put                          
+    list_next                   lnode_return                       
+    list_prepend                
+\end{verbatim}
+The following preprocessor symbols (macros) shall be defined:
+\index{List!macro names}\index{macros!defined by List}
+\indexmacro{LISTCOUNT_T_MAX}
+\indexmacro{LIST_H}
+\begin{verbatim}
+    LISTCOUNT_T_MAX
+    LIST_H\end{verbatim}
+\index{symbols!reserved by List}\index{List!reserved symbols}
+Macro identifiers which begin with the upper-case prefix \verb|LIST| are
+reserved for future extensions to the \verb|list.h| header, as are
+names in the ordinary and tag namespaces which begin with
+\verb|list_| or \verb|lnode_|. External names which begin with \verb|list_| or
+\verb|lnode_| are reserved by the Kazlib library regardless of what header
+files are included.
+
+\subsubsection{The {\tt list_t} type}
+
+\indextype{list_t}
+The type \verb|list_t| is an opaque data type which maintains information about the
+current state of a single list.  A list consists of an instance of the
+\verb|list_t| type, plus zero or more instances of the type \verb|lnode_t|. An
+instance of the \verb|list_t| type can be dynamically created using the
+\verb|list_create| function, and destroyed by the \verb|list_destroy| function.
+Alternately, the program can declare an object of type \verb|list_t| and have
+it initialized via the \verb|list_init| function. 
+
+\subsubsection{The {\tt listcount_t} type}
+
+\indextype{listcount_t}
+\indexmacro{LISTCOUNT_T_MAX}
+The type \verb|listcount_t| is an unsigned integral type which represents
+the number of nodes in a list. The specific choice of unsigned integral type
+is implementation defined. The \verb|LISTCOUNT_T_MAX| macro expands to a
+constant expression of type \verb|listcount_t| which specifies the maximum
+value of that type.\footnote{For example, if the implementation defines
+{\tt listcount_t} as an alias for the type unsigned long, then 
+{\tt LISTCOUNT_T_MAX} must have the same value as {\tt ULONG_MAX}.}
+
+\subsubsection{The {\tt lnode_t} type}
+
+\indextype{lnode_t}
+The type \verb|lnode_t| is an opaque type that represents a single node of a
+list. A node contains a a reference to satellite data provided by the user,
+and also stores the key that is associated with the node when it is inserted.
+Nodes may be dynamically created by the \verb|lnode_create| function.
+Alternately, the program may supply an \verb|lnode_t| object that can be
+initialized by the \verb|lnode_init| function. 
+
+\subsubsection{The {\tt lnodepool_t} type}
+
+\indextype{lnodepool_t}
+The \verb|lnodepool_t| type provides an alternate method for supplying list
+nodes to the application. A user-supplied or dynamically allocated fixed size
+array of nodes is converted into a a {\it pool\/} of nodes from which free
+nodes may be obtained and to which they may be returned. A user-supplied node
+pool is created by the function \verb|lnode_pool_init| which requires a pointer
+to an object of type \verb|lnode_pool_t|, a pointer to the first element of an
+array of \verb|lnode_t| objects, as well as an integer representing the size of
+the array. Alternately, the function \verb|lnode_pool_create| will dynamically
+allocate an object of type \verb|lnode_pool_t| containing the specified number
+of list nodes. 
+
+\subsubsection{The {\tt list_append} function}
+
+    \indexfunc{list_append}
+    \index{List!appending a node}
+    \index{append node to list}
+    \synopsis
+    \begin{verbatim}
+    void list_append(list_t *, lnode_t *);\end{verbatim}
+
+    \constraints
+    The second argument shall not refer to a node that is already in a list
+    or in a list node pool. The first argument shall not refer to a list
+    that is full.
+
+    \description
+    The append operation causes the node pointed at by the second
+    argument to become the last node in the list pointed at by the first
+    argument.\footnote{That is to say, after the operation, the
+    {\tt list_last} function, when applied to the list, shall return a pointer
+    to that node.}
+
+    If the first argument is an expression with side effects, the behavior
+    is undefined.\footnote{Thus, the implementation may provide a macro
+    version of {\tt list_append} which evaluates the first argument
+    more than once.}
+    \index{macros!and side effects}
+
+\subsubsection{The {\tt list_contains} function}
+
+    \indexfunc{list_contains}
+    \index{List!testing for presence of node}
+    \nobreak
+    \synopsis
+    \begin{verbatim}
+    int list_contains(list_t *, lnode_t *node);\end{verbatim}
+    \nobreak
+    \description
+    \nobreak
+    The \verb|list_contains| function shall return 1 if the node
+    pointed at by the second argument is in the list pointed at by the first
+    argument.  Otherwise, it shall return 0.
+
+\subsubsection{The {\tt list_count} function}
+
+    \indexfunc{list_count}
+    \index{List!count}
+    \index{List!size}
+    \synopsis
+    \begin{verbatim}
+    listcount_t list_count(list_t *);\end{verbatim}
+
+    \description
+
+    The \verb|list_count| function returns a value which represents the number
+    of nodes currently stored in the list pointed at by the argument.
+
+\subsubsection{The {\tt list_create} function}
+
+    \indexfunc{list_create}
+    \index{List!creation of}
+    \index{create!list object}
+    \synopsis
+    \begin{verbatim}
+    list_t *list_create(listcount_t);\end{verbatim}
+
+    \description
+    The \verb|list_create| function instantiates and initializes an object of
+    type \verb|list_t|, and returns a pointer to it unless insufficient
+    resources exist for the creation of the object, in which case a null
+    pointer is returned.
+
+    The value of the function's argument establishes, for the entire duration
+    of the list object, its capacity.
+
+    The newly created list object is empty.
+
+\subsubsection{The {\tt list_del_first} function}
+
+    \index{List!first node}
+    \indexfunc{list_del_first}
+    \index{List!deletion}
+    \index{delete!first node of a list}
+    \synopsis
+    \begin{verbatim}
+    lnode_t *list_del_first(list_t *);\end{verbatim}
+
+    \constraints
+    The argument shall not point to an empty list.
+
+    \description
+    The \verb|list_del_first| function removes the first node from the
+    list pointed at by the argument and returns a pointer to that
+    node. 
+
+    If the argument is an expression with side effects, the behavior is
+    undefined.\index{macros!and side effects}
+
+\subsubsection{The {\tt list_del_last} function}
+
+    \index{List!last node}
+    \indexfunc{list_del_last}
+    \index{List!deletion}
+    \index{delete!last node of a list}
+    \synopsis
+    \begin{verbatim}
+    lnode_t *list_del_last(list_t *);\end{verbatim}
+
+    \constraints
+    The argument shall not point to an empty list.
+
+    \description
+    The \verb|list_del_last| function removes the last node from the list
+    specified by the argument, and returns a pointer to that node. If,
+    prior to the operation, that node had a predecessor, that predecessor
+    shall become the new last node of the list. Otherwise, the list
+    shall become empty.
+
+    The new value of the list count shall be one less than its value
+    prior to the call to this function.
+
+    If the argument is an expression with side effects, the behavior is
+    undefined.\index{macros!and side effects}
+
+\subsubsection{The {\tt list_delete} function}
+
+    \indexfunc{list_delete}
+    \index{List!deletion}
+    \index{delete!arbitrary node of a list}
+    \synopsis
+    \begin{verbatim}
+    lnode_t *list_delete(list_t *, lnode_t *);\end{verbatim}
+
+    \constraints
+    The second argument shall point to a node that is inside the list
+    pointed at by the first argument.
+
+    \description
+    The \verb|list_delete| function removes the node pointed at by its
+    second argument from the list pointed at by its first argument.
+    A pointer to the deleted node is returned.
+
+\subsubsection{The {\tt list_destroy} function}
+
+    \indexfunc{list_destroy}
+    \index{List!destruction of}
+    \synopsis
+    \begin{verbatim}
+    void list_destroy(list_t *);\end{verbatim}
+
+    \constraints
+    The argument shall point to an empty list.
+
+    \description
+    The empty list pointed at by the argument is destroyed. If the list has
+    not been created by a call to the \verb|list_create| function, the
+    behavior is undefined.
+
+    A pointer that previously referred to a list that has been disposed by
+    \verb|list_destroy| has an indeterminate value.
+
+\subsubsection{The {\tt list_destroy_nodes} function}
+
+    \indexfunc{list_destroy_nodes}
+    \synopsis
+    \begin{verbatim}
+    void list_destroy_nodes(list_t *);\end{verbatim}
+
+    \description
+    The nodes, if any, contained in the list pointed at by the argument are
+    disposed of as if by a call to the \verb|lnode_destroy| function. If any
+    node contained in the list was created by means other than the
+    \verb|lnode_create| function, the behavior is undefined.
+
+    After the operation, the list is empty.
+
+    Any pointer that referred to any of the destroyed nodes takes on an
+    indeterminate value.
+
+\subsubsection{The {\tt list_extract} function}
+
+    \index{List!node range extraction}
+    \indexfunc{list_extract}
+    \synopsis
+    \begin{verbatim}
+    void list_extract(list_t *, list_t *, lnode_t *, lnode_t *);\end{verbatim}
+
+    \constraints
+    The second argument points to the {\it source list}. The third
+    argument is either null, or points to a node that is an occupant
+    of the source list. This node is called the {\it starting node}.
+    The fourth argument is either null, or points to a node that is
+    an occupant of the source list. This node is called the {\it ending
+    node}. If the starting node and ending node are both specified, and are
+    distinct nodes, then the starting node shall appear earlier in the source
+    list than the ending node.
+
+    The transfer request shall not call for the capacity of the  destination
+    list to be exceeded.
+
+    \description
+    The \verb|list_extract| function moves nodes from the source
+    list to the {\it destination list\/} pointed at by the first
+    argument.\footnote{This right-to-left direction of transfer is consistent
+    with the semantics of standard C library functions such as {\tt memmove} or
+    {\tt strcpy}.}
+
+    If the third and fourth arguments are not null, the entire range of nodes
+    from the starting node and to the ending node, inclusive, is transferred
+    from the source list to the end of the destination list, where they appear
+    in their original order. Other nodes in the source list, if any, are
+    unaffected.
+
+    If the third and fourth arguments both point to the same node, that
+    node alone is transferred to the end of the destination list.
+
+    If either the third argument or the fourth argument is null, or both are null,
+    no transfer of nodes takes place.
+
+    The source and destination list may be the same object.
+
+\subsubsection{The {\tt list_first} function}
+
+    \index{List!first node}
+    \indexfunc{list_first}
+    \synopsis
+    \begin{verbatim}
+    lnode_t *list_first(list_t *);\end{verbatim}
+
+    \description
+    If the list pointed at by the argument is an empty list, a null pointer
+    is returned. Otherwise, a pointer to the first node in that list is
+    returned.
+
+    If the argument is an expression with side effects, the behavior is
+    undefined.\index{macros!and side effects}
+
+\subsubsection{The {\tt list_init} function}
+
+    \indexfunc{list_init}
+    \synopsis
+    \begin{verbatim}
+    list_t *list_init(list_t *, listcount_t);\end{verbatim}
+
+    \constraints
+    The second argument shall not have a zero value.
+
+    \description
+    The \verb|list_init| function initializes the list object pointed at by the
+    first argument, turning it into a valid, empty list. If the object is an
+    already initialized list, the behavior is undefined. A list returned by
+    \verb|list_create| is considered initialized. The second argument 
+    specifies the maximum number of nodes that may simultaneously occupy the
+    list.
+
+    The value returned is that of the first argument.
+
+\subsubsection{The {\tt list_ins_after} function}
+
+    \indexfunc{list_ins_after}
+    \index{insert!node into list}
+    \index{List!insertion}
+    \synopsis
+    \begin{verbatim}
+    void list_ins_after(list_t *, lnode_t *, lnode_t *);\end{verbatim}
+
+    \constraints
+    The first argument shall point to a list that is not already full.  The
+    second argument shall point to a node, called the {\it new node}, that is not
+    already an occupant of the list pointed at by the first argument, nor
+    of any other list or node pool object. The third
+    argument shall point to a node, called the {\it reference node}, that is an
+    occupant of the list.
+
+    \description
+    The new node becomes an occupant of the list, such that its predecessor
+    is the reference node. If the reference node has a successor, the
+    new node is inserted between the reference node and that successor.
+    Otherwise, the new node becomes the last node of the list.
+
+\subsubsection{The {\tt list_ins_before} function}
+
+    \indexfunc{list_ins_before}
+    \index{insert!node into list}
+    \index{List!insertion}
+    \synopsis
+    \begin{verbatim}
+    void list_ins_before(list_t *, lnode_t *, lnode_t *);\end{verbatim}
+
+    \constraints
+    The first argument shall point to a list that is not already full.  The
+    second argument shall point to a node, called the {\it new node}, that is not
+    already an occupant of the list pointed at by the first argument, nor
+    of any other list or node pool object. The third
+    argument shall point to a node, called the {\it reference node}, that is an
+    occupant of the list.
+
+    \description
+    The new node becomes an occupant of the list, such that its successor
+    is the reference node. If the reference node has a predecessor, the
+    new node is inserted between the reference node and that predecessor.
+    Otherwise, the new node becomes the first node of the list.
+    
+\subsubsection{The {\tt list_is_sorted} function}
+\label{list:is:sorted}
+    \indexfunc{list_is_sorted}
+
+    \synopsis
+    \begin{verbatim}
+    int list_is_sorted(list_t *,
+            int (const void *, const void *));\end{verbatim}
+
+    \description
+    The first argument points to a list object. The second is assumed to
+    point to a comparison function.
+    
+    If the list has exactly one node or is empty, $1$ is returned
+    unconditionally.  Otherwise, nodes of the list are examined to
+    determine whether they are in a sorted order according to the comparison
+    function. This is true if the integer ranks of their data items,
+    examined from the first node of the list through to the last node, form a
+    monotonically increasing sequence. If the nodes are in order, the value $1$
+    is returned. Otherwise $0$ is returned.
+    
+    If the list has two or more nodes, and the second argument is a pointer to
+    a function that has the correct type, but does not satisfy the semantic
+    properties of a comparison function, the result is unpredictable, but is
+    guaranteed to be one of the values~$0$~or~$1$. 
+
+\subsubsection{The {\tt list_isempty} function}
+
+    \indexfunc{list_isempty}
+    \synopsis
+    \begin{verbatim}
+    int list_isempty(list_t *);\end{verbatim}
+
+    \description
+    The \verb|list_isempty| function returns $1$ if the list pointed at by
+    the first argument is empty. Otherwise it returns $0$.
+
+\subsubsection{The {\tt list_isfull} function}
+
+    \indexfunc{list_isfull}
+    \synopsis
+    \begin{verbatim}
+    int list_isfull(list_t *);\end{verbatim}
+
+    \description
+    The \verb|list_isfull| function returns $1$ if the list pointed at by
+    the first argument is full. Otherwise it returns $0$.
+    A list is considered full when it contains the maximum number of nodes
+    that was specified upon its initialization.
+
+    If the argument is an expression with side effects, the behavior is
+    undefined.\index{macros!and side effects}
+
+\subsubsection{The {\tt list_last} function}
+
+    \index{List!last node}
+    \indexfunc{list_last}
+    \synopsis
+    \begin{verbatim}
+    lnode_t *list_last(list_t *);\end{verbatim}
+
+    \description
+    If the list pointed at by its first argument is empty, the \verb|list_last|
+    function returns a null pointer. Otherwise it returns a pointer to the
+    last node.
+
+    If the argument is an expression with side effects, the behavior is
+    undefined.\index{macros!and side effects}
+
+\subsubsection{The {\tt list_merge} function}
+
+    \index{List!merge operation}
+    \indexfunc{list_merge}
+    \synopsis
+    \begin{verbatim}
+    void list_merge(list_t *, list_t *,
+            int (const void *, const void *));\end{verbatim}
+
+    \constraints
+    The list pointed at by the first argument is called the {\it destination
+    list}. The second argument points to the {\it source list}. The third
+    argument points to a comparison function.  The sum of the number of nodes
+    occupying the source list and the destination list shall not exceed the
+    maximum number of nodes that are permitted to occupy the destination list.
+    Furthermore, both the source and destination list shall be sorted such that
+    a call to \verb|list_is_sorted| given a pointer to either list as a first
+    argument, and the pointer to the comparison function as its second
+    argument, shall yield the value $1$.
+
+    \description
+    Nodes from the sorted source list are merged into the sorted destination
+    list. After the operation, the source list is empty and the destination
+    list contains all of the nodes it contained prior to the operation, as well
+    as all of the nodes that the source list contained. The nodes are in sorted
+    order according to the comparison function.
+
+    If the third argument is a pointer to a function that has the correct type,
+    but does not fulfill the semantic properties of a comparison function, the
+    order of the nodes in the destination list is unpredictable.
+
+    If the source and destination list are the same object, the
+    \verb|list_merge| operation has no effect.
+
+\subsubsection{The {\tt list_next} function}
+
+    \indexfunc{list_next}
+    \synopsis
+    \begin{verbatim}
+    lnode_t *list_next(list_t *, lnode_t *);\end{verbatim}
+
+    \constraints
+    The node pointed at by the second argument is an occupant of the list pointed
+    at by the first argument.
+
+    \description
+    If the node pointed at by the second argument has a successor, a pointer to
+    that successor is returned. Otherwise, a null pointer is returned.
+
+    If the second argument is an expression which has side effects, the behavior
+    is undefined.\index{macros!and side effects}
+
+\subsubsection{The {\tt list_prepend} function}
+
+    \indexfunc{list_prepend}
+    \index{List!prepending a node}
+    \index{prepend node to list}
+    \synopsis
+    \begin{verbatim}
+    void list_prepend(list_t *, lnode_t *);\end{verbatim}
+
+    \constraints
+    The second argument shall not refer to a node that is already in a list
+    or in a list node pool. The first argument shall not refer to a list
+    that is full.
+
+    \description
+    The prepend operation causes the node pointed at by the second
+    argument to become the first node in the list pointed at by the first
+    argument. After the operation, the \verb|list_first| function, when
+    applied to the list, shall return a pointer to that node.
+    If, prior to to the operation, the list is empty, then the prepended node
+    shall become the first node in that list, otherwise, the prepended node
+    becomes the predecessor of what was previously the first node.
+
+    If the first argument is an expression with side effects, the behavior
+    is undefined.\index{macros!and side effects}
+
+\subsubsection{The {\tt list_prev} function}
+
+    \indexfunc{list_prev}
+    \synopsis
+    \begin{verbatim}
+    lnode_t *list_prev(list_t *, lnode_t *);\end{verbatim}
+
+    \constraints
+    The node pointed at by the second argument is an occupant of the list pointed
+    at by the first argument.
+
+    \description
+    If the node pointed at by the second argument has a predecessor, a pointer to
+    that predecessor is returned. Otherwise, a null pointer is returned.
+
+    If the second argument is an expression which has side effects, the behavior
+    \index{macros!and side effects}
+    is undefined.
+
+\subsubsection{The {\tt list_process} function}
+
+    \indexfunc{list_process}
+    \synopsis
+    \begin{verbatim}
+    void list_process(list_t *, void *,
+            void (*)(list_t *, lnode_t *, void *));\end{verbatim}
+    \nobreak
+    \description
+    The \verb|list_process| function iterates over the nodes of a list,
+    and for each node invokes a callback function.\footnote{In most cases,
+    it is more convenient and preferable to 
+    iterate over the list using explicit calls to {\tt list_first}
+    and {\tt list_next}.}
+    The second argument is a {\it context pointer\/} which can have any value.
+    The third argument of
+    \verb|list_process| shall be a pointer to a function which is compatible
+    with the specified type. If the list contains one or more nodes,
+    then the function is invoked once for each node, in order from first
+    to last. On each invocation, the first argument of the callback is a
+    pointer to the list; the second argument is a pointer to a node, called
+    the {\it subject node}; and the third argument repeats the context pointer
+    value that was originally passed to \verb|list_process|.
+
+    The callback function may delete the subject node by, for instance, calling
+    \verb|list_delete|. It may insert new nodes to any place in the list;
+    however, if such an insertion causes the subject node to acquire
+    a new successor, it is implementation-defined whether upon returning
+    from the callback function, the traversal shall continue with the
+    new successor, or with the original successor.
+    
+    The callback function, and any function invoked from the callback
+    function, shall not destroy the list or make any modifications
+    other than the insertion of new nodes, or the deletion of the 
+    subject node.
+
+    The callback function may recursively invoke \verb|list_process| for the
+    same list or for a different list; the callback invocations arising out of
+    the nested call inherit all of the restrictions of the outer callback in
+    addition to being subject to the usual restrictions.\footnote{This means,
+    for instance, that if two callbacks are in progress for different
+    subject nodes from the same list, the inner callback may not delete
+    its subject node, because it inherits the restriction that the only
+    permitted deletion is the outer callback's subject node.}
+
+    The callback function may freely operate on a different list,
+    subject to any inherited restrictions.
+
+\subsubsection{The {\tt list_return_nodes} function}
+
+    \indexfunc{list_return_nodes}
+    \synopsis
+    \begin{verbatim}
+    void list_return_nodes(list_t *, lnodepool_t *);\end{verbatim}
+
+    \description
+
+    Every node in the list specified by the first argument
+    is returned to the node pool specified by the second argument
+    If the list contains a node that has not been allocated
+    from that node pool, the behavior is undefined.
+
+\subsubsection{The {\tt list_sort} function}
+
+    \index{List!sort operation}
+    \indexfunc{list_sort}
+    \synopsis
+    \begin{verbatim}
+    void list_sort(list_t *, int (const void *, const void *));\end{verbatim}
+
+    \description
+
+    The \verb|list_sort| function changes the order of the nodes of the list
+    specified by the first argument according to the comparison function
+    pointed at by the second argument. 
+
+    If the list is empty, or contains only one node, the comparison function is
+    not called.
+
+    Whenever the comparison function is invoked, its arguments are are the data
+    pointers stored in two distinct nodes of the list.
+
+\subsubsection{The {\tt list_find} function}
+
+    \index{List!find operation}
+    \indexfunc{list_find}
+    \synopsis
+    \begin{verbatim}
+    lnode_t *list_find(list_t *,
+           const void *, int (const void *, const void *));\end{verbatim}
+
+    \description
+
+    The \verb|list_find| function exhaustively searches the key for a node
+    whose satellite data matches a search key according to the comparison
+    function. The first argument is the list to be searched, the second
+    argument specifies the search key and the third argument is a pointer
+    to the comparison function.
+
+    The comparison function is invoked to compare the key against the
+    satellite data of successive nodes of the list, starting with the first
+    node. A pointer to the first node for which the comparison function returns
+    zero is returned.
+
+    If the list is empty, or the comparison function returns non-zero for
+    each item, a null pointer is returned.
+
+\subsubsection{The {\tt list_transfer} function}
+
+    \index{List!node transfer}
+    \indexfunc{list_transfer}
+    \synopsis
+    \begin{verbatim}
+    void list_transfer(list_t *, list_t *, lnode_t *);\end{verbatim}
+
+    \constraints
+    The third argument is either null, or it points at a node which is an
+    occupant of the list pointed at by the second argument.
+
+    The transfer request shall not call for the capacity of the  destination
+    list to be exceeded.
+
+    \description
+    The \verb|list_transfer| function moves nodes from the list
+    pointed at by the second argument to the list pointed at by
+    the first argument.
+
+    If the third argument is not null, it specifies the node in the source list
+    at which the transfer begins. That node, its successor, and all 
+    subsequent nodes, are transferred to the end of the destination list where
+    they appear in their original order. Other nodes in the source list are
+    unaffected.
+
+    If the third argument is null, no transfer of nodes takes place.
+
+    The source and destination list may be the same object.
+
+    If \verb|DL|, \verb|SL| and \verb|SN| are appropriately typed expressions,
+    the function call
+
+\begin{verbatim}
+    void list_transfer(DL, SL, SN);
+\end{verbatim}
+    is equivalent to 
+\begin{verbatim}
+    list_extract(DL, SL, SN, list_last(SL));
+\end{verbatim}
+    except that \verb|SL| is evaluated only once.
+
+\subsubsection{The {\tt list_verify} function}
+
+    \indexfunc{list_verify}
+    \synopsis
+    \begin{verbatim}
+    int list_verify(list_t *list);\end{verbatim}
+
+    \description
+    The intent of the \verb|list_verify| function is to perform a verification
+    on the list object, regardless of whether the Kazlib implementation is
+    operated in verification or production mode. If the list objects
+    and its constituent nodes have been correctly manipulated, and the
+    program has not caused any undefined behaviors, the value $1$ is returned.
+    Otherwise, the function may be able to, but is not guaranteed to, detect
+    corruption, and return the value zero.
+
+\subsubsection{The {\tt lnode_borrow} function}
+
+    \indexfunc{lnode_borrow}
+    \synopsis
+    \begin{verbatim}
+    lnode_t *lnode_borrow(lnodepool_t *, void *);\end{verbatim}
+
+    \description
+
+    The \verb|lnode_borrow| function allocates a node from
+    the pool managed by the given \verb|lnodepool_t| object.
+    If the request succeeds, a pointer to the node is returned.  If the object
+    has run out of nodes, the return value is a null pointer.
+
+\subsubsection{The {\tt lnode_create} function}
+
+    \indexfunc{lnode_create}
+    \synopsis
+    \begin{verbatim}
+    lnode_t *lnode_create(void *);\end{verbatim}
+
+    \description
+
+    The \verb|lnode_create| function dynamically allocates a list node,
+    stores in it the data value specified in the argument and
+    returns a pointer to it. The allocation is performed by a call to the
+    standard \verb|malloc| function. If the allocation fails, a null
+    pointer is returned.
+
+\subsubsection{The {\tt lnode_destroy} function}
+
+    \indexfunc{lnode_destroy}
+    \synopsis
+    \begin{verbatim}
+    void lnode_destroy(lnode_t *);\end{verbatim}
+
+    \description
+
+    The \verb|lnode_destroy| function destroys a list node that has been
+    allocated with the \verb|lnode_create| function.  The value of any pointer
+    that referred to the node that was thus freed is indeterminate.
+
+    If the node is currently the occupant of a list, the behavior is undefined
+    if the list is subsequently used.
+
+\subsubsection{The {\tt lnode_get} function}
+
+    \indexfunc{lnode_get}
+    \synopsis
+    \begin{verbatim}
+    void *lnode_get(lnode_t *);\end{verbatim}
+
+    \description
+
+    The \verb|lnode_get| function retrieves the \verb|void *| data value
+    associated with a node.\footnote{This is the {\bf only} interface for
+    retrieving the data element.}
+    
+\subsubsection{The {\tt lnode_init} function}
+
+    \indexfunc{lnode_init}
+    \synopsis
+    \begin{verbatim}
+    lnode_t *lnode_init(lnode_t *, void *);\end{verbatim}
+
+    The \verb|lnode_init| function initializes the contents
+    of the specified list node object, assigning it the
+    data value specified as the second argument. 
+    The first argument is a pointer which refers to 
+    a data object that has a suitable size and alignment
+    for the representation of an \verb|lnode_t| type.
+    After initialization with \verb|lnode_init|, the object is subsequently
+    eligible as an operand to the functions of the List component.
+
+\subsubsection{The {\tt lnode_is_in_a_list} function}
+
+    \indexfunc{lnode_is_in_a_list}
+    \synopsis
+    \begin{verbatim}
+    int lnode_is_in_a_list(lnode_t *);\end{verbatim}
+
+    \description
+
+    The \verb|lnode_is_in_a_list| function determines whether the given node is
+    an occupant of some list. If the node is in a list, the function returns
+    the value $1$.  If the node is not in any list, the return value is zero.
+
+\subsubsection{The {\tt lnode_pool_create} function}
+
+    \indexfunc{lnode_pool_create}
+    \synopsis
+    \begin{verbatim}
+    lnodepool_t *lnode_pool_create(listcount_t);\end{verbatim}
+
+    \constraints
+
+    The value of the argument shall not be zero.
+
+    \description
+
+    The \verb|lnode_pool_create| function dynamically allocates,
+    by means of the standard library function \verb|malloc|
+    a node pool object containing the number of nodes specified
+    as the first argument. If not enough resources are available,
+    a null pointer is returned, otherwise a pointer to the
+    \verb|lnodepool_t| object is returned.
+
+\subsubsection{The {\tt lnode_pool_destroy} function}
+
+    \indexfunc{lnode_pool_destroy}
+    \synopsis
+    \begin{verbatim}
+    void lnode_pool_destroy(lnodepool_t *);\end{verbatim}
+
+    \description
+
+    The \verb|lnode_pool_destroy| function deallocates a
+    node pool that was allocated by \verb|lnode_pool_create|.
+    The value of any pointer which referred to the
+    node pool object becomes indeterminate.
+
+\subsubsection{The {\tt lnode_pool_init} function}
+
+    \indexfunc{lnode_pool_init}
+    \synopsis
+    \begin{verbatim}
+    lnodepool_t *lnode_pool_init(lnodepool_t *,
+            lnode_t *, listcount_t);\end{verbatim}
+
+    \constraints
+
+    The third argument, which specifies the node count, shall not be zero.
+
+    \description
+
+    The \verb|lnode_pool_init| function initializes a data object
+    that has a suitable size and alignment to represent an
+    \verb|lnodepool_t| type. A pointer to this object is passed
+    as the first argument. The node pool thus created draws nodes
+    from an array specified by the second argument, which shall be a pointer to
+    an object that can behave like an array of \verb|lnode_t| objects.
+    The third argument specifies the number of elements in this array.
+
+    After this function, the object pointed at by the \verb|lnodepool_t *|
+    argument is eligible for use with the node pool management functions
+    of the List component. Nodes may be drawn from the pool and returned to it.
+
+    As long as the pool continues to be used, the program should not directly
+    manipulate the node array. In particular, if the program modifies any
+    part of the array, then the behavior is undefined if the
+    \verb|lnodepool_t| object or any nodes drawn from it are subsequently
+    passed to a List function. The program shall not directly use the array
+    elements as independent \verb|lnode_t| objects while the array is
+    associated with the pool; in particular, it shall not pass these elements
+    to Kazlib functions that operate on \verb|lnode_t|.
+    
+    The behavior is undefined if the same array is associated with more than
+    one node pool object, or if two node pool objects are given overlapping
+    arrays.
+
+    The node array is managed in an manner that is specific to the
+    implementation; the intent is that each element of the array represents a
+    distinct node object, a pointer to which can be returned in response to an
+    allocation request.
+
+    The \verb|lnode_pool_init| function returns a copy of the first argument.
+
+\subsubsection{The {\tt lnode_pool_isempty} function}
+
+    \indexfunc{lnode_pool_isempty}
+    \synopsis
+    \begin{verbatim}
+    int lnode_pool_isempty(lnodepool_t *);\end{verbatim}
+
+    \description
+
+    The \verb|lnode_pool_isempty| function tests the 
+    specified \verb|lnodepool_t| object for ability to supply nodes.
+    If the object has been
+    subject to so many requests that it is no longer capable of
+    of supplying additional list nodes, the value $1$ is returned.
+    Otherwise the return value returned is zero.
+
+\subsubsection{The {\tt lnode_pool_isfrom} function}
+
+    \indexfunc{lnode_pool_isfrom}
+    \synopsis
+    \begin{verbatim}
+    int lnode_pool_isfrom(lnodepool_t *, lnode_t *);\end{verbatim}
+
+    \description
+
+    The function \verb|lnode_pool_isfrom|, intended to serve as a software
+    verification aid, determines whether a list node originates from
+    a particular node pool. The return value is $1$ if this relationship is
+    true, otherwise zero.
+
+\subsubsection{The {\tt lnode_put} function}
+
+    \indexfunc{lnode_put}
+    \synopsis
+    \begin{verbatim}
+    void lnode_put(lnode_t *, void *);\end{verbatim}
+
+    \description
+
+    The function \verb|lnode_put| replaces the data element
+    associated with the list node. 
+
+\subsubsection{The {\tt lnode_return} function}
+
+    \indexfunc{lnode_return}
+    \synopsis
+    \begin{verbatim}
+    void lnode_return(lnodepool_t *, lnode_t *);\end{verbatim}
+
+    \constraints
+
+    The node pointed at by the second argument was derived by an allocation
+    request from the pool pointed at by the first argument.\footnote{In
+    other words, the {\tt lnode_pool_isfrom} function, were it called with
+    the same two arguments, would return $1$ if this constraint is met.}
+
+    Furthermore, the node must not be the occupant of a list.
+
+    \description
+
+    The \verb|lnode_return| function returns a node back to the node pool from
+    which it came. The node must not be subsequently used as an argument to any
+    List functions, until it happens to be allocated again. The pointer to
+    the node object remains valid, and may be returned by a subsequent
+    allocation request from the same node pool.
+
+\subsection{Implementation}
+\index{List!reference implementation}
+
+This section describes the elements of the reference implementation of the
+List component. No requirement is imposed that an implementation should
+follow the reference implementation. The same is true of the
+implementation notes for the other components.
+
+\subsubsection{Types}
+\index{implementation!List types}
+\index{typedefs!implementation of List}
+
+The reference List implementation is a doubly-linked circular list
+\index{sentinel node!of linked list}
+with a {\it sentinel node}. The node structure type is defined like this:
+\begin{verbatim}
+    typedef struct lnode_t {
+        struct lnode_t *list_next;
+        struct lnode_t *list_prev;
+        void *list_data;
+    } lnode_t;
+\end{verbatim}
+and the list structure is defined like this:
+\begin{verbatim}
+    typedef struct list_t {
+        lnode_t list_nilnode;
+        listcount_t list_nodecount;
+        listcount_t list_maxcount;
+    } list_t;
+\end{verbatim}
+The \verb|list_nilnode| member of the list object is the sentinel. It is
+always present in the list, never deleted. When the list is empty, the sentinel
+node's \verb|list_next| and \verb|list_prev| pointers simply point back at the sentinel
+node.  The \verb|list_maxcount| member of the list tells how many nodes may be
+inserted and \verb|list_nodecount| keeps track of the actual count.
+
+The reason the sentinel node is called \verb|list_nilnode| is that it
+acts as the successor of a list's tail node, if there is one,
+and as the predecessor of the first node.  In a linked list implementation
+that does not use a sentinel node, the \verb|list_next| pointer of
+the the tail node and the \verb|list_prev| pointer of the first node would
+be null.
+
+Note that prefixed names are used for all of the structure members.  This is so
+that the header file conforms to the documented namespace. If, for example, the
+\verb|list_nilnode| member were simply called \verb|nilnode|, then
+if the program contained somewhere a macro called \verb|nilnode|, there would
+be a potential clash. If the program defined \verb|nilnode| prior to including
+the \verb|list.h| header, the declaration of \verb|struct list_t| would
+be confounded. If the program defined \verb|nilnode| after 
+including \verb|list.h|, the definition would interfere with \verb|list.h|
+macros whose replacement text refers to the \verb|nilnode| member.
+
+For programming convenience, the list implementation source file defines short
+macro names for the structure members:
+\begin{verbatim}
+    #define next list_next
+    #define prev list_prev
+    #define data list_data
+\end{verbatim}
+... and so forth. These names are private to the translation unit, which
+includes only standard ANSI C headers.  Some of the examples in this section
+make use of the short names; it is assumed that these macros are in effect.
+
+\subsubsection{Selected operations}
+\index{implementation!List operations}
+
+\paragraph{Retrieving the first node}
+\index{List!first node}
+
+Given a pointer \verb|P| to a \verb|list_t| type, the \verb|list_first|
+function examines the value of \verb|P->nilnode.next| which points
+at the head node if the list is not empty. If the list is empty,
+then this expression points back at the sentinel node. In
+other words, the comparison
+\begin{verbatim}
+    P->nilnode.next == &P->nilnode
+\end{verbatim}
+yields true when the list is empty. In this case, the interface requires that
+a null pointer be returned by \verb|list_first|.  The implementation actually
+uses the above test, through a test for \verb|P->nodecount| being equal to
+zero is also possible.
+
+In general, any operation which produces a pointer to the nilnode that must be
+returned back to the calling program  must test for that case and return a null
+pointer instead to satisfy the interface requirements.
+
+\paragraph{Node deletion}
+\index{List!deletion}
+
+Thanks to the use of the sentinel node, the list deletion operation doesn't
+have to test for special cases. A node in the middle of the list is
+deleted in exactly the same way as the first or the last node:
+\begin{verbatim}
+    lnode_t *list_delete(list_t *list, lnode_t *del)
+    {
+        lnode_t *next = del->next;
+        lnode_t *prev = del->prev;
+
+        assert (list_contains(list, del));
+
+        prev->next = next;
+        next->prev = prev;
+        list->nodecount--;
+
+        del->next = del->prev = NULL;
+
+        return del;
+    }
+\end{verbatim}
+Quite simply, the successor and predecessor of the deleted node are connected
+together so that the deleted node is spliced out from the list. If the node is
+the last remaining one, then the sentinel node serves as both the successor and
+the predecessor. The effect of the deletion then is to set the sentinel's next
+and previous links to point to itself, as they did initially when the list was
+previously empty.
+
+The next and prev pointers are set to null not only for enhanced error checking
+in language implementations that trap dereferences of null pointers,
+but also to indicate that the node is not on any list. The interface
+function \verb|lnode_is_in_a_list| makes use of this.
+
+It's worth discussing in some detail why the values of expressions
+\verb|del->next| and \verb|del->prev| are cached in local variables.  The
+actual statements that splice the node out of the list could instead have been
+written:
+\begin{verbatim}
+    del->prev->next = del->next;
+    del->next->prev = del->prev;
+\end{verbatim}
+However, this causes some compilers to generate less than optimal code because
+they fail to apply common subexpression elimination to the double
+occurrence of \verb|del->next|.  Caching this expression in a local variable
+helps to get better code by making the semantics more obvious.  In any case,
+modern compilers tend to do a good job of caching locals in high speed storage,
+particularly on architectures generously endowed with registers, so using a few
+extra locals is unlikely to lead to worse target code. The principle of using
+local variables to perform ``manual CSE'' is applied throughout the Kazlib
+reference implementation.
+
+\paragraph{Node insertion}
+Node insertion is also simple, thanks to the sentinel node which makes
+the doubly linked list circular. All insertions are done using
+the functions \verb|list_ins_before| and \verb|list_ins_after|.
+These are very similar, so it suffices to show \verb|list_ins_before|:
+\begin{verbatim}
+    void list_ins_before(list_t *list, lnode_t *new, lnode_t *this)
+    {
+        lnode_t *that = this->prev;
+
+        assert (new != NULL);
+        assert (!list_contains(list, new));
+        assert (!lnode_is_in_a_list(new));
+        assert (this == list_nil(list) || list_contains(list, this));
+        assert (list->nodecount + 1 > list->nodecount);
+
+        new->next = this;
+        new->prev = that;
+        that->next = new;
+        this->prev = new;
+        list->nodecount++;
+
+        assert (list->nodecount <= list->maxcount);
+    }
+\end{verbatim}
+The node \verb|this| is the one before which the new node is being
+inserted. Internally, the pointer \verb|that| points to the
+node after which the insertion takes place. In other words, the function
+inserts the node \verb|new| in between \verb|this| and \verb|that|.
+
+Note the copious assertions which verify all of the documented constraints:
+that the node is not already on the list, or any other list, that the reference
+node \verb|this| is in the list, and that the list capacity won't be exceeded,
+and that the node count doesn't overflow its type.
+
+\index{List!insertion}
+
+\section{Hash component}
+
+The Hash component provides a means to manage collections of elements, called
+hashes, that are not ordered. Each element in the collection has a unique key,
+which is used for searching and inserting. The intent is that the
+implementation is based on extendible hashing, and the interface allows for
+user-defined hashing functions. The number of elements that can be stored
+in a hash is limited; maximum number of entries in a hash is known as its
+{\it capacity}.
+
+\subsection{Interface}
+
+\subsubsection{The {\tt hash.h} header}
+
+Each C or C++ translation unit that is to use the functionality of the Hash
+component shall include the header \verb|hash.h|. This header shall
+contain declarations of types and external functions, and definitions of
+macros.  The following typedef names shall be
+defined:\index{Hash!typedef names}
+\index{typedefs!defined by Hash}
+\begin{verbatim}
+    hash_t                      hashcount_t
+    hnode_t                     hash_val_t
+    hash_comp_t                 hnode_alloc_t
+    hscan_t                     hnode_free_t
+    hash_fun_t
+\end{verbatim}
+In addition, the following structure tags may be defined:\index{Hash!tag names}
+\index{tags!defined by Hash}
+\begin{verbatim}
+    struct hash_t
+    struct hnode_t
+    struct hscan_t
+\end{verbatim}
+The following external function names shall be declared:
+\index{Hash!function names}\index{functions!defined by Hash}
+\begin{verbatim}
+    hash_create                 hash_count           
+    hash_set_allocator          hash_size            
+    hash_destroy                hash_isfull          
+    hash_free_nodes             hash_isempty         
+    hash_init                   hash_scan_begin      
+    hash_insert                 hash_scan_next       
+    hash_lookup                 hash_scan_delete     
+    hash_delete                 hash_scan_delfree
+    hash_alloc_insert           hash_verify          
+    hash_delete_free            hnode_create         
+    hnode_put                   hnode_init           
+    hnode_get                   hnode_destroy        
+    hnode_getkey                hash_free
+\end{verbatim}
+\index{Hash!external objects}
+In addition, the external object name
+\begin{verbatim}
+    hash_val_t_bit
+\end{verbatim}
+shall be declared.  The following preprocessor symbols (macros) shall be
+defined: \index{Hash!macro names}\index{macros!defined by Hash}
+\indexmacro{HASHCOUNT_T_MAX}
+\indexmacro{HASH_VAL_T_BIT}
+\indexmacro{HASH_VAL_T_MAX}
+\indexmacro{HASH_H}
+\begin{verbatim}
+    HASHCOUNT_T_MAX
+    HASH_VAL_T_BIT
+    HASH_H\end{verbatim}
+\index{symbols!reserved by Hash}\index{Hash!reserved symbols}
+Macro identifiers which begin with the upper-case prefix \verb|HASH| are
+reserved for future extensions to the \verb|hash.h| header, as are
+names in the ordinary and tag namespaces which begin with \verb|hash_|,
+\verb|hnode_| or \verb|hscan_|. External names which begin with \verb|hash_|,
+\verb|hnode_| or \verb|hscan_| are reserved by the Kazlib library regardless of
+what headers are included.
+
+\subsubsection{The {\tt hash_t} type}
+
+\indextype{hash_t}
+The type \verb|hash_t| is an opaque data type which maintains information about
+the current state of a single hash.  From the programmer's viewpoint, a hash
+consists of an instance of the \verb|hash_t| type, plus zero or more instances
+of the type \verb|hnode_t|. An instance of the \verb|hash_t| type can be
+dynamically created using the \verb|hash_create| function, and destroyed by the
+\verb|hash_destroy| function.  Alternately, the program can declare an object
+of type \verb|hash_t| and have it initialized via the \verb|hash_init|
+function.  When initializing a hash this way, the user must also provide
+a fixed-size array of \verb|hnode_t *| objects which serves as the hash table.
+\footnote{A hash initialized this way does not support extendible hashing,
+because there is no mechanism for growing the user-supplied array.}
+
+\subsubsection{The {\tt hnode_t} type}
+
+\indextype{hnode_t}
+The \verb|hnode_t| type is an opaque type that represents a single element
+that can be inserted into a hash. A hash node contains a a reference to
+satellite data provided by the user.  Nodes may be dynamically created by the
+\verb|hnode_create| function.  Alternately, the program may supply an
+\verb|hnode_t| object that can be initialized by the \verb|hnode_init|
+function. 
+
+\subsubsection{The {\tt hash_comp_t} type}
+
+\indextype{hash_comp_t}
+The \verb|hash_comp_t| type is a typedef name for the pointer-to-function type
+\begin{verbatim}
+    int (*)(const void *, const void *);
+\end{verbatim}
+In the context of the Hash component, this type denotes pointers to
+comparison functions.
+
+\subsubsection{The {\tt hscan_t} type}
+
+\indextype{hscan_t}
+The \verb|hscan_t| typedef stands for an opaque type which represents
+context information for traversing a hash. It is initialized by the
+\verb|hash_scan_begin| function, which specifies a hash to be
+traversed. Successive elements are retrieved using the \verb|hash_scan_next|
+function, which eventually indicates that no more elements
+remain. Inserting to, or deleting from a hash other than using
+the function \verb|hash_scan_delete| causes any \verb|hscan_t|
+objects that refer to it to become indeterminate.
+
+\subsubsection{The {\tt hashcount_t} type}
+
+\indextype{hashcount_t}
+\indexmacro{HASHCOUNT_T_MAX}
+This is an unsigned integral type which is capable of representing the number
+of nodes in a hash. 
+The \verb|HASHCOUNT_T_MAX| macro expands to a
+constant expression of type \verb|hashcount_t| which specifies the maximum
+value of that type.
+
+\subsubsection{The {\tt hash_val_t} type}
+
+\indextype{hash_val_t}
+\indexmacro{HASH_VAL_T_MAX}
+The \verb|hash_val_t| type is an unsigned integral type capable of
+holding at least 32 bits. The purpose of this type is to represent the
+output values of hashing functions.
+The \verb|HASH_VAL_T_MAX| macro expands to a
+constant expression of type \verb|hash_val_t| which specifies the maximum
+value of that type.
+
+\subsubsection{The {\tt hnode_alloc_t} type}
+
+\index{Hash!allocator function}
+The \verb|hnode_alloc_t| identifier is a typedef name for the pointer-to-function
+type
+\begin{verbatim}
+    hnode_t *(*)(void *);
+\end{verbatim}
+In other words, a pointer to a function that takes a \verb|void *|
+argument and returns a pointer to \verb|hnode_t|.
+A function of this type which meets certain behavior criteria may be
+registered with a \verb|hash_t| object as node allocator, together
+with a compatible deallocator function. The \verb|void *| argument
+passes user-specified context information through to the
+allocator routines (see section \ref{section:hash_set_allocator}).
+
+\subsubsection{The {\tt hnode_free_t} type}
+
+\index{Hash!deallocator function}
+The \verb|hnode_free_t| identifier is a typedef name for the
+pointer-to-function type
+\begin{verbatim}
+    void (*)(hnode_t *, void *);
+\end{verbatim}
+A function of this type which meets certain behavior criteria may be
+registered with a \verb|hash_t| object as node deallocator
+together with a compatible allocator function.
+
+\subsubsection{The {\tt hash_fun_t} type}
+
+\index{hashing function}
+The \verb|hash_fun_t| identifier is a typedef name for the
+pointer-to-function type
+\begin{verbatim}
+    hash_val_t (*hash_fun_t)(const void *);
+\end{verbatim}
+A function of this type which behaves a certain way is called
+a {\it hashing function}.  To be a viable hashing function, such
+a function must take a pointer to a key object, and produce
+an integer value that depends only on the contents of the key,
+and possibly on information that does not change over the lifetime of any hash
+for which that hashing function is used.  Additional requirements for hashing
+functions are introduced later.
+
+\subsubsection{The {\tt hash_val_t_bit} object}
+
+    \indexobject{hash_val_t_bit}
+    \synopsis
+    \begin{verbatim}
+    extern int hash_val_t_bit;\end{verbatim}
+
+    \description
+
+    The \verb|hash_val_t_bit| object of type int has a fixed value
+    which counts the number of bits in the \verb|hash_val_t| object.
+    The program shall not store a value into this object.
+    
+    The value of \verb|hash_val_t_bit| need not be correct until the
+    first successful call to \verb|hash_create| or to \verb|hash_init|
+    completes.
+
+    The implementation shall provide the macro \verb|HASH_VAL_T_BIT| which
+    expands to a non-lvalue expression that has the same value and type as the
+    object, but which may be a constant expression.\footnote{The intent of
+    providing these values is to ease the implementation of portable hashing
+    functions that take advantage of all of the available bits of a given
+    Kazlib implementation. Alternately, hashing functions may be constructed to
+    only use the lower 32 bits of the type.}
+
+\subsubsection{The {\tt hash_create} function}
+
+    \indexfunc{hash_create}
+    \index{Hash!creation of}
+    \index{create!hash object}
+    \synopsis
+    \begin{verbatim}
+    hash_t *hash_create(hashcount_t, hash_comp_t, hash_fun_t);\end{verbatim}
+
+    \description
+
+    If sufficient resources exist, the \verb|hash_create| function instantiates
+    and initializes an object of type \verb|hash_t| and returns a pointer to
+    it. Otherwise it returns a null pointer.
+
+    The first argument establishes the capacity of the hash, which is
+    initially empty.
+
+    The second argument is a pointer to a comparison function that will be
+    associated with the \verb|hash_t| object for its entire duration.
+
+    \index{hashing function}
+    The third argument is either null or a pointer to a hashing function
+    that is permanently associated with the object. If it is null, a {\it default
+    hashing function\/} is assigned by the implementation.
+
+    The hashing function shall be invoked with an argument that is one
+    of the keys that are being inserted into, or sought after, in the
+    hash. The hashing function must produce the same value each time it
+    is called for a given key. It is up to the hash user to define the
+    representation of keys, to manage their storage, and to provide a matching
+    hashing function.  The hash stores only generic \verb|void *| pointers to
+    keys. 
+
+    The default hashing function assumes that keys are null terminated
+    strings. That is to say, it behaves as though its \verb|void *|
+    argument points to the first elements of an array of \verb|unsigned|
+    \verb|char|, the last of which is a null character. The use of
+    the default hashing function with keys that do not have this representation
+    results in undefined behavior.
+    
+\subsubsection{The {\tt hash_set_allocator} function}
+
+    \indexfunc{hash_set_allocator}
+    \label{section:hash_set_allocator}
+
+    \synopsis
+    \begin{verbatim}
+    void hash_set_allocator(hash_t *, hnode_alloc_t,
+            hnode_free_t, void *);\end{verbatim}
+
+    \constraints
+
+    The second and third arguments---the function pointers---shall either
+    both be null, or both be non-null. The hash pointed at by the first
+    argument shall be empty.
+
+    \description
+
+    When a hash is initialized, it is outfitted with a pair of default
+    node allocation functions. These functions may be replaced with functions
+    supplied by the program by calling the \verb|hash_set_allocator| function
+    and specifying two suitable pointers. If these pointers are null, the
+    default functions are restored.
+
+    These functions are called to allocate and free \verb|hnode_t| 
+    objects by the functions \verb|hash_alloc_insert|
+    and \verb|hash_delete_free| (see sections
+    \ref{section:hash_delete_free} and \ref{section:hash_alloc_insert}).
+
+    If sufficient resources exist, the allocation function shall
+    return a pointer to a unique storage object that is large enough
+    and suitably aligned to represent an object of type \verb|dnode_t|.
+    Otherwise, the function shall return a null pointer.
+
+    The deallocation function shall be capable of disposing of the
+    objects created by the matching allocator function.
+
+
+\subsubsection{The {\tt hash_destroy} function}
+
+    \indexfunc{hash_destroy}
+    \synopsis
+    \begin{verbatim}
+    void hash_destroy(hash_t *);\end{verbatim}
+
+    \constraints
+
+    The hash pointed at by the first argument shall be empty.
+
+    \description
+
+    The \verb|hash_destroy| function deinitializes and deallocates a hash
+    that was created with \verb|hash_create|.
+    All pointers and \verb|hscan_t| objects that referred to the hash become
+    indeterminate.
+
+\subsubsection{The {\tt hash_free_nodes} function}
+
+    \indexfunc{hash_free_nodes}
+    \synopsis
+    \begin{verbatim}
+    void hash_free_nodes(hash_t *);\end{verbatim}
+
+    \description
+
+    The \verb|hash_free_nodes| function removes each node from
+    the hash and destroys it as if by calling \verb|hash_delete_free|
+    (Section \ref{section:hash_delete_free}). The order in which
+    the nodes are destroyed is unspecified.
+
+\subsubsection{The {\tt hash_free} function}
+
+    \indexfunc{hash_free}
+    \synopsis
+    \begin{verbatim}
+    void hash_free(hash_t *);\end{verbatim}
+
+    \description
+
+    Every node in the hash is removed from the hash and is then subject to the
+    deallocation function. The overall effect is as if the function
+    \verb|hash_delete_free| (Section \ref{section:hash_delete_free}) were
+    invoked on each node, and then \verb|hash_destroy| invoked on the
+    hash itself.
+
+    This function is obsolescent, and will be removed from some future revision
+    of this document.
+
+\subsubsection{The {\tt hash_init} function}
+
+    \indexfunc{hash_init}
+    \synopsis
+    \begin{verbatim}
+    hash_t *hash_init(hash_t *, hashcount_t, hash_comp_t,
+        hash_fun_t, hnode_t **, hashcount_t);
+    \end{verbatim}
+
+    \constraints
+
+    The last argument, which specifies the size of the program-supplied table,
+    shall be integral power of two that is greater than one---that is to say, an
+    integer of the form $2^k$ where $k$ is a positive integer.
+ 
+    \description
+ 
+    The \verb|hash_init| function configures the specified \verb|hash_t| object
+    to use a specified array of \verb|hnode_t *| pointer objects as a table.
+    The user is responsible for providing storage for the \verb|hash_t|
+    object and the array. As in the \verb|hash_create| interface,
+    the second parameter specifies the capacity, and the subsequent
+    arguments specify the comparison and hashing function, respectively.
+    The last two arguments specify the table of pointers. The array object
+    shall have at least as many elements as indicated by the last parameter,
+    otherwise the behavior is undefined. The call to \verb|hash_init| is said
+    to register the array with the hash.
+
+    The program shall not register the same array with more than one hash.
+    More specifically, once the program modifies a registered array, or
+    registers it with another hash, it must discontinue use of the first hash.
+    \footnote{Note that no explicit deinitialization function is provided to
+    dissociate the array. A program disposes of a hash created by
+    {\tt hash_init} by discontinuing its use.}
+ 
+\subsubsection{The {\tt hash_insert} function}
+
+    \indexfunc{hash_insert}
+    \label{section:hash_insert}
+    \synopsis
+    \begin{verbatim}
+    void hash_insert(hash_t *, hnode_t *, const void *);\end{verbatim}
+
+    \constraints
+    The hash is not full.  The key specified by the \verb|void *| parameter
+    does not already exist in the specified hash. The node specified
+    by the second parameter is not already inserted into a hash.
+
+    \description
+    The \verb|hash_insert| function adds a new node to a hash. The user
+    must supply a node object that was initialized with \verb|hnode_init|
+    or dynamically created with \verb|hnode_create|. If the node is
+    already inserted into the same hash or any other hash, the behavior
+    is undefined.
+
+    A program may modify a key or node that has been inserted into a hash, or
+    cause the storage of the key or the node to become invalid.  However, any
+    subsequent use of the hash invokes undefined behavior, with the following
+    exception: the data pointer stored within a node may be modified using the
+    \verb|hnode_put| function.
+
+    The \verb|hash_insert| function invokes the hashing function callback with
+    the key pointer as the argument.
+
+    The \verb|hash_insert| function may need to acquire additional storage in
+    order to support hash table growth. If the storage allocation fails, the
+    function shall fully recover, and insert the node without growing the
+    table.
+
+    The Hash implementation shall not modify the storage referenced by a key,
+    and shall not access it other than indirectly through the supplied hashing
+    and comparison functions.
+
+\subsubsection{The {\tt hash_lookup} function}
+
+    \indexfunc{hash_lookup}
+    \synopsis
+    \begin{verbatim}
+    hnode_t *hash_lookup(hash_t *, const void *);\end{verbatim}
+
+    \description
+
+    The \verb|hash_lookup| function searches the given hash for a node
+    matching the given key. Unless the hash is empty, the key shall be
+    compared against one or more keys that are already in the hash,
+    using the comparison function. The key pointer may
+    be identical to one that has already been inserted into the
+    hash.\footnote {In that case, the comparison function must correctly
+    cope with aliased parameters}.
+
+    If the key is found in the hash, a pointer to the corresponding node
+    is returned.\footnote{The corresponding node is the one that was specified
+    in the call to {\tt hash_insert} together with the matching key.}
+
+    If the key is not found, a null pointer is returned.
+
+\subsubsection{The {\tt hash_delete} function}
+
+    \indexfunc{hash_delete}
+    \synopsis
+    \begin{verbatim}
+    hnode_t *hash_delete(hash_t *, hnode_t *);\end{verbatim}
+
+    \constraints
+    The specified node is an occupant of the given hash.
+
+    \description
+    The \verb|hash_delete| function removes from the given hash a
+    node that has previously been inserted into it. The key under
+    which the node was inserted is also removed from the hash.\footnote{Thus
+    the program may arbitrarily manipulate the removed key without destroying
+    the integrity of the hash.}
+
+    Any existing \verb|hscan_t| iterator which is associated with the
+    hash becomes indeterminate.\footnote{To delete the current node during hash
+    table traversal, the {\tt hash_scan_delete} function must be used
+    instead.}
+
+
+\subsubsection{The {\tt hash_alloc_insert} function}
+
+    \label{section:hash_alloc_insert}
+    \indexfunc{hash_alloc_insert}
+
+    \synopsis
+    \begin{verbatim}
+    int hash_alloc_insert(hash_t *, const void *, void *);\end{verbatim}
+
+    \constraints
+
+    The second argument specifies the insertion key. The hash shall not
+    already contain this key.
+
+    \description
+
+    The \verb|hash_alloc_insert| function dynamically allocates and
+    initializes a \verb|hnode_t| object and inserts it into the 
+    given hash. The second argument and third arguments are pointers
+    to user data and key objects, either of which may be null.
+
+    The allocation is performed by a call to the default allocation
+    function, or to the function that was configured using
+    \verb|hash_set_allocator| (Section \ref{section:hash_set_allocator}).
+
+    If the allocation succeeds, the insertion is performed and
+    the value 1 is returned.  If the allocation fails, no insertion is
+    performed and 0 is returned.
+
+\subsubsection{The {\tt hash_delete_free} function}
+
+    \label{section:hash_delete_free}
+    \indexfunc{hash_delete_free}
+
+    \synopsis
+    \begin{verbatim}
+    void hash_delete_free(hash_t *, hnode_t *)
+    \end{verbatim}
+
+    \constraints
+    The given node can be found within the given hash.
+   
+    \description
+    The \verb|hash_delete_free| function is the reverse of
+    \verb|hash_alloc_insert|. It removes the given node form the
+    hash as if by a call to \verb|hash_delete| and then deletes it using the
+    default or user-defined allocator (Section
+    \ref{section:hash_set_allocator}). If the given node had not been created
+    using \verb|hash_alloc_insert|, the behavior is undefined.
+
+\subsubsection{The {\tt hnode_put} function}
+
+    \indexfunc{hnode_put}
+    \synopsis
+    \begin{verbatim}
+    void hnode_put(hnode_t *, void *);\end{verbatim}
+
+    \description
+    The function \verb|hnode_put| replaces the data element
+    associated with the hash node.
+
+\subsubsection{The {\tt hnode_get} function}
+
+    \indexfunc{hnode_get}
+    \synopsis
+    \begin{verbatim}
+    void *hnode_get(hnode_t *);\end{verbatim}
+
+    \description
+    The \verb|hnode_get| function retrieves the \verb|void * | data value
+    associated with the given hash node.
+
+\subsubsection{The {\tt hnode_getkey} function}
+
+    \indexfunc{hnode_getkey}
+    \synopsis
+    \begin{verbatim}
+    const void *hnode_getkey(hnode_t *);\end{verbatim}
+
+    \description
+
+    The \verb|hnode_getkey| function retrieves the \verb|void *| key value 
+    associated with the given node. A node acquires an associated key
+    when it is inserted into a hash (see section \ref{section:hash_insert}).
+    Invoking \verb|hnode_getkey| on a node that has not been inserted
+    into a hash results in undefined behavior.
+
+\subsubsection{The {\tt hash_count} function}
+
+    \indexfunc{hash_count}
+    \synopsis
+    \begin{verbatim}
+    hashcount_t hash_count(hash_t *);\end{verbatim}
+
+    \description
+    The \verb|hash_count| function returns a value which represents the number
+    of nodes currently stored in the hash pointed at by the argument.
+
+\subsubsection{The {\tt hash_size} function}
+
+    \indexfunc{hash_size}
+    \synopsis
+    \begin{verbatim}
+    hashcount_t hash_size(hash_t *hash)\end{verbatim}
+
+    \description
+    The \verb|hash_size| function returns an implementation-defined value that
+    depends on the number of entries in the given hash.  The intent is that the
+    value represent the size of the internal hash table managed by the given
+    hash.
+
+\subsubsection{The {\tt hash_isfull} function}
+
+    \indexfunc{hash_isfull}
+    \synopsis
+    \begin{verbatim}
+    int hash_isfull(hash_t *);\end{verbatim}
+
+    \description
+    The \verb|hash_isfull| function returns 1 if the hash is full,
+    otherwise it returns 0.
+
+    If the argument is an expression with side effects, the behavior is
+    undefined.\index{macros!and side effects}
+
+
+\subsubsection{The {\tt hash_isempty} function}
+
+    \indexfunc{hash_isempty}
+    \synopsis
+    \begin{verbatim}
+    int hash_isempty(hash_t *);\end{verbatim}
+
+    \description
+    The \verb|hash_isempty| function returns 1 if the given hash is empty,
+    otherwise it returns 0.
+
+\subsubsection{The {\tt hash_scan_begin} function}
+
+    \indexfunc{hash_scan_begin}
+    \synopsis
+    \begin{verbatim}
+    void hash_scan_begin(hscan_t *, hash_t *);\end{verbatim}
+
+    \description
+    The \verb|hash_scan_begin| initializes the \verb|hscan_t| iterator object,
+    preparing it for a traversal of the given hash.
+
+    After this initialization, if the hash is modified in any way by
+    the performance of an insertion or deletion operation, the
+    value of the \verb|hscan_t| object becomes indeterminate,
+    with one exception:  the \verb|hash_scan_delete| function or the
+    \verb|hash_scan_delfree| function may be used to delete the current
+    node.
+
+\subsubsection{The {\tt hash_scan_next} function}
+
+    \indexfunc{hash_scan_next}
+    \synopsis
+    \begin{verbatim}
+    hnode_t *hash_scan_next(hscan_t *);\end{verbatim}
+
+    \description
+    If any unvisited nodes remain, the \verb|hash_scan_next| function advances
+    to the next one and returns a pointer to it. Otherwise, it returns a null
+    pointer. Repeated invocations of \verb|hash_scan_next| return a pointer to
+    every node that has been inserted into the table, in no particular order,
+    such that no node is reported twice.
+
+\subsubsection{The {\tt hash_scan_delete} function}
+
+    \indexfunc{hash_scan_delete}
+    \synopsis
+    \begin{verbatim}
+    hnode_t *hash_scan_delete(hash_t *, hnode_t *);
+    \end{verbatim}
+
+    \constraints
+    The specified node is an occupant of the given hash.
+
+    \description
+    This function is almost exactly like \verb|hash_delete| except that it may
+    be used to delete a node that has been most recently obtained from
+    \verb|hash_scan_next| without destroying the validity of the \verb|hscan_t|
+    iterator from which the node was obtained.
+
+\subsubsection{The {\tt hash_scan_delfree} function}
+
+    \label{section:hash_scan_delfree}
+    \indexfunc{hash_scan_delfree}
+
+    \synopsis
+    \begin{verbatim}
+    void hash_scan_delfree(hash_t *, hnode_t *)
+    \end{verbatim}
+
+    \constraints
+    The given node can be found within the given hash.
+   
+    \description
+    The \verb|hash_scan_delfree| function is similar to
+    \verb|hash_delete_free|. It removes the given node form the
+    hash and then deletes it using the default or user-defined allocator
+    (Section \ref{section:hash_set_allocator}). If the given node
+    had not been created using \verb|hash_alloc_insert|, the behavior
+    is undefined.
+
+    The deletion from the hash is performed as if by a call to
+    \verb|hash_scan_delete|, thus it is safe to delete a node that
+    was most recently obtained from a \verb|hash_scan_next| without
+    destroying the validity of the \verb|hscan_t| iterator.
+
+\subsubsection{The {\tt hash_verify} function}
+
+    \indexfunc{hash_verify}
+    \synopsis
+    \begin{verbatim}
+    int hash_verify(hash_t *hash);\end{verbatim}
+
+    \description
+    The intent of the \verb|hash_verify| function is to perform a verification
+    on the hash object, regardless of whether the Kazlib implementation is
+    operated in verification or production mode. If the hash object
+    and its constituent nodes have been correctly manipulated, and the
+    program has not caused any undefined behaviors, the value $1$ is returned.
+    Otherwise, the function may be able to, but is not guaranteed to, detect
+    corruption, and return the value zero.
+
+\subsubsection{The {\tt hnode_create} function}
+
+    \indexfunc{hnode_create}
+    \synopsis
+    \begin{verbatim}
+    hnode_t *hnode_create(void *);\end{verbatim}
+
+    \description
+    The \verb|hnode_create| function dynamically allocates a hash node,
+    stores in it the data value specified in the argument and
+    returns a pointer to it. The allocation is performed by a call to the
+    standard \verb|malloc| function. If the allocation fails, a null
+    pointer is returned.
+
+    The node's key pointer remains indeterminate until it is the subject of a
+    \verb|hash_insert| operation.
+
+\subsubsection{The {\tt hnode_init} function}
+
+    \indexfunc{hnode_init}
+    \synopsis
+    \begin{verbatim}
+    hnode_t *hnode_init(hnode_t *, void *);\end{verbatim}
+
+    \description
+    The \verb|hnode_init| function initializes the contents
+    of the specified hash node object, assigning it the
+    data value specified as the second argument. 
+    The first argument is a pointer which refers to 
+    a data object that has a suitable size and alignment
+    for the representation of an \verb|hnode_t| type.
+    After initialization with \verb|hnode_init|, the object is subsequently
+    eligible as an operand to the functions of the hash component,
+    other than \verb|hnode_getkey|.
+
+    The node's key pointer remains indeterminate until it is the subject of a
+    \verb|hash_insert| operation.
+
+\subsubsection{The {\tt hnode_destroy} function}
+
+    \indexfunc{hnode_destroy}
+    \synopsis
+    \begin{verbatim}
+    void hnode_destroy(hnode_t *);\end{verbatim}
+
+    \description
+    The \verb|hnode_destroy| function destroys a hash node that has been
+    allocated with the \verb|hnode_create| function.  The value of any pointer
+    that referred to the node that was thus freed is indeterminate.
+
+    If the node is currently the occupant of a hash, the behavior is undefined
+    if the hash is subsequently used.
+
+\subsection{Implementation}
+
+TODO
+
+\section{Dictionary component}
+
+\index{Dictionary}
+The Dictionary component provides a means to manage ordered sequences of
+elements, having the following properties:
+\begin{enumerate}
+\item If the dictionary is not empty, a first and last element can be identified.
+    In a dictionary having only one element, that one element is both the first and
+    last element.
+\item Each element that is not the last element has another element as its
+    {\it successor}.
+    \index{successor!of a dictionary element}
+    \index{Dictionary!successor of an element}
+\item Each element that is not the first element has a {\it predecessor}.
+    \index{predecessor!of a dictionary element}
+    \index{Dictionary!predecessor of an element}
+\item No element is the predecessor or successor of more than one element.
+\item If one element is the successor of another, the other is necessarily the
+    predecessor of the first.
+\item Each element is associated with a piece of information known as 
+    the key. The sequence is ordered according to the relation imposed
+    by the comparison function: the key of an element compares
+    greater than or equal to the key of its predecessor.
+\item If duplicate keys are present, then elements
+    having the same key form a subsequence with no other keys in it, which
+    follows from the previous property. No additional ordering is imposed
+    within such subsequences.
+\item Each element is associated with arbitrary satellite data.
+\end{enumerate}
+
+The Dictionary component supports efficient operations over such ordered
+sequences: such as insertion, deletion, ordered traversal, as well as exact and
+range searches.\footnote{The implicit association of keys and satellite data,
+together with the ability of efficiently search by key to retrieve data, gives
+rise to the term {\it dictionary}. A dictionary need not be ordered; a hash can
+therefore also be considered to be a kind of dictionary; the Kazlib
+nomenclature is somewhat unfortunate in that regard.}
+
+The number of elements that can be stored in a dictionary is limited; maximum
+number of entries in a dictionary is known as its {\it capacity}.
+
+\subsection{Interface}
+
+\subsubsection{The {\tt dict.h} header}
+
+Each C or C++ translation unit that is to use the functionality of the Dict
+component shall include the header \verb|dict.h|. This header shall
+contain declarations of types and external functions, and definitions of
+macros.  The following typedef names shall be
+defined:\index{Dict!typedef names}
+\index{typedefs!defined by Dict}
+\begin{verbatim}
+    dict_t                      dnode_process_t
+    dnode_t                     dnode_alloc_t
+    dictcount_t                 dnode_free_t
+    dict_comp_t                 dict_load_t
+\end{verbatim}
+In addition, the following structure tags may be defined:\index{Dict!tag names}
+\index{tags!defined by Dict}
+\begin{verbatim}
+    struct dict_t
+    struct dnode_t
+\end{verbatim}
+The following external function names shall be declared:
+\index{Dict!function names}\index{functions!defined by Dict}
+\begin{verbatim}
+    dict_create                 dict_count                     
+    dict_set_allocator          dict_isempty                   
+    dict_destroy                dict_isfull                    
+    dict_free_nodes             dict_contains                  
+    dict_init                   dict_allow_dupes               
+    dict_verify                 dnode_is_in_a_dict             
+    dict_lookup                 dnode_create                   
+    dict_lower_bound            dnode_init                     
+    dict_upper_bound            dnode_destroy                  
+    dict_insert                 dnode_get                      
+    dict_delete                 dnode_getkey                   
+    dict_alloc_insert           dnode_put                      
+    dict_delete_free            dict_process                   
+    dict_first                  dict_load_begin
+    dict_last                   dict_load_next
+    dict_next                   dict_load_end 
+    dict_prev                   dict_free
+\end{verbatim}
+The following preprocessor symbols shall be
+defined: \index{Dict!macro names}\index{macros!defined by Dict}
+\indexmacro{DICTCOUNT_T_MAX}
+\indexmacro{DICT_H}
+\begin{verbatim}
+    DICTCOUNT_T_MAX
+    DICT_H\end{verbatim}
+\index{symbols!reserved by Dict}\index{Dict!reserved symbols}
+Macro identifiers which begin with the upper-case prefix \verb|DICT| are
+reserved for future extensions to the \verb|dict.h| header, as are
+names in the ordinary and tag namespaces which begin with \verb|dict_|
+or \verb|dnode_|. External names which begin with \verb|dict_|
+or \verb|dnode_| are reserved by the Kazlib library regardless of
+what headers are included.
+
+\subsubsection{The {\tt dict_t} type}
+
+\indextype{dict_t}
+The type \verb|dict_t| is an opaque data type which represents a single
+dictionary. A dictionary consists of an instance of the \verb|dict_t| type,
+plus zero or more instances of the type \verb|dnode_t|. An object of type
+\verb|dict_t| can be initialized by the \verb|dict_init| function. Alternately,
+the \verb|dict_create| function will dynamically allocate and initialize a
+dictionary.  An empty dictionary created by \verb|dict_create| may be disposed
+of using \verb|dict_destroy|.
+
+\subsubsection{The {\tt dnode_t} type}
+
+\indextype{dnode_t}
+The \verb|dnode_t| type represents a single entry in a dictionary called a
+dictionary node.  The object stores a pointer to user data, and a key pointer
+that is assigned to the dictionary node at the time when it is inserted into
+the dictionary. A \verb|dnode_t| may be dynamically created using
+\verb|dnode_create| and destroyed using \verb|dnode_destroy|. Alternately,
+the program may supply storage for a \verb|dnode_t| object and initialize
+it using the \verb|dnode_init| function.
+
+\subsubsection{The {\tt dictcount_t} type}
+
+\indextype{dictcount_t}
+\indexmacro{DICTCOUNT_T_MAX}
+This is an unsigned integral type which is capable of representing the number
+of nodes in a dictionary.  The \verb|DICTCOUNT_T_MAX| macro expands to a
+constant expression of type \verb|dictcount_t| which specifies the maximum
+value of that type.
+
+\subsubsection{The {\tt dict_comp_t} type}
+
+\indextype{dict_comp_t}
+The \verb|dict_comp_t| type is a typedef name for the pointer-to-function type
+\begin{verbatim}
+    int (*)(const void *, const void *);
+\end{verbatim}
+In the context of the Dictionary component, this type denotes pointers to
+comparison functions. 
+
+\subsubsection{The {\tt dnode_process_t} type}
+
+\indextype{dnode_process_t}
+The type \verb|dnode_process_t| is a typedef name for the pointer-to-function type
+\begin{verbatim}
+    void (*)(dict_t *, dnode_t *, void *);
+\end{verbatim}
+In the context of the Dictionary component, this is the type of a
+dictionary node processing function (See section \ref{section:dict_process}).
+The first two parameters identify a dictionary and the node within that
+dictionary that is being processed. The third argument is a context pointer.
+
+\subsubsection{The {\tt dnode_alloc_t} type}
+
+\indextype{dnode_alloc_t}
+The type \verb|dnode_alloc_t| is a typedef name for the pointer-to-function type
+\begin{verbatim}
+    dnode_t *(*)(void *);
+\end{verbatim}
+A function compatible with this type which meets certain other criteria may be
+registered with a \verb|dict_t| object as a node allocator function
+(See section \ref{section:dict_set_allocator}).
+
+\subsubsection{The {\tt dnode_free_t} type}
+
+\indextype{dnode_free_t}
+The type \verb|dnode_free_t| is a typedef name for the pointer-to-function type
+\begin{verbatim}
+    void (*)(dnode_t *, void *);
+\end{verbatim}
+A function compatible with this type which meets certain other criteria may be
+registered with a \verb|dict_t| object as a node deallocator function.
+(See section \ref{section:dict_set_allocator}).
+
+\subsubsection{The {\tt dict_load_t} type}
+
+\indextype{dict_load_t}
+
+The \verb|dict_load_t| type is opaque, and represents a context structure
+used during the process of constructing a dictionary from an ordered list
+of nodes.  (See sections \ref{section:dict_load_begin} to
+\ref{section:dict_load_end}).
+
+\subsubsection{The {\tt dict_create} function}
+
+    \indexfunc{dict_create}
+    \index{Dictionary!creation of}
+    \index{create!dictionary object}
+
+    \synopsis
+    \begin{verbatim}
+    dict_t *dict_create(dictcount_t, dict_comp_t);\end{verbatim}
+
+    \description
+    The \verb|dict_create| function allocates a new
+    object of type \verb|dict_t| and initializes it to act as
+    a dictionary.
+    
+    If insufficient resources exist for the allocation,
+    a null pointer is returned, otherwise a pointer to the dictionary
+    is returned.
+    
+    The first argument specifies the capacity of the dictionary,
+    which is initially empty.
+
+    The second argument is a comparison function that is used for comparing
+    keys during insertion and searching operations, and is associated
+    with the dictionary for its entire duration.
+
+\subsubsection{The {\tt dict_set_allocator} function}
+
+    \label{section:dict_set_allocator}
+    \indexfunc{dict_set_allocator}
+
+    \synopsis
+    \begin{verbatim}
+    void dict_set_allocator(dict_t *, dnode_alloc_t,
+            dnode_free_t, void *);\end{verbatim}
+
+    \constraints
+
+    The second and third arguments---the function pointers---shall either
+    both be null, or both be non-null. The dictionary pointed at by the first
+    argument shall be empty.
+
+    \description
+
+    When a dictionary is initialized, it is outfitted with a pair of default
+    node allocation functions. These functions may be replaced with functions
+    supplied by the program by calling the \verb|dict_set_allocator| function
+    and specifying two suitable pointers. If these pointers are null, the
+    default functions are restored.
+
+    These functions are called to allocate and free \verb|dnode_t|
+    objects by the functions \verb|dict_alloc_insert|
+    and \verb|dict_delete_free| (see sections
+    \ref{section:dict_delete_free} and \ref{section:dict_alloc_insert}).
+
+    If sufficient resources exist, the allocation function shall
+    return a pointer to a unique storage object that is large enough
+    and suitably aligned to represent an object of type \verb|dnode_t|.
+    Otherwise, the function shall return a null pointer.
+
+    The deallocation function shall be capable of disposing of the
+    objects created by the matching allocator function.
+
+\subsubsection{The {\tt dict_destroy} function}
+
+    \indexfunc{dict_destroy}
+
+    \synopsis
+    \begin{verbatim}
+    void dict_destroy(dict_t *);\end{verbatim}
+
+    \constraints
+
+    The dictionary pointed at by the first argument shall be empty.
+
+    \description
+
+    The \verb|dict_destroy| function deinitializes and deallocates a dictionary
+    object that was created by \verb|dict_create|.  All pointers that
+    referred to the dictionary become indeterminate.
+
+\subsubsection{The {\tt dict_free_nodes} function}
+
+    \indexfunc{dict_free_nodes}
+
+    \synopsis
+    \begin{verbatim}
+    void dict_free_nodes(dict_t *);\end{verbatim}
+
+    \description
+
+    Every node in the dictionary is removed from the dictionary and is then
+    subject to the deallocation function, as if the function
+    \verb|dict_delete_free| (Section \ref{section:dict_delete_free}) were
+    invoked on each node, in some unspecified order.
+
+\subsubsection{The {\tt dict_free} function}
+
+    \indexfunc{dict_free}
+
+    \synopsis
+    \begin{verbatim}
+    void dict_free(dict_t *);\end{verbatim}
+
+    \description
+
+    This function is obsolescent, and will be removed from some future revision
+    of this document. It is equivalent to \verb|dict_free_nodes|.
+
+\subsubsection{The {\tt dict_init} function}
+
+    \indexfunc{dict_init}
+
+    \synopsis
+    \begin{verbatim}
+    dict_t *dict_init(dict_t *, dictcount_t, dict_comp_t);\end{verbatim}
+
+    \description
+ 
+    The \verb|dict_init| function prepares specified \verb|dict_t| object
+    to behave as a dictionary that may subsequently be used with the other
+    dictionary functions.
+    
+    The first argument points to the \verb|dict_t| object to be initialized.
+    The second argument specifies the capacity of the dictionary. The third
+    argument is a pointer to the comparison function which shall be associated
+    with the dictionary for its entire duration.
+
+\subsubsection{The {\tt dict_verify} function}
+
+    \indexfunc{dict_verify}
+
+    \synopsis
+    \begin{verbatim}
+    int dict_verify(dict_t *);\end{verbatim}
+
+    \description
+
+    The intent of the \verb|dict_verify| function is to perform a verification
+    on the dictionary object, regardless of whether the Kazlib implementation
+    is operated in verification or production mode. If the dictionary object
+    and its constituent nodes have been correctly manipulated, and the program
+    has not caused any undefined behaviors, the value $1$ is returned.
+    Otherwise, the function may be able to, but is not guaranteed to, detect
+    corruption, and return the value zero.
+
+\subsubsection{The {\tt dict_lookup} function}
+
+    \indexfunc{dict_lookup}
+
+    \synopsis
+    \begin{verbatim}
+    dnode_t *dict_lookup(dict_t *, const void *);\end{verbatim}
+
+    \description
+    The \verb|dict_lookup| function searches the given dictionary for a node
+    matching the given key. Unless the dictionary is empty, the key shall be
+    compared against one or more keys that are already in the dictionary, using
+    the comparison function. The key pointer may be identical to one that has
+    already been inserted into the dictionary.
+
+    If the key is found in the dictionary, a pointer to the corresponding node
+    is returned.
+
+    If the key is not found, a null pointer is returned.
+
+    If the dictionary contains more than one key which matches the search
+    key, then the first key in the subsequence of duplicate keys is returned.
+
+\subsubsection{The {\tt dict_lower_bound} function}
+
+    \indexfunc{dict_lower_bound}
+
+    \synopsis
+    \begin{verbatim}
+    dnode_t *dict_lower_bound(dict_t *, const void *);\end{verbatim}
+
+    \description
+
+    The \verb|dict_lower_bound| function searches the dictionary in a manner
+    similar to \verb|dict_lookup|.
+    
+    If the given key exists in the dictionary, the behavior is exactly the same
+    as \verb|dict_lookup|.
+    
+    However, if the key is not found, then the node which has the smallest key
+    that is greater than the search key is returned. If no such key exists
+    (because the search key is higher than any other key in the dictionary
+    or the dictionary is empty) then a null pointer is returned.
+
+    \example
+    Suppose that pointer \verb|d| refers to a dictionary whose registered
+    comparison function performs lexicographic comparisons on ordinary
+    C strings, similar to \verb|strcmp|.  To iterate over all keys that
+    begin with the letter \verb|d|, the following idiom can be used:
+    \begin{verbatim}
+    dict_t *d;
+    dnode_t *n, *start, *end;
+    /*...*/
+    start = dict_lower_bound(d, "d");
+    end = dict_lower_bound(d, "e");
+    for (n = start; n != end; n = dict_next(d, n)) {
+        /* n points to each node in turn whose
+           key starts with 'd' */
+    }
+    \end{verbatim}
+    Note that if the dictionary is empty, or has keys which are all lower
+    than \verb|"d"|, then both \verb|start| and \verb|end| shall be null
+    pointers, and the loop body will never execute since the two are equal.
+    Also note that if there are keys that begin with \verb|d| and the
+    dictionary's last node has a key that starts with \verb|d|, then \verb|end|
+    is null, otherwise \verb|end| points to the first key that doesn't begin
+    with \verb|d|. In both cases, the loop will terminate after processing the
+    last \verb|d| key, because \verb|dict_next| shall produce a pointer that is
+    equal to \verb|end|.
+
+\subsubsection{The {\tt dict_upper_bound} function}
+
+    \indexfunc{dict_upper_bound}
+
+    \synopsis
+    \begin{verbatim}
+    dnode_t *dict_upper_bound(dict_t *, const void *);\end{verbatim}
+
+    \description
+
+    The \verb|dict_upper_bound| function searches the dictionary in a manner
+    similar to \verb|dict_lookup|.
+    
+    If the given key exists in the dictionary, the behavior is exactly the same
+    as \verb|dict_lookup| with one difference: 
+    If the dictionary contains more than one key which matches the search
+    key, then the last key in the sequence of duplicates is returned,
+    rather than the first.
+    
+    However, if the key is not found, then the node which has the greatest key
+    that is lower than the search key is returned. If no such key exists
+    (because the search key is lower than any other key in the dictionary
+    or the dictionary is empty) then a null pointer is returned.
+  
+    \example
+    The following idiom can be used to iterate over a sequence of duplicate
+    keys without the overhead of performing a full comparison before each
+    iteration to detect the first non-matching key. 
+    \begin{verbatim}
+    dict_t *d;
+    void *key;
+    dnode_t *n, *start, *end;
+
+    /* ... Initialize d, and key. ...*/
+    start = dict_lower_bound(d, key);
+    end = dict_upper_bound(d, key);
+
+    /* advance end to first non-matching key */
+    if (end != 0)
+        end = dict_next(d, end);
+    else
+        end = start;	/* start == dict_first(d) in this case */
+
+    for (n = start; n != end; n = dict_next(d, n)) {
+        /* n points to duplicate keys in turn */
+    }
+    \end{verbatim}
+    Immediately prior to the execution of the if statement, exactly one of the
+    following conditions is true:
+    \begin{itemize}
+    \item The key was found in the dictionary; \verb|start| points to the
+	first duplicate node and \verb|end| points to the last.
+    \item The dictionary has only higher keys than the search key; \verb|start|
+	points to the first node in the dictionary and \verb|end| is null.
+    \item The dictionary has only lower keys than the search key; \verb|end|
+	points to the last node in the dictionary, and \verb|start| is null.
+    \item The dictionary has both lower and higher keys; \verb|end| and \verb|start|
+	point to two consecutive nodes, respectively, such that the node
+	pointed at by \verb|end| has a lower key than the search key and
+	the node pointed at by \verb|start| has a higher key.
+    \item The dictionary is empty; \verb|start| and \verb|end| are null.
+    \end{itemize}
+    The if statement ensures that if the dictionary contains no matching
+    keys, than \verb|start| and \verb|end| are equal, and if the dictionary
+    contains one or more matching keys, than \verb|end| points to the first
+    non-matching node, or is null if there is no such node.  Thus the loop
+    performs correctly in all circumstances.
+
+\subsubsection{The {\tt dict_insert} function}
+
+    \label{section:dict_insert}
+    \indexfunc{dict_insert}
+
+    \synopsis
+    \begin{verbatim}
+    void dict_insert(dict_t *, dnode_t *, const void *);\end{verbatim}
+
+    \constraints
+    The dictionary is not full.  If the dictionary has not been configured
+    to allow duplicate keys, the key specified by the \verb|void *| parameter
+    does not already exist in the dictionary.
+
+    \description
+    The \verb|dict_insert| function adds a new node to a dictionary. The user
+    must supply a node object that was initialized with \verb|dnode_init| or
+    dynamically created with \verb|dnode_create|. If the node is already
+    inserted into the same dictionary or any other dictionary, the behavior is
+    undefined.
+
+    Duplicate keys may be inserted into a dictionary only if the dictionary
+    has been configured to permit duplicate keys (see section
+    \ref{section:dict_allow_dupes}). If this is the case, it is also
+    permissible to insert the same key more than once: the implementation shall
+    not distinguish between distinct keys that are declared equal by a
+    correctly designed comparison function, and two key pointers that refer to
+    the same key.
+
+    A program may modify a key or node that has been inserted into a
+    dictionary, or cause the storage of the key or the node to become invalid.
+    However, any subsequent use of the dictionary invokes undefined behavior, with
+    the following exception: the data pointer stored within a node may be
+    modified using the \verb|dnode_put| function.
+
+    The Dictionary implementation shall not modify the storage referenced by a
+    key, and shall not access it other than indirectly through the supplied
+    comparison function.
+
+\subsubsection{The {\tt dict_delete} function}
+
+    \indexfunc{dict_delete}
+
+    \synopsis
+    \begin{verbatim}
+    dnode_t *dict_delete(dict_t *, dnode_t *);\end{verbatim}
+
+    \constraints
+    The specified node is an occupant of the given dictionary.
+
+    \description
+    The \verb|dict_delete| function removes from the given dictionary a
+    node that has previously been inserted into it. The key under
+    which the node was inserted is also removed from the dictionary.
+
+\subsubsection{The {\tt dict_alloc_insert} function}
+
+    \label{section:dict_alloc_insert}
+    \indexfunc{dict_alloc_insert}
+
+    \synopsis
+    \begin{verbatim}
+    int dict_alloc_insert(dict_t *, const void *, void *);\end{verbatim}
+
+    \constraints
+
+    The second argument specifies the insertion key. The dictionary shall not
+    already contain this key unless it has been configured as allowing
+    duplicates.
+
+    \description
+
+    The \verb|dict_alloc_insert| function dynamically allocates and
+    initializes a \verb|dnode_t| object and inserts it into the 
+    given dictionary. The second argument and third arguments are pointers
+    to user data and key objects, either of which may be null.
+
+    The allocation is performed by a call to the default allocation
+    function, or to the function that was configured using
+    \verb|dict_set_allocator| (Section \ref{section:dict_set_allocator}).
+
+    If the allocation succeeds, the insertion is performed and
+    the value 1 is returned.  If the allocation fails, no insertion is
+    performed and 0 is returned.
+
+\subsubsection{The {\tt dict_delete_free} function}
+
+    \label{section:dict_delete_free}
+    \indexfunc{dict_delete_free}
+
+    \synopsis
+    \begin{verbatim}
+    void dict_delete_free(dict_t *, dnode_t *);\end{verbatim}
+
+    \constraints
+    The given node can be found within the given dictionary.
+   
+    \description
+    The \verb|dict_delete_free| function is the reverse of
+    \verb|dict_alloc_insert|. It removes the given node form the
+    dictionary and then deletes it using the default or user-defined allocator
+    (Section \ref{section:dict_set_allocator}). If the given node
+    had not been created using \verb|dict_alloc_insert|, the behavior
+    is undefined.
+
+\subsubsection{The {\tt dict_first} function}
+
+    \indexfunc{dict_first}
+
+    \synopsis
+    \begin{verbatim}
+    dnode_t *dict_first(dict_t *);\end{verbatim}
+
+    \description
+    If the dictionary pointed at by the argument is empty, a null pointer
+    is returned. Otherwise, a pointer to the first node in that dictionary is
+    returned. 
+
+\subsubsection{The {\tt dict_last} function}
+
+    \indexfunc{dict_last}
+
+    \synopsis
+    \begin{verbatim}
+    dnode_t *dict_last(dict_t *);\end{verbatim}
+
+    \description
+    If the dictionary pointed at by the argument is empty, a null pointer
+    is returned. Otherwise, a pointer to the last node in that dictionary is
+    returned. 
+
+
+\subsubsection{The {\tt dict_next} function}
+
+    \indexfunc{dict_next}
+
+    \synopsis
+    \begin{verbatim}
+    dnode_t *dict_next(dict_t *, dnode_t *);\end{verbatim}
+
+    \constraints
+    The node pointed at by the second argument is an occupant of the dictionary
+    pointed at by the first argument.
+
+    \description
+    If the node pointed at by the second argument has a successor, a pointer to
+    that successor is returned. Otherwise, a null pointer is returned.
+
+    \example
+    The \verb|dict_first| and \verb|dict_next| functions can be used together
+    to iterate over all of the elements of the dictionary, as in the following
+    idiom:
+    \begin{verbatim}
+    dict_t *d;
+    dnode_t *n;
+    /*...*/
+    for (n = dict_first(d); n != 0; n = dict_next(d, n)) {
+        /* n points to each node in turn */
+    }
+    \end{verbatim}
+
+\subsubsection{The {\tt dict_prev} function}
+
+    \indexfunc{dict_prev}
+
+    \synopsis
+    \begin{verbatim}
+    dnode_t *dict_prev(dict_t *, dnode_t *);\end{verbatim}
+
+    \constraints
+    The node pointed at by the second argument is an occupant of the dictionary
+    pointed at by the first argument.
+
+    \description
+    If the node pointed at by the second argument has a predecessor, a pointer
+    to that predecessor is returned. Otherwise, a null pointer is returned.
+
+\subsubsection{The {\tt dict_count} function}
+
+    \indexfunc{dict_count}
+
+    \synopsis
+    \begin{verbatim}
+    dictcount_t dict_count(dict_t *);\end{verbatim}
+
+    \description
+    The \verb|dict_count| function returns a value which represents the number
+    of nodes currently stored in the dictionary pointed at by the argument.
+
+\subsubsection{The {\tt dict_isempty} function}
+
+    \indexfunc{dict_isempty}
+
+    \synopsis
+    \begin{verbatim}
+    int dict_isempty(dict_t *);\end{verbatim}
+
+    \description
+    The \verb|dict_isempty| function returns 1 if the given dictionary is
+    empty, otherwise it returns 0.
+
+\subsubsection{The {\tt dict_isfull} function}
+
+    \indexfunc{dict_isfull}
+
+    \synopsis
+    \begin{verbatim}
+    int dict_isfull(dict_t *);\end{verbatim}
+
+    \description
+    The \verb|dict_isfull| function returns 1 if the dictionary is full,
+    otherwise it returns 0.
+
+    If the argument is an expression with side effects, the behavior is
+    undefined.\index{macros!and side effects}
+
+\subsubsection{The {\tt dict_contains} function}
+
+    \indexfunc{dict_contains}
+
+    \synopsis
+    \begin{verbatim}
+    int dict_contains(dict_t *, dnode_t *);\end{verbatim}
+
+    \description
+    The \verb|dict_contains| function searches the given dictionary to
+    determine whether the given node is an occupant. If the node is found, 1 is
+    returned, otherwise 0 is returned.\footnote{The intent is to support
+    verification.  The search may be inefficient compared to {\tt
+    dict_lookup}.}
+
+\subsubsection{The {\tt dict_allow_dupes} function}
+
+    \label{section:dict_allow_dupes}
+    \indexfunc{dict_allow_dupes}
+
+    \synopsis
+    \begin{verbatim}
+    void dict_allow_dupes(dict_t *);\end{verbatim}
+
+    \constraints
+    The dictionary specified by the first argument shall be empty.
+
+    \description
+    The \verb|dict_allow_dupes| function configures the given dictionary to
+    support duplicate keys. This can only be done when the dictionary is empty,
+    and the change cannot be reverted.
+
+\subsubsection{The {\tt dnode_is_in_a_dict} function}
+
+    \indexfunc{dnode_is_in_a_dict}
+
+    \synopsis
+    \begin{verbatim}
+    int dnode_is_in_a_dict(dnode_t *);\end{verbatim}
+
+    \description
+    The \verb|dnode_is_in_a_dict| function reports whether the given node
+    is currently the occupant of some dictionary. If so, 1 is returned.
+    Otherwise 0 is returned.
+
+\subsubsection{The {\tt dnode_create} function}
+
+    \indexfunc{dnode_create}
+
+    \synopsis
+    \begin{verbatim}
+    dnode_t *dnode_create(void *);\end{verbatim}
+
+    \description
+    The \verb|dnode_create| function dynamically allocates a dictionary node,
+    stores in it the data value specified in the argument and
+    returns a pointer to it. The allocation is performed by a call to the
+    standard \verb|malloc| function. If the allocation fails, a null
+    pointer is returned.
+
+    The node's key pointer remains indeterminate until it is the subject of a
+    \verb|dict_insert| operation.
+
+\subsubsection{The {\tt dnode_init} function}
+
+    \indexfunc{dnode_init}
+
+    \synopsis
+    \begin{verbatim}
+    dnode_t *dnode_init(dnode_t *, void *);\end{verbatim}
+
+    \description
+    The \verb|dnode_init| function initializes the contents
+    of the specified dictionary node object, assigning it the
+    data value specified as the second argument. 
+    The first argument is a pointer which refers to 
+    a data object that has a suitable size and alignment
+    for the representation of an \verb|dnode_t| type.
+    After initialization with \verb|dnode_init|, the object is subsequently
+    eligible as an operand to the functions of the dictionary component,
+    other than \verb|dnode_getkey|.
+
+    The node's key pointer remains indeterminate until it is the subject of a
+    \verb|dict_insert| operation.
+
+\subsubsection{The {\tt dnode_destroy} function}
+
+    \indexfunc{dnode_destroy}
+
+    \synopsis
+    \begin{verbatim}
+    void dnode_destroy(dnode_t *);\end{verbatim}
+
+    \description
+    The \verb|dnode_destroy| function destroys a dictionary node that has been
+    allocated with \verb|dnode_create|.  The value of any pointer
+    that referred to the node that was thus freed is indeterminate.
+
+    If the node is currently the occupant of a dictionary, the behavior is
+    undefined if the hash is subsequently used.
+
+\subsubsection{The {\tt dnode_get} function}
+
+    \indexfunc{dnode_get}
+
+    \synopsis
+    \begin{verbatim}
+    void *dnode_get(dnode_t *);\end{verbatim}
+
+    \description
+    The \verb|dnode_get| function retrieves the \verb|void * | data value
+    associated with the given dictionary node.
+
+\subsubsection{The {\tt dnode_getkey} function}
+
+    \indexfunc{dnode_getkey}
+
+    \synopsis
+    \begin{verbatim}
+    const void *dnode_getkey(dnode_t *);\end{verbatim}
+
+    \description
+
+    The \verb|dnode_getkey| function retrieves the \verb|void *| key value 
+    associated with the given node. A node acquires an associated key
+    when it is inserted into a dictionary (see section \ref{section:dict_insert}).
+    Invoking \verb|dnode_getkey| on a node that has not been inserted
+    into a dictionary results in undefined behavior.
+
+\subsubsection{The {\tt dnode_put} function}
+
+    \indexfunc{dnode_put}
+
+    \synopsis
+    \begin{verbatim}
+    void dnode_put(dnode_t *, void *);\end{verbatim}
+
+    \description
+    The function \verb|dnode_put| replaces the data element
+    associated with the dictionary node.
+
+\subsubsection{The {\tt dict_process} function}
+
+    \label{section:dict_process}
+    \indexfunc{dict_process}
+
+    \synopsis
+    \begin{verbatim}
+    void dict_process(dict_t *, void *, dnode_process_t);\end{verbatim}
+
+    \description
+    The \verb|dict_process| function iterates over the nodes of a dict,
+    and for each node invokes a callback function.\footnote{In most cases,
+    it is more convenient and preferable to 
+    iterate over the dict using explicit calls to {\tt dict_first}
+    and {\tt dict_next}.}
+    The second argument is a {\it context pointer\/} which can have any value.
+    The third argument of
+    \verb|dict_process| shall be a pointer to a function which is compatible
+    with the specified type. If the dict contains one or more nodes,
+    then the function is invoked once for each node, in order from first
+    to last. On each invocation, the first argument of the callback is a
+    pointer to the dict; the second argument is a pointer to a node, called
+    the {\it subject node}; and the third argument repeats the context pointer
+    value that was originally passed to \verb|dict_process|.
+
+    The callback function may delete the subject node by, for instance, calling
+    \verb|dict_delete|. It may insert new nodes into the dictionary;
+    however, if such an insertion causes the subject node to acquire
+    a new successor, it is implementation-defined whether upon returning
+    from the callback function, the traversal shall continue with the
+    new successor, or with the original successor.
+    
+    The callback function, and any function invoked from the callback
+    function, shall not destroy the dictionary or make any modifications
+    other than the insertion of new nodes, or the deletion of the 
+    subject node.
+
+    The callback function may recursively invoke \verb|dict_process| for the
+    same dictionary or for a different dictionary; the callback invocations arising out of
+    the nested call inherit all of the restrictions of the outer callback in
+    addition to being subject to the usual restrictions.\footnote{This means,
+    for instance, that if two callbacks are in progress for different
+    subject nodes from the same dictionary, the inner callback may not delete
+    its subject node, because it inherits the restriction that the only
+    permitted deletion is the outer callback's subject node.}
+
+    The callback function may freely operate on a different dictionary,
+    subject to any inherited restrictions.
+
+\subsubsection{The {\tt dict_load_begin} function}
+
+    \label{section:dict_load_begin}
+    \indexfunc{dict_load_begin}
+
+    \synopsis
+    \begin{verbatim}
+    void dict_load_begin(dict_load_t *, dict_t *);\end{verbatim}
+
+    \constraints
+    The dictionary specified by the second argument is empty.
+
+    \description
+    The \verb|dict_load_begin| function prepares a context object
+    for the task of constructing the contents of a dictionary  out of
+    a sequence of elements which is already sorted according to the
+    sorting function of the dictionary.\footnote{This process is more efficient 
+    than inserting all of the elements into a dictionary using {\tt dict_insert}. 
+    In the reference implementation, this process runs in linear time, or $O(n)$
+    whereas construction by repeated insertions runs in $O(n\log n)$ time.}
+    The actual construction is performed
+    by zero or more calls to \verb|dict_load_next| and is finalized by
+    \verb|dict_load_end|.
+
+    The \verb|dict_load_begin| function is said to bind the dictionary
+    and context object together; the only way to unbind the two 
+    is by calling \verb|dict_load_end| on the context object.
+
+    The program shall not manipulate a dictionary that is bound to
+    a context object, other than by calling \verb|dict_load_next|.
+
+    The program shall not attempt to bind a dictionary to more than one context
+    object simultaneously, or a context object to more than one dictionary
+    simultaneously.
+
+\subsubsection{The {\tt dict_load_next} function}
+
+    \label{section:dict_load_next}
+    \indexfunc{dict_load_next}
+
+    \synopsis
+    \begin{verbatim}
+    void dict_load_next(dict_load_t *, dnode_t *, const void *);\end{verbatim}
+
+    \constraints
+    The node pointed at by the second argument is not an occupant of
+    any dictionary. The key specified by the third argument is greater
+    than or equal to all keys specified in previous calls to 
+    \verb|dict_load_next| in the context of the same construction,
+    according to the comparison function of the dictionary that is
+    being constructed. That is to say, successive calls specify monotonically
+    increasing keys.
+    The dictionary is not full.
+
+    \description
+    The \verb|dict_load_next| function continues the construction of a
+    dictionary from an ordered list of elements by specifying the next
+    node in the sequence, along with its key. After this call, the node
+    is considered to be inserted into the dictionary as if by
+    \verb|dict_insert|.
+
+\subsubsection{The {\tt dict_load_end} function}
+
+    \label{section:dict_load_end}
+    \indexfunc{dict_load_end}
+
+    \synopsis
+    \begin{verbatim}
+    void dict_load_end(dict_load_t *);\end{verbatim}
+
+    \description
+    The \verb|dict_load_end| function finalizes the construction of
+    a dictionary from a ordered sequence.  It breaks the binding between
+    the \verb|dict_load_t| context object and the dictionary.
+
+\subsection{Implementation}
+
+TODO
+
+\section{Exception component}
+\label{section:exception_component}
+\index{Exception}
+
+The Exception component provides distributed error handling in the form of
+exceptions, behind an interface designed to be implementable using only the
+portable features of standard C. The features of this interface are:
+\begin{itemize}
+\item the ability to set up nested try-catch regions which declare specific
+exceptions that they can handle;
+\item grouped exceptions, allowing handlers to catch specific exceptions,
+or any exception within a group;
+\item the ability to designate a function that is called in the event
+that an exception is thrown that has no handler.
+\item a mechanism for releasing resources acquired by code that is terminated
+by an exception;
+\item the ability to pass dynamically allocated data from the throw site to the
+catch site.
+\end{itemize}
+
+An exception is simply a means of returning to a prior place in the program's
+execution. The ANSI C language provides crude, but portable, exception handling
+consisting of the \verb|jmp_buf| type, the \verb|setjmp| macro and the
+\verb|longjmp| function. The Kazlib Exception component can be implemented in
+terms of these primitives. The constraint to implementability in standard C
+leads to a number of concessions:
+\begin{itemize}
+\item A program can leave cleanup regions and try-catch regions by improper
+means, such as using \verb|goto|, \verb|return| or \verb|break|. This is
+difficult to diagnose, and is simply documented as undefined behavior.
+There is no support in the standard language for designating code that is
+executed whenever a statement block terminates by any means.
+\item For the same reason, the exception handling interface described here
+has an explicit mechanism for deallocation of resources associated with
+statement blocks that are terminated by exceptions. This interface is
+not as convenient as language support for automatic cleanup. Correct
+management of temporary dynamic resources using this interface requires
+programmer discipline.
+\item The requirement to be able to use \verb|setjmp| to save a context
+to be later returned to during exception processing brings in restrictions
+related to non-volatile objects. If non-volatile objects are modified 
+between the time an exception handling region is initiated and the time
+an exception is caught in the region, these objects have indeterminate
+values.\footnote{This liberty in ANSI C allows compiler
+or library writers to implement {\tt setjmp} as a simple mechanism that
+takes a snapshot of the machine context. Objects that are optimized into
+special storage---such as registers---and whose values change since the
+context saving operation will be clobbered when the context is restored
+by {\tt longjmp}.} 
+\end{itemize}
+
+\subsection{Interface}
+
+\subsubsection{The {\tt except.h} header}
+
+Each C or C++ translation unit that is to use the functionality of the Exception
+component shall include the header \verb|except.h|. This header shall
+contain declarations of types and external functions, and definitions of
+macros.  The following typedef names shall be
+defined:\index{Exception!typedef names}
+\begin{verbatim}
+    except_id_t
+    except_t
+\end{verbatim}
+The following external function names shall be declared:
+\index{Exception!function names}\index{functions!defined by Exception}
+\begin{verbatim}
+    except_init                 except_group   
+    except_deinit               except_message 
+    except_rethrow              except_data    
+    except_throw                except_take_data
+    except_throwd               except_set_allocator
+    except_throwf               except_alloc
+    except_unhandled_catcher    except_free
+    except_code            
+\end{verbatim}
+The following preprocessor symbols shall be
+defined: \index{Exception!macro names}\index{macros!defined by Exception}
+\indexmacro{XCEPT_H}
+\begin{verbatim}
+    XCEPT_H                     except_cleanup_pop
+    XCEPT_GROUP_ANY             except_checked_cleanup_pop
+    XCEPT_CODE_ANY              except_try_push
+    XCEPT_BAD_ALLOC             except_try_pop
+    except_cleanup_push
+\end{verbatim}
+Finally, these two enum constants are defined:
+\begin{verbatim}
+    except_no_call
+    except_call
+\end{verbatim}
+\index{symbols!reserved by Exception}\index{Exception!reserved symbols} Macro
+identifiers which begin with the upper-case prefix \verb|XCEPT|\footnote{The
+prefix {\tt XCEPT} is used rather than {\tt EXCEPT} because ISO 9899 reserves
+preprocessor symbols beginning with {\tt E} followed by a digit or
+capital letter for future extensions to the {\tt <errno.h>} header.}
+are reserved for future extensions to the \verb|except.h|
+header, as are names in the ordinary and tag namespaces which begin with
+\verb|except_|. External names which begin with \verb|except_| are reserved by
+the Kazlib library regardless of what headers are included.
+
+\subsubsection{The {\tt except_id_t} type}
+
+\label{section:except_id_t}
+\indextype{except_id_t}
+\indexmacro{XCEPT_GROUP_ANY}
+\indexmacro{XCEPT_CODE_ANY}
+The type \verb|except_id_t| is an aggregate consisting of two unsigned long
+values which represent an {\it exception group\/} and {\it exception code},
+respectively, in that order.\footnote{Thus, the program may initialize
+an {\tt except_id_t} object using two brace-enclosed initializers which
+specify the group and code.} An exception group is a value which identifies a
+group of related exceptions. An exception code is a value which identifies a
+specific exception uniquely within a group.  The codes are assigned by the
+program designer. The Exception component reserves only the group and code
+values of zero, which, when used to specify a catch, match any value.
+
+The preprocessor symbols \verb|XCEPT_GROUP_ANY| and
+\verb|XCEPT_CODE_ANY| each expand to a constant integral expression having the
+value zero.  These symbols are intended, in a catch specification, to clearly
+convey that any exception or any group is being caught.
+
+The preprocessor symbol \verb|XCEPT_BAD_ALLOC| expands to an integral constant
+expression having the value 1. This symbol is intended to represent the
+standard exception group for failed memory allocations.
+(See section \ref{section:except_throwf}).
+
+The exception groups from 1 to 15 are reserved for implementation use.
+
+\subsubsection{The {\tt except_t} type}
+
+\indextype{except_t}
+An object of type \verb|except_t| keeps track of all of the information that is
+passed when an exception is thrown, and is known as an {\it exception
+descriptor}.  The type is opaque, hence the program shall manipulate this type
+using only the interface functions provided.
+
+\subsubsection{The {\tt except_init} function}
+
+    \indexfunc{except_init}
+
+    \synopsis
+    \begin{verbatim}
+    int except_init(void);\end{verbatim}
+
+    \description
+    The \verb|except_init| function allocates resources needed by the
+    Exception component.  Before using any of the other exception interface
+    functions or macros, the program shall perform at least one successful call
+    to \verb|except_init|.
+
+    If the initialization succeeds, \verb|except_init| returns 1. Otherwise
+    it returns 0.
+
+    The \verb|except_init| function may be called more than once. After a
+    successful call, every subsequent call shall be successful up to an
+    implementation-defined maximum number of repetitions, which shall be at least
+    as large as the \verb|INT_MAX| from \verb|limits.h|. \footnote{
+    The intent is to support, but not enforce, a style of global initialization
+    whereby each module which requires the use of another module calls its
+    initialization function from its own initialization function. Only the
+    first such call performs the initialization of the module; subsequent calls
+    merely increment a counter. During deinitialization, the counter is
+    decremented and cleanup takes place when the counter reaches zero.}
+
+\subsubsection{The {\tt except_deinit} function}
+
+    \indexfunc{except_deinit}
+
+    \synopsis
+    \begin{verbatim}
+    void except_deinit(void);\end{verbatim}
+
+    \description
+    The \verb|except_deinit| function releases the resources 
+    that were allocated by \verb|except_init|.
+
+    For the resource deallocation to actually take place, the
+    \verb|except_deinit| must be called as many times as the
+    number of times \verb|except_init| was successfully called.
+
+    If \verb|except_deinit| is called more times than \verb|except_init| is
+    successfully called, the behavior is undefined.
+
+\subsubsection{The {\tt except_rethrow} function}
+
+    \indexfunc{except_rethrow}
+
+    \synopsis
+    \begin{verbatim}
+    void except_rethrow(except_t *);\end{verbatim}
+    
+    \description
+    The rethrow function is used to rethrow a caught exception.  The argument
+    shall not be null. An exception shall not be rethrown from outside of the
+    {\it try-catch region\/} in which it was caught. An exception shall not be
+    rethrown from a try-catch region other than the one in which it was caught.
+    It shall not be rethrown from a try-catch or cleanup region enclosed within
+    the one in which it was caught.
+
+    When an exception is rethrown, the search for a handler does not begin with
+    the region in which the exception was caught. Instead, this region is
+    terminated, and the search continues with the enclosing one, if one
+    exists.
+
+\subsubsection{The {\tt except_throw} function}
+
+    \indexfunc{except_throw}
+
+    \synopsis
+    \begin{verbatim}
+    void except_throw(long, long, const char *);\end{verbatim}
+
+    \constraints
+    The first two arguments specify the exception group and code,
+    respectively. Neither of these arguments shall be zero.
+
+    \description
+    The \verb|except_throw| function causes an exception to be thrown.
+
+    If the throw takes place in a try-catch region where an exception
+    was just caught, this original exception is considered handled. In
+    this case, the new exception is still eligible for handling by the
+    same try-catch region.
+
+    The third argument points to the first character of a string
+    which becomes the {\it exception message}. Because the throwing of
+    the exception may cause the current statement block to terminate,
+    this string data shall be non-local. It may be a string literal, since the
+    implementation shall not modify the message, or it may be an ordinary
+    object of static duration. If it is dynamic data, it becomes the handler's
+    responsibility to extract the message from the caught exception and
+    free the data.\footnote{The programmer should consider using 
+    {\tt except_throwd} to pass arbitrary dynamic data from the throw
+    site to the try-catch region.}
+
+    The \verb|except_throw| function does not return. The implementation
+    searches for a suitable try-catch region starting with the one
+    initiated by the most recent \verb|except_try_push|. If there
+    is no enclosing region, the search fails.  Otherwise if a match is found,
+    execution continues at the start of the target try-catch region, appearing
+    to be a second return from \verb|except_try_push| distinguished by a non-null
+    value of the \verb|except_t *| object.
+
+    If no match is found during exception processing, the exception is
+    handled internally by the implementation. The implementation then
+    calls the currently registered function for catching unhandled
+    exceptions (see section \ref{section:except_unhandled_catcher}).
+
+    The default catcher for unhandled exceptions shall terminate the program
+    with a diagnostic which identifies the code, group and exception message.
+
+    During the search for an exception handler, cleanup handlers may be
+    encountered. They are removed from the inside out and called with
+    their registered arguments. This process is called {\it unwinding}.
+    \index{unwinding}
+
+\subsubsection{The {\tt except_throwd} function}
+
+    \indexfunc{except_throwd}
+
+    \synopsis
+    \begin{verbatim}
+    void except_throwd(long, long, const char *, void *);\end{verbatim}
+
+    \constraints
+    The first two arguments specify the exception group and code,
+    respectively. Neither of these arguments shall be zero.
+
+    \description
+    The \verb|except_throwd| function is the same as \verb|except_throw| in
+    every respect except that it has an additional \verb|void *| parameter. A
+    null argument may be used for this parameter, or it may be any valid
+    pointer value.
+
+    When the exception is handled, and the handler does not remove this pointer
+    using \verb|except_take_data| then the implementation shall automatically
+    invoke the function \verb|except_free| on this pointer.
+
+\subsubsection{The {\tt except_throwf} function}
+
+    \indexfunc{except_throwf}
+    \label{section:except_throwf}
+
+    \synopsis
+    \begin{verbatim}
+    void except_throwf(long, long, const char *, ...);\end{verbatim}
+
+    \constraints
+    The first two arguments specify the exception group and code,
+    respectively. Neither of these arguments shall be zero.
+
+    \description
+
+    This function is almost exactly the same as \verb|except_throw|
+    except that the exception message is not directly specified.
+    Instead, the \verb|char *| argument specifies a format string which may be
+    followed by trailing arguments. The format string and trailing arguments
+    are interpreted as the format string and arguments of the standard C
+    function \verb|printf| and are subject to the same requirements.
+    
+    The format string is interpreted, and the results of formatting are placed into
+    buffer provided by the implementation.  The implementation shall provide
+    space for at least 1024 bytes of storage for the result of the formatting,
+    including the null terminator byte. If the formatting requires more space
+    than the implementation provides, the behavior is undefined.
+
+    The results of the formatted print shall become the exception message
+    of the thrown exception.
+
+    If the implementation is unable to allocate resources for the formatted
+    message, it shall throw a code 1 exception having an unspecified code in
+    group \verb|XCEPT_BAD_ALLOC| with an implementation-defined message.
+    (See section \ref{section:except_id_t}).
+
+\subsubsection{The {\tt except_unhandled_catcher} function}
+
+    \label{section:except_unhandled_catcher}
+    \indexfunc{except_unhandled_catcher}
+
+    \synopsis
+    \begin{verbatim}
+    void (*except_unhandled_catcher(void (*)(except_t *)))
+            (except_t *);\end{verbatim}
+
+    \description
+    The \verb|except_unhandled_catcher| function installs a new
+    function for catching unhandled exceptions. The argument is a 
+    pointer to a catching function that returns nothing, and accepts a pointer
+    of type \verb|except_t *|.  A pointer to the previously installed
+    catching function is returned. If the program did not previously
+    install a catching function, then a pointer to the default catching
+    function is returned. The program may retain this pointer and
+    use it to reinstall the default function.
+
+    A function for catching unhandled exceptions should not return. If it
+    returns, the implementation shall terminate the program with a diagnostic.
+
+\subsubsection{The {\tt except_code} function}
+
+    \indexfunc{except_code}
+
+    \synopsis
+    \begin{verbatim}
+    unsigned long except_code(except_t *);\end{verbatim}
+
+    \description
+    The \verb|except_code| is an accessor function which returns the
+    exception code of the given exception descriptor.
+
+\subsubsection{The {\tt except_group} function}
+
+    \indexfunc{except_group}
+
+    \synopsis
+    \begin{verbatim}
+    unsigned long except_group(except_t *);\end{verbatim}
+
+    \description
+    The \verb|except_group| is an accessor function which returns the
+    exception group of the given exception descriptor.
+
+\subsubsection{The {\tt except_message} function}
+
+    \indexfunc{except_message}
+
+    \synopsis
+    \begin{verbatim}
+    const char *except_message(except_t *);\end{verbatim}
+
+    \description
+    The \verb|except_group| is an accessor function which returns 
+    a pointer to the string of text that was specified when the
+    exception was thrown (the exception message).
+
+\subsubsection{The {\tt except_data} function}
+
+    \indexfunc{except_data}
+
+    \synopsis
+    \begin{verbatim}
+    void *except_data(except_t *);\end{verbatim}
+
+    \description
+    The \verb|except_group| returns the data pointer that
+    was specified in the \verb|except_throwd| call.
+    If the exception was not thrown by \verb|except_throwd|
+    the return value is unspecified.
+
+
+\subsubsection{The {\tt except_take_data} function}
+
+    \indexfunc{except_take_data}
+
+    \synopsis
+    \begin{verbatim}
+    void *except_take_data(except_t *);\end{verbatim}
+
+    \description
+    The \verb|except_take_data| returns the data pointer that
+    was specified in the \verb|except_throwd| call, and
+    updates the exception descriptor so that the pointer is
+    set to null.
+
+    If the exception was not thrown by \verb|except_throwd|
+    the result is unspecified.
+
+\subsubsection{The {\tt except_cleanup_push} macro}
+
+    \indexmacro{except_cleanup_push}
+
+    \synopsis
+    \begin{verbatim}
+    void except_cleanup_push(void (*)(void *), void *);\end{verbatim}
+
+    \description
+    The call to \verb|except_cleanup_push| shall be matched with a call to
+    \verb|except_cleanup_pop| which must occur in the same statement block at
+    the same level of nesting.\footnote{This requirement allows an implementation
+    to provide an {\tt except_cleanup_push} macro which opens up a statement
+    block and a {\tt except_cleanup_pop} which closes the statement block.
+    The space for the registered pointers can then be efficiently allocated
+    from automatic storage.}
+
+    The \verb|except_cleanup_push| macro registers a cleanup handler that will
+    be called if an exception subsequently occurs before the matching
+    \verb|except_cleanup_pop| is executed, and is not intercepted and handled by
+    a try-catch region that is nested between the two.
+
+    The first argument to \verb|except_cleanup_push| is a pointer
+    to the cleanup handler, a function that returns nothing and takes
+    a single argument of type \verb|void *|. The second argument
+    is a \verb|void *| value that is registered along with the handler.
+    This value is what is passed to the registered handler, should it
+    be called.
+
+    Cleanup handlers are called in the reverse order of their nesting: inner
+    handlers are called before outer handlers.
+
+    The program shall not leave the cleanup region between the call to the macro
+    \verb|except_cleanup_push| and the matching call to
+    \verb|except_cleanup_pop| by means other than throwing an exception, or
+    calling \verb|except_cleanup_pop|.
+
+    Within the call to the cleanup handler, it is possible that new exceptions
+    may happen.  Such exceptions must be handled before the cleanup handler
+    terminates. If the call to the cleanup handler is terminated by an
+    exception, the behavior is undefined.\footnote{The exception which triggered
+    the cleanup is not yet caught; thus the program would be effectively trying
+    to replace an exception with one that isn't in a well-defined state.}
+
+\subsubsection{The {\tt except_cleanup_pop} macro}
+
+    \indexmacro{except_cleanup_pop}
+    \label{section:except_cleanup_pop}
+
+    \synopsis
+    \begin{verbatim}
+    void except_cleanup_pop(int);\end{verbatim}
+
+    \description
+    A call to the \verb|except_cleanup_pop| macro shall match each
+    call to \verb|except_cleanup_push| which shall be in the
+    same statement block at the same nesting level.  It shall
+    match the most recent such a call that is not matched
+    by a previous \verb|except_cleanup_pop| at the same level.
+
+    This macro causes the registered cleanup handler to be removed.  If, and
+    only if the argument is other than zero, the cleanup handler is called.
+    In that case, the registered context pointer is passed to the cleanup
+    handler.
+
+    \indexenum{except_no_call}
+    \indexenum{except_call}
+    The enumeration constants \verb|except_no_call| and \verb|except_call|
+    may be used as arguments to this function instead of
+    the equivalent constants \verb|0| and \verb|1|.
+
+    The program shall not leave the region between the call to the macro
+    \verb|except_cleanup_push| and the matching call to
+    \verb|except_cleanup_pop| other than by throwing an exception, or
+    by executing the \verb|except_cleanup_pop|.
+
+\subsubsection{The {\tt except_checked_cleanup_pop} macro}
+
+    \indexmacro{except_checked_cleanup_pop}
+
+    \synopsis
+    \begin{verbatim}
+    void except_checked_cleanup_pop(void (*)(void *), int);\end{verbatim}
+
+    \constraints
+    The first pointer-to-function argument shall match the pointer value that
+    was registered by the matching \verb|except_cleanup_push| macro.
+
+    \description
+    The \verb|except_checked_cleanup_pop| macro may be used as an alternative to
+    \verb|except_cleanup_pop|. In verification mode, the constraint serves to
+    provide additional safety by making an explicit declaration regarding which
+    handler is being called (or ignored, as the case may be).
+
+    The program shall not leave the region between the call to the macro
+    \verb|except_cleanup_push| and the call to
+    \verb|except_checked_cleanup_pop| by means other than throwing an
+    exception, or executing the latter macro.
+
+\subsubsection{The {\tt except_try_push} macro}
+
+    \indexmacro{except_try_push}
+    \label{section:except_try_push}
+
+    \synopsis
+    \begin{verbatim}
+    void except_try_push(const except_id_t [],
+            size_t, except_t **);\end{verbatim}
+
+    \description
+    The \verb|except_try_push| marks the beginning of a try-catch region
+    of the program. It must be matched by a \verb|except_try_pop| written in
+    the same statement block at the same level of nesting, which
+    terminates the try-catch region. Regions may be nested.
+
+    The program shall not leave a try-catch region other than by throwing
+    an exception or by executing the \verb|except_try_pop|.\footnote{Thus,
+    leaving the try-catch region using {\tt goto}, {\tt return},
+    {\tt break} or {\tt continue} leads to undefined behavior.}
+
+    The first argument is a pointer to the first element of an array of
+    \verb|except_id_t| objects, the number of elements of which is specified by
+    the second argument. The array specifies which exceptions are caught.
+    The implementation shall treat this array as read-only.\footnote{Thus,
+    the program may allocate the array in static storage.}
+
+    The third argument of \verb|except_try_push| shall point to an object
+    of type \verb|except_t *|. After the call to \verb|except_try_push|,
+    the program shall inspect the value of this object. A null value indicates
+    that no exception has been thrown. A non-null value indicates that an
+    exception was thrown, and is now caught. In other words, when an exception
+    is caught by a try-catch region, then control passes from the throw site
+    back to the first statement after the \verb|except_try_push| statement of
+    the try-catch region. This case is distinguished from an ordinary return by
+    the non-null value of the pointer object that was specified by the third
+    argument of the earlier call to \verb|except_try_push|.
+
+    An exception is considered handled if it is caught in a try-catch region
+    which subsequently terminates by executing its \verb|except_try_pop| or by
+    throwing another exception.  When an exception is considered handled, any
+    dynamic data that was associated with that exception is
+    freed.\footnote{Dynamic data may be explicitly associated with an exception
+    using {\tt except_throwd}. Other types of throw may associate unspecified
+    dynamic data.} It's possible for more than one exception to be active
+    at once. During the processing of one exception, a try-catch region
+    which catches the exception may execute a nested try-catch region
+    in which independent exception processing takes place. Provided that 
+    no exception escapes from the inner try-catch region, the original
+    exception remains pending. But if an exception escapes from the inner
+    region, it causes the original exception to be handled.\footnote{Thus, a
+    given try-catch region cannot catch multiple exceptions concurrently.}
+   
+    The caught exception may be rethrown by calling \verb|except_rethrow|,
+    specifying the the value of the caught exception descriptor as the
+    argument.  Rethrowing a caught exception causes the innermost try-catch
+    region to terminate, but the exception is not considered handled. The
+    search for a handler continues with the second most enclosing region.
+
+    Throwing a new exception during the handling of a caught exception may
+    cause the {\it same\/} try-catch region to catch that exception; the
+    try-catch region is not terminated until it is determined that it doesn't
+    catch the new exception.
+
+    Each entry in the array of \verb|except_id_t| objects specifies what
+    exceptions are caught by the try-catch region. When an exception is
+    thrown, the implementation searches for the inner-most try-catch region
+    which has at least one match for the thrown exception in its catch
+    specification array. 
+
+    A match occurs when a specification exactly matches the group and code of
+    the thrown exception. If a catch specification is for group 0, then it
+    matches any group. If a catch specification is for code 0, then it matches
+    any exception code. A catch specification of group 0 and code 0 catches all
+    exceptions.
+
+    Non-volatile automatic variables that are local to the function containing
+    the try-catch region, and that are modified after \verb|except_try_push|
+    begins the try-catch region have indeterminate values when an exception is
+    caught.
+
+    Once a caught exception is handled or re-thrown, the value of the
+    \verb|except_t *| pointer which referenced it becomes indeterminate.
+    If a re-thrown exception is caught again, the implementation shall
+    produce a valid \verb|except_t *| pointer.
+
+    \example
+    The following example illustrates the use of \verb|except_try_push| and
+    related macros and functions.
+    \begin{verbatim}
+    #include <stdlib.h>
+    #include <assert.h>
+    #include "except.h"
+
+    #define MY_GROUP 42
+    #define MY_CODE   1
+
+    static void func_that_throws(void)
+    {
+        except_throw(MY_GROUP, MY_CODE, "this is an exception");        
+    }
+
+    static void func_that_cleans_up(void)
+    {
+        void *local_data = malloc(10);
+
+        except_cleanup_push(free, local_data);
+        func_that_throws();
+        except_checked_cleanup_pop(free, except_call);
+    }
+
+    void func_that_catches(void)
+    {
+        /* catch specification */
+        static const except_id_t catch_spec[] = {
+            { MY_GROUP, XCEPT_CODE_ANY }
+        };
+        /* exception handle */
+        except_t *exc;
+
+        except_try_push(catch_spec, 1, &exc);
+
+        /*
+         * Start of try-catch region: when exception is 
+         * thrown, control returns here.
+         */
+
+        if (exc == 0) {
+            /* try code that may throw an exception */
+
+            func_that_cleans_up();
+        } else {
+            /* handle exception that was thrown */
+
+            assert (except_group(exc) == MY_GROUP);
+            printf("exception caught: %s %ld %ld\n",
+                except_message(exc),
+                except_group(exc), except_code(exc));
+
+            goto terminate; /* ERROR! jumping out of try-catch */
+        }
+
+        /* end of try-catch region */
+
+        except_try_pop();
+    terminate:
+        ;
+    }
+    \end{verbatim}
+    In this example, the function \verb|func_that_catches| is intended to be
+    called first.  It sets up a try-catch region which traps exceptions having
+    the group identification \verb|MY_GROUP| (or 42). Any code within that
+    group is caught because the code catch was specified as
+    \verb|XCEPT_CODE_ANY|. When the \verb|except_try_push| macro is executed,
+    it sets the value of \verb|exc| to null. Then \verb|func_that_cleans_up| is
+    called, which throws an exception in the \verb|MY_GROUP| group. This
+    exception is caught, so control resumes at the top of the try-catch region,
+    with \verb|exc| set to a non-null value.  Thus the else clause of the if
+    statement is now executed.  The handling code simply prints the exception
+    message on standard output, as well as the numeric group and code.  The
+    subsequent goto statement demonstrates a serious programming error.
+
+    The \verb|func_that_cleans_up| function illustrates the use of cleanup
+    regions. Dynamic memory is allocated which must not be allowed to leak
+    when an exception is thrown, so a cleanup handler is set up to free the
+    memory in that event. The standard C function \verb|free| happens to have,
+    the right type signature and semantics that it can be used directly as a
+    cleanup handler.   Should no exception be thrown, the cleanup pop macro
+    will perform the call to the cleanup handler, because it is invoked with
+    argument \verb|except_call|.
+
+\subsubsection{The {\tt except_try_pop} macro}
+
+    \indexmacro{except_try_pop}
+
+    \synopsis
+    \begin{verbatim}
+    void except_try_pop(void);\end{verbatim}
+
+    \description
+
+    The \verb|except_try_pop| macro terminates a try-catch region. It must
+    match a previous \verb|except_try_push| macro in the same statement
+    block at the same level of nesting which is not already matched by an
+    earlier \verb|except_try_pop|.
+
+\subsubsection{The {\tt except_set_allocator} function}
+
+    \indexfunc{except_set_allocator}
+    \label{section:except_set_allocator}
+
+    \synopsis
+    \begin{verbatim}
+    void except_set_allocator(void *(*)(size_t), void (*)(void *));\end{verbatim}
+
+    \description
+    The \verb|except_set_allocator| function installs a pair of allocator
+    routines that will be used by the Exception component for future allocation
+    and deallocation requests. 
+
+    The first argument points to a function that resembles the standard C
+    \verb|malloc| in type and semantics. The second argument points to a
+    function that similarly resembles the standard C function \verb|free|.
+
+    The default allocators are \verb|malloc| and \verb|free|. 
+    The call
+    \begin{verbatim}
+    except_set_allocator(malloc, free);
+    \end{verbatim}
+    may be used to restore these default allocator functions.
+
+    The program shall not call \verb|except_set_allocator| if an exception
+    was thrown and has not yet been handled.\footnote{Doing so could, for example,
+    create a mismatch whereby a pointer to data allocated with the previously installed
+    allocator function would be passed to the new deallocator function.}
+
+    The allocator function shall create a unique object consisting of at least
+    as many bytes of storage as indicated by the value of the argument.
+    The pointer returned shall be suitably aligned to represent an object
+    of any type. If insufficient resources exist, the pointer returned shall be
+    null. Requesting an object of zero size may produce a unique pointer
+    that shall be acceptable to the deallocator function, or a null pointer.
+
+    The deallocator function shall be capable of destroying objects created
+    by the corresponding allocator function. Passing a null pointer to the
+    deallocator shall have no effect.
+
+\subsubsection{The {\tt except_alloc} function}
+
+    \indexfunc{except_alloc}
+
+    \synopsis
+    \begin{verbatim}
+    void *except_alloc(size_t);\end{verbatim}
+
+    \description
+    The \verb|except_alloc| function allocates memory using the default
+    memory allocator or one installed by the program.
+    (See section \ref{section:except_set_allocator}).
+
+    If the allocation succeeds, a non-null pointer to the allocated object is
+    returned.
+
+    If the allocator indicates failure by returning a null pointer,
+    then instead of returning, \verb|except_alloc| throws exception code 1 
+    in the group \verb|XCEPT_BAD_ALLOC| (See section \ref{section:except_id_t}).
+
+    If a zero size request is specified, then an exception is thrown or
+    a non-null pointer is returned, depending on the treatment of such
+    requests by the underlying allocator.
+
+\subsubsection{The {\tt except_free} function}
+
+    \indexfunc{except_free}
+
+    \synopsis
+    \begin{verbatim}
+    void *except_free(void *);\end{verbatim}
+
+    \description
+
+    The \verb|except_free| function releases memory that was allocated
+    using \verb|except_alloc|.  The deallocation is performed using the
+    default allocator or one installed by the program.
+
+    If an object is allocated by \verb|except_alloc|, then a 
+    different allocator is installed, and the object is freed using
+    \verb|except_free|, the behavior is undefined.
+
+\subsection{Implementation}
+\index{Exception component!reference implementation}
+
+Described here is a reference implementation of the exception handling
+interface that is covered in section \ref{section:exception_component}
+The reference implementation requires only a conforming ANSI C implementation.
+In particular, the actual mechanism for passing control from an exception throw
+to a catch handler is based on the standard C \verb|setjmp| macro and
+\verb|longjmp| function.
+
+\subsubsection{Overview}
+
+The core structure in the exception handling implementation is a stack that is
+composed of a mixture of two types of nodes: cleanup nodes and catch nodes.
+When an exception is thrown, the stack nodes are popped and processed starting
+with the topmost one. 
+
+The nodes are efficiently allocated in automatic storage by the macros
+\verb|except_cleanup_push| and \verb|except_try_push|. These macros
+open up a new statement block and declare the node information in automatic
+storage.  These objects are then pushed onto the stack. The corresponding macros
+\verb|except_cleanup_pop| and \verb|except_try_pop| pop the node off the stack
+and close the statement block.
+
+An static variable keeps track of the stack top. In the multi-threaded variant
+of the code which is based on the POSIX threading interface, there is a
+thread-specific stack top created using the thread-specific function
+pthread_key_create. Using global variables is a compromise that simplifies the
+interface; the throw functions simply ``know'' where the thread's exception
+stack is, so the context information doesn't have to be passed around.
+
+\subsubsection{Stack nodes}
+
+A node in the exception handling stack contains a pointer to the next
+node below, followed by a type field and a union which together keep
+track of the appropriate type-specific data:
+\begin{verbatim}
+    enum except_stacktype {
+        XCEPT_CLEANUP, XCEPT_CATCHER
+    };
+
+    struct except_stacknode {
+        struct except_stacknode *except_down;
+        enum except_stacktype except_type;
+        union {
+            struct except_catch *except_catcher;       
+            struct except_cleanup *except_cleanup;
+        } except_info;
+    };
+\end{verbatim}
+The union overlaps pointers to structures instead of structures in order to
+save space: there is a disparity in size between a cleanup node and a catch
+node, so making them both use the same amount of space would be wasteful.
+The space saving comes at a price, because the pointers themselves take up
+extra space and time is spent initializing them. Some casting trickery
+could be used to create a stack having two different kinds of structures
+without the use of unions.
+
+\paragraph{Cleanup nodes}
+
+Cleanup nodes act as placeholders for a pointer to a cleanup handler function
+and a context pointer to be passed to that function. The type-dependent
+component of the cleanup node is declared like this:
+\begin{verbatim}
+    struct except_cleanup {
+        void (*except_func)(void *);
+        void *except_context;
+    };
+\end{verbatim}
+The cleanup handler is invoked when the node is popped during exception
+processing. A cleanup handler may also be invoked when the cleanup node is
+removed by executing \verb|except_cleanup_pop| or
+\verb|except_checked_cleanup_pop|. Whether or not this happens depends on the
+integer parameter that is documented in section
+\ref{section:except_cleanup_pop}.
+
+\paragraph{Catch nodes}
+
+The catch node structure is more complicated than the cleanup node.
+Its definition depends on two additional types, \verb|except_id_t|
+and \verb|except_t|, both of which also make play a role in the exception
+component's interface.
+\begin{verbatim}
+    typedef struct {
+        unsigned long except_group;
+        unsigned long except_code;
+    } except_id_t;
+
+    typedef struct {
+        except_id_t except_id;
+        const char *except_message;
+        void *except_dyndata;
+    } except_t;
+
+    struct except_catch {
+        const except_id_t *except_id;
+        size_t except_size;
+        except_t except_obj;
+        jmp_buf except_jmp;
+    };
+\end{verbatim}
+The \verb|except_id| member of the \verb|except_catch| structure is a pointer to the
+array of \verb|except_id_t| objects which specify what exceptions the node
+catches. The \verb|except_size| member specifies the number of elements in the array.
+Both of these values are derived directly from the arguments of the
+\verb|except_try_push| macro (see section \ref{section:except_try_push}). The
+\verb|except_obj| member provides storage for the caught exception. This member is
+the means by which the thrown exception is communicated to the try-catch region
+where it is caught. It contains the group and code identifiers, the exception
+message and, optionally, the pointer to arbitrary exception data.  The
+\verb|except_jmp| member is the standard C \verb|jmp_buf|---a place for saving the
+execution context so that it's possible to pass control, via \verb|longjmp|
+from the place where an exception is thrown to the place where it is caught.
+
+If, during the search for an exception handler, a catch node is encountered
+which matches the thrown exception, the node remains the stack.  The exception
+information is stored into into the node's \verb|except_obj| member and a
+\verb|longjmp| is executed to return to the try-catch region in which the node
+was allocated and pushed. Because the node is still on the stack, it's possible
+to throw another exception which is caught again by the same node.  When an
+exception is thus caught, control resumes just after the \verb|except_throw|
+which placed the node onto the stack. The pointer passed into \verb|except_throw|
+is updated  to point to the \verb|except_obj| member of the catch structure.
+The program can then use the portable accessor functions such as
+\verb|except_code| to gain information about the caught exception and handle it
+accordingly.
+
+\index{external names|see {functions}}
+\index{reference implementation|see {implementation}}
+\index{names|see {symbols}}
+\index{identifiers|see {symbols}}
+\index{structure names|see{tags}}
+\index{preprocessor symbols|see{macros}}
+\index{defines|see{macros}}
+\index{reserved symbols|see{symbols}}
+\index{symbols!preprocessor|see{macros}}
+\index{symbols!type names|see{typedefs}}
+\index{symbols!function names|see{functions}}
+\printindex 
+
+\end{document}
