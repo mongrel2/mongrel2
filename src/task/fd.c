@@ -208,7 +208,7 @@ fdread1(int fd, void *buf, int n)
 		if(fdwait(fd, 'r') == -1) {
             return -1;
         }
-    } while((m = read(fd, buf, n)) < 0 && errno == EAGAIN);
+    } while((m = recv(fd, buf, n, MSG_NOSIGNAL)) < 0 && errno == EAGAIN);
 
 	return m;
 }
@@ -232,7 +232,7 @@ fdwrite(int fd, void *buf, int n)
 	int m, tot;
 	
 	for(tot=0; tot<n; tot+=m){
-		while((m=write(fd, (char*)buf+tot, n-tot)) < 0 && errno == EAGAIN) {
+		while((m=send(fd, (char*)buf+tot, n-tot, MSG_NOSIGNAL)) < 0 && errno == EAGAIN) {
 			if(fdwait(fd, 'w') == -1) {
                 return -1;
             }
@@ -247,9 +247,10 @@ fdwrite(int fd, void *buf, int n)
 int
 fdnoblock(int fd)
 {
+#ifdef SO_NOSIGPIPE
     int set = 1;
-
     setsockopt(fd, SOL_SOCKET, SO_NOSIGPIPE, (void *)&set, sizeof(int));
+#endif
     
 	return fcntl(fd, F_SETFL, fcntl(fd, F_GETFL)|O_NONBLOCK);
 }

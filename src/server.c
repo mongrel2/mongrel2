@@ -13,16 +13,16 @@
 char *FLASH_RESPONSE = "<?xml version=\"1.0\"?><!DOCTYPE cross-domain-policy SYSTEM \"http://www.macromedia.com/xml/dtds/cross-domain-policy.dtd\"> <cross-domain-policy> <allow-access-from domain=\"*\" to-ports=\"*\" /></cross-domain-policy>";
 
 char *HTTP_RESPONSE = "HTTP/1.1 200 OK\r\n"
-    "Server: nginx/0.6.31\r\n"
+    "Server: mongrel2/0.1\r\n"
     "Date: Tue, 08 Jun 2010 04:33:23 GMT\r\n"
-    "Content-Type: text/plain\r\n"
+    "Content-Type: text/html\r\n"
     "Content-Length: 2\r\n"
     "Last-Modified: Tue, 08 Jun 2010 04:00:07 GMT\r\n"
     "Connection: close\r\n\r\nHI";
 
 enum
 {
-	STACK = 10 * 1024
+	STACK = 32 * 1024
 };
 
 tst_t *registrations = NULL;
@@ -97,10 +97,7 @@ void mqtask(void *v)
 
 void register_user(char *buffer, int fd)
 {
-    static int counter = 0;
-
-    counter++;
-    int len = sprintf(buffer, "%d:%d", fd, counter);
+    int len = sprintf(buffer, "%d", fd);
 
     fprintf(stderr, "registering %s\n", buffer);
 
@@ -160,7 +157,7 @@ void httptask(void *v)
                     deliver_message(buf, n-1);
                 }
             } else {
-                fdwrite(fd, HTTP_RESPONSE, strlen(HTTP_RESPONSE) + 1);
+                fdwrite(fd, HTTP_RESPONSE, strlen(HTTP_RESPONSE));
                 break;
             }
         } else {
