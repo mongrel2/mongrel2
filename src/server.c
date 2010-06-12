@@ -116,8 +116,6 @@ void deliver_message(char *buffer, size_t len)
         int to_fd = (int)fd_val;
         char *buffer = (char *)buf_data;
 
-        fprintf(stderr, "sending %d bytes to %d\n", b64_len, to_fd);
-
         fdwrite(to_fd, buffer, b64_len+1); 
     }
 
@@ -135,7 +133,9 @@ void httptask(void *v)
     size_t nparsed = 0;
     int finished = 0;
 
-	while((n = fdread(fd, buf, sizeof buf)) > 0) {
+	while((n = fdread(fd, buf, sizeof(buf) - 1)) > 0) {
+        buf[n+1] = '\0';
+
         http_parser_init(&parser);
 
         nparsed = http_parser_execute(&parser, buf, n, 0);
