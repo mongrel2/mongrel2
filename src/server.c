@@ -149,11 +149,13 @@ void httptask(void *v)
                 fdwrite(fd, FLASH_RESPONSE, strlen(FLASH_RESPONSE) + 1);
                 break;
             } else if(parser.json_sent) {
-                fprintf(stderr, "json message sent: %.*s\n", n, buf);
 
-                if(strcmp(buf, "{\"type\":\"join\"}") == 0) {
+                if(strcmp(buf, "{\"type\":\"ping\"}") == 0) {
+                    fprintf(stderr, "json message sent: %.*s\n", n, buf);
+                } else if(strcmp(buf, "{\"type\":\"join\"}") == 0) {
                     register_user(buf, fd);
                 } else {
+                    fprintf(stderr, "json message sent: %.*s\n", n, buf);
                     deliver_message(buf, n-1);
                 }
             } else {
