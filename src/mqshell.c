@@ -7,10 +7,16 @@ void our_free(void *data, void *hint)
     free(data);
 }
 
-int main () 
+int main(int argc, char *argv[])
 {
     void *ctx, *s;
     zmq_msg_t query, resultset;
+    char buffer[1024];
+
+    if(argc != 2) {
+        printf("usage: mqshell tcp://127.0.0.1:9999\n");
+        return 1;
+    }
 
     /* Initialise 0MQ context, requesting a single application thread
        and a single I/O thread */
@@ -20,27 +26,27 @@ int main ()
     s = zmq_socket (ctx, ZMQ_REQ);
 
     printf("connecting\n");
-    zmq_connect (s, "tcp://127.0.0.1:9999");
+    zmq_connect (s, argv[1]);
 
     while(1) {
-        /* Allocate an empty message to receive a query into */
-        zmq_msg_init_data (&query, strdup("HELLO"), strlen("HELLO") + 1, our_free, NULL);
+        printf("> ");
 
-        /* Receive a message, blocks until one is available */
-        printf("send\n");
+        if(!fgets(buffer, sizeof(buffer) - 1, stdin)) {
+            printf("bye\n");
+            return 0;
+        }
+
+        zmq_msg_init_data (&query, strdup(buffer), strlen(buffer) + 1, our_free, NULL);
+
         zmq_send (s, &query, 0);
 
-        /* Allocate a message for sending the resultset */
         zmq_msg_init (&resultset);
 
-        /* TODO: Process the query here and fill in the resultset */
-
-        /* Deallocate the query */
         zmq_msg_close (&query);
 
-        /* Send back our canned response */
-        printf("receive\n");
         zmq_recv (s, &resultset, 0);
+
+        printf(">>> %.*s\n", zmq_msg_size(&resultset), zmq_msg_data(&resultset));
         zmq_msg_close (&resultset);
     }
 }

@@ -1,10 +1,13 @@
-# CFLAGS=-fnested-functions -g -Isrc
-CFLAGS=-g -Isrc
+CFLAGS=-fnested-functions -g -Isrc
+# CFLAGS=-g -Isrc
 
-all: server
+all: server mqshell
 
 server: src/http11/http11_parser.o src/server.o src/adt/tst.o src/b64/b64.o src/task/libtask.a
-	$(CC) ${CLAGS} -o server -lzmq -pthread -lsqlite3 src/http11/http11_parser.o src/server.o src/adt/tst.o src/b64/b64.o src/task/libtask.a
+	$(CC) $(CLAGS) -o server -lzmq -pthread -lsqlite3 src/http11/http11_parser.o src/server.o src/adt/tst.o src/b64/b64.o src/task/libtask.a
+
+mqshell: src/mqshell.o
+	$(CC) $(CFLAGS) -o mqshell -lzmq -pthread src/mqshell.o
 
 src/task/libtask.a:
 	cd src/task && make clean && make
