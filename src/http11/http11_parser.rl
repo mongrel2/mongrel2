@@ -124,7 +124,6 @@ size_t http_parser_execute(http_parser *parser, const char *buffer, size_t len, 
   p = buffer+off;
   pe = buffer+len;
 
-  assert(*pe == '\0' && "pointer does not end on NUL");
   assert(pe - p == len - off && "pointers aren't same distance");
 
   %% write exec;
@@ -133,7 +132,7 @@ size_t http_parser_execute(http_parser *parser, const char *buffer, size_t len, 
     parser->cs = cs;
   parser->nread += p - (buffer + off);
 
-  fprintf("p: %d, pe: %d\n", p-buffer, pe-buffer);
+  fprintf(stderr, "p: %d, pe: %d\n", p-buffer, pe-buffer);
 
   assert(p <= pe && "buffer overflow after parsing execute");
   assert(parser->nread <= len && "nread longer than length");

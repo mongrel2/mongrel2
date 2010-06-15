@@ -21,6 +21,11 @@ static uvlong nsec(void);
 
 static void *ZMQ_CTX = NULL;
 
+
+#ifndef MSG_NOSIGNAL
+#define MSG_NOSIGNAL 0
+#endif
+
 void mqinit()
 {
     ZMQ_CTX = zmq_init(2);
