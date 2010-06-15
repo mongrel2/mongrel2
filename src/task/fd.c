@@ -26,13 +26,15 @@ static void *ZMQ_CTX = NULL;
 #define MSG_NOSIGNAL 0
 #endif
 
-void mqinit()
+void mqinit(int threads)
 {
-    ZMQ_CTX = zmq_init(2);
+    if(ZMQ_CTX == NULL) {
+        ZMQ_CTX = zmq_init(threads);
 
-    if(!ZMQ_CTX) {
-        printf("Error setting up 0mq.\n");
-        exit(1);
+        if(!ZMQ_CTX) {
+            printf("Error setting up 0mq.\n");
+            exit(1);
+        }
     }
 }
 
@@ -141,7 +143,6 @@ _wait(void *socket, int fd, int rw)
 
 	if(!startedfdtask) {
 		startedfdtask = 1;
-        mqinit();
 		taskcreate(fdtask, 0, 32768);
 	}
 

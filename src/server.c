@@ -24,14 +24,16 @@ char *HTTP_RESPONSE = "HTTP/1.1 200 OK\r\n"
     "Last-Modified: Tue, 08 Jun 2010 04:00:07 GMT\r\n"
     "Connection: close\r\n\r\nHI";
 
+char *UUID = "907F620B-BC91-4C93-86EF-512B71C2AE27";
+
 enum
 {
 	STACK = 32 * 1024
 };
 
 
-void listener_task(void*);
-void handler_task(void *v);
+void from_listener_task(void*);
+void from_handler_task(void *v);
 void register_connect(int fd);
 void unregister_connect(int fd);
 void ping_connect(int fd);
@@ -40,6 +42,18 @@ void listener_deliver(int to_fd, char *buffer, size_t len);
 
 void *handler_socket = NULL;
 void *listener_socket = NULL;
+hash_t *registrations = NULL;
+
+
+hash_val_t fd_hash_func(const void *fd)
+{
+    return (hash_val_t)fd;
+}
+
+int fd_comp_func(const void *a, const void *b)
+{
+    return a - b;
+}
 
 
 void taskmain(int argc, char **argv)
@@ -49,22 +63,32 @@ void taskmain(int argc, char **argv)
 	char remote[16];
     FLASH_LEN = strlen(FLASH_RESPONSE);
 	
-	if(argc != 3){
+	if(argc != 4){
 		fprintf(stderr, "usage: server localport handlerq listenerq\n");
 		taskexitall(1);
 	}
 
+    mqinit(2);
+
+    registrations = hash_create(HASHCOUNT_T_MAX, fd_comp_func, fd_hash_func);
+    assert(registrations && "Can't make the registration hash.");
+
 	int port = atoi(argv[1]);
 
     handler_socket = mqsocket(ZMQ_PUB);
-    fprintf(stderr, "binding handler\n");
-    if(zmq_bind(socket, argv[2]) == -1) {
+    zmq_setsockopt(handler_socket, ZMQ_IDENTITY, UUID, strlen(UUID));
+    fprintf(stderr, "binding handler PUB socket %s with identity: %s\n", argv[2], UUID);
+
+    if(zmq_bind(handler_socket, argv[2]) == -1) {
         fprintf(stderr, "error can't bind %s: %s\n", argv[2], strerror(errno));
         taskexitall(1);
     }
 
     listener_socket = mqsocket(ZMQ_SUB);
-    if(zmq_bind(socket, argv[3]) == -1) {
+    zmq_setsockopt(listener_socket, ZMQ_SUBSCRIBE, "", 0);
+
+    fprintf(stderr, "binding listener SUB socket %s subscribed to: %s\n", argv[3], UUID);
+    if(zmq_bind(listener_socket, argv[3]) == -1) {
         fprintf(stderr, "error can't bind %s: %s\n", argv[3], strerror(errno));
         taskexitall(1);
     }
@@ -74,13 +98,13 @@ void taskmain(int argc, char **argv)
 		taskexitall(1);
 	}
 
-    fprintf(stderr, "starting handler_task\n");
-    taskcreate(handler_task, NULL, STACK);
+    fprintf(stderr, "starting from_handler_task\n");
+    taskcreate(from_handler_task, listener_socket, STACK);
 
 	fdnoblock(fd);
     fprintf(stderr, "waiting on %d\n", port);
 	while((cfd = netaccept(fd, remote, &rport)) >= 0){
-		taskcreate(listener_task, (void*)cfd, STACK);
+		taskcreate(from_listener_task, (void*)cfd, STACK);
 	}
 }
 
@@ -91,39 +115,76 @@ void our_free(void *data, void *hint)
 }
 
 
-void handler_task(void *v)
+void from_handler_task(void *socket)
 {
     zmq_msg_t inmsg;
+    char *data = NULL;
+    size_t sz = 0;
     int fd = 0;
 
     while(1) {
         zmq_msg_init(&inmsg);
 
-        if(mqrecv(listener_socket, &inmsg, 0) == -1) {
+        fprintf(stderr, "WAIT FROM HANDLER\n");
+        if(mqrecv(socket, &inmsg, 0) == -1) {
             fprintf(stderr, "oops can't read: %s\n", strerror(errno));
             taskexitall(1);
         }
 
-        // lookup the fd
-        listener_deliver(fd, (char *)zmq_msg_data(&inmsg), zmq_msg_size(&inmsg));
+        data = (char *)zmq_msg_data(&inmsg);
+        sz = zmq_msg_size(&inmsg);
+        data[sz] = '\0';
+
+        int end = 0;
+        int ok = sscanf(data, "%u%n", &fd, &end);
+        fprintf(stderr, "!!! message from handler: %s for fd: %d, nread: %d\n",
+                data, fd, end);
+
+        if(end && hash_lookup(registrations, fd)) {
+            listener_deliver(fd, data+end, sz-end);
+        }
+
+        zmq_msg_close(&inmsg);
     }
 }
 
 
 void register_connect(int fd)
 {
+    fprintf(stderr, "register for %d\n", fd);
 
+    hnode_t *hn = hash_lookup(registrations, (void *)fd);
+
+    if(hn) hash_delete_free(registrations, hn);
+
+    if(!hash_alloc_insert(registrations, (void *)fd, NULL)) {
+        fprintf(stderr, "cannot register fd");
+        return;
+    }
+
+    fprintf(stderr, "currently registered: %d\n", hash_count(registrations));
 }
 
 void unregister_connect(int fd)
 {
-	shutdown(fd, SHUT_WR);
-	close(fd);
+    hnode_t *hn = hash_lookup(registrations, (void *)fd);
+
+    if(hn) {
+        fprintf(stderr, "unregister %d\n", fd);
+        hash_delete_free(registrations, hn);
+        shutdown(fd, SHUT_WR);
+        close(fd);
+    }
+
+    fprintf(stderr, "currently registered: %d\n", hash_count(registrations));
 }
 
 void ping_connect(int fd)
 {
+    fprintf(stderr, "ping for %d\n", fd);
+    hnode_t *hn = hash_lookup(registrations, (void *)fd);
 
+    // TODO: increment its ping time
 }
 
 
@@ -133,22 +194,33 @@ void listener_deliver(int to_fd, char *buffer, size_t len)
     b64_char_t b64_buf[512] = {0};
     assert(buffer[len] == '\0' && "invalid message, must end in \0");
 
-    b64_len = b64_encode(buffer, len-1, b64_buf, sizeof(b64_buf)-1);
+    fprintf(stderr, "delivering %.*s to %d\n", len, buffer, to_fd);
+
+    b64_len = b64_encode(buffer, len, b64_buf, sizeof(b64_buf)-1);
     b64_buf[b64_len] = '\0';
 
-    fdwrite(to_fd, buffer, b64_len+1); 
+    fprintf(stderr, "b65 is %s\n", b64_buf);
+
+    fdwrite(to_fd, b64_buf, b64_len+1); 
 }
 
 
 void handler_deliver(int from_fd, char *buffer, size_t len)
 {
+    zmq_msg_t msg;
 
+    zmq_msg_init(&msg);
 
+    fprintf(stderr, "sending msg to handler backends: %.*s\n", len, buffer);
+
+    zmq_msg_init_data(&msg, strdup(buffer), len, our_free, NULL);
+
+    zmq_send(handler_socket, &msg, 0);
 
 }
 
 
-void listener_task(void *v)
+void from_listener_task(void *v)
 {
 	int fd = (int)v;
     char *buf = calloc(1024, 1);
@@ -158,7 +230,7 @@ void listener_task(void *v)
     int finished = 0;
     int registered = 0;
 
-	while((n = fdread(fd, buf, sizeof(buf) - 1)) > 0) {
+	while((n = fdread(fd, buf, 1024)) > 0) {
         buf[n+1] = '\0';
 
         http_parser_init(&parser);
@@ -167,7 +239,7 @@ void listener_task(void *v)
         finished =  http_parser_finish(&parser);
 
         if(finished != 1) {
-            fprintf(stderr, "error in parsing: %d\n", finished);
+            fprintf(stderr, "error in parsing: %d, %.*s\n", finished, n, buf);
             break;
         }
         
@@ -183,7 +255,7 @@ void listener_task(void *v)
                 ping_connect(fd);
             } else {
                 fprintf(stderr, "json message sent: %.*s\n", n, buf);
-                listener_deliver(fd, buf, n);
+                handler_deliver(fd, buf, n);
             }
         } else {
             fdwrite(fd, HTTP_RESPONSE, strlen(HTTP_RESPONSE));

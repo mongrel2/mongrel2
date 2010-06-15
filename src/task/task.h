@@ -133,22 +133,6 @@ struct Channel
   char    *name;
 };
 
-int    chanalt(Alt *alts);
-Channel*  chancreate(int elemsize, int elemcnt);
-void    chanfree(Channel *c);
-int    chaninit(Channel *c, int elemsize, int elemcnt);
-int    channbrecv(Channel *c, void *v);
-void*    channbrecvp(Channel *c);
-unsigned long  channbrecvul(Channel *c);
-int    channbsend(Channel *c, void *v);
-int    channbsendp(Channel *c, void *v);
-int    channbsendul(Channel *c, unsigned long v);
-int    chanrecv(Channel *c, void *v);
-void*    chanrecvp(Channel *c);
-unsigned long  chanrecvul(Channel *c);
-int    chansend(Channel *c, void *v);
-int    chansendp(Channel *c, void *v);
-int    chansendul(Channel *c, unsigned long v);
 
 /*
  * Threaded I/O.
@@ -164,6 +148,7 @@ void    fdtask(void*);
 /*
  * 0mq Integration.
  */
+void mqinit(int threads);
 void *mqsocket(int type);
 int mqwait(void *socket, int rw);
 int mqrecv(void *socket, zmq_msg_t *msg, int flags);
