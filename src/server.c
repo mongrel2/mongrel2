@@ -31,7 +31,9 @@ char *UUID = "907F620B-BC91-4C93-86EF-512B71C2AE27";
 
 enum
 {
-	STACK = 32 * 1024
+	LISTENER_STACK = 32 * 1024,
+    HANDLER_STACK = 100 * 1024
+
 };
 
 
@@ -105,12 +107,12 @@ void taskmain(int argc, char **argv)
 	}
 
     fprintf(stderr, "starting from_handler_task\n");
-    taskcreate(from_handler_task, listener_socket, STACK);
+    taskcreate(from_handler_task, listener_socket, HANDLER_STACK);
 
 	fdnoblock(fd);
     fprintf(stderr, "waiting on %d\n", port);
 	while((cfd = netaccept(fd, remote, &rport)) >= 0){
-		taskcreate(from_listener_task, (void*)cfd, STACK);
+		taskcreate(from_listener_task, (void*)cfd, LISTENER_STACK);
 	}
 }
 
@@ -123,31 +125,33 @@ void our_free(void *data, void *hint)
 
 void from_handler_task(void *socket)
 {
-    zmq_msg_t inmsg;
+    zmq_msg_t *inmsg = calloc(sizeof(zmq_msg_t), 1);
     char *data = NULL;
     size_t sz = 0;
     int fd = 0;
 
     while(1) {
-        zmq_msg_init(&inmsg);
+        zmq_msg_init(inmsg);
 
         fprintf(stderr, "WAIT FROM HANDLER\n");
-        if(mqrecv(socket, &inmsg, 0) == -1) {
+        if(mqrecv(socket, inmsg, 0) == -1) {
             fprintf(stderr, "oops can't read: %s\n", strerror(errno));
             taskexitall(1);
         }
 
-        data = (char *)zmq_msg_data(&inmsg);
-        sz = zmq_msg_size(&inmsg);
-        data[sz] = '\0';
+        data = (char *)zmq_msg_data(inmsg);
+        sz = zmq_msg_size(inmsg);
+        if(data[sz-1] != '\0') {
+            fprintf(stderr, "error, last char from handler is not 0 it's %d\n", data[sz-1]);
+        } else {
+            int end = 0;
+            int ok = sscanf(data, "%u%n", &fd, &end);
+            fprintf(stderr, "!!! message from handler: %s for fd: %d, nread: %d, final: %d, last: %d\n",
+                    data, fd, end, sz-end-1, (data + end)[sz-end-1]);
 
-        int end = 0;
-        int ok = sscanf(data, "%u%n", &fd, &end);
-        fprintf(stderr, "!!! message from handler: %s for fd: %d, nread: %d\n",
-                data, fd, end);
-
-        if(end && hash_lookup(registrations, (void *)fd)) {
-            listener_deliver(fd, data+end, sz-end);
+            if(ok > 0 && end > 0 && hash_lookup(registrations, (void *)fd)) {
+                listener_deliver(fd, data+end, sz-end-1);
+            }
         }
     }
 }
@@ -201,26 +205,32 @@ void ping_connect(int fd)
 void listener_deliver(int to_fd, char *buffer, size_t len)
 {
     size_t b64_len = 0;
-    b64_char_t b64_buf[512] = {0};
-    assert(buffer[len] == '\0' && "invalid message, must end in \0");
-    assert(buffer[len - 1] != '\0' && "must end in only one \0");
-
     fprintf(stderr, "delivering %.*s to %d\n", len, buffer, to_fd);
+    if(buffer[len] != '\0') {
+        fprintf(stderr, "must end in NUL\n");
+        return;
+    } else if (buffer[len-1] == '\0') {
+        fprintf(stderr, "must end in only 1 NUL, you have too many\n");
+        return;
+    }
 
-    b64_len = b64_encode(buffer, len, b64_buf, sizeof(b64_buf)-1);
+    b64_char_t *b64_buf = calloc(1024, 1);
+
+    b64_len = b64_encode(buffer, len, b64_buf, 1024-1);
     b64_buf[b64_len] = '\0';
 
     fprintf(stderr, "b64 is %s\n", b64_buf);
 
     fdwrite(to_fd, b64_buf, b64_len+1); 
+    free(b64_buf);
 }
 
 
 void handler_deliver(int from_fd, char *buffer, size_t len)
 {
-    zmq_msg_t msg;
+    zmq_msg_t *msg = calloc(sizeof(zmq_msg_t), 1);
 
-    zmq_msg_init(&msg);
+    zmq_msg_init(msg);
 
     fprintf(stderr, "sending msg to handler backends: %.*s\n", len, buffer);
 
@@ -229,13 +239,13 @@ void handler_deliver(int from_fd, char *buffer, size_t len)
     int msg_size = snprintf(msg_buf, sz, "%d %.*s", from_fd, len, buffer);
 
     if(msg_size > 0) {
-        zmq_msg_init_data(&msg, msg_buf, msg_size, our_free, NULL);
+        zmq_msg_init_data(msg, msg_buf, msg_size, our_free, NULL);
+        zmq_send(handler_socket, msg, 0);
     } else {
         free(msg_buf);
     }
 
-    zmq_send(handler_socket, &msg, 0);
-
+    free(msg);
 }
 
 
@@ -243,29 +253,29 @@ void from_listener_task(void *v)
 {
 	int fd = (int)v;
     char *buf = calloc(1024, 1);
-    http_parser parser;
+    http_parser *parser = calloc(sizeof(http_parser), 1);
     size_t n = 0;
     size_t nparsed = 0;
     int finished = 0;
     int registered = 0;
 
-	while((n = fdread(fd, buf, 1024)) > 0) {
+	while((n = fdread(fd, buf, 1024-1)) > 0) {
         buf[n+1] = '\0';
 
-        http_parser_init(&parser);
+        http_parser_init(parser);
 
-        nparsed = http_parser_execute(&parser, buf, n, 0);
-        finished =  http_parser_finish(&parser);
+        nparsed = http_parser_execute(parser, buf, n, 0);
+        finished =  http_parser_finish(parser);
 
         if(finished != 1) {
             fprintf(stderr, "error in parsing: %d, %.*s\n", finished, n, buf);
             break;
         }
         
-        if(parser.socket_started) {
+        if(parser->socket_started) {
             fdwrite(fd, FLASH_RESPONSE, strlen(FLASH_RESPONSE) + 1);
             break;
-        } else if(parser.json_sent) {
+        } else if(parser->json_sent) {
             if(!registered) {
                 register_connect(fd);
             }
@@ -282,10 +292,11 @@ void from_listener_task(void *v)
         }
     }
 
-    if(parser.json_sent) {
+    if(parser->json_sent) {
         unregister_connect(fd, 1);
     }
 
     free(buf);
+    free(parser);
 }
 

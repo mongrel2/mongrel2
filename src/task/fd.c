@@ -8,7 +8,7 @@
 
 enum
 {
-	MAXFD = 1024 * 10, FDSTACK=32 * 1024
+	MAXFD = 1024 * 10, FDSTACK= 100 * 1024
 };
 
 static zmq_pollitem_t pollfd[MAXFD];

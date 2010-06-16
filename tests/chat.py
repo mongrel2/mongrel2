@@ -18,7 +18,7 @@ users = {}
 user_list = []
 
 def send(i, data):
-    resp.send(i + ' ' + json.dumps(data))
+    resp.send(i + ' ' + json.dumps(data) + '\0')
 
 def deliver(data):
     for i in users.keys():
