@@ -8,7 +8,7 @@
 
 enum
 {
-	MAXFD = 1024, FDSTACK=32768
+	MAXFD = 1024 * 10, FDSTACK=32 * 1024
 };
 
 static zmq_pollitem_t pollfd[MAXFD];
@@ -143,7 +143,7 @@ _wait(void *socket, int fd, int rw)
 
 	if(!startedfdtask) {
 		startedfdtask = 1;
-		taskcreate(fdtask, 0, 32768);
+		taskcreate(fdtask, 0, FDSTACK);
 	}
 
 	if(npollfd >= MAXFD){

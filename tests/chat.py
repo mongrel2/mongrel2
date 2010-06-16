@@ -18,7 +18,6 @@ users = {}
 user_list = []
 
 def send(i, data):
-    print "SENDING:", i + ' ' + json.dumps(data)
     resp.send(i + ' ' + json.dumps(data))
 
 def deliver(data):
@@ -29,7 +28,10 @@ while True:
     msg = reqs.recv()
 
     ident, data = msg.split(' ', 1)
-    data = json.loads(data)
+    try:
+        data = json.loads(data)
+    except:
+        continue
 
     print "IDENT:", ident, "MSG:", data
 

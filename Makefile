@@ -1,5 +1,5 @@
-CFLAGS=-fnested-functions -g -Isrc
-# CFLAGS=-g -Isrc
+# CFLAGS=-fnested-functions -g -Isrc
+CFLAGS=-g -Isrc
 
 all: server mqshell
 
