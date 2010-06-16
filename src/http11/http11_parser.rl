@@ -129,13 +129,13 @@ size_t http_parser_execute(http_parser *parser, const char *buffer, size_t len, 
   %% write exec;
 
   if (!http_parser_has_error(parser)) {
-      assert(p <= pe && "buffer overflow after parsing execute");
       parser->cs = cs;
   }
 
   parser->nread += p - (buffer + off);
 
   fprintf(stderr, "p: %d, pe: %d\n", p-buffer, pe-buffer);
+
 
   assert(parser->nread <= len && "nread longer than length");
   assert(parser->body_start <= len && "body starts after buffer end");
