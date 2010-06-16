@@ -15,7 +15,10 @@ reqs.setsockopt(zmq.IDENTITY, sender_id)
 
 while True:
     msg = raw_input("> ")
-    reqs.send(msg)
+
+    if msg:
+        reqs.send(msg)
+
     msg = resp.recv()
     print "RESP", msg
 

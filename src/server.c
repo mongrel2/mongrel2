@@ -16,6 +16,9 @@ char *FLASH_RESPONSE = "<?xml version=\"1.0\"?><!DOCTYPE cross-domain-policy SYS
 
 size_t FLASH_LEN = 0;
 
+static char *LEAVE_MSG = "{\"type\":\"leave\"}";
+size_t LEAVE_MSG_LEN = 0;
+
 char *HTTP_RESPONSE = "HTTP/1.1 200 OK\r\n"
     "Server: mongrel2/0.1\r\n"
     "Date: Tue, 08 Jun 2010 04:33:23 GMT\r\n"
@@ -35,9 +38,10 @@ enum
 void from_listener_task(void*);
 void from_handler_task(void *v);
 void register_connect(int fd);
-void unregister_connect(int fd);
+void unregister_connect(int fd, int announce_leave);
 void ping_connect(int fd);
 void listener_deliver(int to_fd, char *buffer, size_t len);
+void handler_deliver(int from_fd, char *buffer, size_t len);
 
 
 void *handler_socket = NULL;
@@ -62,6 +66,7 @@ void taskmain(int argc, char **argv)
     int rport;
 	char remote[16];
     FLASH_LEN = strlen(FLASH_RESPONSE);
+    LEAVE_MSG_LEN = strlen(LEAVE_MSG);
 	
 	if(argc != 4){
 		fprintf(stderr, "usage: server localport handlerq listenerq\n");
@@ -140,7 +145,7 @@ void from_handler_task(void *socket)
         fprintf(stderr, "!!! message from handler: %s for fd: %d, nread: %d\n",
                 data, fd, end);
 
-        if(end && hash_lookup(registrations, fd)) {
+        if(end && hash_lookup(registrations, (void *)fd)) {
             listener_deliver(fd, data+end, sz-end);
         }
 
@@ -165,15 +170,21 @@ void register_connect(int fd)
     fprintf(stderr, "currently registered: %d\n", hash_count(registrations));
 }
 
-void unregister_connect(int fd)
+void unregister_connect(int fd, int announce_leave)
 {
     hnode_t *hn = hash_lookup(registrations, (void *)fd);
 
     if(hn) {
         fprintf(stderr, "unregister %d\n", fd);
         hash_delete_free(registrations, hn);
-        shutdown(fd, SHUT_WR);
-        close(fd);
+
+        if(close(fd) == -1) {
+            fprintf(stderr, "errno after close: %s\n", strerror(errno));
+        }
+
+        if(announce_leave) {
+            handler_deliver(fd, LEAVE_MSG, LEAVE_MSG_LEN);
+        }
     }
 
     fprintf(stderr, "currently registered: %d\n", hash_count(registrations));
@@ -193,13 +204,14 @@ void listener_deliver(int to_fd, char *buffer, size_t len)
     size_t b64_len = 0;
     b64_char_t b64_buf[512] = {0};
     assert(buffer[len] == '\0' && "invalid message, must end in \0");
+    assert(buffer[len - 1] != '\0' && "must end in only one \0");
 
     fprintf(stderr, "delivering %.*s to %d\n", len, buffer, to_fd);
 
     b64_len = b64_encode(buffer, len, b64_buf, sizeof(b64_buf)-1);
     b64_buf[b64_len] = '\0';
 
-    fprintf(stderr, "b65 is %s\n", b64_buf);
+    fprintf(stderr, "b64 is %s\n", b64_buf);
 
     fdwrite(to_fd, b64_buf, b64_len+1); 
 }
@@ -213,7 +225,15 @@ void handler_deliver(int from_fd, char *buffer, size_t len)
 
     fprintf(stderr, "sending msg to handler backends: %.*s\n", len, buffer);
 
-    zmq_msg_init_data(&msg, strdup(buffer), len, our_free, NULL);
+    size_t sz = strlen(buffer) + 32;
+    char *msg_buf = malloc(sz);
+    int msg_size = snprintf(msg_buf, sz, "%d %.*s", from_fd, len, buffer);
+
+    if(msg_size > 0) {
+        zmq_msg_init_data(&msg, msg_buf, msg_size, our_free, NULL);
+    } else {
+        free(msg_buf);
+    }
 
     zmq_send(handler_socket, &msg, 0);
 
@@ -263,7 +283,10 @@ void from_listener_task(void *v)
         }
     }
 
-    unregister_connect(fd);
+    if(parser.json_sent) {
+        unregister_connect(fd, 1);
+    }
+
     free(buf);
 }
 
