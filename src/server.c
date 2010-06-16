@@ -11,8 +11,12 @@
 #include <zmq.h>
 #include <b64/b64.h>
 #include <assert.h>
+#include <dbg.h>
+
 
 char *FLASH_RESPONSE = "<?xml version=\"1.0\"?><!DOCTYPE cross-domain-policy SYSTEM \"http://www.macromedia.com/xml/dtds/cross-domain-policy.dtd\"> <cross-domain-policy> <allow-access-from domain=\"*\" to-ports=\"*\" /></cross-domain-policy>";
+
+FILE *LOG_FILE = NULL;
 
 size_t FLASH_LEN = 0;
 
@@ -43,8 +47,8 @@ void from_handler_task(void *v);
 void register_connect(int fd);
 void unregister_connect(int fd, int announce_leave);
 void ping_connect(int fd);
-void listener_deliver(int to_fd, char *buffer, size_t len);
-void handler_deliver(int from_fd, char *buffer, size_t len);
+int listener_deliver(int to_fd, char *buffer, size_t len);
+int handler_deliver(int from_fd, char *buffer, size_t len);
 
 
 void *handler_socket = NULL;
@@ -63,58 +67,6 @@ int fd_comp_func(const void *a, const void *b)
 }
 
 
-void taskmain(int argc, char **argv)
-{
-	int cfd, fd;
-    int rport;
-	char remote[16];
-    FLASH_LEN = strlen(FLASH_RESPONSE);
-    LEAVE_MSG_LEN = strlen(LEAVE_MSG);
-	
-	if(argc != 4){
-		fprintf(stderr, "usage: server localport handlerq listenerq\n");
-		taskexitall(1);
-	}
-
-    mqinit(2);
-
-    registrations = hash_create(HASHCOUNT_T_MAX, fd_comp_func, fd_hash_func);
-    assert(registrations && "Can't make the registration hash.");
-
-	int port = atoi(argv[1]);
-
-    handler_socket = mqsocket(ZMQ_PUB);
-    zmq_setsockopt(handler_socket, ZMQ_IDENTITY, UUID, strlen(UUID));
-    fprintf(stderr, "binding handler PUB socket %s with identity: %s\n", argv[2], UUID);
-
-    if(zmq_bind(handler_socket, argv[2]) == -1) {
-        fprintf(stderr, "error can't bind %s: %s\n", argv[2], strerror(errno));
-        taskexitall(1);
-    }
-
-    listener_socket = mqsocket(ZMQ_SUB);
-    zmq_setsockopt(listener_socket, ZMQ_SUBSCRIBE, "", 0);
-
-    fprintf(stderr, "binding listener SUB socket %s subscribed to: %s\n", argv[3], UUID);
-    if(zmq_bind(listener_socket, argv[3]) == -1) {
-        fprintf(stderr, "error can't bind %s: %s\n", argv[3], strerror(errno));
-        taskexitall(1);
-    }
-
-	if((fd = netannounce(TCP, 0, port)) < 0){
-		fprintf(stderr, "cannot announce on tcp port %d: %s\n", atoi(argv[1]), strerror(errno));
-		taskexitall(1);
-	}
-
-    fprintf(stderr, "starting from_handler_task\n");
-    taskcreate(from_handler_task, listener_socket, HANDLER_STACK);
-
-	fdnoblock(fd);
-    fprintf(stderr, "waiting on %d\n", port);
-	while((cfd = netaccept(fd, remote, &rport)) >= 0){
-		taskcreate(from_listener_task, (void*)cfd, LISTENER_STACK);
-	}
-}
 
 
 void our_free(void *data, void *hint)
@@ -129,48 +81,62 @@ void from_handler_task(void *socket)
     char *data = NULL;
     size_t sz = 0;
     int fd = 0;
+    int rc = 0;
 
     while(1) {
         zmq_msg_init(inmsg);
 
-        fprintf(stderr, "WAIT FROM HANDLER\n");
-        if(mqrecv(socket, inmsg, 0) == -1) {
-            fprintf(stderr, "oops can't read: %s\n", strerror(errno));
-            taskexitall(1);
-        }
+        rc = mqrecv(socket, inmsg, 0);
+        check(rc == 0, "Receive on handler socket failed.");
 
         data = (char *)zmq_msg_data(inmsg);
         sz = zmq_msg_size(inmsg);
+
         if(data[sz-1] != '\0') {
-            fprintf(stderr, "error, last char from handler is not 0 it's %d\n", data[sz-1]);
+            log_err("Last char from handler is not 0 it's %d, fix your backend.", data[sz-1]);
+        } if(data[sz-2] == '\0') {
+            log_err("You have two \0 ending your message, that's bad.");
         } else {
             int end = 0;
             int ok = sscanf(data, "%u%n", &fd, &end);
-            fprintf(stderr, "!!! message from handler: %s for fd: %d, nread: %d, final: %d, last: %d\n",
-                    data, fd, end, sz-end-1, (data + end)[sz-end-1]);
+            debug("MESSAGE from handler: %s for fd: %d, nread: %d, len: %d, final: %d, last: %d",
+                    data, fd, end, sz, sz-end-1, (data + end)[sz-end-1]);
 
-            if(ok > 0 && end > 0 && hash_lookup(registrations, (void *)fd)) {
-                listener_deliver(fd, data+end, sz-end-1);
+            if(ok <= 0 || end <= 0) {
+                log_err("Message didn't start with a ident number.");
+            } else if(!hash_lookup(registrations, (void *)fd)) {
+                log_err("Ident %d is no longer connected.", fd);
+            } else {
+                if(listener_deliver(fd, data+end, sz-end-1) == -1) {
+                    log_err("Error sending to listener %d, closing them.");
+                    unregister_connect(fd, 1);
+                }
             }
         }
     }
+
+    return;
+error:
+    taskexitall(1);
 }
 
 
 void register_connect(int fd)
 {
-    fprintf(stderr, "register for %d\n", fd);
+    debug("Registering %d ident.", fd);
 
     hnode_t *hn = hash_lookup(registrations, (void *)fd);
 
     if(hn) hash_delete_free(registrations, hn);
 
-    if(!hash_alloc_insert(registrations, (void *)fd, NULL)) {
-        fprintf(stderr, "cannot register fd");
-        return;
-    }
+    check(hash_alloc_insert(registrations, (void *)fd, NULL), "Cannot register fd, out of space.");
 
-    fprintf(stderr, "currently registered: %d\n", hash_count(registrations));
+    debug("Currently registered idents: %d", hash_count(registrations));
+
+    return;
+
+error:
+    taskexitall(1);
 }
 
 void unregister_connect(int fd, int announce_leave)
@@ -178,125 +144,222 @@ void unregister_connect(int fd, int announce_leave)
     hnode_t *hn = hash_lookup(registrations, (void *)fd);
 
     if(hn) {
-        fprintf(stderr, "unregister %d\n", fd);
+        debug("Unregistering %d", fd);
+
         hash_delete_free(registrations, hn);
 
         if(close(fd) == -1) {
-            fprintf(stderr, "errno after close: %s\n", strerror(errno));
+            log_err("Failed on close for ident %d, not sure why.", fd);
         }
 
         if(announce_leave) {
-            handler_deliver(fd, LEAVE_MSG, LEAVE_MSG_LEN);
+            if(handler_deliver(fd, LEAVE_MSG, LEAVE_MSG_LEN) == -1) {
+                log_err("Can't deliver unregister to handler.");
+            }
         }
+    } else {
+        log_err("Ident %d was unregistered but doesn't exist in registrations.", fd);
     }
-
-    fprintf(stderr, "currently registered: %d\n", hash_count(registrations));
 }
 
 void ping_connect(int fd)
 {
-    fprintf(stderr, "ping for %d\n", fd);
+    debug("Ping received for ident %d", fd);
     hnode_t *hn = hash_lookup(registrations, (void *)fd);
 
+    check(hn, "Ping received but %d isn't actually registerd.", fd);
     // TODO: increment its ping time
+    
+    return;
+
+error:
+    taskexitall(1);
 }
 
 
-void listener_deliver(int to_fd, char *buffer, size_t len)
+int listener_deliver(int to_fd, char *buffer, size_t len)
 {
     size_t b64_len = 0;
-    fprintf(stderr, "delivering %.*s to %d\n", len, buffer, to_fd);
-    if(buffer[len] != '\0') {
-        fprintf(stderr, "must end in NUL\n");
-        return;
-    } else if (buffer[len-1] == '\0') {
-        fprintf(stderr, "must end in only 1 NUL, you have too many\n");
-        return;
-    }
+    b64_char_t *b64_buf = NULL;
+    int rc = 0;
 
-    b64_char_t *b64_buf = calloc(1024, 1);
+    check(buffer[len] == '\0', "Message for listener must end in \\0, you have '%c'", buffer[len]);
+    check(buffer[len-1] != '\0', "Message for listener must end in ONE \\0, you have more.");
+
+    b64_buf = calloc(1024, 1);
+    check(b64_buf, "Failed to allocate buffer for Base64 convert.");
 
     b64_len = b64_encode(buffer, len, b64_buf, 1024-1);
+    check(b64_len > 0, "Base64 convert failed.");
+
     b64_buf[b64_len] = '\0';
 
-    fprintf(stderr, "b64 is %s\n", b64_buf);
+    rc = fdwrite(to_fd, b64_buf, b64_len+1);
+    check(rc == b64_len+1, "Failed to write entire message to listener %d", to_fd);
 
-    fdwrite(to_fd, b64_buf, b64_len+1); 
-    free(b64_buf);
+
+    if(b64_buf) free(b64_buf);
+    return 0;
+
+error:
+    if(b64_buf) free(b64_buf);
+    return -1;
 }
 
 
-void handler_deliver(int from_fd, char *buffer, size_t len)
+int handler_deliver(int from_fd, char *buffer, size_t len)
 {
-    zmq_msg_t *msg = calloc(sizeof(zmq_msg_t), 1);
+    int rc = 0;
+    zmq_msg_t *msg = NULL;
+    char *msg_buf = NULL;
+    int msg_size = 0;
+    size_t sz = 0;
 
-    zmq_msg_init(msg);
+    msg = calloc(sizeof(zmq_msg_t), 1);
+    msg_buf = NULL;
 
-    fprintf(stderr, "sending msg to handler backends: %.*s\n", len, buffer);
+    check(msg, "Failed to allocate 0mq message to send.");
 
-    size_t sz = strlen(buffer) + 32;
-    char *msg_buf = malloc(sz);
-    int msg_size = snprintf(msg_buf, sz, "%d %.*s", from_fd, len, buffer);
+    rc = zmq_msg_init(msg);
+    check(rc == 0, "Failed to initialize 0mq message to send.");
 
-    if(msg_size > 0) {
-        zmq_msg_init_data(msg, msg_buf, msg_size, our_free, NULL);
-        zmq_send(handler_socket, msg, 0);
-    } else {
-        free(msg_buf);
-    }
+    sz = strlen(buffer) + 32;
+    msg_buf = malloc(sz);
+    check(msg_buf, "Failed to allocate message buffer for handler delivery.");
 
-    free(msg);
+    msg_size = snprintf(msg_buf, sz, "%d %.*s", from_fd, len, buffer);
+    check(msg_size > 0, "Message too large, killing it.");
+
+    rc = zmq_msg_init_data(msg, msg_buf, msg_size, our_free, NULL);
+    check(rc == 0, "Failed to init 0mq message data.");
+
+    rc = zmq_send(handler_socket, msg, 0);
+    check(rc == 0, "Failed to deliver 0mq message to handler.");
+
+    if(msg) free(msg);
+    return 0;
+
+error:
+    if(msg) free(msg);
+    if(msg_buf) free(msg_buf);
+    return -1;
 }
 
 
 void from_listener_task(void *v)
 {
 	int fd = (int)v;
-    char *buf = calloc(1024, 1);
-    http_parser *parser = calloc(sizeof(http_parser), 1);
+    char *buf = NULL;
+    http_parser *parser = NULL;
     size_t n = 0;
     size_t nparsed = 0;
     int finished = 0;
     int registered = 0;
+    int rc = 0;
 
-	while((n = fdread(fd, buf, 1024-1)) > 0) {
-        buf[n+1] = '\0';
+    buf = calloc(1024, 1);
+    check(buf, "Failed to allocate parse buffer.");
+
+    parser = calloc(sizeof(http_parser), 1);
+    check(parser, "Failed to allocate http_parser.");
+
+	while((n = fdread(fd, buf, 1024)) > 0) {
+        buf[n] = '\0';
 
         http_parser_init(parser);
 
         nparsed = http_parser_execute(parser, buf, n, 0);
         finished =  http_parser_finish(parser);
-
-        if(finished != 1) {
-            fprintf(stderr, "error in parsing: %d, %.*s\n", finished, n, buf);
-            break;
-        }
+        check(finished == 1, "Error in parsing: %d, %.*s", finished, n, buf);
         
         if(parser->socket_started) {
-            fdwrite(fd, FLASH_RESPONSE, strlen(FLASH_RESPONSE) + 1);
+            rc = fdwrite(fd, FLASH_RESPONSE, strlen(FLASH_RESPONSE) + 1);
+            check(rc > 0, "Failed to write Flash socket response.");
             break;
         } else if(parser->json_sent) {
             if(!registered) {
                 register_connect(fd);
+                registered = 1;
             }
 
             if(strcmp(buf, "{\"type\":\"ping\"}") == 0) {
                 ping_connect(fd);
             } else {
-                fprintf(stderr, "json message sent: %.*s\n", n, buf);
-                handler_deliver(fd, buf, n);
+                debug("JSON message sent on jssocket: %.*s", n, buf);
+
+                if(handler_deliver(fd, buf, n) == -1) {
+                    log_err("Can't deliver message to handler.");
+                }
             }
         } else {
-            fdwrite(fd, HTTP_RESPONSE, strlen(HTTP_RESPONSE));
+            rc = fdwrite(fd, HTTP_RESPONSE, strlen(HTTP_RESPONSE));
+            check(rc > 0, "Failed to write HTTP response.");
             break;
         }
     }
 
+error: // fallthrough for both error or not
+    if(buf) free(buf);
+    if(parser) free(parser);
     if(parser->json_sent) {
         unregister_connect(fd, 1);
     }
-
-    free(buf);
-    free(parser);
 }
 
+
+void taskmain(int argc, char **argv)
+{
+	int cfd, fd;
+    int rport;
+	char remote[16];
+    FLASH_LEN = strlen(FLASH_RESPONSE);
+    LEAVE_MSG_LEN = strlen(LEAVE_MSG);
+    int rc = 0;
+    LOG_FILE = stderr;
+	
+    check(argc == 4, "usage: server localport handlerq listenerq");
+    char *handler_spec = argv[2];
+    char *listener_spec = argv[3];
+
+    mqinit(2);
+
+    registrations = hash_create(HASHCOUNT_T_MAX, fd_comp_func, fd_hash_func);
+    check(registrations, "Failed creating registrations store.");
+
+	int port = atoi(argv[1]);
+    check(port > 0, "Can't bind to the given port: %s", argv[1]);
+
+    handler_socket = mqsocket(ZMQ_PUB);
+    rc = zmq_setsockopt(handler_socket, ZMQ_IDENTITY, UUID, strlen(UUID));
+    check(rc == 0, "Failed to set handler socket %s identity %s", handler_spec, UUID);
+
+    debug("Binding handler PUB socket %s with identity: %s", argv[2], UUID);
+
+    rc = zmq_bind(handler_socket, handler_spec);
+    check(rc == 0, "Can't bind handler socket: %s", handler_spec);
+
+    listener_socket = mqsocket(ZMQ_SUB);
+    rc = zmq_setsockopt(listener_socket, ZMQ_SUBSCRIBE, "", 0);
+    check(rc == 0, "Failed to subscribe listener socket: %s", listener_spec);
+    debug("binding listener SUB socket %s subscribed to: %s", listener_spec, UUID);
+
+    rc = zmq_bind(listener_socket, listener_spec);
+    check(rc == 0, "Can't bind listener socket %s", listener_spec);
+
+	fd = netannounce(TCP, 0, port);
+    check(fd >= 0, "Can't announce on TCP port %d", port);
+
+    debug("Starting server on port %d", port);
+    taskcreate(from_handler_task, listener_socket, HANDLER_STACK);
+
+	fdnoblock(fd);
+	while((cfd = netaccept(fd, remote, &rport)) >= 0){
+		taskcreate(from_listener_task, (void*)cfd, LISTENER_STACK);
+	}
+
+
+
+error:
+    log_err("Exiting due to error.");
+    taskexitall(1);
+}
