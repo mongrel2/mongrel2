@@ -148,8 +148,6 @@ void from_handler_task(void *socket)
         if(end && hash_lookup(registrations, (void *)fd)) {
             listener_deliver(fd, data+end, sz-end);
         }
-
-        zmq_msg_close(&inmsg);
     }
 }
 
