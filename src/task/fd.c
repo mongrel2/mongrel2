@@ -223,7 +223,7 @@ int
 fdread(int fd, void *buf, int n)
 {
 	int m;
-	
+
 	while((m=read(fd, buf, n)) < 0 && errno == EAGAIN) {
 		if(fdwait(fd, 'r') == -1) {
             return -1;

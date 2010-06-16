@@ -41,11 +41,12 @@ while True:
         user_list = [u[1] for u in users.items()]
         send(ident, {'type': 'userList', 'users': user_list})
     elif data["type"] == "leave":
-        deliver(data)
 
         if ident in users:
+            data['user'] = users[ident]
             del users[ident]
 
+        deliver(data)
         user_list = [u[1] for u in users.items()]
     elif ident not in users:
         users[ident] = data['user']

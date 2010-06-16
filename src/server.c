@@ -12,6 +12,7 @@
 #include <b64/b64.h>
 #include <assert.h>
 #include <dbg.h>
+#include <proxy.h>
 
 
 char *FLASH_RESPONSE = "<?xml version=\"1.0\"?><!DOCTYPE cross-domain-policy SYSTEM \"http://www.macromedia.com/xml/dtds/cross-domain-policy.dtd\"> <cross-domain-policy> <allow-access-from domain=\"*\" to-ports=\"*\" /></cross-domain-policy>";
@@ -106,6 +107,10 @@ void from_handler_task(void *socket)
                 log_err("Message didn't start with a ident number.");
             } else if(!hash_lookup(registrations, (void *)fd)) {
                 log_err("Ident %d is no longer connected.", fd);
+
+                if(handler_deliver(fd, LEAVE_MSG, LEAVE_MSG_LEN) == -1) {
+                    log_err("Can't tell handler %d died.", fd);
+                }
             } else {
                 if(listener_deliver(fd, data+end, sz-end-1) == -1) {
                     log_err("Error sending to listener %d, closing them.");
@@ -292,8 +297,12 @@ void from_listener_task(void *v)
                 }
             }
         } else {
-            rc = fdwrite(fd, HTTP_RESPONSE, strlen(HTTP_RESPONSE));
-            check(rc > 0, "Failed to write HTTP response.");
+            // HTTP, proxy it back
+            ProxyConnect *conn = ProxyConnect_create(fd, buf, 1024, n); 
+            proxy_connect(conn);
+
+            // set buf to NULL so that we don't close it, the proxy owns it
+            buf = NULL;
             break;
         }
     }
@@ -322,6 +331,7 @@ void taskmain(int argc, char **argv)
     char *listener_spec = argv[3];
 
     mqinit(2);
+    proxy_init("127.0.0.1", 8080);
 
     registrations = hash_create(HASHCOUNT_T_MAX, fd_comp_func, fd_hash_func);
     check(registrations, "Failed creating registrations store.");
