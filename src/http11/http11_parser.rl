@@ -128,7 +128,7 @@ size_t http_parser_execute(http_parser *parser, const char *buffer, size_t len, 
 
   %% write exec;
 
-  if(p >= pe) {
+  if(p > pe) {
       fprintf(stderr, "FUCKING BUFFER OVERFLOW: %d past end, len: %d, off: %d, buffer: %.*s, last-char: '%c'\n", p - pe, len, off, len, buffer, buffer[len]);
   }
 

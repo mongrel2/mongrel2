@@ -1418,7 +1418,7 @@ case 81:
 
 #line 130 "src/http11/http11_parser.rl"
 
-  if(p >= pe) {
+  if(p > pe) {
       fprintf(stderr, "FUCKING BUFFER OVERFLOW: %d past end, len: %d, off: %d, buffer: %.*s, last-char: '%c'\n", p - pe, len, off, len, buffer, buffer[len]);
   }
 
