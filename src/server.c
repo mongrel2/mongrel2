@@ -248,8 +248,8 @@ void from_listener_task(void *v)
 	int fd = (int)v;
     char *buf = NULL;
     http_parser *parser = NULL;
-    size_t n = 0;
-    size_t nparsed = 0;
+    int n = 0;
+    int nparsed = 0;
     int finished = 0;
     int registered = 0;
     int rc = 0;
@@ -323,7 +323,7 @@ void taskmain(int argc, char **argv)
     char *listener_spec = argv[3];
 
     mqinit(2);
-    proxy_init("127.0.0.1", 8080);
+    proxy_init("127.0.0.1", 80);
 
     registrations = hash_create(HASHCOUNT_T_MAX, fd_comp_func, fd_hash_func);
     check(registrations, "Failed creating registrations store.");
