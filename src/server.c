@@ -300,18 +300,18 @@ void from_listener_task(void *v)
             // HTTP, proxy it back
             ProxyConnect *conn = ProxyConnect_create(fd, buf, 1024, n); 
             proxy_connect(conn);
-
-            // set buf to NULL so that we don't close it, the proxy owns it
-            buf = NULL;
-            break;
+            free(parser);
+            return;
         }
     }
 
 error: // fallthrough for both error or not
     if(buf) free(buf);
-    if(parser) free(parser);
-    if(parser->json_sent) {
-        unregister_connect(fd, 1);
+    if(parser) { 
+        if(parser->json_sent) {
+            unregister_connect(fd, 1);
+        }
+        free(parser);
     }
 }
 

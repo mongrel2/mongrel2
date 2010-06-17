@@ -86,11 +86,14 @@ void
 rwtask(void *v)
 {
     ProxyConnect *conn = (ProxyConnect *)v;	
+    int rc = 0;
 
     do {
-        fdwrite(conn->read_fd, conn->buffer, conn->n);
+        rc = fdwrite(conn->read_fd, conn->buffer, conn->n);
+        check(rc == conn->n, "Connection closed.");
     } while((conn->n = fdread(conn->write_fd, conn->buffer, conn->size)) > 0);
 
+error:
     ProxyConnect_destroy(conn);
 }
 
