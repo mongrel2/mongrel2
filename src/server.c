@@ -24,14 +24,6 @@ size_t FLASH_LEN = 0;
 static char *LEAVE_MSG = "{\"type\":\"leave\"}";
 size_t LEAVE_MSG_LEN = 0;
 
-char *HTTP_RESPONSE = "HTTP/1.1 200 OK\r\n"
-    "Server: mongrel2/0.1\r\n"
-    "Date: Tue, 08 Jun 2010 04:33:23 GMT\r\n"
-    "Content-Type: text/html\r\n"
-    "Content-Length: 2\r\n"
-    "Last-Modified: Tue, 08 Jun 2010 04:00:07 GMT\r\n"
-    "Connection: close\r\n\r\nHI";
-
 char *UUID = "907F620B-BC91-4C93-86EF-512B71C2AE27";
 
 enum
@@ -268,7 +260,7 @@ void from_listener_task(void *v)
     parser = calloc(sizeof(http_parser), 1);
     check(parser, "Failed to allocate http_parser.");
 
-	while((n = fdread(fd, buf, 1024)) > 0) {
+	while((n = fdread(fd, buf, 1023)) > 0) {
         buf[n] = '\0';
 
         http_parser_init(parser);
