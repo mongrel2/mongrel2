@@ -44,14 +44,14 @@ void ProxyConnect_destroy(ProxyConnect *conn) {
 }
 
 
-void proxy_init(char *server, int port)
+void Proxy_init(char *server, int port)
 {
     SERVER = strdup(server);
     PORT = port;
 }
 
 
-void proxy_connect(ProxyConnect *conn)
+void Proxy_connect(ProxyConnect *conn)
 {
     taskcreate(proxytask, (void*)conn, STACK);
 }

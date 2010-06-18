@@ -13,8 +13,8 @@ ProxyConnect *ProxyConnect_create(int write_fd, char *buffer, size_t size, size_
 
 void ProxyConnect_destroy(ProxyConnect *conn);
 
-void proxy_init(char *server, int port);
+void Proxy_init(char *server, int port);
 
-void proxy_connect(ProxyConnect *conn);
+void Proxy_connect(ProxyConnect *conn);
 
 #endif

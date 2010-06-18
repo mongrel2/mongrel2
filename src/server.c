@@ -3,24 +3,19 @@
 #include <errno.h>
 #include <unistd.h>
 #include <task/task.h>
-#include <http11/http11_parser.h>
 #include <adt/tst.h>
 #include <stdlib.h>
 #include <sys/socket.h>
 #include <zmq.h>
-#include <b64/b64.h>
 #include <assert.h>
 #include <dbg.h>
 #include <proxy.h>
+#include <listener.h>
 
 #include <register.h>
 
 
-char *FLASH_RESPONSE = "<?xml version=\"1.0\"?><!DOCTYPE cross-domain-policy SYSTEM \"http://www.macromedia.com/xml/dtds/cross-domain-policy.dtd\"> <cross-domain-policy> <allow-access-from domain=\"*\" to-ports=\"*\" /></cross-domain-policy>";
-
 FILE *LOG_FILE = NULL;
-
-size_t FLASH_LEN = 0;
 
 static char *LEAVE_MSG = "{\"type\":\"leave\"}";
 size_t LEAVE_MSG_LEN = 0;
@@ -29,23 +24,14 @@ char *UUID = "907F620B-BC91-4C93-86EF-512B71C2AE27";
 
 enum
 {
-	LISTENER_STACK = 32 * 1024,
     HANDLER_STACK = 100 * 1024
 };
 
-
-
-void from_listener_task(void*);
-void from_handler_task(void *v);
-int listener_deliver(int to_fd, char *buffer, size_t len);
-int handler_deliver(int from_fd, char *buffer, size_t len);
-void *handler_socket = NULL;
 void *listener_socket = NULL;
 
-
-
-
-
+void from_handler_task(void *v);
+int handler_deliver(int from_fd, char *buffer, size_t len);
+void *handler_socket = NULL;
 
 void our_free(void *data, void *hint)
 {
@@ -89,7 +75,7 @@ void from_handler_task(void *socket)
                     log_err("Can't tell handler %d died.", fd);
                 }
             } else {
-                if(listener_deliver(fd, data+end, sz-end-1) == -1) {
+                if(Listener_deliver(fd, data+end, sz-end-1) == -1) {
                     log_err("Error sending to listener %d, closing them.");
                     Register_disconnect(fd);
                 }
@@ -104,35 +90,6 @@ error:
 
 
 
-
-int listener_deliver(int to_fd, char *buffer, size_t len)
-{
-    size_t b64_len = 0;
-    b64_char_t *b64_buf = NULL;
-    int rc = 0;
-
-    check(buffer[len] == '\0', "Message for listener must end in \\0, you have '%c'", buffer[len]);
-    check(buffer[len-1] != '\0', "Message for listener must end in ONE \\0, you have more.");
-
-    b64_buf = calloc(1024, 1);
-    check(b64_buf, "Failed to allocate buffer for Base64 convert.");
-
-    b64_len = b64_encode(buffer, len, b64_buf, 1024-1);
-    check(b64_len > 0, "Base64 convert failed.");
-
-    b64_buf[b64_len] = '\0';
-
-    rc = fdwrite(to_fd, b64_buf, b64_len+1);
-    check(rc == b64_len+1, "Failed to write entire message to listener %d", to_fd);
-
-
-    if(b64_buf) free(b64_buf);
-    return 0;
-
-error:
-    if(b64_buf) free(b64_buf);
-    return -1;
-}
 
 
 int handler_deliver(int from_fd, char *buffer, size_t len)
@@ -174,77 +131,12 @@ error:
 }
 
 
-void from_listener_task(void *v)
-{
-	int fd = (int)v;
-    char *buf = NULL;
-    http_parser *parser = NULL;
-    int n = 0;
-    int nparsed = 0;
-    int finished = 0;
-    int registered = 0;
-    int rc = 0;
-
-    buf = calloc(1024, 1);
-    check(buf, "Failed to allocate parse buffer.");
-
-    parser = calloc(sizeof(http_parser), 1);
-    check(parser, "Failed to allocate http_parser.");
-
-	while((n = fdread(fd, buf, 1023)) > 0) {
-        buf[n] = '\0';
-
-        http_parser_init(parser);
-
-        nparsed = http_parser_execute(parser, buf, n, 0);
-        finished =  http_parser_finish(parser);
-        check(finished == 1, "Error in parsing: %d, %.*s", finished, n, buf);
-        
-        if(parser->socket_started) {
-            rc = fdwrite(fd, FLASH_RESPONSE, strlen(FLASH_RESPONSE) + 1);
-            check(rc > 0, "Failed to write Flash socket response.");
-            break;
-        } else if(parser->json_sent) {
-            if(!registered) {
-                Register_connect(fd);
-                registered = 1;
-            }
-
-            if(strcmp(buf, "{\"type\":\"ping\"}") == 0) {
-                if(!Register_ping(fd)) Register_disconnect(fd);
-            } else {
-                debug("JSON message sent on jssocket: %.*s", n, buf);
-
-                if(handler_deliver(fd, buf, n) == -1) {
-                    log_err("Can't deliver message to handler.");
-                }
-            }
-        } else {
-            // HTTP, proxy it back
-            ProxyConnect *conn = ProxyConnect_create(fd, buf, 1024, n); 
-            proxy_connect(conn);
-            free(parser);
-            return;
-        }
-    }
-
-error: // fallthrough for both error or not
-    if(buf) free(buf);
-    if(parser) { 
-        if(parser->json_sent) {
-            Register_disconnect(fd);
-        }
-        free(parser);
-    }
-}
-
 
 void taskmain(int argc, char **argv)
 {
 	int cfd, fd;
     int rport;
 	char remote[16];
-    FLASH_LEN = strlen(FLASH_RESPONSE);
     LEAVE_MSG_LEN = strlen(LEAVE_MSG);
     int rc = 0;
     LOG_FILE = stderr;
@@ -254,8 +146,7 @@ void taskmain(int argc, char **argv)
     char *listener_spec = argv[3];
 
     mqinit(2);
-    proxy_init("127.0.0.1", 80);
-
+    Proxy_init("127.0.0.1", 80);
 
 	int port = atoi(argv[1]);
     check(port > 0, "Can't bind to the given port: %s", argv[1]);
@@ -269,13 +160,8 @@ void taskmain(int argc, char **argv)
     rc = zmq_bind(handler_socket, handler_spec);
     check(rc == 0, "Can't bind handler socket: %s", handler_spec);
 
-    listener_socket = mqsocket(ZMQ_SUB);
-    rc = zmq_setsockopt(listener_socket, ZMQ_SUBSCRIBE, "", 0);
-    check(rc == 0, "Failed to subscribe listener socket: %s", listener_spec);
-    debug("binding listener SUB socket %s subscribed to: %s", listener_spec, UUID);
-
-    rc = zmq_bind(listener_socket, listener_spec);
-    check(rc == 0, "Can't bind listener socket %s", listener_spec);
+    listener_socket = Listener_init(listener_spec, "");  // TODO: add uuid
+    check(listener_socket, "Failed to create listener socket.");
 
 	fd = netannounce(TCP, 0, port);
     check(fd >= 0, "Can't announce on TCP port %d", port);
@@ -284,8 +170,9 @@ void taskmain(int argc, char **argv)
     taskcreate(from_handler_task, listener_socket, HANDLER_STACK);
 
 	fdnoblock(fd);
+
 	while((cfd = netaccept(fd, remote, &rport)) >= 0){
-		taskcreate(from_listener_task, (void*)cfd, LISTENER_STACK);
+		taskcreate(Listener_task, (void*)cfd, LISTENER_STACK);
 	}
 
 
