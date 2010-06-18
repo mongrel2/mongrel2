@@ -5,7 +5,6 @@
 #include <task/task.h>
 #include <http11/http11_parser.h>
 #include <adt/tst.h>
-#include <adt/hash.h>
 #include <stdlib.h>
 #include <sys/socket.h>
 #include <zmq.h>
@@ -13,6 +12,8 @@
 #include <assert.h>
 #include <dbg.h>
 #include <proxy.h>
+
+#include <register.h>
 
 
 char *FLASH_RESPONSE = "<?xml version=\"1.0\"?><!DOCTYPE cross-domain-policy SYSTEM \"http://www.macromedia.com/xml/dtds/cross-domain-policy.dtd\"> <cross-domain-policy> <allow-access-from domain=\"*\" to-ports=\"*\" /></cross-domain-policy>";
@@ -30,34 +31,18 @@ enum
 {
 	LISTENER_STACK = 32 * 1024,
     HANDLER_STACK = 100 * 1024
-
 };
 
 
 
 void from_listener_task(void*);
 void from_handler_task(void *v);
-void register_connect(int fd);
-void unregister_connect(int fd, int announce_leave);
-void ping_connect(int fd);
 int listener_deliver(int to_fd, char *buffer, size_t len);
 int handler_deliver(int from_fd, char *buffer, size_t len);
-
-
 void *handler_socket = NULL;
 void *listener_socket = NULL;
-hash_t *registrations = NULL;
 
 
-hash_val_t fd_hash_func(const void *fd)
-{
-    return (hash_val_t)fd;
-}
-
-int fd_comp_func(const void *a, const void *b)
-{
-    return a - b;
-}
 
 
 
@@ -97,7 +82,7 @@ void from_handler_task(void *socket)
 
             if(ok <= 0 || end <= 0) {
                 log_err("Message didn't start with a ident number.");
-            } else if(!hash_lookup(registrations, (void *)fd)) {
+            } else if(!Register_exists(fd)) {
                 log_err("Ident %d is no longer connected.", fd);
 
                 if(handler_deliver(fd, LEAVE_MSG, LEAVE_MSG_LEN) == -1) {
@@ -106,7 +91,7 @@ void from_handler_task(void *socket)
             } else {
                 if(listener_deliver(fd, data+end, sz-end-1) == -1) {
                     log_err("Error sending to listener %d, closing them.");
-                    unregister_connect(fd, 1);
+                    Register_disconnect(fd);
                 }
             }
         }
@@ -118,60 +103,6 @@ error:
 }
 
 
-void register_connect(int fd)
-{
-    debug("Registering %d ident.", fd);
-
-    hnode_t *hn = hash_lookup(registrations, (void *)fd);
-
-    if(hn) hash_delete_free(registrations, hn);
-
-    check(hash_alloc_insert(registrations, (void *)fd, NULL), "Cannot register fd, out of space.");
-
-    debug("Currently registered idents: %d", hash_count(registrations));
-
-    return;
-
-error:
-    taskexitall(1);
-}
-
-void unregister_connect(int fd, int announce_leave)
-{
-    hnode_t *hn = hash_lookup(registrations, (void *)fd);
-
-    if(hn) {
-        debug("Unregistering %d", fd);
-
-        hash_delete_free(registrations, hn);
-
-        if(close(fd) == -1) {
-            log_err("Failed on close for ident %d, not sure why.", fd);
-        }
-
-        if(announce_leave) {
-            if(handler_deliver(fd, LEAVE_MSG, LEAVE_MSG_LEN) == -1) {
-                log_err("Can't deliver unregister to handler.");
-            }
-        }
-    } else {
-        log_err("Ident %d was unregistered but doesn't exist in registrations.", fd);
-    }
-}
-
-void ping_connect(int fd)
-{
-    debug("Ping received for ident %d", fd);
-    hnode_t *hn = hash_lookup(registrations, (void *)fd);
-
-    check(hn, "Ping received but %d isn't actually registerd.", fd);
-    // TODO: increment its ping time
-    
-    return;
-
-error:
-    taskexitall(1);
-}
 
 
 int listener_deliver(int to_fd, char *buffer, size_t len)
@@ -275,12 +206,12 @@ void from_listener_task(void *v)
             break;
         } else if(parser->json_sent) {
             if(!registered) {
-                register_connect(fd);
+                Register_connect(fd);
                 registered = 1;
             }
 
             if(strcmp(buf, "{\"type\":\"ping\"}") == 0) {
-                ping_connect(fd);
+                if(!Register_ping(fd)) Register_disconnect(fd);
             } else {
                 debug("JSON message sent on jssocket: %.*s", n, buf);
 
@@ -301,7 +232,7 @@ error: // fallthrough for both error or not
     if(buf) free(buf);
     if(parser) { 
         if(parser->json_sent) {
-            unregister_connect(fd, 1);
+            Register_disconnect(fd);
         }
         free(parser);
     }
@@ -325,8 +256,6 @@ void taskmain(int argc, char **argv)
     mqinit(2);
     proxy_init("127.0.0.1", 80);
 
-    registrations = hash_create(HASHCOUNT_T_MAX, fd_comp_func, fd_hash_func);
-    check(registrations, "Failed creating registrations store.");
 
 	int port = atoi(argv[1]);
     check(port > 0, "Can't bind to the given port: %s", argv[1]);
