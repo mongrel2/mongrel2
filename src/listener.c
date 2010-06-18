@@ -6,6 +6,7 @@
 #include <zmq.h>
 #include <task/task.h>
 #include <dbg.h>
+#include <handler.h>
 
 
 char *FLASH_RESPONSE = "<?xml version=\"1.0\"?><!DOCTYPE cross-domain-policy SYSTEM \"http://www.macromedia.com/xml/dtds/cross-domain-policy.dtd\"> <cross-domain-policy> <allow-access-from domain=\"*\" to-ports=\"*\" /></cross-domain-policy>";
@@ -45,7 +46,8 @@ error:
 
 void Listener_task(void *v)
 {
-	int fd = (int)v;
+    SocketPair *pair = (SocketPair *)v;
+	int fd = pair->fd;
     char *buf = NULL;
     http_parser *parser = NULL;
     int n = 0;
@@ -84,7 +86,7 @@ void Listener_task(void *v)
             } else {
                 debug("JSON message sent on jssocket: %.*s", n, buf);
 
-                if(handler_deliver(fd, buf, n) == -1) {
+                if(Handler_deliver(pair->handler, fd, buf, n) == -1) {
                     log_err("Can't deliver message to handler.");
                 }
             }
@@ -92,6 +94,7 @@ void Listener_task(void *v)
             // HTTP, proxy it back
             ProxyConnect *conn = ProxyConnect_create(fd, buf, 1024, n); 
             Proxy_connect(conn);
+            free(pair);
             free(parser);
             return;
         }
@@ -99,6 +102,7 @@ void Listener_task(void *v)
 
 error: // fallthrough for both error or not
     if(buf) free(buf);
+    if(pair) free(pair);
     if(parser) { 
         if(parser->json_sent) {
             Register_disconnect(fd);
@@ -108,7 +112,7 @@ error: // fallthrough for both error or not
 }
 
 
-void *Listener_init(const char *listener_spec, const char *uuid)
+void *Listener_create(const char *listener_spec, const char *uuid)
 {
     void *listener_socket = mqsocket(ZMQ_SUB);
     int rc = zmq_setsockopt(listener_socket, ZMQ_SUBSCRIBE, uuid, 0);
@@ -125,3 +129,5 @@ void *Listener_init(const char *listener_spec, const char *uuid)
 error:
     return NULL;
 }
+
+
