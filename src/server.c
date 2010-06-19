@@ -25,6 +25,8 @@ Server *Server_create(const char *port)
 
     check(fdnoblock(srv->listen_fd) == 0, "Failed to set listening port %d nonblocking.", srv->port);
 
+    return srv;
+
 error:
     Server_destroy(srv);
     return NULL;
@@ -68,7 +70,7 @@ void Server_start(Server *srv)
 
 int Server_add_proxy(Server *srv, Proxy *proxy)
 {
-    check(srv->proxy != NULL, "Too many proxies.");
+    check(srv->proxy == NULL, "Too many proxies.");
 
     srv->proxy = proxy;
     check(srv->proxy, "Failed to create proxy configuration.");
@@ -82,7 +84,7 @@ error:
 
 int Server_add_handler(Server *srv, Handler *handler)
 {
-    check(srv->handler != NULL, "Too many handlers.");
+    check(srv->handler == NULL, "Too many handlers.");
 
     srv->handler = handler;
     check(srv->handler, "Handler is invalid.");
