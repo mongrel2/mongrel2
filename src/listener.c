@@ -115,6 +115,8 @@ error: // fallthrough for both error or not
 void *Listener_create(const char *listener_spec, const char *uuid)
 {
     void *listener_socket = mqsocket(ZMQ_SUB);
+    check(listener_socket, "Can't create ZMQ_SUB socket.");
+
     int rc = zmq_setsockopt(listener_socket, ZMQ_SUBSCRIBE, uuid, 0);
     check(rc == 0, "Failed to subscribe listener socket: %s", listener_spec);
     debug("binding listener SUB socket %s subscribed to: %s", listener_spec, uuid);

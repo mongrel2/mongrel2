@@ -25,6 +25,8 @@ void Register_init()
         check(registrations, "Failed creating registrations store.");
     }
 
+    return;
+
 error:
     taskexitall(1);
 }
@@ -90,5 +92,7 @@ int Register_exists(int fd)
 {
     hash_lookup(registrations, (void *)fd);
     assert(registrations && "Call Register_init.");
+
+    return hash_lookup(registrations, (void *)fd) != NULL;
 }
 

@@ -8,12 +8,7 @@
 
 FILE *LOG_FILE = NULL;
 
-
 char *UUID = "907F620B-BC91-4C93-86EF-512B71C2AE27";
-
-void *listener_socket = NULL;
-
-void *handler_socket = NULL;
 
 
 void taskmain(int argc, char **argv)
@@ -30,19 +25,21 @@ void taskmain(int argc, char **argv)
     char *listener_spec = argv[3];
 
     mqinit(2);
+    Register_init();
+
     Proxy_init("127.0.0.1", 80);
 
 	int port = atoi(argv[1]);
     check(port > 0, "Can't bind to the given port: %s", argv[1]);
 
     pair->handler = Handler_create(handler_spec, UUID);
+    check(pair->handler, "Failed to create handler socket.");
 
     pair->listener = Listener_create(listener_spec, "");  // TODO: add uuid
-    check(listener_socket, "Failed to create listener socket.");
+    check(pair->listener, "Failed to create listener socket.");
 
 	fd = netannounce(TCP, 0, port);
     check(fd >= 0, "Can't announce on TCP port %d", port);
-
 
     debug("Starting server on port %d", port);
     taskcreate(Handler_task, pair, HANDLER_STACK);
@@ -60,3 +57,4 @@ error:
     log_err("Exiting due to error.");
     taskexitall(1);
 }
+
