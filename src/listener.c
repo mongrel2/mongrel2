@@ -105,11 +105,14 @@ void Listener_task(void *v)
 
 error: // fallthrough for both error or not
     if(buf) free(buf);
-    if(pair) free(pair);
+    if(pair) {
+        Handler_notify_leave(pair->handler, fd);
+        free(pair);
+    }
+
     if(parser) { 
         if(parser->json_sent) {
             Register_disconnect(fd);
-            Handler_notify_leave(pair->handler, fd);
         }
         free(parser);
     }
