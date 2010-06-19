@@ -1,12 +1,12 @@
-#define	setcontext(u)	setmcontext(&(u)->uc_mcontext)
-#define	getcontext(u)	getmcontext(&(u)->uc_mcontext)
+#define    setcontext(u)    setmcontext(&(u)->uc_mcontext)
+#define    getcontext(u)    getmcontext(&(u)->uc_mcontext)
 typedef struct mcontext mcontext_t;
 typedef struct ucontext ucontext_t;
 
-extern	int		swapcontext(ucontext_t*, const ucontext_t*);
-extern	void		makecontext(ucontext_t*, void(*)(), int, ...);
-extern	int		getmcontext(mcontext_t*);
-extern	void		setmcontext(const mcontext_t*);
+extern    int        swapcontext(ucontext_t*, const ucontext_t*);
+extern    void        makecontext(ucontext_t*, void(*)(), int, ...);
+extern    int        getmcontext(mcontext_t*);
+extern    void        setmcontext(const mcontext_t*);
 
 /*-
  * Copyright (c) 1999 Marcel Moolenaar
@@ -71,51 +71,51 @@ extern	void		setmcontext(const mcontext_t*);
  */
 
 struct mcontext {
-	/*
-	 * The first 20 fields must match the definition of
-	 * sigcontext. So that we can support sigcontext
-	 * and ucontext_t at the same time.
-	 */
-	int	mc_onstack;		/* XXX - sigcontext compat. */
-	int	mc_gs;
-	int	mc_fs;
-	int	mc_es;
-	int	mc_ds;
-	int	mc_edi;
-	int	mc_esi;
-	int	mc_ebp;
-	int	mc_isp;
-	int	mc_ebx;
-	int	mc_edx;
-	int	mc_ecx;
-	int	mc_eax;
-	int	mc_trapno;
-	int	mc_err;
-	int	mc_eip;
-	int	mc_cs;
-	int	mc_eflags;
-	int	mc_esp;			/* machine state */
-	int	mc_ss;
+    /*
+     * The first 20 fields must match the definition of
+     * sigcontext. So that we can support sigcontext
+     * and ucontext_t at the same time.
+     */
+    int    mc_onstack;        /* XXX - sigcontext compat. */
+    int    mc_gs;
+    int    mc_fs;
+    int    mc_es;
+    int    mc_ds;
+    int    mc_edi;
+    int    mc_esi;
+    int    mc_ebp;
+    int    mc_isp;
+    int    mc_ebx;
+    int    mc_edx;
+    int    mc_ecx;
+    int    mc_eax;
+    int    mc_trapno;
+    int    mc_err;
+    int    mc_eip;
+    int    mc_cs;
+    int    mc_eflags;
+    int    mc_esp;            /* machine state */
+    int    mc_ss;
 
-	int	mc_fpregs[28];		/* env87 + fpacc87 + u_long */
-	int	__spare__[17];
+    int    mc_fpregs[28];        /* env87 + fpacc87 + u_long */
+    int    __spare__[17];
 };
 
 struct ucontext {
-	/*
-	 * Keep the order of the first two fields. Also,
-	 * keep them the first two fields in the structure.
-	 * This way we can have a union with struct
-	 * sigcontext and ucontext_t. This allows us to
-	 * support them both at the same time.
-	 * note: the union is not defined, though.
-	 */
-	sigset_t	uc_sigmask;
-	mcontext_t	uc_mcontext;
+    /*
+     * Keep the order of the first two fields. Also,
+     * keep them the first two fields in the structure.
+     * This way we can have a union with struct
+     * sigcontext and ucontext_t. This allows us to
+     * support them both at the same time.
+     * note: the union is not defined, though.
+     */
+    sigset_t    uc_sigmask;
+    mcontext_t    uc_mcontext;
 
-	struct __ucontext *uc_link;
-	stack_t		uc_stack;
-	int		__spare__[8];
+    struct __ucontext *uc_link;
+    stack_t        uc_stack;
+    int        __spare__[8];
 };
 
 

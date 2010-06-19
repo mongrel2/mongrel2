@@ -8,7 +8,7 @@
 
 enum
 {
-	MAXFD = 1024 * 10, FDSTACK= 100 * 1024
+    MAXFD = 1024 * 10, FDSTACK= 100 * 1024
 };
 
 static zmq_pollitem_t pollfd[MAXFD];
@@ -41,134 +41,134 @@ void mqinit(int threads)
 void
 fdtask(void *v)
 {
-	int i, ms;
-	Task *t;
-	uvlong now;
+    int i, ms;
+    Task *t;
+    uvlong now;
 
-	tasksystem();
-	taskname("fdtask");
+    tasksystem();
+    taskname("fdtask");
 
-	for(;;){
-		/* let everyone else run */
-		while(taskyield() > 0)
-			;
-		/* we're the only one runnable - poll for i/o */
-		errno = 0;
-		taskstate("poll");
-		if((t=sleeping.head) == nil)
-			ms = -1;
-		else{
-			/* sleep at most 5s */
-			now = nsec();
-			if(now >= t->alarmtime)
-				ms = 0;
-			else if(now+5*1000*1000*1000LL >= t->alarmtime)
-				ms = (t->alarmtime - now)/1000000;
-			else
-				ms = 5000;
-		}
-		if(zmq_poll(pollfd, npollfd, ms) < 0){
-			if(errno == EINTR)
-				continue;
-			fprint(2, "poll: %s\n", strerror(errno));
-			taskexitall(0);
-		}
+    for(;;){
+        /* let everyone else run */
+        while(taskyield() > 0)
+            ;
+        /* we're the only one runnable - poll for i/o */
+        errno = 0;
+        taskstate("poll");
+        if((t=sleeping.head) == nil)
+            ms = -1;
+        else{
+            /* sleep at most 5s */
+            now = nsec();
+            if(now >= t->alarmtime)
+                ms = 0;
+            else if(now+5*1000*1000*1000LL >= t->alarmtime)
+                ms = (t->alarmtime - now)/1000000;
+            else
+                ms = 5000;
+        }
+        if(zmq_poll(pollfd, npollfd, ms) < 0){
+            if(errno == EINTR)
+                continue;
+            fprint(2, "poll: %s\n", strerror(errno));
+            taskexitall(0);
+        }
 
-		/* wake up the guys who deserve it */
-		for(i=0; i<npollfd; i++){
-			while(i < npollfd && pollfd[i].revents){
-				taskready(polltask[i]);
-				--npollfd;
-				pollfd[i] = pollfd[npollfd];
-				polltask[i] = polltask[npollfd];
-			}
-		}
-		
-		now = nsec();
-		while((t=sleeping.head) && now >= t->alarmtime){
-			deltask(&sleeping, t);
-			if(!t->system && --sleepingcounted == 0)
-				taskcount--;
-			taskready(t);
-		}
-	}
+        /* wake up the guys who deserve it */
+        for(i=0; i<npollfd; i++){
+            while(i < npollfd && pollfd[i].revents){
+                taskready(polltask[i]);
+                --npollfd;
+                pollfd[i] = pollfd[npollfd];
+                polltask[i] = polltask[npollfd];
+            }
+        }
+        
+        now = nsec();
+        while((t=sleeping.head) && now >= t->alarmtime){
+            deltask(&sleeping, t);
+            if(!t->system && --sleepingcounted == 0)
+                taskcount--;
+            taskready(t);
+        }
+    }
 }
 
 uint
 taskdelay(uint ms)
 {
-	uvlong when, now;
-	Task *t;
-	
-	if(!startedfdtask){
-		startedfdtask = 1;
-		taskcreate(fdtask, 0, FDSTACK);
-	}
+    uvlong when, now;
+    Task *t;
+    
+    if(!startedfdtask){
+        startedfdtask = 1;
+        taskcreate(fdtask, 0, FDSTACK);
+    }
 
-	now = nsec();
-	when = now+(uvlong)ms*1000000;
-	for(t=sleeping.head; t!=nil && t->alarmtime < when; t=t->next)
-		;
+    now = nsec();
+    when = now+(uvlong)ms*1000000;
+    for(t=sleeping.head; t!=nil && t->alarmtime < when; t=t->next)
+        ;
 
-	if(t){
-		taskrunning->prev = t->prev;
-		taskrunning->next = t;
-	}else{
-		taskrunning->prev = sleeping.tail;
-		taskrunning->next = nil;
-	}
-	
-	t = taskrunning;
-	t->alarmtime = when;
-	if(t->prev)
-		t->prev->next = t;
-	else
-		sleeping.head = t;
-	if(t->next)
-		t->next->prev = t;
-	else
-		sleeping.tail = t;
+    if(t){
+        taskrunning->prev = t->prev;
+        taskrunning->next = t;
+    }else{
+        taskrunning->prev = sleeping.tail;
+        taskrunning->next = nil;
+    }
+    
+    t = taskrunning;
+    t->alarmtime = when;
+    if(t->prev)
+        t->prev->next = t;
+    else
+        sleeping.head = t;
+    if(t->next)
+        t->next->prev = t;
+    else
+        sleeping.tail = t;
 
-	if(!t->system && sleepingcounted++ == 0)
-		taskcount++;
-	taskswitch();
+    if(!t->system && sleepingcounted++ == 0)
+        taskcount++;
+    taskswitch();
 
-	return (nsec() - now)/1000000;
+    return (nsec() - now)/1000000;
 }
 
 int
 _wait(void *socket, int fd, int rw)
 {
-	int bits;
+    int bits;
 
-	if(!startedfdtask) {
-		startedfdtask = 1;
-		taskcreate(fdtask, 0, FDSTACK);
-	}
+    if(!startedfdtask) {
+        startedfdtask = 1;
+        taskcreate(fdtask, 0, FDSTACK);
+    }
 
-	if(npollfd >= MAXFD){
+    if(npollfd >= MAXFD){
         errno = EBUSY;
         return -1;
-	}
-	
-	taskstate("fdwait for %s", rw=='r' ? "read" : rw=='w' ? "write" : "error");
-	bits = 0;
-	switch(rw){
-	case 'r':
-		bits |= ZMQ_POLLIN;
-		break;
-	case 'w':
-		bits |= ZMQ_POLLOUT;
-		break;
-	}
+    }
+    
+    taskstate("fdwait for %s", rw=='r' ? "read" : rw=='w' ? "write" : "error");
+    bits = 0;
+    switch(rw){
+    case 'r':
+        bits |= ZMQ_POLLIN;
+        break;
+    case 'w':
+        bits |= ZMQ_POLLOUT;
+        break;
+    }
 
-	polltask[npollfd] = taskrunning;
-	pollfd[npollfd].fd = fd;
-	pollfd[npollfd].socket = socket;
-	pollfd[npollfd].events = bits;
-	pollfd[npollfd].revents = 0;
-	npollfd++;
-	taskswitch();
+    polltask[npollfd] = taskrunning;
+    pollfd[npollfd].fd = fd;
+    pollfd[npollfd].socket = socket;
+    pollfd[npollfd].events = bits;
+    pollfd[npollfd].revents = 0;
+    npollfd++;
+    taskswitch();
 
     return 0;
 }
@@ -208,46 +208,46 @@ int mqsend(void *socket, zmq_msg_t *msg, int flags)
 int
 fdread1(int fd, void *buf, int n)
 {
-	int m;
-	
-	do {
-		if(fdwait(fd, 'r') == -1) {
+    int m;
+    
+    do {
+        if(fdwait(fd, 'r') == -1) {
             return -1;
         }
     } while((m = recv(fd, buf, n, MSG_NOSIGNAL)) < 0 && errno == EAGAIN);
 
-	return m;
+    return m;
 }
 
 int
 fdread(int fd, void *buf, int n)
 {
-	int m;
+    int m;
 
-	while((m=read(fd, buf, n)) < 0 && errno == EAGAIN) {
-		if(fdwait(fd, 'r') == -1) {
+    while((m=read(fd, buf, n)) < 0 && errno == EAGAIN) {
+        if(fdwait(fd, 'r') == -1) {
             return -1;
         }
     }
-	return m;
+    return m;
 }
 
 int
 fdwrite(int fd, void *buf, int n)
 {
-	int m, tot;
-	
-	for(tot=0; tot<n; tot+=m){
-		while((m=send(fd, (char*)buf+tot, n-tot, MSG_NOSIGNAL)) < 0 && errno == EAGAIN) {
-			if(fdwait(fd, 'w') == -1) {
+    int m, tot;
+    
+    for(tot=0; tot<n; tot+=m){
+        while((m=send(fd, (char*)buf+tot, n-tot, MSG_NOSIGNAL)) < 0 && errno == EAGAIN) {
+            if(fdwait(fd, 'w') == -1) {
                 return -1;
             }
         }
 
-		if(m < 0) return m;
-		if(m == 0) break;
-	}
-	return tot;
+        if(m < 0) return m;
+        if(m == 0) break;
+    }
+    return tot;
 }
 
 int
@@ -258,16 +258,16 @@ fdnoblock(int fd)
     setsockopt(fd, SOL_SOCKET, SO_NOSIGPIPE, (void *)&set, sizeof(int));
 #endif
     
-	return fcntl(fd, F_SETFL, fcntl(fd, F_GETFL)|O_NONBLOCK);
+    return fcntl(fd, F_SETFL, fcntl(fd, F_GETFL)|O_NONBLOCK);
 }
 
 static uvlong
 nsec(void)
 {
-	struct timeval tv;
+    struct timeval tv;
 
-	if(gettimeofday(&tv, 0) < 0)
-		return -1;
-	return (uvlong)tv.tv_sec*1000*1000*1000 + tv.tv_usec*1000;
+    if(gettimeofday(&tv, 0) < 0)
+        return -1;
+    return (uvlong)tv.tv_sec*1000*1000*1000 + tv.tv_usec*1000;
 }
 

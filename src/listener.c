@@ -47,7 +47,7 @@ error:
 void Listener_task(void *v)
 {
     SocketPair *pair = (SocketPair *)v;
-	int fd = pair->fd;
+    int fd = pair->fd;
     char *buf = NULL;
     http_parser *parser = NULL;
     int n = 0;
@@ -62,7 +62,7 @@ void Listener_task(void *v)
     parser = calloc(sizeof(http_parser), 1);
     check(parser, "Failed to allocate http_parser.");
 
-	while((n = fdread(fd, buf, 1023)) > 0) {
+    while((n = fdread(fd, buf, 1023)) > 0) {
         buf[n] = '\0';
 
         http_parser_init(parser);
