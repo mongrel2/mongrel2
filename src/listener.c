@@ -82,7 +82,10 @@ void Listener_task(void *v)
             }
 
             if(strcmp(buf, "{\"type\":\"ping\"}") == 0) {
-                if(!Register_ping(fd)) Register_disconnect(fd);
+                if(!Register_ping(fd)) {
+                    Register_disconnect(fd);
+                    Handler_notify_leave(pair->handler, fd);
+                }
             } else {
                 debug("JSON message sent on jssocket: %.*s", n, buf);
 
@@ -106,6 +109,7 @@ error: // fallthrough for both error or not
     if(parser) { 
         if(parser->json_sent) {
             Register_disconnect(fd);
+            Handler_notify_leave(pair->handler, fd);
         }
         free(parser);
     }

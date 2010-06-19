@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <listener.h>
+#include <assert.h>
 
 
 static char *LEAVE_MSG = "{\"type\":\"leave\"}";
@@ -13,6 +14,16 @@ size_t LEAVE_MSG_LEN = 0;
 void our_free(void *data, void *hint)
 {
     free(data);
+}
+
+
+void Handler_notify_leave(void *socket, int fd)
+{
+    assert(socket && "Socket can't be NULL");
+
+    if(Handler_deliver(socket, fd, LEAVE_MSG, LEAVE_MSG_LEN) == -1) {
+        log_err("Can't tell handler %d died.", fd);
+    }
 }
 
 void Handler_task(void *v)
@@ -36,7 +47,7 @@ void Handler_task(void *v)
         if(data[sz-1] != '\0') {
             log_err("Last char from handler is not 0 it's %d, fix your backend.", data[sz-1]);
         } if(data[sz-2] == '\0') {
-            log_err("You have two \0 ending your message, that's bad.");
+            log_err("You have two \0 ending your message, fix your backend.");
         } else {
             int end = 0;
             int ok = sscanf(data, "%u%n", &fd, &end);
@@ -47,14 +58,12 @@ void Handler_task(void *v)
                 log_err("Message didn't start with a ident number.");
             } else if(!Register_exists(fd)) {
                 log_err("Ident %d is no longer connected.", fd);
-
-                if(Handler_deliver(pair->handler, fd, LEAVE_MSG, LEAVE_MSG_LEN) == -1) {
-                    log_err("Can't tell handler %d died.", fd);
-                }
+                Handler_notify_leave(pair->handler, fd);
             } else {
                 if(Listener_deliver(fd, data+end, sz-end-1) == -1) {
                     log_err("Error sending to listener %d, closing them.");
                     Register_disconnect(fd);
+                    Handler_notify_leave(pair->handler, fd);
                 }
             }
         }
