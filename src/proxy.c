@@ -8,16 +8,14 @@
 #include <dbg.h>
 #include <proxy.h>
 #include <assert.h>
+#include <stdlib.h>
 
 enum
 {
     STACK = 32768
 };
 
-char *SERVER;
-int PORT;
 
-void proxytask(void*);
 void rwtask(void*);
 
 
@@ -36,51 +34,79 @@ error:
     taskexitall(1);
 }
 
-void ProxyConnect_destroy(ProxyConnect *conn) {
-    if(conn->write_fd) shutdown(conn->write_fd, SHUT_WR);
-    if(conn->read_fd) close(conn->read_fd);
-    if(conn->buffer) free(conn->buffer);
-    free(conn);
-}
-
-
-void Proxy_init(char *server, int port)
+void ProxyConnect_destroy(ProxyConnect *conn) 
 {
-    SERVER = strdup(server);
-    PORT = port;
-}
-
-
-void Proxy_connect(ProxyConnect *conn)
-{
-    taskcreate(proxytask, (void*)conn, STACK);
-}
-
-void
-proxytask(void *v)
-{
-    ProxyConnect *h2l_conn = (ProxyConnect *)v;
-
-    if((h2l_conn->read_fd = netdial(TCP, SERVER, PORT)) < 0){
-        ProxyConnect_destroy(h2l_conn);
+    if(conn) {
+        if(conn->write_fd) shutdown(conn->write_fd, SHUT_WR);
+        if(conn->read_fd) close(conn->read_fd);
+        if(conn->buffer) free(conn->buffer);
+        free(conn);
     }
-
-    fdnoblock(h2l_conn->read_fd);
-    fdnoblock(h2l_conn->write_fd);
-
-    debug("Proxy connected to %s:%d", SERVER, PORT);
-    
-    ProxyConnect *l2h_conn = ProxyConnect_create(h2l_conn->read_fd, 
-            malloc(h2l_conn->size), h2l_conn->size, 0);
-
-    l2h_conn->read_fd = h2l_conn->write_fd;
-
-    assert(l2h_conn->write_fd != h2l_conn->write_fd && "Wrong write fd setup.");
-    assert(l2h_conn->read_fd != h2l_conn->read_fd && "Wrong read fd setup.");
-
-    taskcreate(rwtask, (void *)l2h_conn, STACK);
-    taskcreate(rwtask, (void *)h2l_conn, STACK);
 }
+
+
+void Proxy_destroy(Proxy *proxy)
+{
+    if(proxy) {
+        if(proxy->server) free(proxy->server);
+        free(proxy);
+    }
+}
+
+Proxy *Proxy_create(char *server, int port)
+{
+    Proxy *proxy = calloc(sizeof(Proxy), 1);
+    check(proxy, "Failed to create proxy, memory allocation fail.");
+    
+    proxy->server = strdup(server);
+    check(proxy->server, "Out of ram.");
+
+    proxy->port = port;
+
+    return proxy;
+
+error:
+    Proxy_destroy(proxy);
+    return NULL;
+}
+
+
+void Proxy_connect(Proxy *proxy, int fd, char *buf, size_t len, size_t n)
+{
+    ProxyConnect *to_listener = NULL;
+    ProxyConnect *to_proxy = ProxyConnect_create(fd, buf, 1024, n); 
+
+    check(to_proxy, "Could not create the connection to backend %s:%d", proxy->server, proxy->port);
+
+
+    debug("Connecting to %s:%d", proxy->server, proxy->port);
+
+    to_proxy->read_fd = netdial(TCP, proxy->server, proxy->port);
+    check(to_proxy->read_fd >= 0, "Failed to connect to %s:%d", proxy->server, proxy->port);
+
+    fdnoblock(to_proxy->read_fd);
+    fdnoblock(to_proxy->write_fd);
+
+    debug("Proxy connected to %s:%d", proxy->server, proxy->port);
+    
+    to_listener = ProxyConnect_create(to_proxy->read_fd, 
+            malloc(to_proxy->size), to_proxy->size, 0);
+
+    check(to_listener, "Could not create the connection to backend %s:%d", proxy->server, proxy->port);
+    
+    to_listener->read_fd = to_proxy->write_fd;
+
+    assert(to_listener->write_fd != to_proxy->write_fd && "Wrong write fd setup.");
+    assert(to_listener->read_fd != to_proxy->read_fd && "Wrong read fd setup.");
+
+    taskcreate(rwtask, (void *)to_listener, STACK);
+    taskcreate(rwtask, (void *)to_proxy, STACK);
+
+error:
+    ProxyConnect_destroy(to_proxy);
+    ProxyConnect_destroy(to_listener);
+}
+
 
 void
 rwtask(void *v)

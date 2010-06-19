@@ -9,12 +9,19 @@ typedef struct ProxyConnect {
     size_t n;
 } ProxyConnect;
 
+typedef struct Proxy {
+    char *server;
+    int port;
+} Proxy;
+
 ProxyConnect *ProxyConnect_create(int write_fd, char *buffer, size_t size, size_t n);
 
 void ProxyConnect_destroy(ProxyConnect *conn);
 
-void Proxy_init(char *server, int port);
+Proxy *Proxy_create(char *server, int port);
 
-void Proxy_connect(ProxyConnect *conn);
+void Proxy_destroy(Proxy *proxy);
+
+void Proxy_connect(Proxy *proxy, int fd, char *buf, size_t len, size_t n);
 
 #endif

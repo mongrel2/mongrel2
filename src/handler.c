@@ -17,6 +17,12 @@ void our_free(void *data, void *hint)
 }
 
 
+void Handler_init()
+{
+    LEAVE_MSG_LEN = strlen(LEAVE_MSG);
+}
+
+
 void Handler_notify_leave(void *socket, int fd)
 {
     assert(socket && "Socket can't be NULL");
@@ -33,12 +39,12 @@ void Handler_task(void *v)
     size_t sz = 0;
     int fd = 0;
     int rc = 0;
-    SocketPair *pair = (SocketPair *)v;
+    Handler *handler = (Handler *)v;
 
     while(1) {
         zmq_msg_init(inmsg);
 
-        rc = mqrecv(pair->listener, inmsg, 0);
+        rc = mqrecv(handler->recv_socket, inmsg, 0);
         check(rc == 0, "Receive on handler socket failed.");
 
         data = (char *)zmq_msg_data(inmsg);
@@ -58,12 +64,12 @@ void Handler_task(void *v)
                 log_err("Message didn't start with a ident number.");
             } else if(!Register_exists(fd)) {
                 log_err("Ident %d is no longer connected.", fd);
-                Handler_notify_leave(pair->handler, fd);
+                Handler_notify_leave(handler->send_socket, fd);
             } else {
                 if(Listener_deliver(fd, data+end, sz-end-1) == -1) {
                     log_err("Error sending to listener %d, closing them.");
                     Register_disconnect(fd);
-                    Handler_notify_leave(pair->handler, fd);
+                    Handler_notify_leave(handler->send_socket, fd);
                 }
             }
         }
@@ -113,22 +119,70 @@ error:
 }
 
 
-void *Handler_create(const char *handler_spec, const char *identity)
+void *Handler_send_create(const char *send_spec, const char *identity)
 {
     
     void *handler_socket = mqsocket(ZMQ_PUB);
     int rc = zmq_setsockopt(handler_socket, ZMQ_IDENTITY, identity, strlen(identity));
-    check(rc == 0, "Failed to set handler socket %s identity %s", handler_spec, identity);
+    check(rc == 0, "Failed to set handler socket %s identity %s", send_spec, identity);
 
-    debug("Binding handler PUB socket %s with identity: %s", handler_spec, identity);
+    debug("Binding handler PUB socket %s with identity: %s", send_spec, identity);
 
-    rc = zmq_bind(handler_socket, handler_spec);
-    check(rc == 0, "Can't bind handler socket: %s", handler_spec);
+    rc = zmq_bind(handler_socket, send_spec);
+    check(rc == 0, "Can't bind handler socket: %s", send_spec);
 
-    LEAVE_MSG_LEN = strlen(LEAVE_MSG);
 
     return handler_socket;
 
 error:
     return NULL;
+}
+
+void *Handler_recv_create(const char *recv_spec, const char *uuid)
+{
+    void *listener_socket = mqsocket(ZMQ_SUB);
+    check(listener_socket, "Can't create ZMQ_SUB socket.");
+
+    int rc = zmq_setsockopt(listener_socket, ZMQ_SUBSCRIBE, uuid, 0);
+    check(rc == 0, "Failed to subscribe listener socket: %s", recv_spec);
+    debug("binding listener SUB socket %s subscribed to: %s", recv_spec, uuid);
+
+    rc = zmq_bind(listener_socket, recv_spec);
+    check(rc == 0, "Can't bind listener socket %s", recv_spec);
+
+    return listener_socket;
+
+error:
+    return NULL;
+}
+
+
+Handler *Handler_create(const char *send_spec, const char *send_ident,
+        const char *recv_spec, const char *recv_ident)
+{
+    Handler *handler = calloc(sizeof(Handler), 1);
+    check(handler, "Memory allocate failed.");
+
+    handler->send_socket = Handler_send_create(send_spec, send_ident);
+    check(handler->send_socket, "Failed to create handler socket.");
+
+    handler->recv_socket = Handler_recv_create(recv_spec, recv_ident);
+    check(handler->recv_socket, "Failed to create listener socket.");
+
+    return handler;
+error:
+
+    if(handler) free(handler);
+    return NULL;
+}
+
+
+void Handler_destroy(Handler *handler, int fd)
+{
+    if(handler) {
+        if(fd) {
+            Handler_notify_leave(handler->send_socket, fd);
+        }
+        free(handler);
+    }
 }

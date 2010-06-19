@@ -13,6 +13,50 @@ char *FLASH_RESPONSE = "<?xml version=\"1.0\"?><!DOCTYPE cross-domain-policy SYS
 
 size_t FLASH_LEN = 0;
 
+void Listener_init()
+{
+    FLASH_LEN = strlen(FLASH_RESPONSE);
+}
+
+void Listener_accept(Handler *base, Proxy *proxy, int fd, const char *remote)
+{
+    Handler *handler = calloc(sizeof(Handler), 1);
+    *handler = *base;
+
+    Listener *listener = Listener_create(handler, proxy, fd, remote);
+    taskcreate(Listener_task, listener, LISTENER_STACK);
+}
+
+
+Listener *Listener_create(Handler *handler, Proxy *proxy, int fd, const char *remote)
+{
+    Listener *listener = calloc(sizeof(Listener), 1);
+    check(listener, "Out of memory.");
+
+    listener->handler = handler;
+    listener->proxy = proxy;
+    listener->fd = fd;
+
+    listener->remote = strdup(remote);
+    check(listener->remote, "Out of memory.");
+
+
+    return listener;
+error:
+    Listener_destroy(listener);
+    return NULL;
+}
+
+void Listener_destroy(Listener *listener)
+{
+    if(listener) {
+        // TODO: determine who owns the members
+        free(listener->remote);
+        free(listener);
+    }
+}
+
+
 int Listener_deliver(int to_fd, char *buffer, size_t len)
 {
     size_t b64_len = 0;
@@ -46,8 +90,9 @@ error:
 
 void Listener_task(void *v)
 {
-    SocketPair *pair = (SocketPair *)v;
-    int fd = pair->fd;
+    Listener *listener = (Listener *)v;
+    Handler *handler = listener->handler;
+    int fd = listener->fd;
     char *buf = NULL;
     http_parser *parser = NULL;
     int n = 0;
@@ -69,7 +114,7 @@ void Listener_task(void *v)
 
         nparsed = http_parser_execute(parser, buf, n, 0);
         finished =  http_parser_finish(parser);
-        check(finished == 1, "Error in parsing: %d, %.*s", finished, n, buf);
+        check(finished == 1, "Error in parsing: %d, bytes: %d, value: %.*s", finished, n, n, buf);
         
         if(parser->socket_started) {
             rc = fdwrite(fd, FLASH_RESPONSE, strlen(FLASH_RESPONSE) + 1);
@@ -84,31 +129,28 @@ void Listener_task(void *v)
             if(strcmp(buf, "{\"type\":\"ping\"}") == 0) {
                 if(!Register_ping(fd)) {
                     Register_disconnect(fd);
-                    Handler_notify_leave(pair->handler, fd);
+                    Handler_notify_leave(handler->send_socket, fd);
                 }
             } else {
                 debug("JSON message sent on jssocket: %.*s", n, buf);
 
-                if(Handler_deliver(pair->handler, fd, buf, n) == -1) {
+                if(Handler_deliver(handler->send_socket, fd, buf, n) == -1) {
                     log_err("Can't deliver message to handler.");
                 }
             }
         } else {
-            // HTTP, proxy it back
-            ProxyConnect *conn = ProxyConnect_create(fd, buf, 1024, n); 
-            Proxy_connect(conn);
-            free(pair);
+            Handler_destroy(handler, fd);
             free(parser);
+            Proxy_connect(listener->proxy, fd, buf, 1024, n);
             return;
         }
     }
 
 error: // fallthrough for both error or not
     if(buf) free(buf);
-    if(pair) {
-        Handler_notify_leave(pair->handler, fd);
-        free(pair);
-    }
+
+    Handler_destroy(handler, fd);  // TODO: resolve who should do this
+    Listener_destroy(listener);
 
     if(parser) { 
         if(parser->json_sent) {
@@ -116,27 +158,6 @@ error: // fallthrough for both error or not
         }
         free(parser);
     }
-}
-
-
-void *Listener_create(const char *listener_spec, const char *uuid)
-{
-    void *listener_socket = mqsocket(ZMQ_SUB);
-    check(listener_socket, "Can't create ZMQ_SUB socket.");
-
-    int rc = zmq_setsockopt(listener_socket, ZMQ_SUBSCRIBE, uuid, 0);
-    check(rc == 0, "Failed to subscribe listener socket: %s", listener_spec);
-    debug("binding listener SUB socket %s subscribed to: %s", listener_spec, uuid);
-
-    rc = zmq_bind(listener_socket, listener_spec);
-    check(rc == 0, "Can't bind listener socket %s", listener_spec);
-
-    FLASH_LEN = strlen(FLASH_RESPONSE);
-
-    return listener_socket;
-
-error:
-    return NULL;
 }
 
 

@@ -4,12 +4,12 @@
 #include <listener.h>
 #include <register.h>
 #include <handler.h>
+#include <server.h>
 
 
 FILE *LOG_FILE = NULL;
 
 char *UUID = "907F620B-BC91-4C93-86EF-512B71C2AE27";
-
 
 
 void taskmain(int argc, char **argv)
@@ -19,40 +19,39 @@ void taskmain(int argc, char **argv)
     char remote[16];
     int rc = 0;
     LOG_FILE = stderr;
-    SocketPair *pair = calloc(sizeof(SocketPair), 1);
+    Handler *handler = NULL;
 
     check(argc == 4, "usage: server localport handlerq listenerq");
-    char *handler_spec = argv[2];
-    char *listener_spec = argv[3];
+    char *send_spec = argv[2];
+    char *recv_spec = argv[3];
 
     mqinit(2);
     Register_init();
+    Listener_init();
+    Handler_init();
 
-    Proxy_init("127.0.0.1", 80);
+    Proxy *proxy = Proxy_create("127.0.0.1", 80);
 
     int port = atoi(argv[1]);
     check(port > 0, "Can't bind to the given port: %s", argv[1]);
 
-    pair->handler = Handler_create(handler_spec, UUID);
-    check(pair->handler, "Failed to create handler socket.");
-
-    pair->listener = Listener_create(listener_spec, "");  // TODO: add uuid
-    check(pair->listener, "Failed to create listener socket.");
+    handler = Handler_create(send_spec, UUID, recv_spec, "");
 
     fd = netannounce(TCP, 0, port);
     check(fd >= 0, "Can't announce on TCP port %d", port);
 
     debug("Starting server on port %d", port);
-    taskcreate(Handler_task, pair, HANDLER_STACK);
+    taskcreate(Handler_task, handler, HANDLER_STACK);
 
-    fdnoblock(fd);
+    check(fdnoblock(fd) == 0, "Failed to set listening port %d nonblocking.", port);
 
     while((cfd = netaccept(fd, remote, &rport)) >= 0) {
-        SocketPair *p = calloc(sizeof(SocketPair), 1);
-        *p = *pair;
-        p->fd = cfd;
-        taskcreate(Listener_task, p, LISTENER_STACK);
+        Listener_accept(handler, proxy, cfd, remote);
     }
+
+    // TODO: handle sigint and make a service port
+
+    return;
 
 error:
     log_err("Exiting due to error.");
