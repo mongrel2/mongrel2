@@ -11,6 +11,10 @@ FILE *LOG_FILE = NULL;
 
 char *UUID = "907F620B-BC91-4C93-86EF-512B71C2AE27";
 
+typedef struct Server {
+    
+
+} Server;
 
 void taskmain(int argc, char **argv)
 {
@@ -20,6 +24,7 @@ void taskmain(int argc, char **argv)
     int rc = 0;
     LOG_FILE = stderr;
     Handler *handler = NULL;
+    Proxy *proxy = NULL;
 
     check(argc == 4, "usage: server localport handlerq listenerq");
     char *send_spec = argv[2];
@@ -30,12 +35,14 @@ void taskmain(int argc, char **argv)
     Listener_init();
     Handler_init();
 
-    Proxy *proxy = Proxy_create("127.0.0.1", 80);
+    proxy = Proxy_create("127.0.0.1", 80);
+    check(proxy, "Failed to create proxy configuration.");
 
     int port = atoi(argv[1]);
     check(port > 0, "Can't bind to the given port: %s", argv[1]);
 
     handler = Handler_create(send_spec, UUID, recv_spec, "");
+    check(handler, "Failed to create handler for %s/%s UUID %s", send_spec, recv_spec, UUID);
 
     fd = netannounce(TCP, 0, port);
     check(fd >= 0, "Can't announce on TCP port %d", port);
