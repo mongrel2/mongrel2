@@ -23,6 +23,12 @@ char *test_pattern_match()
     m = pattern_match("ZXXXXD", strlen("ZXXXXD"), "ZE.*D");
     mu_assert(m == NULL, "Should not match.");
 
+    m = pattern_match("ZED", strlen("ZED"), ".*D$");
+    mu_assert(m != NULL, "Should match.");
+
+    m = pattern_match("ZED", strlen("ZED"), ".*X$");
+    mu_assert(m == NULL, "Should not match.");
+
     return NULL;
 }
 
