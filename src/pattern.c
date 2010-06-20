@@ -1,6 +1,7 @@
 #include <dbg.h>
 #include <stdlib.h>
 #include <pattern.h>
+#include <string.h>
 
 
 /*
@@ -219,3 +220,28 @@ const char *match(MatchState *ms, const char *s, const char *p) {
   }
 }
 
+
+
+list_t *pattern_tst_collect(tst_t *from, const char *pattern)
+{
+    tst_collect_t found = tst_collect(from, pattern, strlen(pattern));
+    list_t *res = list_create(LISTCOUNT_T_MAX);
+
+    if(found.length) {
+        lnode_t *n = list_first(found.values);
+        
+        while(n != NULL) 
+        {
+            const char *value = (const char *)lnode_get(n);
+
+            if(pattern_match(value, strlen(value), pattern)) {
+                n = list_next(found.values, n);
+                list_transfer(res, found.values, n);
+            } else {
+                n = list_next(found.values, n);
+            }
+        }
+    }
+
+    return res;
+}
