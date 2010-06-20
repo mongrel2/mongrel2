@@ -4,17 +4,23 @@
 #include <assert.h>
 #include <dbg.h>
 
+typedef struct tst_collect_t {
+    list_t *values;
+    tst_collect_test_cb tester;
+    void *data;
+} tst_collect_t;
 
 static void tst_collect_build(void *value, tst_collect_t *results)
 {
-    lnode_t *node = lnode_create(value);
-    list_append(results->values, node);
-    results->length++;
+    if(!results->tester || results->tester(value, results->data)) {
+        lnode_t *node = lnode_create(value);
+        list_append(results->values, node);
+    }
 }
 
-tst_collect_t tst_collect(tst_t *root, const char *s, int len)
+list_t *tst_collect(tst_t *root, const char *s, int len, tst_collect_test_cb tester, void *data)
 {
-    tst_collect_t results = {.length = 0, .values = NULL};
+    tst_collect_t results = {.values = NULL, .tester = tester, .data = data};
     tst_t *p = root;
     int i = 0;
     results.values = list_create(LISTCOUNT_T_MAX);
@@ -36,7 +42,7 @@ tst_collect_t tst_collect(tst_t *root, const char *s, int len)
         tst_traverse(p, (tst_traverse_cb)tst_collect_build, &results);
     }
 
-    return results;
+    return results.values;
 }
 
 void *tst_search_suffix(tst_t *root, const char *s, int len)
@@ -130,9 +136,3 @@ void tst_traverse(tst_t *p, tst_traverse_cb cb, void *data)
     if(p->value) cb(p->value, data);
 }
 
-void tst_collect_destroy(tst_collect_t *found)
-{
-    assert(found && "Cannot be NULL.");
-    list_destroy_nodes(found->values);
-    list_destroy(found->values);
-}

@@ -12,12 +12,9 @@ typedef struct tst_t {
     void *value;
 } tst_t; 
 
-typedef struct tst_collect_t {
-    size_t length;
-    list_t *values;
-} tst_collect_t;
 
 typedef void (*tst_traverse_cb)(void *value, void *data);
+typedef int (*tst_collect_test_cb)(void *value, void *data);
 
 
 // won't work unless you reverse before insert, useful though
@@ -31,7 +28,7 @@ tst_t *tst_insert(tst_t *p, const char *s, int len, void *value);
 // TODO: should pass in the key as well
 void tst_traverse(tst_t *p, tst_traverse_cb cb, void *data);
 
-tst_collect_t tst_collect(tst_t *root, const char *s, int len);
+list_t *tst_collect(tst_t *root, const char *s, int len, tst_collect_test_cb tester, void *data);
 
-void tst_collect_destroy(tst_collect_t *found);
+
 #endif

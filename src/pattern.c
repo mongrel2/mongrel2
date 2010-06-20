@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <pattern.h>
 #include <string.h>
+#include <assert.h>
 
 
 /*
@@ -161,6 +162,12 @@ const char *pattern_match(const char *s, size_t len, const char *p)
 const char *match(MatchState *ms, const char *s, const char *p) {
   init: /* using goto's to optimize tail recursion */
   switch (*p) {
+    case '(':
+        p++;
+        goto init;
+    case ')':
+        p++;
+        goto init;
     case L_ESC: {
       switch (*(p+1)) {
         case 'b': {  /* balanced string? */
@@ -220,28 +227,3 @@ const char *match(MatchState *ms, const char *s, const char *p) {
   }
 }
 
-
-
-list_t *pattern_tst_collect(tst_t *from, const char *pattern)
-{
-    tst_collect_t found = tst_collect(from, pattern, strlen(pattern));
-    list_t *res = list_create(LISTCOUNT_T_MAX);
-
-    if(found.length) {
-        lnode_t *n = list_first(found.values);
-        
-        while(n != NULL) 
-        {
-            const char *value = (const char *)lnode_get(n);
-
-            if(pattern_match(value, strlen(value), pattern)) {
-                n = list_next(found.values, n);
-                list_transfer(res, found.values, n);
-            } else {
-                n = list_next(found.values, n);
-            }
-        }
-    }
-
-    return res;
-}
