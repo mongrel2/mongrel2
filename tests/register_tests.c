@@ -1,5 +1,3 @@
-/* file minunit_example.c */
- 
 #include "minunit.h"
 #include <register.h>
 
