@@ -113,9 +113,15 @@ error:
 
 int Server_add_host(Server *srv, Host *host)
 {
+    // TODO: reverse it here so it can be reverse searched
     srv->hosts = tst_insert(srv->hosts, host->name, sizeof(host->name), host);
 
-    assert(srv->hosts && "Failed to insert host.");
+    check(srv->hosts != NULL, "Failed to insert host.");
+
+    return 1;
+
+error:
+    return -1;
 }
 
 
