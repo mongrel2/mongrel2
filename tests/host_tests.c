@@ -5,17 +5,17 @@
 
 FILE *LOG_FILE = NULL;
 
-static char * test_create_destroy() {
+char * test_create_destroy() {
     Host *host = Host_create("zedshaw.com");
 
     mu_assert(host != NULL, "Failed to make host.");
 
     Host_destroy(host);
 
-    return 0;
+    return NULL;
 }
 
-static char * all_tests() {
+char *all_tests() {
     mu_suite_start();
 
     mu_run_test(test_create_destroy);

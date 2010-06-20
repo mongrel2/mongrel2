@@ -7,16 +7,16 @@
 #define mu_suite_start() char *message = NULL
 
 /* file: minunit.h */
-#define mu_assert(test, message) if (!(test)) return message;
+#define mu_assert(test, message) if (!(test)) { log_err(message); return message; }
 #define mu_run_test(test) message = test(); tests_run++; if (message) return message;
 
 #define RUN_TESTS(name) int taskmain(int argc, char **argv) {\
-     LOG_FILE = fopen("tests.log", "a+");\
+     LOG_FILE = fopen("tests/tests.log", "a+");\
      setbuf(LOG_FILE, NULL);\
      printf("----\nRUNNING: %s\n", argv[0]);\
      char *result = name();\
      if (result != 0) {\
-         printf("%s\n", result);\
+         printf("FAILED: %s\n", result);\
      }\
      else {\
          printf("ALL TESTS PASSED\n");\
