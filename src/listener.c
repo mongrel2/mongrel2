@@ -140,6 +140,7 @@ void Listener_task(void *v)
             }
         } else {
             Handler_destroy(handler, fd);
+            // TODO: will want to give the proxy the parser instead of freeing it
             free(parser);
             Proxy_connect(listener->proxy, fd, buf, 1024, n);
             return;

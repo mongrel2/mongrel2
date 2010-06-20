@@ -26,7 +26,6 @@ CREATE TABLE server (id INTEGER PRIMARY KEY, name TEXT, uuid TEXT,
     maintenance BOOLEAN DEFAULT false, chroot TEXT DEFAULT '/var/www/mongrel2'
 );
 
-
 CREATE TABLE listener (id INTEGER PRIMARY KEY, server_id INTEGER, specification TEXT, socket_type TEXT);
 
 CREATE TABLE handler (id INTEGER PRIMARY KEY, specification TEXT, socket_type TEXT);

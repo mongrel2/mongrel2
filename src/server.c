@@ -5,17 +5,23 @@
 #include <register.h>
 #include <handler.h>
 #include <server.h>
+#include <host.h>
+#include <assert.h>
 
-
-FILE *LOG_FILE = NULL;
-
-char *UUID = "907F620B-BC91-4C93-86EF-512B71C2AE27";
 
 
 Server *Server_create(const char *port)
 {
     Server *srv = calloc(sizeof(Server), 1);
     check(srv, "Out of memory.");
+
+    srv->handlers = list_create(LISTCOUNT_T_MAX);
+    check(srv->handlers, "Can't create handlers list.");
+
+    srv->proxies = list_create(LISTCOUNT_T_MAX);
+    check(srv->proxies, "Can't create proxies list.");
+
+    srv->hosts = NULL;
 
     srv->port = atoi(port);
     check(port > 0, "Can't bind to the given port: %s", port);
@@ -35,8 +41,11 @@ error:
 void Server_destroy(Server *srv)
 {
     if(srv) {
-        Handler_destroy(srv->handler, 0);
-        Proxy_destroy(srv->proxy);
+        // TODO: leaks the actual handlers and proxies
+        list_destroy_nodes(srv->proxies);
+        list_destroy(srv->proxies);
+        list_destroy_nodes(srv->handlers);
+        list_destroy(srv->handlers);
         close(srv->listen_fd);
         free(srv);
     }
@@ -49,8 +58,6 @@ void Server_init()
     Register_init();
     Listener_init();
     Handler_init();
-
-    LOG_FILE = stderr;
 }
 
 
@@ -60,20 +67,29 @@ void Server_start(Server *srv)
     int rport;
     char remote[16];
 
+    check(!(list_isempty(srv->proxies) || list_isempty(srv->handlers)), "No proxies or handlers created, you need something.");
+
+    Handler *handler = (Handler *)lnode_get(list_first(srv->handlers));
+    Proxy *proxy = (Proxy *)lnode_get(list_first(srv->proxies));
+
     debug("Starting server on port %d", srv->port);
-    taskcreate(Handler_task, srv->handler, HANDLER_STACK);
+    taskcreate(Handler_task, handler, HANDLER_STACK);
 
     while((cfd = netaccept(srv->listen_fd, remote, &rport)) >= 0) {
-        Listener_accept(srv->handler, srv->proxy, cfd, remote);
+        Listener_accept(handler, proxy, cfd, remote);
     }
+
+    return;
+
+error:
+    taskexitall(1);
 }
 
 int Server_add_proxy(Server *srv, Proxy *proxy)
 {
-    check(srv->proxy == NULL, "Too many proxies.");
+    check(!list_isfull(srv->proxies), "Too many proxies.");
 
-    srv->proxy = proxy;
-    check(srv->proxy, "Failed to create proxy configuration.");
+    list_append(srv->proxies, lnode_create(proxy));
 
     return 1;
 
@@ -84,10 +100,9 @@ error:
 
 int Server_add_handler(Server *srv, Handler *handler)
 {
-    check(srv->handler == NULL, "Too many handlers.");
+    check(!list_isfull(srv->handlers), "Too many handlers.");
 
-    srv->handler = handler;
-    check(srv->handler, "Handler is invalid.");
+    list_append(srv->handlers, lnode_create(handler));
 
     return 1;
 error:
@@ -96,32 +111,11 @@ error:
 }
 
 
-void taskmain(int argc, char **argv)
+int Server_add_host(Server *srv, Host *host)
 {
-    int rc = 0;
-    Server *srv = NULL;
+    srv->hosts = tst_insert(srv->hosts, host->name, sizeof(host->name), host);
 
-    check(argc == 4, "usage: server localport handlerq listenerq");
-    char *send_spec = argv[2];
-    char *recv_spec = argv[3];
-
-    Server_init();
-
-    srv = Server_create(argv[1]);
-    check(srv, "Failed to create server.");
-    
-    rc = Server_add_proxy(srv, Proxy_create("127.0.0.1", 80));
-    check(rc != -1, "Failed to add proxy to server config.");
-
-    rc = Server_add_handler(srv, Handler_create(send_spec, UUID, recv_spec, ""));
-    check(rc != -1, "Failed to add handler to server config.");
-
-    Server_start(srv);
-
-    return;
-
-error:
-    log_err("Exiting due to error.");
-    taskexitall(1);
+    assert(srv->hosts && "Failed to insert host.");
 }
+
 

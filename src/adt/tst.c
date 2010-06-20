@@ -38,6 +38,29 @@ tst_collect_t tst_collect(tst_t *root, const char *s, int len)
     return results;
 }
 
+void *tst_search_reverse(tst_t *root, const char *s, int len)
+{
+    tst_t *p = root;
+    int i = len;
+
+    while(i >= 0 && p) {
+        if (s[i] < p->splitchar) {
+            p = p->low; 
+        } else if (s[i] == p->splitchar) {
+            i--;
+            if(i < len) p = p->equal; 
+        } else {
+            p = p->high; 
+        }
+    }
+
+    if(p) {
+        return p->value;
+    } else {
+        return NULL; 
+    }
+}
+
 void *tst_search(tst_t *root, const char *s, int len)
 {
     tst_t *p = root;

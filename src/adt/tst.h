@@ -18,6 +18,11 @@ typedef struct tst_collect_t {
 
 typedef void (*tst_traverse_cb)(void *value, void *data);
 
+
+// won't work unless you reverse before insert, useful though
+// for looking up things from last to first char, as in hostnames
+void *tst_search_reverse(tst_t *root, const char *s, int len);
+
 void *tst_search(tst_t *root, const char *s, int len);
 
 tst_t *tst_insert(tst_t *p, const char *s, int len, void *value);

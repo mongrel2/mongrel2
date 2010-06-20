@@ -19,5 +19,5 @@ kazlib.idx: kazlib.ltx
 	latex kazlib.ltx
 
 clean:
-	-rm kazlib.aux kazlib.log kazlib.dvi kazlib.toc kazlib.idx kazlib.ind kazlib.ilg
+	rm -f kazlib.aux kazlib.log kazlib.dvi kazlib.toc kazlib.idx kazlib.ind kazlib.ilg
 
