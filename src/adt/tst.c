@@ -2,13 +2,14 @@
 #include "tst.h"
 #include <stdio.h>
 #include <assert.h>
+#include <dbg.h>
 
 
 static void tst_collect_build(void *value, tst_collect_t *results)
 {
-    if(results->length < 100) {
-        results->values[results->length++] = value;
-    }
+    lnode_t *node = lnode_create(value);
+    list_append(results->values, node);
+    results->length++;
 }
 
 tst_collect_t tst_collect(tst_t *root, const char *s, int len)
@@ -16,7 +17,7 @@ tst_collect_t tst_collect(tst_t *root, const char *s, int len)
     tst_collect_t results = {.length = 0, .values = NULL};
     tst_t *p = root;
     int i = 0;
-    results.values = calloc(100 * sizeof(void *), 1);
+    results.values = list_create(LISTCOUNT_T_MAX);
 
     // first we get to where we match the prefix
     while(i < len && p) {
@@ -38,12 +39,16 @@ tst_collect_t tst_collect(tst_t *root, const char *s, int len)
     return results;
 }
 
-void *tst_search_reverse(tst_t *root, const char *s, int len)
+void *tst_search_suffix(tst_t *root, const char *s, int len)
 {
     tst_t *p = root;
-    int i = len;
+    int i = len-1;
 
-    while(i >= 0 && p) {
+    debug(">> p: %p, s: %c, splitchar: %c, i: %d", p, s[i], p->splitchar, i);
+
+    while(i > 0 && p) {
+        debug("p: %p, s: %c, splitchar: %c, i: %d", p, s[i], p->splitchar, i);
+        
         if (s[i] < p->splitchar) {
             p = p->low; 
         } else if (s[i] == p->splitchar) {
@@ -53,6 +58,8 @@ void *tst_search_reverse(tst_t *root, const char *s, int len)
             p = p->high; 
         }
     }
+
+    debug("<< p: %p, s: %c, i: %d", p, s[i], i);
 
     if(p) {
         return p->value;
@@ -67,6 +74,7 @@ void *tst_search(tst_t *root, const char *s, int len)
     int i = 0;
 
     while(i < len && p) {
+
         if (s[i] < p->splitchar) {
             p = p->low; 
         } else if (s[i] == p->splitchar) {
@@ -122,3 +130,9 @@ void tst_traverse(tst_t *p, tst_traverse_cb cb, void *data)
     if(p->value) cb(p->value, data);
 }
 
+void tst_collect_destroy(tst_collect_t *found)
+{
+    assert(found && "Cannot be NULL.");
+    list_destroy_nodes(found->values);
+    list_destroy(found->values);
+}

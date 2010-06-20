@@ -2,6 +2,7 @@
 #define tst_h
 
 #include <stdlib.h>
+#include <adt/list.h>
 
 typedef struct tst_t { 
     char splitchar; 
@@ -13,7 +14,7 @@ typedef struct tst_t {
 
 typedef struct tst_collect_t {
     size_t length;
-    void **values;
+    list_t *values;
 } tst_collect_t;
 
 typedef void (*tst_traverse_cb)(void *value, void *data);
@@ -21,7 +22,7 @@ typedef void (*tst_traverse_cb)(void *value, void *data);
 
 // won't work unless you reverse before insert, useful though
 // for looking up things from last to first char, as in hostnames
-void *tst_search_reverse(tst_t *root, const char *s, int len);
+void *tst_search_suffix(tst_t *root, const char *s, int len);
 
 void *tst_search(tst_t *root, const char *s, int len);
 
@@ -32,4 +33,5 @@ void tst_traverse(tst_t *p, tst_traverse_cb cb, void *data);
 
 tst_collect_t tst_collect(tst_t *root, const char *s, int len);
 
+void tst_collect_destroy(tst_collect_t *found);
 #endif
