@@ -183,6 +183,10 @@ void Handler_destroy(Handler *handler, int fd)
         if(fd) {
             Handler_notify_leave(handler->send_socket, fd);
         }
+
+        zmq_close(handler->recv_socket);
+        zmq_close(handler->send_socket);
+
         free(handler);
     }
 }
