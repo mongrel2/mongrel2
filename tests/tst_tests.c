@@ -77,20 +77,20 @@ char *test_tst_traverse()
 
 char *test_tst_collect()
 {
-    list_t *found = tst_collect(node, "TE", 2, NULL, NULL);
+    list_t *found = tst_collect(node, "TE", 2, NULL);
     debug("collect found %d values", list_count(found));
 
-    mu_assert(list_count(found) == 2, "Didn't find 2 with prefix TE.");
+    mu_assert(list_count(found) == 3, "Didn't find 2 with prefix TE.");
 
-    found = tst_collect(node, "T", 1, NULL, NULL);
+    found = tst_collect(node, "T", 1, NULL);
     debug("collect found %d values", list_count(found));
+    mu_assert(list_count(found) == 3, "Didn't find 4 with prefix T.");
 
-    mu_assert(list_count(found) == 3, "Didn't find 3 with prefix T.");
-    mu_assert(list_count(found) == list_count(found), "Found count doesn't match list count.");
-
-    found = tst_collect(node, "XNOT", 4, NULL, NULL);
+    found = tst_collect(node, "TEST2", 5, NULL);
     debug("collect found %d values", list_count(found));
+    mu_assert(list_count(found) == 1, "Didn't find 1 with prefix TEST2.");
 
+    found = tst_collect(node, "XNOT", 4, NULL);
     mu_assert(list_count(found) == 0, "Should not find any with prefix XNOT.");
 
     return NULL;

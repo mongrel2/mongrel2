@@ -1,6 +1,9 @@
 #include <routing.h>
 #include <dbg.h>
 #include <string.h>
+#include <assert.h>
+#include <dbg.h>
+#include <pattern.h>
 
 
 
@@ -43,9 +46,18 @@ error:
     return -1;
 }
 
+int RouteMap_collect_match(void *value, const char *key, size_t len)
+{
+    assert(value && "NULL value from TST.");
+
+    Route *route = (Route *)value;
+
+    return pattern_match(key, len, route->pattern) != NULL;
+}
+
 list_t *RouteMap_match(RouteMap *routes, const char *path, size_t len)
 {
-    return NULL;
+     return tst_collect(routes->routes, path, len, RouteMap_collect_match);
 }
 
 
