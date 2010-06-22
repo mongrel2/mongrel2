@@ -33,7 +33,7 @@ clean:
 
 
 tests: $(TESTS)
-	find tests -name "*_tests" -a -maxdepth 1 -exec {} \;	
+	find tests -maxdepth 1 -name "*_tests" -a -exec {} \;	
 
 %_tests: %_tests.c
 	$(CC) $(CFLAGS) $(LIBS) $(OBJS) $< -o $@

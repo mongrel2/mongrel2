@@ -214,7 +214,7 @@ fdread1(int fd, void *buf, int n)
         if(fdwait(fd, 'r') == -1) {
             return -1;
         }
-    } while((m = recv(fd, buf, n, MSG_NOSIGNAL)) < 0 && errno == EAGAIN);
+    } while((m = read(fd, buf, n)) < 0 && errno == EAGAIN);
 
     return m;
 }
@@ -237,8 +237,8 @@ fdwrite(int fd, void *buf, int n)
 {
     int m, tot;
     
-    for(tot=0; tot<n; tot+=m){
-        while((m=send(fd, (char*)buf+tot, n-tot, MSG_NOSIGNAL)) < 0 && errno == EAGAIN) {
+    for(tot = 0; tot < n; tot += m){
+        while((m=write(fd, (char*)buf+tot, n-tot)) < 0 && errno == EAGAIN) {
             if(fdwait(fd, 'w') == -1) {
                 return -1;
             }

@@ -12,7 +12,8 @@ Host *Host_create(const char *name)
     Host *host = calloc(sizeof(Host), 1);
     check(host, "Out of memory error.");
 
-    strlcpy(host->name, name, len);
+    strncpy(host->name, name, len);
+    host->name[len] = '\0';
     
     return host;
 
