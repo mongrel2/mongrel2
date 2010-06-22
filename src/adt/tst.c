@@ -29,12 +29,12 @@ list_t *tst_collect(tst_t *root, const char *s, size_t len, tst_collect_test_cb 
 
     // first we get to where we match the prefix
     while(i < len && p) {
-        last = p;
         if (s[i] < p->splitchar) {
             p = p->low; 
         } else if (s[i] == p->splitchar) {
             i++;
             if(i < len) {
+                last = p;
                 p = p->equal; 
             }
         } else {
@@ -44,7 +44,7 @@ list_t *tst_collect(tst_t *root, const char *s, size_t len, tst_collect_test_cb 
 
     if(last && results.tester || p) {
         // we found node matching this prefix, so traverse and collect
-        tst_traverse(last, (tst_traverse_cb)tst_collect_build, &results);
+        tst_traverse(p == NULL ? last : p, (tst_traverse_cb)tst_collect_build, &results);
     }
 
     return results.values;
@@ -113,6 +113,7 @@ tst_t *tst_insert(tst_t *p, const char *s, size_t len, void *value)
             // not done yet, keep going but one less
             p->equal = tst_insert(p->equal, s+1, len - 1, value);
         } else {
+            assert(p->value == NULL && "Duplicate insert into tst.");
             p->value = value;
         }
     } else {
@@ -120,6 +121,9 @@ tst_t *tst_insert(tst_t *p, const char *s, size_t len, void *value)
     }
 
     return p; 
+
+error:
+    return NULL;
 }
 
 void tst_traverse(tst_t *p, tst_traverse_cb cb, void *data)

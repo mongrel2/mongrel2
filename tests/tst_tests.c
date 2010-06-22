@@ -18,9 +18,6 @@ char *test_tst_insert()
     node = tst_insert(node, "TEST", strlen("TEST"), valueA);
     mu_assert(node != NULL, "Failed to insert into tst.");
 
-    node = tst_insert(node, "TEST", strlen("TEST"), valueB);
-    mu_assert(node != NULL, "Failed to insert into tst with same name.");
-
     node = tst_insert(node, "TEST2", strlen("TEST2"), value2);
     mu_assert(node != NULL, "Failed to insert into tst with second name.");
 
@@ -34,7 +31,7 @@ char *test_tst_search()
 {
     // tst returns the last one inserted
     void *res = tst_search(node, "TEST", strlen("TEST"));
-    mu_assert(res == valueB, "Got the wrong value back.");
+    mu_assert(res == valueA, "Got the wrong value back, should get A not B.");
 
     // tst does not find if not exact
     res = tst_search(node, "TESTNOT", strlen("TESTNOT"));

@@ -8,7 +8,8 @@ FILE *LOG_FILE = NULL;
 
 int check_routing(list_t *found, Route *route, int expected_count, const char *route_data)
 {
-    check(list_count(found) == expected_count, "Didn't find right number of routes.");
+    check(list_count(found) == expected_count, "Didn't find right number of routes: got %d, expected %d.", 
+            list_count(found), expected_count);
     route = lnode_get(list_first(found));
     debug("Route returned: %s", route->data);
     check(route->data == route_data, "Wrong data returned.");
@@ -26,13 +27,12 @@ char *test_routing_match()
     char *route_data1 = "route1";
     char *route_data2 = "route2";
     char *route_data3 = "route3";
+    char *route_data4 = "route4";
     Route *route = NULL;
 
     RouteMap_insert(routes, "/users/([0-9]+)", strlen("/users/([0-9]+)"), route_data1);
     RouteMap_insert(routes, "/users", strlen("/users"), route_data2);
-
-    // TODO: seems you can't have more than one match for a path, need to find out why
-    // if this is changed to be /users/([a-z]-)$ it causes route1 to fail.
+    RouteMap_insert(routes, "/users/people/([0-9]+))$", strlen("/users/people/([0-9]+)"), route_data4);
     RouteMap_insert(routes, "/cars/([a-z]-)$", strlen("/cars/([a-z]-)$"), route_data3);
 
     list_t *found = RouteMap_match(routes, "/users/1234", strlen("/users/1234"));
@@ -48,6 +48,9 @@ char *test_routing_match()
 
     found = RouteMap_match(routes, "/cars/cadillac", strlen("/cars/cadillac"));
     mu_assert(check_routing(found, route, 1, route_data3), "Wrong $ terminated route.");
+
+    found = RouteMap_match(routes, "/users/people/1234", strlen("/users/people/1234"));
+    mu_assert(check_routing(found, route, 1, route_data4), "Wrong longer route match.");
 
     return NULL;
 }

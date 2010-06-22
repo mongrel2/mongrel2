@@ -2,7 +2,6 @@
 #include <dbg.h>
 #include <string.h>
 #include <assert.h>
-#include <dbg.h>
 #include <pattern.h>
 
 
@@ -28,7 +27,7 @@ int RouteMap_insert(RouteMap *routes, const char *pattern, size_t len, void *dat
 
     // WARNING: dangerous code potentially
     char *first_paren = strchr(route->pattern, '(');
-    
+
     if(first_paren) {
         debug("Route added with pattern: %s until %.*s", route->pattern, 
                 first_paren - route->pattern, route->pattern);
@@ -49,7 +48,6 @@ error:
 int RouteMap_collect_match(void *value, const char *key, size_t len)
 {
     assert(value && "NULL value from TST.");
-
     Route *route = (Route *)value;
 
     return pattern_match(key, len, route->pattern) != NULL;
@@ -57,7 +55,7 @@ int RouteMap_collect_match(void *value, const char *key, size_t len)
 
 list_t *RouteMap_match(RouteMap *routes, const char *path, size_t len)
 {
-     return tst_collect(routes->routes, path, len, RouteMap_collect_match);
+    return tst_collect(routes->routes, path, len, RouteMap_collect_match);
 }
 
 
