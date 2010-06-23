@@ -1,6 +1,7 @@
 #include <server.h>
 #include <dbg.h>
 #include <task/task.h>
+#include <string.h>
 
 FILE *LOG_FILE = NULL;
 
@@ -22,12 +23,26 @@ void taskmain(int argc, char **argv)
 
     srv = Server_create(argv[1]);
     check(srv, "Failed to create server.");
-    
-    rc = Server_add_proxy(srv, Proxy_create("127.0.0.1", 80));
-    check(rc != -1, "Failed to add proxy to server config.");
 
-    rc = Server_add_handler(srv, Handler_create(send_spec, UUID, recv_spec, ""));
-    check(rc != -1, "Failed to add handler to server config.");
+    Host *host = Host_create("mongrel2.org");
+    check(host, "Couldn't create mongrel2.org host.");
+
+    Proxy *web_server = Proxy_create("127.0.0.1", 80);
+    check(web_server, "Failed to add web proxy to server config.");
+
+    Handler *chat_svc = Handler_create(send_spec, UUID, recv_spec, "");
+    check(chat_svc, "Failed to add chat service to server config.");
+
+    rc = Host_add_backend(host, "@chat", strlen("@chat"), BACKEND_HANDLER, chat_svc);
+    check(rc == 0, "Adding chat server backend failed.");
+
+    Host_add_backend(host, "/chat/", strlen("/chat/"), BACKEND_PROXY, web_server);
+    check(rc == 0, "Adding web proxy backend failed.");
+
+    const char *host_pattern = "(.*).mongrel2.org";
+
+    rc = Server_add_host(srv, host_pattern, strlen(host_pattern), host);
+    check(rc == 0, "Could add the main host to the server.");
 
     Server_start(srv);
 

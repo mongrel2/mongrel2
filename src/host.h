@@ -14,25 +14,23 @@ typedef struct Host {
 } Host;
 
 
-typedef enum RouteType {
-    HANDLER=1, PROXY, LAST
-} RouteType;
+typedef enum BackendType {
+    BACKEND_HANDLER, BACKEND_PROXY
+} BackendType;
 
-typedef struct Route {
+typedef struct Backend {
     int type;
 
     union {
         Handler *handler;
         Proxy *proxy;
     } target;
-
-    char path[MAX_URL_PATH];
-} Route;
+} Backend;
 
 Host *Host_create(const char *name);
 void Host_destroy(Host *host);
 
-int Host_add_route(const char *path, RouteType type, void *target);
+int Host_add_backend(Host *host, const char *path, size_t path_len, BackendType type, void *target);
 
 
 #endif

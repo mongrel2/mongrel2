@@ -1,5 +1,6 @@
 #include "minunit.h"
 #include <server.h>
+#include <string.h>
 
 FILE *LOG_FILE = NULL;
 
@@ -31,27 +32,12 @@ char *test_Server_adds()
     Server *srv = Server_create("8090");
     mu_assert(srv != NULL, "Failed to make the server, something on 8090?");
 
-    Proxy *proxy = Proxy_create("127.0.0.1", 80);
-    mu_assert(proxy != NULL, "Didn't make the proxy.");
-
-    rc = Server_add_proxy(srv, proxy);
-    mu_assert(rc > 0, "Failed to add proxy to server.");
-
-
-    Handler *handler = Handler_create("tcp://127.0.0.1:1234", "ZED", "tcp://127.0.0.1:4321", "ZED");
-    mu_assert(handler != NULL, "Failed to make the handler.");
-
-    rc = Server_add_handler(srv, handler);
-    mu_assert(rc > 0, "Failed to add handler to server.");
-
     Host *host = Host_create("zedshaw.com");
     mu_assert(host != NULL, "Failed to make host.");
 
-    rc = Server_add_host(srv, host);
+    rc = Server_add_host(srv, host->name, strlen(host->name), host);
     mu_assert(rc > 0, "Failed to add host to server.");
 
-    Handler_destroy(handler, 0);
-    Proxy_destroy(proxy);
     Host_destroy(host);
     Server_destroy(srv);
 
