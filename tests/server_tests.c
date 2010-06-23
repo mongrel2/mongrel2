@@ -36,7 +36,7 @@ char *test_Server_adds()
     mu_assert(host != NULL, "Failed to make host.");
 
     rc = Server_add_host(srv, host->name, strlen(host->name), host);
-    mu_assert(rc > 0, "Failed to add host to server.");
+    mu_assert(rc == 0, "Failed to add host to server.");
 
     Host_destroy(host);
     Server_destroy(srv);

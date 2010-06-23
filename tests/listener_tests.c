@@ -1,5 +1,6 @@
 #include "minunit.h"
 #include <listener.h>
+#include <server.h>
 #include <string.h>
 
 FILE *LOG_FILE = NULL;
@@ -15,17 +16,12 @@ char *test_Listener_init()
 
 char *test_Listener_create_destroy()
 {
-    Proxy *proxy = Proxy_create("127.0.0.1", 80);
-    mu_assert(proxy != NULL, "Failed to make proxy.");
+    Server *srv = Server_create("19999");
+    mu_assert(srv != NULL, "Failed to make the server to test with.");
 
-    Handler *handler = Handler_create("tcp://127.0.0.1:1234", "ZED", "tcp://127.0.0.1:4321", "ZED");
-    mu_assert(handler != NULL, "Failed to make the handler.");
-
-    Listener *listener = Listener_create(handler, proxy, 12, "127.0.0.1"); 
+    Listener *listener = Listener_create(srv, 12, 1400, "127.0.0.1"); 
     mu_assert(listener != NULL, "Failed to make listener.");
 
-    Handler_destroy(handler, 12);
-    Proxy_destroy(proxy);
     Listener_destroy(listener);
 
     return NULL;

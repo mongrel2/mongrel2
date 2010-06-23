@@ -7,9 +7,10 @@
 #include <adt/tst.h>
 #include <handler.h>
 #include <proxy.h>
+#include <routing.h>
 
 typedef struct Host {
-    tst_t *routes;
+    RouteMap *routes;
     char name[MAX_HOST_NAME];
 } Host;
 
@@ -32,5 +33,7 @@ void Host_destroy(Host *host);
 
 int Host_add_backend(Host *host, const char *path, size_t path_len, BackendType type, void *target);
 
+
+Backend *Host_match(Host *host, const char *target, size_t len);
 
 #endif

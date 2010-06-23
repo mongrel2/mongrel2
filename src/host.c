@@ -1,6 +1,7 @@
 #include <host.h>
 #include <string.h>
 #include <dbg.h>
+#include <routing.h>
 
 Host *Host_create(const char *name)
 {
@@ -12,7 +13,7 @@ Host *Host_create(const char *name)
     Host *host = calloc(sizeof(Host), 1);
     check(host, "Out of memory error.");
 
-    strncpy(host->name, name, len);
+    strncpy(host->name, name, MAX_HOST_NAME);
     host->name[len] = '\0';
     
     return host;
@@ -44,7 +45,7 @@ int Host_add_backend(Host *host, const char *path, size_t path_len, BackendType 
         check(0, "Invalid proxy type given: %d", type);
     }
 
-    int rc = RouteMap_insert(host, path, path_len, backend);
+    int rc = RouteMap_insert(host->routes, path, path_len, backend);
     check(rc == 0, "Failed to insert into host %s route map.", host->name);
 
     return 0;
@@ -52,3 +53,21 @@ int Host_add_backend(Host *host, const char *path, size_t path_len, BackendType 
 error:
     return -1;
 }
+
+
+Backend *Host_match(Host *host, const char *target, size_t len)
+{
+    // TODO: figure out the best policy, longest? first? all?
+    Backend *found = NULL;
+
+    list_t *results = RouteMap_match(host->routes, target, len);
+    if(!list_isempty(results)) {
+        found = (Backend *)lnode_get(list_first(results));
+    }
+
+    list_destroy_nodes(results);
+    list_destroy(results);
+
+    return found;
+}
+

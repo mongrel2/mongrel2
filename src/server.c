@@ -51,7 +51,7 @@ void Server_start(Server *srv)
 {
     int cfd;
     int rport;
-    char remote[16];
+    char remote[IPADDR_SIZE];
 
     // check(!(list_isempty(srv->proxies) || list_isempty(srv->handlers)), "No proxies or handlers created, you need something.");
 
@@ -62,7 +62,7 @@ void Server_start(Server *srv)
     // taskcreate(Handler_task, handler, HANDLER_STACK);
 
     // while((cfd = netaccept(srv->listen_fd, remote, &rport)) >= 0) {
-    //     Listener_accept(handler, proxy, cfd, remote);
+    //     Listener_accept(handler, proxy, cfd, rport, remote);
     // }
 
     return;
@@ -79,3 +79,7 @@ int Server_add_host(Server *srv, const char *pattern, size_t len, Host *host)
 }
 
 
+void Server_set_default_host(Server *srv, Host *host)
+{
+    srv->default_host = host;
+}

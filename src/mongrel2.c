@@ -42,7 +42,9 @@ void taskmain(int argc, char **argv)
     const char *host_pattern = "(.*).mongrel2.org";
 
     rc = Server_add_host(srv, host_pattern, strlen(host_pattern), host);
-    check(rc == 0, "Could add the main host to the server.");
+    check(rc == 0, "Could not add the main host to the server.");
+
+    Server_set_default_host(srv, host);
 
     Server_start(srv);
 

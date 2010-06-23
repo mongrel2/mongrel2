@@ -99,8 +99,9 @@ void Proxy_connect(Proxy *proxy, int fd, char *buf, size_t len, size_t n)
     assert(to_listener->write_fd != to_proxy->write_fd && "Wrong write fd setup.");
     assert(to_listener->read_fd != to_proxy->read_fd && "Wrong read fd setup.");
 
-    taskcreate(rwtask, (void *)to_listener, STACK);
     taskcreate(rwtask, (void *)to_proxy, STACK);
+    // rather than spawn a whole new task for one side, we just call it
+    rwtask(to_listener);
 
 error:
     ProxyConnect_destroy(to_proxy);
