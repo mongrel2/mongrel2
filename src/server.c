@@ -5,6 +5,7 @@
 #include <server.h>
 #include <host.h>
 #include <assert.h>
+#include <string.h>
 
 
 Server *Server_create(const char *port)
@@ -53,10 +54,17 @@ void Server_start(Server *srv)
     int rport;
     char remote[IPADDR_SIZE];
 
+    check(srv->default_host, "No default_host set.");
+
     debug("Starting server on port %d", srv->port);
 
-    // TODO: hmm, so where's this go?
-    // taskcreate(Handler_task, handler, HANDLER_STACK);
+    // TODO: figure out how to start receive side handlers, probably traverse?
+    
+    Backend *found = Host_match(srv->default_host, "@chat", strlen("@chat"));
+    check(found, "Didn't find a route named @chat, nowhere to go.");
+    check(found->type == BACKEND_HANDLER, "@chat route should be handler type, it's %d", found->type);
+    
+    taskcreate(Handler_task, found->target.handler, HANDLER_STACK);
 
     while((cfd = netaccept(srv->listen_fd, remote, &rport)) >= 0) {
         // TODO: name servers better

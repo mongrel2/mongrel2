@@ -26,6 +26,7 @@ def deliver(data):
 
 while True:
     msg = reqs.recv()
+    print "MESSAGE", repr(msg)
 
     ident, data = msg.split(' ', 1)
     try:

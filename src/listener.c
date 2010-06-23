@@ -108,7 +108,7 @@ int Listener_process_json(Listener *listener)
         check(found, "Didn't find a route named @chat, nowhere to go.");
         check(found->type == BACKEND_HANDLER, "@chat route should be handler type, it's %d", found->type);
 
-        debug("JSON message from %s:%d sent on jssocket: %.*s", listener->remote, listener->fd, listener->nread, listener->buf);
+        debug("JSON message from %s:%d sent on jssocket: %.*s", listener->remote, listener->rport, listener->nread, listener->buf);
         check(found->target.handler, "Oops, handler got reset, how'd that happen?.");
 
         if(Handler_deliver(found->target.handler->send_socket, listener->fd, listener->buf, listener->nread) == -1) {
@@ -190,7 +190,7 @@ void Listener_task(void *v)
             rc = Listener_process_http(listener);
             check(rc == 0, "HTTP hand off failed, closing %s:%d",
                     listener->remote, listener->rport);
-            return;
+            break;
         }
     }
 
