@@ -15,7 +15,7 @@ RouteMap *RouteMap_create()
 
 int RouteMap_insert(RouteMap *routes, const char *pattern, size_t len, void *data)
 {
-    Route *route = malloc(sizeof(RouteMap));
+    Route *route = malloc(sizeof(Route));
     check(route, "Out of memory.");
 
     route->pattern = strdup(pattern);

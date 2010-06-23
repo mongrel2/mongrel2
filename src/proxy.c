@@ -70,11 +70,35 @@ error:
     return NULL;
 }
 
+inline int Proxy_read_loop(ProxyConnect *conn)
+{
+    int rc = 0;
 
-void Proxy_connect(Proxy *proxy, int fd, char *buf, size_t len, size_t n)
+    do {
+        rc = fdwrite(conn->read_fd, conn->buffer, conn->n);
+
+        if(rc != conn->n) {
+            break;
+        }
+    } while((conn->n = fdread(conn->write_fd, conn->buffer, conn->size)) > 0);
+
+    // no matter what, we do this
+    ProxyConnect_destroy(conn);
+
+    // TODO: do some better error checking here by looking at errno
+    return 0;
+}
+
+int Proxy_connect(Proxy *proxy, int fd, const char *buf, size_t len, size_t n)
 {
     ProxyConnect *to_listener = NULL;
-    ProxyConnect *to_proxy = ProxyConnect_create(fd, buf, 1024, n); 
+    ProxyConnect *to_proxy = NULL;
+
+    char *initial_buf = malloc(len);
+    check(initial_buf, "Out of memory.");
+    check(memcpy(initial_buf, buf, n), "Failed to copy the initial buffer.");
+
+    to_proxy = ProxyConnect_create(fd, initial_buf, len, n); 
 
     check(to_proxy, "Could not create the connection to backend %s:%d", proxy->server, proxy->port);
 
@@ -99,28 +123,24 @@ void Proxy_connect(Proxy *proxy, int fd, char *buf, size_t len, size_t n)
     assert(to_listener->write_fd != to_proxy->write_fd && "Wrong write fd setup.");
     assert(to_listener->read_fd != to_proxy->read_fd && "Wrong read fd setup.");
 
+    // kick off one side as a task to do its thing
     taskcreate(rwtask, (void *)to_proxy, STACK);
-    // rather than spawn a whole new task for one side, we just call it
-    rwtask(to_listener);
+
+    // rather than spawn a whole new task for this side, we just call our loop
+    return Proxy_read_loop(to_listener);
 
 error:
     ProxyConnect_destroy(to_proxy);
     ProxyConnect_destroy(to_listener);
+    return -1;
 }
 
 
 void
 rwtask(void *v)
 {
-    ProxyConnect *conn = (ProxyConnect *)v;    
-    int rc = 0;
-
-    do {
-        rc = fdwrite(conn->read_fd, conn->buffer, conn->n);
-        check(rc == conn->n, "Connection closed.");
-    } while((conn->n = fdread(conn->write_fd, conn->buffer, conn->size)) > 0);
-
-error:
-    ProxyConnect_destroy(conn);
+    ProxyConnect *conn = (ProxyConnect *)v;
+    // return value ignored since this is a task
+    Proxy_read_loop(conn);
 }
 

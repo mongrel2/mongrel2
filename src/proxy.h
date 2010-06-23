@@ -22,6 +22,6 @@ Proxy *Proxy_create(char *server, int port);
 
 void Proxy_destroy(Proxy *proxy);
 
-void Proxy_connect(Proxy *proxy, int fd, char *buf, size_t len, size_t n);
+int Proxy_connect(Proxy *proxy, int fd, const char *buf, size_t len, size_t n);
 
 #endif

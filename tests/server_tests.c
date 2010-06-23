@@ -45,7 +45,7 @@ char *test_Server_adds()
 }
 
 
-char * all_tests() {
+char *all_tests() {
     mu_suite_start();
 
     mu_run_test(test_Server_init);

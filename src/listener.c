@@ -106,7 +106,7 @@ int Listener_process_json(Listener *listener)
         // TODO: actually, like, parse the route yo
         Backend *found = Host_match(listener->server->default_host, "@chat", strlen("@chat"));
         check(found, "Didn't find a route named @chat, nowhere to go.");
-        check(found->type == BACKEND_HANDLER, "@chat route should be handler type.");
+        check(found->type == BACKEND_HANDLER, "@chat route should be handler type, it's %d", found->type);
 
         debug("JSON message from %s:%d sent on jssocket: %.*s", listener->remote, listener->fd, listener->nread, listener->buf);
         check(found->target.handler, "Oops, handler got reset, how'd that happen?.");
@@ -132,9 +132,8 @@ int Listener_process_http(Listener *listener)
     check(found->type == BACKEND_PROXY, "/chat/ route should be proxy type.");
 
     // we can share the data because the caller will block as the proxy runs
-    Proxy_connect(found->target.proxy, listener->fd, listener->buf, BUFFER_SIZE, listener->nread);
+    return Proxy_connect(found->target.proxy, listener->fd, listener->buf, BUFFER_SIZE, listener->nread);
    
-    return 1;
 error:
     return -1;
 }
@@ -176,21 +175,21 @@ void Listener_task(void *v)
 
         rc = Listener_parse(listener);
         check(rc == 0, "Parsing failed, closing %s:%d 'cause they suck.",
-                listener->remote, listener->fd);
+                listener->remote, listener->rport);
         
         if(listener->parser->socket_started) {
             rc = Listener_process_flash_socket(listener);
             check(rc == 0, "Invalid flash socket, closing %s:%d 'cause flash sucks.",
-                    listener->remote, listener->fd);
+                    listener->remote, listener->rport);
             break;
         } else if(listener->parser->json_sent) {
             rc = Listener_process_json(listener);
             check(rc == 0, "Invalid json request, closing %s:%d 'cause they can't read.",
-                    listener->remote, listener->fd);
+                    listener->remote, listener->rport);
         } else {
             rc = Listener_process_http(listener);
             check(rc == 0, "HTTP hand off failed, closing %s:%d",
-                    listener->remote, listener->fd);
+                    listener->remote, listener->rport);
             return;
         }
     }

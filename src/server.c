@@ -53,17 +53,18 @@ void Server_start(Server *srv)
     int rport;
     char remote[IPADDR_SIZE];
 
-    // check(!(list_isempty(srv->proxies) || list_isempty(srv->handlers)), "No proxies or handlers created, you need something.");
+    debug("Starting server on port %d", srv->port);
 
-    // Handler *handler = (Handler *)lnode_get(list_first(srv->handlers));
-    // Proxy *proxy = (Proxy *)lnode_get(list_first(srv->proxies));
-
-    // debug("Starting server on port %d", srv->port);
+    // TODO: hmm, so where's this go?
     // taskcreate(Handler_task, handler, HANDLER_STACK);
 
-    // while((cfd = netaccept(srv->listen_fd, remote, &rport)) >= 0) {
-    //     Listener_accept(handler, proxy, cfd, rport, remote);
-    // }
+    while((cfd = netaccept(srv->listen_fd, remote, &rport)) >= 0) {
+        // TODO: name servers better
+        debug("Connection from %s:%d to %s:%d", remote, rport, 
+                srv->default_host->name, srv->port);
+
+        Listener_accept(srv, cfd, rport, remote);
+    }
 
     return;
 

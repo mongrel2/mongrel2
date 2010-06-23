@@ -5,8 +5,8 @@
 #define MAX_URL_PATH 256
 
 #include <adt/tst.h>
-#include <handler.h>
 #include <proxy.h>
+#include <handler.h>
 #include <routing.h>
 
 typedef struct Host {
@@ -16,7 +16,7 @@ typedef struct Host {
 
 
 typedef enum BackendType {
-    BACKEND_HANDLER, BACKEND_PROXY
+    BACKEND_HANDLER=1, BACKEND_PROXY
 } BackendType;
 
 typedef struct Backend {

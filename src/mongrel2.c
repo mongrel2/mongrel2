@@ -27,7 +27,7 @@ void taskmain(int argc, char **argv)
     Host *host = Host_create("mongrel2.org");
     check(host, "Couldn't create mongrel2.org host.");
 
-    Proxy *web_server = Proxy_create("127.0.0.1", 80);
+    Proxy *web_server = Proxy_create("127.0.0.1", 8080);
     check(web_server, "Failed to add web proxy to server config.");
 
     Handler *chat_svc = Handler_create(send_spec, UUID, recv_spec, "");
@@ -39,7 +39,7 @@ void taskmain(int argc, char **argv)
     Host_add_backend(host, "/chat/", strlen("/chat/"), BACKEND_PROXY, web_server);
     check(rc == 0, "Adding web proxy backend failed.");
 
-    const char *host_pattern = "(.*).mongrel2.org";
+    const char *host_pattern = "mongrel2.org";
 
     rc = Server_add_host(srv, host_pattern, strlen(host_pattern), host);
     check(rc == 0, "Could not add the main host to the server.");

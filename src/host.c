@@ -1,7 +1,7 @@
 #include <host.h>
 #include <string.h>
 #include <dbg.h>
-#include <routing.h>
+#include <assert.h>
 
 Host *Host_create(const char *name)
 {
@@ -15,6 +15,9 @@ Host *Host_create(const char *name)
 
     strncpy(host->name, name, MAX_HOST_NAME);
     host->name[len] = '\0';
+
+    host->routes = RouteMap_create();
+    check(host->routes, "Failed to create host route map for %s.", name);
     
     return host;
 
@@ -45,6 +48,8 @@ int Host_add_backend(Host *host, const char *path, size_t path_len, BackendType 
         check(0, "Invalid proxy type given: %d", type);
     }
 
+    debug("Putting backend into %s with pointer: %p", host->name, backend);
+
     int rc = RouteMap_insert(host->routes, path, path_len, backend);
     check(rc == 0, "Failed to insert into host %s route map.", host->name);
 
@@ -58,16 +63,22 @@ error:
 Backend *Host_match(Host *host, const char *target, size_t len)
 {
     // TODO: figure out the best policy, longest? first? all?
-    Backend *found = NULL;
+    Route *found = NULL;
 
     list_t *results = RouteMap_match(host->routes, target, len);
-    if(!list_isempty(results)) {
-        found = (Backend *)lnode_get(list_first(results));
+
+    lnode_t *n = list_first(results);
+    if(n) {
+        found = lnode_get(n);
+        assert(found && "RouteMap returned a list node with NULL.");
+        debug("Found backend at %.*s", found->length, found->pattern);
     }
 
     list_destroy_nodes(results);
     list_destroy(results);
 
-    return found;
+    assert(found->data && "Invalid value for stored route.");
+
+    return found->data;
 }
 
