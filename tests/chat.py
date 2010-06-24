@@ -36,23 +36,27 @@ while True:
 
     print "IDENT:", ident, "MSG:", data
 
-    if data["type"] == "join":
-        deliver(data)
-        users[ident] = data['user']
-        user_list = [u[1] for u in users.items()]
-        send(ident, {'type': 'userList', 'users': user_list})
-    elif data["type"] == "leave":
+    try:
+        if data["type"] == "join":
+            deliver(data)
+            users[ident] = data['user']
+            user_list = [u[1] for u in users.items()]
+            send(ident, {'type': 'userList', 'users': user_list})
+        elif data["type"] == "leave":
 
-        if ident in users:
-            data['user'] = users[ident]
-            del users[ident]
+            if ident in users:
+                data['user'] = users[ident]
+                del users[ident]
 
-        deliver(data)
-        user_list = [u[1] for u in users.items()]
-    elif ident not in users:
-        users[ident] = data['user']
-    elif data['type'] == "msg":
-        deliver(data)
+            deliver(data)
+            user_list = [u[1] for u in users.items()]
+        elif ident not in users:
+            users[ident] = data['user']
+        elif data['type'] == "msg":
+            deliver(data)
+    except KeyError:
+        print "BAD", data
+
 
     print "REGISTERED USERS:", len(users)
 

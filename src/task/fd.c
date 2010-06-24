@@ -238,7 +238,7 @@ fdwrite(int fd, void *buf, int n)
     int m, tot;
     
     for(tot = 0; tot < n; tot += m){
-        while((m=write(fd, (char*)buf+tot, n-tot)) < 0 && errno == EAGAIN) {
+        while((m=send(fd, (char*)buf+tot, n-tot, MSG_NOSIGNAL)) < 0 && errno == EAGAIN) {
             if(fdwait(fd, 'w') == -1) {
                 return -1;
             }
