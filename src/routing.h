@@ -21,5 +21,7 @@ int RouteMap_insert(RouteMap *routes, const char *pattern, size_t len, void *dat
 
 list_t *RouteMap_match(RouteMap *routes, const char *path, size_t len);
 
+int RouteMap_insert_reversed(RouteMap *routes, const char *pattern, size_t len, void *data);
+
 
 #endif

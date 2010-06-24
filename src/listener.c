@@ -124,7 +124,8 @@ error:
 
 int Listener_process_http(Listener *listener)
 {
-    // TODO: get the right path and host from the http request
+    // TODO: parse the host and query that up in the host map
+    // TODO: parse the path and find it in that host
     check(listener->server->default_host, "No default host set.");
 
     Backend *found = Host_match(listener->server->default_host, "/chat/", strlen("/chat/"));

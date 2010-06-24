@@ -19,6 +19,7 @@ static void tst_collect_build(void *value, tst_collect_t *results)
     }
 }
 
+// TODO: give this a reversed parameter for reversed collects, similar to reversed search
 list_t *tst_collect(tst_t *root, const char *s, size_t len, tst_collect_test_cb tester)
 {
     tst_collect_t results = {.values = NULL, .tester = tester, .key = s, .len = len};

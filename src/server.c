@@ -59,7 +59,6 @@ void Server_start(Server *srv)
     debug("Starting server on port %d", srv->port);
 
     // TODO: figure out how to start receive side handlers, probably traverse?
-    
     Backend *found = Host_match(srv->default_host, "@chat", strlen("@chat"));
     check(found, "Didn't find a route named @chat, nowhere to go.");
     check(found->type == BACKEND_HANDLER, "@chat route should be handler type, it's %d", found->type);
@@ -84,7 +83,7 @@ error:
 
 int Server_add_host(Server *srv, const char *pattern, size_t len, Host *host)
 {
-    return RouteMap_insert(srv->hosts, pattern, len, host);
+    return RouteMap_insert_reversed(srv->hosts, pattern, len, host);
 }
 
 

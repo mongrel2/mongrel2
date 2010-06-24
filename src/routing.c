@@ -3,6 +3,7 @@
 #include <string.h>
 #include <assert.h>
 #include <pattern.h>
+#include <host.h>
 
 
 
@@ -51,6 +52,34 @@ int RouteMap_insert(RouteMap *routes, const char *pattern, size_t len, void *dat
 error:
     return -1;
 }
+
+int RouteMap_insert_reversed(RouteMap *routes, const char *pattern, size_t len, void *data)
+{
+    Route *route = NULL;
+    char reversed_prefix[MAX_HOST_NAME];
+    char *last_paren = strrchr(pattern, ')');
+    size_t prefix_len = last_paren ? len - (last_paren - pattern) : len;
+    int pi, ri;
+
+    debug("prefix_len: %d", prefix_len);
+
+    for(pi = len-1, ri = 0; ri < prefix_len; ri++, pi--) {
+        reversed_prefix[ri] = pattern[pi];
+    }
+    reversed_prefix[prefix_len] = '\0';
+
+    debug("prefix: %.*s, pattern: %.*s", prefix_len, reversed_prefix, len, pattern);
+
+    route = RouteMap_insert_base(routes, reversed_prefix, prefix_len, pattern, len);
+    check(route, "Failed to add host.");
+    route->data = data;
+
+    return 0;
+  
+error:
+    return -1;
+}
+
 
 int RouteMap_collect_match(void *value, const char *key, size_t len)
 {
