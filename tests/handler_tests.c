@@ -23,7 +23,7 @@ char *test_Handler_recv_create()
 char *test_Handler_send_create()
 {
 
-    void *socket = Handler_send_create("tcp://127.0.0.1:1234", "ZED");
+    void *socket = Handler_send_create("tcp://127.0.0.1:12345", "ZED");
     mu_assert(socket != NULL, "Failed to make the send socket.");
 
     zmq_close(socket);
@@ -33,7 +33,7 @@ char *test_Handler_send_create()
 
 char *test_Handler_deliver()
 {
-    void *socket = Handler_send_create("tcp://127.0.0.1:1234", "ZED");
+    void *socket = Handler_send_create("tcp://127.0.0.1:12346", "ZED");
     mu_assert(socket != NULL, "Failed to make the send socket.");
 
     char *message =  "{\"type\":\"join\"}";
@@ -47,7 +47,7 @@ char *test_Handler_deliver()
 
 char *test_Handler_notify_leave()
 {
-    void *socket = Handler_send_create("tcp://127.0.0.1:1234", "ZED");
+    void *socket = Handler_send_create("tcp://127.0.0.1:12347", "ZED");
     mu_assert(socket != NULL, "Failed to make the send socket.");
 
     Handler_notify_leave(socket, 100);
@@ -59,7 +59,7 @@ char *test_Handler_notify_leave()
 
 char *test_Handler_create_destroy()
 {
-    Handler *handler = Handler_create("tcp://127.0.0.1:1234", "ZED", "tcp://127.0.0.1:4321", "ZED");
+    Handler *handler = Handler_create("tcp://127.0.0.1:12348", "ZED", "tcp://127.0.0.1:4321", "ZED");
     mu_assert(handler != NULL, "Failed to make the handler.");
 
     Handler_destroy(handler, 1000);
