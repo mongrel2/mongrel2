@@ -5,6 +5,8 @@
 
 Host *Host_create(const char *name)
 {
+    debug("HOST CREATED FOR %s", name);
+    
     size_t len = strlen(name);
 
     check(len < MAX_HOST_NAME, "Host name too long (max %d): '%s'\n", 

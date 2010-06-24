@@ -6,6 +6,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <task/task.h>
+#include <assert.h>
 
 
 FILE *LOG_FILE = NULL;
@@ -46,26 +47,33 @@ char *test_Listener_deliver()
     return NULL;
 }
 
+int test_task_with_sample(const char *sample_file)
+{
+    check(SRV, "Server isn't configured.");
+
+    Listener *listener = Listener_create(SRV, 12, 1400, "127.0.0.1");
+    check(listener, "Failed to create the listener.");
+
+    listener->fd = open(sample_file, O_RDONLY);
+    check(!listener->fd >= 0, "Failed to open the sample file: %s.", sample_file);
+
+    Listener_task(listener);
+
+    check(!Register_exists(listener->fd), "Didn't unregister the socket: %d", listener->fd);
+
+    return 1;
+error:
+    return 0;
+}
+
 char *test_Listener_task()
 {
-    Listener *listener = Listener_create(SRV, 12, 1400, "127.0.0.1");
-    listener->fd = open("tests/sample.json", O_RDONLY);
-    mu_assert(listener->fd >= 0, "Failed to open the tests/sample json file.");
+    assert(SRV->default_host != NULL);
 
-    Listener_task(listener);
-    // it's destroyed now
-    
-    mu_assert(!Register_exists(12), "Didn't unregister the socket.");
-
-    listener = Listener_create(SRV, 12, 1400, "127.0.0.1");
-    listener->fd = open("tests/sample.xml", O_RDONLY);
-    mu_assert(listener->fd >= 0, "Failed to open tests/sample.xml file.");
-
-    Listener_task(listener);
-
-    mu_assert(!Register_exists(12), "Didn't unregister the socket.");
-
-    // TODO: add an http request to the mix
+    mu_assert(test_task_with_sample("tests/sample.json"), "json failed.");
+    mu_assert(test_task_with_sample("tests/sample.xml"), "xml failed.");
+    mu_assert(test_task_with_sample("tests/sample.garbage"), "garbage failed");
+    mu_assert(test_task_with_sample("tests/sample.http"), "http failed");
 
     return NULL;
 }
@@ -102,6 +110,7 @@ char * all_tests()
 
     Server_init();
     SRV = Server_create("19999");
+    Server_set_default_host(SRV, Host_create("zedshaw.com"));
 
     mu_run_test(test_Listener_init);
     mu_run_test(test_Listener_create_destroy);
