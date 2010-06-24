@@ -13,10 +13,23 @@ char *FLASH_RESPONSE = "<?xml version=\"1.0\"?><!DOCTYPE cross-domain-policy SYS
 
 size_t FLASH_LEN = 0;
 
+// these are used by unit tests to fake out sockets from files
+static int (*Listener_read_func)(int, void*, int);
+static int (*Listener_write_func)(int, void*, int);
+
 void Listener_init()
 {
     FLASH_LEN = strlen(FLASH_RESPONSE);
+    Listener_set_iofuncs(fdrecv, fdsend);
 }
+
+void Listener_set_iofuncs( int (*read_func)(int, void*, int),
+        int (*write_func)(int, void*, int))
+{
+    Listener_read_func = read_func;
+    Listener_write_func = write_func;
+}
+
 
 void Listener_accept(Server *srv, int fd, int rport, const char *remote)
 {
@@ -73,7 +86,7 @@ int Listener_deliver(int to_fd, char *buffer, size_t len)
 
     b64_buf[b64_len] = '\0';
 
-    rc = fdsend(to_fd, b64_buf, b64_len+1);
+    rc = Listener_write_func(to_fd, b64_buf, b64_len+1);
     check(rc == b64_len+1, "Failed to write entire message to listener %d", to_fd);
 
 
@@ -141,7 +154,7 @@ error:
 
 int Listener_process_flash_socket(Listener *listener)
 {
-    int rc = fdsend(listener->fd, FLASH_RESPONSE, strlen(FLASH_RESPONSE) + 1);
+    int rc = Listener_write_func(listener->fd, FLASH_RESPONSE, strlen(FLASH_RESPONSE) + 1);
     check(rc > 0, "Failed to write Flash socket response.");
 
     return 0;
@@ -171,7 +184,7 @@ void Listener_task(void *v)
     Listener *listener = (Listener *)v;
     int rc = 0;
 
-    while((listener->nread = fdrecv(listener->fd, listener->buf, BUFFER_SIZE-1)) > 0) {
+    while((listener->nread = Listener_read_func(listener->fd, listener->buf, BUFFER_SIZE-1)) > 0) {
         listener->buf[listener->nread] = '\0';
 
         rc = Listener_parse(listener);

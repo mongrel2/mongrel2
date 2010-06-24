@@ -26,6 +26,9 @@ typedef struct Listener {
 
 void Listener_init();
 
+void Listener_set_iofuncs( int (*read_func)(int, void*, int),
+        int (*write_func)(int, void*, int));
+
 void Listener_destroy(Listener *listener);
 
 Listener *Listener_create(Server *srv, int fd, int rport, const char *remote);
