@@ -137,11 +137,14 @@ struct Channel
 /*
  * Threaded I/O.
  */
-int    fdread(int, void*, int);
-int    fdread1(int, void*, int);  /* always uses fdwait */
-int    fdwrite(int, void*, int);
-int     fdwait(int, int);
-int    fdnoblock(int);
+int fdread(int, void*, int);
+int fdread1(int, void*, int);  /* always uses fdwait */
+int fdrecv1(int, void*, int);  /* always uses fdwait */
+int fdwrite(int, void*, int);
+int fdsend(int, void*, int);
+int fdrecv(int, void*, int);
+int fdwait(int, int);
+int fdnoblock(int);
 
 void    fdtask(void*);
 

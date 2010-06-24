@@ -12,32 +12,39 @@ RouteMap *RouteMap_create()
     return map;
 }
 
-
-int RouteMap_insert(RouteMap *routes, const char *pattern, size_t len, void *data)
+Route *RouteMap_insert_base(RouteMap *routes, 
+        const char *prefix, size_t prefix_len,
+        const char *pattern, size_t pattern_len)
 {
     Route *route = malloc(sizeof(Route));
     check(route, "Out of memory.");
 
+    route->length = pattern_len;
     route->pattern = strdup(pattern);
     check(route->pattern, "Error copying pattern.");
-    route->pattern[len] = '\0';  // make sure it's capped
+    route->pattern[pattern_len] = '\0';  // make sure it's capped
 
-    route->length = len;
-    route->data = data;
-
-    // WARNING: dangerous code potentially
-    char *first_paren = strchr(route->pattern, '(');
-
-    if(first_paren) {
-        debug("Route added with pattern: %s until %.*s", route->pattern, 
-                first_paren - route->pattern, route->pattern);
-        routes->routes = tst_insert(routes->routes, route->pattern,
-                first_paren - route->pattern, route);
-    } else {
-        routes->routes = tst_insert(routes->routes, route->pattern, len, route);
-    }
+    routes->routes = tst_insert(routes->routes, prefix, prefix_len, route);
 
     check(routes->routes, "Failed to insert into TST.");
+
+    return route;
+
+error:
+    return NULL;
+}
+
+int RouteMap_insert(RouteMap *routes, const char *pattern, size_t len, void *data)
+{
+    Route *route = NULL;
+    // WARNING: dangerous code potentially
+    char *first_paren = strchr(pattern, '(');
+    size_t pref_len = first_paren ? first_paren - pattern : len;
+
+    route = RouteMap_insert_base(routes, pattern, pref_len, pattern, len);
+    check(route, "Failed to insert route: %.*s", len, pattern);
+
+    route->data = data;
 
     return 0;
 

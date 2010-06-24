@@ -75,12 +75,12 @@ inline int Proxy_read_loop(ProxyConnect *conn)
     int rc = 0;
 
     do {
-        rc = fdwrite(conn->read_fd, conn->buffer, conn->n);
+        rc = fdsend(conn->read_fd, conn->buffer, conn->n);
 
         if(rc != conn->n) {
             break;
         }
-    } while((conn->n = fdread(conn->write_fd, conn->buffer, conn->size)) > 0);
+    } while((conn->n = fdrecv(conn->write_fd, conn->buffer, conn->size)) > 0);
 
     // no matter what, we do this
     ProxyConnect_destroy(conn);

@@ -73,7 +73,7 @@ int Listener_deliver(int to_fd, char *buffer, size_t len)
 
     b64_buf[b64_len] = '\0';
 
-    rc = fdwrite(to_fd, b64_buf, b64_len+1);
+    rc = fdsend(to_fd, b64_buf, b64_len+1);
     check(rc == b64_len+1, "Failed to write entire message to listener %d", to_fd);
 
 
@@ -140,7 +140,7 @@ error:
 
 int Listener_process_flash_socket(Listener *listener)
 {
-    int rc = fdwrite(listener->fd, FLASH_RESPONSE, strlen(FLASH_RESPONSE) + 1);
+    int rc = fdsend(listener->fd, FLASH_RESPONSE, strlen(FLASH_RESPONSE) + 1);
     check(rc > 0, "Failed to write Flash socket response.");
 
     return 0;
@@ -170,7 +170,7 @@ void Listener_task(void *v)
     Listener *listener = (Listener *)v;
     int rc = 0;
 
-    while((listener->nread = fdread(listener->fd, listener->buf, BUFFER_SIZE-1)) > 0) {
+    while((listener->nread = fdrecv(listener->fd, listener->buf, BUFFER_SIZE-1)) > 0) {
         listener->buf[listener->nread] = '\0';
 
         rc = Listener_parse(listener);

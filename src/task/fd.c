@@ -220,6 +220,20 @@ fdread1(int fd, void *buf, int n)
 }
 
 int
+fdrecv1(int fd, void *buf, int n)
+{
+    int m;
+    
+    do {
+        if(fdwait(fd, 'r') == -1) {
+            return -1;
+        }
+    } while((m = recv(fd, buf, n, MSG_NOSIGNAL)) < 0 && errno == EAGAIN);
+
+    return m;
+}
+
+int
 fdread(int fd, void *buf, int n)
 {
     int m;
@@ -233,7 +247,38 @@ fdread(int fd, void *buf, int n)
 }
 
 int
+fdrecv(int fd, void *buf, int n)
+{
+    int m;
+
+    while((m=recv(fd, buf, n, MSG_NOSIGNAL)) < 0 && errno == EAGAIN) {
+        if(fdwait(fd, 'r') == -1) {
+            return -1;
+        }
+    }
+    return m;
+}
+
+int
 fdwrite(int fd, void *buf, int n)
+{
+    int m, tot;
+    
+    for(tot = 0; tot < n; tot += m){
+        while((m=write(fd, (char*)buf+tot, n-tot)) < 0 && errno == EAGAIN) {
+            if(fdwait(fd, 'w') == -1) {
+                return -1;
+            }
+        }
+
+        if(m < 0) return m;
+        if(m == 0) break;
+    }
+    return tot;
+}
+
+int
+fdsend(int fd, void *buf, int n)
 {
     int m, tot;
     
