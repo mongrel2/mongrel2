@@ -19,12 +19,12 @@ char *test_DB_close()
 }
 
 
-int query_callback(void *param, int cols, char **names, char **data)
+int query_callback(void *param, int cols, char **data, char **names)
 {
     int i = 0;
 
     for(i = 0; i < cols; i++) {
-        debug("%s=%s", names[i], data[i]);
+        debug("QUERY RESULT: %s=%s", names[i], data[i]);
     }
 
     return 0;
@@ -40,7 +40,7 @@ char *test_DB_exec()
     rc = DB_exec("CREATE TABLE testing (name TEXT, age INT)", NULL, NULL);
     mu_assert(rc == 0, "CREATE TABLE failed.");
 
-    rc = DB_exec("INSERT INTO testing ('Zed',35)", NULL, NULL);
+    rc = DB_exec("INSERT INTO testing VALUES ('Zed',35)", NULL, NULL);
     mu_assert(rc == 0, "INSERT FAILED.");
 
     rc = DB_exec("SELECT * FROM testing", query_callback, NULL);
