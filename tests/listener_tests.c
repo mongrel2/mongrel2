@@ -57,9 +57,11 @@ int test_task_with_sample(const char *sample_file)
     listener->fd = open(sample_file, O_RDONLY);
     check(!listener->fd >= 0, "Failed to open the sample file: %s.", sample_file);
 
+    int fd = listener->fd;
+
     Listener_task(listener);
 
-    check(!Register_exists(listener->fd), "Didn't unregister the socket: %d", listener->fd);
+    check(!Register_exists(fd), "Didn't unregister the socket: %d", listener->fd);
 
     return 1;
 error:
@@ -97,7 +99,6 @@ char *test_Listener_parse()
     mu_assert(rc == 0, "Failed to parse flash message.");
     mu_assert(listener->parser->socket_started, "Didn't start flash socket.");
 
-    Server_destroy(SRV);
     Listener_destroy(listener);
 
     return NULL;
@@ -109,7 +110,7 @@ char * all_tests()
     mu_suite_start();
 
     Server_init();
-    SRV = Server_create("19999");
+    SRV = Server_create("1999");
     Server_set_default_host(SRV, Host_create("zedshaw.com"));
 
     mu_run_test(test_Listener_init);

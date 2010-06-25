@@ -63,9 +63,7 @@ void Register_disconnect(int fd)
 
         hash_delete_free(registrations, hn);
 
-        if(close(fd) == -1) {
-            log_err("Failed on close for ident %d, not sure why.", fd);
-        }
+        close(fd);
     } else {
         log_err("Ident %d was unregistered but doesn't exist in registrations.", fd);
     }

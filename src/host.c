@@ -77,8 +77,11 @@ Backend *Host_match(Host *host, const char *target, size_t len)
     list_destroy_nodes(results);
     list_destroy(results);
 
-    assert(found->data && "Invalid value for stored route.");
-
-    return found->data;
+    if(found) {
+        assert(found->data && "Invalid value for stored route.");
+        return found->data;
+    } else {
+        return NULL;
+    }
 }
 
