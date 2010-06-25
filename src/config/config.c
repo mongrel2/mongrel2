@@ -38,7 +38,7 @@ int Config_proxy_load_cb(void *param, int cols, char **data, char **names)
 
     debug("Making a proxy for %s:%s:%s", data[0], data[1], data[2]);
 
-    *target = Proxy_create(data[2], atoi(data[1]));
+    *target = Proxy_create(data[1], atoi(data[2]));
     check(*target, "Failed to create proxy for %s:%s:%s", data[0], data[1], data[2]);
 
     return 0;
