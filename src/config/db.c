@@ -1,51 +1,40 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sqlite3.h>
+#include <dbg.h>
+#include <config/db.h>
 #include <assert.h>
-#include "config.h"
 
-sqlite3 *db = NULL;
+sqlite3 *CONFIG_DB = NULL;
 
 
-int db_open(const char *path)
+int DB_init(const char *path)
 {
-    return sqlite3_open(path, &db);
+    assert(CONFIG_DB == NULL && "Must close it first.");
+    return sqlite3_open(path, &CONFIG_DB);
 }
 
 
-void db_close()
+void DB_close()
 {
-    sqlite3_close(db);
+    sqlite3_close(CONFIG_DB);
+    CONFIG_DB = NULL;
 }
 
 
-int db_exec(const char *query, 
+int DB_exec(const char *query, 
         int (*callback)(void*,int,char**,char**),
         void *param)
 {
-    char *zErrMsg = 0;
+    char *zErrMsg = NULL;
     
-    int rc = sqlite3_exec(db, query, callback, param, &zErrMsg);
+    int rc = sqlite3_exec(CONFIG_DB, query, callback, param, &zErrMsg);
+    check(rc == SQLITE_OK, "Error querying DB: %s", zErrMsg);
 
-    if(rc != SQLITE_OK) {
-        fprintf(stderr, "ERROR QUERYING: %s\n", zErrMsg);
-        free(zErrMsg);
-        abort();
-    }
-
-    return rc;
-}
-
-
-int main(int argc, char **argv)
-{
-    db_open("config.db");
-    
-    db_exec("SELECT path, name, style, addr FROM route, handler WHERE route.target = handler.name", config_load_routes, NULL);
-
-    db_exec("SELECT path FROM route", config_print_routes, NULL);
-
-    db_close();
     return 0;
+
+error:
+    return -1;
 }
+
 
