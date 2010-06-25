@@ -1,11 +1,11 @@
-DROP TABLE server;
-DROP TABLE host;
-DROP TABLE handler;
-DROP TABLE proxy;
-DROP TABLE route;
-DROP TABLE statistic;
-DROP TABLE mimetype;
-DROP TABLE setting;
+DROP TABLE IF EXISTS server;
+DROP TABLE IF EXISTS host;
+DROP TABLE IF EXISTS handler;
+DROP TABLE IF EXISTS proxy;
+DROP TABLE IF EXISTS route;
+DROP TABLE IF EXISTS statistic;
+DROP TABLE IF EXISTS mimetype;
+DROP TABLE IF EXISTS setting;
 
 CREATE TABLE server (id INTEGER PRIMARY KEY,
     uuid TEXT,
@@ -24,8 +24,8 @@ CREATE TABLE host (id INTEGER PRIMARY KEY,
 
 CREATE TABLE handler (id INTEGER PRIMARY KEY,
     send_spec TEXT, 
-    recv_spec TEXT,
     send_ident TEXT,
+    recv_spec TEXT,
     recv_ident TEXT);
 
 CREATE TABLE proxy (id INTEGER PRIMARY KEY,

@@ -4,12 +4,12 @@ all: build/mongrel2 tests
 
 TESTS=tests/host_tests tests/register_tests tests/proxy_tests tests/handler_tests \
 	  tests/listener_tests tests/server_tests tests/tst_tests tests/pattern_tests \
-	  tests/routing_tests tests/db_tests
+	  tests/routing_tests tests/db_tests tests/config_tests
 
 OBJS=src/http11/http11_parser.o src/server.o src/adt/tst.o src/b64/b64.o src/task/libtask.a \
 	 src/adt/hash.o src/proxy.o src/register.o src/listener.o \
 	 src/handler.o src/adt/list.o src/host.o src/pattern.o \
-	 src/routing.o src/config/db.o
+	 src/routing.o src/config/db.o src/config/config.o
 
 LIBS=-lzmq -pthread -lsqlite3
 
@@ -32,8 +32,11 @@ clean:
 	cd docs && make clean
 
 
-tests: $(TESTS)
+tests: tests/config.sqlite $(TESTS)
 	find tests -maxdepth 1 -name "*_tests" -a -exec {} \;	
+
+tests/config.sqlite:
+	sqlite3 tests/config.sqlite < src/config/example.sql
 
 %_tests: %_tests.c
 	$(CC) $(CFLAGS) $(LIBS) $(OBJS) $< -o $@

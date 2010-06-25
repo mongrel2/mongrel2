@@ -5,8 +5,6 @@
 
 Host *Host_create(const char *name)
 {
-    debug("HOST CREATED FOR %s", name);
-    
     size_t len = strlen(name);
 
     check(len < MAX_HOST_NAME, "Host name too long (max %d): '%s'\n", 
@@ -47,7 +45,7 @@ int Host_add_backend(Host *host, const char *path, size_t path_len, BackendType 
     } else if(type == BACKEND_PROXY) {
         backend->target.proxy = target;
     } else {
-        check(0, "Invalid proxy type given: %d", type);
+        sentinel("Invalid proxy type given: %d", type);
     }
 
     debug("Putting backend into %s with pointer: %p", host->name, backend);

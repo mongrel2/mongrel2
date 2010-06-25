@@ -27,9 +27,11 @@ int DB_exec(const char *query,
         void *param)
 {
     char *zErrMsg = NULL;
-    
+
+    debug("[SQL] %s", query);
+
     int rc = sqlite3_exec(CONFIG_DB, query, callback, param, &zErrMsg);
-    check(rc == SQLITE_OK, "Error querying DB: %s", zErrMsg);
+    check(rc == SQLITE_OK, "[SQL ERROR]: %s : '%s'", query, zErrMsg);
 
     return 0;
 

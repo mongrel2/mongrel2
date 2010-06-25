@@ -7,7 +7,7 @@ INSERT INTO server (uuid, access_log, error_log, chroot, default_host, port)
         '/mongrel2/logs/error.log',
         '/var/www',
         'mongrel2.org',
-        80);
+        8999);
 
 INSERT INTO host (server_id, name, matching)
     VALUES (
@@ -16,7 +16,7 @@ INSERT INTO host (server_id, name, matching)
         '(.*).mongrel2.org'
     );
 
-INSERT INTO handler (send_spec, recv_spec, send_ident, recv_ident)
+INSERT INTO handler (send_spec, send_ident, recv_spec, recv_ident)
     VALUES (
         'tcp://127.0.0.1:9999',
         '54c6755b-9628-40a4-9a2d-cc82a816345e',

@@ -58,7 +58,7 @@ int RouteMap_insert_reversed(RouteMap *routes, const char *pattern, size_t len, 
     Route *route = NULL;
     char reversed_prefix[MAX_HOST_NAME];
     char *last_paren = strrchr(pattern, ')');
-    size_t prefix_len = last_paren ? len - (last_paren - pattern) : len;
+    size_t prefix_len = last_paren ? len - (last_paren - pattern + 1) : len;
     int pi, ri;
 
     debug("prefix_len: %d", prefix_len);

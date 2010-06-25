@@ -1,36 +1,174 @@
-#include "config.h"
-#include <stdio.h>
+#include <config/config.h>
+#include <config/db.h>
+#include <stdlib.h>
+#include <dbg.h>
+#include <adt/list.h>
+#include <server.h>
 #include <string.h>
-#include "tst.h"
+#include <stdarg.h>
+#include <sqlite3.h>
 
-tst_t *routes = NULL;
 
+#define arity(N) check(cols == (N), "Wrong number of cols: %d but expect %d", cols, (N)); int max = N;
+#define SQL(Q, ...) sqlite3_mprintf((Q), ##__VA_ARGS__)
+#define SQL_FREE(Q) if(Q) sqlite3_free(Q)
 
-int config_load_routes(void *NotUsed, int argc, char **argv, char **azColName)
+int Config_handler_load_cb(void *param, int cols, char **data, char **names)
 {
-    Route *next = calloc(sizeof(Route), 1);
+    arity(5);
+    Handler **target = (Handler **)param;
 
-    next->path = strdup(argv[0]);
-    next->name = strdup(argv[1]);
-    next->style = strdup(argv[2]);
-    next->addr = strdup(argv[3]);
+    debug("Making a handler for %s:%s:%s:%s:%s", data[0], data[1], data[2],
+            data[3], data[4]);
 
-    routes = tst_insert(routes, next->path, strlen(next->path), next);
+    *target = Handler_create(data[1], data[2], data[3], data[4]);
+
+    check(*target, "Failed to create handler for %s:%s:%s:%s:%s", 
+            data[0], data[1], data[2], data[3], data[4]);
 
     return 0;
+error:
+    return -1;
 }
 
-int config_print_routes(void *NotUsed, int argc, char **argv, char **azColName)
+int Config_proxy_load_cb(void *param, int cols, char **data, char **names)
 {
-    Route *found = tst_search(routes, argv[0], strlen(argv[0]));
+    arity(3);
+    Proxy **target = (Proxy **)param;
 
-    if(!found) {
-        printf("Didn't find: %s\n", argv[0]);
+    debug("Making a proxy for %s:%s:%s", data[0], data[1], data[2]);
+
+    *target = Proxy_create(data[2], atoi(data[1]));
+    check(*target, "Failed to create proxy for %s:%s:%s", data[0], data[1], data[2]);
+
+    return 0;
+error:
+    return -1;
+}
+
+int Config_route_load_cb(void *param, int cols, char **data, char **names)
+{
+    arity(4);
+    
+    Host *host = (Host *)param;
+    check(host, "Should get a host on callback for routes.");
+
+    char *query = NULL;
+    int rc = 0;
+    void *target = NULL;
+    BackendType type = 0;
+    const char *HANDLER_QUERY = "SELECT id, send_spec, send_ident, recv_spec, recv_ident FROM handler WHERE id=%s";
+    const char *PROXY_QUERY = "SELECT id, addr, port FROM proxy where id=%s";
+
+
+    if(strcmp(data[3], "handler") == 0) {
+        query = SQL(HANDLER_QUERY, data[2]);
+
+        rc = DB_exec(query, Config_handler_load_cb, &target);
+        check(rc == 0, "Failed to find handler for route: %s (id: %s)",
+                data[1], data[0]);
+
+        type = BACKEND_HANDLER;
+
+    } else if(strcmp(data[3], "proxy") == 0) {
+        query = SQL(PROXY_QUERY, data[2]);
+        rc = DB_exec(query, Config_proxy_load_cb, &target);
+        check(rc == 0, "Failed to find handler for route: %s (id: %s)",
+                data[1], data[0]);
+
+        type = BACKEND_PROXY;
+
     } else {
-        printf("Found %s, name: %s, style: %s, addr: %s\n",
-                argv[0], found->name, found->style, found->addr);
+        sentinel("Invalid handler type: %s for host: %s", data[3], host->name);
     }
 
+    Host_add_backend(host, data[1], strlen(data[1]), type, target);
+
+    SQL_FREE(query);
+
     return 0;
+error:
+
+    SQL_FREE(query);
+    return -1;
 }
 
+int Config_host_load_cb(void *param, int cols, char **data, char **names)
+{
+    arity(3);
+
+    Server *srv = (Server *)param;
+    const char *ROUTE_QUERY = "SELECT id, path, target_id, target_type FROM route WHERE host_id=%s";
+    check(srv, "Should be given the server to add hosts to.");
+
+    Host *host = Host_create(data[1]);
+    check(host, "Failed to create host: %s (id: %d)", data[1], data[0]);
+
+    char *query = SQL(ROUTE_QUERY, data[0]);
+
+    DB_exec(query, Config_route_load_cb, host);
+
+    debug("Adding host %s (id: %d) to server at pattern %s", data[1], data[0], data[2]);
+
+
+    Server_add_host(srv, data[2], strlen(data[2]), host);
+
+    if(srv->default_host == NULL) Server_set_default_host(srv, host);
+
+    SQL_FREE(query);
+    return 0;
+error:
+
+    SQL_FREE(query);
+    return -1;
+}
+
+int Config_server_load_cb(void *param, int cols, char **data, char **names)
+{
+    arity(4);
+
+    list_t *servers = (list_t *)param;
+    Server *srv = NULL;
+    const char *HOST_QUERY = "SELECT id, name, matching FROM host where server_id = %s";
+ 
+    debug("Configuring server ID: %s, default host: %s, port: %s", 
+            data[1], data[2], data[3]);
+
+    srv = Server_create(data[3]);
+    check(srv, "Failed to create server %s on port %s", data[2], data[3]);
+
+    char *query = SQL(HOST_QUERY, data[0]);
+    check(query, "Failed to craft query.");
+
+    int rc = DB_exec(query, Config_host_load_cb, srv);
+    check(rc == 0, "Failed to find hosts for server %s on port %s (id: %s)",
+            data[2], data[3], data[0]);
+
+    list_append(servers, lnode_create(srv));
+
+    SQL_FREE(query);
+    return 0;
+
+error:
+    SQL_FREE(query);
+    return -1;
+}
+
+
+list_t *Config_load(const char *path)
+{
+    list_t *servers = list_create(LISTCOUNT_T_MAX);
+    const char *SERVER_QUERY = "SELECT id, uuid, default_host, port FROM server";
+
+    int rc = DB_init(path);
+    check(rc == 0, "Failed to load config database: %s", path);
+
+    rc = DB_exec(SERVER_QUERY, Config_server_load_cb, servers);
+    check(rc == 0, "Failed to select servers from: %s", path);
+
+
+    return servers;
+error:
+
+    return NULL;
+}
