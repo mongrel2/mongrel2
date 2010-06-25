@@ -10,18 +10,14 @@ FILE *LOG_FILE = NULL;
 void taskmain(int argc, char **argv)
 {
     LOG_FILE = stderr;
-
-    int rc = 0;
-    Server *srv = NULL;
-
-    check(argc == 2, "usage: server config.sqlite");
+    check(argc == 3, "usage: server config.sqlite default_host");
 
     Server_init();
 
-    list_t *servers = Config_load(argv[1]);
+    list_t *servers = Config_load_servers(argv[1], argv[2]);
     check(list_count(servers) == 1, "Currently only support running one server.");
 
-    srv = lnode_get(list_first(servers));
+    Server *srv = lnode_get(list_first(servers));
 
     Server_start(srv);
 

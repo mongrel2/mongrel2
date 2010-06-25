@@ -3,6 +3,6 @@
 
 #include <adt/list.h>
 
-list_t *Config_load(const char *path);
+list_t *Config_load_servers(const char *path, const char *name);
 
 #endif

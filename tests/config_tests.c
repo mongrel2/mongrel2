@@ -5,7 +5,7 @@ FILE *LOG_FILE = NULL;
 
 char *test_Config_load() 
 {
-    list_t *servers = Config_load("tests/config.sqlite");
+    list_t *servers = Config_load_servers("tests/config.sqlite", "mongrel2.org");
 
     mu_assert(servers != NULL, "Should get a server list.");
     mu_assert(list_count(servers) == 1, "Failed to load the server.");
@@ -14,7 +14,8 @@ char *test_Config_load()
 }
 
 
-char * all_tests() {
+char * all_tests() 
+{
     mu_suite_start();
 
     Server_init();

@@ -155,20 +155,23 @@ error:
 }
 
 
-list_t *Config_load(const char *path)
+list_t *Config_load_servers(const char *path, const char *name)
 {
     list_t *servers = list_create(LISTCOUNT_T_MAX);
-    const char *SERVER_QUERY = "SELECT id, uuid, default_host, port FROM server";
+    const char *SERVER_QUERY = "SELECT id, uuid, default_host, port FROM server WHERE default_host=%Q";
 
     int rc = DB_init(path);
     check(rc == 0, "Failed to load config database: %s", path);
 
-    rc = DB_exec(SERVER_QUERY, Config_server_load_cb, servers);
+    char *query = SQL(SERVER_QUERY, name);
+
+    rc = DB_exec(query, Config_server_load_cb, servers);
     check(rc == 0, "Failed to select servers from: %s", path);
 
-
+    SQL_FREE(query);
     return servers;
 error:
 
+    SQL_FREE(query);
     return NULL;
 }
