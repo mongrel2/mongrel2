@@ -1,5 +1,3 @@
-.read src/config/config.sql
-
 INSERT INTO server (uuid, access_log, error_log, chroot, default_host, port) 
     VALUES (
         'AC1F8236-5919-4696-9D40-0F38DE9E5861',
