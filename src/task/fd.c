@@ -8,8 +8,10 @@
 
 enum
 {
+    // TODO: base how many we can handle on the rlimit possible
     MAXFD = 1024 * 10, FDSTACK= 100 * 1024
 };
+
 
 static zmq_pollitem_t pollfd[MAXFD];
 static Task *polltask[MAXFD];

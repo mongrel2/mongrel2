@@ -77,7 +77,7 @@ int Register_ping(int fd)
     hnode_t *hn = hash_lookup(registrations, (void *)fd);
 
     check(hn, "Ping received but %d isn't actually registerd.", fd);
-    // TODO: increment its ping time
+    // TODO: implement ping and timeout tracking killing dead connects
     
     return 1;
 

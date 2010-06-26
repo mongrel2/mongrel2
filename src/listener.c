@@ -7,6 +7,7 @@
 #include <task/task.h>
 #include <dbg.h>
 #include <handler.h>
+#include <dir.h>
 
 
 char *FLASH_RESPONSE = "<?xml version=\"1.0\"?><!DOCTYPE cross-domain-policy SYSTEM \"http://www.macromedia.com/xml/dtds/cross-domain-policy.dtd\"> <cross-domain-policy> <allow-access-from domain=\"*\" to-ports=\"*\" /></cross-domain-policy>";
@@ -16,6 +17,38 @@ size_t FLASH_LEN = 0;
 // these are used by unit tests to fake out sockets from files
 static int (*Listener_read_func)(int, void*, int);
 static int (*Listener_write_func)(int, void*, int);
+
+void debug_element(void *data, const char *at, size_t length)
+{
+    debug("ELEMENT %.*s", length, at);
+}
+
+void debug_done(void *data, const char *at, size_t length)
+{
+    debug("DONE %.*s", length, at);
+}
+
+void debug_uri(void *data, const char *at, size_t length)
+{
+    debug("URI %.*s", length, at);
+}
+
+void debug_path(void *data, const char *at, size_t length)
+{
+    debug("PATH %.*s", length, at);
+}
+
+void debug_qstring(void *data, const char *at, size_t length)
+{
+    debug("QSTR %.*s", length, at);
+}
+
+void debug_field(void *data, const char *field, size_t flen,
+        const char *value, size_t vlen)
+{
+    debug("FIELD %.*s: %.*s", flen, field, vlen, value);
+}
+
 
 void Listener_init()
 {
@@ -53,6 +86,15 @@ Listener *Listener_create(Server *srv, int fd, int rport, const char *remote)
 
     listener->parser = calloc(sizeof(http_parser), 1);
     check(listener->parser, "Failed to allocate http_parser.");
+
+    listener->parser->http_field = debug_field;
+    listener->parser->request_method = debug_element;
+    listener->parser->request_uri = debug_uri;
+    listener->parser->fragment = debug_element;
+    listener->parser->request_path = debug_path;
+    listener->parser->query_string = debug_qstring;
+    listener->parser->http_version = debug_element;
+    listener->parser->header_done = debug_element;
 
     return listener;
 error:
@@ -140,6 +182,9 @@ int Listener_process_http(Listener *listener)
     // TODO: parse the host and query that up in the host map
     // TODO: parse the path and find it in that host
     check(listener->server->default_host, "No default host set.");
+
+    debug("HTTP BODY START: %d, CONTENT_LENGTH: %d",
+            listener->parser->body_start, listener->parser->content_len);
 
     Backend *found = Host_match(listener->server->default_host, "/chat/", strlen("/chat/"));
     check(found, "Didn't find a route named /chat/, nowhere to go.");
