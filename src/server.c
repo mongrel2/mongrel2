@@ -56,7 +56,7 @@ void handlers_receive_start(void *value, void *data)
 
         // TODO: make this optional
         if(found->type == BACKEND_HANDLER) {
-            debug("LOADING BACKEND %.*s", route->length, route->pattern);
+            debug("LOADING BACKEND %.*s", (int)route->length, route->pattern);
             taskcreate(Handler_task, found->target.handler, HANDLER_STACK);
         }
     }
