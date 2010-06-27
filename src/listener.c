@@ -168,6 +168,8 @@ int Listener_process_http(Listener *listener)
     // TODO: resolve what the default host means, maybe we're matching hosts now?
     check(listener->server->default_host, "No default host set.");
 
+    taskname("Listener_task");
+
     const char *path = NULL;
 
     Backend *found = Listener_match_path(listener, BACKEND_PROXY, &path);
@@ -175,12 +177,15 @@ int Listener_process_http(Listener *listener)
     // TODO: make a generic error response system
     if(found) {
         // we can share the data because the caller will block as the proxy runs
+        taskstate("proxying");
         return Proxy_connect(found->target.proxy, listener->fd, listener->buf, BUFFER_SIZE, listener->nread);
     } else {
         log_err("[%s] 404 Not Found", path);
+        taskstate("404");
 
         fdwrite(listener->fd, HTTP_404, strlen(HTTP_404));
 
+        taskstate("closing");
         close(listener->fd);
 
         return -1;

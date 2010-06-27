@@ -74,12 +74,17 @@ inline int Proxy_read_loop(ProxyConnect *conn)
 {
     int rc = 0;
 
+
     do {
+        taskstate("writing");
+
         rc = fdsend(conn->read_fd, conn->buffer, conn->n);
 
         if(rc != conn->n) {
             break;
         }
+        
+        taskstate("reading");
     } while((conn->n = fdrecv(conn->write_fd, conn->buffer, conn->size)) > 0);
 
     // no matter what, we do this
@@ -94,6 +99,8 @@ int Proxy_connect(Proxy *proxy, int fd, const char *buf, size_t len, size_t n)
     ProxyConnect *to_listener = NULL;
     ProxyConnect *to_proxy = NULL;
 
+    taskname("proxy_to_listener");
+
     char *initial_buf = malloc(len);
     check(initial_buf, "Out of memory.");
     check(memcpy(initial_buf, buf, n), "Failed to copy the initial buffer.");
@@ -105,12 +112,16 @@ int Proxy_connect(Proxy *proxy, int fd, const char *buf, size_t len, size_t n)
 
     debug("Connecting to %s:%d", proxy->server, proxy->port);
 
+    // TODO: create release style macros that compile these away
+    taskstate("connecting");
+
     to_proxy->read_fd = netdial(TCP, proxy->server, proxy->port);
     check(to_proxy->read_fd >= 0, "Failed to connect to %s:%d", proxy->server, proxy->port);
 
     fdnoblock(to_proxy->read_fd);
     fdnoblock(to_proxy->write_fd);
 
+    taskstate("connected");
     debug("Proxy connected to %s:%d", proxy->server, proxy->port);
     
     to_listener = ProxyConnect_create(to_proxy->read_fd, 
@@ -122,6 +133,7 @@ int Proxy_connect(Proxy *proxy, int fd, const char *buf, size_t len, size_t n)
 
     assert(to_listener->write_fd != to_proxy->write_fd && "Wrong write fd setup.");
     assert(to_listener->read_fd != to_proxy->read_fd && "Wrong read fd setup.");
+
 
     // kick off one side as a task to do its thing
     taskcreate(rwtask, (void *)to_proxy, STACK);
@@ -139,6 +151,7 @@ error:
 void
 rwtask(void *v)
 {
+    taskname("proxy_to_proxy");
     ProxyConnect *conn = (ProxyConnect *)v;
     // return value ignored since this is a task
     Proxy_read_loop(conn);

@@ -70,6 +70,8 @@ void Server_start(Server *srv)
 
     check(srv->default_host, "No default_host set.");
 
+    taskname("SERVER");
+
     debug("Starting server on port %d", srv->port);
 
     tst_traverse(srv->default_host->routes->routes, handlers_receive_start, srv);
@@ -78,7 +80,9 @@ void Server_start(Server *srv)
         debug("Connection from %s:%d to %s:%d", remote, rport, 
                 srv->default_host->name, srv->port);
 
+        taskstate("accepting");
         Listener_accept(srv, cfd, rport, remote);
+        taskstate("waiting");
     }
 
     return;

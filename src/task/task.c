@@ -4,7 +4,6 @@
 #include <fcntl.h>
 #include <stdio.h>
 
-int    taskdebuglevel;
 int    taskcount;
 int    tasknswitch;
 int    taskexitval;
@@ -13,47 +12,16 @@ Task    *taskrunning;
 Context    taskschedcontext;
 Tasklist    taskrunqueue;
 
+enum {
+    TASK_LIST_GROWTH=256
+};
+
 Task    **alltask;
 int        nalltask;
 
 static char *argv0;
 static    void        contextswitch(Context *from, Context *to);
 
-static void
-taskdebug(char *fmt, ...)
-{
-    va_list arg;
-    char buf[128];
-    Task *t;
-    char *p;
-    static int fd = -1;
-
-return;
-    va_start(arg, fmt);
-    vfprint(1, fmt, arg);
-    va_end(arg);
-return;
-
-    if(fd < 0){
-        p = strrchr(argv0, '/');
-        if(p)
-            p++;
-        else
-            p = argv0;
-        snprint(buf, sizeof buf, "/tmp/%s.tlog", p);
-        if((fd = open(buf, O_CREAT|O_WRONLY, 0666)) < 0)
-            fd = open("/dev/null", O_WRONLY);
-    }
-
-    va_start(arg, fmt);
-    vsnprint(buf, sizeof buf, fmt, arg);
-    va_end(arg);
-    t = taskrunning;
-    if(t)
-        fprint(fd, "%d.%d: %s\n", getpid(), t->id, buf);
-    else
-        fprint(fd, "%d._: %s\n", getpid(), buf);
-}
 
 static void
 taskstart(uint y, uint x)
@@ -66,11 +34,8 @@ taskstart(uint y, uint x)
     z |= y;
     t = (Task*)z;
 
-//print("taskstart %p\n", t);
     t->startfn(t->startarg);
-//print("taskexits %p\n", t);
     taskexit(0);
-//print("not reacehd\n");
 }
 
 static int taskidgen;
@@ -123,7 +88,6 @@ taskalloc(void (*fn)(void*), void *arg, uint stack)
      * function that takes some number of word-sized variables,
      * and on 64-bit machines pointers are bigger than words.
      */
-//print("make %p\n", t);
     z = (ulong)t;
     y = z;
     z >>= 16;    /* hide undefined 32-bit shift from 32-bit compilers */
@@ -142,8 +106,8 @@ taskcreate(void (*fn)(void*), void *arg, uint stack)
     t = taskalloc(fn, arg, stack);
     taskcount++;
     id = t->id;
-    if(nalltask%64 == 0){
-        alltask = realloc(alltask, (nalltask+64)*sizeof(alltask[0]));
+    if(nalltask % TASK_LIST_GROWTH == 0){
+        alltask = realloc(alltask, (nalltask + TASK_LIST_GROWTH)*sizeof(alltask[0]));
         if(alltask == nil){
             fprint(2, "out of memory\n");
             abort();
@@ -225,7 +189,6 @@ taskscheduler(void)
     int i;
     Task *t;
 
-    taskdebug("scheduler enter");
     for(;;){
         if(taskcount == 0)
             exit(taskexitval);
@@ -238,9 +201,7 @@ taskscheduler(void)
         t->ready = 0;
         taskrunning = t;
         tasknswitch++;
-        taskdebug("run %d (%s)", t->id, t->name);
         contextswitch(&taskschedcontext, &t->context);
-//print("back in scheduler\n");
         taskrunning = nil;
         if(t->exiting){
             if(!t->system)
@@ -319,6 +280,8 @@ taskinfo(int s)
     Task *t;
     char *extra;
 
+    // TODO: create a generic status module for stuff like this, web accessible
+    
     fprint(2, "task list:\n");
     for(i=0; i<nalltask; i++){
         t = alltask[i];
@@ -340,7 +303,7 @@ taskinfo(int s)
 
 static int taskargc;
 static char **taskargv;
-int mainstacksize;
+int MAINSTACKSIZE = 256 * 1024;
 
 static void
 taskmainstart(void *v)
@@ -367,10 +330,9 @@ main(int argc, char **argv)
     taskargc = argc;
     taskargv = argv;
 
-    if(mainstacksize == 0)
-        mainstacksize = 256*1024;
-    taskcreate(taskmainstart, nil, mainstacksize);
+    taskcreate(taskmainstart, nil, MAINSTACKSIZE);
     taskscheduler();
+
     fprint(2, "taskscheduler returned in main!\n");
     abort();
     return 0;

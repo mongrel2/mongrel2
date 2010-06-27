@@ -141,14 +141,12 @@ void Request_dump(http_parser *parser)
     } else if(parser->json_sent) {
         debug("JSON REQUEST of LENGTH: %d", (int)parser->body_start);
     } else {
-        debug("HTTP REQUEST\n---------");
+        debug("HTTP REQUEST of LENGTH: %d ***********", (int)parser->body_start);
     }
 
     for(node = dict_first(req); node != NULL; node = dict_next(req, node)) {
         debug("%s: %s", (const char *)dnode_getkey(node), (const char *)dnode_get(node));
     }
-    
-    debug("REQUEST HEADER LENGTH: %d\n------------", (int)parser->body_start);
 }
 
 const char *Request_get(http_parser *parser, const char *field)

@@ -42,9 +42,12 @@ void Handler_task(void *v)
     int rc = 0;
     Handler *handler = (Handler *)v;
 
+    taskname("Handler_task");
+
     while(1) {
         zmq_msg_init(inmsg);
 
+        taskstate("recv");
         rc = mqrecv(handler->recv_socket, inmsg, 0);
         check(rc == 0, "Receive on handler socket failed.");
 
@@ -59,12 +62,14 @@ void Handler_task(void *v)
             int end = 0;
             int ok = sscanf(data, "%u%n", &fd, &end);
 
+            taskstate("delivering");
             if(ok <= 0 || end <= 0) {
                 log_err("Message didn't start with a ident number.");
             } else if(!Register_exists(fd)) {
                 log_err("Ident %d is no longer connected.", fd);
                 Handler_notify_leave(handler->send_socket, fd);
             } else {
+
                 if(Listener_deliver(fd, data+end, sz-end-1) == -1) {
                     log_err("Error sending to listener %d, closing them.", fd);
                     Register_disconnect(fd);
