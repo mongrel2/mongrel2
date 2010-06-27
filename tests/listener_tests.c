@@ -61,8 +61,6 @@ int test_task_with_sample(const char *sample_file)
 
     Listener_task(listener);
 
-    check(!Register_exists(fd), "Didn't unregister the socket: %d", listener->fd);
-
     return 1;
 error:
     return 0;

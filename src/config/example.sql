@@ -5,7 +5,7 @@ INSERT INTO server (uuid, access_log, error_log, chroot, default_host, port)
         '/mongrel2/logs/error.log',
         '/var/www',
         'mongrel2.org',
-        8999);
+        6767);
 
 INSERT INTO host (server_id, name, matching)
     VALUES (
@@ -34,7 +34,7 @@ INSERT INTO proxy (addr, port)
     VALUES 
     (
         '127.0.0.1',
-        80
+        8080
     );
 
 
@@ -46,5 +46,22 @@ INSERT INTO route (path, host_id, target_id, target_type)
         "proxy"
     );
 
+
+
+INSERT INTO proxy (addr, port)
+    VALUES 
+    (
+        '127.0.0.1',
+        8080
+    );
+
+
+INSERT INTO route (path, host_id, target_id, target_type)
+    VALUES (
+        "/",
+        (select id from host where name="mongrel2.org"),
+        last_insert_rowid(),
+        "proxy"
+    );
 
 

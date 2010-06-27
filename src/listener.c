@@ -1,6 +1,5 @@
 #include <listener.h>
 #include <b64/b64.h>
-#include <http11/http11_parser.h>
 #include <string.h>
 #include <proxy.h>
 #include <zmq.h>
@@ -8,46 +7,25 @@
 #include <dbg.h>
 #include <handler.h>
 #include <dir.h>
+#include <request.h>
 
 
 char *FLASH_RESPONSE = "<?xml version=\"1.0\"?><!DOCTYPE cross-domain-policy SYSTEM \"http://www.macromedia.com/xml/dtds/cross-domain-policy.dtd\"> <cross-domain-policy> <allow-access-from domain=\"*\" to-ports=\"*\" /></cross-domain-policy>";
 
 size_t FLASH_LEN = 0;
 
+char *HTTP_404 = "HTTP/1.1 404 Not Found\r\n"
+    "Content-Type: text/plain\r\n"
+    "Connection: close\r\n"
+    "Date: Sun, 27 Jun 2010 05:45:24 GMT\r\n"
+    "Content-Length: 9\r\n"
+    "Server: Mongrel2\r\n\r\nNot Found";
+
+
+
 // these are used by unit tests to fake out sockets from files
 static int (*Listener_read_func)(int, void*, int);
 static int (*Listener_write_func)(int, void*, int);
-
-void debug_element(void *data, const char *at, size_t length)
-{
-    debug("ELEMENT %.*s", length, at);
-}
-
-void debug_done(void *data, const char *at, size_t length)
-{
-    debug("DONE %.*s", length, at);
-}
-
-void debug_uri(void *data, const char *at, size_t length)
-{
-    debug("URI %.*s", length, at);
-}
-
-void debug_path(void *data, const char *at, size_t length)
-{
-    debug("PATH %.*s", length, at);
-}
-
-void debug_qstring(void *data, const char *at, size_t length)
-{
-    debug("QSTR %.*s", length, at);
-}
-
-void debug_field(void *data, const char *field, size_t flen,
-        const char *value, size_t vlen)
-{
-    debug("FIELD %.*s: %.*s", flen, field, vlen, value);
-}
 
 
 void Listener_init()
@@ -84,17 +62,9 @@ Listener *Listener_create(Server *srv, int fd, int rport, const char *remote)
     strncpy(listener->remote, remote, IPADDR_SIZE);
     listener->remote[IPADDR_SIZE] = '\0';
 
-    listener->parser = calloc(sizeof(http_parser), 1);
-    check(listener->parser, "Failed to allocate http_parser.");
+    listener->parser = Request_create();
+    check(listener->parser, "Failed to allocate Request.");
 
-    listener->parser->http_field = debug_field;
-    listener->parser->request_method = debug_element;
-    listener->parser->request_uri = debug_uri;
-    listener->parser->fragment = debug_element;
-    listener->parser->request_path = debug_path;
-    listener->parser->query_string = debug_qstring;
-    listener->parser->http_version = debug_element;
-    listener->parser->header_done = debug_element;
 
     return listener;
 error:
@@ -105,7 +75,7 @@ error:
 void Listener_destroy(Listener *listener)
 {
     if(listener) {
-        free(listener->parser);
+        Request_destroy(listener->parser);
         free(listener);
     }
 }
@@ -179,19 +149,28 @@ error:
 
 int Listener_process_http(Listener *listener)
 {
-    // TODO: parse the host and query that up in the host map
-    // TODO: parse the path and find it in that host
     check(listener->server->default_host, "No default host set.");
 
-    debug("HTTP BODY START: %d, CONTENT_LENGTH: %d",
-            listener->parser->body_start, listener->parser->content_len);
+    const char *path = Request_get(listener->parser, "PATH");
+    check(path, "Invalid HTTP Request, no PATH parameter.");
 
-    Backend *found = Host_match(listener->server->default_host, "/chat/", strlen("/chat/"));
-    check(found, "Didn't find a route named /chat/, nowhere to go.");
-    check(found->type == BACKEND_PROXY, "/chat/ route should be proxy type.");
+    Backend *found = Host_match(listener->server->default_host, path, strlen(path));
 
-    // we can share the data because the caller will block as the proxy runs
-    return Proxy_connect(found->target.proxy, listener->fd, listener->buf, BUFFER_SIZE, listener->nread);
+    // TODO: make a generic error response system
+    if(found) {
+        check(found->type == BACKEND_PROXY, "%s route should be proxy type.", path);
+
+        // we can share the data because the caller will block as the proxy runs
+        return Proxy_connect(found->target.proxy, listener->fd, listener->buf, BUFFER_SIZE, listener->nread);
+    } else {
+        log_err("[%s] 404 Not Found", path);
+
+        fdwrite(listener->fd, HTTP_404, strlen(HTTP_404));
+
+        close(listener->fd);
+
+        return -1;
+    }
    
 error:
     return -1;
@@ -209,12 +188,13 @@ error:
 
 int Listener_parse(Listener *listener)
 {
-    http_parser_init(listener->parser);
+    Request_start(listener->parser);
 
-    listener->nparsed = http_parser_execute(listener->parser, listener->buf, listener->nread, 0);
-    listener->finished =  http_parser_finish(listener->parser);
-    check(listener->finished == 1, "Error in parsing: %d, bytes: %d, value: %.*s", 
-            listener->finished, listener->nread, listener->nread, listener->buf);
+    int finished = Request_parse(listener->parser, listener->buf,
+                        listener->nread, &listener->nparsed);
+
+    check(finished == 1, "Error in parsing: %d, bytes: %d, value: %.*s", 
+            finished, listener->nread, listener->nread, listener->buf);
 
     return 0;
     
@@ -233,9 +213,12 @@ void Listener_task(void *v)
         listener->buf[listener->nread] = '\0';
 
         rc = Listener_parse(listener);
+
+        Request_dump(listener->parser);
+
         check(rc == 0, "Parsing failed, closing %s:%d 'cause they suck.",
                 listener->remote, listener->rport);
-        
+       
         if(listener->parser->socket_started) {
             rc = Listener_process_flash_socket(listener);
             check(rc == 0, "Invalid flash socket, closing %s:%d 'cause flash sucks.",

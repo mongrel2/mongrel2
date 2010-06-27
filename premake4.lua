@@ -56,6 +56,7 @@ solution "Mongrel2"
    test("listener_tests")
    test("register_tests")
    test("tst_tests")
+   test("request_tests")
 
    project "mongrel2"
       kind "ConsoleApp"

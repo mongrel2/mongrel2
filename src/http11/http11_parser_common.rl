@@ -49,8 +49,8 @@
 
   Request = Request_Line ( message_header )* ( CRLF @done );
 
-  SocketStart = "<policy-file-request/>\0" @socket;
-  SocketJSON = "{" any** "\0" @json;
+  SocketStart = "<policy-file-request/>\0" @socket @done;
+  SocketJSON = "{" any** "\0" @json @done;
   SocketRequest = SocketStart | SocketJSON;
 
 main := Request | SocketRequest;
