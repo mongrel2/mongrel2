@@ -9,7 +9,7 @@
 #include <register.h>
 
 
-static char *LEAVE_MSG = "{\"type\":\"leave\"}";
+static char *LEAVE_MSG = "@* {\"type\":\"leave\"}";
 size_t LEAVE_MSG_LEN = 0;
 
 void our_free(void *data, void *hint)

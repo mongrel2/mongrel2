@@ -48,6 +48,20 @@ void Server_init()
 }
 
 
+void handlers_receive_start(void *value, void *data)
+{
+    Route *route = (Route *)value;
+    if(route) { 
+        Backend *found = (Backend *)route->data;
+
+        // TODO: make this optional
+        if(found->type == BACKEND_HANDLER) {
+            debug("LOADING BACKEND %.*s", route->length, route->pattern);
+            taskcreate(Handler_task, found->target.handler, HANDLER_STACK);
+        }
+    }
+}
+
 void Server_start(Server *srv)
 {
     int cfd;
@@ -58,15 +72,9 @@ void Server_start(Server *srv)
 
     debug("Starting server on port %d", srv->port);
 
-    // TODO: figure out how to start receive side handlers, probably traverse?
-    Backend *found = Host_match(srv->default_host, "@chat", strlen("@chat"));
-    check(found, "Didn't find a route named @chat, nowhere to go.");
-    check(found->type == BACKEND_HANDLER, "@chat route should be handler type, it's %d", found->type);
-    
-    taskcreate(Handler_task, found->target.handler, HANDLER_STACK);
+    tst_traverse(srv->default_host->routes->routes, handlers_receive_start, srv);
 
     while((cfd = netaccept(srv->listen_fd, remote, &rport)) >= 0) {
-        // TODO: name servers better
         debug("Connection from %s:%d to %s:%d", remote, rport, 
                 srv->default_host->name, srv->port);
 

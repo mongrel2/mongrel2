@@ -9,7 +9,7 @@
 #include <dir.h>
 #include <request.h>
 #include <register.h>
-#include <unistd.h>
+#include <pattern.h>
 
 
 char *FLASH_RESPONSE = "<?xml version=\"1.0\"?><!DOCTYPE cross-domain-policy SYSTEM \"http://www.macromedia.com/xml/dtds/cross-domain-policy.dtd\"> <cross-domain-policy> <allow-access-from domain=\"*\" to-ports=\"*\" /></cross-domain-policy>";
@@ -19,10 +19,10 @@ size_t FLASH_LEN = 0;
 char *HTTP_404 = "HTTP/1.1 404 Not Found\r\n"
     "Content-Type: text/plain\r\n"
     "Connection: close\r\n"
-    "Date: Sun, 27 Jun 2010 05:45:24 GMT\r\n"
     "Content-Length: 9\r\n"
     "Server: Mongrel2\r\n\r\nNot Found";
 
+const char *PING_PATTERN = "@[a-z/]- {\"type\":%s*\"ping\"}"; 
 
 
 // these are used by unit tests to fake out sockets from files
@@ -123,24 +123,21 @@ int Listener_process_json(Listener *listener)
         listener->registered = 1;
     }
 
-    // TODO: strcmp is lame
-    if(strcmp(listener->buf, "{\"type\":\"ping\"}") == 0) {
+    if(pattern_match(listener->buf, listener->parser->body_start, PING_PATTERN)) {
         if(!Register_ping(listener->fd)) {
             Register_disconnect(listener->fd);
         }
 
     } else {
-        // TODO: actually, like, parse the route yo
-        Backend *found = Host_match(listener->server->default_host, "@chat", strlen("@chat"));
-        check(found, "Didn't find a route named @chat, nowhere to go.");
-        check(found->type == BACKEND_HANDLER, "@chat route should be handler type, it's %d", found->type);
+        const char *path = NULL;
+        Backend *found = Listener_match_path(listener, BACKEND_HANDLER, &path);
+        check(found, "Handler not found: %s", path);
 
         debug("JSON message from %s:%d sent on jssocket: %.*s", listener->remote, listener->rport, listener->nread, listener->buf);
-        check(found->target.handler, "Oops, handler got reset, how'd that happen?.");
 
         if(Handler_deliver(found->target.handler->send_socket, listener->fd, listener->buf, listener->nread) == -1) {
             log_err("Can't deliver message to handler.");
-        }
+       }
     }
 
     return 0;
@@ -148,20 +145,35 @@ error:
     return -1;
 }
 
+Backend *Listener_match_path(Listener *listener, BackendType of_type, const char **out_path)
+{
+    *out_path = Request_get(listener->parser, "PATH");
+    check(*out_path, "Invalid HTTP Request, no PATH parameter.");
+
+    Backend *found = Host_match(listener->server->default_host, *out_path, strlen(*out_path));
+
+    if(found) {
+        // TODO: better non-numeric error message here
+        check(found->type == of_type, "Wrong handler type, expected %d got %d", of_type, found->type);
+    }
+
+    return found;
+
+error:
+    return NULL;
+}
 
 int Listener_process_http(Listener *listener)
 {
+    // TODO: resolve what the default host means, maybe we're matching hosts now?
     check(listener->server->default_host, "No default host set.");
 
-    const char *path = Request_get(listener->parser, "PATH");
-    check(path, "Invalid HTTP Request, no PATH parameter.");
+    const char *path = NULL;
 
-    Backend *found = Host_match(listener->server->default_host, path, strlen(path));
+    Backend *found = Listener_match_path(listener, BACKEND_PROXY, &path);
 
     // TODO: make a generic error response system
     if(found) {
-        check(found->type == BACKEND_PROXY, "%s route should be proxy type.", path);
-
         // we can share the data because the caller will block as the proxy runs
         return Proxy_connect(found->target.proxy, listener->fd, listener->buf, BUFFER_SIZE, listener->nread);
     } else {

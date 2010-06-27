@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <server.h>
 #include <http11/http11_parser.h>
+#include <host.h>
 
 enum
 {
@@ -46,5 +47,7 @@ int Listener_process_http(Listener *listener);
 int Listener_process_flash_socket(Listener *listener);
 
 int Listener_parse(Listener *listener);
+
+Backend *Listener_match_path(Listener *listener, BackendType of_type, const char **out_path);
 
 #endif

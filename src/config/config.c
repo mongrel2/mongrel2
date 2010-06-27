@@ -61,7 +61,7 @@ int Config_route_load_cb(void *param, int cols, char **data, char **names)
     const char *PROXY_QUERY = "SELECT id, addr, port FROM proxy where id=%s";
 
 
-    if(strcmp(data[3], "handler") == 0) {
+    if(strcmp("handler", data[3]) == 0) {
         query = SQL(HANDLER_QUERY, data[2]);
 
         rc = DB_exec(query, Config_handler_load_cb, &target);
@@ -70,7 +70,7 @@ int Config_route_load_cb(void *param, int cols, char **data, char **names)
 
         type = BACKEND_HANDLER;
 
-    } else if(strcmp(data[3], "proxy") == 0) {
+    } else if(strcmp("proxy", data[3]) == 0) {
         query = SQL(PROXY_QUERY, data[2]);
         rc = DB_exec(query, Config_proxy_load_cb, &target);
         check(rc == 0, "Failed to find handler for route: %s (id: %s)",

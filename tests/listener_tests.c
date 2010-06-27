@@ -12,7 +12,7 @@
 FILE *LOG_FILE = NULL;
 Server *SRV = NULL;
 const char *FLASH_POLICY = "<policy-file-request/>";
-const char *JSON_PING = "{\"type\":\"ping\"}";
+const char *JSON_PING = "@chat {\"type\":\"ping\"}";
 
 char *test_Listener_init() 
 {

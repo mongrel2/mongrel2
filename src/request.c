@@ -112,6 +112,9 @@ void Request_start(http_parser *parser)
 {
     assert(parser && "NULL pointer error.");
     http_parser_init(parser);
+    if(parser->data) {
+        dict_free_nodes(parser->data);
+    }
 }
 
 int Request_parse(http_parser *parser, char *buf, size_t nread,
@@ -137,7 +140,6 @@ void Request_dump(http_parser *parser)
         return;
     } else if(parser->json_sent) {
         debug("JSON REQUEST of LENGTH: %d", (int)parser->body_start);
-        return;
     } else {
         debug("HTTP REQUEST\n---------");
     }

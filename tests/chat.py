@@ -28,7 +28,7 @@ while True:
     msg = reqs.recv()
     print "MESSAGE", repr(msg)
 
-    ident, data = msg.split(' ', 1)
+    ident, path, data = msg.split(' ', 2)
     try:
         data = json.loads(data)
     except:
