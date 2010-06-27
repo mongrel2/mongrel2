@@ -1,6 +1,7 @@
 #include "minunit.h"
 #include <server.h>
 #include <string.h>
+#include <task/task.h>
 
 FILE *LOG_FILE = NULL;
 

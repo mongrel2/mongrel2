@@ -57,8 +57,6 @@ int test_task_with_sample(const char *sample_file)
     listener->fd = open(sample_file, O_RDONLY);
     check(!listener->fd >= 0, "Failed to open the sample file: %s.", sample_file);
 
-    int fd = listener->fd;
-
     Listener_task(listener);
 
     return 1;

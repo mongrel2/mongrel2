@@ -2,6 +2,7 @@
 #include "minunit.h"
 #include <handler.h>
 #include <string.h>
+#include <task/task.h>
 
 FILE *LOG_FILE = NULL;
 

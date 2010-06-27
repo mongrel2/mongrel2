@@ -71,7 +71,7 @@ Backend *Host_match(Host *host, const char *target, size_t len)
     if(n) {
         found = lnode_get(n);
         assert(found && "RouteMap returned a list node with NULL.");
-        debug("Found backend at %.*s", found->length, found->pattern);
+        debug("Found backend at %.*s", (int)found->length, found->pattern);
     }
 
     list_destroy_nodes(results);

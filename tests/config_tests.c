@@ -1,5 +1,6 @@
 #include "minunit.h"
 #include <config/config.h>
+#include <server.h>
 
 FILE *LOG_FILE = NULL;
 

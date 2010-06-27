@@ -2,6 +2,8 @@
 #define _dir_h
 
 #include <stdlib.h>
+#include <sys/sendfile.h>
+
 enum {
     MAX_SEND_BUFFER = 16 * 1024
 };

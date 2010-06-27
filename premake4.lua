@@ -8,6 +8,7 @@ function test(test_name)
       kind("ConsoleApp")
       language("C")
       files {"tests/*.h", "tests/" .. test_name .. ".c"}
+      flags { "ExtraWarnings", "FatalWarnings", "Symbols" }
 
       libdirs {"lib"}
       links { "sqlite3", "zmq", "m2" }
@@ -36,7 +37,7 @@ solution "Mongrel2"
  
       configuration "Debug"
          defines { "DEBUG" }
-         flags { "Symbols" }
+         flags { "ExtraWarnings", "FatalWarnings", "Symbols" }
 
       postbuildcommands {
           "sqlite3 ../tests/config.sqlite < ../src/config/config.sql",
@@ -66,4 +67,5 @@ solution "Mongrel2"
       includedirs { "src" }
       targetdir "bin"
       files { "src/mongrel2.c" }
+      flags { "ExtraWarnings", "FatalWarnings", "Symbols" }
 

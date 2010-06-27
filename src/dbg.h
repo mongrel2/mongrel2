@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <errno.h>
+#include <string.h>
 
 extern FILE *LOG_FILE;
 

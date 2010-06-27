@@ -9,4 +9,6 @@ int Register_ping(int fd);
 
 void Register_init();
 
+int Register_exists(int fd);
+
 #endif

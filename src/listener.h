@@ -16,7 +16,7 @@ typedef struct Listener {
     int fd;
     http_parser *parser;
     int nread;
-    int nparsed;
+    size_t nparsed;
     int finished;
     int registered;
     int rport;

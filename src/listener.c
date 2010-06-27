@@ -8,6 +8,8 @@
 #include <handler.h>
 #include <dir.h>
 #include <request.h>
+#include <register.h>
+#include <unistd.h>
 
 
 char *FLASH_RESPONSE = "<?xml version=\"1.0\"?><!DOCTYPE cross-domain-policy SYSTEM \"http://www.macromedia.com/xml/dtds/cross-domain-policy.dtd\"> <cross-domain-policy> <allow-access-from domain=\"*\" to-ports=\"*\" /></cross-domain-policy>";

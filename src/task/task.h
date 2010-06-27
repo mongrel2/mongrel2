@@ -8,6 +8,7 @@ extern "C" {
 #endif
 
 #include <stdarg.h>
+#include <unistd.h>
 #include <inttypes.h>
 #include <zmq.h>
 

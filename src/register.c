@@ -3,7 +3,9 @@
 #include <adt/hash.h>
 #include <task/task.h>
 #include <assert.h>
-
+#include <errno.h>
+#include <string.h>
+#include <unistd.h>
 
 hash_t *registrations = NULL;
 
@@ -37,13 +39,13 @@ void Register_connect(int fd)
 
     debug("Registering %d ident.", fd);
 
-    hnode_t *hn = hash_lookup(registrations, (void *)fd);
+    hnode_t *hn = hash_lookup(registrations, (void *)(intptr_t)fd);
 
     if(hn) hash_delete_free(registrations, hn);
 
-    check(hash_alloc_insert(registrations, (void *)fd, NULL), "Cannot register fd, out of space.");
+    check(hash_alloc_insert(registrations, (void *)(intptr_t)fd, NULL), "Cannot register fd, out of space.");
 
-    debug("Currently registered idents: %d", hash_count(registrations));
+    debug("Currently registered idents: %d", (int)hash_count(registrations));
 
     return;
 
@@ -56,7 +58,7 @@ void Register_disconnect(int fd)
 {
     assert(registrations && "Call Register_init.");
 
-    hnode_t *hn = hash_lookup(registrations, (void *)fd);
+    hnode_t *hn = hash_lookup(registrations, (void *)(intptr_t)fd);
 
     if(hn) {
         debug("Unregistering %d", fd);
@@ -74,7 +76,7 @@ int Register_ping(int fd)
     assert(registrations && "Call Register_init.");
 
     debug("Ping received for ident %d", fd);
-    hnode_t *hn = hash_lookup(registrations, (void *)fd);
+    hnode_t *hn = hash_lookup(registrations, (void *)(intptr_t)fd);
 
     check(hn, "Ping received but %d isn't actually registerd.", fd);
     // TODO: implement ping and timeout tracking killing dead connects
@@ -88,9 +90,9 @@ error:
 
 int Register_exists(int fd)
 {
-    hash_lookup(registrations, (void *)fd);
+    hash_lookup(registrations, (void *)(intptr_t)fd);
     assert(registrations && "Call Register_init.");
 
-    return hash_lookup(registrations, (void *)fd) != NULL;
+    return hash_lookup(registrations, (void *)(intptr_t)fd) != NULL;
 }
 

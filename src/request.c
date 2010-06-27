@@ -67,7 +67,6 @@ static void query_string_cb(void *data, const char *at, size_t length)
 static void header_field_cb(void *data, const char *field, size_t flen,
         const char *value, size_t vlen)
 {
-    dict_t *dict = (dict_t *)data;
     char *key = strndup(field, flen);
     add_named_param((dict_t *)data, key, value, vlen);
 }
@@ -134,20 +133,20 @@ void Request_dump(http_parser *parser)
     dnode_t *node = NULL;
 
     if(parser->socket_started) {
-        debug("FLASH SOCKET REQUEST of LENGTH: %d", parser->body_start);
+        debug("FLASH SOCKET REQUEST of LENGTH: %d", (int)parser->body_start);
         return;
     } else if(parser->json_sent) {
-        debug("JSON REQUEST of LENGTH: %d", parser->body_start);
+        debug("JSON REQUEST of LENGTH: %d", (int)parser->body_start);
         return;
     } else {
         debug("HTTP REQUEST\n---------");
     }
 
     for(node = dict_first(req); node != NULL; node = dict_next(req, node)) {
-        debug("%s: %s", dnode_getkey(node), dnode_get(node));
+        debug("%s: %s", (const char *)dnode_getkey(node), (const char *)dnode_get(node));
     }
     
-    debug("REQUEST HEADER LENGTH: %d\n------------", parser->body_start);
+    debug("REQUEST HEADER LENGTH: %d\n------------", (int)parser->body_start);
 }
 
 const char *Request_get(http_parser *parser, const char *field)

@@ -75,16 +75,16 @@ char *test_tst_traverse()
 char *test_tst_collect()
 {
     list_t *found = tst_collect(node, "TE", 2, NULL);
-    debug("collect found %d values", list_count(found));
+    debug("collect found %d values", (int)list_count(found));
 
     mu_assert(list_count(found) == 3, "Didn't find 2 with prefix TE.");
 
     found = tst_collect(node, "T", 1, NULL);
-    debug("collect found %d values", list_count(found));
+    debug("collect found %d values", (int)list_count(found));
     mu_assert(list_count(found) == 3, "Didn't find 4 with prefix T.");
 
     found = tst_collect(node, "TEST2", 5, NULL);
-    debug("collect found %d values", list_count(found));
+    debug("collect found %d values", (int)list_count(found));
     mu_assert(list_count(found) == 1, "Didn't find 1 with prefix TEST2.");
 
     found = tst_collect(node, "XNOT", 4, NULL);

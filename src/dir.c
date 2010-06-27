@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <dbg.h>
 #include <task/task.h>
+#include <string.h>
 
 int Dir_find_file(const char *path, size_t path_len, size_t *out_size)
 {
@@ -14,12 +15,12 @@ int Dir_find_file(const char *path, size_t path_len, size_t *out_size)
 
     // TODO: implement a stat cache and track inode changes in it
     int rc = stat(path, &sb);
-    check(rc == 0, "File stat failed: %.*s", path_len, path);
+    check(rc == 0, "File stat failed: %.*s", (int)path_len, path);
 
     *out_size = (size_t)sb.st_size;
 
     fd = open(path, O_RDONLY);
-    check(fd, "Failed to open file but stat worked: %.*s", path_len, path);
+    check(fd, "Failed to open file but stat worked: %.*s", (int)path_len, path);
 
     return fd;
 
@@ -40,7 +41,7 @@ int Dir_stream_file(int file_fd, size_t flen, int sock_fd)
         check(sent > 0, "Failed to sendfile on socket: %d from file %d", sock_fd, file_fd);
     }
 
-    check(total <= flen, "Wrote way too much, wrote %d but size was %d", total, flen);
+    check(total <= flen, "Wrote way too much, wrote %d but size was %d", (int)total, (int)flen);
 
     // TODO: with cache system in place we shouldn't close here
     close(file_fd);

@@ -9,9 +9,9 @@ FILE *LOG_FILE = NULL;
 int check_routing(list_t *found, Route *route, int expected_count, const char *route_data)
 {
     check(list_count(found) == expected_count, "Didn't find right number of routes: got %d, expected %d.", 
-            list_count(found), expected_count);
+            (int)list_count(found), expected_count);
     route = lnode_get(list_first(found));
-    debug("Route returned: %s", route->data);
+    debug("Route returned: %s", (const char *)route->data);
     check(route->data == route_data, "Wrong data returned.");
     return 1;
 

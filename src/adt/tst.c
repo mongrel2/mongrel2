@@ -43,7 +43,7 @@ list_t *tst_collect(tst_t *root, const char *s, size_t len, tst_collect_test_cb 
         }
     }
 
-    if(last && results.tester || p) {
+    if((last && results.tester) || p) {
         // we found node matching this prefix, so traverse and collect
         tst_traverse(p == NULL ? last : p, (tst_traverse_cb)tst_collect_build, &results);
     }
@@ -122,9 +122,6 @@ tst_t *tst_insert(tst_t *p, const char *s, size_t len, void *value)
     }
 
     return p; 
-
-error:
-    return NULL;
 }
 
 void tst_traverse(tst_t *p, tst_traverse_cb cb, void *data)

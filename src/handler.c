@@ -6,6 +6,7 @@
 #include <string.h>
 #include <listener.h>
 #include <assert.h>
+#include <register.h>
 
 
 static char *LEAVE_MSG = "{\"type\":\"leave\"}";
@@ -53,12 +54,10 @@ void Handler_task(void *v)
         if(data[sz-1] != '\0') {
             log_err("Last char from handler is not 0 it's %d, fix your backend.", data[sz-1]);
         } if(data[sz-2] == '\0') {
-            log_err("You have two \0 ending your message, fix your backend.");
+            log_err("You have two \\0 ending your message, fix your backend.");
         } else {
             int end = 0;
             int ok = sscanf(data, "%u%n", &fd, &end);
-            debug("MESSAGE from handler: %s for fd: %d, nread: %d, len: %d, final: %d, last: %d",
-                    data, fd, end, sz, sz-end-1, (data + end)[sz-end-1]);
 
             if(ok <= 0 || end <= 0) {
                 log_err("Message didn't start with a ident number.");
@@ -67,7 +66,7 @@ void Handler_task(void *v)
                 Handler_notify_leave(handler->send_socket, fd);
             } else {
                 if(Listener_deliver(fd, data+end, sz-end-1) == -1) {
-                    log_err("Error sending to listener %d, closing them.");
+                    log_err("Error sending to listener %d, closing them.", fd);
                     Register_disconnect(fd);
                     Handler_notify_leave(handler->send_socket, fd);
                 }
@@ -100,7 +99,7 @@ int Handler_deliver(void *handler_socket, int from_fd, char *buffer, size_t len)
     msg_buf = malloc(sz);
     check(msg_buf, "Failed to allocate message buffer for handler delivery.");
 
-    msg_size = snprintf(msg_buf, sz, "%d %.*s", from_fd, len, buffer);
+    msg_size = snprintf(msg_buf, sz, "%d %.*s", from_fd, (int)len, buffer);
     check(msg_size > 0, "Message too large, killing it.");
 
     rc = zmq_msg_init_data(msg, msg_buf, msg_size, our_free, NULL);

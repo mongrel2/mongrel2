@@ -9,7 +9,7 @@
 #include <sqlite3.h>
 
 
-#define arity(N) check(cols == (N), "Wrong number of cols: %d but expect %d", cols, (N)); int max = N;
+#define arity(N) check(cols == (N), "Wrong number of cols: %d but expect %d", cols, (N))
 #define SQL(Q, ...) sqlite3_mprintf((Q), ##__VA_ARGS__)
 #define SQL_FREE(Q) if(Q) sqlite3_free(Q)
 
@@ -98,17 +98,19 @@ int Config_host_load_cb(void *param, int cols, char **data, char **names)
     arity(3);
 
     Server *srv = (Server *)param;
+    char *query = NULL;
+
     const char *ROUTE_QUERY = "SELECT id, path, target_id, target_type FROM route WHERE host_id=%s";
     check(srv, "Should be given the server to add hosts to.");
 
     Host *host = Host_create(data[1]);
-    check(host, "Failed to create host: %s (id: %d)", data[1], data[0]);
+    check(host, "Failed to create host: %s (id: %s)", data[1], data[0]);
 
-    char *query = SQL(ROUTE_QUERY, data[0]);
+    query = SQL(ROUTE_QUERY, data[0]);
 
     DB_exec(query, Config_route_load_cb, host);
 
-    debug("Adding host %s (id: %d) to server at pattern %s", data[1], data[0], data[2]);
+    debug("Adding host %s (id: %s) to server at pattern %s", data[1], data[0], data[2]);
 
 
     Server_add_host(srv, data[2], strlen(data[2]), host);

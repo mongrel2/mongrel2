@@ -31,7 +31,7 @@ ProxyConnect *ProxyConnect_create(int write_fd, char *buffer, size_t size, size_
 
     return conn;
 error:
-    taskexitall(1);
+    return NULL;
 }
 
 void ProxyConnect_destroy(ProxyConnect *conn) 
