@@ -134,6 +134,7 @@ int Proxy_connect(Proxy *proxy, int fd, const char *buf, size_t len, size_t n)
     assert(to_listener->write_fd != to_proxy->write_fd && "Wrong write fd setup.");
     assert(to_listener->read_fd != to_proxy->read_fd && "Wrong read fd setup.");
 
+    // TODO: we get 411 errors on large POST so consider swapping these tasks
 
     // kick off one side as a task to do its thing
     taskcreate(rwtask, (void *)to_proxy, STACK);

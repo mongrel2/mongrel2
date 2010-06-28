@@ -7,11 +7,29 @@
 #include <string.h>
 #include <stdarg.h>
 #include <sqlite3.h>
+#include <assert.h>
 
 
 #define arity(N) check(cols == (N), "Wrong number of cols: %d but expect %d", cols, (N))
 #define SQL(Q, ...) sqlite3_mprintf((Q), ##__VA_ARGS__)
 #define SQL_FREE(Q) if(Q) sqlite3_free(Q)
+
+int Config_dir_load_cb(void *param, int cols, char **data, char **names)
+{
+    arity(2);
+    Dir **target = (Dir **)param;
+
+    debug("Making a dir for %s:%s", data[0], data[1]);
+
+    *target = Dir_create(data[1]);
+    assert((*target)->base_len > 0 && "WTF");
+
+    check(*target, "Failed to create dir for %s:%s", data[0], data[1]);
+
+    return 0;
+error:
+    return -1;
+}
 
 int Config_handler_load_cb(void *param, int cols, char **data, char **names)
 {
@@ -58,7 +76,8 @@ int Config_route_load_cb(void *param, int cols, char **data, char **names)
     void *target = NULL;
     BackendType type = 0;
     const char *HANDLER_QUERY = "SELECT id, send_spec, send_ident, recv_spec, recv_ident FROM handler WHERE id=%s";
-    const char *PROXY_QUERY = "SELECT id, addr, port FROM proxy where id=%s";
+    const char *PROXY_QUERY = "SELECT id, addr, port FROM proxy WHERE id=%s";
+    const char *DIR_QUERY = "SELECT id, base FROM directory WHERE id=%s";
 
 
     if(strcmp("handler", data[3]) == 0) {
@@ -73,11 +92,18 @@ int Config_route_load_cb(void *param, int cols, char **data, char **names)
     } else if(strcmp("proxy", data[3]) == 0) {
         query = SQL(PROXY_QUERY, data[2]);
         rc = DB_exec(query, Config_proxy_load_cb, &target);
-        check(rc == 0, "Failed to find handler for route: %s (id: %s)",
+        check(rc == 0, "Failed to find proxy for route: %s (id: %s)",
                 data[1], data[0]);
 
         type = BACKEND_PROXY;
 
+    } else if(strcmp("dir", data[3]) == 0) {
+        query = SQL(DIR_QUERY, data[2]);
+        rc = DB_exec(query, Config_dir_load_cb, &target);
+        check(rc == 0, "Failed to find dir for route: %s (id: %s)",
+                data[1], data[0]);
+        type = BACKEND_DIR;
+        
     } else {
         sentinel("Invalid handler type: %s for host: %s", data[3], host->name);
     }
@@ -171,6 +197,7 @@ list_t *Config_load_servers(const char *path, const char *name)
     check(rc == 0, "Failed to select servers from: %s", path);
 
     SQL_FREE(query);
+
     return servers;
 error:
 

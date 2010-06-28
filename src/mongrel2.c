@@ -5,6 +5,7 @@
 #include <config/config.h>
 #include <adt/list.h>
 
+
 FILE *LOG_FILE = NULL;
 
 void taskmain(int argc, char **argv)
@@ -15,6 +16,7 @@ void taskmain(int argc, char **argv)
     Server_init();
 
     list_t *servers = Config_load_servers(argv[1], argv[2]);
+    check(servers, "Failed to load server config from %s for host %s", argv[1], argv[2]);
     check(list_count(servers) == 1, "Currently only support running one server.");
 
     Server *srv = lnode_get(list_first(servers));

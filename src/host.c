@@ -44,6 +44,8 @@ int Host_add_backend(Host *host, const char *path, size_t path_len, BackendType 
         backend->target.handler = target;
     } else if(type == BACKEND_PROXY) {
         backend->target.proxy = target;
+    } else if(type == BACKEND_DIR) {
+        backend->target.dir = target;
     } else {
         sentinel("Invalid proxy type given: %d", type);
     }

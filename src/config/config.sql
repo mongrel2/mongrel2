@@ -6,6 +6,7 @@ DROP TABLE IF EXISTS route;
 DROP TABLE IF EXISTS statistic;
 DROP TABLE IF EXISTS mimetype;
 DROP TABLE IF EXISTS setting;
+DROP TABLE IF EXISTS directory;
 
 CREATE TABLE server (id INTEGER PRIMARY KEY,
     uuid TEXT,
@@ -32,6 +33,7 @@ CREATE TABLE proxy (id INTEGER PRIMARY KEY,
     addr TEXT,
     port INTEGER);
 
+CREATE TABLE directory (id INTEGER PRIMARY KEY, base TEXT);
 
 CREATE TABLE route (id INTEGER PRIMARY KEY,
     path TEXT,

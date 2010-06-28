@@ -64,4 +64,12 @@ INSERT INTO route (path, host_id, target_id, target_type)
         "proxy"
     );
 
+INSERT INTO directory (base) VALUES ("/tests/.+.json");
 
+INSERT INTO route (path, host_id, target_id, target_type)
+    VALUES (
+        "/tests/",
+        (select id from host where name="mongrel2.org"),
+        last_insert_rowid(),
+        "dir"
+    );

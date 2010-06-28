@@ -7,11 +7,14 @@
 #include <dbg.h>
 #include <task/task.h>
 #include <string.h>
+#include <pattern.h>
+#include <assert.h>
+
 
 int Dir_find_file(const char *path, size_t path_len, size_t *out_size)
 {
-    struct stat sb;
     int fd = 0;
+    struct stat sb;
 
     // TODO: implement a stat cache and track inode changes in it
     int rc = stat(path, &sb);
@@ -51,6 +54,64 @@ error:
 
     // TODO: cache should have to do this on error
     close(file_fd);
+    return -1;
+}
+
+
+Dir *Dir_create(const char *base)
+{
+    Dir *dir = calloc(sizeof(Dir), 1);
+    check(dir, "Out of memory error.");
+
+    dir->base_len = strlen(base);
+    check(dir->base_len > 0, "Cannot have an empty directory base");
+    check(dir->base_len < MAX_DIR_PATH, "Dir base cannot be greater than %d", MAX_DIR_PATH);
+
+    strncpy(dir->base, base, MAX_DIR_PATH-1);
+    dir->base[dir->base_len] = '\0';
+
+    return dir;
+error:
+    return NULL;
+}
+
+void Dir_destroy(Dir *dir)
+{
+    free(dir);
+}
+
+char *STATUS_200 = "HTTP/1.1 200 OK\r\n\r\n";
+
+int Dir_serve_file(Dir *dir, const char *path, int fd)
+{
+    // TODO: normalize path? probably doesn't matter since
+    // we'll be chroot as a mandatory operation
+    char header[512] = {0};
+
+    size_t path_len = strlen(path);
+    size_t flen = 0;
+
+    check(pattern_match(path, path_len, dir->base),
+            "(len %d): Failed to match Dir base path: %.*s against PATH %.*s",
+            (int)dir->base_len, 
+            (int)dir->base_len, dir->base, (int)path_len, path);
+
+    int file_fd = Dir_find_file(path+1, path_len-1, &flen);
+    check(file_fd, "Error opening file: %.*s", (int)path_len, path);
+
+    int rc = snprintf(header, sizeof(header)-1, "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %d\r\nConnection: close\r\n\r\n", flen);
+    fdwrite(fd, header, rc);
+
+    rc = Dir_stream_file(file_fd, flen, fd);
+    check(rc == flen, "Didn't send all of the file, send %d.", rc);
+
+    close(file_fd);
+    close(fd);
+    return 0;
+
+error:
+    close(file_fd);
+    close(fd);
     return -1;
 }
 

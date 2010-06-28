@@ -158,6 +158,8 @@ int mqwait(void *socket, int rw);
 int mqrecv(void *socket, zmq_msg_t *msg, int flags);
 int mqsend(void *socket, zmq_msg_t *msg, int flags);
 
+extern void *ZMQ_CTX;
+
 /*
  * Network dialing - sets non-blocking automatically
  */

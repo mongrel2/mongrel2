@@ -48,6 +48,6 @@ int Listener_process_flash_socket(Listener *listener);
 
 int Listener_parse(Listener *listener);
 
-Backend *Listener_match_path(Listener *listener, BackendType of_type, const char **out_path);
+Backend *Listener_match_path(Listener *listener, const char **out_path);
 
 #endif

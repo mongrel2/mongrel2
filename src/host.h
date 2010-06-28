@@ -1,13 +1,17 @@
 #ifndef _host_h
 #define _host_h
 
-#define MAX_HOST_NAME 256
-#define MAX_URL_PATH 256
-
 #include <adt/tst.h>
 #include <proxy.h>
 #include <handler.h>
+#include <dir.h>
 #include <routing.h>
+
+enum {
+   MAX_HOST_NAME=256,
+   MAX_URL_PATH=256
+};
+
 
 typedef struct Host {
     RouteMap *routes;
@@ -16,7 +20,7 @@ typedef struct Host {
 
 
 typedef enum BackendType {
-    BACKEND_HANDLER=1, BACKEND_PROXY
+    BACKEND_HANDLER=1, BACKEND_PROXY, BACKEND_DIR
 } BackendType;
 
 typedef struct Backend {
@@ -25,6 +29,7 @@ typedef struct Backend {
     union {
         Handler *handler;
         Proxy *proxy;
+        Dir *dir;
     } target;
 } Backend;
 

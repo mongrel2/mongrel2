@@ -130,8 +130,9 @@ int Listener_process_json(Listener *listener)
 
     } else {
         const char *path = NULL;
-        Backend *found = Listener_match_path(listener, BACKEND_HANDLER, &path);
+        Backend *found = Listener_match_path(listener, &path);
         check(found, "Handler not found: %s", path);
+        check(found->type == BACKEND_HANDLER, "Should get a handler.");
 
         debug("JSON message from %s:%d sent on jssocket: %.*s", listener->remote, listener->rport, listener->nread, listener->buf);
 
@@ -145,17 +146,12 @@ error:
     return -1;
 }
 
-Backend *Listener_match_path(Listener *listener, BackendType of_type, const char **out_path)
+Backend *Listener_match_path(Listener *listener, const char **out_path)
 {
     *out_path = Request_get(listener->parser, "PATH");
     check(*out_path, "Invalid HTTP Request, no PATH parameter.");
 
     Backend *found = Host_match(listener->server->default_host, *out_path, strlen(*out_path));
-
-    if(found) {
-        // TODO: better non-numeric error message here
-        check(found->type == of_type, "Wrong handler type, expected %d got %d", of_type, found->type);
-    }
 
     return found;
 
@@ -172,14 +168,28 @@ int Listener_process_http(Listener *listener)
 
     const char *path = NULL;
 
-    Backend *found = Listener_match_path(listener, BACKEND_PROXY, &path);
+    Backend *found = Listener_match_path(listener, &path);
+    check(path, "PATH not given, invalid HTTP request.");
 
-    // TODO: make a generic error response system
+    
     if(found) {
         // we can share the data because the caller will block as the proxy runs
-        taskstate("proxying");
-        return Proxy_connect(found->target.proxy, listener->fd, listener->buf, BUFFER_SIZE, listener->nread);
+        switch(found->type) {
+            case BACKEND_PROXY:
+                taskstate("proxying");
+                return Proxy_connect(found->target.proxy, listener->fd, listener->buf, BUFFER_SIZE, listener->nread);
+
+            case BACKEND_HANDLER:
+                taskstate("error");
+                sentinel("Handler isn't supported for HTTP yet.");
+            case BACKEND_DIR:
+                taskstate("sending");
+                return Dir_serve_file(found->target.dir, path, listener->fd);
+            default:
+                sentinel("Unknown handler type id: %d", found->type);
+        }
     } else {
+        // TODO: make a generic error response system
         log_err("[%s] 404 Not Found", path);
         taskstate("404");
 

@@ -21,7 +21,7 @@ static Tasklist sleeping;
 static int sleepingcounted;
 static uvlong nsec(void);
 
-static void *ZMQ_CTX = NULL;
+void *ZMQ_CTX = NULL;
 
 
 #ifndef MSG_NOSIGNAL
