@@ -8,6 +8,7 @@
 #include <stdarg.h>
 #include <sqlite3.h>
 #include <assert.h>
+#include <mime.h>
 
 
 #define arity(N) check(cols == (N), "Wrong number of cols: %d but expect %d", cols, (N))
@@ -151,6 +152,18 @@ error:
     return -1;
 }
 
+int Config_mimetypes_load_cb(void *param, int cols, char **data, char **names)
+{
+    arity(3);
+
+    int rc = MIME_add_type(data[1], data[2]);
+    check(rc == 0, "Failed to add mimetype %s:%s:%s", data[0], data[1], data[2]);
+
+    return 0;
+error:
+    return -1;
+}
+
 int Config_server_load_cb(void *param, int cols, char **data, char **names)
 {
     arity(4);
@@ -203,4 +216,17 @@ error:
 
     SQL_FREE(query);
     return NULL;
+}
+
+
+int Config_load_mimetypes()
+{
+    const char *MIME_QUERY = "SELECT id, extension, mimetype FROM mimetype";
+
+    int rc = DB_exec(MIME_QUERY, Config_mimetypes_load_cb, NULL);
+    check(rc == 0, "Failed to load mimetypes.");
+
+    return 0;
+error:
+    return -1;
 }

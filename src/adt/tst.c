@@ -60,8 +60,6 @@ void *tst_search_suffix(tst_t *root, const char *s, size_t len)
     int i = len-1;
 
     while(i > 0 && p) {
-        debug("i: %d, s: %c, split: %c", i, s[i], p->splitchar);
-
         if (s[i] < p->splitchar) {
             p = p->low; 
         } else if (s[i] == p->splitchar) {
@@ -74,8 +72,6 @@ void *tst_search_suffix(tst_t *root, const char *s, size_t len)
             p = p->high; 
         }
     }
-
-    debug("last: %p, p: %p", last, p);
 
     if(p) {
         return p->value;

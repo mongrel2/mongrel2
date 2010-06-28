@@ -19,6 +19,8 @@ void taskmain(int argc, char **argv)
     check(servers, "Failed to load server config from %s for host %s", argv[1], argv[2]);
     check(list_count(servers) == 1, "Currently only support running one server.");
 
+    check(Config_load_mimetypes() == 0, "Failed to load mime types.");
+
     Server *srv = lnode_get(list_first(servers));
 
     Server_start(srv);

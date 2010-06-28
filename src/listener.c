@@ -151,6 +151,10 @@ Backend *Listener_match_path(Listener *listener, const char **out_path)
     *out_path = Request_get(listener->parser, "PATH");
     check(*out_path, "Invalid HTTP Request, no PATH parameter.");
 
+    // TODO: find the host from reverse of host name, match it or use default host
+   
+    // TODO: convert this to actually return all found Backends, then iterate through them all
+     
     Backend *found = Host_match(listener->server->default_host, *out_path, strlen(*out_path));
 
     return found;
@@ -243,7 +247,7 @@ void Listener_task(void *v)
 
         rc = Listener_parse(listener);
 
-        Request_dump(listener->parser);
+        // Request_dump(listener->parser);
 
         check(rc == 0, "Parsing failed, closing %s:%d 'cause they suck.",
                 listener->remote, listener->rport);

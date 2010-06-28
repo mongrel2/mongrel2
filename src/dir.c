@@ -9,6 +9,7 @@
 #include <string.h>
 #include <pattern.h>
 #include <assert.h>
+#include <mime.h>
 
 
 int Dir_find_file(const char *path, size_t path_len, size_t *out_size)
@@ -80,13 +81,13 @@ void Dir_destroy(Dir *dir)
     free(dir);
 }
 
-char *STATUS_200 = "HTTP/1.1 200 OK\r\n\r\n";
 
 int Dir_serve_file(Dir *dir, const char *path, int fd)
 {
     // TODO: normalize path? probably doesn't matter since
     // we'll be chroot as a mandatory operation
     char header[512] = {0};
+    const char *content_type = NULL;
 
     size_t path_len = strlen(path);
     size_t flen = 0;
@@ -99,7 +100,12 @@ int Dir_serve_file(Dir *dir, const char *path, int fd)
     int file_fd = Dir_find_file(path+1, path_len-1, &flen);
     check(file_fd, "Error opening file: %.*s", (int)path_len, path);
 
-    int rc = snprintf(header, sizeof(header)-1, "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %d\r\nConnection: close\r\n\r\n", flen);
+    // TODO: get this from a configuration
+    content_type = MIME_match_ext(path, path_len, "text/plain");
+
+
+    int rc = snprintf(header, sizeof(header)-1, "HTTP/1.1 200 OK\r\nContent-Type: %s\r\nContent-Length: %d\r\nConnection: close\r\n\r\n", 
+            content_type, flen);
     fdwrite(fd, header, rc);
 
     rc = Dir_stream_file(file_fd, flen, fd);

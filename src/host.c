@@ -64,7 +64,7 @@ error:
 
 Backend *Host_match(Host *host, const char *target, size_t len)
 {
-    // TODO: figure out the best policy, longest? first? all?
+    // TODO: figure out the best matching policy, longest? first? all?
     Route *found = NULL;
 
     list_t *results = RouteMap_match(host->routes, target, len);
