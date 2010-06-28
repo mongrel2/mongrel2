@@ -1,3 +1,5 @@
+begin transaction;
+
 insert into mimetype (extension, mimetype) values ('.obd', 'application/x-msbinder');
 insert into mimetype (extension, mimetype) values ('.obj', 'application/octet-stream');
 insert into mimetype (extension, mimetype) values ('.silo', 'model/mesh');
@@ -848,3 +850,5 @@ insert into mimetype (extension, mimetype) values ('.pqa', 'application/vnd.palm
 insert into mimetype (extension, mimetype) values ('.java', 'text/x-java');
 insert into mimetype (extension, mimetype) values ('.vms', 'chemical/x-vamas-iso14976');
 insert into mimetype (extension, mimetype) values ('.asx', 'video/x-ms-asf');
+
+commit;

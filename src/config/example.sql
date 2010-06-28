@@ -1,3 +1,5 @@
+begin transaction;
+
 INSERT INTO server (uuid, access_log, error_log, chroot, default_host, port) 
     VALUES (
         'AC1F8236-5919-4696-9D40-0F38DE9E5861',
@@ -73,3 +75,5 @@ INSERT INTO route (path, host_id, target_id, target_type)
         last_insert_rowid(),
         "dir"
     );
+
+commit;

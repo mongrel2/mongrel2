@@ -1,3 +1,5 @@
+begin transaction;
+
 DROP TABLE IF EXISTS server;
 DROP TABLE IF EXISTS host;
 DROP TABLE IF EXISTS handler;
@@ -67,5 +69,4 @@ CREATE TABLE statistic (id SERIAL,
 
 CREATE TABLE mimetype (id INTEGER PRIMARY KEY, mimetype TEXT, extension TEXT);
 
-/* .read src/config/mimetypes.sql */
-
+commit;
