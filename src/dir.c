@@ -109,7 +109,7 @@ int Dir_serve_file(Dir *dir, const char *path, int fd)
     fdwrite(fd, header, rc);
 
     rc = Dir_stream_file(file_fd, flen, fd);
-    check(rc == flen, "Didn't send all of the file, send %d.", rc);
+    check(rc == flen, "Didn't send all of the file, sent %d of %s.", rc, path);
 
     close(file_fd);
     close(fd);
