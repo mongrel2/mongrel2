@@ -45,6 +45,7 @@ solution "Mongrel2"
           "sqlite3 ../tests/config.sqlite < ../src/config/mimetypes.sql"
       }
 
+   test("bstr_tests")
    test("listener_tests")
    test("config_tests")
    test("handler_tests")
