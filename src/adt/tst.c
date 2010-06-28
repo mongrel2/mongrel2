@@ -56,23 +56,33 @@ void *tst_search_suffix(tst_t *root, const char *s, size_t len)
     if(len == 0) return NULL;
 
     tst_t *p = root;
+    tst_t *last = p;
     int i = len-1;
 
     while(i > 0 && p) {
+        debug("i: %d, s: %c, split: %c", i, s[i], p->splitchar);
+
         if (s[i] < p->splitchar) {
             p = p->low; 
         } else if (s[i] == p->splitchar) {
             i--;
-            if(i < len) p = p->equal; 
+            if(i >= 0) {
+                last = p;
+                p = p->equal;
+            }
         } else {
             p = p->high; 
         }
     }
 
+    debug("last: %p, p: %p", last, p);
+
     if(p) {
         return p->value;
+    } else if(last) {
+        return last->value;
     } else {
-        return NULL; 
+        return NULL;
     }
 }
 
