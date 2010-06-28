@@ -8,7 +8,7 @@ char *test_Config_load()
 {
     list_t *servers = Config_load_servers("tests/config.sqlite", "mongrel2.org");
 
-    mu_assert(servers != NULL, "Should get a server list.");
+    mu_assert(servers != NULL, "Should get a server list, is mongrel2 running already?");
     mu_assert(list_count(servers) == 1, "Failed to load the server.");
 
     return NULL;
