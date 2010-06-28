@@ -41,7 +41,8 @@ solution "Mongrel2"
 
       postbuildcommands {
           "sqlite3 ../tests/config.sqlite < ../src/config/config.sql",
-          "sqlite3 ../tests/config.sqlite < ../src/config/example.sql"
+          "sqlite3 ../tests/config.sqlite < ../src/config/example.sql",
+          "sqlite3 ../tests/config.sqlite < ../src/config/mimetypes.sql"
       }
 
    test("listener_tests")
