@@ -171,6 +171,7 @@ int Config_server_load_cb(void *param, int cols, char **data, char **names)
     list_t *servers = (list_t *)param;
     Server *srv = NULL;
     const char *HOST_QUERY = "SELECT id, name, matching FROM host where server_id = %s";
+    char *query = NULL;
  
     debug("Configuring server ID: %s, default host: %s, port: %s", 
             data[1], data[2], data[3]);
@@ -178,7 +179,7 @@ int Config_server_load_cb(void *param, int cols, char **data, char **names)
     srv = Server_create(data[3]);
     check(srv, "Failed to create server %s on port %s", data[2], data[3]);
 
-    char *query = SQL(HOST_QUERY, data[0]);
+    query = SQL(HOST_QUERY, data[0]);
     check(query, "Failed to craft query.");
 
     int rc = DB_exec(query, Config_host_load_cb, srv);
@@ -200,11 +201,12 @@ list_t *Config_load_servers(const char *path, const char *name)
 {
     list_t *servers = list_create(LISTCOUNT_T_MAX);
     const char *SERVER_QUERY = "SELECT id, uuid, default_host, port FROM server WHERE default_host=%Q";
+    char *query = NULL;
 
     int rc = DB_init(path);
     check(rc == 0, "Failed to load config database: %s", path);
 
-    char *query = SQL(SERVER_QUERY, name);
+    query = SQL(SERVER_QUERY, name);
 
     rc = DB_exec(query, Config_server_load_cb, servers);
     check(rc == 0, "Failed to select servers from: %s", path);
