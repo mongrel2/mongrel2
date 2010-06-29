@@ -62,8 +62,8 @@ error:
 void Handler_task(void *v)
 {
     zmq_msg_t *inmsg = calloc(sizeof(zmq_msg_t), 1);
-    bstring data = bfromcstr("");
     struct target_splits splits;
+    bstring data = bfromcstr("");
     int rc = 0;
     int i = 0;
     Handler *handler = (Handler *)v;

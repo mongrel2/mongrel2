@@ -9,6 +9,7 @@
 #include <request.h>
 #include <register.h>
 #include <pattern.h>
+#include <b64/b64.h>
 
 
 char *FLASH_RESPONSE = "<?xml version=\"1.0\"?><!DOCTYPE cross-domain-policy SYSTEM \"http://www.macromedia.com/xml/dtds/cross-domain-policy.dtd\"> <cross-domain-policy> <allow-access-from domain=\"*\" to-ports=\"*\" /></cross-domain-policy>";
@@ -86,8 +87,12 @@ int Listener_deliver(int to_fd, bstring buf)
 {
     int rc = 0;
 
-    bstring b64_buf = bBase64Encode(buf);
-    check(b64_buf, "Base64 encode failure.");
+    debug("Delivering: '%s', %d %d", bdata(buf), buf->data[buf->slen], buf->data[buf->slen-1]);
+
+    bstring b64_buf = bfromcstralloc(blength(buf) * 2, "");
+
+    b64_buf->slen = b64_encode(bdata(buf), blength(buf), bdata(b64_buf), blength(buf) * 2 - 1); 
+    b64_buf->data[b64_buf->slen] = '\0';
 
     rc = Listener_write_func(to_fd, bdata(b64_buf), blength(b64_buf)+1);
 
