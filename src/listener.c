@@ -87,8 +87,6 @@ int Listener_deliver(int to_fd, bstring buf)
 {
     int rc = 0;
 
-    debug("Delivering: '%s', %d %d", bdata(buf), buf->data[buf->slen], buf->data[buf->slen-1]);
-
     bstring b64_buf = bfromcstralloc(blength(buf) * 2, "");
 
     b64_buf->slen = b64_encode(bdata(buf), blength(buf), bdata(b64_buf), blength(buf) * 2 - 1); 

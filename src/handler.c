@@ -42,8 +42,6 @@ int split_first_integers(void * param, int ofs, int len)
     struct target_splits *sp = (struct target_splits *)param;
     check(sp->cur_fd < MAX_TARGETS, "Too many targets given on send, max is %d", MAX_TARGETS);
 
-    debug("handling: %c at %d of %s", bchar(sp->data, ofs), ofs, bdata(sp->data));
-
     if(!isdigit(bchar(sp->data, ofs))) {
         sp->last_pos = ofs;
         return -1;
@@ -84,13 +82,11 @@ void Handler_task(void *v)
         splits.data = data;
 
         rc = bsplitcb(data, ' ', 0, split_first_integers, &splits);
-        debug("rc: %d, cur_fd: %d, last_post %d, data: %s", rc, splits.cur_fd, splits.last_pos, bdata(data));
 
         taskstate("delivering");
         
         for(i = 0; i < splits.cur_fd; i++) {
             int fd = splits.fds[i];
-            debug("Delivering to %d at index: %d", fd, i);
 
             if(!Register_exists(fd)) {
                 log_err("Ident %d is no longer connected.", fd);
