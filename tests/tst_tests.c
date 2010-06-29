@@ -2,6 +2,8 @@
 #include <adt/tst.h>
 #include <string.h>
 #include <assert.h>
+#include <bstring.h>
+
 
 FILE *LOG_FILE = NULL;
 
@@ -12,16 +14,19 @@ char *value2 = "VALUE2";
 char *reverse = "VALUER";
 int traverse_count = 0;
 
+bstring test1;
+bstring test2;
+bstring test3;
 
 char *test_tst_insert() 
 {
-    node = tst_insert(node, "TEST", strlen("TEST"), valueA);
+    node = tst_insert(node, bdata(test1), blength(test1), valueA);
     mu_assert(node != NULL, "Failed to insert into tst.");
 
-    node = tst_insert(node, "TEST2", strlen("TEST2"), value2);
+    node = tst_insert(node, bdata(test2), blength(test2), value2);
     mu_assert(node != NULL, "Failed to insert into tst with second name.");
 
-    node = tst_insert(node, "TSET", strlen("TSET"), reverse);
+    node = tst_insert(node, bdata(test3), blength(test3), reverse);
     mu_assert(node != NULL, "Failed to insert into tst with reverse name.");
 
     return NULL;
@@ -30,7 +35,7 @@ char *test_tst_insert()
 char *test_tst_search()
 {
     // tst returns the last one inserted
-    void *res = tst_search(node, "TEST", strlen("TEST"));
+    void *res = tst_search(node, bdata(test1), blength(test1));
     mu_assert(res == valueA, "Got the wrong value back, should get A not B.");
 
     // tst does not find if not exact
@@ -42,7 +47,7 @@ char *test_tst_search()
 
 char *test_tst_search_suffix()
 {
-    void *res = tst_search_suffix(node, "TEST", strlen("TEST"));
+    void *res = tst_search_suffix(node, bdata(test1), blength(test1));
     debug("result: %p, expected: %p", res, reverse);
     mu_assert(res == reverse, "Got the wrong value.");
 
@@ -78,17 +83,32 @@ char *test_tst_collect()
     debug("collect found %d values", (int)list_count(found));
 
     mu_assert(list_count(found) == 3, "Didn't find 2 with prefix TE.");
+    list_destroy_nodes(found);
+    list_destroy(found);
 
     found = tst_collect(node, "T", 1, NULL);
     debug("collect found %d values", (int)list_count(found));
     mu_assert(list_count(found) == 3, "Didn't find 4 with prefix T.");
+    list_destroy_nodes(found);
+    list_destroy(found);
 
     found = tst_collect(node, "TEST2", 5, NULL);
     debug("collect found %d values", (int)list_count(found));
     mu_assert(list_count(found) == 1, "Didn't find 1 with prefix TEST2.");
+    list_destroy_nodes(found);
+    list_destroy(found);
 
     found = tst_collect(node, "XNOT", 4, NULL);
     mu_assert(list_count(found) == 0, "Should not find any with prefix XNOT.");
+    list_destroy_nodes(found);
+    list_destroy(found);
+
+    return NULL;
+}
+
+char *test_tst_destroy()
+{
+    tst_destroy(node);
 
     return NULL;
 }
@@ -96,11 +116,20 @@ char *test_tst_collect()
 char * all_tests() {
     mu_suite_start();
 
+    test1 = bfromcstr("TEST");
+    test2 = bfromcstr("TEST2");
+    test3 = bfromcstr("TSET");
+
     mu_run_test(test_tst_insert);
     mu_run_test(test_tst_search);
     mu_run_test(test_tst_search_suffix);
     mu_run_test(test_tst_traverse);
     mu_run_test(test_tst_collect);
+    mu_run_test(test_tst_destroy);
+
+    bdestroy(test1);
+    bdestroy(test2);
+    bdestroy(test3);
 
     return NULL;
 }

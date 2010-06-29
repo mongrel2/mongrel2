@@ -30,5 +30,6 @@ void tst_traverse(tst_t *p, tst_traverse_cb cb, void *data);
 
 list_t *tst_collect(tst_t *root, const char *s, size_t len, tst_collect_test_cb tester);
 
+void tst_destroy(tst_t *root);
 
 #endif

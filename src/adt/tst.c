@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <dbg.h>
+#include <mem/halloc.h>
 
 typedef struct tst_collect_t {
     list_t *values;
@@ -106,28 +107,40 @@ void *tst_search(tst_t *root, const char *s, size_t len)
     }
 }
 
-tst_t *tst_insert(tst_t *p, const char *s, size_t len, void *value)
+tst_t *tst_insert_base(tst_t *root, tst_t *p, const char *s, size_t len, void *value)
 {
     if (p == NULL) { 
-        p = (tst_t *) calloc(sizeof(tst_t), 1);
+        p = (tst_t *) h_calloc(sizeof(tst_t), 1);
+
+        if(root == NULL) {
+            root = p;
+        } else {
+            hattach(p, root);
+        }
+
         p->splitchar = *s; 
     }
 
     if (*s < p->splitchar) {
-        p->low = tst_insert(p->low, s, len, value); 
+        p->low = tst_insert_base(root, p->low, s, len, value); 
     } else if (*s == p->splitchar) { 
         if (len > 1) {
             // not done yet, keep going but one less
-            p->equal = tst_insert(p->equal, s+1, len - 1, value);
+            p->equal = tst_insert_base(root, p->equal, s+1, len - 1, value);
         } else {
             assert(p->value == NULL && "Duplicate insert into tst.");
             p->value = value;
         }
     } else {
-        p->high = tst_insert(p->high, s, len, value);
+        p->high = tst_insert_base(root, p->high, s, len, value);
     }
 
     return p; 
+}
+
+tst_t *tst_insert(tst_t *p, const char *s, size_t len, void *value)
+{
+    return tst_insert_base(p, p, s, len, value);
 }
 
 void tst_traverse(tst_t *p, tst_traverse_cb cb, void *data)
@@ -145,3 +158,8 @@ void tst_traverse(tst_t *p, tst_traverse_cb cb, void *data)
     if(p->value) cb(p->value, data);
 }
 
+
+void tst_destroy(tst_t *root)
+{
+    h_free(root);
+}
