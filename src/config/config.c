@@ -23,7 +23,6 @@ int Config_dir_load_cb(void *param, int cols, char **data, char **names)
     debug("Making a dir for %s:%s", data[0], data[1]);
 
     *target = Dir_create(data[1]);
-    assert((*target)->base_len > 0 && "WTF");
 
     check(*target, "Failed to create dir for %s:%s", data[0], data[1]);
 
@@ -57,7 +56,7 @@ int Config_proxy_load_cb(void *param, int cols, char **data, char **names)
 
     debug("Making a proxy for %s:%s:%s", data[0], data[1], data[2]);
 
-    *target = Proxy_create(data[1], atoi(data[2]));
+    *target = Proxy_create(bfromcstr(data[1]), atoi(data[2]));
     check(*target, "Failed to create proxy for %s:%s:%s", data[0], data[1], data[2]);
 
     return 0;
@@ -106,7 +105,8 @@ int Config_route_load_cb(void *param, int cols, char **data, char **names)
         type = BACKEND_DIR;
         
     } else {
-        sentinel("Invalid handler type: %s for host: %s", data[3], host->name);
+        sentinel("Invalid handler type: %s for host: %s",
+                data[3], bdata(host->name));
     }
 
     Host_add_backend(host, data[1], strlen(data[1]), type, target);
@@ -140,7 +140,7 @@ int Config_host_load_cb(void *param, int cols, char **data, char **names)
     debug("Adding host %s (id: %s) to server at pattern %s", data[1], data[0], data[2]);
 
 
-    Server_add_host(srv, data[2], strlen(data[2]), host);
+    Server_add_host(srv, bfromcstr(data[2]), host);
 
     if(srv->default_host == NULL) Server_set_default_host(srv, host);
 

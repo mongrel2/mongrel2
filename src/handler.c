@@ -9,18 +9,11 @@
 #include <register.h>
 
 
-static char *LEAVE_MSG = "@* {\"type\":\"leave\"}";
-size_t LEAVE_MSG_LEN = 0;
+struct tagbstring LEAVE_MSG = bsStatic("@* {\"type\":\"leave\"}");
 
-void our_free(void *data, void *hint)
+void bstring_free(void *data, void *hint)
 {
-    free(data);
-}
-
-
-void Handler_init()
-{
-    LEAVE_MSG_LEN = strlen(LEAVE_MSG);
+    bdestroy((bstring)hint);
 }
 
 
@@ -28,18 +21,51 @@ void Handler_notify_leave(void *socket, int fd)
 {
     assert(socket && "Socket can't be NULL");
 
-    if(Handler_deliver(socket, fd, LEAVE_MSG, LEAVE_MSG_LEN) == -1) {
+    if(Handler_deliver(socket, fd, bdata(&LEAVE_MSG), blength(&LEAVE_MSG)) == -1) {
         log_err("Can't tell handler %d died.", fd);
     }
 }
 
+enum {
+    MAX_TARGETS=100
+};
+
+struct target_splits {
+    bstring data;
+    int fds[MAX_TARGETS];
+    int cur_fd;
+    int last_pos;
+};
+
+int split_first_integers(void * param, int ofs, int len)
+{
+    struct target_splits *sp = (struct target_splits *)param;
+    check(sp->cur_fd < MAX_TARGETS, "Too many targets given on send, max is %d", MAX_TARGETS);
+
+    debug("handling: %c at %d of %s", bchar(sp->data, ofs), ofs, bdata(sp->data));
+
+    if(!isdigit(bchar(sp->data, ofs))) {
+        sp->last_pos = ofs;
+        return -1;
+    } else {
+        char *s = bdataofs(sp->data, ofs);
+        sp->fds[sp->cur_fd++] = atoi(s);
+    }
+
+    return 0;
+error:
+    return -1;
+}
+
+
+
 void Handler_task(void *v)
 {
     zmq_msg_t *inmsg = calloc(sizeof(zmq_msg_t), 1);
-    char *data = NULL;
-    size_t sz = 0;
-    int fd = 0;
+    bstring data = bfromcstr("");
+    struct target_splits splits;
     int rc = 0;
+    int i = 0;
     Handler *handler = (Handler *)v;
 
     taskname("Handler_task");
@@ -51,30 +77,41 @@ void Handler_task(void *v)
         rc = mqrecv(handler->recv_socket, inmsg, 0);
         check(rc == 0, "Receive on handler socket failed.");
 
-        data = (char *)zmq_msg_data(inmsg);
-        sz = zmq_msg_size(inmsg);
+        bassignblk(data, zmq_msg_data(inmsg), zmq_msg_size(inmsg));
 
-        if(data[sz-1] != '\0') {
-            log_err("Last char from handler is not 0 it's %d, fix your backend.", data[sz-1]);
-        } if(data[sz-2] == '\0') {
-            log_err("You have two \\0 ending your message, fix your backend.");
-        } else {
-            int end = 0;
-            int ok = sscanf(data, "%u%n", &fd, &end);
+        splits.cur_fd = 0;
+        splits.last_pos = 0;
+        splits.data = data;
 
-            taskstate("delivering");
-            if(ok <= 0 || end <= 0) {
-                log_err("Message didn't start with a ident number.");
-            } else if(!Register_exists(fd)) {
+        rc = bsplitcb(data, ' ', 0, split_first_integers, &splits);
+        debug("rc: %d, cur_fd: %d, last_post %d, data: %s", rc, splits.cur_fd, splits.last_pos, bdata(data));
+
+        taskstate("delivering");
+        
+        for(i = 0; i < splits.cur_fd; i++) {
+            int fd = splits.fds[i];
+            debug("Delivering to %d at index: %d", fd, i);
+
+            if(!Register_exists(fd)) {
                 log_err("Ident %d is no longer connected.", fd);
                 Handler_notify_leave(handler->send_socket, fd);
             } else {
+                bstring payload = bTail(data, blength(data) - splits.last_pos);
 
-                if(Listener_deliver(fd, data+end, sz-end-1) == -1) {
+                // TODO: find out why this would be happening
+                if(payload->data[payload->slen - 1] == '\0') {
+                    btrunc(payload, blength(payload)-1);
+                } else if(payload->data[payload->slen] != '\0') {
+                    bconchar(payload, '\0');
+                }
+
+                if(Listener_deliver(fd, payload) == -1) {
                     log_err("Error sending to listener %d, closing them.", fd);
                     Register_disconnect(fd);
                     Handler_notify_leave(handler->send_socket, fd);
                 }
+
+                bdestroy(payload);
             }
         }
     }
@@ -88,9 +125,7 @@ int Handler_deliver(void *handler_socket, int from_fd, char *buffer, size_t len)
 {
     int rc = 0;
     zmq_msg_t *msg = NULL;
-    char *msg_buf = NULL;
-    int msg_size = 0;
-    size_t sz = 0;
+    bstring msg_buf;
 
     msg = calloc(sizeof(zmq_msg_t), 1);
     msg_buf = NULL;
@@ -100,14 +135,10 @@ int Handler_deliver(void *handler_socket, int from_fd, char *buffer, size_t len)
     rc = zmq_msg_init(msg);
     check(rc == 0, "Failed to initialize 0mq message to send.");
 
-    sz = strlen(buffer) + 32;
-    msg_buf = malloc(sz);
+    msg_buf = bformat("%d %.*s", from_fd, len, buffer);
     check(msg_buf, "Failed to allocate message buffer for handler delivery.");
 
-    msg_size = snprintf(msg_buf, sz, "%d %.*s", from_fd, (int)len, buffer);
-    check(msg_size > 0, "Message too large, killing it.");
-
-    rc = zmq_msg_init_data(msg, msg_buf, msg_size, our_free, NULL);
+    rc = zmq_msg_init_data(msg, bdata(msg_buf), blength(msg_buf), bstring_free, msg_buf);
     check(rc == 0, "Failed to init 0mq message data.");
 
     rc = zmq_send(handler_socket, msg, 0);
@@ -117,8 +148,9 @@ int Handler_deliver(void *handler_socket, int from_fd, char *buffer, size_t len)
     return 0;
 
 error:
+    // TODO: confirm what if this is the right shutdown
     if(msg) free(msg);
-    if(msg_buf) free(msg_buf);
+    if(msg_buf) bdestroy(msg_buf);
     return -1;
 }
 

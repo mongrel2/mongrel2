@@ -9,12 +9,6 @@ enum {
     MAX_HEADER_COUNT=128
 };
 
-static void add_named_param(dict_t *req, const char *name, const char *at, size_t length)
-{
-    char *value = strndup(at, length);
-    dict_alloc_insert(req, name, value);
-}
-
 
 static dnode_t *req_alloc_dict(void *notused)
 {
@@ -23,25 +17,25 @@ static dnode_t *req_alloc_dict(void *notused)
 
 static void req_free_dict(dnode_t *node, void *notused)
 {
-    free(dnode_get(node));
-    free((void *)dnode_getkey(node));
+    bdestroy((bstring)dnode_get(node));
+    bdestroy((bstring)dnode_getkey(node));
     free(node);
 }
 
 
 static void request_method_cb(void *data, const char *at, size_t length)
 {
-    add_named_param((dict_t *)data, strdup("REQUEST_METHOD"), at, length);
+    dict_alloc_insert((dict_t *)data, bfromcstr("REQUEST_METHOD"), blk2bstr(at, length));
 }
 
 static void fragment_cb(void *data, const char *at, size_t length)
 {
-    add_named_param((dict_t *)data, strdup("FRAGMENT"), at, length);
+    dict_alloc_insert((dict_t *)data, bfromcstr("FRAGMENT"), blk2bstr(at, length));
 }
 
 static void http_version_cb(void *data, const char *at, size_t length)
 {
-    add_named_param((dict_t *)data, strdup("VERSION"), at, length);
+    dict_alloc_insert((dict_t *)data, bfromcstr("VERSION"), blk2bstr(at, length));
 }
 
 static void header_done_cb(void *data, const char *at, size_t length)
@@ -51,24 +45,23 @@ static void header_done_cb(void *data, const char *at, size_t length)
 
 static void uri_cb(void *data, const char *at, size_t length)
 {
-    add_named_param((dict_t *)data, strdup("URI"), at, length);
+    dict_alloc_insert((dict_t *)data, bfromcstr("URI"), blk2bstr(at, length));
 }
 
 static void path_cb(void *data, const char *at, size_t length)
 {
-    add_named_param((dict_t *)data, strdup("PATH"), at, length);
+    dict_alloc_insert((dict_t *)data, bfromcstr("PATH"), blk2bstr(at, length));
 }
 
 static void query_string_cb(void *data, const char *at, size_t length)
 {
-    add_named_param((dict_t *)data, strdup("QUERY_STRING"), at, length);
+    dict_alloc_insert((dict_t *)data, bfromcstr("QUERY_STRING"), blk2bstr(at, length));
 }
 
 static void header_field_cb(void *data, const char *field, size_t flen,
         const char *value, size_t vlen)
 {
-    char *key = strndup(field, flen);
-    add_named_param((dict_t *)data, key, value, vlen);
+    dict_alloc_insert((dict_t *)data, blk2bstr(field, flen), blk2bstr(value, vlen));
 }
 
 
@@ -86,7 +79,7 @@ http_parser *Request_create()
     parser->http_version = http_version_cb;
     parser->header_done = header_done_cb;
 
-    parser->data = dict_create(MAX_HEADER_COUNT, (dict_comp_t)strcmp);
+    parser->data = dict_create(MAX_HEADER_COUNT, (dict_comp_t)bstrcmp);
     dict_set_allocator(parser->data, req_alloc_dict, req_free_dict, NULL);
     dict_allow_dupes(parser->data);
 
@@ -145,19 +138,23 @@ void Request_dump(http_parser *parser)
     }
 
     for(node = dict_first(req); node != NULL; node = dict_next(req, node)) {
-        debug("%s: %s", (const char *)dnode_getkey(node), (const char *)dnode_get(node));
+        bstring key = (bstring)dnode_getkey(node);
+        bstring value = (bstring)dnode_get(node);
+
+        debug("%s: %s", bdata(key), bdata(value));
     }
 }
 
-const char *Request_get(http_parser *parser, const char *field)
+bstring Request_get(http_parser *parser, bstring field)
 {
     dict_t *req = (dict_t *)parser->data;
 
     dnode_t *node = dict_lookup(req, field);
 
     if(node) {
-        return (const char *)dnode_get(node);
+        return (bstring)dnode_get(node);
     } else {
         return NULL;
     }
 }
+

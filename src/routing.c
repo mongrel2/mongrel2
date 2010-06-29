@@ -13,20 +13,17 @@ RouteMap *RouteMap_create()
     return map;
 }
 
-Route *RouteMap_insert_base(RouteMap *routes, 
-        const char *prefix, size_t prefix_len,
-        const char *pattern, size_t pattern_len)
+Route *RouteMap_insert_base(RouteMap *routes, bstring prefix, bstring pattern)
 {
     Route *route = malloc(sizeof(Route));
     check(route, "Out of memory.");
 
-    route->length = pattern_len;
-    route->pattern = strdup(pattern);
-    check(route->pattern, "Error copying pattern.");
-    route->pattern[pattern_len] = '\0';  // make sure it's capped
+    route->pattern = pattern;
+    check(route->pattern, "Pattern is required.");
 
-    routes->routes = tst_insert(routes->routes, prefix, prefix_len, route);
+    debug("ADDING prefix: %s, pattern: %s", bdata(prefix), bdata(pattern));
 
+    routes->routes = tst_insert(routes->routes, bdata(prefix), blength(prefix), route);
     check(routes->routes, "Failed to insert into TST.");
 
     return route;
@@ -35,48 +32,61 @@ error:
     return NULL;
 }
 
-int RouteMap_insert(RouteMap *routes, const char *pattern, size_t len, void *data)
+int RouteMap_insert(RouteMap *routes, bstring pattern, void *data)
 {
     Route *route = NULL;
-    // WARNING: dangerous code potentially
-    char *first_paren = strchr(pattern, '(');
-    size_t pref_len = first_paren ? first_paren - pattern : len;
+    int first_paren = bstrchr(pattern, '(');
+    bstring prefix = NULL;
 
-    route = RouteMap_insert_base(routes, pattern, pref_len, pattern, len);
-    check(route, "Failed to insert route: %.*s", (int)len, pattern);
+    if(first_paren >= 0) {
+        prefix = bHead(pattern, first_paren);
+    } else {
+        prefix = bstrcpy(pattern);
+    }
+
+    check(prefix, "Couldn't create prefix: %s", bdata(pattern));
+
+    // pattern is owned by RouteMap, prefix is owned by us
+    route = RouteMap_insert_base(routes, prefix, pattern);
+
+    check(route, "Failed to insert route: %s", bdata(pattern));
 
     route->data = data;
 
+    bdestroy(prefix);
     return 0;
 
 error:
+    bdestroy(prefix);
     return -1;
 }
 
-int RouteMap_insert_reversed(RouteMap *routes, const char *pattern, size_t len, void *data)
+int RouteMap_insert_reversed(RouteMap *routes, bstring pattern, void *data)
 {
     Route *route = NULL;
-    char reversed_prefix[MAX_HOST_NAME];
-    char *last_paren = strrchr(pattern, ')');
-    size_t prefix_len = last_paren ? len - (last_paren - pattern + 1) : len;
-    int pi, ri;
+    bstring reversed_prefix = NULL;
 
-    debug("prefix_len: %d", (int)prefix_len);
-
-    for(pi = len-1, ri = 0; ri < prefix_len; ri++, pi--) {
-        reversed_prefix[ri] = pattern[pi];
+    int last_paren = bstrrchr(pattern, ')');
+    if(last_paren >= 0) {
+        reversed_prefix = bTail(pattern, last_paren);
+    } else {
+        reversed_prefix = bstrcpy(pattern);
     }
-    reversed_prefix[prefix_len] = '\0';
 
-    debug("prefix: %.*s, pattern: %.*s", (int)prefix_len, reversed_prefix, (int)len, pattern);
+    check(reversed_prefix, "Failed to create prefix to reverse.");
+    bReverse(reversed_prefix);
 
-    route = RouteMap_insert_base(routes, reversed_prefix, prefix_len, pattern, len);
+    // we own reversed_prefix, they own pattern
+    route = RouteMap_insert_base(routes, reversed_prefix, pattern);
     check(route, "Failed to add host.");
+
     route->data = data;
 
+    bdestroy(reversed_prefix);
     return 0;
   
 error:
+    bdestroy(reversed_prefix);
     return -1;
 }
 
@@ -86,12 +96,13 @@ int RouteMap_collect_match(void *value, const char *key, size_t len)
     assert(value && "NULL value from TST.");
     Route *route = (Route *)value;
 
-    return pattern_match(key, len, route->pattern) != NULL;
+    return pattern_match(key, len, bdata(route->pattern)) != NULL;
 }
 
-list_t *RouteMap_match(RouteMap *routes, const char *path, size_t len)
+list_t *RouteMap_match(RouteMap *routes, bstring path)
 {
-    return tst_collect(routes->routes, path, len, RouteMap_collect_match);
+    return tst_collect(routes->routes, bdata(path),
+            blength(path), RouteMap_collect_match);
 }
 
 

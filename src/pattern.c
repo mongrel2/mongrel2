@@ -159,6 +159,11 @@ const char *pattern_match(const char *s, size_t len, const char *p)
 }
 
 
+const char *bstring_match(bstring s, bstring pattern)
+{
+    MatchState ms = {.src_init = bdata(s), .src_end = bdata(s) + blength(s)};
+    return match(&ms, bdata(s), bdata(pattern));
+}
 
 const char *match(MatchState *ms, const char *s, const char *p) {
     //TODO: get it to understand \ to skip pattern chars

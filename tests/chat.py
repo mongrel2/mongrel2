@@ -18,11 +18,13 @@ users = {}
 user_list = []
 
 def send(i, data):
-    resp.send(i + ' ' + json.dumps(data) + '\0')
+    d = i + ' ' + json.dumps(data)
+    resp.send(d)
+
 
 def deliver(data):
-    for i in users.keys():
-        send(i, data)
+    # TODO: this will fail when it's over 100
+    resp.send(' '.join(users.keys()) + ' ' + json.dumps(data))
 
 while True:
     msg = reqs.recv()

@@ -17,7 +17,7 @@ char *test_ProxyConnect_create_destroy()
 
 char *test_Proxy_create_destroy()
 {
-    Proxy *proxy = Proxy_create("127.0.0.1", 80);
+    Proxy *proxy = Proxy_create(bfromcstr("127.0.0.1"), 80);
     mu_assert(proxy != NULL, "Didn't make the proxy.");
 
     Proxy_destroy(proxy); 
@@ -28,7 +28,7 @@ char *test_Proxy_create_destroy()
 char *test_Proxy_connect()
 {
     // hopefully this port isn't there so we error on connect
-    Proxy *proxy = Proxy_create("127.0.0.1", 12345);
+    Proxy *proxy = Proxy_create(bfromcstr("127.0.0.1"), 12345);
     mu_assert(proxy != NULL, "Didn't make the proxy.");
 
     Proxy_connect(proxy, 12, malloc(12), 12, 0);

@@ -5,16 +5,12 @@
 
 Host *Host_create(const char *name)
 {
-    size_t len = strlen(name);
-
-    check(len < MAX_HOST_NAME, "Host name too long (max %d): '%s'\n", 
-            MAX_HOST_NAME, name);
-
     Host *host = calloc(sizeof(Host), 1);
     check(host, "Out of memory error.");
 
-    strncpy(host->name, name, MAX_HOST_NAME);
-    host->name[len] = '\0';
+    host->name = bfromcstr(name);
+    check(blength(host->name) < MAX_HOST_NAME, "Host name too long (max %d): '%s'\n", 
+            MAX_HOST_NAME, name);
 
     host->routes = RouteMap_create();
     check(host->routes, "Failed to create host route map for %s.", name);
@@ -28,6 +24,7 @@ error:
 
 void Host_destroy(Host *host)
 {
+    bdestroy(host->name);
     free(host);
 }
 
@@ -50,10 +47,8 @@ int Host_add_backend(Host *host, const char *path, size_t path_len, BackendType 
         sentinel("Invalid proxy type given: %d", type);
     }
 
-    debug("Putting backend into %s with pointer: %p", host->name, backend);
-
-    int rc = RouteMap_insert(host->routes, path, path_len, backend);
-    check(rc == 0, "Failed to insert into host %s route map.", host->name);
+    int rc = RouteMap_insert(host->routes, blk2bstr(path, path_len), backend);
+    check(rc == 0, "Failed to insert into host %s route map.", bdata(host->name));
 
     return 0;
     
@@ -62,18 +57,18 @@ error:
 }
 
 
-Backend *Host_match(Host *host, const char *target, size_t len)
+Backend *Host_match(Host *host, bstring target)
 {
     // TODO: figure out the best matching policy, longest? first? all?
     Route *found = NULL;
 
-    list_t *results = RouteMap_match(host->routes, target, len);
+    list_t *results = RouteMap_match(host->routes, target);
 
     lnode_t *n = list_first(results);
     if(n) {
         found = lnode_get(n);
         assert(found && "RouteMap returned a list node with NULL.");
-        debug("Found backend at %.*s", (int)found->length, found->pattern);
+        debug("Found backend at %s", bdata(found->pattern));
     }
 
     list_destroy_nodes(results);

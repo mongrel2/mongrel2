@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include <sys/sendfile.h>
+#include <bstring.h>
 
 enum {
     MAX_SEND_BUFFER = 16 * 1024,
@@ -11,18 +12,17 @@ enum {
 
 
 typedef struct Dir {
-    size_t base_len;
-    char base[MAX_DIR_PATH];
+    bstring base;
 } Dir;
 
 Dir *Dir_create(const char *base);
 void Dir_destroy(Dir *dir);
 
-int Dir_find_file(const char *path, size_t path_len, size_t *out_size);
+int Dir_find_file(bstring path, size_t *out_size);
 
 int Dir_stream_file(int file_fd, size_t flen, int sock_fd);
 
-int Dir_serve_file(Dir *dir, const char *path, int fd);
+int Dir_serve_file(Dir *dir, bstring, int fd);
 
 #define Dir_send sendfile
 

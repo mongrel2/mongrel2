@@ -1,6 +1,8 @@
 #ifndef _proxy_h
 #define _proxy_h
 
+#include <bstring.h>
+
 typedef struct ProxyConnect {
     int write_fd;
     int read_fd;
@@ -10,7 +12,7 @@ typedef struct ProxyConnect {
 } ProxyConnect;
 
 typedef struct Proxy {
-    char *server;
+    bstring server;
     int port;
 } Proxy;
 
@@ -18,7 +20,7 @@ ProxyConnect *ProxyConnect_create(int write_fd, char *buffer, size_t size, size_
 
 void ProxyConnect_destroy(ProxyConnect *conn);
 
-Proxy *Proxy_create(char *server, int port);
+Proxy *Proxy_create(bstring server, int port);
 
 void Proxy_destroy(Proxy *proxy);
 

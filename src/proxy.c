@@ -48,19 +48,17 @@ void ProxyConnect_destroy(ProxyConnect *conn)
 void Proxy_destroy(Proxy *proxy)
 {
     if(proxy) {
-        if(proxy->server) free(proxy->server);
+        if(proxy->server) bdestroy(proxy->server);
         free(proxy);
     }
 }
 
-Proxy *Proxy_create(char *server, int port)
+Proxy *Proxy_create(bstring server, int port)
 {
     Proxy *proxy = calloc(sizeof(Proxy), 1);
     check(proxy, "Failed to create proxy, memory allocation fail.");
     
-    proxy->server = strdup(server);
-    check(proxy->server, "Out of ram.");
-
+    proxy->server = server;
     proxy->port = port;
 
     return proxy;
@@ -107,27 +105,29 @@ int Proxy_connect(Proxy *proxy, int fd, const char *buf, size_t len, size_t n)
 
     to_proxy = ProxyConnect_create(fd, initial_buf, len, n); 
 
-    check(to_proxy, "Could not create the connection to backend %s:%d", proxy->server, proxy->port);
+    check(to_proxy, "Could not create the connection to backend %s:%d",
+            bdata(proxy->server), proxy->port);
 
 
-    debug("Connecting to %s:%d", proxy->server, proxy->port);
+    debug("Connecting to %s:%d", bdata(proxy->server), proxy->port);
 
     // TODO: create release style macros that compile these away
     taskstate("connecting");
 
-    to_proxy->read_fd = netdial(TCP, proxy->server, proxy->port);
-    check(to_proxy->read_fd >= 0, "Failed to connect to %s:%d", proxy->server, proxy->port);
+    to_proxy->read_fd = netdial(TCP, bdata(proxy->server), proxy->port);
+    check(to_proxy->read_fd >= 0, "Failed to connect to %s:%d", bdata(proxy->server), proxy->port);
 
     fdnoblock(to_proxy->read_fd);
     fdnoblock(to_proxy->write_fd);
 
     taskstate("connected");
-    debug("Proxy connected to %s:%d", proxy->server, proxy->port);
+    debug("Proxy connected to %s:%d", bdata(proxy->server), proxy->port);
     
     to_listener = ProxyConnect_create(to_proxy->read_fd, 
             malloc(to_proxy->size), to_proxy->size, 0);
 
-    check(to_listener, "Could not create the connection to backend %s:%d", proxy->server, proxy->port);
+    check(to_listener, "Could not create the connection to backend %s:%d",
+            bdata(proxy->server), proxy->port);
     
     to_listener->read_fd = to_proxy->write_fd;
 

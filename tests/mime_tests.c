@@ -31,23 +31,23 @@ char *test_MIME_ops()
     mu_assert(rc == 0, "Failed to add .html");
 
     // now test that we can get them
+    bstring type;
 
-    const char *type = NULL;
-
-    type = MIME_match_ext("test.html", strlen("test.html"), NULL);
+    type = MIME_match_ext(bfromcstr("test.html"), NULL);
     mu_assert(type, "Didn't find .html file.");
-    mu_assert(strcmp("text/html", type) == 0, "Wrong type returned for.html.");
+    mu_assert(biseqcstr(type, "text/html"), "Wrong type returned for.html.");
 
-    type = MIME_match_ext("test.json", strlen("test.json"), NULL);
+    type = MIME_match_ext(bfromcstr("test.json"), NULL);
     mu_assert(type, "Didn't find .json file.");
-    mu_assert(strcmp("application/javascript", type) == 0, "Wrong type returned for .json.");
+    debug("GOT json type: %s", bdata(type));
+    mu_assert(biseqcstr(type, "application/javascript"), "Wrong type returned for .json.");
 
-    type = MIME_match_ext("test.crap", strlen("test.crap"), NULL);
+    type = MIME_match_ext(bfromcstr("test.crap"), NULL);
     mu_assert(!type, "Should not find unknown types.");
 
-    type = MIME_match_ext("test.crap", strlen("test.crap"), "text/plain");
+    type = MIME_match_ext(bfromcstr("test.crap"), bfromcstr("text/plain"));
     mu_assert(type, "Should get the default type.");
-    mu_assert(strcmp("text/plain", type) == 0, "Wrong type returned for.html.");
+    mu_assert(biseqcstr(type, "text/plain"), "Wrong type returned for.html.");
     return NULL;
 }
 

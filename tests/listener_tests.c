@@ -40,7 +40,7 @@ char *test_Listener_create_destroy()
 
 char *test_Listener_deliver()
 {
-    int rc = Listener_deliver(1, "TEST", strlen("TEST"));
+    int rc = Listener_deliver(1, bfromcstr("TEST"));
     // depending on the platform this will fail or not if send is allowed on files
     mu_assert(rc == 0, "Should be able to write.");
 

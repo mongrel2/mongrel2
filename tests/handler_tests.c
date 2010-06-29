@@ -6,12 +6,6 @@
 
 FILE *LOG_FILE = NULL;
 
-char *test_Handler_init() 
-{
-    mqinit(2);
-    Handler_init();
-    return NULL;
-}
 
 char *test_Handler_recv_create()
 {
@@ -70,8 +64,8 @@ char *test_Handler_create_destroy()
 
 char * all_tests() {
     mu_suite_start();
+    mqinit(2);
 
-    mu_run_test(test_Handler_init);
     mu_run_test(test_Handler_send_create);
     mu_run_test(test_Handler_recv_create);
     mu_run_test(test_Handler_deliver);

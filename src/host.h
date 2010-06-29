@@ -15,7 +15,7 @@ enum {
 
 typedef struct Host {
     RouteMap *routes;
-    char name[MAX_HOST_NAME];
+    bstring name;
 } Host;
 
 
@@ -39,6 +39,6 @@ void Host_destroy(Host *host);
 int Host_add_backend(Host *host, const char *path, size_t path_len, BackendType type, void *target);
 
 
-Backend *Host_match(Host *host, const char *target, size_t len);
+Backend *Host_match(Host *host, bstring target);
 
 #endif

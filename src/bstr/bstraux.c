@@ -251,12 +251,13 @@ static struct bStream * bsFromBstrRef (struct tagbstring * t) {
  *           in the character position one past the "," terminator.
  */
 char * bStr2NetStr (const_bstring b) {
-char strnum[sizeof (b->slen) * 3 + 1];
+size_t numlen = sizeof (b->slen) * 3 + 1;
+char strnum[numlen+1];
 bstring s;
 unsigned char * buff;
 
 	if (b == NULL || b->data == NULL || b->slen < 0) return NULL;
-	sprintf (strnum, "%d:", b->slen);
+	snprintf(strnum, numlen+1, "%d:", b->slen);
 	if (NULL == (s = bfromcstr (strnum))
 	 || bconcat (s, b) == BSTR_ERR || bconchar (s, (char) ',') == BSTR_ERR) {
 		bdestroy (s);

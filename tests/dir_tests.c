@@ -8,7 +8,7 @@ char *test_Dir_find_file()
 {
     size_t fsize;
 
-    int fd = Dir_find_file("tests/sample.json", strlen("tests/sample.json"), &fsize);
+    int fd = Dir_find_file(bfromcstr("tests/sample.json"), &fsize);
     mu_assert(fd >= 0, "Failed to find the file.");
 
     return NULL;

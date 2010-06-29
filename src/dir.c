@@ -12,19 +12,20 @@
 #include <mime.h>
 
 
-int Dir_find_file(const char *path, size_t path_len, size_t *out_size)
+int Dir_find_file(bstring path, size_t *out_size)
 {
     int fd = 0;
     struct stat sb;
+    const char *p = bdata(path);
 
     // TODO: implement a stat cache and track inode changes in it
-    int rc = stat(path, &sb);
-    check(rc == 0, "File stat failed: %.*s", (int)path_len, path);
+    int rc = stat(p, &sb);
+    check(rc == 0, "File stat failed: %s", bdata(path));
 
     *out_size = (size_t)sb.st_size;
 
-    fd = open(path, O_RDONLY);
-    check(fd, "Failed to open file but stat worked: %.*s", (int)path_len, path);
+    fd = open(p, O_RDONLY);
+    check(fd, "Failed to open file but stat worked: %s", bdata(path));
 
     return fd;
 
@@ -64,12 +65,8 @@ Dir *Dir_create(const char *base)
     Dir *dir = calloc(sizeof(Dir), 1);
     check(dir, "Out of memory error.");
 
-    dir->base_len = strlen(base);
-    check(dir->base_len > 0, "Cannot have an empty directory base");
-    check(dir->base_len < MAX_DIR_PATH, "Dir base cannot be greater than %d", MAX_DIR_PATH);
-
-    strncpy(dir->base, base, MAX_DIR_PATH-1);
-    dir->base[dir->base_len] = '\0';
+    dir->base = bfromcstr(base);
+    check(blength(dir->base) < MAX_DIR_PATH, "Base pattern is too long, must be less than %d", MAX_DIR_PATH);
 
     return dir;
 error:
@@ -78,44 +75,47 @@ error:
 
 void Dir_destroy(Dir *dir)
 {
+    bdestroy(dir->base);
     free(dir);
 }
 
+struct tagbstring default_type = bsStatic ("text/plain");
 
-int Dir_serve_file(Dir *dir, const char *path, int fd)
+
+int Dir_serve_file(Dir *dir, bstring path, int fd)
 {
     // TODO: normalize path? probably doesn't matter since
     // we'll be chroot as a mandatory operation
-    char header[512] = {0};
-    const char *content_type = NULL;
 
-    size_t path_len = strlen(path);
     size_t flen = 0;
 
-    check(pattern_match(path, path_len, dir->base),
-            "(len %d): Failed to match Dir base path: %.*s against PATH %.*s",
-            (int)dir->base_len, 
-            (int)dir->base_len, dir->base, (int)path_len, path);
+    check(pattern_match(bdata(path), blength(path), bdata(dir->base)),
+            "Failed to match Dir base path: %s against PATH %s",
+            bdata(dir->base), bdata(path));
 
-    int file_fd = Dir_find_file(path+1, path_len-1, &flen);
-    check(file_fd, "Error opening file: %.*s", (int)path_len, path);
+    int file_fd = Dir_find_file(path, &flen);
+
+    check(file_fd, "Error opening file: %s", bdata(path));
 
     // TODO: get this from a configuration
-    content_type = MIME_match_ext(path, path_len, "text/plain");
+    bstring content_type = MIME_match_ext(path, &default_type);
 
+    bstring header = bformat("HTTP/1.1 200 OK\r\nContent-Type: %s\r\nContent-Length: %d\r\nConnection: close\r\n\r\n", 
+            bdata(content_type), flen);
+    check(header != NULL, "Failed to create response header.");
 
-    int rc = snprintf(header, sizeof(header)-1, "HTTP/1.1 200 OK\r\nContent-Type: %s\r\nContent-Length: %d\r\nConnection: close\r\n\r\n", 
-            content_type, flen);
-    fdwrite(fd, header, rc);
+    fdwrite(fd, bdata(header), blength(header));
 
-    rc = Dir_stream_file(file_fd, flen, fd);
-    check(rc == flen, "Didn't send all of the file, sent %d of %s.", rc, path);
+    int rc = Dir_stream_file(file_fd, flen, fd);
+    check(rc == flen, "Didn't send all of the file, sent %d of %s.", rc, bdata(path));
 
+    bdestroy(header);
     close(file_fd);
     close(fd);
     return 0;
 
 error:
+    bdestroy(header);
     close(file_fd);
     close(fd);
     return -1;

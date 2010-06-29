@@ -30,26 +30,26 @@ char *test_routing_match()
     char *route_data4 = "route4";
     Route *route = NULL;
 
-    RouteMap_insert(routes, "/users/([0-9]+)", strlen("/users/([0-9]+)"), route_data1);
-    RouteMap_insert(routes, "/users", strlen("/users"), route_data2);
-    RouteMap_insert(routes, "/users/people/([0-9]+))$", strlen("/users/people/([0-9]+)"), route_data4);
-    RouteMap_insert(routes, "/cars/([a-z]-)$", strlen("/cars/([a-z]-)$"), route_data3);
+    RouteMap_insert(routes, bfromcstr("/users/([0-9]+)"), route_data1);
+    RouteMap_insert(routes, bfromcstr("/users"), route_data2);
+    RouteMap_insert(routes, bfromcstr("/users/people/([0-9]+))$"), route_data4);
+    RouteMap_insert(routes, bfromcstr("/cars/([a-z]-)$"), route_data3);
 
-    list_t *found = RouteMap_match(routes, "/users/1234", strlen("/users/1234"));
+    list_t *found = RouteMap_match(routes, bfromcstr("/users/1234"));
     mu_assert(check_routing(found, route, 1, route_data1), "Pattern match route wrong.");
 
     // must make sure that match is partial unless $ explicitly
-    found = RouteMap_match(routes, "/users/1234/testing", strlen("/users/1234/testing"));
+    found = RouteMap_match(routes, bfromcstr("/users/1234/testing"));
     mu_assert(check_routing(found, route, 1, route_data1), "Past end route wrong.");
 
 
-    found = RouteMap_match(routes, "/users", strlen("/users"));
+    found = RouteMap_match(routes, bfromcstr("/users"));
     mu_assert(check_routing(found, route, 1, route_data2), "No pattern route wrong.");
 
-    found = RouteMap_match(routes, "/cars/cadillac", strlen("/cars/cadillac"));
+    found = RouteMap_match(routes, bfromcstr("/cars/cadillac"));
     mu_assert(check_routing(found, route, 1, route_data3), "Wrong $ terminated route.");
 
-    found = RouteMap_match(routes, "/users/people/1234", strlen("/users/people/1234"));
+    found = RouteMap_match(routes, bfromcstr("/users/people/1234"));
     mu_assert(check_routing(found, route, 1, route_data4), "Wrong longer route match.");
 
     return NULL;

@@ -2,6 +2,7 @@
 #define _request_h
 
 #include <http11/http11_parser.h>
+#include <bstring.h>
 
 http_parser *Request_create();
 
@@ -14,6 +15,6 @@ void Request_destroy(http_parser *parser);
 
 void Request_dump(http_parser *parser);
 
-const char *Request_get(http_parser *parser, const char *field);
+bstring Request_get(http_parser *parser, bstring field);
 
 #endif

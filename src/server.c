@@ -44,7 +44,6 @@ void Server_init()
     mqinit(2);
     Register_init();
     Listener_init();
-    Handler_init();
 }
 
 
@@ -56,7 +55,7 @@ void handlers_receive_start(void *value, void *data)
 
         // TODO: make this optional
         if(found->type == BACKEND_HANDLER) {
-            debug("LOADING BACKEND %.*s", (int)route->length, route->pattern);
+            debug("LOADING BACKEND %s", bdata(route->pattern));
             taskcreate(Handler_task, found->target.handler, HANDLER_STACK);
         }
     }
@@ -78,7 +77,7 @@ void Server_start(Server *srv)
 
     while((cfd = netaccept(srv->listen_fd, remote, &rport)) >= 0) {
         debug("Connection from %s:%d to %s:%d", remote, rport, 
-                srv->default_host->name, srv->port);
+                bdata(srv->default_host->name), srv->port);
 
         taskstate("accepting");
         Listener_accept(srv, cfd, rport, remote);
@@ -93,9 +92,9 @@ error:
 
 
 
-int Server_add_host(Server *srv, const char *pattern, size_t len, Host *host)
+int Server_add_host(Server *srv, bstring pattern, Host *host)
 {
-    return RouteMap_insert_reversed(srv->hosts, pattern, len, host);
+    return RouteMap_insert_reversed(srv->hosts, pattern, host);
 }
 
 

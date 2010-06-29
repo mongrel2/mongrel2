@@ -4,6 +4,7 @@
 #include <server.h>
 #include <http11/http11_parser.h>
 #include <host.h>
+#include <bstring.h>
 
 enum
 {
@@ -21,8 +22,8 @@ typedef struct Listener {
     int finished;
     int registered;
     int rport;
-    char remote[IPADDR_SIZE];
-    char buf[BUFFER_SIZE];
+    char remote[IPADDR_SIZE+1];
+    char buf[BUFFER_SIZE+1];
 } Listener;
 
 void Listener_init();
@@ -36,7 +37,7 @@ Listener *Listener_create(Server *srv, int fd, int rport, const char *remote);
 
 void Listener_accept(Server *srv, int fd, int rport, const char *remote);
 
-int Listener_deliver(int to_fd, char *buffer, size_t len);
+int Listener_deliver(int to_fd, bstring buf);
 
 void Listener_task(void*);
 
@@ -48,6 +49,6 @@ int Listener_process_flash_socket(Listener *listener);
 
 int Listener_parse(Listener *listener);
 
-Backend *Listener_match_path(Listener *listener, const char **out_path);
+Backend *Listener_match_path(Listener *listener, bstring out_path);
 
 #endif

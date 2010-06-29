@@ -13,8 +13,6 @@ typedef struct Handler {
     void *recv_socket;
 } Handler;
 
-void Handler_init();
-
 void Handler_task(void *v);
 
 int Handler_deliver(void *handler_socket, int from_fd, char *buffer, size_t len);

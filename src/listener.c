@@ -1,5 +1,4 @@
 #include <listener.h>
-#include <b64/b64.h>
 #include <string.h>
 #include <proxy.h>
 #include <zmq.h>
@@ -16,11 +15,11 @@ char *FLASH_RESPONSE = "<?xml version=\"1.0\"?><!DOCTYPE cross-domain-policy SYS
 
 size_t FLASH_LEN = 0;
 
-char *HTTP_404 = "HTTP/1.1 404 Not Found\r\n"
+struct tagbstring HTTP_404 = bsStatic("HTTP/1.1 404 Not Found\r\n"
     "Content-Type: text/plain\r\n"
     "Connection: close\r\n"
     "Content-Length: 9\r\n"
-    "Server: Mongrel2\r\n\r\nNot Found";
+    "Server: Mongrel2\r\n\r\nNot Found");
 
 const char *PING_PATTERN = "@[a-z/]- {\"type\":%s*\"ping\"}"; 
 
@@ -61,7 +60,7 @@ Listener *Listener_create(Server *srv, int fd, int rport, const char *remote)
     listener->fd = fd;
 
     listener->rport = rport;
-    strncpy(listener->remote, remote, IPADDR_SIZE);
+    memcpy(listener->remote, remote, IPADDR_SIZE);
     listener->remote[IPADDR_SIZE] = '\0';
 
     listener->parser = Request_create();
@@ -83,32 +82,23 @@ void Listener_destroy(Listener *listener)
 }
 
 
-int Listener_deliver(int to_fd, char *buffer, size_t len)
+int Listener_deliver(int to_fd, bstring buf)
 {
-    size_t b64_len = 0;
-    b64_char_t *b64_buf = NULL;
     int rc = 0;
 
-    check(buffer[len] == '\0', "Message for listener must end in \\0, you have '%c'", buffer[len]);
-    check(buffer[len-1] != '\0', "Message for listener must end in ONE \\0, you have more.");
+    bstring b64_buf = bBase64Encode(buf);
+    check(b64_buf, "Base64 encode failure.");
 
-    b64_buf = calloc(BUFFER_SIZE * 1.5, 1);
-    check(b64_buf, "Failed to allocate buffer for Base64 convert.");
+    rc = Listener_write_func(to_fd, bdata(b64_buf), blength(b64_buf)+1);
 
-    b64_len = b64_encode(buffer, len, b64_buf, BUFFER_SIZE * 1.5-1);
-    check(b64_len > 0, "Base64 convert failed.");
-
-    b64_buf[b64_len] = '\0';
-
-    rc = Listener_write_func(to_fd, b64_buf, b64_len+1);
-    check(rc == b64_len+1, "Failed to write entire message to listener %d", to_fd);
+    check(rc == blength(b64_buf)+1, "Failed to write entire message to listener %d", to_fd);
 
 
-    if(b64_buf) free(b64_buf);
+    bdestroy(b64_buf);
     return 0;
 
 error:
-    if(b64_buf) free(b64_buf);
+    bdestroy(b64_buf);
     return -1;
 }
 
@@ -116,6 +106,7 @@ error:
 
 int Listener_process_json(Listener *listener)
 {
+    bstring path = bfromcstr("");
     check(listener->server->default_host, "No default host set, need one for jssockets to work.");
 
     if(!listener->registered) {
@@ -129,9 +120,8 @@ int Listener_process_json(Listener *listener)
         }
 
     } else {
-        const char *path = NULL;
-        Backend *found = Listener_match_path(listener, &path);
-        check(found, "Handler not found: %s", path);
+        Backend *found = Listener_match_path(listener, path);
+        check(found, "Handler not found: %s", bdata(path));
         check(found->type == BACKEND_HANDLER, "Should get a handler.");
 
         debug("JSON message from %s:%d sent on jssocket: %.*s", listener->remote, listener->rport, listener->nread, listener->buf);
@@ -141,21 +131,29 @@ int Listener_process_json(Listener *listener)
        }
     }
 
+    bdestroy(path);
     return 0;
+
 error:
+    bdestroy(path);
     return -1;
 }
 
-Backend *Listener_match_path(Listener *listener, const char **out_path)
+
+struct tagbstring HTTP_PATH = bsStatic ("PATH");
+
+Backend *Listener_match_path(Listener *listener, bstring out_path)
 {
-    *out_path = Request_get(listener->parser, "PATH");
-    check(*out_path, "Invalid HTTP Request, no PATH parameter.");
+    bstring path = Request_get(listener->parser, &HTTP_PATH);
+    check(path, "Invalid HTTP request, no path (that's unpossible).");
+
+    bassign(out_path, path); // always assign this
 
     // TODO: find the host from reverse of host name, match it or use default host
    
     // TODO: convert this to actually return all found Backends, then iterate through them all
      
-    Backend *found = Host_match(listener->server->default_host, *out_path, strlen(*out_path));
+    Backend *found = Host_match(listener->server->default_host, path);
 
     return found;
 
@@ -165,47 +163,56 @@ error:
 
 int Listener_process_http(Listener *listener)
 {
+    int rc = 0;
+    bstring path = bfromcstr("");
+    Backend *found = NULL;
+
     // TODO: resolve what the default host means, maybe we're matching hosts now?
     check(listener->server->default_host, "No default host set.");
 
     taskname("Listener_task");
 
-    const char *path = NULL;
-
-    Backend *found = Listener_match_path(listener, &path);
-    check(path, "PATH not given, invalid HTTP request.");
-
+    found = Listener_match_path(listener, path);
     
     if(found) {
         // we can share the data because the caller will block as the proxy runs
         switch(found->type) {
             case BACKEND_PROXY:
                 taskstate("proxying");
-                return Proxy_connect(found->target.proxy, listener->fd, listener->buf, BUFFER_SIZE, listener->nread);
+                rc = Proxy_connect(found->target.proxy, listener->fd, listener->buf, BUFFER_SIZE, listener->nread);
+                break;
 
             case BACKEND_HANDLER:
                 taskstate("error");
                 sentinel("Handler isn't supported for HTTP yet.");
+                break;
+
             case BACKEND_DIR:
                 taskstate("sending");
-                return Dir_serve_file(found->target.dir, path, listener->fd);
+                rc = Dir_serve_file(found->target.dir, path, listener->fd);
+                break;
+
             default:
                 sentinel("Unknown handler type id: %d", found->type);
+                break;
         }
     } else {
         // TODO: make a generic error response system
-        log_err("[%s] 404 Not Found", path);
         taskstate("404");
 
-        fdwrite(listener->fd, HTTP_404, strlen(HTTP_404));
+        fdwrite(listener->fd, bdata(&HTTP_404), blength(&HTTP_404));
 
         taskstate("closing");
         close(listener->fd);
 
-        return -1;
+        sentinel("[%s] 404 Not Found", bdata(path));
     }
-   
+  
+    bdestroy(path);
+    return rc;
+
 error:
+    bdestroy(path);
     return -1;
 }
 
