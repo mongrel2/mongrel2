@@ -9,6 +9,7 @@
 #include <proxy.h>
 #include <assert.h>
 #include <stdlib.h>
+#include <mem/halloc.h>
 
 enum
 {
@@ -21,11 +22,12 @@ void rwtask(void*);
 
 ProxyConnect *ProxyConnect_create(int write_fd, char *buffer, size_t size, size_t n)
 {
-    ProxyConnect *conn = malloc(sizeof(ProxyConnect));
+    ProxyConnect *conn = h_malloc(sizeof(ProxyConnect));
     check(conn, "Failed to allocate ProxyConnect.");
     conn->write_fd = write_fd;
     conn->read_fd = 0;
     conn->buffer = buffer;
+    hattach(buffer, conn);
     conn->size = size;
     conn->n = n; 
 
@@ -39,8 +41,7 @@ void ProxyConnect_destroy(ProxyConnect *conn)
     if(conn) {
         if(conn->write_fd) shutdown(conn->write_fd, SHUT_WR);
         if(conn->read_fd) close(conn->read_fd);
-        if(conn->buffer) free(conn->buffer);
-        free(conn);
+        h_free(conn);
     }
 }
 
@@ -49,13 +50,13 @@ void Proxy_destroy(Proxy *proxy)
 {
     if(proxy) {
         if(proxy->server) bdestroy(proxy->server);
-        free(proxy);
+        h_free(proxy);
     }
 }
 
 Proxy *Proxy_create(bstring server, int port)
 {
-    Proxy *proxy = calloc(sizeof(Proxy), 1);
+    Proxy *proxy = h_calloc(sizeof(Proxy), 1);
     check(proxy, "Failed to create proxy, memory allocation fail.");
     
     proxy->server = server;
@@ -99,7 +100,7 @@ int Proxy_connect(Proxy *proxy, int fd, const char *buf, size_t len, size_t n)
 
     taskname("proxy_to_listener");
 
-    char *initial_buf = malloc(len);
+    char *initial_buf = h_malloc(len);
     check(initial_buf, "Out of memory.");
     check(memcpy(initial_buf, buf, n), "Failed to copy the initial buffer.");
 
@@ -124,7 +125,7 @@ int Proxy_connect(Proxy *proxy, int fd, const char *buf, size_t len, size_t n)
     debug("Proxy connected to %s:%d", bdata(proxy->server), proxy->port);
     
     to_listener = ProxyConnect_create(to_proxy->read_fd, 
-            malloc(to_proxy->size), to_proxy->size, 0);
+            h_malloc(to_proxy->size), to_proxy->size, 0);
 
     check(to_listener, "Could not create the connection to backend %s:%d",
             bdata(proxy->server), proxy->port);

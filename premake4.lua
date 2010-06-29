@@ -14,11 +14,11 @@ function test(test_name)
       links { "sqlite3", "zmq", "m2" }
       includedirs { "src" }
       targetdir("build/tests")
-      -- postbuildcommands { 
-      --     "cp ../tests/sample.* tests",
-      --     "cp ../tests/config.sqlite tests",
-      --     "tests/" .. test_name 
-      -- }
+      postbuildcommands { 
+          "cp ../tests/sample.* tests",
+          "cp ../tests/config.sqlite tests",
+          "tests/" .. test_name 
+      }
 end
 
 solution "Mongrel2"

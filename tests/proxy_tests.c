@@ -1,12 +1,13 @@
 #include "minunit.h"
 #include <proxy.h>
 #include <stdlib.h>
+#include <mem/halloc.h>
 
 FILE *LOG_FILE = NULL;
 
 char *test_ProxyConnect_create_destroy()
 {
-    ProxyConnect *conn = ProxyConnect_create(12, malloc(12), 12, 0);
+    ProxyConnect *conn = ProxyConnect_create(12, h_malloc(12), 12, 0);
     mu_assert(conn != NULL, "Didn't make the proxy connection.");
 
     ProxyConnect_destroy(conn);

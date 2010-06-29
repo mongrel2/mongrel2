@@ -17,6 +17,8 @@ typedef struct Route {
 
 RouteMap *RouteMap_create();
 
+void RouteMap_destroy(RouteMap *map);
+
 int RouteMap_insert(RouteMap *routes, bstring pattern, void *data);
 
 list_t *RouteMap_match(RouteMap *routes, bstring path);

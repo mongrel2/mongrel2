@@ -28,29 +28,63 @@ char *test_routing_match()
     char *route_data2 = "route2";
     char *route_data3 = "route3";
     char *route_data4 = "route4";
+    bstring route1 = bfromcstr("/users/([0-9]+)");
+    bstring route2 = bfromcstr("/users");
+    bstring route3 = bfromcstr("/users/people/([0-9]+))$");
+    bstring route4 = bfromcstr("/cars/([a-z]-)$");
+
     Route *route = NULL;
 
-    RouteMap_insert(routes, bfromcstr("/users/([0-9]+)"), route_data1);
-    RouteMap_insert(routes, bfromcstr("/users"), route_data2);
-    RouteMap_insert(routes, bfromcstr("/users/people/([0-9]+))$"), route_data4);
-    RouteMap_insert(routes, bfromcstr("/cars/([a-z]-)$"), route_data3);
+    RouteMap_insert(routes, route1, route_data1);
+    RouteMap_insert(routes, route2, route_data2);
+    RouteMap_insert(routes, route3, route_data4);
+    RouteMap_insert(routes, route4, route_data3);
 
-    list_t *found = RouteMap_match(routes, bfromcstr("/users/1234"));
+    bstring path1 = bfromcstr("/users/1234/testing");
+    bstring path2 = bfromcstr("/users");
+    bstring path3 = bfromcstr("/cars/cadillac");
+    bstring path4 = bfromcstr("/users/people/1234"); 
+    bstring path5 = bfromcstr("/users/1234");
+
+    list_t *found = RouteMap_match(routes, path5);
     mu_assert(check_routing(found, route, 1, route_data1), "Pattern match route wrong.");
+    list_destroy_nodes(found);
+    list_destroy(found);
 
     // must make sure that match is partial unless $ explicitly
-    found = RouteMap_match(routes, bfromcstr("/users/1234/testing"));
+    found = RouteMap_match(routes, path1);
     mu_assert(check_routing(found, route, 1, route_data1), "Past end route wrong.");
+    list_destroy_nodes(found);
+    list_destroy(found);
 
-
-    found = RouteMap_match(routes, bfromcstr("/users"));
+    found = RouteMap_match(routes, path2);
     mu_assert(check_routing(found, route, 1, route_data2), "No pattern route wrong.");
+    list_destroy_nodes(found);
+    list_destroy(found);
 
-    found = RouteMap_match(routes, bfromcstr("/cars/cadillac"));
+    found = RouteMap_match(routes, path3);
     mu_assert(check_routing(found, route, 1, route_data3), "Wrong $ terminated route.");
+    list_destroy_nodes(found);
+    list_destroy(found);
 
-    found = RouteMap_match(routes, bfromcstr("/users/people/1234"));
+    found = RouteMap_match(routes, path4);
     mu_assert(check_routing(found, route, 1, route_data4), "Wrong longer route match.");
+    list_destroy_nodes(found);
+    list_destroy(found);
+
+    bdestroy(path1);
+    bdestroy(path2);
+    bdestroy(path3);
+    bdestroy(path4);
+    bdestroy(path5);
+
+    RouteMap_destroy(routes);
+
+    // TODO: make it so we don't need to do this manually by having RouteMap do it
+    bdestroy(route1);
+    bdestroy(route2);
+    bdestroy(route3);
+    bdestroy(route4);
 
     return NULL;
 }

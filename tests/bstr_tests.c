@@ -554,7 +554,7 @@ static int test2_0 (const_bstring b, char z, const unsigned char * res) {
     if (s == NULL) {
         if (res != NULL) ret++;
         debug (".\tbstr2cstr (%s, %02X) = NULL", dumpBstring (b), z);
-        free(s);
+        bcstrfree(s);
         return ret;
     }
 
@@ -567,7 +567,7 @@ static int test2_0 (const_bstring b, char z, const unsigned char * res) {
     }
 
     debug (".\tbstr2cstr (%s, %02X) = \"%s\"", dumpBstring (b), z, s);
-    free (s);
+    bcstrfree (s);
     return ret;
 }
 
