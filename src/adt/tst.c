@@ -12,6 +12,7 @@ typedef struct tst_collect_t {
     size_t len;
 } tst_collect_t;
 
+
 static void tst_collect_build(void *value, tst_collect_t *results)
 {
     if(!results->tester || results->tester(value, results->key, results->len)) {

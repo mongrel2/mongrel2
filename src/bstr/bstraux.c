@@ -601,11 +601,12 @@ bstring b;
 	b = bfromcstralloc (256, "");
 	if (NULL == b || 0 > bsread (b, d, INT_MAX)) {
 		bdestroy (b);
-		bsclose (d);
-		bsclose (s);
-		return NULL;
-	}
-	return b;
+        b = NULL;
+    }
+
+    bsclose(d);
+    bsclose(s);
+    return b;
 }
 
 struct bsUuCtx {

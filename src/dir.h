@@ -16,6 +16,7 @@ typedef struct Dir {
 } Dir;
 
 Dir *Dir_create(const char *base);
+
 void Dir_destroy(Dir *dir);
 
 int Dir_find_file(bstring path, size_t *out_size);
