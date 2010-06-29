@@ -13,7 +13,6 @@ resp = ctx.socket(zmq.PUB)
 resp.connect("tcp://127.0.0.1:9998")
 resp.setsockopt(zmq.IDENTITY, sender_id)
 
-
 users = {}
 user_list = []
 
@@ -45,7 +44,6 @@ while True:
             user_list = [u[1] for u in users.items()]
             send(ident, {'type': 'userList', 'users': user_list})
         elif data["type"] == "leave":
-
             if ident in users:
                 data['user'] = users[ident]
                 del users[ident]
@@ -55,7 +53,14 @@ while True:
         elif ident not in users:
             users[ident] = data['user']
         elif data['type'] == "msg":
-            deliver(data)
+            idiots = open("idiots").read()
+
+            if users.get(ident, "XXX") in idiots or data['user'] in idiots:
+                print "IDIOT:", ident
+                send(ident, data)
+            else:
+                deliver(data)
+
     except KeyError:
         print "BAD", data
 
