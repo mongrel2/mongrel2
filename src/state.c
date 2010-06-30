@@ -4,19 +4,19 @@
 #include <stdio.h>
 #include <state.h>
 #include <dbg.h>
+#include <events.h>
 
 
 
-#line 46 "src/state.rl"
+#line 47 "src/state.rl"
 
 
 
 #line 2 "src/state.c"
 static const char _State_actions[] = {
-	0, 1, 2, 1, 3, 1, 5, 1, 
-	6, 1, 7, 1, 8, 1, 9, 2, 
-	0, 1, 2, 4, 10, 4, 4, 10, 
-	0, 1
+	0, 1, 2, 1, 3, 1, 4, 1, 
+	5, 1, 6, 1, 7, 1, 8, 1, 
+	9, 2, 0, 1
 };
 
 static const char _State_key_offsets[] = {
@@ -46,12 +46,12 @@ static const char _State_trans_targs[] = {
 };
 
 static const char _State_trans_actions[] = {
-	1, 3, 5, 7, 11, 3, 13, 3, 
-	9, 3, 15, 0, 21, 3, 0
+	1, 3, 7, 9, 13, 3, 15, 3, 
+	11, 3, 17, 0, 17, 3, 0
 };
 
 static const char _State_eof_actions[] = {
-	0, 3, 3, 3, 3, 0, 18
+	0, 3, 3, 3, 3, 0, 5
 };
 
 static const int State_start = 5;
@@ -61,39 +61,48 @@ static const int State_error = 0;
 static const int State_en_main = 5;
 
 
-#line 49 "src/state.rl"
+#line 50 "src/state.rl"
 
 int State_init(State *state)
 {
-  
+    
 #line 2 "src/state.c"
 	{
 	 state->cs = State_start;
 	}
 
-#line 53 "src/state.rl"
-  return 1;
+#line 54 "src/state.rl"
+    return 1;
 }
 
 inline int State_invariant(State *state, int event)
 {
-  if ( state->cs == State_error ) {
-    return -1;
-  }
+    if ( state->cs == 
+#line 2 "src/state.c"
+0
+#line 59 "src/state.rl"
+ ) {
+        return -1;
+    }
 
-  if ( state->cs >= State_first_final )
-    return 1;
-  
-  return 0;
+    if ( state->cs >= 
+#line 2 "src/state.c"
+5
+#line 63 "src/state.rl"
+ ) {
+        return 1;
+    }
+
+    return 0;
 }
 
 int State_exec(State *state, int event)
 {
-  const char *p = (const char *)&event;
-  const char *pe = p+1;
-  const char *eof = NULL;
+    const char *p = (const char *)&event;
+    const char *pe = p+1;
+    const char *eof = event == CLOSE ? pe : NULL;
 
-  
+    
 #line 2 "src/state.c"
 	{
 	int _klen;
@@ -168,48 +177,40 @@ _match:
 		switch ( *_acts++ )
 		{
 	case 0:
-#line 12 "src/state.rl"
+#line 13 "src/state.rl"
 	{ debug("BEGIN "); }
 	break;
 	case 1:
-#line 13 "src/state.rl"
+#line 14 "src/state.rl"
 	{ debug("OPEN "); }
 	break;
 	case 2:
-#line 14 "src/state.rl"
+#line 15 "src/state.rl"
 	{ debug("CONNECTED"); }
 	break;
 	case 3:
-#line 15 "src/state.rl"
+#line 16 "src/state.rl"
 	{ debug("ERROR! "); }
 	break;
-	case 4:
-#line 16 "src/state.rl"
-	{ debug("FINISH "); }
-	break;
 	case 5:
-#line 17 "src/state.rl"
+#line 18 "src/state.rl"
 	{ debug("CLOSE "); }
 	break;
 	case 6:
-#line 18 "src/state.rl"
+#line 19 "src/state.rl"
 	{ debug("RECV "); }
 	break;
 	case 7:
-#line 19 "src/state.rl"
+#line 20 "src/state.rl"
 	{ debug("SENT "); }
 	break;
 	case 8:
-#line 20 "src/state.rl"
+#line 21 "src/state.rl"
 	{ debug("SERVICE"); }
 	break;
 	case 9:
-#line 21 "src/state.rl"
+#line 22 "src/state.rl"
 	{ debug("DELIVERED "); }
-	break;
-	case 10:
-#line 45 "src/state.rl"
-	{ debug("\n"); }
 	break;
 #line 2 "src/state.c"
 		}
@@ -228,16 +229,12 @@ _again:
 	while ( __nacts-- > 0 ) {
 		switch ( *__acts++ ) {
 	case 3:
-#line 15 "src/state.rl"
+#line 16 "src/state.rl"
 	{ debug("ERROR! "); }
 	break;
 	case 4:
-#line 16 "src/state.rl"
+#line 17 "src/state.rl"
 	{ debug("FINISH "); }
-	break;
-	case 10:
-#line 45 "src/state.rl"
-	{ debug("\n"); }
 	break;
 #line 2 "src/state.c"
 		}
@@ -247,14 +244,14 @@ _again:
 	_out: {}
 	}
 
-#line 75 "src/state.rl"
+#line 77 "src/state.rl"
 
-  return State_invariant(state, event);
+    return State_invariant(state, event);
 }
 
 int State_finish(State *state)
 {
-  return State_invariant(state, 0);
+    return State_invariant(state, 0);
 }
 
 
