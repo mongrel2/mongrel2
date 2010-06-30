@@ -17,7 +17,9 @@ function test(test_name)
       postbuildcommands { 
           "cp ../tests/sample.* tests",
           "cp ../tests/config.sqlite tests",
-          "tests/" .. test_name 
+          "tests/" .. test_name
+          -- "valgrind --leak-check=full --log-file=" .. test_name .. "_valgrind.log tests/" .. test_name,
+          -- "egrep '(ERROR SUMMARY|lost)' " .. test_name .. "_valgrind.log"
       }
 end
 

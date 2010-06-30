@@ -162,5 +162,7 @@ void tst_traverse(tst_t *p, tst_traverse_cb cb, void *data)
 
 void tst_destroy(tst_t *root)
 {
-    h_free(root);
+    if(root) {
+        h_free(root);
+    }
 }

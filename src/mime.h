@@ -8,4 +8,6 @@ int MIME_add_type(const char *ext, const char *type);
 
 bstring MIME_match_ext(bstring path, bstring def);
 
+void MIME_destroy();
+
 #endif

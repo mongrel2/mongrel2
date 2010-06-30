@@ -2,10 +2,11 @@
 #include <string.h>
 #include <dbg.h>
 #include <assert.h>
+#include <mem/halloc.h>
 
 Host *Host_create(const char *name)
 {
-    Host *host = calloc(sizeof(Host), 1);
+    Host *host = h_calloc(sizeof(Host), 1);
     check(host, "Out of memory error.");
 
     host->name = bfromcstr(name);
@@ -24,8 +25,11 @@ error:
 
 void Host_destroy(Host *host)
 {
-    bdestroy(host->name);
-    free(host);
+    if(host) {
+        bdestroy(host->name);
+        RouteMap_destroy(host->routes);
+        h_free(host);
+    }
 }
 
 

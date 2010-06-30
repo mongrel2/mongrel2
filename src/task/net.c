@@ -9,7 +9,7 @@
 int
 netannounce(int istcp, char *server, int port)
 {
-    int fd, n, proto;
+    int fd = 0, n = 0, proto = 0;
     struct sockaddr_in sa;
     socklen_t sn;
     uint32_t ip;
@@ -32,6 +32,7 @@ netannounce(int istcp, char *server, int port)
     }
     
     /* set reuse flag for tcp */
+    sn = sizeof(n);
     if(istcp && getsockopt(fd, SOL_SOCKET, SO_TYPE, (void*)&n, &sn) >= 0){
         n = 1;
         setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (char*)&n, sizeof n);

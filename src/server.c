@@ -6,14 +6,15 @@
 #include <host.h>
 #include <assert.h>
 #include <string.h>
-
+#include <mem/halloc.h>
 
 Server *Server_create(const char *port)
 {
-    Server *srv = calloc(sizeof(Server), 1);
+    Server *srv = h_calloc(sizeof(Server), 1);
     check(srv, "Out of memory.");
 
     srv->hosts = RouteMap_create();
+    check(srv->hosts, "Failed to create host RouteMap.");
 
     srv->port = atoi(port);
     check(port > 0, "Can't bind to the given port: %s", port);
@@ -33,8 +34,9 @@ error:
 void Server_destroy(Server *srv)
 {
     if(srv) {
+        RouteMap_destroy(srv->hosts);
         close(srv->listen_fd);
-        free(srv);
+        h_free(srv);
     }
 }
 

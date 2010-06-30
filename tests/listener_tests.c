@@ -40,9 +40,13 @@ char *test_Listener_create_destroy()
 
 char *test_Listener_deliver()
 {
-    int rc = Listener_deliver(1, bfromcstr("TEST"));
+    bstring t1;
+
+    int rc = Listener_deliver(1, t1 = bfromcstr("TEST"));
     // depending on the platform this will fail or not if send is allowed on files
     mu_assert(rc == 0, "Should be able to write.");
+
+    bdestroy(t1);
 
     return NULL;
 }
@@ -107,13 +111,20 @@ char * all_tests()
 
     Server_init();
     SRV = Server_create("1999");
-    Server_set_default_host(SRV, Host_create("zedshaw.com"));
+    Host *zedshaw_com = Host_create("zedshaw.com");
+    Server_set_default_host(SRV, zedshaw_com);
 
     mu_run_test(test_Listener_init);
     mu_run_test(test_Listener_create_destroy);
     mu_run_test(test_Listener_deliver);
     mu_run_test(test_Listener_parse);
     mu_run_test(test_Listener_task);
+
+    Server_destroy(SRV);
+
+    // TODO: the above will eventually do this
+    Host_destroy(zedshaw_com);
+    zmq_term(ZMQ_CTX);
 
     return NULL;
 }

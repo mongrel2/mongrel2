@@ -72,6 +72,7 @@ char * all_tests() {
     mu_run_test(test_Handler_notify_leave);
     mu_run_test(test_Handler_create_destroy);
 
+    zmq_term(ZMQ_CTX);
     return NULL;
 }
 

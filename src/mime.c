@@ -43,3 +43,17 @@ bstring MIME_match_ext(bstring path, bstring def)
 
     return type == NULL ? def : type;
 }
+
+void MIME_traverse_destroy(void *value, void *data)
+{
+    bdestroy((bstring)value);
+}
+
+void MIME_destroy()
+{
+    if(MIME_MAP) {
+        tst_traverse(MIME_MAP, MIME_traverse_destroy, NULL);
+        tst_destroy(MIME_MAP);
+        MIME_MAP = NULL;
+    }
+}

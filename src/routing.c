@@ -17,8 +17,10 @@ RouteMap *RouteMap_create()
 void RouteMap_destroy(RouteMap *map)
 {
     // TODO: add a callback for destroying the contents, or h_malloc required
-    tst_destroy(map->routes);
-    h_free(map);
+    if(map) {
+        tst_destroy(map->routes);
+        h_free(map);
+    }
 }
 
 Route *RouteMap_insert_base(RouteMap *map, bstring prefix, bstring pattern)

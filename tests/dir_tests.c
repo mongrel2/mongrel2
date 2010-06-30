@@ -7,9 +7,12 @@ FILE *LOG_FILE = NULL;
 char *test_Dir_find_file() 
 {
     size_t fsize;
+    bstring t1;
 
-    int fd = Dir_find_file(bfromcstr("tests/sample.json"), &fsize);
+    int fd = Dir_find_file(t1 = bfromcstr("tests/sample.json"), &fsize);
     mu_assert(fd >= 0, "Failed to find the file.");
+
+    bdestroy(t1);
 
     return NULL;
 }

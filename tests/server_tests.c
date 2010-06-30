@@ -8,7 +8,6 @@ FILE *LOG_FILE = NULL;
 char *test_Server_init() 
 {
     mqinit(1);
-
     Server_init();
 
     return NULL;
@@ -52,6 +51,7 @@ char *all_tests() {
     mu_run_test(test_Server_init);
     mu_run_test(test_Server_create_destroy);
     mu_run_test(test_Server_adds);
+    zmq_term(ZMQ_CTX);
 
     return NULL;
 }

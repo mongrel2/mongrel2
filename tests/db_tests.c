@@ -56,6 +56,8 @@ char * all_tests() {
     mu_run_test(test_DB_close);
     mu_run_test(test_DB_exec);
 
+    DB_close();
+
     return NULL;
 }
 
