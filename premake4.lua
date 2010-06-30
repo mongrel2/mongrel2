@@ -63,6 +63,7 @@ solution "Mongrel2"
    test("tst_tests")
    test("request_tests")
    test("mime_tests")
+   test("state_tests")
 
    project "mongrel2"
       kind "ConsoleApp"
