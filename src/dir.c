@@ -84,8 +84,8 @@ struct tagbstring default_type = bsStatic ("text/plain");
 
 int Dir_serve_file(Dir *dir, bstring path, int fd)
 {
-    // TODO: normalize path? probably doesn't matter since
-    // we'll be chroot as a mandatory operation
+    bstring header = NULL;
+    bstring content_type = NULL;
 
     size_t flen = 0;
 
@@ -98,9 +98,8 @@ int Dir_serve_file(Dir *dir, bstring path, int fd)
     check(file_fd, "Error opening file: %s", bdata(path));
 
     // TODO: get this from a configuration
-    bstring content_type = MIME_match_ext(path, &default_type);
-
-    bstring header = bformat("HTTP/1.1 200 OK\r\nContent-Type: %s\r\nContent-Length: %d\r\nConnection: close\r\n\r\n", 
+    content_type = MIME_match_ext(path, &default_type);
+    header = bformat("HTTP/1.1 200 OK\r\nContent-Type: %s\r\nContent-Length: %d\r\nConnection: close\r\n\r\n", 
             bdata(content_type), flen);
     check(header != NULL, "Failed to create response header.");
 

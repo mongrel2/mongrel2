@@ -64,8 +64,8 @@ Listener *Listener_create(Server *srv, int fd, int rport, const char *remote)
     memcpy(listener->remote, remote, IPADDR_SIZE);
     listener->remote[IPADDR_SIZE] = '\0';
 
-    listener->parser = Request_create();
-    check(listener->parser, "Failed to allocate Request.");
+    listener->req = Request_create();
+    check(listener->req, "Failed to allocate Request.");
 
 
     return listener;
@@ -77,7 +77,7 @@ error:
 void Listener_destroy(Listener *listener)
 {
     if(listener) {
-        Request_destroy(listener->parser);
+        Request_destroy(listener->req);
         free(listener);
     }
 }
@@ -117,7 +117,7 @@ int Listener_process_json(Listener *listener)
         listener->registered = 1;
     }
 
-    if(pattern_match(listener->buf, listener->parser->body_start, PING_PATTERN)) {
+    if(pattern_match(listener->buf, listener->req->parser.body_start, PING_PATTERN)) {
         if(!Register_ping(listener->fd)) {
             Register_disconnect(listener->fd);
         }
@@ -143,25 +143,18 @@ error:
 }
 
 
-struct tagbstring HTTP_PATH = bsStatic ("PATH");
 
 Backend *Listener_match_path(Listener *listener, bstring out_path)
 {
-    bstring path = Request_get(listener->parser, &HTTP_PATH);
-    check(path, "Invalid HTTP request, no path (that's unpossible).");
-
-    bassign(out_path, path); // always assign this
+    bassign(out_path, listener->req->path); // always assign this
 
     // TODO: find the host from reverse of host name, match it or use default host
    
     // TODO: convert this to actually return all found Backends, then iterate through them all
      
-    Backend *found = Host_match(listener->server->default_host, path);
+    Backend *found = Host_match(listener->server->default_host, out_path);
 
     return found;
-
-error:
-    return NULL;
 }
 
 int Listener_process_http(Listener *listener)
@@ -231,9 +224,9 @@ error:
 
 int Listener_parse(Listener *listener)
 {
-    Request_start(listener->parser);
+    Request_start(listener->req);
 
-    int finished = Request_parse(listener->parser, listener->buf,
+    int finished = Request_parse(listener->req, listener->buf,
                         listener->nread, &listener->nparsed);
 
     check(finished == 1, "Error in parsing: %d, bytes: %d, value: %.*s", 
@@ -257,30 +250,32 @@ void Listener_task(void *v)
 
         rc = Listener_parse(listener);
 
-        // Request_dump(listener->parser);
+        Request_dump(listener->req);
 
         check(rc == 0, "Parsing failed, closing %s:%d 'cause they suck.",
                 listener->remote, listener->rport);
        
-        if(listener->parser->socket_started) {
+        if(Request_is_socket(listener->req)) {
             rc = Listener_process_flash_socket(listener);
             check(rc == 0, "Invalid flash socket, closing %s:%d 'cause flash sucks.",
                     listener->remote, listener->rport);
             break;
-        } else if(listener->parser->json_sent) {
+        } else if(Request_is_json(listener->req)) {
             rc = Listener_process_json(listener);
             check(rc == 0, "Invalid json request, closing %s:%d 'cause they can't read.",
                     listener->remote, listener->rport);
-        } else {
+        } else if(Request_is_http(listener->req)) {
             rc = Listener_process_http(listener);
             check(rc == 0, "HTTP hand off failed, closing %s:%d",
                     listener->remote, listener->rport);
             break;
+        } else {
+            sentinel("UNKNOWN REQUEST TYPE, TELL ZED.");
         }
     }
 
 error: // fallthrough for both error or not
-    if(listener->parser->json_sent) {
+    if(Request_is_json(listener->req)) {
         Register_disconnect(listener->fd);
     }
 

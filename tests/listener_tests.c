@@ -89,15 +89,15 @@ char *test_Listener_parse()
 
     int rc = Listener_parse(listener);
     mu_assert(rc == 0, "Failed to parse the json message.");
-    mu_assert(listener->parser->json_sent, "Didn't actually find the ping.");
-    http_parser_init(listener->parser);
+    mu_assert(Request_is_json(listener->req), "Didn't actually find the ping.");
+    http_parser_init(Request_parser(listener->req));
 
     strcpy(listener->buf, FLASH_POLICY);
     listener->nread = strlen(listener->buf) + 1;
 
     rc = Listener_parse(listener);
     mu_assert(rc == 0, "Failed to parse flash message.");
-    mu_assert(listener->parser->socket_started, "Didn't start flash socket.");
+    mu_assert(Request_is_socket(listener->req), "Didn't start flash socket.");
 
     Listener_destroy(listener);
 

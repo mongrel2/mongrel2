@@ -5,6 +5,7 @@
 #include <http11/http11_parser.h>
 #include <host.h>
 #include <bstring.h>
+#include <request.h>
 
 enum
 {
@@ -16,7 +17,7 @@ enum
 typedef struct Listener {
     Server *server;
     int fd;
-    http_parser *parser;
+    Request *req;
     int nread;
     size_t nparsed;
     int finished;

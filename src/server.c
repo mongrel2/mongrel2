@@ -75,6 +75,7 @@ void Server_start(Server *srv)
 
     debug("Starting server on port %d", srv->port);
 
+    // TODO: this could cause problems if the tst is too deep, recursion may break
     tst_traverse(srv->default_host->routes->routes, handlers_receive_start, srv);
 
     while((cfd = netaccept(srv->listen_fd, remote, &rport)) >= 0) {

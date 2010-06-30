@@ -25,131 +25,164 @@ static void req_free_dict(dnode_t *node, void *notused)
 
 static void request_method_cb(void *data, const char *at, size_t length)
 {
-    dict_alloc_insert((dict_t *)data, bfromcstr("REQUEST_METHOD"), blk2bstr(at, length));
+    Request *req = (Request *)data;
+    req->request_method = blk2bstr(at, length);
 }
 
 static void fragment_cb(void *data, const char *at, size_t length)
 {
-    dict_alloc_insert((dict_t *)data, bfromcstr("FRAGMENT"), blk2bstr(at, length));
+    Request *req = (Request *)data;
+    req->fragment = blk2bstr(at, length);
 }
 
 static void http_version_cb(void *data, const char *at, size_t length)
 {
-    dict_alloc_insert((dict_t *)data, bfromcstr("VERSION"), blk2bstr(at, length));
+    Request *req = (Request *)data;
+    req->version = blk2bstr(at, length);
 }
+
+struct tagbstring HTTP_CONTENT_LENGTH = bsStatic("CONTENT_LENGTH");
 
 static void header_done_cb(void *data, const char *at, size_t length)
 {
-    dict_verify((dict_t *)data);
+    Request *req = (Request *)data;
+
+    const char *clen = bdata(Request_get(req, &HTTP_CONTENT_LENGTH));
+
+    if(clen) req->parser.content_len = atoi(clen);
+        
+    // TODO: do something else here like verify the request or call filters
 }
 
 static void uri_cb(void *data, const char *at, size_t length)
 {
-    dict_alloc_insert((dict_t *)data, bfromcstr("URI"), blk2bstr(at, length));
+    Request *req = (Request *)data;
+    req->uri = blk2bstr(at, length);
 }
 
 static void path_cb(void *data, const char *at, size_t length)
 {
-    dict_alloc_insert((dict_t *)data, bfromcstr("PATH"), blk2bstr(at, length));
+    Request *req = (Request *)data;
+    req->path = blk2bstr(at, length);
 }
 
 static void query_string_cb(void *data, const char *at, size_t length)
 {
-    dict_alloc_insert((dict_t *)data, bfromcstr("QUERY_STRING"), blk2bstr(at, length));
+    Request *req = (Request *)data;
+    req->query_string = blk2bstr(at, length);
 }
 
 static void header_field_cb(void *data, const char *field, size_t flen,
         const char *value, size_t vlen)
 {
-    dict_alloc_insert((dict_t *)data, blk2bstr(field, flen), blk2bstr(value, vlen));
+    Request *req = (Request *)data;
+    dict_alloc_insert(req->headers, blk2bstr(field, flen), blk2bstr(value, vlen));
 }
 
 
-http_parser *Request_create()
+Request *Request_create()
 {
-    http_parser *parser = calloc(sizeof(http_parser), 1);
-    check(parser, "Out of Memory.");
+    Request *req = calloc(sizeof(Request), 1);
+    check(req, "Out of Memory.");
 
-    parser->http_field = header_field_cb;
-    parser->request_method = request_method_cb;
-    parser->request_uri = uri_cb;
-    parser->fragment = fragment_cb;
-    parser->request_path = path_cb;
-    parser->query_string = query_string_cb;
-    parser->http_version = http_version_cb;
-    parser->header_done = header_done_cb;
+    req->parser.http_field = header_field_cb;
+    req->parser.request_method = request_method_cb;
+    req->parser.request_uri = uri_cb;
+    req->parser.fragment = fragment_cb;
+    req->parser.request_path = path_cb;
+    req->parser.query_string = query_string_cb;
+    req->parser.http_version = http_version_cb;
+    req->parser.header_done = header_done_cb;
 
-    parser->data = dict_create(MAX_HEADER_COUNT, (dict_comp_t)bstrcmp);
-    dict_set_allocator(parser->data, req_alloc_dict, req_free_dict, NULL);
-    dict_allow_dupes(parser->data);
+    req->headers = dict_create(MAX_HEADER_COUNT, (dict_comp_t)bstrcmp);
+    check(req->headers, "Out of Memory");
+    dict_set_allocator(req->headers, req_alloc_dict, req_free_dict, NULL);
+    dict_allow_dupes(req->headers);
 
-    return parser;
+    req->parser.data = req;  // for the http callbacks
+
+    return req;
 
 error:
-    Request_destroy(parser);
+    Request_destroy(req);
     return NULL;
 }
 
-
-void Request_destroy(http_parser *parser)
+inline void Request_nuke_parts(Request *req)
 {
-    if(parser) {
-        dict_free_nodes(parser->data);
-        dict_destroy(parser->data);
-        free(parser);
+    bdestroy(req->request_method); req->request_method = NULL;
+    bdestroy(req->version); req->version = NULL;
+    bdestroy(req->uri); req->uri = NULL;
+    bdestroy(req->path); req->path = NULL;
+    bdestroy(req->query_string); req->query_string = NULL;
+    bdestroy(req->fragment); req->fragment = NULL;
+}
+
+void Request_destroy(Request *req)
+{
+    if(req) {
+        Request_nuke_parts(req);
+        dict_free_nodes(req->headers);
+        dict_destroy(req->headers);
+        free(req);
     }
 }
 
 
-void Request_start(http_parser *parser)
+void Request_start(Request *req)
 {
-    assert(parser && "NULL pointer error.");
-    http_parser_init(parser);
-    if(parser->data) {
-        dict_free_nodes(parser->data);
+    assert(req && "NULL pointer error.");
+    http_parser_init(&(req->parser));
+
+    Request_nuke_parts(req);
+
+    if(req->headers) {
+        dict_free_nodes(req->headers);
     }
 }
 
-int Request_parse(http_parser *parser, char *buf, size_t nread,
+int Request_parse(Request *req, char *buf, size_t nread,
         size_t *out_nparsed)
 {
-    assert(parser && "NULL pointer error.");
+    assert(req && "NULL pointer error.");
 
-    *out_nparsed = http_parser_execute(parser, buf, nread, 0);
+    *out_nparsed = http_parser_execute(&(req->parser), buf, nread, 0);
     
-    int finished =  http_parser_finish(parser);
+    int finished =  http_parser_finish(&(req->parser));
 
     return finished;
 }
 
 
-void Request_dump(http_parser *parser)
+void Request_dump(Request *req)
 {
-    dict_t *req = (dict_t *)parser->data;
     dnode_t *node = NULL;
 
-    if(parser->socket_started) {
-        debug("FLASH SOCKET REQUEST of LENGTH: %d", (int)parser->body_start);
+    if(Request_is_socket(req)) {
+        debug("FLASH SOCKET REQUEST of LENGTH: %d", (int)req->parser.body_start);
         return;
-    } else if(parser->json_sent) {
-        debug("JSON REQUEST of LENGTH: %d", (int)parser->body_start);
+    } else if(Request_is_json(req)) {
+        debug("JSON REQUEST of LENGTH: %d", (int)req->parser.body_start);
+    } else if(Request_is_http(req)) {
+        debug("HTTP REQUEST of LENGTH: %d ***********", (int)req->parser.body_start);
     } else {
-        debug("HTTP REQUEST of LENGTH: %d ***********", (int)parser->body_start);
+        sentinel("UNKNOWN REQUEST TYPE, TELL ZED.");
     }
 
-    for(node = dict_first(req); node != NULL; node = dict_next(req, node)) {
+    for(node = dict_first(req->headers); node != NULL; node = dict_next(req->headers, node)) {
         bstring key = (bstring)dnode_getkey(node);
         bstring value = (bstring)dnode_get(node);
 
         debug("%s: %s", bdata(key), bdata(value));
     }
+
+error:
+    return;
 }
 
-bstring Request_get(http_parser *parser, bstring field)
+bstring Request_get(Request *req, bstring field)
 {
-    dict_t *req = (dict_t *)parser->data;
-
-    dnode_t *node = dict_lookup(req, field);
+    dnode_t *node = dict_lookup(req->headers, field);
 
     if(node) {
         return (bstring)dnode_get(node);

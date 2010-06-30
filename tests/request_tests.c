@@ -6,10 +6,10 @@ FILE *LOG_FILE = NULL;
 char *test_Request_create() 
 {
  
-    http_parser *parser = Request_create();
-    mu_assert(parser != NULL, "Failed to create parser for request.");
+    Request *req = Request_create();
+    mu_assert(req != NULL, "Failed to create parser for request.");
 
-    Request_destroy(parser);
+    Request_destroy(req);
 
     return NULL;
 }

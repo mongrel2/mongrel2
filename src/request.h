@@ -2,19 +2,40 @@
 #define _request_h
 
 #include <http11/http11_parser.h>
+#include <adt/dict.h>
 #include <bstring.h>
 
-http_parser *Request_create();
+typedef struct Request {
+    bstring request_method;
+    bstring version;
+    bstring uri;
+    bstring path;
+    bstring query_string;
+    bstring fragment;
+    dict_t *headers;
+    int invalid_headers;
 
-int Request_parse(http_parser *parser, char *buf, size_t nread,
-        size_t *out_nparsed);
+    http_parser parser;
+} Request;
 
-void Request_start(http_parser *parser);
+Request *Request_create();
 
-void Request_destroy(http_parser *parser);
+int Request_parse(Request *parser, char *buf, size_t nread, size_t *out_nparsed);
 
-void Request_dump(http_parser *parser);
+void Request_start(Request *parser);
 
-bstring Request_get(http_parser *parser, bstring field);
+void Request_destroy(Request *parser);
+
+void Request_dump(Request *parser);
+
+bstring Request_get(Request *parser, bstring field);
+
+#define Request_parser(R) (&((R)->parser))
+
+#define Request_is_json(R) ((R)->parser.json_sent == 1)
+
+#define Request_is_socket(R) ((R)->parser.socket_started == 1)
+
+#define Request_is_http(R) (!(Request_is_json(R) || Request_is_socket(R)))
 
 #endif
