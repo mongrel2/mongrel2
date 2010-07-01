@@ -158,7 +158,13 @@ char *test_State_exec_error()
 {
     State state;
 
+    // Basic client opens, then closes right away
     FAILS(failed_connect, OPEN, CLOSE);
+
+    // Proxy error where client closed connection mid-connect
+    FAILS(failed_proxy, 
+            OPEN, ACCEPT, 
+            REQ_RECV, HTTP_REQ, PROXY, CONNECT, CLOSE);
 
     return NULL;
 }
