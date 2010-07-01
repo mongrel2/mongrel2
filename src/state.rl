@@ -19,12 +19,19 @@
     action timeout { debug("TIMEOUT"); }
 
 ### proxy actions
-    @proxy_connected { debug("PROXY CONNECTED"); }
-    @proxy_failed { debug("PROXY FAILED"); }
+    action proxy_connected { debug("PROXY CONNECTED"); }
+    action proxy_failed { debug("PROXY FAILED"); }
+    action proxy_request { debug("PROXY REQUEST"); }
+    action proxy_req_sent { debug("PROXY REQUEST SENT"); }
+    action proxy_resp_sent { debug("PROXY RESP SENT"); }
+    action proxy_resp_recv { debug("PROXY RESP RECV"); }
 
 ### exit modes for proxy
-    action exit_idle {fgoto Connection::Idle; }
-    action exit_routing { fhold; fgoto Connection::HTTPRouting; }
+    action proxy_exit_idle { debug("PROXY EXIT IDLE"); fgoto Connection::Idle; }
+    action proxy_exit_routing { debug("PROXY EXIT ROUTING"); fhold; fgoto Connection::HTTPRouting; }
+
+    action proxy_error { debug("PROXY ERROR! "); }
+    action proxy_finish { debug("PROXY FINISH "); }
 
     import "events.h";
 
@@ -33,37 +40,37 @@ Proxy := (
         start: ( 
            CONNECT @proxy_connected -> Sending |
            FAILED @proxy_failed -> final |
-           REMOTE_CLOSE @exit_idle |
+           REMOTE_CLOSE @proxy_exit_idle |
            TIMEOUT @timeout -> final
         ),
 
         Connected: (
-           REMOTE_CLOSE @exit_idle |
+           REMOTE_CLOSE @proxy_exit_idle |
            REQ_RECV -> Routing |
            TIMEOUT @timeout -> final
         ),
 
         Routing: (
-           HTTP_REQ PROXY -> Sending |
-           HTTP_REQ (HANDLER|DIRECTORY) @exit_routing
+           HTTP_REQ PROXY @proxy_request -> Sending |
+           HTTP_REQ (HANDLER|DIRECTORY) @proxy_exit_routing
         ),
 
         Sending: (
-            REQ_SENT -> Expecting |
+            REQ_SENT @proxy_req_sent -> Expecting |
             TIMEOUT @timeout -> final
         ),
 
         Expecting: (
-            RESP_RECV -> Responding |
+            RESP_RECV @proxy_resp_recv -> Responding |
             TIMEOUT @timeout -> final
         ),
 
         Responding: ( 
-            RESP_SENT -> Connected |
+            RESP_SENT @proxy_resp_sent -> Connected |
             TIMEOUT @timeout -> final
         )
 
-     )  >begin %eof(finish) <err(error);
+     )  >begin %eof(proxy_finish) <err(proxy_error);
 
 
 Connection = (
