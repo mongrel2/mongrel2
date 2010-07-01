@@ -3,6 +3,7 @@
 #include <state.h>
 #include <dbg.h>
 #include <events.h>
+#include <assert.h>
 
 
 %%{
@@ -88,3 +89,30 @@ int State_finish(State *state)
 }
 
 
+/* Do not access these directly or alter their order EVER.  */
+const char *EVENT_NAMES[] = {
+    "ACCEPT",
+    "CLOSE",
+    "CONNECT",
+    "DIRECTORY",
+    "FAILED",
+    "HANDLER",
+    "HTTP_REQ",
+    "MSG_REQ",
+    "MSG_RESP",
+    "OPEN",
+    "PROXY",
+    "REMOTE_CLOSE",
+    "REQ_RECV",
+    "REQ_SENT",
+    "RESP_RECV",
+    "RESP_SENT",
+    "SOCKET_REQ",
+    "TIMEOUT"};
+
+const char *State_event_name(int event)
+{
+    assert(event > EVENT_START && event < EVENT_END && "Event is outside range.");
+
+    return EVENT_NAMES[event - EVENT_START - 1];
+}

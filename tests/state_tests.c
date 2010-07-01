@@ -18,7 +18,7 @@ int run_events(State *state, const char *name, int *events)
     debug(">>> RUNNING %s", name);
 
     for(i = 0; events[i] != 0; i++) {
-        debug("EVENT[%d]: %d", i, events[i]);
+        debug("EVENT[%d]: %s:%d", i, State_event_name(events[i]), events[i]);
         rc = State_exec(state, events[i]);
         check(rc != -1, "Failed on processing %d event.", events[i]);
     }

@@ -5,10 +5,11 @@
 #include <state.h>
 #include <dbg.h>
 #include <events.h>
+#include <assert.h>
 
 
 
-#line 51 "src/state.rl"
+#line 52 "src/state.rl"
 
 
 
@@ -23,7 +24,7 @@ static const int StateActions_en_main_Connection_Idle = 2;
 static const int StateActions_en_main_Connection_HTTPRouting = 5;
 
 
-#line 54 "src/state.rl"
+#line 55 "src/state.rl"
 
 int State_init(State *state)
 {
@@ -33,7 +34,7 @@ int State_init(State *state)
 	 state->cs = StateActions_start;
 	}
 
-#line 58 "src/state.rl"
+#line 59 "src/state.rl"
     return 1;
 }
 
@@ -42,7 +43,7 @@ inline int State_invariant(State *state, int event)
     if ( state->cs == 
 #line 2 "src/state.c"
 0
-#line 63 "src/state.rl"
+#line 64 "src/state.rl"
  ) {
         return -1;
     }
@@ -50,7 +51,7 @@ inline int State_invariant(State *state, int event)
     if ( state->cs >= 
 #line 2 "src/state.c"
 19
-#line 67 "src/state.rl"
+#line 68 "src/state.rl"
  ) {
         return 1;
     }
@@ -76,11 +77,11 @@ case 19:
 		goto tr33;
 	goto st0;
 tr0:
-#line 16 "src/state.rl"
+#line 17 "src/state.rl"
 	{ debug("ERROR! "); }
 	goto st0;
 tr23:
-#line 48 "src/state.rl"
+#line 49 "src/state.rl"
 	{ debug("PROXY ERROR! "); }
 	goto st0;
 #line 2 "src/state.c"
@@ -88,9 +89,9 @@ st0:
  state->cs = 0;
 	goto _out;
 tr33:
-#line 14 "src/state.rl"
-	{ debug("BEGIN "); }
 #line 15 "src/state.rl"
+	{ debug("BEGIN "); }
+#line 16 "src/state.rl"
 	{ debug("OPEN "); }
 	goto st1;
 st1:
@@ -102,15 +103,15 @@ case 1:
 		goto tr1;
 	goto tr0;
 tr1:
-#line 20 "src/state.rl"
+#line 21 "src/state.rl"
 	{ debug("ACCEPTED"); }
 	goto st2;
 tr6:
-#line 32 "src/state.rl"
+#line 33 "src/state.rl"
 	{ debug("RESP SENT"); }
 	goto st2;
 tr12:
-#line 31 "src/state.rl"
+#line 32 "src/state.rl"
 	{ debug("REQ SENT"); }
 	goto st2;
 st2:
@@ -121,16 +122,16 @@ case 2:
 	switch( (*p) ) {
 		case 102: goto tr2;
 		case 109: goto tr3;
-		case 114: goto st4;
-		case 119: goto tr5;
+		case 113: goto st4;
+		case 118: goto tr5;
 	}
 	goto tr0;
 tr2:
-#line 18 "src/state.rl"
+#line 19 "src/state.rl"
 	{ debug("CLOSE "); }
 	goto st20;
 tr5:
-#line 19 "src/state.rl"
+#line 20 "src/state.rl"
 	{ debug("TIMEOUT"); }
 	goto st20;
 st20:
@@ -142,19 +143,19 @@ case 20:
 		goto tr33;
 	goto tr0;
 tr3:
-#line 23 "src/state.rl"
+#line 24 "src/state.rl"
 	{ debug("MSG RESP"); }
 	goto st3;
 tr9:
-#line 30 "src/state.rl"
+#line 31 "src/state.rl"
 	{ debug("HTTP TO DIRECTORY"); }
 	goto st3;
 tr13:
-#line 26 "src/state.rl"
+#line 27 "src/state.rl"
 	{ debug("MSG TO DIRECTORY"); }
 	goto st3;
 tr17:
-#line 33 "src/state.rl"
+#line 34 "src/state.rl"
 	{ debug("RESP RECV"); }
 	goto st3;
 st3:
@@ -163,8 +164,8 @@ st3:
 case 3:
 #line 2 "src/state.c"
 	switch( (*p) ) {
-		case 117: goto tr6;
-		case 119: goto tr5;
+		case 116: goto tr6;
+		case 118: goto tr5;
 	}
 	goto tr0;
 st4:
@@ -174,11 +175,11 @@ case 4:
 	switch( (*p) ) {
 		case 107: goto tr7;
 		case 108: goto tr8;
-		case 118: goto tr2;
+		case 117: goto tr2;
 	}
 	goto tr0;
 tr7:
-#line 21 "src/state.rl"
+#line 22 "src/state.rl"
 	{ debug("HTTP REQUEST"); }
 	goto st5;
 st5:
@@ -189,15 +190,15 @@ case 5:
 	switch( (*p) ) {
 		case 104: goto tr9;
 		case 106: goto tr10;
-		case 112: goto tr11;
+		case 111: goto tr11;
 	}
 	goto tr0;
 tr10:
-#line 28 "src/state.rl"
+#line 29 "src/state.rl"
 	{ debug("HTTP TO HANDLER"); }
 	goto st6;
 tr14:
-#line 24 "src/state.rl"
+#line 25 "src/state.rl"
 	{ debug("MSG TO HANDLER"); }
 	goto st6;
 st6:
@@ -205,11 +206,11 @@ st6:
 		goto _test_eof6;
 case 6:
 #line 2 "src/state.c"
-	if ( (*p) == 115 )
+	if ( (*p) == 114 )
 		goto tr12;
 	goto tr0;
 tr11:
-#line 29 "src/state.rl"
+#line 30 "src/state.rl"
 	{ debug("HTTP TO PROXY"); {goto st11;} }
 	goto st7;
 st7:
@@ -219,7 +220,7 @@ case 7:
 #line 2 "src/state.c"
 	goto tr0;
 tr8:
-#line 22 "src/state.rl"
+#line 23 "src/state.rl"
 	{ debug("MSG REQUEST"); }
 	goto st8;
 st8:
@@ -230,11 +231,11 @@ case 8:
 	switch( (*p) ) {
 		case 104: goto tr13;
 		case 106: goto tr14;
-		case 112: goto tr15;
+		case 111: goto tr15;
 	}
 	goto tr0;
 tr15:
-#line 25 "src/state.rl"
+#line 26 "src/state.rl"
 	{ debug("MSG TO PROXY"); }
 	goto st9;
 st9:
@@ -243,12 +244,12 @@ st9:
 case 9:
 #line 2 "src/state.c"
 	switch( (*p) ) {
-		case 115: goto tr16;
-		case 119: goto tr5;
+		case 114: goto tr16;
+		case 118: goto tr5;
 	}
 	goto tr0;
 tr16:
-#line 31 "src/state.rl"
+#line 32 "src/state.rl"
 	{ debug("REQ SENT"); }
 	goto st10;
 st10:
@@ -257,8 +258,8 @@ st10:
 case 10:
 #line 2 "src/state.c"
 	switch( (*p) ) {
-		case 116: goto tr17;
-		case 119: goto tr5;
+		case 115: goto tr17;
+		case 118: goto tr5;
 	}
 	goto tr0;
 st11:
@@ -268,18 +269,18 @@ case 11:
 	switch( (*p) ) {
 		case 103: goto tr18;
 		case 105: goto tr20;
-		case 113: goto tr21;
-		case 119: goto tr22;
+		case 112: goto tr21;
+		case 118: goto tr22;
 	}
 	goto st0;
 tr18:
-#line 14 "src/state.rl"
+#line 15 "src/state.rl"
 	{ debug("BEGIN "); }
-#line 36 "src/state.rl"
+#line 37 "src/state.rl"
 	{ debug("PROXY CONNECTED"); }
 	goto st12;
 tr32:
-#line 38 "src/state.rl"
+#line 39 "src/state.rl"
 	{ debug("PROXY REQUEST"); }
 	goto st12;
 st12:
@@ -288,12 +289,12 @@ st12:
 case 12:
 #line 2 "src/state.c"
 	switch( (*p) ) {
-		case 115: goto tr24;
-		case 119: goto tr25;
+		case 114: goto tr24;
+		case 118: goto tr25;
 	}
 	goto tr23;
 tr24:
-#line 39 "src/state.rl"
+#line 40 "src/state.rl"
 	{ debug("PROXY REQUEST SENT"); }
 	goto st13;
 st13:
@@ -302,12 +303,12 @@ st13:
 case 13:
 #line 2 "src/state.c"
 	switch( (*p) ) {
-		case 116: goto tr26;
-		case 119: goto tr25;
+		case 115: goto tr26;
+		case 118: goto tr25;
 	}
 	goto tr23;
 tr26:
-#line 41 "src/state.rl"
+#line 42 "src/state.rl"
 	{ debug("PROXY RESP RECV"); }
 	goto st14;
 st14:
@@ -316,12 +317,12 @@ st14:
 case 14:
 #line 2 "src/state.c"
 	switch( (*p) ) {
-		case 117: goto tr27;
-		case 119: goto tr25;
+		case 116: goto tr27;
+		case 118: goto tr25;
 	}
 	goto tr23;
 tr27:
-#line 40 "src/state.rl"
+#line 41 "src/state.rl"
 	{ debug("PROXY RESP SENT"); }
 	goto st15;
 st15:
@@ -330,23 +331,23 @@ st15:
 case 15:
 #line 2 "src/state.c"
 	switch( (*p) ) {
-		case 113: goto tr28;
-		case 114: goto st17;
-		case 119: goto tr25;
+		case 112: goto tr28;
+		case 113: goto st17;
+		case 118: goto tr25;
 	}
 	goto tr23;
 tr21:
-#line 14 "src/state.rl"
+#line 15 "src/state.rl"
 	{ debug("BEGIN "); }
-#line 45 "src/state.rl"
+#line 46 "src/state.rl"
 	{ debug("PROXY EXIT IDLE"); {goto st2;} }
 	goto st16;
 tr28:
-#line 45 "src/state.rl"
+#line 46 "src/state.rl"
 	{ debug("PROXY EXIT IDLE"); {goto st2;} }
 	goto st16;
 tr31:
-#line 46 "src/state.rl"
+#line 47 "src/state.rl"
 	{ debug("PROXY EXIT ROUTING"); p--; {goto st5;} }
 	goto st16;
 st16:
@@ -369,23 +370,23 @@ case 18:
 	switch( (*p) ) {
 		case 104: goto tr31;
 		case 106: goto tr31;
-		case 112: goto tr32;
+		case 111: goto tr32;
 	}
 	goto tr23;
 tr25:
-#line 19 "src/state.rl"
+#line 20 "src/state.rl"
 	{ debug("TIMEOUT"); }
 	goto st21;
 tr20:
-#line 14 "src/state.rl"
+#line 15 "src/state.rl"
 	{ debug("BEGIN "); }
-#line 37 "src/state.rl"
+#line 38 "src/state.rl"
 	{ debug("PROXY FAILED"); }
 	goto st21;
 tr22:
-#line 14 "src/state.rl"
+#line 15 "src/state.rl"
 	{ debug("BEGIN "); }
-#line 19 "src/state.rl"
+#line 20 "src/state.rl"
 	{ debug("TIMEOUT"); }
 	goto st21;
 st21:
@@ -430,11 +431,11 @@ case 21:
 	case 8: 
 	case 9: 
 	case 10: 
-#line 16 "src/state.rl"
+#line 17 "src/state.rl"
 	{ debug("ERROR! "); }
 	break;
 	case 20: 
-#line 17 "src/state.rl"
+#line 18 "src/state.rl"
 	{ debug("FINISH "); }
 	break;
 	case 12: 
@@ -444,7 +445,7 @@ case 21:
 	case 16: 
 	case 17: 
 	case 18: 
-#line 48 "src/state.rl"
+#line 49 "src/state.rl"
 	{ debug("PROXY ERROR! "); }
 	break;
 #line 2 "src/state.c"
@@ -454,7 +455,7 @@ case 21:
 	_out: {}
 	}
 
-#line 81 "src/state.rl"
+#line 82 "src/state.rl"
 
     return State_invariant(state, event);
 }
@@ -465,3 +466,30 @@ int State_finish(State *state)
 }
 
 
+/* Do not access these directly or alter their order EVER.  */
+const char *EVENT_NAMES[] = {
+    "ACCEPT",
+    "CLOSE",
+    "CONNECT",
+    "DIRECTORY",
+    "FAILED",
+    "HANDLER",
+    "HTTP_REQ",
+    "MSG_REQ",
+    "MSG_RESP",
+    "OPEN",
+    "PROXY",
+    "REMOTE_CLOSE",
+    "REQ_RECV",
+    "REQ_SENT",
+    "RESP_RECV",
+    "RESP_SENT",
+    "SOCKET_REQ",
+    "TIMEOUT"};
+
+const char *State_event_name(int event)
+{
+    assert(event > EVENT_START && event < EVENT_END && "Event is outside range.");
+
+    return EVENT_NAMES[event - EVENT_START - 1];
+}

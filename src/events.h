@@ -1,7 +1,8 @@
 #ifndef _events_h
 #define _events_h
 
-enum {
+typedef enum StateEvent {
+    EVENT_START=100,
     ACCEPT=101,
     CLOSE=102,
     CONNECT=103,
@@ -12,14 +13,18 @@ enum {
     MSG_REQ=108,
     MSG_RESP=109,
     OPEN=110,
-    PROXY=112,
-    REMOTE_CLOSE=113,
-    REQ_RECV=114,
-    REQ_SENT=115,
-    RESP_RECV=116,
-    RESP_SENT=117,
-    SOCKET_REQ=118,
-    TIMEOUT=119
-};
+    PROXY=111,
+    REMOTE_CLOSE=112,
+    REQ_RECV=113,
+    REQ_SENT=114,
+    RESP_RECV=115,
+    RESP_SENT=116,
+    SOCKET_REQ=117,
+    TIMEOUT=118,
+    EVENT_END=119
+} StateEvent ;
+
+
+
 
 #endif
