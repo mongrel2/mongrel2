@@ -5,6 +5,7 @@
 #include <events.h>
 #include <assert.h>
 
+#define CALL(A, C) if(state->actions) state->actions->A(state, C, data)
 
 %%{
     machine StateActions;
@@ -12,49 +13,57 @@
     access state->;
 
 ### actions
-    action begin { debug("BEGIN "); }
-    action open { debug("OPEN "); }
-    action error { debug("ERROR! "); }
-    action finish { debug("FINISH "); }
-    action close { debug("CLOSE "); }
-    action timeout { debug("TIMEOUT"); }
-    action accepted { debug("ACCEPTED"); }
-    action http_req { debug("HTTP REQUEST"); }
-    action msg_req { debug("MSG REQUEST"); }
-    action msg_resp { debug("MSG RESP"); }
-    action msg_to_handler { debug("MSG TO HANDLER"); }
-    action msg_to_proxy { debug("MSG TO PROXY"); }
-    action msg_to_directory { debug("MSG TO DIRECTORY"); }
+    action begin { CALL(begin, fc); }
+    action open { CALL(open, fc); }
+    action error { CALL(error, fc); }
+    action finish { CALL(finish, fc); }
+    action close { CALL(close, fc); }
+    action timeout { CALL(timeout, fc); }
+    action accepted { CALL(accepted, fc); }
+    action http_req { CALL(http_req, fc); }
+    action msg_req { CALL(msg_req, fc); }
+    action msg_resp { CALL(msg_resp, fc); }
+    action msg_to_handler { CALL(msg_to_handler, fc); }
+    action msg_to_proxy { CALL(msg_to_proxy, fc); }
+    action msg_to_directory { CALL(msg_to_directory, fc); }
 
-    action http_to_handler { debug("HTTP TO HANDLER"); }
-    action http_to_proxy { debug("HTTP TO PROXY"); fgoto Proxy; }
-    action http_to_directory { debug("HTTP TO DIRECTORY"); }
-    action req_sent { debug("REQ SENT"); }
-    action resp_sent { debug("RESP SENT"); }
-    action resp_recv { debug("RESP RECV"); }
+    action http_to_handler { CALL(http_to_handler, fc); }
+    action http_to_proxy { CALL(http_to_proxy, fc); fgoto Proxy; }
+    action http_to_directory { CALL(http_to_directory, fc); }
+    action req_sent { CALL(req_sent, fc); }
+    action resp_sent { CALL(resp_sent, fc); }
+    action resp_recv { CALL(resp_recv, fc); }
 
 ### proxy actions
-    action proxy_connected { debug("PROXY CONNECTED"); }
-    action proxy_failed { debug("PROXY FAILED"); }
-    action proxy_request { debug("PROXY REQUEST"); }
-    action proxy_req_sent { debug("PROXY REQUEST SENT"); }
-    action proxy_resp_sent { debug("PROXY RESP SENT"); }
-    action proxy_resp_recv { debug("PROXY RESP RECV"); }
+    action proxy_connected { CALL(proxy_connected, fc); }
+    action proxy_failed { CALL(proxy_failed, fc); }
+    action proxy_request { CALL(proxy_request, fc); }
+    action proxy_req_sent { CALL(proxy_req_sent, fc); }
+    action proxy_resp_sent { CALL(proxy_resp_sent, fc); }
+    action proxy_resp_recv { CALL(proxy_resp_recv, fc); }
 
 
 ### exit modes for proxy
-    action proxy_exit_idle { debug("PROXY EXIT IDLE"); fgoto Connection::Idle; }
-    action proxy_exit_routing { debug("PROXY EXIT ROUTING"); fhold; fgoto Connection::HTTPRouting; }
-
-    action proxy_error { debug("PROXY ERROR! "); }
+    action proxy_exit_idle {
+        CALL(proxy_exit_idle, fc);
+        fgoto Connection::Idle; 
+    }
+    action proxy_exit_routing {
+        CALL(proxy_exit_routing, fc);
+        fhold;
+        fgoto Connection::HTTPRouting; 
+    }
+    action proxy_error { CALL(proxy_error, fc); }
 
     include State "state_machine.rl";
 }%%
 
 %% write data;
 
-int State_init(State *state)
+int State_init(State *state, StateActions *actions)
 {
+    state->actions = actions;
+
     %% write init;
     return 1;
 }
@@ -72,7 +81,7 @@ inline int State_invariant(State *state, int event)
     return 0;
 }
 
-int State_exec(State *state, int event)
+int State_exec(State *state, int event, void *data)
 {
     const char *p = (const char *)&event;
     const char *pe = p+1;
@@ -112,6 +121,10 @@ const char *EVENT_NAMES[] = {
 
 const char *State_event_name(int event)
 {
+    if(event == 0) {
+        return "NUL";
+    }
+
     assert(event > EVENT_START && event < EVENT_END && "Event is outside range.");
 
     return EVENT_NAMES[event - EVENT_START - 1];
