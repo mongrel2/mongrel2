@@ -8,60 +8,22 @@
 
 
 
-#line 47 "src/state.rl"
+#line 81 "src/state.rl"
 
 
 
 #line 2 "src/state.c"
-static const char _State_actions[] = {
-	0, 1, 2, 1, 3, 1, 4, 1, 
-	5, 1, 6, 1, 7, 1, 8, 1, 
-	9, 2, 0, 1
-};
-
-static const char _State_key_offsets[] = {
-	0, 0, 1, 4, 5, 6, 7
-};
-
-static const char _State_trans_keys[] = {
-	7, 2, 3, 4, 5, 6, 1, 1, 
-	0
-};
-
-static const char _State_single_lengths[] = {
-	0, 1, 3, 1, 1, 1, 1
-};
-
-static const char _State_range_lengths[] = {
-	0, 0, 0, 0, 0, 0, 0
-};
-
-static const char _State_index_offsets[] = {
-	0, 0, 2, 6, 8, 10, 12
-};
-
-static const char _State_trans_targs[] = {
-	2, 0, 6, 3, 4, 0, 2, 0, 
-	2, 0, 1, 0, 1, 0, 0
-};
-
-static const char _State_trans_actions[] = {
-	1, 3, 7, 9, 13, 3, 15, 3, 
-	11, 3, 17, 0, 17, 3, 0
-};
-
-static const char _State_eof_actions[] = {
-	0, 3, 3, 3, 3, 0, 5
-};
-
-static const int State_start = 5;
-static const int State_first_final = 5;
+static const int State_start = 18;
+static const int State_first_final = 18;
 static const int State_error = 0;
 
-static const int State_en_main = 5;
+static const int State_en_Proxy = 11;
+static const int State_en_main = 18;
+static const int State_en_main_Connection_Idle = 2;
+static const int State_en_main_Connection_HTTPRouting = 9;
 
 
-#line 50 "src/state.rl"
+#line 84 "src/state.rl"
 
 int State_init(State *state)
 {
@@ -71,7 +33,7 @@ int State_init(State *state)
 	 state->cs = State_start;
 	}
 
-#line 54 "src/state.rl"
+#line 88 "src/state.rl"
     return 1;
 }
 
@@ -80,15 +42,15 @@ inline int State_invariant(State *state, int event)
     if ( state->cs == 
 #line 2 "src/state.c"
 0
-#line 59 "src/state.rl"
+#line 93 "src/state.rl"
  ) {
         return -1;
     }
 
     if ( state->cs >= 
 #line 2 "src/state.c"
-5
-#line 63 "src/state.rl"
+18
+#line 97 "src/state.rl"
  ) {
         return 1;
     }
@@ -105,146 +67,267 @@ int State_exec(State *state, int event)
     
 #line 2 "src/state.c"
 	{
-	int _klen;
-	unsigned int _trans;
-	const char *_acts;
-	unsigned int _nacts;
-	const char *_keys;
-
 	if ( p == pe )
 		goto _test_eof;
-	if (  state->cs == 0 )
-		goto _out;
-_resume:
-	_keys = _State_trans_keys + _State_key_offsets[ state->cs];
-	_trans = _State_index_offsets[ state->cs];
-
-	_klen = _State_single_lengths[ state->cs];
-	if ( _klen > 0 ) {
-		const char *_lower = _keys;
-		const char *_mid;
-		const char *_upper = _keys + _klen - 1;
-		while (1) {
-			if ( _upper < _lower )
-				break;
-
-			_mid = _lower + ((_upper-_lower) >> 1);
-			if ( (*p) < *_mid )
-				_upper = _mid - 1;
-			else if ( (*p) > *_mid )
-				_lower = _mid + 1;
-			else {
-				_trans += (_mid - _keys);
-				goto _match;
-			}
-		}
-		_keys += _klen;
-		_trans += _klen;
-	}
-
-	_klen = _State_range_lengths[ state->cs];
-	if ( _klen > 0 ) {
-		const char *_lower = _keys;
-		const char *_mid;
-		const char *_upper = _keys + (_klen<<1) - 2;
-		while (1) {
-			if ( _upper < _lower )
-				break;
-
-			_mid = _lower + (((_upper-_lower) >> 1) & ~1);
-			if ( (*p) < _mid[0] )
-				_upper = _mid - 2;
-			else if ( (*p) > _mid[1] )
-				_lower = _mid + 2;
-			else {
-				_trans += ((_mid - _keys)>>1);
-				goto _match;
-			}
-		}
-		_trans += _klen;
-	}
-
-_match:
-	 state->cs = _State_trans_targs[_trans];
-
-	if ( _State_trans_actions[_trans] == 0 )
-		goto _again;
-
-	_acts = _State_actions + _State_trans_actions[_trans];
-	_nacts = (unsigned int) *_acts++;
-	while ( _nacts-- > 0 )
+	switch (  state->cs )
 	{
-		switch ( *_acts++ )
-		{
-	case 0:
+case 18:
+	if ( (*p) == 1 )
+		goto tr22;
+	goto st0;
+tr0:
+#line 15 "src/state.rl"
+	{ debug("ERROR! "); }
+	goto st0;
+#line 2 "src/state.c"
+st0:
+ state->cs = 0;
+	goto _out;
+tr22:
 #line 13 "src/state.rl"
 	{ debug("BEGIN "); }
-	break;
-	case 1:
 #line 14 "src/state.rl"
 	{ debug("OPEN "); }
-	break;
-	case 2:
-#line 15 "src/state.rl"
-	{ debug("CONNECTED"); }
-	break;
-	case 3:
-#line 16 "src/state.rl"
-	{ debug("ERROR! "); }
-	break;
-	case 5:
-#line 18 "src/state.rl"
-	{ debug("CLOSE "); }
-	break;
-	case 6:
-#line 19 "src/state.rl"
-	{ debug("RECV "); }
-	break;
-	case 7:
-#line 20 "src/state.rl"
-	{ debug("SENT "); }
-	break;
-	case 8:
-#line 21 "src/state.rl"
-	{ debug("SERVICE"); }
-	break;
-	case 9:
-#line 22 "src/state.rl"
-	{ debug("DELIVERED "); }
-	break;
+	goto st1;
+st1:
+	if ( ++p == pe )
+		goto _test_eof1;
+case 1:
 #line 2 "src/state.c"
-		}
+	if ( (*p) == 7 )
+		goto st2;
+	goto tr0;
+st2:
+	if ( ++p == pe )
+		goto _test_eof2;
+case 2:
+	switch( (*p) ) {
+		case 2: goto tr2;
+		case 3: goto st3;
+		case 4: goto st6;
+		case 9: goto st2;
 	}
+	goto tr0;
+tr2:
+#line 17 "src/state.rl"
+	{ debug("CLOSE "); }
+	goto st19;
+st19:
+	if ( ++p == pe )
+		goto _test_eof19;
+case 19:
+#line 2 "src/state.c"
+	if ( (*p) == 1 )
+		goto tr22;
+	goto tr0;
+st3:
+	if ( ++p == pe )
+		goto _test_eof3;
+case 3:
+	switch( (*p) ) {
+		case 8: goto st4;
+		case 10: goto st9;
+	}
+	goto tr0;
+st4:
+	if ( ++p == pe )
+		goto _test_eof4;
+case 4:
+	switch( (*p) ) {
+		case 14: goto st5;
+		case 15: goto st6;
+		case 16: goto st7;
+	}
+	goto tr0;
+st5:
+	if ( ++p == pe )
+		goto _test_eof5;
+case 5:
+	if ( (*p) == 5 )
+		goto st2;
+	goto tr0;
+st6:
+	if ( ++p == pe )
+		goto _test_eof6;
+case 6:
+	if ( (*p) == 6 )
+		goto st2;
+	goto tr0;
+st7:
+	if ( ++p == pe )
+		goto _test_eof7;
+case 7:
+	if ( (*p) == 5 )
+		goto st8;
+	goto tr0;
+st8:
+	if ( ++p == pe )
+		goto _test_eof8;
+case 8:
+	if ( (*p) == 4 )
+		goto st6;
+	goto tr0;
+st9:
+	if ( ++p == pe )
+		goto _test_eof9;
+case 9:
+	switch( (*p) ) {
+		case 14: goto st5;
+		case 15: goto st6;
+		case 16: goto tr10;
+	}
+	goto tr0;
+tr10:
+#line 66 "src/state.rl"
+	{ {goto st11;} }
+	goto st10;
+st10:
+	if ( ++p == pe )
+		goto _test_eof10;
+case 10:
+#line 2 "src/state.c"
+	goto tr0;
+st11:
+	if ( ++p == pe )
+		goto _test_eof11;
+case 11:
+	switch( (*p) ) {
+		case 11: goto tr11;
+		case 12: goto tr13;
+		case 17: goto tr14;
+	}
+	goto st0;
+tr11:
+#line 13 "src/state.rl"
+	{ debug("BEGIN "); }
+	goto st20;
+st20:
+	if ( ++p == pe )
+		goto _test_eof20;
+case 20:
+#line 2 "src/state.c"
+	goto tr0;
+tr13:
+#line 13 "src/state.rl"
+	{ debug("BEGIN "); }
+	goto st12;
+st12:
+	if ( ++p == pe )
+		goto _test_eof12;
+case 12:
+#line 2 "src/state.c"
+	if ( (*p) == 5 )
+		goto st13;
+	goto tr0;
+st13:
+	if ( ++p == pe )
+		goto _test_eof13;
+case 13:
+	if ( (*p) == 4 )
+		goto st14;
+	goto tr0;
+st14:
+	if ( ++p == pe )
+		goto _test_eof14;
+case 14:
+	if ( (*p) == 6 )
+		goto st15;
+	goto tr0;
+st15:
+	if ( ++p == pe )
+		goto _test_eof15;
+case 15:
+	switch( (*p) ) {
+		case 10: goto st16;
+		case 17: goto tr19;
+	}
+	goto tr0;
+st16:
+	if ( ++p == pe )
+		goto _test_eof16;
+case 16:
+	if ( (*p) == 16 )
+		goto st12;
+	if ( 14 <= (*p) && (*p) <= 15 )
+		goto tr20;
+	goto tr0;
+tr14:
+#line 13 "src/state.rl"
+	{ debug("BEGIN "); }
+#line 20 "src/state.rl"
+	{{goto st2;} }
+	goto st17;
+tr19:
+#line 20 "src/state.rl"
+	{{goto st2;} }
+	goto st17;
+tr20:
+#line 21 "src/state.rl"
+	{ p--; {goto st9;} }
+	goto st17;
+st17:
+	if ( ++p == pe )
+		goto _test_eof17;
+case 17:
+#line 2 "src/state.c"
+	goto tr0;
+	}
+	_test_eof1:  state->cs = 1; goto _test_eof; 
+	_test_eof2:  state->cs = 2; goto _test_eof; 
+	_test_eof19:  state->cs = 19; goto _test_eof; 
+	_test_eof3:  state->cs = 3; goto _test_eof; 
+	_test_eof4:  state->cs = 4; goto _test_eof; 
+	_test_eof5:  state->cs = 5; goto _test_eof; 
+	_test_eof6:  state->cs = 6; goto _test_eof; 
+	_test_eof7:  state->cs = 7; goto _test_eof; 
+	_test_eof8:  state->cs = 8; goto _test_eof; 
+	_test_eof9:  state->cs = 9; goto _test_eof; 
+	_test_eof10:  state->cs = 10; goto _test_eof; 
+	_test_eof11:  state->cs = 11; goto _test_eof; 
+	_test_eof20:  state->cs = 20; goto _test_eof; 
+	_test_eof12:  state->cs = 12; goto _test_eof; 
+	_test_eof13:  state->cs = 13; goto _test_eof; 
+	_test_eof14:  state->cs = 14; goto _test_eof; 
+	_test_eof15:  state->cs = 15; goto _test_eof; 
+	_test_eof16:  state->cs = 16; goto _test_eof; 
+	_test_eof17:  state->cs = 17; goto _test_eof; 
 
-_again:
-	if (  state->cs == 0 )
-		goto _out;
-	if ( ++p != pe )
-		goto _resume;
 	_test_eof: {}
 	if ( p == eof )
 	{
-	const char *__acts = _State_actions + _State_eof_actions[ state->cs];
-	unsigned int __nacts = (unsigned int) *__acts++;
-	while ( __nacts-- > 0 ) {
-		switch ( *__acts++ ) {
-	case 3:
-#line 16 "src/state.rl"
+	switch (  state->cs ) {
+	case 1: 
+	case 2: 
+	case 3: 
+	case 4: 
+	case 5: 
+	case 6: 
+	case 7: 
+	case 8: 
+	case 9: 
+	case 10: 
+	case 12: 
+	case 13: 
+	case 14: 
+	case 15: 
+	case 16: 
+	case 17: 
+#line 15 "src/state.rl"
 	{ debug("ERROR! "); }
 	break;
-	case 4:
-#line 17 "src/state.rl"
+	case 19: 
+	case 20: 
+#line 16 "src/state.rl"
 	{ debug("FINISH "); }
 	break;
 #line 2 "src/state.c"
-		}
 	}
 	}
 
 	_out: {}
 	}
 
-#line 77 "src/state.rl"
+#line 111 "src/state.rl"
 
     return State_invariant(state, event);
 }

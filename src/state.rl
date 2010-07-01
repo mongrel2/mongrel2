@@ -12,36 +12,70 @@
 ### actions
     action begin { debug("BEGIN "); }
     action open { debug("OPEN "); }
-    action connected { debug("CONNECTED"); }
     action error { debug("ERROR! "); }
     action finish { debug("FINISH "); }
     action close { debug("CLOSE "); }
-    action recv { debug("RECV "); }
-    action sent { debug("SENT "); }
-    action service { debug("SERVICE"); }
-    action delivered { debug("DELIVERED "); }
 
-### events
+### exit modes for proxy
+    action exit_idle {fgoto Connection::Idle; }
+    action exit_routing { fhold; fgoto Connection::HTTPRouting; }
 
     import "events.h";
 
-### state chart
-    Connection = (
-            start: ( OPEN @open -> Accepting ),
 
-            Accepting: ( ACCEPT @connected -> Idle ),
+Proxy := (
+           start: ( 
+               CONNECT -> Sending |
+               FAILED -> final |
+               REMOTE_CLOSE @exit_idle
+           ),
 
-            Idle: (
-                REQ_RECV @recv -> Delivering |
-                RESP_RECV @service -> Responding |
-                CLOSE @close -> final
-                ),
+           Connected: (
+               HTTP_REQ PROXY -> Sending |
+               REMOTE_CLOSE @exit_idle |
+               HTTP_REQ (HANDLER|DIRECTORY) @exit_routing
+           ),
 
-            Delivering: ( REQ_SENT @delivered -> Idle ),
+           Sending: ( REQ_SENT -> Expecting ),
+           Expecting: ( RESP_RECV -> Responding ),
+           Responding: ( RESP_SENT -> Connected)
+         ) >begin %eof(finish) <err(error);
 
-            Responding: ( RESP_SENT @sent -> Idle )
 
-            ) >begin %eof(finish) <err(error);
+Connection = (
+        start: ( OPEN @open -> Accepting ),
+
+        Accepting: ( ACCEPT -> Idle ),
+
+        Idle: (
+            REQ_RECV HTTP_REQ -> HTTPRouting |
+            REQ_RECV JSON_REQ -> MSGRouting |
+            RESP_RECV -> Responding |
+            SOCKET_REQ -> Idle |
+            CLOSE @close -> final
+        ),
+
+        MSGRouting: (
+            HANDLER -> Queueing |
+            PROXY -> Delivering |
+            DIRECTORY -> Responding 
+        ),
+
+        HTTPRouting: (
+            HANDLER -> Queueing |
+            PROXY @{ fgoto Proxy; } |
+            DIRECTORY -> Responding
+        ),
+
+        Queueing: ( REQ_SENT -> Idle ),
+
+        Delivering: ( REQ_SENT -> Waiting ),
+
+        Waiting: ( RESP_RECV -> Responding ),
+
+        Responding: ( RESP_SENT -> Idle)
+
+        ) >begin %eof(finish) <err(error);
 
 main := (Connection)*;
 }%%
