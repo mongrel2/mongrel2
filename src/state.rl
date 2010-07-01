@@ -5,7 +5,7 @@
 #include <events.h>
 #include <assert.h>
 
-#define CALL(A, C) if(state->actions) state->actions->A(state, C, data)
+#define CALL(A, C) if(state->actions && state->actions->A) state->actions->A(state, C, data)
 
 %%{
     machine StateActions;
@@ -121,6 +121,8 @@ const char *EVENT_NAMES[] = {
 
 const char *State_event_name(int event)
 {
+    // TODO: find out why the hell the FSM is actually giving us this
+
     if(event == 0) {
         return "NUL";
     }
