@@ -18,6 +18,10 @@
     action close { debug("CLOSE "); }
     action timeout { debug("TIMEOUT"); }
 
+### proxy actions
+    @proxy_connected { debug("PROXY CONNECTED"); }
+    @proxy_failed { debug("PROXY FAILED"); }
+
 ### exit modes for proxy
     action exit_idle {fgoto Connection::Idle; }
     action exit_routing { fhold; fgoto Connection::HTTPRouting; }
@@ -27,8 +31,8 @@
 
 Proxy := (
         start: ( 
-           CONNECT -> Sending |
-           FAILED -> final |
+           CONNECT @proxy_connected -> Sending |
+           FAILED @proxy_failed -> final |
            REMOTE_CLOSE @exit_idle |
            TIMEOUT @timeout -> final
         ),
