@@ -2,23 +2,24 @@
 #define _events_h
 
 enum {
-    OPEN=1,
-    CLOSE=2,
-    REQ_RECV=3,
-    RESP_RECV=4,
-    REQ_SENT=5,
-    RESP_SENT=6,
-    ACCEPT=7,
-    JSON_REQ=8,
-    SOCKET_REQ=9,
-    HTTP_REQ=10,
-    FAILED=11,
-    CONNECT=12,
-    PARSED=13,
-    HANDLER=14,
-    DIRECTORY=15,
-    PROXY=16,
-    REMOTE_CLOSE=17
+    ACCEPT=101,
+    CLOSE=102,
+    CONNECT=103,
+    DIRECTORY=104,
+    FAILED=105,
+    HANDLER=106,
+    HTTP_REQ=107,
+    MSG_REQ=108,
+    MSG_RESP=109,
+    OPEN=110,
+    PROXY=112,
+    REMOTE_CLOSE=113,
+    REQ_RECV=114,
+    REQ_SENT=115,
+    RESP_RECV=116,
+    RESP_SENT=117,
+    SOCKET_REQ=118,
+    TIMEOUT=119
 };
 
 #endif

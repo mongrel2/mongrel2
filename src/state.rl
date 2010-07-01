@@ -7,6 +7,7 @@
 
 %%{
     machine State;
+
     access state->;
 
 ### actions
@@ -15,6 +16,7 @@
     action error { debug("ERROR! "); }
     action finish { debug("FINISH "); }
     action close { debug("CLOSE "); }
+    action timeout { debug("TIMEOUT"); }
 
 ### exit modes for proxy
     action exit_idle {fgoto Connection::Idle; }
@@ -24,22 +26,40 @@
 
 
 Proxy := (
-           start: ( 
-               CONNECT -> Sending |
-               FAILED -> final |
-               REMOTE_CLOSE @exit_idle
-           ),
+        start: ( 
+           CONNECT -> Sending |
+           FAILED -> final |
+           REMOTE_CLOSE @exit_idle |
+           TIMEOUT @timeout -> final
+        ),
 
-           Connected: (
-               HTTP_REQ PROXY -> Sending |
-               REMOTE_CLOSE @exit_idle |
-               HTTP_REQ (HANDLER|DIRECTORY) @exit_routing
-           ),
+        Connected: (
+           REMOTE_CLOSE @exit_idle |
+           REQ_RECV -> Routing |
+           TIMEOUT @timeout -> final
+        ),
 
-           Sending: ( REQ_SENT -> Expecting ),
-           Expecting: ( RESP_RECV -> Responding ),
-           Responding: ( RESP_SENT -> Connected)
-         ) >begin %eof(finish) <err(error);
+        Routing: (
+           HTTP_REQ PROXY -> Sending |
+           HTTP_REQ (HANDLER|DIRECTORY) @exit_routing
+        ),
+
+        Sending: (
+            REQ_SENT -> Expecting |
+            TIMEOUT @timeout -> final
+        ),
+
+        Expecting: (
+            RESP_RECV -> Responding |
+            TIMEOUT @timeout -> final
+        ),
+
+        Responding: ( 
+            RESP_SENT -> Connected |
+            TIMEOUT @timeout -> final
+        )
+
+     )  >begin %eof(finish) <err(error);
 
 
 Connection = (
@@ -49,10 +69,11 @@ Connection = (
 
         Idle: (
             REQ_RECV HTTP_REQ -> HTTPRouting |
-            REQ_RECV JSON_REQ -> MSGRouting |
-            RESP_RECV -> Responding |
-            SOCKET_REQ -> Idle |
-            CLOSE @close -> final
+            REQ_RECV MSG_REQ -> MSGRouting |
+            REQ_RECV SOCKET_REQ @close -> final |
+            MSG_RESP -> Responding |
+            CLOSE @close -> final |
+            TIMEOUT @timeout -> final 
         ),
 
         MSGRouting: (
@@ -69,11 +90,20 @@ Connection = (
 
         Queueing: ( REQ_SENT -> Idle ),
 
-        Delivering: ( REQ_SENT -> Waiting ),
+        Delivering: (
+            TIMEOUT @timeout -> final |
+            REQ_SENT -> Waiting 
+        ),
 
-        Waiting: ( RESP_RECV -> Responding ),
+        Waiting: ( 
+            TIMEOUT @timeout -> final |
+            RESP_RECV -> Responding
+        ),
 
-        Responding: ( RESP_SENT -> Idle)
+        Responding: (
+            TIMEOUT @timeout -> final |
+            RESP_SENT -> Idle
+        )
 
         ) >begin %eof(finish) <err(error);
 

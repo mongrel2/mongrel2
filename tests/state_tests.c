@@ -42,51 +42,113 @@ error:
 #define FAILS(N, ...) int N[] = { __VA_ARGS__, 0 };\
           mu_assert(!run_events(&state, "TEST " #N, N), "Test " #N " failed.");
 
-char *test_State_json_workflow()
+char *test_State_msg()
 {
     State state;
 
-    /**
-     * Simulates the most basic JSON message request for a handler.
-     */
-    RUN(json_handler, 
+    // Simulates the most basic MSG message request for a handler.
+    RUN(msg_handler, 
             OPEN, ACCEPT, 
-            REQ_RECV, JSON_REQ, HANDLER, REQ_SENT, RESP_RECV, RESP_SENT,
+            REQ_RECV, MSG_REQ, HANDLER, REQ_SENT, MSG_RESP, RESP_SENT,
             CLOSE);
+
+    // Simulates a basic socket request start
+    RUN(socket_start, OPEN, ACCEPT, REQ_RECV, SOCKET_REQ);
+
+    // Simulates a full async setup of one req and 2 responses
+    RUN(msg_handler_2_resp, 
+            OPEN, ACCEPT, 
+            REQ_RECV, MSG_REQ, HANDLER, REQ_SENT,
+            MSG_RESP, RESP_SENT,
+            MSG_RESP, RESP_SENT,
+            CLOSE);
+
 
     return NULL;
 }
 
 
-char *test_State_http_workflow() 
+char *test_State_http() 
 {
     State state;
 
-    /**
-     * Simulates doing a basic HTTP request then closing the connection.
-     */
+    // Simulates doing a basic HTTP request then closing the connection.
     RUN(http_dir,
             OPEN, ACCEPT,
             REQ_RECV, HTTP_REQ, DIRECTORY, RESP_SENT, CLOSE);
 
-    /**
-     * Simulates two requests over a proxy connection followed by
-     * the remote closing the connection so we have to shutdown.
-     */
+    // Simulates two keep-alive handler requests then a close.
+    RUN(http_handler,
+            OPEN, ACCEPT,
+            REQ_RECV, HTTP_REQ, HANDLER, REQ_SENT,
+            REQ_RECV, HTTP_REQ, HANDLER, REQ_SENT, CLOSE);
+
+    // Simulates an accept then idle timeout
+    RUN(http_idle_timeout, OPEN, ACCEPT, TIMEOUT);
+
+
+    // Simulates a request for a dir then timeout
+    RUN(http_dir_timeout,
+            OPEN, ACCEPT,
+            REQ_RECV, HTTP_REQ, DIRECTORY, TIMEOUT);
+
+    // Simulates a handler, then a dir, then timeout
+    RUN(http_handler_dir_timeout,
+            OPEN, ACCEPT,
+            REQ_RECV, HTTP_REQ, HANDLER, REQ_SENT,
+            REQ_RECV, HTTP_REQ, DIRECTORY, RESP_SENT, TIMEOUT);
+
+    // Simulates handler, dir, proxy attempt, then proxy closes abruptly
+    RUN(http_handler_dir_proxy_remote_close,
+            OPEN, ACCEPT,
+            REQ_RECV, HTTP_REQ, HANDLER, REQ_SENT,
+            REQ_RECV, HTTP_REQ, DIRECTORY, RESP_SENT,
+            REQ_RECV, HTTP_REQ, PROXY, REMOTE_CLOSE, CLOSE); 
+
+    // Simulates a dir, then proxy, then back to a handler
+    RUN(http_handler_dir_proxy_handler,
+            OPEN, ACCEPT,
+            REQ_RECV, HTTP_REQ, HANDLER, REQ_SENT,
+            REQ_RECV, HTTP_REQ, DIRECTORY, RESP_SENT,
+            REQ_RECV, HTTP_REQ, PROXY, CONNECT, REQ_SENT, RESP_RECV, RESP_SENT,
+            REQ_RECV, HTTP_REQ, HANDLER, REQ_SENT, CLOSE);
+
+
+    // Simulates two requests over a proxy connection followed by
+    // the remote closing the connection so we have to shutdown.
     RUN(http_proxy,
             OPEN, ACCEPT,
             REQ_RECV, HTTP_REQ, PROXY, CONNECT, REQ_SENT, RESP_RECV, RESP_SENT,
-            HTTP_REQ, PROXY, REQ_SENT, RESP_RECV, RESP_SENT, REMOTE_CLOSE,
+            REQ_RECV, HTTP_REQ, PROXY, REQ_SENT, RESP_RECV, RESP_SENT, REMOTE_CLOSE,
             CLOSE);
 
-    /**
-     * Simulates a proxy connection that is then routed to a directory
-     * access, so has to change from proxying to serving a file.
-     */
+    // Simulates a proxy connection that is then routed to a directory
+    // access, so has to change from proxying to serving a file.
     RUN(http_proxy_dir, 
-            OPEN, ACCEPT, REQ_RECV, 
-            HTTP_REQ, PROXY, CONNECT, REQ_SENT, RESP_RECV, RESP_SENT, 
-            HTTP_REQ, DIRECTORY, RESP_SENT, CLOSE);
+            OPEN, ACCEPT, 
+            REQ_RECV, HTTP_REQ, PROXY, CONNECT, REQ_SENT, RESP_RECV, RESP_SENT, 
+            REQ_RECV, HTTP_REQ, DIRECTORY, RESP_SENT, CLOSE);
+
+    /**
+     * These all simulate timeouts on different proxy operations.
+     */
+    RUN(http_proxy_timeout_send,
+            OPEN, ACCEPT,
+            REQ_RECV, HTTP_REQ, PROXY, CONNECT, TIMEOUT);
+
+    RUN(http_proxy_timeout_expecting,
+            OPEN, ACCEPT,
+            REQ_RECV, HTTP_REQ, PROXY, CONNECT, REQ_SENT, TIMEOUT);
+
+    RUN(http_proxy_timeout_responding,
+            OPEN, ACCEPT,
+            REQ_RECV, HTTP_REQ, PROXY, CONNECT, REQ_SENT, RESP_RECV, TIMEOUT);
+
+    RUN(http_proxy_timeout_connected,
+            OPEN, ACCEPT,
+            REQ_RECV, HTTP_REQ, PROXY, CONNECT, REQ_SENT, RESP_RECV, RESP_SENT,
+            TIMEOUT);
+
 
     return NULL;
 }
@@ -105,8 +167,8 @@ char * all_tests() {
     mu_suite_start();
 
     mu_run_test(test_State_exec_error);
-    mu_run_test(test_State_json_workflow);
-    mu_run_test(test_State_http_workflow);
+    mu_run_test(test_State_msg);
+    mu_run_test(test_State_http);
 
     return NULL;
 }
