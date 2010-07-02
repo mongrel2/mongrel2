@@ -9,11 +9,12 @@
 
 /* file: minunit.h */
 #define mu_assert(test, message) if (!(test)) { log_err(message); return message; }
-#define mu_run_test(test) message = test(); tests_run++; if (message) return message;
+#define mu_run_test(test) debug("\n-----%s", " " #test); message = test(); tests_run++; if (message) return message;
 
 #define RUN_TESTS(name) void taskmain(int argc, char *argv[]) {\
      LOG_FILE = fopen("tests/tests.log", "a+");\
      setbuf(LOG_FILE, NULL);\
+     debug("----- RUNNING: %s", argv[0]);\
      printf("----\nRUNNING: %s\n", argv[0]);\
      char *result = name();\
      if (result != 0) {\
