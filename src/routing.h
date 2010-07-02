@@ -25,5 +25,6 @@ list_t *RouteMap_match(RouteMap *routes, bstring path);
 
 int RouteMap_insert_reversed(RouteMap *routes, bstring pattern, void *data);
 
+list_t *RouteMap_match_suffix(RouteMap *map, bstring target);
 
 #endif

@@ -9,7 +9,7 @@ FILE *LOG_FILE = NULL;
 
 char *test_Config_load() 
 {
-    list_t *servers = Config_load_servers("tests/config.sqlite", "mongrel2.org");
+    list_t *servers = Config_load_servers("tests/config.sqlite", "localhost");
 
     mu_assert(servers != NULL, "Should get a server list, is mongrel2 running already?");
     mu_assert(list_count(servers) == 1, "Failed to load the server.");

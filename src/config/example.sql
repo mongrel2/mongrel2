@@ -6,14 +6,14 @@ INSERT INTO server (uuid, access_log, error_log, chroot, default_host, port)
         '/mongrel2/logs/access.log',
         '/mongrel2/logs/error.log',
         '/var/www',
-        'mongrel2.org',
+        'localhost',
         6767);
 
 INSERT INTO host (server_id, name, matching)
     VALUES (
         last_insert_rowid(),
-        'mongrel2.org',
-        '(.*).mongrel2.org'
+        'localhost',
+        'localhost'
     );
 
 INSERT INTO handler (send_spec, send_ident, recv_spec, recv_ident)
@@ -27,7 +27,7 @@ INSERT INTO handler (send_spec, send_ident, recv_spec, recv_ident)
 INSERT INTO route (path, host_id, target_id, target_type)
     VALUES (
         "@chat", 
-        (select id from host where name="mongrel2.org"),
+        (select id from host where name="localhost"),
         last_insert_rowid(),
         "handler"
     );
@@ -43,7 +43,7 @@ INSERT INTO proxy (addr, port)
 INSERT INTO route (path, host_id, target_id, target_type)
     VALUES (
         "/chat/",
-        (select id from host where name="mongrel2.org"),
+        (select id from host where name="localhost"),
         last_insert_rowid(),
         "proxy"
     );
@@ -61,7 +61,7 @@ INSERT INTO proxy (addr, port)
 INSERT INTO route (path, host_id, target_id, target_type)
     VALUES (
         "/",
-        (select id from host where name="mongrel2.org"),
+        (select id from host where name="localhost"),
         last_insert_rowid(),
         "proxy"
     );
@@ -71,7 +71,7 @@ INSERT INTO directory (base) VALUES ("/tests/.+.json");
 INSERT INTO route (path, host_id, target_id, target_type)
     VALUES (
         "/tests/",
-        (select id from host where name="mongrel2.org"),
+        (select id from host where name="localhost"),
         last_insert_rowid(),
         "dir"
     );

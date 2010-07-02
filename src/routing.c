@@ -5,6 +5,7 @@
 #include <pattern.h>
 #include <host.h>
 #include <mem/halloc.h>
+#include <bstring.h>
 
 
 
@@ -82,7 +83,7 @@ int RouteMap_insert_reversed(RouteMap *map, bstring pattern, void *data)
 
     int last_paren = bstrrchr(pattern, ')');
     if(last_paren >= 0) {
-        reversed_prefix = bTail(pattern, last_paren);
+        reversed_prefix = bTail(pattern, blength(pattern) - last_paren - 1);
     } else {
         reversed_prefix = bstrcpy(pattern);
     }
@@ -110,6 +111,8 @@ int RouteMap_collect_match(void *value, const char *key, size_t len)
     assert(value && "NULL value from TST.");
     Route *route = (Route *)value;
 
+    debug("route matching: %.*s with pattern: %s", len, key, bdata(route->pattern));
+
     return pattern_match(key, len, bdata(route->pattern)) != NULL;
 }
 
@@ -119,4 +122,18 @@ list_t *RouteMap_match(RouteMap *map, bstring path)
             blength(path), RouteMap_collect_match);
 }
 
+
+list_t *RouteMap_match_suffix(RouteMap *map, bstring target)
+{
+    // TODO: create a suffix collect so we don't have to do this
+    bstring reversed = bstrcpy(target);
+    bReverse(reversed);
+
+    list_t *results = tst_collect(map->routes, bdata(reversed),
+                        blength(reversed), NULL);
+
+    bdestroy(reversed);
+
+    return results;
+}
 

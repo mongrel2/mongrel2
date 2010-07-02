@@ -7,6 +7,7 @@
 #include <assert.h>
 #include <string.h>
 #include <mem/halloc.h>
+#include <routing.h>
 
 Server *Server_create(const char *port)
 {
@@ -102,4 +103,31 @@ int Server_add_host(Server *srv, bstring pattern, Host *host)
 void Server_set_default_host(Server *srv, Host *host)
 {
     srv->default_host = host;
+}
+
+
+
+Host *Server_match(Server *srv, bstring target)
+{
+    // TODO: figure out the best matching policy, longest? first? all?
+    Route *found = NULL;
+
+    list_t *results = RouteMap_match_suffix(srv->hosts, target);
+    lnode_t *n = list_first(results);
+
+    if(n) {
+        found = lnode_get(n);
+        assert(found && "RouteMap returned a list node with NULL.");
+        debug("Found host at %s", bdata(found->pattern));
+    }
+
+    list_destroy_nodes(results);
+    list_destroy(results);
+
+    if(found) {
+        assert(found->data && "Invalid value for stored route.");
+        return found->data;
+    } else {
+        return NULL;
+    }
 }

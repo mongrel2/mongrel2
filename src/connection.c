@@ -61,6 +61,10 @@ int connection_open(State *state, int event, void *data)
 int connection_error(State *state, int event, void *data)
 {
     TRACE(error);
+
+    close(((Connection *)data)->fd);
+    Connection_destroy((Connection *)data);
+
     return CLOSE;
 }
 
@@ -68,6 +72,9 @@ int connection_error(State *state, int event, void *data)
 int connection_finish(State *state, int event, void *data)
 {
     TRACE(finish);
+
+    Connection_destroy((Connection *)data);
+
     return CLOSE;
 }
 
@@ -110,14 +117,29 @@ error:
     return CLOSE;
 }
 
+struct tagbstring HTTP_HOST = bsStatic("HOST");
 
 int connection_route(State *state, int event, void *data)
 {
     TRACE(route);
     Connection *conn = (Connection *)data;
+    Host *host = NULL;
+    bstring host_name = NULL;
+
     bstring path = conn->req->path;
 
-    check(conn->server->default_host, "No default host set, need one for jssockets to work.");
+    bstring host_header = Request_get(conn->req, &HTTP_HOST);
+    host_name = bHead(host_header, bstrchr(host_header, ':'));
+
+    if(host_name) {
+        host = Server_match(conn->server, host_name);
+        // TODO: find out if this should be an error or not
+        check(host, "Request for a host we don't have registered: %s", bdata(host_name));
+    } else {
+        host = conn->server->default_host;
+    }
+
+    check(host, "Failed to resolve a host for the request, set a default host.");
 
     Backend *found = Host_match(conn->server->default_host, path);
 
@@ -125,9 +147,11 @@ int connection_route(State *state, int event, void *data)
 
     conn->req->action = found;
 
+    bdestroy(host_name);
     return Connection_backend_event(found);
 
 error:
+    bdestroy(host_name);
     return CLOSE;
 }
 
@@ -436,16 +460,12 @@ void Connection_task(void *v)
 
     for(i = 0, next = OPEN; next != CLOSE; i++) {
         next = State_exec(&conn->state, next, (void *)conn);
-        debug("EVENT: %s[%d]", State_event_name(next), next);
-
         check(next > EVENT_START && next < EVENT_END, "!!! Invalid next event[%d]: %d", i, next);
     }
 
-    State_exec(&conn->state, next, (void *)conn);
-
 error:
-
-    Connection_destroy(conn);
+    // fallthrough on purpose
+    State_exec(&conn->state, CLOSE, (void *)conn);
 }
 
 
@@ -462,7 +482,6 @@ int Connection_deliver(int to_fd, bstring buf)
     rc = fdwrite(to_fd, bdata(b64_buf), blength(b64_buf)+1);
 
     check(rc == blength(b64_buf)+1, "Failed to write entire message to conn %d", to_fd);
-
 
     bdestroy(b64_buf);
     return 0;
