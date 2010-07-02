@@ -61,9 +61,11 @@ int connection_open(State *state, int event, void *data)
 int connection_error(State *state, int event, void *data)
 {
     TRACE(error);
+    Connection *conn = (Connection *)data;
 
-    close(((Connection *)data)->fd);
-    Connection_destroy((Connection *)data);
+    Register_disconnect(conn->fd);
+    close(conn->fd);
+    Connection_destroy(conn);
 
     return CLOSE;
 }
@@ -128,6 +130,7 @@ int connection_route(State *state, int event, void *data)
 
     bstring path = conn->req->path;
 
+    // TODO: pre-process these out since we'll have to look them up all the damn time
     bstring host_header = Request_get(conn->req, &HTTP_HOST);
     host_name = bHead(host_header, bstrchr(host_header, ':'));
 
