@@ -37,7 +37,7 @@ Proxy := (
             TIMEOUT @timeout -> final
         )
 
-     )  >begin <err(proxy_error);
+     )  <err(proxy_error);
 
 
 Connection = (
@@ -46,9 +46,9 @@ Connection = (
         Accepting: ( ACCEPT @accepted -> Idle ),
 
         Idle: (
-            REQ_RECV HTTP_REQ @http_req -> HTTPRouting |
-            REQ_RECV MSG_REQ @msg_req -> MSGRouting |
-            REQ_RECV SOCKET_REQ @close -> final |
+            REQ_RECV @ident_req HTTP_REQ @route -> HTTPRouting |
+            REQ_RECV @ident_req MSG_REQ @route -> MSGRouting |
+            REQ_RECV @ident_req SOCKET_REQ @socket_req -> Responding |
             MSG_RESP @msg_resp -> Responding |
             CLOSE @close -> final |
             TIMEOUT @timeout -> final 
@@ -56,7 +56,6 @@ Connection = (
 
         MSGRouting: (
             HANDLER @msg_to_handler -> Queueing |
-            PROXY @msg_to_proxy -> Delivering |
             DIRECTORY @msg_to_directory -> Responding 
         ),
 
@@ -66,7 +65,7 @@ Connection = (
             DIRECTORY @http_to_directory -> Responding
         ),
 
-        Queueing: ( REQ_SENT @req_sent -> Idle ),
+        Queueing: ( REQ_SENT @msg_sent -> Idle ),
 
         Delivering: (
             TIMEOUT @timeout -> final |
@@ -83,7 +82,7 @@ Connection = (
             RESP_SENT @resp_sent -> Idle
         )
 
-        ) >begin %eof(finish) <err(error);
+        ) %eof(finish) <err(error);
 
 main := (Connection)*;
 

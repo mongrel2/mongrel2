@@ -4,6 +4,7 @@
 #include <http11/http11_parser.h>
 #include <adt/dict.h>
 #include <bstring.h>
+#include <handler.h>
 
 typedef struct Request {
     bstring request_method;
@@ -13,6 +14,7 @@ typedef struct Request {
     bstring query_string;
     bstring fragment;
     dict_t *headers;
+    struct Backend *action;
     int invalid_headers;
 
     http_parser parser;

@@ -110,13 +110,11 @@ int Dir_serve_file(Dir *dir, bstring path, int fd)
 
     bdestroy(header);
     close(file_fd);
-    close(fd);
     return 0;
 
 error:
     bdestroy(header);
     close(file_fd);
-    close(fd);
     return -1;
 }
 

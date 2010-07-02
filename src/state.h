@@ -6,16 +6,17 @@ struct State;
 typedef int (*state_action_cb)(struct State *state, int event, void *data);
 
 typedef struct StateActions {
-    state_action_cb begin;
     state_action_cb open;
     state_action_cb error;
     state_action_cb finish;
     state_action_cb close;
     state_action_cb timeout;
     state_action_cb accepted;
-    state_action_cb http_req;
-    state_action_cb msg_req;
+    state_action_cb ident_req;
+    state_action_cb route;
+    state_action_cb socket_req;
     state_action_cb msg_resp;
+    state_action_cb msg_sent;
     state_action_cb msg_to_handler;
     state_action_cb msg_to_proxy;
     state_action_cb msg_to_directory;

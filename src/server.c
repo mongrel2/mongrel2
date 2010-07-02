@@ -1,6 +1,6 @@
 #include <dbg.h>
 #include <task/task.h>
-#include <listener.h>
+#include <connection.h>
 #include <register.h>
 #include <server.h>
 #include <host.h>
@@ -45,7 +45,6 @@ void Server_init()
 {
     mqinit(2);
     Register_init();
-    Listener_init();
 }
 
 
@@ -82,9 +81,8 @@ void Server_start(Server *srv)
         debug("Connection from %s:%d to %s:%d", remote, rport, 
                 bdata(srv->default_host->name), srv->port);
 
-        taskstate("accepting");
-        Listener_accept(srv, cfd, rport, remote);
-        taskstate("waiting");
+        Connection *conn = Connection_create(srv, cfd, rport, remote);
+        Connection_accept(conn);
     }
 
     return;

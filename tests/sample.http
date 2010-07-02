@@ -1,4 +1,4 @@
-GET /test HTTP/1.1
+GET /tmp/sample.json HTTP/1.1
 Host: mongrel2.org
 Accept: text/plain
 

@@ -5,23 +5,25 @@
 #include <events.h>
 #include <assert.h>
 
-#define CALL(A, C) if(state->actions && state->actions->A) state->actions->A(state, C, data)
+#define CALL(A, C) if(state->actions && state->actions->A) next = state->actions->A(state, C, data)
 
 %%{
     machine StateActions;
+    alphtype int;
 
     access state->;
 
 ### actions
-    action begin { CALL(begin, fc); }
     action open { CALL(open, fc); }
     action error { CALL(error, fc); }
     action finish { CALL(finish, fc); }
     action close { CALL(close, fc); }
     action timeout { CALL(timeout, fc); }
     action accepted { CALL(accepted, fc); }
-    action http_req { CALL(http_req, fc); }
-    action msg_req { CALL(msg_req, fc); }
+    action ident_req { CALL(ident_req, fc); }
+    action socket_req { CALL(socket_req, fc); }
+    action route { CALL(route, fc); }
+    action msg_sent{ CALL(msg_sent, fc); }
     action msg_resp { CALL(msg_resp, fc); }
     action msg_to_handler { CALL(msg_to_handler, fc); }
     action msg_to_proxy { CALL(msg_to_proxy, fc); }
@@ -83,13 +85,17 @@ inline int State_invariant(State *state, int event)
 
 int State_exec(State *state, int event, void *data)
 {
-    const char *p = (const char *)&event;
-    const char *pe = p+1;
-    const char *eof = event == CLOSE ? pe : NULL;
+    int event_queue[2] = {0};
+    event_queue[0] = event;
+    int next = 0;
+
+    const int *p = event_queue;
+    const int *pe = p+1;
+    const int *eof = event == CLOSE ? pe : NULL;
 
     %% write exec;
 
-    return State_invariant(state, event);
+    return next;
 }
 
 int State_finish(State *state)

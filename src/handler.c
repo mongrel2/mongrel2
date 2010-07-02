@@ -4,7 +4,7 @@
 #include <dbg.h>
 #include <stdlib.h>
 #include <string.h>
-#include <listener.h>
+#include <connection.h>
 #include <assert.h>
 #include <register.h>
 
@@ -101,7 +101,7 @@ void Handler_task(void *v)
                     bconchar(payload, '\0');
                 }
 
-                if(Listener_deliver(fd, payload) == -1) {
+                if(Connection_deliver(fd, payload) == -1) {
                     log_err("Error sending to listener %d, closing them.", fd);
                     Register_disconnect(fd);
                     Handler_notify_leave(handler->send_socket, fd);

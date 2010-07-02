@@ -48,7 +48,6 @@ solution "Mongrel2"
       }
 
    test("bstr_tests")
-   test("listener_tests")
    test("config_tests")
    test("handler_tests")
    test("pattern_tests")
@@ -58,12 +57,12 @@ solution "Mongrel2"
    test("proxy_tests")
    test("server_tests")
    test("dir_tests")
-   test("listener_tests")
    test("register_tests")
    test("tst_tests")
    test("request_tests")
    test("mime_tests")
    test("state_tests")
+   test("connection_tests")
 
    project "mongrel2"
       kind "ConsoleApp"

@@ -13,16 +13,17 @@ int test_action_cb(State *state, int event, void *data)
 }
 
 StateActions test_actions = {
-    .begin = test_action_cb,
     .open = test_action_cb,
     .error = test_action_cb,
     .finish = test_action_cb,
     .close = test_action_cb,
     .timeout = test_action_cb,
     .accepted = test_action_cb,
-    .http_req = test_action_cb,
-    .msg_req = test_action_cb,
+    .ident_req = test_action_cb,
+    .socket_req = test_action_cb,
+    .route = test_action_cb,
     .msg_resp = test_action_cb,
+    .msg_sent = test_action_cb,
     .msg_to_handler = test_action_cb,
     .msg_to_proxy = test_action_cb,
     .msg_to_directory = test_action_cb,
@@ -57,11 +58,12 @@ int run_events(State *state, const char *name, int *events)
 
     for(i = 0; events[i] != 0; i++) {
         rc = State_exec(state, events[i], (void *)i);
-        check(rc != -1, "Failed on processing %d event.", events[i]);
+        check(State_finish(state) != -1, "Failed on processing %d event.", events[i]);
     }
 
-    debug("<<< FINAL RESULT: %d", rc);
-    return rc == 1;
+    debug("<<< FINAL RESULT: %d, finished: %d", rc, State_finish(state));
+    return State_finish(state);
+
 error:
     return 0;
 }
@@ -90,7 +92,7 @@ char *test_State_msg()
             CLOSE);
 
     // Simulates a basic socket request start
-    RUN(socket_start, OPEN, ACCEPT, REQ_RECV, SOCKET_REQ);
+    RUN(socket_start, OPEN, ACCEPT, REQ_RECV, SOCKET_REQ, RESP_SENT, CLOSE);
 
     // Simulates a full async setup of one req and 2 responses
     RUN(msg_handler_2_resp, 
