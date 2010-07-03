@@ -41,7 +41,6 @@ StateActions test_actions = {
     .proxy_resp_recv = test_action_cb,
     .proxy_exit_idle = test_action_cb,
     .proxy_exit_routing = test_action_cb,
-    .proxy_error = test_action_cb
 };
 
 /**

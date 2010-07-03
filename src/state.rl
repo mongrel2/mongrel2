@@ -55,7 +55,6 @@
         fhold;
         fgoto Connection::HTTPRouting; 
     }
-    action proxy_error { CALL(proxy_error, fc); }
 
     include State "state_machine.rl";
 }%%

@@ -4,6 +4,7 @@
 #include <server.h>
 #include <request.h>
 #include <state.h>
+#include <proxy.h>
 
 enum
 {
@@ -21,6 +22,8 @@ typedef struct Connection {
     int finished;
     int registered;
     int rport;
+    ProxyConnect *proxy;
+
     State state;
     char remote[IPADDR_SIZE+1];
     char buf[BUFFER_SIZE+1];

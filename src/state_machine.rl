@@ -37,7 +37,7 @@ Proxy := (
             TIMEOUT @timeout -> final
         )
 
-     )  <err(proxy_error);
+     )  <err(error);
 
 
 Connection = (

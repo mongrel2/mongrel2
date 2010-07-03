@@ -111,8 +111,6 @@ int RouteMap_collect_match(void *value, const char *key, size_t len)
     assert(value && "NULL value from TST.");
     Route *route = (Route *)value;
 
-    debug("route matching: %.*s with pattern: %s", len, key, bdata(route->pattern));
-
     return pattern_match(key, len, bdata(route->pattern)) != NULL;
 }
 

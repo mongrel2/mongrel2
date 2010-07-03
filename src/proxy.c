@@ -27,7 +27,6 @@ ProxyConnect *ProxyConnect_create(int write_fd, char *buffer, size_t size, size_
     conn->write_fd = write_fd;
     conn->read_fd = 0;
     conn->buffer = buffer;
-    hattach(buffer, conn);
     conn->size = size;
     conn->n = n; 
 
@@ -41,7 +40,7 @@ void ProxyConnect_destroy(ProxyConnect *conn)
     if(conn) {
         if(conn->write_fd) shutdown(conn->write_fd, SHUT_WR);
         if(conn->read_fd) close(conn->read_fd);
-        h_free(conn);
+        // We don't own the buf
     }
 }
 

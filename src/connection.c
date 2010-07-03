@@ -10,6 +10,8 @@
 #include <handler.h>
 #include <pattern.h>
 #include <dir.h>
+#include <proxy.h>
+#include <assert.h>
 
 
 struct tagbstring FLASH_RESPONSE = bsStatic("<?xml version=\"1.0\"?>"
@@ -65,7 +67,6 @@ int connection_error(State *state, int event, void *data)
 
     Register_disconnect(conn->fd);
     close(conn->fd);
-    Connection_destroy(conn);
 
     return CLOSE;
 }
@@ -141,11 +142,9 @@ int connection_route(State *state, int event, void *data)
     } else {
         host = conn->server->default_host;
     }
-
     check(host, "Failed to resolve a host for the request, set a default host.");
 
     Backend *found = Host_match(conn->server->default_host, path);
-
     check(found, "Handler not found: %s", bdata(path));
 
     conn->req->action = found;
@@ -217,18 +216,13 @@ int connection_http_to_handler(State *state, int event, void *data)
 }
 
 
-int connection_http_to_proxy(State *state, int event, void *data)
-{
-    TRACE(http_to_proxy);
-    return CLOSE;
-}
-
 
 int connection_http_to_directory(State *state, int event, void *data)
 {
     TRACE(http_to_directory);
     Connection *conn = (Connection *)data;
     bstring path = conn->req->path;
+
     Dir *dir = conn->req->action->target.dir;
 
     int rc = Dir_serve_file(dir, path, conn->fd);
@@ -257,17 +251,62 @@ int connection_resp_recv(State *state, int event, void *data)
 }
 
 
+int connection_http_to_proxy(State *state, int event, void *data)
+{
+    TRACE(http_to_proxy);
+    Connection *conn = (Connection *)data;
 
+    assert(conn->req && "conn->req can't be NULL");
+    assert(conn->req->action && "Action can't be NULL");
+
+    Proxy *proxy = conn->req->action->target.proxy;
+
+    int proxy_fd = netdial(TCP, bdata(proxy->server), proxy->port);
+
+    check(proxy_fd >= 0, "Failed to connect to %s:%d", bdata(proxy->server), proxy->port);
+
+    fdnoblock(proxy_fd);
+
+    conn->proxy = ProxyConnect_create(proxy_fd, conn->buf, BUFFER_SIZE, conn->nread);
+    check(conn->proxy, "Failed creating the proxy connection.");
+
+    return CONNECT;
+
+error:
+    if(conn->proxy) ProxyConnect_destroy(conn->proxy);
+
+    return FAILED;
+}
+
+
+// TODO: this and proxy_request can be merged to one callback
 int connection_proxy_connected(State *state, int event, void *data)
 {
     TRACE(proxy_connected);
-    return CLOSE;
+    Connection *conn = (Connection *)data;
+    ProxyConnect *proxy_conn = conn->proxy;
+    Proxy *proxy = conn->req->action->target.proxy;
+
+    int rc = fdsend(proxy_conn->write_fd, proxy_conn->buffer, proxy_conn->n);
+
+    check(rc > 0, "Failed to send to the proxy server: %s:%d.", 
+            bdata(proxy->server), proxy->port);
+
+    return REQ_SENT;
+error:
+    return REMOTE_CLOSE;
 }
 
 
 int connection_proxy_failed(State *state, int event, void *data)
 {
     TRACE(proxy_failed);
+    Connection *conn = (Connection *)data;
+
+    if(conn->proxy) {
+        ProxyConnect_destroy(conn->proxy);
+    }
+
     return CLOSE;
 }
 
@@ -282,27 +321,41 @@ int connection_proxy_request(State *state, int event, void *data)
 int connection_proxy_req_sent(State *state, int event, void *data)
 {
     TRACE(proxy_req_sent);
-    return CLOSE;
+    Connection *conn = (Connection *)data;
+    ProxyConnect *proxy_conn = conn->proxy;
+
+    proxy_conn->n = fdrecv(proxy_conn->write_fd, conn->buf, BUFFER_SIZE-1);
+    check(proxy_conn->n > 0, "Failed to read from the proxy.");
+
+    return RESP_RECV;
+error:
+    return FAILED;
 }
 
-
-int connection_proxy_resp_sent(State *state, int event, void *data)
-{
-    TRACE(proxy_resp_sent);
-    return CLOSE;
-}
 
 
 int connection_proxy_resp_recv(State *state, int event, void *data)
 {
     TRACE(proxy_resp_recv);
-    return CLOSE;
+    Connection *conn = (Connection *)data;
+    ProxyConnect *proxy_conn = conn->proxy;
+
+    // TODO: look at splice to do this stupid socket->socket copying
+    int rc = fdsend(conn->fd, conn->buf, proxy_conn->n);
+    check(rc > 0, "Failed to write response back to client.");
+
+    debug("Sent %d to listener:\n%.*s", rc, rc, conn->buf);
+
+    return RESP_SENT;
+error:
+    return FAILED;
 }
 
 
 int connection_proxy_exit_idle(State *state, int event, void *data)
 {
     TRACE(proxy_exit_idle);
+
     return CLOSE;
 }
 
@@ -310,16 +363,9 @@ int connection_proxy_exit_idle(State *state, int event, void *data)
 int connection_proxy_exit_routing(State *state, int event, void *data)
 {
     TRACE(proxy_exit_routing);
+
     return CLOSE;
 }
-
-
-int connection_proxy_error(State *state, int event, void *data)
-{
-    TRACE(proxy_error);
-    return CLOSE;
-}
-
 
 
 
@@ -406,11 +452,10 @@ StateActions CONN_ACTIONS = {
     .proxy_failed = connection_proxy_failed,
     .proxy_request = connection_proxy_request,
     .proxy_req_sent = connection_proxy_req_sent,
-    .proxy_resp_sent = connection_proxy_resp_sent,
+    .proxy_resp_sent = connection_parse,
     .proxy_resp_recv = connection_proxy_resp_recv,
     .proxy_exit_idle = connection_proxy_exit_idle,
     .proxy_exit_routing = connection_proxy_exit_routing,
-    .proxy_error = connection_proxy_error
 };
 
 
@@ -419,6 +464,7 @@ void Connection_destroy(Connection *conn)
 {
     if(conn) {
         Request_destroy(conn->req);
+        conn->req = NULL;
         free(conn);
     }
 }
@@ -468,7 +514,7 @@ void Connection_task(void *v)
 
 error:
     // fallthrough on purpose
-    State_exec(&conn->state, CLOSE, (void *)conn);
+    return;
 }
 
 

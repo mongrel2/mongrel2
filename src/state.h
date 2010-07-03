@@ -34,7 +34,6 @@ typedef struct StateActions {
     state_action_cb proxy_resp_recv;
     state_action_cb proxy_exit_idle;
     state_action_cb proxy_exit_routing;
-    state_action_cb proxy_error;
 } StateActions;
 
 typedef struct State {
