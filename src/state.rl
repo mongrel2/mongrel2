@@ -18,31 +18,24 @@
     action error { CALL(error, fc); }
     action finish { CALL(finish, fc); }
     action close { CALL(close, fc); }
-    action timeout { CALL(timeout, fc); }
-    action accepted { CALL(accepted, fc); }
-    action ident_req { CALL(ident_req, fc); }
-    action socket_req { CALL(socket_req, fc); }
-    action route { CALL(route, fc); }
-    action msg_sent{ CALL(msg_sent, fc); }
-    action msg_resp { CALL(msg_resp, fc); }
+    action parse { CALL(parse, fc); }
+    action identify_request { CALL(identify_request, fc); }
+    action send_socket_response { CALL(send_socket_response, fc); }
+    action route_request { CALL(route_request, fc); }
     action msg_to_handler { CALL(msg_to_handler, fc); }
-    action msg_to_proxy { CALL(msg_to_proxy, fc); }
     action msg_to_directory { CALL(msg_to_directory, fc); }
 
     action http_to_handler { CALL(http_to_handler, fc); }
     action http_to_proxy { CALL(http_to_proxy, fc); fgoto Proxy; }
     action http_to_directory { CALL(http_to_directory, fc); }
-    action req_sent { CALL(req_sent, fc); }
-    action resp_sent { CALL(resp_sent, fc); }
-    action resp_recv { CALL(resp_recv, fc); }
 
 ### proxy actions
     action proxy_connected { CALL(proxy_connected, fc); }
     action proxy_failed { CALL(proxy_failed, fc); }
-    action proxy_request { CALL(proxy_request, fc); }
-    action proxy_req_sent { CALL(proxy_req_sent, fc); }
-    action proxy_resp_sent { CALL(proxy_resp_sent, fc); }
-    action proxy_resp_recv { CALL(proxy_resp_recv, fc); }
+    action proxy_send_request { CALL(proxy_send_request, fc); }
+    action proxy_read_response { CALL(proxy_read_response, fc); }
+    action proxy_send_response { CALL(proxy_send_response, fc); }
+    action proxy_parse { CALL(proxy_parse, fc); }
 
 
 ### exit modes for proxy

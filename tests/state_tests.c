@@ -17,28 +17,21 @@ StateActions test_actions = {
     .error = test_action_cb,
     .finish = test_action_cb,
     .close = test_action_cb,
-    .timeout = test_action_cb,
-    .accepted = test_action_cb,
-    .ident_req = test_action_cb,
-    .socket_req = test_action_cb,
-    .route = test_action_cb,
-    .msg_resp = test_action_cb,
-    .msg_sent = test_action_cb,
+    .parse = test_action_cb,
+    .identify_request = test_action_cb,
+    .send_socket_response = test_action_cb,
+    .route_request = test_action_cb,
     .msg_to_handler = test_action_cb,
-    .msg_to_proxy = test_action_cb,
     .msg_to_directory = test_action_cb,
     .http_to_handler = test_action_cb,
     .http_to_proxy = test_action_cb,
     .http_to_directory = test_action_cb,
-    .req_sent = test_action_cb,
-    .resp_sent = test_action_cb,
-    .resp_recv = test_action_cb,
     .proxy_connected = test_action_cb,
     .proxy_failed = test_action_cb,
-    .proxy_request = test_action_cb,
-    .proxy_req_sent = test_action_cb,
-    .proxy_resp_sent = test_action_cb,
-    .proxy_resp_recv = test_action_cb,
+    .proxy_send_request = test_action_cb,
+    .proxy_read_response = test_action_cb,
+    .proxy_send_response = test_action_cb,
+    .proxy_parse = test_action_cb,
     .proxy_exit_idle = test_action_cb,
     .proxy_exit_routing = test_action_cb,
 };
@@ -87,18 +80,16 @@ char *test_State_msg()
     // Simulates the most basic MSG message request for a handler.
     RUN(msg_handler, 
             OPEN, ACCEPT, 
-            REQ_RECV, MSG_REQ, HANDLER, REQ_SENT, MSG_RESP, RESP_SENT,
-            CLOSE);
+            REQ_RECV, MSG_REQ, HANDLER, REQ_SENT, CLOSE);
 
     // Simulates a basic socket request start
     RUN(socket_start, OPEN, ACCEPT, REQ_RECV, SOCKET_REQ, RESP_SENT, CLOSE);
 
-    // Simulates a full async setup of one req and 2 responses
-    RUN(msg_handler_2_resp, 
+    // simulates two requests then a close
+    RUN(msg_handler_2_req, 
             OPEN, ACCEPT, 
             REQ_RECV, MSG_REQ, HANDLER, REQ_SENT,
-            MSG_RESP, RESP_SENT,
-            MSG_RESP, RESP_SENT,
+            REQ_RECV, MSG_REQ, HANDLER, REQ_SENT,
             CLOSE);
 
 
@@ -120,21 +111,6 @@ char *test_State_http()
             OPEN, ACCEPT,
             REQ_RECV, HTTP_REQ, HANDLER, REQ_SENT,
             REQ_RECV, HTTP_REQ, HANDLER, REQ_SENT, CLOSE);
-
-    // Simulates an accept then idle timeout
-    RUN(http_idle_timeout, OPEN, ACCEPT, TIMEOUT);
-
-
-    // Simulates a request for a dir then timeout
-    RUN(http_dir_timeout,
-            OPEN, ACCEPT,
-            REQ_RECV, HTTP_REQ, DIRECTORY, TIMEOUT);
-
-    // Simulates a handler, then a dir, then timeout
-    RUN(http_handler_dir_timeout,
-            OPEN, ACCEPT,
-            REQ_RECV, HTTP_REQ, HANDLER, REQ_SENT,
-            REQ_RECV, HTTP_REQ, DIRECTORY, RESP_SENT, TIMEOUT);
 
     // Simulates handler, dir, proxy attempt, then proxy closes abruptly
     RUN(http_handler_dir_proxy_remote_close,
@@ -166,26 +142,6 @@ char *test_State_http()
             OPEN, ACCEPT, 
             REQ_RECV, HTTP_REQ, PROXY, CONNECT, REQ_SENT, RESP_RECV, RESP_SENT, 
             REQ_RECV, HTTP_REQ, DIRECTORY, RESP_SENT, CLOSE);
-
-    /**
-     * These all simulate timeouts on different proxy operations.
-     */
-    RUN(http_proxy_timeout_send,
-            OPEN, ACCEPT,
-            REQ_RECV, HTTP_REQ, PROXY, CONNECT, TIMEOUT);
-
-    RUN(http_proxy_timeout_expecting,
-            OPEN, ACCEPT,
-            REQ_RECV, HTTP_REQ, PROXY, CONNECT, REQ_SENT, TIMEOUT);
-
-    RUN(http_proxy_timeout_responding,
-            OPEN, ACCEPT,
-            REQ_RECV, HTTP_REQ, PROXY, CONNECT, REQ_SENT, RESP_RECV, TIMEOUT);
-
-    RUN(http_proxy_timeout_connected,
-            OPEN, ACCEPT,
-            REQ_RECV, HTTP_REQ, PROXY, CONNECT, REQ_SENT, RESP_RECV, RESP_SENT,
-            TIMEOUT);
 
 
     return NULL;

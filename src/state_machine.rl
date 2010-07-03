@@ -7,34 +7,29 @@ Proxy := (
         start: ( 
            CONNECT @proxy_connected -> Sending |
            FAILED @proxy_failed -> final |
-           REMOTE_CLOSE @proxy_exit_idle |
-           TIMEOUT @timeout -> final
+           REMOTE_CLOSE @proxy_exit_idle
         ),
 
         Connected: (
            REMOTE_CLOSE @proxy_exit_idle |
-           REQ_RECV -> Routing |
-           TIMEOUT @timeout -> final
+           REQ_RECV -> Routing
         ),
 
         Routing: (
-           HTTP_REQ PROXY @proxy_request -> Sending |
+           HTTP_REQ PROXY @proxy_send_request -> Sending |
            HTTP_REQ (HANDLER|DIRECTORY) @proxy_exit_routing
         ),
 
         Sending: (
-            REQ_SENT @proxy_req_sent -> Expecting |
-            TIMEOUT @timeout -> final
+            REQ_SENT @proxy_read_response -> Expecting
         ),
 
         Expecting: (
-            RESP_RECV @proxy_resp_recv -> Responding |
-            TIMEOUT @timeout -> final
+            RESP_RECV @proxy_send_response -> Responding
         ),
 
         Responding: ( 
-            RESP_SENT @proxy_resp_sent -> Connected |
-            TIMEOUT @timeout -> final
+            RESP_SENT @proxy_parse -> Connected
         )
 
      )  <err(error);
@@ -43,15 +38,13 @@ Proxy := (
 Connection = (
         start: ( OPEN @open -> Accepting ),
 
-        Accepting: ( ACCEPT @accepted -> Idle ),
+        Accepting: ( ACCEPT @parse -> Idle ),
 
         Idle: (
-            REQ_RECV @ident_req HTTP_REQ @route -> HTTPRouting |
-            REQ_RECV @ident_req MSG_REQ @route -> MSGRouting |
-            REQ_RECV @ident_req SOCKET_REQ @socket_req -> Responding |
-            MSG_RESP @msg_resp -> Responding |
-            CLOSE @close -> final |
-            TIMEOUT @timeout -> final 
+            REQ_RECV @identify_request HTTP_REQ @route_request -> HTTPRouting |
+            REQ_RECV @identify_request MSG_REQ @route_request -> MSGRouting |
+            REQ_RECV @identify_request SOCKET_REQ @send_socket_response -> Responding |
+            CLOSE @close -> final
         ),
 
         MSGRouting: (
@@ -65,21 +58,10 @@ Connection = (
             DIRECTORY @http_to_directory -> Responding
         ),
 
-        Queueing: ( REQ_SENT @msg_sent -> Idle ),
-
-        Delivering: (
-            TIMEOUT @timeout -> final |
-            REQ_SENT @req_sent -> Waiting 
-        ),
-
-        Waiting: ( 
-            TIMEOUT @timeout -> final |
-            RESP_RECV @resp_recv -> Responding
-        ),
+        Queueing: ( REQ_SENT @parse -> Idle ),
 
         Responding: (
-            TIMEOUT @timeout -> final |
-            RESP_SENT @resp_sent -> Idle
+            RESP_SENT @parse -> Idle
         )
 
         ) %eof(finish) <err(error);

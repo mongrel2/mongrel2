@@ -96,14 +96,8 @@ int connection_close(State *state, int event, void *data)
 }
 
 
-int connection_timeout(State *state, int event, void *data)
-{
-    TRACE(timeout);
-    return CLOSE;
-}
 
-
-int connection_socket_req(State *state, int event, void *data)
+int connection_send_socket_response(State *state, int event, void *data)
 {
     TRACE(socket_req);
     Connection *conn = (Connection *)data;
@@ -122,7 +116,7 @@ error:
 
 struct tagbstring HTTP_HOST = bsStatic("HOST");
 
-int connection_route(State *state, int event, void *data)
+int connection_route_request(State *state, int event, void *data)
 {
     TRACE(route);
     Connection *conn = (Connection *)data;
@@ -158,12 +152,6 @@ error:
 }
 
 
-int connection_resp(State *state, int event, void *data)
-{
-    TRACE(resp);
-    return CLOSE;
-}
-
 
 int connection_msg_to_handler(State *state, int event, void *data)
 {
@@ -184,15 +172,6 @@ error:
     return CLOSE;
 }
 
-
-int connection_msg_to_proxy(State *state, int event, void *data)
-{
-    TRACE(msg_to_proxy);
-
-    log_err("MSG to PROXY currently not supported.");
-
-    return CLOSE;
-}
 
 
 int connection_msg_to_directory(State *state, int event, void *data)
@@ -311,14 +290,14 @@ int connection_proxy_failed(State *state, int event, void *data)
 }
 
 
-int connection_proxy_request(State *state, int event, void *data)
+int connection_proxy_send_request(State *state, int event, void *data)
 {
     TRACE(proxy_request);
     return CLOSE;
 }
 
 
-int connection_proxy_req_sent(State *state, int event, void *data)
+int connection_proxy_read_response(State *state, int event, void *data)
 {
     TRACE(proxy_req_sent);
     Connection *conn = (Connection *)data;
@@ -334,7 +313,7 @@ error:
 
 
 
-int connection_proxy_resp_recv(State *state, int event, void *data)
+int connection_proxy_send_response(State *state, int event, void *data)
 {
     TRACE(proxy_resp_recv);
     Connection *conn = (Connection *)data;
@@ -369,7 +348,7 @@ int connection_proxy_exit_routing(State *state, int event, void *data)
 
 
 
-int connection_ident_req(State *state, int event, void *data)
+int connection_identify_request(State *state, int event, void *data)
 {
     Connection *conn = (Connection *)data;
 
@@ -432,28 +411,21 @@ StateActions CONN_ACTIONS = {
     .error = connection_error,
     .finish = connection_finish,
     .close = connection_close,
-    .timeout = connection_timeout,
-    .accepted = connection_parse,
-    .ident_req = connection_ident_req,
-    .route = connection_route,
-    .socket_req = connection_socket_req,
-    .msg_sent = connection_parse,
-    .msg_resp = connection_resp,
+    .parse = connection_parse,
+    .identify_request = connection_identify_request,
+    .route_request = connection_route_request,
+    .send_socket_response = connection_send_socket_response,
     .msg_to_handler = connection_msg_to_handler,
-    .msg_to_proxy = connection_msg_to_proxy,
     .msg_to_directory = connection_msg_to_directory,
     .http_to_handler = connection_http_to_handler,
     .http_to_proxy = connection_http_to_proxy,
     .http_to_directory = connection_http_to_directory,
-    .req_sent = connection_parse,
-    .resp_sent = connection_parse,
-    .resp_recv = connection_resp_recv,
     .proxy_connected = connection_proxy_connected,
     .proxy_failed = connection_proxy_failed,
-    .proxy_request = connection_proxy_request,
-    .proxy_req_sent = connection_proxy_req_sent,
-    .proxy_resp_sent = connection_parse,
-    .proxy_resp_recv = connection_proxy_resp_recv,
+    .proxy_send_request = connection_proxy_send_request,
+    .proxy_read_response = connection_proxy_read_response,
+    .proxy_send_response = connection_proxy_send_response,
+    .proxy_parse = connection_parse,
     .proxy_exit_idle = connection_proxy_exit_idle,
     .proxy_exit_routing = connection_proxy_exit_routing,
 };
