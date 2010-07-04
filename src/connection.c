@@ -34,6 +34,8 @@ struct tagbstring HTTP_502 = bsStatic("HTTP/1.1 502 Bad Gateway\r\n"
 
 struct tagbstring PING_PATTERN = bsStatic("@[a-z/]- {\"type\":%s*\"ping\"}");
 
+struct tagbstring HTTP_HOST = bsStatic("HOST");
+
 
 #define TRACE(C) debug("--> %s(%s:%d) %s:%d ", "" #C, State_event_name(event), event, __FUNCTION__, __LINE__)
 
@@ -121,7 +123,6 @@ error:
     return CLOSE;
 }
 
-struct tagbstring HTTP_HOST = bsStatic("HOST");
 
 int connection_route_request(State *state, int event, void *data)
 {
@@ -236,8 +237,7 @@ int connection_http_to_proxy(State *state, int event, void *data)
     ProxyConnect *to_proxy = NULL;
     ProxyConnect *to_listener = NULL;
 
-    to_proxy = Proxy_connect_backend(proxy,
-            conn->fd, conn->buf, BUFFER_SIZE, conn->nread);
+    to_proxy = Proxy_connect_backend(proxy, conn->fd, conn->buf, BUFFER_SIZE, conn->nread);
 
     check(to_proxy, "Failed to connect to backend proxy server: %s:%d",
             bdata(proxy->server), proxy->port);
@@ -260,8 +260,12 @@ error:
 int connection_proxy_connected(State *state, int event, void *data)
 {
     TRACE(proxy_to_proxy);
-    ProxyConnect *to_proxy = ((Connection *)data)->proxy;
+    Connection *conn = (Connection *)data;
+    ProxyConnect *to_proxy = conn->proxy;
     int rc = 0;
+
+
+    debug("CONTENT LENGTH: %d", conn->req->parser.content_len);
 
     /*
      * Now we have to change this so we base our send/recv loop not
