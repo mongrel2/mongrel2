@@ -25,7 +25,7 @@ int Dir_find_file(bstring path, size_t *out_size)
     *out_size = (size_t)sb.st_size;
 
     fd = open(p, O_RDONLY);
-    check(fd, "Failed to open file but stat worked: %s", bdata(path));
+    check(fd >= 0, "Failed to open file but stat worked: %s", bdata(path));
 
     return fd;
 
@@ -95,10 +95,11 @@ int Dir_serve_file(Dir *dir, bstring path, int fd)
 
     file_fd = Dir_find_file(path, &flen);
 
-    check(file_fd, "Error opening file: %s", bdata(path));
+    check(file_fd != -1, "Error opening file: %s", bdata(path));
 
     // TODO: get this from a configuration
     content_type = MIME_match_ext(path, &default_type);
+
     header = bformat("HTTP/1.1 200 OK\r\nContent-Type: %s\r\nContent-Length: %d\r\nConnection: close\r\n\r\n", 
             bdata(content_type), flen);
     check(header != NULL, "Failed to create response header.");

@@ -1,12 +1,13 @@
 #include "minunit.h"
 #include <state.h>
 #include <events.h>
+#include <stdint.h>
 
 FILE *LOG_FILE = NULL;
 
 int test_action_cb(State *state, int event, void *data)
 {
-    int i = (int)data;
+    int i = (int)(intptr_t)data;
 
     debug("EVENT[%d]: %s:%d", i, State_event_name(event), event);
     return 1;
@@ -45,7 +46,7 @@ int run_events(State *state, const char *name, int *events)
     debug(">>> RUNNING %s", name);
 
     for(i = 0; events[i] != 0; i++) {
-        rc = State_exec(state, events[i], (void *)i);
+        rc = State_exec(state, events[i], (void *)(intptr_t)i);
         check(State_finish(state) != -1, "Failed on processing %d event.", events[i]);
     }
 

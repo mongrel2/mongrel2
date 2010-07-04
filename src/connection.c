@@ -357,14 +357,14 @@ int connection_parse(State *state, int event, void *data)
 
     TRACE(parse);
 
-    debug("PARSING with nread: %d and nparser: %d", conn->nread, conn->nparsed);
+    debug("PARSING with nread: %d and nparser: %d", conn->nread, (int)conn->nparsed);
 
     Request_start(conn->req);
 
     do {
         n = fdread(conn->fd, conn->buf, BUFFER_SIZE - conn->nread -1);
         check(n > 0, "Failed to read from socket after %d read: %d parsed.",
-                conn->nread, conn->nparsed);
+                conn->nread, (int)conn->nparsed);
 
         conn->nread += n;
 
