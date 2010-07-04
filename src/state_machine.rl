@@ -50,7 +50,8 @@ Connection = (
         Queueing: ( REQ_SENT @parse -> Idle ),
 
         Responding: (
-            RESP_SENT @parse -> Idle
+            RESP_SENT @parse -> Idle |
+            CLOSE @close -> final
         )
 
         ) %eof(finish) <err(error);

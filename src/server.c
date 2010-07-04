@@ -36,7 +36,7 @@ void Server_destroy(Server *srv)
 {
     if(srv) {
         RouteMap_destroy(srv->hosts);
-        close(srv->listen_fd);
+        fdclose(srv->listen_fd);
         h_free(srv);
     }
 }

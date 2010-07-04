@@ -65,7 +65,7 @@ void Register_disconnect(int fd)
 
         hash_delete_free(registrations, hn);
 
-        close(fd);
+        fdclose(fd);
     } else {
         log_err("Ident %d was unregistered but doesn't exist in registrations.", fd);
     }

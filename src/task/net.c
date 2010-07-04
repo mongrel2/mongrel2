@@ -40,7 +40,7 @@ netannounce(int istcp, char *server, int port)
 
     if(bind(fd, (struct sockaddr*)&sa, sizeof sa) < 0){
         taskstate("bind failed");
-        close(fd);
+        fdclose(fd);
         return -1;
     }
 
@@ -181,7 +181,7 @@ netdial(int istcp, char *server, int port)
     sa.sin_port = htons(port);
     if(connect(fd, (struct sockaddr*)&sa, sizeof sa) < 0 && errno != EINPROGRESS){
         taskstate("connect failed");
-        close(fd);
+        fdclose(fd);
         return -1;
     }
 
@@ -199,7 +199,7 @@ netdial(int istcp, char *server, int port)
     getsockopt(fd, SOL_SOCKET, SO_ERROR, (void*)&n, &sn);
     if(n == 0)
         n = ECONNREFUSED;
-    close(fd);
+    fdclose(fd);
     taskstate("connect failed");
     errno = n;
     return -1;

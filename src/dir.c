@@ -49,13 +49,13 @@ int Dir_stream_file(int file_fd, size_t flen, int sock_fd)
     check(total <= flen, "Wrote way too much, wrote %d but size was %d", (int)total, (int)flen);
 
     // TODO: with cache system in place we shouldn't close here
-    close(file_fd);
+    fdclose(file_fd);
     return sent;
 
 error:
 
     // TODO: cache should have to do this on error
-    close(file_fd);
+    fdclose(file_fd);
     return -1;
 }
 
@@ -86,14 +86,14 @@ int Dir_serve_file(Dir *dir, bstring path, int fd)
 {
     bstring header = NULL;
     bstring content_type = NULL;
-
+    int file_fd = -1;
     size_t flen = 0;
 
     check(pattern_match(bdata(path), blength(path), bdata(dir->base)),
             "Failed to match Dir base path: %s against PATH %s",
             bdata(dir->base), bdata(path));
 
-    int file_fd = Dir_find_file(path, &flen);
+    file_fd = Dir_find_file(path, &flen);
 
     check(file_fd, "Error opening file: %s", bdata(path));
 
@@ -109,12 +109,12 @@ int Dir_serve_file(Dir *dir, bstring path, int fd)
     check(rc == flen, "Didn't send all of the file, sent %d of %s.", rc, bdata(path));
 
     bdestroy(header);
-    close(file_fd);
+    fdclose(file_fd);
     return 0;
 
 error:
     bdestroy(header);
-    close(file_fd);
+    fdclose(file_fd);
     return -1;
 }
 

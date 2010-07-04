@@ -105,6 +105,8 @@ int fdrecv(int, void*, int);
 int fdwait(int, int);
 int fdnoblock(int);
 
+#define fdclose(fd) if(fd >= 0) close(fd)
+
 void    fdtask(void*);
 
 /*

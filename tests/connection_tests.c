@@ -26,7 +26,7 @@ char *test_Connection_deliver()
 
     int rc = Connection_deliver(1, t1 = bfromcstr("TEST"));
     // depending on the platform this will fail or not if send is allowed on files
-    mu_assert(rc == 0, "Should be able to write.");
+    mu_assert(rc == -1, "Should NOT be able to write.");
 
     bdestroy(t1);
 

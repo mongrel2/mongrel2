@@ -26,6 +26,12 @@ struct tagbstring HTTP_404 = bsStatic("HTTP/1.1 404 Not Found\r\n"
     "Content-Length: 9\r\n"
     "Server: Mongrel2\r\n\r\nNot Found");
 
+struct tagbstring HTTP_502 = bsStatic("HTTP/1.1 502 Bad Gateway\r\n"
+    "Content-Type: text/plain\r\n"
+    "Connection: close\r\n"
+    "Content-Length: 11\r\n"
+    "Server: Mongrel2\r\n\r\nBad Gateway");
+
 struct tagbstring PING_PATTERN = bsStatic("@[a-z/]- {\"type\":%s*\"ping\"}");
 
 
@@ -67,7 +73,7 @@ int connection_error(State *state, int event, void *data)
     Connection *conn = (Connection *)data;
 
     Register_disconnect(conn->fd);
-    close(conn->fd);
+    fdclose(conn->fd);
 
     return CLOSE;
 }
@@ -91,7 +97,7 @@ int connection_close(State *state, int event, void *data)
 
     Register_disconnect(conn->fd);
 
-    close(conn->fd);
+    fdclose(conn->fd);
 
     return 0;
 }
@@ -103,7 +109,7 @@ int connection_send_socket_response(State *state, int event, void *data)
     TRACE(socket_req);
     Connection *conn = (Connection *)data;
 
-    int rc = fdwrite(conn->fd, bdata(&FLASH_RESPONSE),
+    int rc = fdsend(conn->fd, bdata(&FLASH_RESPONSE),
             blength(&FLASH_RESPONSE) + 1);
 
     check(rc > 0, "Failed to write Flash socket response.");
@@ -148,7 +154,9 @@ int connection_route_request(State *state, int event, void *data)
     return Connection_backend_event(found);
 
 error:
+    // TODO: need to get the error state resolver working, but this is alright
     bdestroy(host_name);
+    fdsend(conn->fd, bdata(&HTTP_404), blength(&HTTP_404));
     return CLOSE;
 }
 
@@ -212,6 +220,7 @@ int connection_http_to_directory(State *state, int event, void *data)
     return RESP_SENT;
 
 error:
+    fdsend(conn->fd, bdata(&HTTP_404), blength(&HTTP_404));
     return CLOSE;
 }
 
@@ -223,14 +232,17 @@ int connection_http_to_proxy(State *state, int event, void *data)
     TRACE(http_to_proxy);
     Connection *conn = (Connection *)data;
     Proxy *proxy = conn->req->action->target.proxy;
+    conn->proxy = NULL;
+    ProxyConnect *to_proxy = NULL;
+    ProxyConnect *to_listener = NULL;
 
-    ProxyConnect *to_proxy = Proxy_connect_backend(proxy,
+    to_proxy = Proxy_connect_backend(proxy,
             conn->fd, conn->buf, BUFFER_SIZE, conn->nread);
 
     check(to_proxy, "Failed to connect to backend proxy server: %s:%d",
             bdata(proxy->server), proxy->port);
 
-    ProxyConnect *to_listener = Proxy_sync_to_listener(to_proxy);
+    to_listener = Proxy_sync_to_listener(to_proxy);
     check(to_listener, "Failed to make the listener side of proxy.");
 
     // we keep this since we manage it
@@ -239,11 +251,11 @@ int connection_http_to_proxy(State *state, int event, void *data)
     return CONNECT;
 
 error:
-    ProxyConnect_destroy(to_proxy);
-    // TODO: this is probably not how to clean this up
+    if(to_listener && to_proxy) fdclose(to_proxy->proxy_fd);
     ProxyConnect_destroy(to_listener);
     return FAILED;
 }
+
 
 int connection_proxy_connected(State *state, int event, void *data)
 {
@@ -251,6 +263,21 @@ int connection_proxy_connected(State *state, int event, void *data)
     ProxyConnect *to_proxy = ((Connection *)data)->proxy;
     int rc = 0;
 
+    /*
+     * Now we have to change this so we base our send/recv loop not
+     * on raw bytes, but on parsing the request.
+     *
+     * First, we should have a request ready to go, so send the headers,
+     * look at the clength, and send the remaining body.
+     *
+     * Second, after sending that request, we read a new request, and
+     * see how it routes.  If it routes the same as the original, then
+     * we send this new request on just like normal.
+     *
+     * Third, if the new request is different, then nuke the original,
+     * set it to the original, and return the proper type (HANDLER) for
+     * the Connection::Idle state.
+     */
     do {
         rc = fdsend(to_proxy->proxy_fd, to_proxy->buffer, to_proxy->n);
 
@@ -266,8 +293,12 @@ int connection_proxy_connected(State *state, int event, void *data)
 int connection_proxy_failed(State *state, int event, void *data)
 {
     TRACE(proxy_failed);
+    Connection *conn = (Connection *)data;
 
-    // TODO: send the right 500 message since the backend connect failed
+    int rc = fdsend(conn->fd, bdata(&HTTP_502), blength(&HTTP_502));
+    debug("SEND RC: %d", rc);
+
+    ProxyConnect_destroy(conn->proxy);
 
     return CLOSE;
 }
@@ -279,7 +310,7 @@ int connection_proxy_close(State *state, int event, void *data)
 
     ProxyConnect *to_proxy = ((Connection *)data)->proxy;
 
-    close(to_proxy->proxy_fd);
+    fdclose(to_proxy->proxy_fd);
 
     taskbarrier(to_proxy->waiter);
 
@@ -445,7 +476,7 @@ int Connection_deliver(int to_fd, bstring buf)
     b64_buf->slen = b64_encode(bdata(buf), blength(buf), bdata(b64_buf), blength(buf) * 2 - 1); 
     b64_buf->data[b64_buf->slen] = '\0';
 
-    rc = fdwrite(to_fd, bdata(b64_buf), blength(b64_buf)+1);
+    rc = fdsend(to_fd, bdata(b64_buf), blength(b64_buf)+1);
 
     check(rc == blength(b64_buf)+1, "Failed to write entire message to conn %d", to_fd);
 

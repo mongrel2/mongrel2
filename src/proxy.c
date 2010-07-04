@@ -38,9 +38,7 @@ error:
 void ProxyConnect_destroy(ProxyConnect *conn) 
 {
     if(conn) {
-        if(conn->client_fd) shutdown(conn->client_fd, SHUT_WR);
-        if(conn->proxy_fd) close(conn->proxy_fd);
-        // We don't own the buf
+        h_free(conn);
     }
 }
 
@@ -122,7 +120,6 @@ ProxyConnect *Proxy_sync_to_listener(ProxyConnect *to_proxy)
     return to_listener;
 
 error:
-    ProxyConnect_destroy(to_proxy);
     ProxyConnect_destroy(to_listener);
     return NULL;
 }
@@ -145,6 +142,7 @@ rwtask(void *v)
 
     taskbarrier(to_listener->waiter);
 
+    fdclose(to_listener->proxy_fd);
     ProxyConnect_destroy(to_listener);
 }
 

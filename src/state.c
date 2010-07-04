@@ -177,8 +177,10 @@ st5:
 		goto _test_eof5;
 case 5:
 #line 2 "src/state.c"
-	if ( (*p) == 116 )
-		goto tr1;
+	switch( (*p) ) {
+		case 102: goto tr2;
+		case 116: goto tr1;
+	}
 	goto tr0;
 tr8:
 #line 28 "src/state.rl"
