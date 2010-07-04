@@ -251,13 +251,13 @@ int connection_proxy_connected(State *state, int event, void *data)
     int rc = 0;
 
     do {
-        rc = fdsend(to_listener->read_fd, to_listener->buffer, to_listener->n);
+        rc = fdsend(to_listener->client_fd, to_listener->buffer, to_listener->n);
 
         if(rc != to_listener->n) {
             break;
         }
         
-    } while((to_listener->n = fdrecv(to_listener->write_fd, to_listener->buffer, to_listener->size)) > 0);
+    } while((to_listener->n = fdrecv(to_listener->proxy_fd, to_listener->buffer, to_listener->size)) > 0);
 
     return REMOTE_CLOSE;
 }
@@ -278,7 +278,7 @@ int connection_proxy_close(State *state, int event, void *data)
     TRACE(proxy_close);
 
     ProxyConnect *to_listener = ((Connection *)data)->proxy;
-    shutdown(to_listener->write_fd, SHUT_WR);
+    shutdown(to_listener->client_fd, SHUT_WR);
 
     taskbarrier(to_listener->waiter);
 

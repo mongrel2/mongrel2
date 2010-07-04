@@ -20,12 +20,12 @@ enum
 void rwtask(void*);
 
 
-ProxyConnect *ProxyConnect_create(int write_fd, char *buffer, size_t size, size_t n)
+ProxyConnect *ProxyConnect_create(int client_fd, char *buffer, size_t size, size_t n)
 {
     ProxyConnect *conn = h_malloc(sizeof(ProxyConnect));
     check(conn, "Failed to allocate ProxyConnect.");
-    conn->write_fd = write_fd;
-    conn->read_fd = 0;
+    conn->client_fd = client_fd;
+    conn->proxy_fd = 0;
     conn->buffer = buffer;
     conn->size = size;
     conn->n = n; 
@@ -38,8 +38,8 @@ error:
 void ProxyConnect_destroy(ProxyConnect *conn) 
 {
     if(conn) {
-        if(conn->write_fd) shutdown(conn->write_fd, SHUT_WR);
-        if(conn->read_fd) close(conn->read_fd);
+        if(conn->client_fd) shutdown(conn->client_fd, SHUT_WR);
+        if(conn->proxy_fd) close(conn->proxy_fd);
         // We don't own the buf
     }
 }
@@ -90,8 +90,8 @@ ProxyConnect *Proxy_connect_backend(Proxy *proxy, int fd, const char *buf,
     // TODO: create release style macros that compile these away taskstates
     taskstate("connecting");
 
-    to_proxy->read_fd = netdial(TCP, bdata(proxy->server), proxy->port);
-    check(to_proxy->read_fd >= 0, "Failed to connect to %s:%d", bdata(proxy->server), proxy->port);
+    to_proxy->proxy_fd = netdial(TCP, bdata(proxy->server), proxy->port);
+    check(to_proxy->proxy_fd >= 0, "Failed to connect to %s:%d", bdata(proxy->server), proxy->port);
 
     debug("Proxy connected to %s:%d", bdata(proxy->server), proxy->port);
 
@@ -107,14 +107,14 @@ ProxyConnect *Proxy_sync_to_listener(ProxyConnect *to_proxy)
 {
     ProxyConnect *to_listener = NULL;
 
-    to_listener = ProxyConnect_create(to_proxy->read_fd, 
+    to_listener = ProxyConnect_create(to_proxy->client_fd, 
             h_malloc(to_proxy->size), to_proxy->size, 0);
 
     check(to_listener, "Could not create listener side proxy connect.");
 
     // halloc will make sure the rendez goes away when the to_listener does
     to_listener->waiter = to_proxy->waiter;
-    to_listener->read_fd = to_proxy->write_fd;
+    to_listener->proxy_fd = to_proxy->proxy_fd;
 
     // kick off one side as a task to do its thing on the proxy
     taskcreate(rwtask, (void *)to_proxy, STACK);
@@ -135,14 +135,14 @@ rwtask(void *v)
     int rc = 0;
 
     do {
-        rc = fdsend(to_proxy->read_fd, to_proxy->buffer, to_proxy->n);
+        rc = fdsend(to_proxy->proxy_fd, to_proxy->buffer, to_proxy->n);
 
         if(rc != to_proxy->n) {
             break;
         }
-    } while((to_proxy->n = fdrecv(to_proxy->write_fd, to_proxy->buffer, to_proxy->size)) > 0);
+    } while((to_proxy->n = fdrecv(to_proxy->client_fd, to_proxy->buffer, to_proxy->size)) > 0);
 
-    close(to_proxy->read_fd);
+    close(to_proxy->proxy_fd);
 
     rc = taskbarrier(to_proxy->waiter);
 

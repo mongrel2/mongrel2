@@ -5,8 +5,8 @@
 #include <task/task.h>
 
 typedef struct ProxyConnect {
-    int write_fd;
-    int read_fd;
+    int client_fd;
+    int proxy_fd;
     char *buffer;
     size_t size;
     size_t n;
@@ -18,7 +18,7 @@ typedef struct Proxy {
     int port;
 } Proxy;
 
-ProxyConnect *ProxyConnect_create(int write_fd, char *buffer, size_t size, size_t n);
+ProxyConnect *ProxyConnect_create(int client_fd, char *buffer, size_t size, size_t n);
 
 void ProxyConnect_destroy(ProxyConnect *conn);
 
