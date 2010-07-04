@@ -264,9 +264,6 @@ int connection_proxy_connected(State *state, int event, void *data)
     ProxyConnect *to_proxy = conn->proxy;
     int rc = 0;
 
-
-    debug("CONTENT LENGTH: %d", conn->req->parser.content_len);
-
     /*
      * Now we have to change this so we base our send/recv loop not
      * on raw bytes, but on parsing the request.
@@ -282,14 +279,43 @@ int connection_proxy_connected(State *state, int event, void *data)
      * set it to the original, and return the proper type (HANDLER) for
      * the Connection::Idle state.
      */
-    do {
+
+    debug("CONTENT LENGTH: %d", conn->req->parser.content_len);
+    int header_len = conn->req->parser.body_start;
+    int len_remaining = conn->req->parser.content_len + header_len;
+
+    // totally inneficient here, but send the header
+    rc = fdsend(to_proxy->proxy_fd, to_proxy->buffer, header_len);
+    check(rc > 0, "Failed to write header to proxy.");
+    len_remaining -= rc;
+
+    // then send the body if we have any
+    if(to_proxy->n - header_len > 0) {
+        rc = fdsend(to_proxy->proxy_fd, to_proxy->buffer+header_len, to_proxy->n - header_len);
+        check(rc > 0, "Failed to write trailing body piece: %d out of %d", rc, to_proxy->n - header_len);
+        len_remaining -= rc;
+    }
+
+    for(to_proxy->n = 0; len_remaining > 0; len_remaining -= rc)
+    {
+        to_proxy->n = fdrecv(to_proxy->client_fd, to_proxy->buffer, to_proxy->size);
+        check(to_proxy->n > 0, "Failed to read from client.");
+
         rc = fdsend(to_proxy->proxy_fd, to_proxy->buffer, to_proxy->n);
+        check(rc > 0, "Failed to write to proxy.");
+    }
 
-        if(rc != to_proxy->n) {
-            break;
-        }
-    } while((to_proxy->n = fdrecv(to_proxy->client_fd, to_proxy->buffer, to_proxy->size)) > 0);
+    debug("REMAINING: %d out of (%d header, %d body)", len_remaining, 
+            conn->req->parser.body_start, conn->req->parser.content_len);
 
+    shutdown(to_proxy->proxy_fd, SHUT_WR);
+
+    taskbarrier(to_proxy->waiter);
+
+    return REMOTE_CLOSE;
+
+error:
+    // TODO: look at returning FAILED here instead
     return REMOTE_CLOSE;
 }
 
