@@ -68,93 +68,84 @@ error:
     return NULL;
 }
 
-inline int Proxy_read_loop(ProxyConnect *conn)
+ProxyConnect *Proxy_connect_backend(Proxy *proxy, int fd, const char *buf, 
+        size_t len, size_t nread)
 {
-    int rc = 0;
-
-
-    do {
-        taskstate("writing");
-
-        rc = fdsend(conn->read_fd, conn->buffer, conn->n);
-
-        if(rc != conn->n) {
-            break;
-        }
-        
-        taskstate("reading");
-    } while((conn->n = fdrecv(conn->write_fd, conn->buffer, conn->size)) > 0);
-
-    // no matter what, we do this
-    ProxyConnect_destroy(conn);
-
-    // TODO: do some better error checking here by looking at errno
-    return 0;
-}
-
-int Proxy_connect(Proxy *proxy, int fd, const char *buf, size_t len, size_t n)
-{
-    ProxyConnect *to_listener = NULL;
     ProxyConnect *to_proxy = NULL;
-
-    taskname("proxy_to_listener");
 
     char *initial_buf = h_malloc(len);
     check(initial_buf, "Out of memory.");
-    check(memcpy(initial_buf, buf, n), "Failed to copy the initial buffer.");
+    check(memcpy(initial_buf, buf, nread), "Failed to copy the initial buffer.");
 
-    to_proxy = ProxyConnect_create(fd, initial_buf, len, n); 
+    // this is used by both sides, but owned by the to_proxy task
+    to_proxy = ProxyConnect_create(fd, initial_buf, len, nread);
+    to_proxy->waiter = h_calloc(sizeof(Rendez), 1);
+    hattach(to_proxy, to_proxy->waiter);
 
     check(to_proxy, "Could not create the connection to backend %s:%d",
             bdata(proxy->server), proxy->port);
 
-
     debug("Connecting to %s:%d", bdata(proxy->server), proxy->port);
 
-    // TODO: create release style macros that compile these away
+    // TODO: create release style macros that compile these away taskstates
     taskstate("connecting");
 
     to_proxy->read_fd = netdial(TCP, bdata(proxy->server), proxy->port);
     check(to_proxy->read_fd >= 0, "Failed to connect to %s:%d", bdata(proxy->server), proxy->port);
 
-    fdnoblock(to_proxy->read_fd);
-    fdnoblock(to_proxy->write_fd);
-
-    taskstate("connected");
     debug("Proxy connected to %s:%d", bdata(proxy->server), proxy->port);
-    
+
+    return to_proxy;
+error:
+
+    ProxyConnect_destroy(to_proxy);
+    return NULL;
+}
+
+
+ProxyConnect *Proxy_sync_to_listener(ProxyConnect *to_proxy)
+{
+    ProxyConnect *to_listener = NULL;
+
     to_listener = ProxyConnect_create(to_proxy->read_fd, 
             h_malloc(to_proxy->size), to_proxy->size, 0);
 
-    check(to_listener, "Could not create the connection to backend %s:%d",
-            bdata(proxy->server), proxy->port);
-    
+    check(to_listener, "Could not create listener side proxy connect.");
+
+    // halloc will make sure the rendez goes away when the to_listener does
+    to_listener->waiter = to_proxy->waiter;
     to_listener->read_fd = to_proxy->write_fd;
 
-    assert(to_listener->write_fd != to_proxy->write_fd && "Wrong write fd setup.");
-    assert(to_listener->read_fd != to_proxy->read_fd && "Wrong read fd setup.");
-
-    // TODO: we get 411 errors on large POST so consider swapping these tasks
-
-    // kick off one side as a task to do its thing
+    // kick off one side as a task to do its thing on the proxy
     taskcreate(rwtask, (void *)to_proxy, STACK);
 
-    // rather than spawn a whole new task for this side, we just call our loop
-    return Proxy_read_loop(to_listener);
+    return to_listener;
 
 error:
     ProxyConnect_destroy(to_proxy);
     ProxyConnect_destroy(to_listener);
-    return -1;
+    return NULL;
 }
 
 
 void
 rwtask(void *v)
 {
-    taskname("proxy_to_proxy");
-    ProxyConnect *conn = (ProxyConnect *)v;
-    // return value ignored since this is a task
-    Proxy_read_loop(conn);
+    ProxyConnect *to_proxy = (ProxyConnect *)v;
+    int rc = 0;
+
+    do {
+        rc = fdsend(to_proxy->read_fd, to_proxy->buffer, to_proxy->n);
+
+        if(rc != to_proxy->n) {
+            break;
+        }
+    } while((to_proxy->n = fdrecv(to_proxy->write_fd, to_proxy->buffer, to_proxy->size)) > 0);
+
+    close(to_proxy->read_fd);
+
+    rc = taskbarrier(to_proxy->waiter);
+
+    ProxyConnect_destroy(to_proxy);
 }
 

@@ -33,18 +33,16 @@
     action proxy_connected { CALL(proxy_connected, fc); }
     action proxy_failed { CALL(proxy_failed, fc); }
     action proxy_send_request { CALL(proxy_send_request, fc); }
-    action proxy_read_response { CALL(proxy_read_response, fc); }
     action proxy_send_response { CALL(proxy_send_response, fc); }
     action proxy_parse { CALL(proxy_parse, fc); }
+    action proxy_close { CALL(proxy_close, fc); }
 
 
 ### exit modes for proxy
     action proxy_exit_idle {
-        CALL(proxy_exit_idle, fc);
         fgoto Connection::Idle; 
     }
     action proxy_exit_routing {
-        CALL(proxy_exit_routing, fc);
         fhold;
         fgoto Connection::HTTPRouting; 
     }

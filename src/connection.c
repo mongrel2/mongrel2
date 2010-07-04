@@ -12,6 +12,7 @@
 #include <dir.h>
 #include <proxy.h>
 #include <assert.h>
+#include <sys/socket.h>
 
 
 struct tagbstring FLASH_RESPONSE = bsStatic("<?xml version=\"1.0\"?>"
@@ -209,70 +210,55 @@ int connection_http_to_directory(State *state, int event, void *data)
     check(rc == 0, "Failed to serve file.");
 
     return RESP_SENT;
+
 error:
     return CLOSE;
 }
 
 
-
-int connection_req_sent(State *state, int event, void *data)
-{
-    TRACE(req_sent);
-    return CLOSE;
-}
-
-
-
-int connection_resp_recv(State *state, int event, void *data)
-{
-    TRACE(resp_recv);
-    return CLOSE;
-}
 
 
 int connection_http_to_proxy(State *state, int event, void *data)
 {
     TRACE(http_to_proxy);
     Connection *conn = (Connection *)data;
-
-    assert(conn->req && "conn->req can't be NULL");
-    assert(conn->req->action && "Action can't be NULL");
-
     Proxy *proxy = conn->req->action->target.proxy;
 
-    int proxy_fd = netdial(TCP, bdata(proxy->server), proxy->port);
+    ProxyConnect *to_proxy = Proxy_connect_backend(proxy,
+            conn->fd, conn->buf, BUFFER_SIZE, conn->nread);
 
-    check(proxy_fd >= 0, "Failed to connect to %s:%d", bdata(proxy->server), proxy->port);
+    check(to_proxy, "Failed to connect to backend proxy server: %s:%d",
+            bdata(proxy->server), proxy->port);
 
-    fdnoblock(proxy_fd);
+    ProxyConnect *to_listener = Proxy_sync_to_listener(to_proxy);
+    check(to_listener, "Failed to make the listener side of proxy.");
 
-    conn->proxy = ProxyConnect_create(proxy_fd, conn->buf, BUFFER_SIZE, conn->nread);
-    check(conn->proxy, "Failed creating the proxy connection.");
+    // we keep this since we manage it
+    conn->proxy = to_listener;
 
     return CONNECT;
 
 error:
-    if(conn->proxy) ProxyConnect_destroy(conn->proxy);
-
+    ProxyConnect_destroy(to_proxy);
+    ProxyConnect_destroy(to_listener);
     return FAILED;
 }
 
-
-// TODO: this and proxy_request can be merged to one callback
 int connection_proxy_connected(State *state, int event, void *data)
 {
-    TRACE(proxy_connected);
-    Connection *conn = (Connection *)data;
-    ProxyConnect *proxy_conn = conn->proxy;
-    Proxy *proxy = conn->req->action->target.proxy;
+    TRACE(proxy_to_listenerected);
+    ProxyConnect *to_listener = ((Connection *)data)->proxy;
+    int rc = 0;
 
-    int rc = fdsend(proxy_conn->write_fd, proxy_conn->buffer, proxy_conn->n);
+    do {
+        rc = fdsend(to_listener->read_fd, to_listener->buffer, to_listener->n);
 
-    check(rc > 0, "Failed to send to the proxy server: %s:%d.", 
-            bdata(proxy->server), proxy->port);
+        if(rc != to_listener->n) {
+            break;
+        }
+        
+    } while((to_listener->n = fdrecv(to_listener->write_fd, to_listener->buffer, to_listener->size)) > 0);
 
-    return REQ_SENT;
-error:
     return REMOTE_CLOSE;
 }
 
@@ -280,68 +266,23 @@ error:
 int connection_proxy_failed(State *state, int event, void *data)
 {
     TRACE(proxy_failed);
-    Connection *conn = (Connection *)data;
 
-    if(conn->proxy) {
-        ProxyConnect_destroy(conn->proxy);
-    }
+    // TODO: send the right 500 message since the backend connect failed
 
     return CLOSE;
 }
 
 
-int connection_proxy_send_request(State *state, int event, void *data)
+int connection_proxy_close(State *state, int event, void *data)
 {
-    TRACE(proxy_request);
-    return CLOSE;
-}
+    TRACE(proxy_close);
 
+    ProxyConnect *to_listener = ((Connection *)data)->proxy;
+    shutdown(to_listener->write_fd, SHUT_WR);
 
-int connection_proxy_read_response(State *state, int event, void *data)
-{
-    TRACE(proxy_req_sent);
-    Connection *conn = (Connection *)data;
-    ProxyConnect *proxy_conn = conn->proxy;
+    taskbarrier(to_listener->waiter);
 
-    proxy_conn->n = fdrecv(proxy_conn->write_fd, conn->buf, BUFFER_SIZE-1);
-    check(proxy_conn->n > 0, "Failed to read from the proxy.");
-
-    return RESP_RECV;
-error:
-    return FAILED;
-}
-
-
-
-int connection_proxy_send_response(State *state, int event, void *data)
-{
-    TRACE(proxy_resp_recv);
-    Connection *conn = (Connection *)data;
-    ProxyConnect *proxy_conn = conn->proxy;
-
-    // TODO: look at splice to do this stupid socket->socket copying
-    int rc = fdsend(conn->fd, conn->buf, proxy_conn->n);
-    check(rc > 0, "Failed to write response back to client.");
-
-    debug("Sent %d to listener:\n%.*s", rc, rc, conn->buf);
-
-    return RESP_SENT;
-error:
-    return FAILED;
-}
-
-
-int connection_proxy_exit_idle(State *state, int event, void *data)
-{
-    TRACE(proxy_exit_idle);
-
-    return CLOSE;
-}
-
-
-int connection_proxy_exit_routing(State *state, int event, void *data)
-{
-    TRACE(proxy_exit_routing);
+    ProxyConnect_destroy(to_listener);
 
     return CLOSE;
 }
@@ -422,12 +363,8 @@ StateActions CONN_ACTIONS = {
     .http_to_directory = connection_http_to_directory,
     .proxy_connected = connection_proxy_connected,
     .proxy_failed = connection_proxy_failed,
-    .proxy_send_request = connection_proxy_send_request,
-    .proxy_read_response = connection_proxy_read_response,
-    .proxy_send_response = connection_proxy_send_response,
     .proxy_parse = connection_parse,
-    .proxy_exit_idle = connection_proxy_exit_idle,
-    .proxy_exit_routing = connection_proxy_exit_routing,
+    .proxy_close = connection_proxy_close
 };
 
 
@@ -480,12 +417,18 @@ void Connection_task(void *v)
     State_init(&conn->state, &CONN_ACTIONS);
 
     for(i = 0, next = OPEN; next != CLOSE; i++) {
+        debug("NEXT EVENT: %s:%d", State_event_name(next), next);
+
         next = State_exec(&conn->state, next, (void *)conn);
         check(next > EVENT_START && next < EVENT_END, "!!! Invalid next event[%d]: %d", i, next);
     }
 
+    debug("CONNECTION DONE");
+    State_exec(&conn->state, CLOSE, (void *)conn);
+    return;
+
 error:
-    // fallthrough on purpose
+    debug("!!! CONNECTION ERROR.");
     return;
 }
 

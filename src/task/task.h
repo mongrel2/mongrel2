@@ -89,50 +89,8 @@ struct Rendez
 void  tasksleep(Rendez*);
 int  taskwakeup(Rendez*);
 int  taskwakeupall(Rendez*);
+int taskbarrier(Rendez *r);
 
-/*
- * channel communication
- */
-typedef struct Alt Alt;
-typedef struct Altarray Altarray;
-typedef struct Channel Channel;
-
-enum
-{
-  CHANEND,
-  CHANSND,
-  CHANRCV,
-  CHANNOP,
-  CHANNOBLK,
-};
-
-struct Alt
-{
-  Channel    *c;
-  void    *v;
-  unsigned int  op;
-  Task    *task;
-  Alt    *xalt;
-};
-
-struct Altarray
-{
-  Alt    **a;
-  unsigned int  n;
-  unsigned int  m;
-};
-
-struct Channel
-{
-  unsigned int  bufsize;
-  unsigned int  elemsize;
-  unsigned char  *buf;
-  unsigned int  nbuf;
-  unsigned int  off;
-  Altarray  asend;
-  Altarray  arecv;
-  char    *name;
-};
 
 
 /*

@@ -44,3 +44,14 @@ taskwakeupall(Rendez *r)
     return _taskwakeup(r, 1);
 }
 
+int
+taskbarrier(Rendez *r)
+{
+    int n = taskwakeupall(r);
+    if(!n) {
+        tasksleep(r);
+    }
+
+    return n;
+}
+

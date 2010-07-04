@@ -2,6 +2,7 @@
 #define _proxy_h
 
 #include <bstring.h>
+#include <task/task.h>
 
 typedef struct ProxyConnect {
     int write_fd;
@@ -9,6 +10,7 @@ typedef struct ProxyConnect {
     char *buffer;
     size_t size;
     size_t n;
+    Rendez *waiter;
 } ProxyConnect;
 
 typedef struct Proxy {
@@ -24,6 +26,8 @@ Proxy *Proxy_create(bstring server, int port);
 
 void Proxy_destroy(Proxy *proxy);
 
-int Proxy_connect(Proxy *proxy, int fd, const char *buf, size_t len, size_t n);
+ProxyConnect *Proxy_connect_backend(Proxy *proxy, int fd, const char *buf, 
+        size_t len, size_t nread);
 
+ProxyConnect *Proxy_sync_to_listener(ProxyConnect *to_proxy);
 #endif

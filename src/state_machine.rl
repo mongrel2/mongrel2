@@ -5,31 +5,19 @@
 
 Proxy := (
         start: ( 
-           CONNECT @proxy_connected -> Sending |
-           FAILED @proxy_failed -> final |
-           REMOTE_CLOSE @proxy_exit_idle
+           CONNECT @proxy_connected -> Proxying |
+           FAILED @proxy_failed -> Closing
         ),
 
-        Connected: (
-           REMOTE_CLOSE @proxy_exit_idle |
-           REQ_RECV -> Routing
+        Proxying: (
+            PROXY @proxy_exit_routing |
+            HANDLER @proxy_exit_routing |
+            DIRECTORY @proxy_exit_routing |
+            REMOTE_CLOSE @proxy_close -> Closing
         ),
 
-        Routing: (
-           HTTP_REQ PROXY @proxy_send_request -> Sending |
-           HTTP_REQ (HANDLER|DIRECTORY) @proxy_exit_routing
-        ),
-
-        Sending: (
-            REQ_SENT @proxy_read_response -> Expecting
-        ),
-
-        Expecting: (
-            RESP_RECV @proxy_send_response -> Responding
-        ),
-
-        Responding: ( 
-            RESP_SENT @proxy_parse -> Connected
+        Closing: (
+            REMOTE_CLOSE @proxy_exit_idle
         )
 
      )  <err(error);
@@ -55,7 +43,8 @@ Connection = (
         HTTPRouting: (
             HANDLER @http_to_handler -> Queueing |
             PROXY @http_to_proxy  |
-            DIRECTORY @http_to_directory -> Responding
+            DIRECTORY @http_to_directory -> Responding |
+            CLOSE @close -> final
         ),
 
         Queueing: ( REQ_SENT @parse -> Idle ),

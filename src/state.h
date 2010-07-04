@@ -21,12 +21,8 @@ typedef struct StateActions {
     state_action_cb http_to_directory;
     state_action_cb proxy_connected;
     state_action_cb proxy_failed;
-    state_action_cb proxy_send_request;
-    state_action_cb proxy_read_response;
-    state_action_cb proxy_send_response;
     state_action_cb proxy_parse;
-    state_action_cb proxy_exit_idle;
-    state_action_cb proxy_exit_routing;
+    state_action_cb proxy_close;
 } StateActions;
 
 typedef struct State {

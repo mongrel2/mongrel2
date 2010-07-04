@@ -28,12 +28,8 @@ StateActions test_actions = {
     .http_to_directory = test_action_cb,
     .proxy_connected = test_action_cb,
     .proxy_failed = test_action_cb,
-    .proxy_send_request = test_action_cb,
-    .proxy_read_response = test_action_cb,
-    .proxy_send_response = test_action_cb,
     .proxy_parse = test_action_cb,
-    .proxy_exit_idle = test_action_cb,
-    .proxy_exit_routing = test_action_cb,
+    .proxy_close = test_action_cb
 };
 
 /**
@@ -112,37 +108,28 @@ char *test_State_http()
             REQ_RECV, HTTP_REQ, HANDLER, REQ_SENT,
             REQ_RECV, HTTP_REQ, HANDLER, REQ_SENT, CLOSE);
 
-    // Simulates handler, dir, proxy attempt, then proxy closes abruptly
-    RUN(http_handler_dir_proxy_remote_close,
-            OPEN, ACCEPT,
-            REQ_RECV, HTTP_REQ, HANDLER, REQ_SENT,
-            REQ_RECV, HTTP_REQ, DIRECTORY, RESP_SENT,
-            REQ_RECV, HTTP_REQ, PROXY, REMOTE_CLOSE, CLOSE); 
-
-    // Simulates a dir, then proxy, then back to a handler
-    RUN(http_handler_dir_proxy_handler,
-            OPEN, ACCEPT,
-            REQ_RECV, HTTP_REQ, HANDLER, REQ_SENT,
-            REQ_RECV, HTTP_REQ, DIRECTORY, RESP_SENT,
-            REQ_RECV, HTTP_REQ, PROXY, CONNECT, REQ_SENT, RESP_RECV, RESP_SENT,
-            REQ_RECV, HTTP_REQ, HANDLER, REQ_SENT, CLOSE);
-
-
     // Simulates two requests over a proxy connection followed by
     // the remote closing the connection so we have to shutdown.
     RUN(http_proxy,
             OPEN, ACCEPT,
-            REQ_RECV, HTTP_REQ, PROXY, CONNECT, REQ_SENT, RESP_RECV, RESP_SENT,
-            REQ_RECV, HTTP_REQ, PROXY, REQ_SENT, RESP_RECV, RESP_SENT, REMOTE_CLOSE,
+            REQ_RECV, HTTP_REQ, PROXY, CONNECT, 
+            REMOTE_CLOSE, REMOTE_CLOSE,
             CLOSE);
 
-    // Simulates a proxy connection that is then routed to a directory
-    // access, so has to change from proxying to serving a file.
-    RUN(http_proxy_dir, 
-            OPEN, ACCEPT, 
-            REQ_RECV, HTTP_REQ, PROXY, CONNECT, REQ_SENT, RESP_RECV, RESP_SENT, 
-            REQ_RECV, HTTP_REQ, DIRECTORY, RESP_SENT, CLOSE);
+    // Simulates randomly interleaved proxy activity from
+    // two tasks at the same time.
+    RUN(http_proxy_mixed,
+            OPEN, ACCEPT,
+            REQ_RECV, HTTP_REQ, PROXY, CONNECT, 
+            REMOTE_CLOSE, REMOTE_CLOSE,
+            CLOSE);
 
+    // Simulates a proxy connect that needs to exit after a 
+    // handler request was issued and there's a bit of data left.
+    RUN(http_proxy_handler,
+            OPEN, ACCEPT,
+            REQ_RECV, HTTP_REQ, PROXY, CONNECT, 
+            HANDLER, REQ_SENT, CLOSE);
 
     return NULL;
 }
