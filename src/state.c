@@ -10,7 +10,7 @@
 #define CALL(A, C) if(state->actions && state->actions->A) next = state->actions->A(state, C, data)
 
 
-#line 51 "src/state.rl"
+#line 52 "src/state.rl"
 
 
 
@@ -25,7 +25,7 @@ static const int StateActions_en_main_Connection_Idle = 2;
 static const int StateActions_en_main_Connection_HTTPRouting = 4;
 
 
-#line 54 "src/state.rl"
+#line 55 "src/state.rl"
 
 int State_init(State *state, StateActions *actions)
 {
@@ -37,7 +37,7 @@ int State_init(State *state, StateActions *actions)
 	 state->cs = StateActions_start;
 	}
 
-#line 60 "src/state.rl"
+#line 61 "src/state.rl"
     return 1;
 }
 
@@ -46,7 +46,7 @@ inline int State_invariant(State *state, int event)
     if ( state->cs == 
 #line 2 "src/state.c"
 0
-#line 65 "src/state.rl"
+#line 66 "src/state.rl"
  ) {
         return -1;
     }
@@ -54,7 +54,7 @@ inline int State_invariant(State *state, int event)
     if ( state->cs >= 
 #line 2 "src/state.c"
 13
-#line 69 "src/state.rl"
+#line 70 "src/state.rl"
  ) {
         return 1;
     }
@@ -246,7 +246,7 @@ case 10:
 	}
 	goto tr0;
 tr15:
-#line 45 "src/state.rl"
+#line 46 "src/state.rl"
 	{
         p--;
         {goto st4;} 
@@ -255,6 +255,7 @@ tr15:
 tr17:
 #line 42 "src/state.rl"
 	{
+        p--;
         {goto st2;} 
     }
 	goto st11;
@@ -277,7 +278,7 @@ st12:
 		goto _test_eof12;
 case 12:
 #line 2 "src/state.c"
-	if ( (*p) == 112 )
+	if ( (*p) == 102 )
 		goto tr17;
 	goto tr0;
 	}
@@ -324,7 +325,7 @@ case 12:
 	_out: {}
 	}
 
-#line 87 "src/state.rl"
+#line 88 "src/state.rl"
 
     return next;
 }

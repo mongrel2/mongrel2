@@ -17,7 +17,7 @@ Proxy := (
         ),
 
         Closing: (
-            REMOTE_CLOSE @proxy_exit_idle
+            CLOSE @proxy_exit_idle
         )
 
      )  <err(error);

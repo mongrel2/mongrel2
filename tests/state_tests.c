@@ -113,7 +113,7 @@ char *test_State_http()
     RUN(http_proxy,
             OPEN, ACCEPT,
             REQ_RECV, HTTP_REQ, PROXY, CONNECT, 
-            REMOTE_CLOSE, REMOTE_CLOSE,
+            REMOTE_CLOSE, 
             CLOSE);
 
     // Simulates randomly interleaved proxy activity from
@@ -121,7 +121,7 @@ char *test_State_http()
     RUN(http_proxy_mixed,
             OPEN, ACCEPT,
             REQ_RECV, HTTP_REQ, PROXY, CONNECT, 
-            REMOTE_CLOSE, REMOTE_CLOSE,
+            REMOTE_CLOSE,
             CLOSE);
 
     // Simulates a proxy connect that needs to exit after a 

@@ -234,30 +234,30 @@ int connection_http_to_proxy(State *state, int event, void *data)
     check(to_listener, "Failed to make the listener side of proxy.");
 
     // we keep this since we manage it
-    conn->proxy = to_listener;
+    conn->proxy = to_proxy;
 
     return CONNECT;
 
 error:
     ProxyConnect_destroy(to_proxy);
+    // TODO: this is probably not how to clean this up
     ProxyConnect_destroy(to_listener);
     return FAILED;
 }
 
 int connection_proxy_connected(State *state, int event, void *data)
 {
-    TRACE(proxy_to_listenerected);
-    ProxyConnect *to_listener = ((Connection *)data)->proxy;
+    TRACE(proxy_to_proxy);
+    ProxyConnect *to_proxy = ((Connection *)data)->proxy;
     int rc = 0;
 
     do {
-        rc = fdsend(to_listener->client_fd, to_listener->buffer, to_listener->n);
+        rc = fdsend(to_proxy->proxy_fd, to_proxy->buffer, to_proxy->n);
 
-        if(rc != to_listener->n) {
+        if(rc != to_proxy->n) {
             break;
         }
-        
-    } while((to_listener->n = fdrecv(to_listener->proxy_fd, to_listener->buffer, to_listener->size)) > 0);
+    } while((to_proxy->n = fdrecv(to_proxy->client_fd, to_proxy->buffer, to_proxy->size)) > 0);
 
     return REMOTE_CLOSE;
 }
@@ -277,12 +277,13 @@ int connection_proxy_close(State *state, int event, void *data)
 {
     TRACE(proxy_close);
 
-    ProxyConnect *to_listener = ((Connection *)data)->proxy;
-    shutdown(to_listener->client_fd, SHUT_WR);
+    ProxyConnect *to_proxy = ((Connection *)data)->proxy;
 
-    taskbarrier(to_listener->waiter);
+    close(to_proxy->proxy_fd);
 
-    ProxyConnect_destroy(to_listener);
+    taskbarrier(to_proxy->waiter);
+
+    ProxyConnect_destroy(to_proxy);
 
     return CLOSE;
 }
@@ -428,6 +429,7 @@ void Connection_task(void *v)
     return;
 
 error:
+    State_exec(&conn->state, CLOSE, (void *)conn);
     debug("!!! CONNECTION ERROR.");
     return;
 }

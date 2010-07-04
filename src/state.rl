@@ -40,6 +40,7 @@
 
 ### exit modes for proxy
     action proxy_exit_idle {
+        fhold;
         fgoto Connection::Idle; 
     }
     action proxy_exit_routing {

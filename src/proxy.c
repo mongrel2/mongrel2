@@ -117,7 +117,7 @@ ProxyConnect *Proxy_sync_to_listener(ProxyConnect *to_proxy)
     to_listener->proxy_fd = to_proxy->proxy_fd;
 
     // kick off one side as a task to do its thing on the proxy
-    taskcreate(rwtask, (void *)to_proxy, STACK);
+    taskcreate(rwtask, (void *)to_listener, STACK);
 
     return to_listener;
 
@@ -131,21 +131,20 @@ error:
 void
 rwtask(void *v)
 {
-    ProxyConnect *to_proxy = (ProxyConnect *)v;
+    ProxyConnect *to_listener = (ProxyConnect *)v;
     int rc = 0;
 
     do {
-        rc = fdsend(to_proxy->proxy_fd, to_proxy->buffer, to_proxy->n);
+        rc = fdsend(to_listener->client_fd, to_listener->buffer, to_listener->n);
 
-        if(rc != to_proxy->n) {
+        if(rc != to_listener->n) {
             break;
         }
-    } while((to_proxy->n = fdrecv(to_proxy->client_fd, to_proxy->buffer, to_proxy->size)) > 0);
+        
+    } while((to_listener->n = fdrecv(to_listener->proxy_fd, to_listener->buffer, to_listener->size)) > 0);
 
-    close(to_proxy->proxy_fd);
+    taskbarrier(to_listener->waiter);
 
-    rc = taskbarrier(to_proxy->waiter);
-
-    ProxyConnect_destroy(to_proxy);
+    ProxyConnect_destroy(to_listener);
 }
 
