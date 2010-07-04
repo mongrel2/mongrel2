@@ -306,11 +306,12 @@ int connection_proxy_connected(State *state, int event, void *data)
     }
 
     debug("REMAINING: %d out of (%d header, %d body)", len_remaining, 
-            conn->req->parser.body_start, conn->req->parser.content_len);
+            header_len, (int)conn->req->parser.content_len);
 
     shutdown(to_proxy->proxy_fd, SHUT_WR);
 
     taskbarrier(to_proxy->waiter);
+    fdclose(to_proxy->proxy_fd);
 
     return REMOTE_CLOSE;
 
@@ -341,8 +342,6 @@ int connection_proxy_close(State *state, int event, void *data)
     ProxyConnect *to_proxy = ((Connection *)data)->proxy;
 
     fdclose(to_proxy->proxy_fd);
-
-    taskbarrier(to_proxy->waiter);
 
     ProxyConnect_destroy(to_proxy);
 

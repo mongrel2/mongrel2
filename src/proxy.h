@@ -9,7 +9,7 @@ typedef struct ProxyConnect {
     int proxy_fd;
     char *buffer;
     size_t size;
-    size_t n;
+    int n;
     Rendez *waiter;
 } ProxyConnect;
 
