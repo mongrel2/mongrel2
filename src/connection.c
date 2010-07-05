@@ -330,7 +330,6 @@ int connection_proxy_parse(State *state, int event, void *data)
 
     sentinel("Should all be handled in if-statement above.");
 error:
-    bdestroy(host);
     return REMOTE_CLOSE;
 }
 
