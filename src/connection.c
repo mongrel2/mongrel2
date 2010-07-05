@@ -516,23 +516,26 @@ int Connection_read_header(Connection *conn, Request *req)
 
     Request_start(req);
 
-    do {
-        n = fdread(conn->fd, conn->buf, BUFFER_SIZE - conn->nread -1);
+     while(!finished && conn->nread < BUFFER_SIZE) {
+        n = fdread(conn->fd, conn->buf, BUFFER_SIZE - 1 - conn->nread);
         check(n > 0, "Failed to read from socket after %d read: %d parsed.",
                 conn->nread, (int)conn->nparsed);
 
         conn->nread += n;
 
+        check(conn->nread < BUFFER_SIZE, "Read too much, FATAL error: nread: %d, buffer size: %d", conn->nread, BUFFER_SIZE);
+
         finished = Request_parse(req, conn->buf, conn->nread, &conn->nparsed);
 
         check(finished != -1, "Error in parsing: %d, bytes: %d, value: %.*s", 
                 finished, conn->nread, conn->nread, conn->buf);
+    }
 
-    } while(!finished && conn->nread < BUFFER_SIZE);
+    conn->buf[BUFFER_SIZE] = '\0';  // always cap it off
 
     Request_dump(req);
     
-    return conn->nread;
+    return conn->nread; 
 
 error:
     return -1;
