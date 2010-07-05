@@ -124,10 +124,11 @@ int connection_route_request(State *state, int event, void *data)
     }
     check(host, "Failed to resolve a host for the request, set a default host.");
 
-    Backend *found = Host_match(conn->server->default_host, path);
+    Backend *found = Host_match(host, path);
     check(found, "Handler not found: %s", bdata(path));
 
     Request_set_action(conn->req, found);
+    conn->req->target_host = host;
 
     bdestroy(host_name);
     return Connection_backend_event(found);
@@ -135,7 +136,7 @@ int connection_route_request(State *state, int event, void *data)
 error:
     // TODO: need to get the error state resolver working, but this is alright
     bdestroy(host_name);
-    fdsend(conn->fd, bdata(&HTTP_404), blength(&HTTP_404));
+    Response_send_error(conn->fd, &HTTP_404);
     return CLOSE;
 }
 
@@ -191,6 +192,8 @@ int connection_http_to_directory(State *state, int event, void *data)
     Connection *conn = (Connection *)data;
     bstring path = Request_path(conn->req);
 
+    debug("GETTING FILE FOR PATH: %s", bdata(path));
+
     Dir *dir = Request_get_action(conn->req, dir);
 
     int rc = Dir_serve_file(dir, path, conn->fd);
@@ -236,41 +239,96 @@ error:
 }
 
 
+
 int connection_proxy_connected(State *state, int event, void *data)
 {
-    TRACE(proxy_to_proxy);
+    TRACE(proxy_connected);
     Connection *conn = (Connection *)data;
     ProxyConnect *to_proxy = conn->proxy;
     int rc = 0;
 
+    int header_len = Request_header_length(conn->req);
+    int content_len = Request_content_length(conn->req);
+    int total_len = header_len + content_len;
 
-    debug("CONTENT LENGTH: %d", Request_content_length(conn->req));
+    if(total_len < conn->nread) {
+        // we read this request and potentially another
+        // send the first request, then move the trailing bit down
+        // TODO: do we need the to_proxy buf at all then?
+        rc = fdwrite(to_proxy->proxy_fd, conn->buf, total_len);
+        check(rc > 0, "Failed to write request to proxy.");
 
-    /*
-     * Now we have to change this so we base our send/recv loop not
-     * on raw bytes, but on parsing the request.
-     *
-     * First, we should have a request ready to go, so send the headers,
-     * look at the clength, and send the remaining body.
-     *
-     * Second, after sending that request, we read a new request, and
-     * see how it routes.  If it routes the same as the original, then
-     * we send this new request on just like normal.
-     *
-     * Third, if the new request is different, then nuke the original,
-     * set it to the original, and return the proper type (HANDLER) for
-     * the Connection::Idle state.
-     */
-    do {
-        rc = fdsend(to_proxy->proxy_fd, to_proxy->buffer, to_proxy->n);
+        // setting up for the next request to be read
+        conn->nread -= total_len;
+        memmove(conn->buf, conn->buf + total_len, conn->nread);
 
-        if(rc != to_proxy->n) {
-            break;
-        }
-    } while((to_proxy->n = fdrecv(to_proxy->client_fd, to_proxy->buffer, to_proxy->size)) > 0);
+    } else if (total_len > conn->nread) {
+        // we haven't read everything, need to do some streaming
+        // TODO: this is totally hosed, not going to work at all
+        do {
+            rc = fdsend(to_proxy->proxy_fd, to_proxy->buffer, to_proxy->n);
 
+            if(rc != to_proxy->n) {
+                break;
+            }
+        } while((to_proxy->n = fdrecv(to_proxy->client_fd, to_proxy->buffer, to_proxy->size)) > 0);
+
+    } else {
+        // not > and not < means ==, so we just write this and try again
+        rc = fdwrite(to_proxy->proxy_fd, conn->buf, total_len);
+        check(rc > 0, "Failed to write complete request to proxy.");
+        conn->nread = 0;
+    }
+
+    return REQ_SENT;
+
+error:
     return REMOTE_CLOSE;
 }
+
+
+int connection_proxy_parse(State *state, int event, void *data)
+{
+    TRACE(proxy_parse);
+
+    int rc = 0;
+    Connection *conn = (Connection *)data;
+    bstring host = bstrcpy(Request_get(conn->req, &HTTP_HOST));
+    Host *target_host = conn->req->target_host;
+    Backend *req_action = conn->req->action;
+
+    // unlike other places, we keep the nread rather than reset
+    rc = Connection_read_header(conn, conn->req);
+    check(rc > 0, "Failed to read another header.");
+    check(Request_is_http(conn->req), "Someone tried to change the protocol on us from HTTP.");
+
+    // do a light find of this request compared to the last one
+    if(!biseq(host, Request_get(conn->req, &HTTP_HOST))) {
+        // TODO: this totally won't work, need to probably find the new host and set it
+        bdestroy(host);
+        return PROXY;
+    } else {
+        bdestroy(host);
+
+        // query up the path to see if it gets the current request action
+        Backend *found = Host_match(target_host, Request_path(conn->req));
+        check(found, "Didn't find next target in proxy chain request.");
+
+        if(found != req_action) {
+            Request_set_action(conn->req, found);
+            return Connection_backend_event(found);
+        } else {
+            // TODO: since we found it already, keep it set and reuse
+            return HTTP_REQ;
+        }
+    }
+
+    sentinel("Should all be handled in if-statement above.");
+error:
+    bdestroy(host);
+    return REMOTE_CLOSE;
+}
+
 
 
 int connection_proxy_failed(State *state, int event, void *data)
@@ -328,36 +386,13 @@ error:
 int connection_parse(State *state, int event, void *data)
 {
     Connection *conn = (Connection *)data;
-    int finished = 0;
     conn->nread = 0;
-    conn->nparsed = 0;
-    int n = 0;
 
-    TRACE(parse);
-
-    debug("PARSING with nread: %d and nparser: %d", conn->nread, (int)conn->nparsed);
-
-    Request_start(conn->req);
-
-    do {
-        n = fdread(conn->fd, conn->buf, BUFFER_SIZE - conn->nread -1);
-        check(n > 0, "Failed to read from socket after %d read: %d parsed.",
-                conn->nread, (int)conn->nparsed);
-
-        conn->nread += n;
-
-        finished = Request_parse(conn->req, conn->buf, conn->nread, &conn->nparsed);
-
-        check(finished != -1, "Error in parsing: %d, bytes: %d, value: %.*s", 
-                finished, conn->nread, conn->nread, conn->buf);
-
-    } while(!finished && conn->nread < BUFFER_SIZE);
-
-    return REQ_RECV;
-    
-error:
-
-    return CLOSE;
+    if(Connection_read_header(conn, conn->req) > 0) {
+        return REQ_RECV;
+    } else {
+        return CLOSE;
+    }
 }
 
 
@@ -377,7 +412,7 @@ StateActions CONN_ACTIONS = {
     .http_to_directory = connection_http_to_directory,
     .proxy_connected = connection_proxy_connected,
     .proxy_failed = connection_proxy_failed,
-    .proxy_parse = connection_parse,
+    .proxy_parse = connection_proxy_parse,
     .proxy_close = connection_proxy_close
 };
 
@@ -431,8 +466,6 @@ void Connection_task(void *v)
     State_init(&conn->state, &CONN_ACTIONS);
 
     for(i = 0, next = OPEN; next != CLOSE; i++) {
-        debug("NEXT EVENT: %s:%d", State_event_name(next), next);
-
         next = State_exec(&conn->state, next, (void *)conn);
         check(next > EVENT_START && next < EVENT_END, "!!! Invalid next event[%d]: %d", i, next);
     }
@@ -470,3 +503,34 @@ error:
     return -1;
 }
 
+
+int Connection_read_header(Connection *conn, Request *req)
+{
+    int finished = 0;
+    int n = 0;
+    conn->nparsed = 0;
+
+    Request_start(req);
+
+    do {
+        n = fdread(conn->fd, conn->buf, BUFFER_SIZE - conn->nread -1);
+        check(n > 0, "Failed to read from socket after %d read: %d parsed.",
+                conn->nread, (int)conn->nparsed);
+
+        conn->nread += n;
+
+        finished = Request_parse(req, conn->buf, conn->nread, &conn->nparsed);
+
+        check(finished != -1, "Error in parsing: %d, bytes: %d, value: %.*s", 
+                finished, conn->nread, conn->nread, conn->buf);
+
+    } while(!finished && conn->nread < BUFFER_SIZE);
+
+    Request_dump(req);
+    
+    return conn->nread;
+
+error:
+    return -1;
+
+}

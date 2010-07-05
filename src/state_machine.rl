@@ -5,14 +5,20 @@
 
 Proxy := (
         start: ( 
-           CONNECT @proxy_connected -> Proxying |
+           CONNECT @proxy_connected -> Sending |
            FAILED @proxy_failed -> Closing
         ),
 
         Proxying: (
+            HTTP_REQ @proxy_connected -> Sending |
             PROXY @proxy_exit_routing |
             HANDLER @proxy_exit_routing |
             DIRECTORY @proxy_exit_routing |
+            REMOTE_CLOSE @proxy_close -> Closing
+        ),
+
+        Sending: (
+            REQ_SENT @proxy_parse -> Proxying |
             REMOTE_CLOSE @proxy_close -> Closing
         ),
 

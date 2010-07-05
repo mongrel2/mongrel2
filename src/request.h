@@ -6,6 +6,7 @@
 #include <bstring.h>
 #include <handler.h>
 #include <headers.h>
+#include <host.h>
 
 typedef struct Request {
     bstring request_method;
@@ -14,6 +15,7 @@ typedef struct Request {
     bstring path;
     bstring query_string;
     bstring fragment;
+    Host *target_host;
     dict_t *headers;
     struct Backend *action;
     int invalid_headers;
@@ -48,5 +50,7 @@ bstring Request_get(Request *parser, bstring field);
 #define Request_path(R) ((R)->path)
 
 #define Request_content_length(R) ((R)->parser.content_len)
+
+#define Request_header_length(R) ((R)->parser.body_start)
 
 #endif

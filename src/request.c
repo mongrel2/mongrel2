@@ -165,6 +165,7 @@ void Request_dump(Request *req)
         debug("JSON REQUEST of LENGTH: %d", (int)req->parser.body_start);
     } else if(Request_is_http(req)) {
         debug("HTTP REQUEST of LENGTH: %d ***********", (int)req->parser.body_start);
+        debug("PATH: %s", bdata(req->path));
     } else {
         sentinel("UNKNOWN REQUEST TYPE, TELL ZED.");
     }
@@ -190,4 +191,5 @@ bstring Request_get(Request *req, bstring field)
         return NULL;
     }
 }
+
 

@@ -5,6 +5,7 @@
 #include <config/config.h>
 #include <adt/list.h>
 #include <unistd.h>
+#include <config/db.h>
 
 
 FILE *LOG_FILE = NULL;
@@ -30,6 +31,8 @@ void taskmain(int argc, char **argv)
     if(chroot(getcwd(wd, MAX_DIR_PATH)) != 0) {
         log_err("Can't chroot to current working dir, rerun as root.");
     }
+
+    DB_close();
 
     Server_start(srv);
 

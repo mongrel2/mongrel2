@@ -40,4 +40,6 @@ void Connection_task(void *v);
 
 int Connection_deliver(int to_fd, bstring buf);
 
+int Connection_read_header(Connection *conn, Request *req);
+
 #endif

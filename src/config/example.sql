@@ -66,7 +66,7 @@ INSERT INTO route (path, host_id, target_id, target_type)
         "proxy"
     );
 
-INSERT INTO directory (base) VALUES ("/tests/.+.json");
+INSERT INTO directory (base) VALUES ("/tests/.+");
 
 INSERT INTO route (path, host_id, target_id, target_type)
     VALUES (
