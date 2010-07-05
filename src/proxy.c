@@ -11,16 +11,18 @@
 #include <stdlib.h>
 #include <mem/halloc.h>
 
+// TODO: make these configurable
 enum
 {
-    STACK = 32768
+    STACK = 32768,
+    BUFFER_SIZE = 2 * 1024 
 };
 
 
 void rwtask(void*);
 
 
-ProxyConnect *ProxyConnect_create(int client_fd, char *buffer, size_t size, size_t n)
+ProxyConnect *ProxyConnect_create(int client_fd, char *buffer, size_t size)
 {
     ProxyConnect *conn = h_malloc(sizeof(ProxyConnect));
     check(conn, "Failed to allocate ProxyConnect.");
@@ -28,7 +30,6 @@ ProxyConnect *ProxyConnect_create(int client_fd, char *buffer, size_t size, size
     conn->proxy_fd = 0;
     conn->buffer = buffer;
     conn->size = size;
-    conn->n = n; 
 
     return conn;
 error:
@@ -66,17 +67,11 @@ error:
     return NULL;
 }
 
-ProxyConnect *Proxy_connect_backend(Proxy *proxy, int fd, const char *buf, 
-        size_t len, size_t nread)
+ProxyConnect *Proxy_connect_backend(Proxy *proxy, int fd)
 {
     ProxyConnect *to_proxy = NULL;
 
-    char *initial_buf = h_malloc(len);
-    check(initial_buf, "Out of memory.");
-    check(memcpy(initial_buf, buf, nread), "Failed to copy the initial buffer.");
-
-    // this is used by both sides, but owned by the to_proxy task
-    to_proxy = ProxyConnect_create(fd, initial_buf, len, nread);
+    to_proxy = ProxyConnect_create(fd, NULL, 0);
     to_proxy->waiter = h_calloc(sizeof(Rendez), 1);
     hattach(to_proxy, to_proxy->waiter);
 
@@ -106,7 +101,7 @@ ProxyConnect *Proxy_sync_to_listener(ProxyConnect *to_proxy)
     ProxyConnect *to_listener = NULL;
 
     to_listener = ProxyConnect_create(to_proxy->client_fd, 
-            h_malloc(to_proxy->size), to_proxy->size, 0);
+            h_malloc(BUFFER_SIZE+1), BUFFER_SIZE);
 
     check(to_listener, "Could not create listener side proxy connect.");
 
@@ -130,15 +125,16 @@ rwtask(void *v)
 {
     ProxyConnect *to_listener = (ProxyConnect *)v;
     int rc = 0;
+    int nread = 0;
 
     do {
-        rc = fdsend(to_listener->client_fd, to_listener->buffer, to_listener->n);
+        rc = fdsend(to_listener->client_fd, to_listener->buffer, nread);
 
-        if(rc != to_listener->n) {
+        if(rc != nread) {
             break;
         }
         
-    } while((to_listener->n = fdrecv(to_listener->proxy_fd, to_listener->buffer, to_listener->size)) > 0);
+    } while((nread = fdrecv(to_listener->proxy_fd, to_listener->buffer, to_listener->size)) > 0);
 
     taskbarrier(to_listener->waiter);
 

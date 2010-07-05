@@ -30,7 +30,7 @@
     action http_to_directory { CALL(http_to_directory, fc); }
 
 ### proxy actions
-    action proxy_connected { CALL(proxy_connected, fc); }
+    action proxy_deliver { CALL(proxy_deliver, fc); }
     action proxy_failed { CALL(proxy_failed, fc); }
     action proxy_send_request { CALL(proxy_send_request, fc); }
     action proxy_send_response { CALL(proxy_send_response, fc); }

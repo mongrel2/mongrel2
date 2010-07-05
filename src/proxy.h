@@ -9,7 +9,6 @@ typedef struct ProxyConnect {
     int proxy_fd;
     char *buffer;
     size_t size;
-    int n;
     Rendez *waiter;
 } ProxyConnect;
 
@@ -18,7 +17,7 @@ typedef struct Proxy {
     int port;
 } Proxy;
 
-ProxyConnect *ProxyConnect_create(int client_fd, char *buffer, size_t size, size_t n);
+ProxyConnect *ProxyConnect_create(int client_fd, char *buffer, size_t size);
 
 void ProxyConnect_destroy(ProxyConnect *conn);
 
@@ -26,8 +25,7 @@ Proxy *Proxy_create(bstring server, int port);
 
 void Proxy_destroy(Proxy *proxy);
 
-ProxyConnect *Proxy_connect_backend(Proxy *proxy, int fd, const char *buf, 
-        size_t len, size_t nread);
+ProxyConnect *Proxy_connect_backend(Proxy *proxy, int fd);
 
 ProxyConnect *Proxy_sync_to_listener(ProxyConnect *to_proxy);
 #endif

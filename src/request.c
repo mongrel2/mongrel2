@@ -94,7 +94,7 @@ Request *Request_create()
     req->parser.http_version = http_version_cb;
     req->parser.header_done = header_done_cb;
 
-    req->headers = dict_create(MAX_HEADER_COUNT, (dict_comp_t)bstrcmp);
+    req->headers = dict_create(MAX_HEADER_COUNT, (dict_comp_t)bstricmp);
     check(req->headers, "Out of Memory");
     dict_set_allocator(req->headers, req_alloc_dict, req_free_dict, NULL);
     dict_allow_dupes(req->headers);

@@ -19,7 +19,7 @@ typedef struct StateActions {
     state_action_cb http_to_handler;
     state_action_cb http_to_proxy;
     state_action_cb http_to_directory;
-    state_action_cb proxy_connected;
+    state_action_cb proxy_deliver;
     state_action_cb proxy_failed;
     state_action_cb proxy_parse;
     state_action_cb proxy_close;

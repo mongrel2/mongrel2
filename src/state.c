@@ -233,7 +233,7 @@ case 9:
 	goto st0;
 tr12:
 #line 33 "src/state.rl"
-	{ CALL(proxy_connected, (*p)); }
+	{ CALL(proxy_deliver, (*p)); }
 	goto st10;
 st10:
 	if ( ++p == pe )

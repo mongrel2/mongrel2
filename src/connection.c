@@ -219,7 +219,7 @@ int connection_http_to_proxy(State *state, int event, void *data)
     ProxyConnect *to_proxy = NULL;
     ProxyConnect *to_listener = NULL;
 
-    to_proxy = Proxy_connect_backend(proxy, conn->fd, conn->buf, BUFFER_SIZE, conn->nread);
+    to_proxy = Proxy_connect_backend(proxy, conn->fd);
 
     check(to_proxy, "Failed to connect to backend proxy server: %s:%d",
             bdata(proxy->server), proxy->port);
@@ -240,9 +240,9 @@ error:
 
 
 
-int connection_proxy_connected(State *state, int event, void *data)
+int connection_proxy_deliver(State *state, int event, void *data)
 {
-    TRACE(proxy_connected);
+    TRACE(proxy_deliver);
     Connection *conn = (Connection *)data;
     ProxyConnect *to_proxy = conn->proxy;
     int rc = 0;
@@ -252,6 +252,7 @@ int connection_proxy_connected(State *state, int event, void *data)
     int total_len = header_len + content_len;
 
     if(total_len < conn->nread) {
+        debug("!!! UNTESTED BRANCH: total=%d, nread=%d", total_len, conn->nread);
         // we read this request and potentially another
         // send the first request, then move the trailing bit down
         // TODO: do we need the to_proxy buf at all then?
@@ -261,22 +262,26 @@ int connection_proxy_connected(State *state, int event, void *data)
         // setting up for the next request to be read
         conn->nread -= total_len;
         memmove(conn->buf, conn->buf + total_len, conn->nread);
-
     } else if (total_len > conn->nread) {
         // we haven't read everything, need to do some streaming
-        // TODO: this is totally hosed, not going to work at all
         do {
-            rc = fdsend(to_proxy->proxy_fd, to_proxy->buffer, to_proxy->n);
+            // TODO: look at sendfile or splice to do this instead
+            rc = fdsend(to_proxy->proxy_fd, conn->buf, conn->nread);
+            check(rc == conn->nread, "Failed to write full request to proxy after %d read.", conn->nread);
 
-            if(rc != to_proxy->n) {
-                break;
+            total_len -= rc;
+            
+            if(total_len > 0) {
+                conn->nread = fdrecv(conn->fd, conn->buf, BUFFER_SIZE);
+                check(conn->nread > 0, "Failed to read from client more data with %d left.", total_len);
+            } else {
+                conn->nread = 0;
             }
-        } while((to_proxy->n = fdrecv(to_proxy->client_fd, to_proxy->buffer, to_proxy->size)) > 0);
-
+        } while(total_len > 0);
     } else {
         // not > and not < means ==, so we just write this and try again
-        rc = fdwrite(to_proxy->proxy_fd, conn->buf, total_len);
-        check(rc > 0, "Failed to write complete request to proxy.");
+        rc = fdsend(to_proxy->proxy_fd, conn->buf, total_len);
+        check(rc == total_len, "Failed to write complete request to proxy, wrote only: %d", rc);
         conn->nread = 0;
     }
 
@@ -410,7 +415,7 @@ StateActions CONN_ACTIONS = {
     .http_to_handler = connection_http_to_handler,
     .http_to_proxy = connection_http_to_proxy,
     .http_to_directory = connection_http_to_directory,
-    .proxy_connected = connection_proxy_connected,
+    .proxy_deliver = connection_proxy_deliver,
     .proxy_failed = connection_proxy_failed,
     .proxy_parse = connection_proxy_parse,
     .proxy_close = connection_proxy_close
@@ -534,3 +539,4 @@ error:
     return -1;
 
 }
+
