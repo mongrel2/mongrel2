@@ -4,6 +4,7 @@
 #include <assert.h>
 #include <adt/dict.h>
 #include <string.h>
+#include <headers.h>
 
 enum {
     MAX_HEADER_COUNT=128
@@ -41,7 +42,6 @@ static void http_version_cb(void *data, const char *at, size_t length)
     req->version = blk2bstr(at, length);
 }
 
-struct tagbstring HTTP_CONTENT_LENGTH = bsStatic("CONTENT_LENGTH");
 
 static void header_done_cb(void *data, const char *at, size_t length)
 {

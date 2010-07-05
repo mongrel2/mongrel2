@@ -5,6 +5,7 @@
 #include <adt/dict.h>
 #include <bstring.h>
 #include <handler.h>
+#include <headers.h>
 
 typedef struct Request {
     bstring request_method;
@@ -39,5 +40,13 @@ bstring Request_get(Request *parser, bstring field);
 #define Request_is_socket(R) ((R)->parser.socket_started == 1)
 
 #define Request_is_http(R) (!(Request_is_json(R) || Request_is_socket(R)))
+
+#define Request_get_action(R, T) ((R)->action->target.T)
+
+#define Request_set_action(R, V) ((R)->action = (V))
+
+#define Request_path(R) ((R)->path)
+
+#define Request_content_length(R) ((R)->parser.content_len)
 
 #endif

@@ -13,29 +13,9 @@
 #include <proxy.h>
 #include <assert.h>
 #include <sys/socket.h>
-
-
-struct tagbstring FLASH_RESPONSE = bsStatic("<?xml version=\"1.0\"?>"
-        "<!DOCTYPE cross-domain-policy SYSTEM \"http://www.macromedia.com/xml/dtds/cross-domain-policy.dtd\">"
-        "<cross-domain-policy> <allow-access-from domain=\"*\" to-ports=\"*\" /></cross-domain-policy>");
-
-
-struct tagbstring HTTP_404 = bsStatic("HTTP/1.1 404 Not Found\r\n"
-    "Content-Type: text/plain\r\n"
-    "Connection: close\r\n"
-    "Content-Length: 9\r\n"
-    "Server: Mongrel2\r\n\r\nNot Found");
-
-struct tagbstring HTTP_502 = bsStatic("HTTP/1.1 502 Bad Gateway\r\n"
-    "Content-Type: text/plain\r\n"
-    "Connection: close\r\n"
-    "Content-Length: 11\r\n"
-    "Server: Mongrel2\r\n\r\nBad Gateway");
+#include <response.h>
 
 struct tagbstring PING_PATTERN = bsStatic("@[a-z/]- {\"type\":%s*\"ping\"}");
-
-struct tagbstring HTTP_HOST = bsStatic("HOST");
-
 
 #define TRACE(C) debug("--> %s(%s:%d) %s:%d ", "" #C, State_event_name(event), event, __FUNCTION__, __LINE__)
 
@@ -111,9 +91,7 @@ int connection_send_socket_response(State *state, int event, void *data)
     TRACE(socket_req);
     Connection *conn = (Connection *)data;
 
-    int rc = fdsend(conn->fd, bdata(&FLASH_RESPONSE),
-            blength(&FLASH_RESPONSE) + 1);
-
+    int rc = Response_send_socket_policy(conn->fd);
     check(rc > 0, "Failed to write Flash socket response.");
 
     return RESP_SENT;
@@ -131,7 +109,7 @@ int connection_route_request(State *state, int event, void *data)
     Host *host = NULL;
     bstring host_name = NULL;
 
-    bstring path = conn->req->path;
+    bstring path = Request_path(conn->req);
 
     // TODO: pre-process these out since we'll have to look them up all the damn time
     bstring host_header = Request_get(conn->req, &HTTP_HOST);
@@ -149,7 +127,7 @@ int connection_route_request(State *state, int event, void *data)
     Backend *found = Host_match(conn->server->default_host, path);
     check(found, "Handler not found: %s", bdata(path));
 
-    conn->req->action = found;
+    Request_set_action(conn->req, found);
 
     bdestroy(host_name);
     return Connection_backend_event(found);
@@ -167,12 +145,13 @@ int connection_msg_to_handler(State *state, int event, void *data)
 {
     TRACE(msg_to_handler);
     Connection *conn = (Connection *)data;
-    Handler *handler = conn->req->action->target.handler;
+    Handler *handler = Request_get_action(conn->req, handler);
     int rc = 0;
 
     if(handler) {
         rc = Handler_deliver(handler->send_socket, conn->fd, conn->buf, conn->nread);
-        check(rc != -1, "Failed to deliver to handler: %s", bdata(conn->req->path));
+        check(rc != -1, "Failed to deliver to handler: %s", 
+                bdata(Request_path(conn->req)));
     }
 
     // TODO: do an error instead of just allowing NULL handlers
@@ -210,9 +189,9 @@ int connection_http_to_directory(State *state, int event, void *data)
 {
     TRACE(http_to_directory);
     Connection *conn = (Connection *)data;
-    bstring path = conn->req->path;
+    bstring path = Request_path(conn->req);
 
-    Dir *dir = conn->req->action->target.dir;
+    Dir *dir = Request_get_action(conn->req, dir);
 
     int rc = Dir_serve_file(dir, path, conn->fd);
 
@@ -221,7 +200,7 @@ int connection_http_to_directory(State *state, int event, void *data)
     return RESP_SENT;
 
 error:
-    fdsend(conn->fd, bdata(&HTTP_404), blength(&HTTP_404));
+    Response_send_error(conn->fd, &HTTP_404);
     return CLOSE;
 }
 
@@ -232,7 +211,7 @@ int connection_http_to_proxy(State *state, int event, void *data)
 {
     TRACE(http_to_proxy);
     Connection *conn = (Connection *)data;
-    Proxy *proxy = conn->req->action->target.proxy;
+    Proxy *proxy = Request_get_action(conn->req, proxy);
     conn->proxy = NULL;
     ProxyConnect *to_proxy = NULL;
     ProxyConnect *to_listener = NULL;
@@ -265,7 +244,7 @@ int connection_proxy_connected(State *state, int event, void *data)
     int rc = 0;
 
 
-    debug("CONTENT LENGTH: %d", conn->req->parser.content_len);
+    debug("CONTENT LENGTH: %d", Request_content_length(conn->req));
 
     /*
      * Now we have to change this so we base our send/recv loop not
@@ -299,8 +278,7 @@ int connection_proxy_failed(State *state, int event, void *data)
     TRACE(proxy_failed);
     Connection *conn = (Connection *)data;
 
-    int rc = fdsend(conn->fd, bdata(&HTTP_502), blength(&HTTP_502));
-    debug("SEND RC: %d", rc);
+    Response_send_error(conn->fd, &HTTP_502);
 
     ProxyConnect_destroy(conn->proxy);
 
