@@ -1,7 +1,13 @@
 #ifndef _register_h
 #define _register_h
 
-void Register_connect(int fd);
+enum {
+    CONN_TYPE_HTTP=1,
+    CONN_TYPE_MSG,
+    CONN_TYPE_SOCKET
+};
+
+void Register_connect(int fd, int conn_type);
 
 void Register_disconnect(int fd);
 

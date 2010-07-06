@@ -32,6 +32,22 @@ INSERT INTO route (path, host_id, target_id, target_type)
         "handler"
     );
 
+INSERT INTO handler (send_spec, send_ident, recv_spec, recv_ident)
+    VALUES (
+        'tcp://127.0.0.1:9997',
+        '54c6755b-9628-40a4-9a2d-cc82a816345e',
+        'tcp://127.0.0.1:9996',
+        ''
+    );
+
+INSERT INTO route (path, host_id, target_id, target_type)
+    VALUES (
+        "/handlertest", 
+        (select id from host where name="localhost"),
+        last_insert_rowid(),
+        "handler"
+    );
+
 INSERT INTO proxy (addr, port)
     VALUES 
     (

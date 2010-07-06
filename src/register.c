@@ -33,7 +33,7 @@ error:
     taskexitall(1);
 }
 
-void Register_connect(int fd)
+void Register_connect(int fd, int conn_type)
 {
     assert(registrations && "Call Register_init.");
 
@@ -43,7 +43,8 @@ void Register_connect(int fd)
 
     if(hn) hash_delete_free(registrations, hn);
 
-    check(hash_alloc_insert(registrations, (void *)(intptr_t)fd, NULL), "Cannot register fd, out of space.");
+    check(hash_alloc_insert(registrations, (void *)(intptr_t)fd, 
+                (void *)(intptr_t)conn_type), "Cannot register fd, out of space.");
 
     debug("Currently registered idents: %d", (int)hash_count(registrations));
 
@@ -90,9 +91,13 @@ error:
 
 int Register_exists(int fd)
 {
-    hash_lookup(registrations, (void *)(intptr_t)fd);
     assert(registrations && "Call Register_init.");
+    hnode_t *node = hash_lookup(registrations, (void *)(intptr_t)fd);
 
-    return hash_lookup(registrations, (void *)(intptr_t)fd) != NULL;
+    if(node) {
+        return (int)hnode_get(node);
+    } else {
+        return 0;
+    }
 }
 

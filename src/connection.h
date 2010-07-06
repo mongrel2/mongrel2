@@ -38,6 +38,7 @@ void Connection_accept(Connection *conn);
 void Connection_task(void *v);
 
 
+int Connection_deliver_raw(int to_fd, bstring buf);
 int Connection_deliver(int to_fd, bstring buf);
 
 int Connection_read_header(Connection *conn, Request *req);

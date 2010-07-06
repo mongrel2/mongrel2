@@ -8,6 +8,10 @@
 #include <headers.h>
 #include <host.h>
 
+enum {
+    REQUEST_EXTRA_HEADERS = 6
+};
+
 typedef struct Request {
     bstring request_method;
     bstring version;
@@ -18,8 +22,6 @@ typedef struct Request {
     Host *target_host;
     dict_t *headers;
     struct Backend *action;
-    int invalid_headers;
-
     http_parser parser;
 } Request;
 

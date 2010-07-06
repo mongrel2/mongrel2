@@ -12,8 +12,8 @@ char *test_Register_init()
 
 char *test_Register_connect_disconnect()
 {
-    Register_connect(12);
-    mu_assert(Register_exists(12) == 1, "Didn't register.");
+    Register_connect(12, CONN_TYPE_MSG);
+    mu_assert(Register_exists(12) == CONN_TYPE_MSG, "Didn't register.");
 
     Register_disconnect(12);
     mu_assert(Register_exists(12) == 0, "Didn't disconnect.");
@@ -23,8 +23,8 @@ char *test_Register_connect_disconnect()
 
 char *test_Register_ping()
 {
-    Register_connect(12232);
-    mu_assert(Register_exists(12232) == 1, "Didn't register.");
+    Register_connect(12232, CONN_TYPE_HTTP);
+    mu_assert(Register_exists(12232) == CONN_TYPE_HTTP, "Didn't register.");
 
     mu_assert(Register_ping(12232), "Ping didn't work.");
 

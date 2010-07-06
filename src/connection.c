@@ -43,7 +43,6 @@ int connection_open(int event, void *data)
     Connection *conn = (Connection *)data;
 
     if(!conn->registered) {
-        Register_connect(conn->fd);
         conn->registered = 1;
     }
 
@@ -167,11 +166,59 @@ error:
     return CLOSE;
 }
 
-
+#define B(K, V) bconcat(headers, K); bconchar(headers, '\1'); bconcat(headers, V); bconchar(headers, '\1')
 
 int connection_http_to_handler(int event, void *data)
 {
     TRACE(http_to_handler);
+    Connection *conn = (Connection *)data;
+    Request *req = conn->req;
+    bstring headers = bfromcstr("");
+    bstring result = NULL;
+    dnode_t *i = NULL;
+    Handler *handler = Request_get_action(req, handler);
+
+    // TODO: not too efficient with all this ram copying, but this gets it done
+
+    B(&HTTP_METHOD, req->request_method);
+    B(&HTTP_VERSION, req->version);
+    B(&HTTP_URI, req->uri);
+    B(&HTTP_PATH, req->path);
+    B(&HTTP_QUERY, req->query_string);
+    B(&HTTP_FRAGMENT, req->fragment);
+
+    for(i = dict_first(req->headers); i != NULL; i = dict_next(req->headers, i))
+    {
+        B(dnode_getkey(i), dnode_get(i));
+    }
+
+    result = bformat("%d:", blength(headers));
+    bconcat(result, headers); bconchar(result, ',');
+    bdestroy(headers); headers = NULL;
+
+    int header_len = Request_header_length(req);
+    int content_len = Request_content_length(req);
+
+    if(content_len > 0) {
+        if(header_len + content_len < BUFFER_SIZE) {
+            // the body fits in the buffer base
+            bcatblk(result, conn->buf + header_len, content_len);
+        } else {
+            // doesn't fit, just throw an error for now
+            Response_send_error(conn->fd, &HTTP_404);
+            sentinel("BODY TOO BIG FOR NOW");
+        }
+    }
+
+    Handler_deliver(handler->send_socket, conn->fd, bdata(result), blength(result));
+
+
+    bdestroy(result);
+    return REQ_SENT;
+
+error:
+    bdestroy(headers);
+    bdestroy(result);
     return CLOSE;
 }
 
@@ -349,10 +396,13 @@ int connection_identify_request(int event, void *data)
     TRACE(ident_req);
 
     if(Request_is_socket(conn->req)) {
+        Register_connect(conn->fd, CONN_TYPE_SOCKET);
         return SOCKET_REQ;
     } else if(Request_is_json(conn->req)) {
+        Register_connect(conn->fd, CONN_TYPE_MSG);
         return MSG_REQ;
     } else if(Request_is_http(conn->req)) {
+        Register_connect(conn->fd, CONN_TYPE_HTTP);
         return HTTP_REQ;
     } else {
         sentinel("Invalid request type, TELL ZED.");
@@ -458,7 +508,10 @@ error:
     return;
 }
 
-
+int Connection_deliver_raw(int to_fd, bstring buf)
+{
+    return fdsend(to_fd, bdata(buf), blength(buf));
+}
 
 int Connection_deliver(int to_fd, bstring buf)
 {

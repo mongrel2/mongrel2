@@ -65,6 +65,7 @@ void Handler_task(void *v)
     int rc = 0;
     int i = 0;
     Handler *handler = (Handler *)v;
+    bstring payload = NULL;
 
     taskname("Handler_task");
 
@@ -87,34 +88,57 @@ void Handler_task(void *v)
         
         for(i = 0; i < splits.cur_fd; i++) {
             int fd = splits.fds[i];
+            int conn_type = Register_exists(fd);
 
-            if(!Register_exists(fd)) {
-                log_err("Ident %d is no longer connected.", fd);
-                Handler_notify_leave(handler->send_socket, fd);
-            } else {
-                bstring payload = bTail(data, blength(data) - splits.last_pos);
-
-                // TODO: find out why this would be happening
-                if(payload->data[payload->slen - 1] == '\0') {
-                    btrunc(payload, blength(payload)-1);
-                } else if(payload->data[payload->slen] != '\0') {
-                    bconchar(payload, '\0');
-                }
-
-                if(Connection_deliver(fd, payload) == -1) {
-                    log_err("Error sending to listener %d, closing them.", fd);
-                    Register_disconnect(fd);
+            // TODO: this needs reworked, the Register_disconnects are dangerous
+            switch(conn_type) {
+                case 0:
+                    log_err("Ident %d is no longer connected.", fd);
                     Handler_notify_leave(handler->send_socket, fd);
-                }
+                    break;
 
-                bdestroy(payload);
+                case CONN_TYPE_MSG:
+                    payload = bTail(data, blength(data) - splits.last_pos);
+
+                    // TODO: find out why this would be happening
+                    if(payload->data[payload->slen - 1] == '\0') {
+                        btrunc(payload, blength(payload)-1);
+                    } else if(payload->data[payload->slen] != '\0') {
+                        bconchar(payload, '\0');
+                    }
+
+                    if(Connection_deliver(fd, payload) == -1) {
+                        log_err("Error sending to MSG listener %d, closing them.", fd);
+                        Register_disconnect(fd);
+                        Handler_notify_leave(handler->send_socket, fd);
+                    }
+
+                    bdestroy(payload);
+                    break;
+
+                case CONN_TYPE_HTTP:
+                    payload = bTail(data, blength(data) - splits.last_pos);
+                    if(Connection_deliver_raw(fd, payload) == -1) {
+                        log_err("Error sending raw message to HTTP listener %d, closing them.", fd);
+                        Register_disconnect(fd);
+                        Handler_notify_leave(handler->send_socket, fd);
+                    }
+                    bdestroy(payload);
+                    break;
+
+                default:
+                    log_err("Attempt to send to an invalid listener type.  Closing them.");
+                    Register_disconnect(fd);
+                    break;
             }
         }
     }
 
     return;
+
 error:
-    taskexitall(1);
+    log_err("HANDLER TASK DIED");
+    return;
 }
 
 int Handler_deliver(void *handler_socket, int from_fd, char *buffer, size_t len)
