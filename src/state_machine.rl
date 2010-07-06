@@ -41,10 +41,7 @@ Connection = (
             CLOSE @close -> final
         ),
 
-        MSGRouting: (
-            HANDLER @msg_to_handler -> Queueing |
-            DIRECTORY @msg_to_directory -> Responding 
-        ),
+        MSGRouting: ( HANDLER @msg_to_handler -> Queueing ),
 
         HTTPRouting: (
             HANDLER @http_to_handler -> Queueing |

@@ -23,7 +23,6 @@ StateActions test_actions = {
     .send_socket_response = test_action_cb,
     .route_request = test_action_cb,
     .msg_to_handler = test_action_cb,
-    .msg_to_directory = test_action_cb,
     .http_to_handler = test_action_cb,
     .http_to_proxy = test_action_cb,
     .http_to_directory = test_action_cb,

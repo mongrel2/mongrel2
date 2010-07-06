@@ -30,8 +30,11 @@ inline int Connection_backend_event(Backend *found)
         case BACKEND_PROXY:
             return PROXY;
         default:
-            return CLOSE;
+            sentinel("Invalid backend type given: %d", found->type);
     }
+
+error:
+    return CLOSE;
 }
 
 
@@ -54,6 +57,8 @@ int connection_error(State *state, int event, void *data)
     TRACE(error);
     Connection *conn = (Connection *)data;
 
+    debug("ERROR from fd: %d after event: %d", conn->fd, event);
+
     Register_disconnect(conn->fd);
     fdclose(conn->fd);
 
@@ -74,11 +79,9 @@ int connection_finish(State *state, int event, void *data)
 int connection_close(State *state, int event, void *data)
 {
     TRACE(close);
-
     Connection *conn = (Connection *)data;
 
     Register_disconnect(conn->fd);
-
     fdclose(conn->fd);
 
     return 0;
@@ -97,7 +100,6 @@ int connection_send_socket_response(State *state, int event, void *data)
     return RESP_SENT;
 
 error:
-
     return CLOSE;
 }
 
@@ -149,32 +151,20 @@ int connection_msg_to_handler(State *state, int event, void *data)
     Handler *handler = Request_get_action(conn->req, handler);
     int rc = 0;
 
-    if(handler) {
-        if(pattern_match(conn->buf, conn->nparsed, bdata(&PING_PATTERN))) {
-            Register_ping(conn->fd);
-        } else {
-            rc = Handler_deliver(handler->send_socket, conn->fd, conn->buf, conn->nread);
-            check(rc != -1, "Failed to deliver to handler: %s", 
-                    bdata(Request_path(conn->req)));
-        }
+    check(handler, "JSON request doesn't match any handler: %s", 
+            bdata(Request_path(conn->req)));
 
+    if(pattern_match(conn->buf, conn->nparsed, bdata(&PING_PATTERN))) {
+        Register_ping(conn->fd);
+    } else {
+        rc = Handler_deliver(handler->send_socket, conn->fd, conn->buf, conn->nread);
+        check(rc != -1, "Failed to deliver to handler: %s", 
+                bdata(Request_path(conn->req)));
     }
 
-    // TODO: do an error instead of just allowing NULL handlers
     return REQ_SENT;
 
 error:
-    return CLOSE;
-}
-
-
-
-int connection_msg_to_directory(State *state, int event, void *data)
-{
-    TRACE(msg_to_directory);
-
-    log_err("MSG to DIR currently not supported.");
-
     return CLOSE;
 }
 
@@ -197,13 +187,10 @@ int connection_http_to_directory(State *state, int event, void *data)
     Connection *conn = (Connection *)data;
     bstring path = Request_path(conn->req);
 
-    debug("GETTING FILE FOR PATH: %s", bdata(path));
-
     Dir *dir = Request_get_action(conn->req, dir);
 
     int rc = Dir_serve_file(dir, path, conn->fd);
-
-    check(rc == 0, "Failed to serve file.");
+    check(rc == 0, "Failed to serve file: %s", bdata(path));
 
     return RESP_SENT;
 
@@ -220,25 +207,19 @@ int connection_http_to_proxy(State *state, int event, void *data)
     TRACE(http_to_proxy);
     Connection *conn = (Connection *)data;
     Proxy *proxy = Request_get_action(conn->req, proxy);
-    conn->proxy = NULL;
-    ProxyConnect *to_proxy = NULL;
     ProxyConnect *to_listener = NULL;
 
-    to_proxy = Proxy_connect_backend(proxy, conn->fd);
-
-    check(to_proxy, "Failed to connect to backend proxy server: %s:%d",
+    conn->proxy = Proxy_connect_backend(proxy, conn->fd);
+    check(conn->proxy, "Failed to connect to backend proxy server: %s:%d",
             bdata(proxy->server), proxy->port);
 
-    to_listener = Proxy_sync_to_listener(to_proxy);
+    to_listener = Proxy_sync_to_listener(conn->proxy);
     check(to_listener, "Failed to make the listener side of proxy.");
-
-    // we keep this since we manage it
-    conn->proxy = to_proxy;
 
     return CONNECT;
 
 error:
-    if(to_listener && to_proxy) fdclose(to_proxy->proxy_fd);
+    if(to_listener && conn->proxy) fdclose(conn->proxy->proxy_fd);
     ProxyConnect_destroy(to_listener);
     return FAILED;
 }
@@ -252,15 +233,10 @@ int connection_proxy_deliver(State *state, int event, void *data)
     ProxyConnect *to_proxy = conn->proxy;
     int rc = 0;
 
-    int header_len = Request_header_length(conn->req);
-    int content_len = Request_content_length(conn->req);
-    int total_len = header_len + content_len;
+    int total_len = Request_header_length(conn->req) + Request_content_length(conn->req);
 
     if(total_len < conn->nread) {
         debug("!!! UNTESTED BRANCH: total=%d, nread=%d", total_len, conn->nread);
-        // we read this request and potentially another
-        // send the first request, then move the trailing bit down
-        // TODO: do we need the to_proxy buf at all then?
         rc = fdwrite(to_proxy->proxy_fd, conn->buf, total_len);
         check(rc > 0, "Failed to write request to proxy.");
 
@@ -275,7 +251,7 @@ int connection_proxy_deliver(State *state, int event, void *data)
             check(rc == conn->nread, "Failed to write full request to proxy after %d read.", conn->nread);
 
             total_len -= rc;
-            
+
             if(total_len > 0) {
                 conn->nread = fdrecv(conn->fd, conn->buf, BUFFER_SIZE);
                 check(conn->nread > 0, "Failed to read from client more data with %d left.", total_len);
@@ -314,7 +290,6 @@ int connection_proxy_parse(State *state, int event, void *data)
 
     // do a light find of this request compared to the last one
     if(!biseq(host, Request_get(conn->req, &HTTP_HOST))) {
-        // TODO: this totally won't work, need to probably find the new host and set it
         bdestroy(host);
         return PROXY;
     } else {
@@ -361,6 +336,7 @@ int connection_proxy_close(State *state, int event, void *data)
 
     fdclose(to_proxy->proxy_fd);
 
+    // this waits on the task in proxy.c that moves data from the proxy to the client
     taskbarrier(to_proxy->waiter);
 
     ProxyConnect_destroy(to_proxy);
@@ -415,7 +391,6 @@ StateActions CONN_ACTIONS = {
     .route_request = connection_route_request,
     .send_socket_response = connection_send_socket_response,
     .msg_to_handler = connection_msg_to_handler,
-    .msg_to_directory = connection_msg_to_directory,
     .http_to_handler = connection_http_to_handler,
     .http_to_proxy = connection_http_to_proxy,
     .http_to_directory = connection_http_to_directory,
@@ -479,13 +454,11 @@ void Connection_task(void *v)
         check(next > EVENT_START && next < EVENT_END, "!!! Invalid next event[%d]: %d", i, next);
     }
 
-    debug("CONNECTION DONE");
     State_exec(&conn->state, CLOSE, (void *)conn);
     return;
 
 error:
     State_exec(&conn->state, CLOSE, (void *)conn);
-    debug("!!! CONNECTION ERROR.");
     return;
 }
 
@@ -497,6 +470,7 @@ int Connection_deliver(int to_fd, bstring buf)
 
     bstring b64_buf = bfromcstralloc(blength(buf) * 2, "");
 
+    // TODO: ditch this for the bstring one, after getting rid of the stupid \n in the bstring one
     b64_buf->slen = b64_encode(bdata(buf), blength(buf), bdata(b64_buf), blength(buf) * 2 - 1); 
     b64_buf->data[b64_buf->slen] = '\0';
 
@@ -521,7 +495,7 @@ int Connection_read_header(Connection *conn, Request *req)
 
     Request_start(req);
 
-     while(!finished && conn->nread < BUFFER_SIZE) {
+    while(!finished && conn->nread < BUFFER_SIZE) {
         n = fdread(conn->fd, conn->buf, BUFFER_SIZE - 1 - conn->nread);
         check(n > 0, "Failed to read from socket after %d read: %d parsed.",
                 conn->nread, (int)conn->nparsed);
@@ -541,7 +515,7 @@ int Connection_read_header(Connection *conn, Request *req)
     conn->buf[BUFFER_SIZE] = '\0';  // always cap it off
 
     Request_dump(req);
-    
+
     return conn->nread; 
 
 error:

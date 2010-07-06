@@ -15,7 +15,6 @@ typedef struct StateActions {
     state_action_cb route_request;
     state_action_cb send_socket_response;
     state_action_cb msg_to_handler;
-    state_action_cb msg_to_directory;
     state_action_cb http_to_handler;
     state_action_cb http_to_proxy;
     state_action_cb http_to_directory;

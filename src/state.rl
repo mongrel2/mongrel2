@@ -23,7 +23,6 @@
     action send_socket_response { CALL(send_socket_response, fc); }
     action route_request { CALL(route_request, fc); }
     action msg_to_handler { CALL(msg_to_handler, fc); }
-    action msg_to_directory { CALL(msg_to_directory, fc); }
 
     action http_to_handler { CALL(http_to_handler, fc); }
     action http_to_proxy { CALL(http_to_proxy, fc); fgoto Proxy; }
