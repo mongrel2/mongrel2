@@ -7,7 +7,7 @@
 #include <events.h>
 #include <assert.h>
 
-#define CALL(A, C) if(state->actions && state->actions->A) next = state->actions->A(state, C, data)
+#define CALL(A, C) if(state->actions && state->actions->A) next = state->actions->A(C, data)
 
 
 #line 51 "src/state.rl"

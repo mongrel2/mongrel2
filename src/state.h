@@ -3,7 +3,7 @@
 
 struct State;
 
-typedef int (*state_action_cb)(struct State *state, int event, void *data);
+typedef int (*state_action_cb)(int event, void *data);
 
 typedef struct StateActions {
     state_action_cb open;

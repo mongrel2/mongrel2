@@ -37,7 +37,7 @@ error:
 }
 
 
-int connection_open(State *state, int event, void *data)
+int connection_open(int event, void *data)
 {
     TRACE(open);
     Connection *conn = (Connection *)data;
@@ -51,7 +51,7 @@ int connection_open(State *state, int event, void *data)
 }
 
 
-int connection_error(State *state, int event, void *data)
+int connection_error(int event, void *data)
 {
     TRACE(error);
     Connection *conn = (Connection *)data;
@@ -65,7 +65,7 @@ int connection_error(State *state, int event, void *data)
 }
 
 
-int connection_finish(State *state, int event, void *data)
+int connection_finish(int event, void *data)
 {
     TRACE(finish);
 
@@ -75,7 +75,7 @@ int connection_finish(State *state, int event, void *data)
 }
 
 
-int connection_close(State *state, int event, void *data)
+int connection_close(int event, void *data)
 {
     TRACE(close);
     Connection *conn = (Connection *)data;
@@ -88,7 +88,7 @@ int connection_close(State *state, int event, void *data)
 
 
 
-int connection_send_socket_response(State *state, int event, void *data)
+int connection_send_socket_response(int event, void *data)
 {
     TRACE(socket_req);
     Connection *conn = (Connection *)data;
@@ -103,7 +103,7 @@ error:
 }
 
 
-int connection_route_request(State *state, int event, void *data)
+int connection_route_request(int event, void *data)
 {
     TRACE(route);
     Connection *conn = (Connection *)data;
@@ -143,7 +143,7 @@ error:
 
 
 
-int connection_msg_to_handler(State *state, int event, void *data)
+int connection_msg_to_handler(int event, void *data)
 {
     TRACE(msg_to_handler);
     Connection *conn = (Connection *)data;
@@ -169,17 +169,15 @@ error:
 
 
 
-int connection_http_to_handler(State *state, int event, void *data)
+int connection_http_to_handler(int event, void *data)
 {
     TRACE(http_to_handler);
-
-
     return CLOSE;
 }
 
 
 
-int connection_http_to_directory(State *state, int event, void *data)
+int connection_http_to_directory(int event, void *data)
 {
     TRACE(http_to_directory);
     Connection *conn = (Connection *)data;
@@ -200,7 +198,7 @@ error:
 
 
 
-int connection_http_to_proxy(State *state, int event, void *data)
+int connection_http_to_proxy(int event, void *data)
 {
     TRACE(http_to_proxy);
     Connection *conn = (Connection *)data;
@@ -224,7 +222,7 @@ error:
 
 
 
-int connection_proxy_deliver(State *state, int event, void *data)
+int connection_proxy_deliver(int event, void *data)
 {
     TRACE(proxy_deliver);
     Connection *conn = (Connection *)data;
@@ -271,7 +269,7 @@ error:
 }
 
 
-int connection_proxy_parse(State *state, int event, void *data)
+int connection_proxy_parse(int event, void *data)
 {
     TRACE(proxy_parse);
 
@@ -313,7 +311,7 @@ error:
 
 
 
-int connection_proxy_failed(State *state, int event, void *data)
+int connection_proxy_failed(int event, void *data)
 {
     TRACE(proxy_failed);
     Connection *conn = (Connection *)data;
@@ -326,7 +324,7 @@ int connection_proxy_failed(State *state, int event, void *data)
 }
 
 
-int connection_proxy_close(State *state, int event, void *data)
+int connection_proxy_close(int event, void *data)
 {
     TRACE(proxy_close);
 
@@ -344,7 +342,7 @@ int connection_proxy_close(State *state, int event, void *data)
 
 
 
-int connection_identify_request(State *state, int event, void *data)
+int connection_identify_request(int event, void *data)
 {
     Connection *conn = (Connection *)data;
 
@@ -366,7 +364,7 @@ error:
 
 
 
-int connection_parse(State *state, int event, void *data)
+int connection_parse(int event, void *data)
 {
     Connection *conn = (Connection *)data;
     conn->nread = 0;

@@ -5,7 +5,7 @@
 
 FILE *LOG_FILE = NULL;
 
-int test_action_cb(State *state, int event, void *data)
+int test_action_cb(int event, void *data)
 {
     int i = (int)(intptr_t)data;
 
