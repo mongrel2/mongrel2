@@ -80,7 +80,6 @@ int connection_close(int event, void *data)
     Connection *conn = (Connection *)data;
 
     Register_disconnect(conn->fd);
-    fdclose(conn->fd);
 
     return 0;
 }
