@@ -95,7 +95,7 @@ int Register_exists(int fd)
     hnode_t *node = hash_lookup(registrations, (void *)(intptr_t)fd);
 
     if(node) {
-        return (int)hnode_get(node);
+        return (int)(intptr_t)hnode_get(node);
     } else {
         return 0;
     }

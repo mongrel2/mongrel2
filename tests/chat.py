@@ -54,8 +54,9 @@ while True:
             users[ident] = data['user']
         elif data['type'] == "msg":
             idiots = open("idiots").read()
-
-            if users.get(ident, "XXX") in idiots or data['user'] in idiots:
+            who = users.get(ident, "XXX")
+            dwho = data.get('user', 'XXX')
+            if who in idiots or dwho in idiots:
                 print "IDIOT:", ident
                 send(ident, data)
             else:

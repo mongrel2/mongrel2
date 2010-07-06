@@ -39,6 +39,8 @@ while True:
     response = "<pre>\nIDENT:%r\nHEADERS:%r\nBODY:%r</pre>" % (req.ident, req.headers,
                                                   req.body)
 
+    print response, "\n"
+
     resp.send(req.ident + " HTTP/1.1 200 OK\r\nContent-Length: %d\r\n\r\n%s" % (
         len(response), response))
 
