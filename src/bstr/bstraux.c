@@ -314,12 +314,6 @@ bstring out;
 
 	out = bfromcstr ("");
 	for (i=0; i + 2 < b->slen; i += 3) {
-		if (i && ((i % 57) == 0)) {
-			if (bconchar (out, (char) '\015') < 0 || bconchar (out, (char) '\012') < 0) {
-				bdestroy (out);
-				return NULL;
-			}
-		}
 		c0 = b->data[i] >> 2;
 		c1 = ((b->data[i] << 4) |
 		      (b->data[i+1] >> 4)) & 0x3F;
@@ -330,13 +324,6 @@ bstring out;
 			bconchar (out, b64ETable[c1]) < 0 ||
 			bconchar (out, b64ETable[c2]) < 0 ||
 			bconchar (out, b64ETable[c3]) < 0) {
-			bdestroy (out);
-			return NULL;
-		}
-	}
-
-	if (i && ((i % 57) == 0)) {
-		if (bconchar (out, (char) '\015') < 0 || bconchar (out, (char) '\012') < 0) {
 			bdestroy (out);
 			return NULL;
 		}

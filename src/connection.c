@@ -174,7 +174,6 @@ int connection_http_to_handler(State *state, int event, void *data)
 {
     TRACE(http_to_handler);
 
-    log_err("HTTP to HANDLER is not supported yet.");
 
     return CLOSE;
 }
@@ -468,14 +467,8 @@ int Connection_deliver(int to_fd, bstring buf)
 {
     int rc = 0;
 
-    bstring b64_buf = bfromcstralloc(blength(buf) * 2, "");
-
-    // TODO: ditch this for the bstring one, after getting rid of the stupid \n in the bstring one
-    b64_buf->slen = b64_encode(bdata(buf), blength(buf), bdata(b64_buf), blength(buf) * 2 - 1); 
-    b64_buf->data[b64_buf->slen] = '\0';
-
+    bstring b64_buf = bBase64Encode(buf);
     rc = fdsend(to_fd, bdata(b64_buf), blength(b64_buf)+1);
-
     check(rc == blength(b64_buf)+1, "Failed to write entire message to conn %d", to_fd);
 
     bdestroy(b64_buf);
