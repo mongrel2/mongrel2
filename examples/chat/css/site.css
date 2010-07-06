@@ -1,0 +1,69 @@
+body {
+    font-family: Gill Sans, sans-serif;
+}
+
+#header {
+    font-family: monospace;
+}
+
+#header h1 {
+    font-size: 2em;
+}
+
+#sidebar {
+    text-align: right;
+}
+
+#sidebar dt {
+    font-size: 1.25em;
+    font-family: monospace;
+}
+
+#sidebar dd {
+    font-style: italic;
+}
+
+a {
+    color: #999;
+    text-decoration: none;
+}
+
+h1 {
+    font-size: 2.5em;
+}
+
+h1 a {
+    color: #333;
+}
+
+h2 a {
+    color: #333;
+}
+
+h3 a {
+    color: #333;
+}
+
+a:hover {
+    color: #333;
+}
+
+
+em { color: red;}
+
+#chatlog { 
+    font-size: 14px;
+    font-family: helvetica;
+    padding: 5px;
+    border: 1px solid black;
+    overflow-y: auto;
+    height: 400px;
+    background: #fff; 
+    margin-bottom: 0.5em;
+}
+
+#msginput { width: 490px; padding: 4px; border: 1px solid gray; }
+
+#sendmsg { width: 100px; }
+
+#chat { float: left; margin-right: 15px;  }
