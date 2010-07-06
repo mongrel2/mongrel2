@@ -6,7 +6,6 @@
 #include <task/task.h>
 #include <events.h>
 #include <register.h>
-#include <b64/b64.h>
 #include <handler.h>
 #include <pattern.h>
 #include <dir.h>
