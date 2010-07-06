@@ -150,9 +150,14 @@ int connection_msg_to_handler(State *state, int event, void *data)
     int rc = 0;
 
     if(handler) {
-        rc = Handler_deliver(handler->send_socket, conn->fd, conn->buf, conn->nread);
-        check(rc != -1, "Failed to deliver to handler: %s", 
-                bdata(Request_path(conn->req)));
+        if(pattern_match(conn->buf, conn->nparsed, bdata(&PING_PATTERN))) {
+            Register_ping(conn->fd);
+        } else {
+            rc = Handler_deliver(handler->send_socket, conn->fd, conn->buf, conn->nread);
+            check(rc != -1, "Failed to deliver to handler: %s", 
+                    bdata(Request_path(conn->req)));
+        }
+
     }
 
     // TODO: do an error instead of just allowing NULL handlers
@@ -530,6 +535,8 @@ int Connection_read_header(Connection *conn, Request *req)
         check(finished != -1, "Error in parsing: %d, bytes: %d, value: %.*s", 
                 finished, conn->nread, conn->nread, conn->buf);
     }
+
+    check(finished, "HEADERS and/or request too big.");
 
     conn->buf[BUFFER_SIZE] = '\0';  // always cap it off
 

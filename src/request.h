@@ -43,7 +43,7 @@ bstring Request_get(Request *parser, bstring field);
 
 #define Request_is_http(R) (!(Request_is_json(R) || Request_is_socket(R)))
 
-#define Request_get_action(R, T) ((R)->action->target.T)
+#define Request_get_action(R, T) ((R)->action ? (R)->action->target.T : NULL)
 
 #define Request_set_action(R, V) ((R)->action = (V))
 
