@@ -57,7 +57,7 @@ Connection = (
             CLOSE @close -> final
         )
 
-        ) %eof(finish) <err(error);
+    ) %eof(finish) <err(error);
 
 main := (Connection)*;
 

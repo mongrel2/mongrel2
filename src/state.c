@@ -10,7 +10,7 @@
 #define CALL(A, C) if(state->actions && state->actions->A) next = state->actions->A(C, data)
 
 
-#line 51 "src/state.rl"
+#line 53 "src/state.rl"
 
 
 
@@ -25,7 +25,7 @@ static const int StateActions_en_main_Connection_Idle = 2;
 static const int StateActions_en_main_Connection_HTTPRouting = 4;
 
 
-#line 54 "src/state.rl"
+#line 56 "src/state.rl"
 
 int State_init(State *state, StateActions *actions)
 {
@@ -37,7 +37,7 @@ int State_init(State *state, StateActions *actions)
 	 state->cs = StateActions_start;
 	}
 
-#line 60 "src/state.rl"
+#line 62 "src/state.rl"
     return 1;
 }
 
@@ -46,7 +46,7 @@ inline int State_invariant(State *state, int event)
     if ( state->cs == 
 #line 2 "src/state.c"
 0
-#line 65 "src/state.rl"
+#line 67 "src/state.rl"
  ) {
         return -1;
     }
@@ -54,7 +54,7 @@ inline int State_invariant(State *state, int event)
     if ( state->cs >= 
 #line 2 "src/state.c"
 14
-#line 69 "src/state.rl"
+#line 71 "src/state.rl"
  ) {
         return 1;
     }
@@ -258,13 +258,15 @@ case 11:
 tr16:
 #line 41 "src/state.rl"
 	{
+        CALL(proxy_close, (*p));
         p--;
         {goto st2;} 
     }
 	goto st12;
 tr17:
-#line 45 "src/state.rl"
+#line 46 "src/state.rl"
 	{
+        CALL(proxy_close, (*p));
         p--;
         {goto st4;} 
     }
@@ -338,7 +340,7 @@ case 13:
 	_out: {}
 	}
 
-#line 87 "src/state.rl"
+#line 89 "src/state.rl"
 
     return next;
 }
