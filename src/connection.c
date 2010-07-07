@@ -374,14 +374,20 @@ int connection_proxy_close(int event, void *data)
 {
     TRACE(proxy_close);
 
-    ProxyConnect *to_proxy = ((Connection *)data)->proxy;
+    Connection *conn = (Connection *)data;
 
-    fdclose(to_proxy->proxy_fd);
+    if(conn->proxy) {
+        ProxyConnect *to_proxy = conn->proxy;
 
-    // this waits on the task in proxy.c that moves data from the proxy to the client
-    taskbarrier(to_proxy->waiter);
+        fdclose(to_proxy->proxy_fd);
 
-    ProxyConnect_destroy(to_proxy);
+        // this waits on the task in proxy.c that moves data from the proxy to the client
+        taskbarrier(to_proxy->waiter);
+
+        ProxyConnect_destroy(to_proxy);
+
+        conn->proxy = NULL;
+    }
 
     return CLOSE;
 }
