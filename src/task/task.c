@@ -22,6 +22,9 @@ int        nalltask;
 static char *argv0;
 static    void        contextswitch(Context *from, Context *to);
 
+// TODO: make this configurable for the status
+const char *STATUS_FILE="/tmp/mongrel2_status.txt";
+
 
 static void
 taskstart(uint y, uint x)
@@ -279,10 +282,17 @@ taskinfo(int s)
     int i;
     Task *t;
     char *extra;
+    int fd = 0;
 
     // TODO: create a generic status module for stuff like this, web accessible
-    
-    fprint(2, "task list:\n");
+  
+    fd = open(STATUS_FILE, O_WRONLY | O_CREAT);
+    if(fd < 0) {
+        fprint(2, "Error, could not open status file.");
+        fd = 2;
+    }
+
+    fprint(fd, "task list:\n");
     for(i=0; i<nalltask; i++){
         t = alltask[i];
         if(t == taskrunning)
@@ -291,7 +301,7 @@ taskinfo(int s)
             extra = " (ready)";
         else
             extra = "";
-        fprint(2, "%6d%c %-20s %s%s\n", 
+        fprint(fd, "%6d%c %-20s %s%s\n", 
             t->id, t->system ? 's' : ' ', 
             t->name, t->state, extra);
     }
