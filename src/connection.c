@@ -50,19 +50,6 @@ int connection_open(int event, void *data)
 }
 
 
-int connection_error(int event, void *data)
-{
-    TRACE(error);
-    Connection *conn = (Connection *)data;
-
-    debug("ERROR from fd: %d after event: %d", conn->fd, event);
-
-    Register_disconnect(conn->fd);
-    fdclose(conn->fd);
-
-    return CLOSE;
-}
-
 
 int connection_finish(int event, void *data)
 {
@@ -71,17 +58,6 @@ int connection_finish(int event, void *data)
     Connection_destroy((Connection *)data);
 
     return CLOSE;
-}
-
-
-int connection_close(int event, void *data)
-{
-    TRACE(close);
-    Connection *conn = (Connection *)data;
-
-    Register_disconnect(conn->fd);
-
-    return 0;
 }
 
 
@@ -391,6 +367,40 @@ int connection_proxy_close(int event, void *data)
 
     return CLOSE;
 }
+
+int connection_close(int event, void *data)
+{
+    TRACE(close);
+    Connection *conn = (Connection *)data;
+
+    if(conn->proxy) {
+        connection_proxy_close(event, data);
+    }
+
+    Register_disconnect(conn->fd);
+
+    return 0;
+}
+
+
+
+int connection_error(int event, void *data)
+{
+    TRACE(error);
+    Connection *conn = (Connection *)data;
+
+    if(conn->proxy) {
+        connection_proxy_close(event, data);
+    }
+
+    debug("ERROR from fd: %d after event: %d", conn->fd, event);
+
+    Register_disconnect(conn->fd);
+    fdclose(conn->fd);
+
+    return CLOSE;
+}
+
 
 
 

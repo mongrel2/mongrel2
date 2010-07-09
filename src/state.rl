@@ -39,11 +39,12 @@
 
 ### exit modes for proxy
     action proxy_exit_idle {
-        CALL(proxy_close, fc);
+        debug("PROXY_EXIT_IDLE!");
         fhold;
         fgoto Connection::Idle; 
     }
     action proxy_exit_routing {
+        debug("PROXY_EXIT_ROUTING!");
         CALL(proxy_close, fc);
         fhold;
         fgoto Connection::HTTPRouting; 
