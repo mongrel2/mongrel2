@@ -7,7 +7,7 @@
 #include <headers.h>
 
 enum {
-    MAX_HEADER_COUNT=128
+    MAX_HEADER_COUNT=128 * 10
 };
 
 
@@ -141,12 +141,11 @@ void Request_start(Request *req)
     }
 }
 
-int Request_parse(Request *req, char *buf, size_t nread,
-        size_t *out_nparsed)
+int Request_parse(Request *req, char *buf, size_t nread, size_t *out_nparsed)
 {
     assert(req && "NULL pointer error.");
 
-    *out_nparsed = http_parser_execute(&(req->parser), buf, nread, 0);
+    *out_nparsed = http_parser_execute(&(req->parser), buf, nread, *out_nparsed);
     
     int finished =  http_parser_finish(&(req->parser));
 

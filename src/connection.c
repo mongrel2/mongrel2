@@ -553,26 +553,28 @@ int Connection_read_header(Connection *conn, Request *req)
 
     Request_start(req);
 
-    while(!finished && conn->nread < BUFFER_SIZE) {
+    conn->buf[BUFFER_SIZE] = '\0';  // always cap it off
+
+    while(!finished && conn->nread < BUFFER_SIZE - 1) {
         n = fdread(conn->fd, conn->buf, BUFFER_SIZE - 1 - conn->nread);
         check(n > 0, "Failed to read from socket after %d read: %d parsed.",
                 conn->nread, (int)conn->nparsed);
 
         conn->nread += n;
 
+        check(conn->buf[BUFFER_SIZE] == '\0', "Trailing \\0 was clobbered, buffer overflow potentially.");
+
         check(conn->nread < BUFFER_SIZE, "Read too much, FATAL error: nread: %d, buffer size: %d", conn->nread, BUFFER_SIZE);
 
         finished = Request_parse(req, conn->buf, conn->nread, &conn->nparsed);
 
-        check(finished != -1, "Error in parsing: %d, bytes: %d, value: %.*s", 
-                finished, conn->nread, conn->nread, conn->buf);
-    }
+        check(finished != -1, "Error in parsing: %d, bytes: %d, value: %.*s, parsed: %d", 
+                finished, conn->nread, conn->nread, conn->buf, conn->nparsed);
 
+    }
     check(finished, "HEADERS and/or request too big.");
 
-    conn->buf[BUFFER_SIZE] = '\0';  // always cap it off
-
-    Request_dump(req);
+    // Request_dump(req);
 
     return conn->nread; 
 
