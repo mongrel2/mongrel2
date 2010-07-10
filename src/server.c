@@ -55,7 +55,7 @@ void handlers_receive_start(void *value, void *data)
     if(route) { 
         Backend *found = (Backend *)route->data;
 
-        // TODO: make this optional
+        // TODO: make whether the handler is loaded immediately optional
         if(found->type == BACKEND_HANDLER) {
             debug("LOADING BACKEND %s", bdata(route->pattern));
             taskcreate(Handler_task, found->target.handler, HANDLER_STACK);
@@ -107,7 +107,7 @@ void Server_set_default_host(Server *srv, Host *host)
 
 
 
-Host *Server_match(Server *srv, bstring target)
+Host *Server_match_backend(Server *srv, bstring target)
 {
     // TODO: figure out the best matching policy, longest? first? all?
     Route *found = NULL;

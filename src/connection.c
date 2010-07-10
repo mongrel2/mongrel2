@@ -91,7 +91,7 @@ int connection_route_request(int event, void *data)
     host_name = bHead(host_header, bstrchr(host_header, ':'));
 
     if(host_name) {
-        host = Server_match(conn->server, host_name);
+        host = Server_match_backend(conn->server, host_name);
         // TODO: find out if this should be an error or not
         check(host, "Request for a host we don't have registered: %s", bdata(host_name));
     } else {
@@ -99,7 +99,7 @@ int connection_route_request(int event, void *data)
     }
     check(host, "Failed to resolve a host for the request, set a default host.");
 
-    Backend *found = Host_match(host, path);
+    Backend *found = Host_match_backend(host, path);
     check(found, "Handler not found: %s", bdata(path));
 
     Request_set_action(conn->req, found);
@@ -314,7 +314,7 @@ int connection_proxy_parse(int event, void *data)
         bdestroy(host);
 
         // query up the path to see if it gets the current request action
-        Backend *found = Host_match(target_host, Request_path(conn->req));
+        Backend *found = Host_match_backend(target_host, Request_path(conn->req));
         check(found, "Didn't find next target in proxy chain request.");
 
         if(found != req_action) {
@@ -574,7 +574,7 @@ int Connection_read_header(Connection *conn, Request *req)
     }
     check(finished, "HEADERS and/or request too big.");
 
-    // Request_dump(req);
+    Request_dump(req);
 
     return conn->nread; 
 

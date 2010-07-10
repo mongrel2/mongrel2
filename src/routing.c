@@ -135,3 +135,15 @@ list_t *RouteMap_match_suffix(RouteMap *map, bstring target)
     return results;
 }
 
+
+Route *RouteMap_simple_prefix_match(RouteMap *map, bstring target)
+{ 
+    Route *route = tst_search_prefix(map->routes, bdata(target), blength(target));
+
+    if(route) {
+        debug("Found simple prefix: %s", bdata(route->pattern));
+        return bstring_match(target, route->pattern) ? route : NULL;
+    } else {
+        return NULL;
+    }
+}

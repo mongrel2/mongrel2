@@ -61,24 +61,21 @@ error:
 }
 
 
-Backend *Host_match(Host *host, bstring target)
+Backend *Host_match_backend(Host *host, bstring target)
 {
-    // TODO: figure out the best matching policy, longest? first? all?
     Route *found = NULL;
 
     list_t *results = RouteMap_match(host->routes, target);
 
-    lnode_t *n = list_first(results);
-    if(n) {
-        found = lnode_get(n);
-        assert(found && "RouteMap returned a list node with NULL.");
-        debug("Found backend at %s", bdata(found->pattern));
+    if(list_count(results) > 0) {
+        found = lnode_get(list_first(results));
     }
 
     list_destroy_nodes(results);
     list_destroy(results);
 
     if(found) {
+        debug("Found backend at %s", bdata(found->pattern));
         assert(found->data && "Invalid value for stored route.");
         return found->data;
     } else {

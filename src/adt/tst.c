@@ -37,7 +37,7 @@ list_t *tst_collect(tst_t *root, const char *s, size_t len, tst_collect_test_cb 
         } else if (s[i] == p->splitchar) {
             i++;
             if(i < len) {
-                last = p;
+                if(p->value) last = p;
                 p = p->equal; 
             }
         } else {
@@ -58,7 +58,7 @@ void *tst_search_suffix(tst_t *root, const char *s, size_t len)
     if(len == 0) return NULL;
 
     tst_t *p = root;
-    tst_t *last = p;
+    tst_t *last = NULL;
     int i = len-1;
 
     while(i > 0 && p) {
@@ -67,13 +67,46 @@ void *tst_search_suffix(tst_t *root, const char *s, size_t len)
         } else if (s[i] == p->splitchar) {
             i--;
             if(i >= 0) {
-                last = p;
+                if(p->value) last = p;
                 p = p->equal;
             }
         } else {
             p = p->high; 
         }
     }
+
+    if(p) {
+        return p->value;
+    } else if(last) {
+        return last->value;
+    } else {
+        return NULL;
+    }
+}
+
+void *tst_search_prefix(tst_t *root, const char *s, size_t len)
+{
+    if(len == 0) return NULL;
+
+    tst_t *p = root;
+    tst_t *last = NULL;
+    int i = 0;
+
+    while(i < len && p) {
+        debug("p: %p, last: %p, s[i]: %c", p, last, s[i]);
+        if (s[i] < p->splitchar) {
+            p = p->low; 
+        } else if (s[i] == p->splitchar) {
+            i++;
+            if(i < len) {
+                if(p->value) last = p;
+                p = p->equal;
+            }
+        } else {
+            p = p->high; 
+        }
+    }
+    debug("p: %p, last: %p, s[i]: %c", p, last, s[i]);
 
     if(p) {
         return p->value;
@@ -107,6 +140,7 @@ void *tst_search(tst_t *root, const char *s, size_t len)
         return NULL; 
     }
 }
+
 
 tst_t *tst_insert_base(tst_t *root, tst_t *p, const char *s, size_t len, void *value)
 {

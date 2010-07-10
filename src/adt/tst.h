@@ -23,6 +23,8 @@ void *tst_search_suffix(tst_t *root, const char *s, size_t len);
 
 void *tst_search(tst_t *root, const char *s, size_t len);
 
+void *tst_search_prefix(tst_t *root, const char *s, size_t len);
+
 tst_t *tst_insert(tst_t *p, const char *s, size_t len, void *value);
 
 // TODO: should pass in the key as well

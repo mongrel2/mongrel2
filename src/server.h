@@ -30,6 +30,6 @@ int Server_add_host(Server *srv, bstring pattern, Host *host);
 
 void Server_set_default_host(Server *srv, Host *host);
 
-Host *Server_match(Server *srv, bstring target);
+Host *Server_match_backend(Server *srv, bstring target);
 
 #endif
