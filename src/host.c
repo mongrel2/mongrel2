@@ -65,14 +65,7 @@ Backend *Host_match_backend(Host *host, bstring target)
 {
     Route *found = NULL;
 
-    list_t *results = RouteMap_match(host->routes, target);
-
-    if(list_count(results) > 0) {
-        found = lnode_get(list_first(results));
-    }
-
-    list_destroy_nodes(results);
-    list_destroy(results);
+    found = RouteMap_simple_prefix_match(host->routes, target);
 
     if(found) {
         debug("Found backend at %s", bdata(found->pattern));
