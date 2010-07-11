@@ -101,7 +101,7 @@ int Unixy_remove_dead_pidfile(bstring pid_path)
 
     debug("Process %d is not running anymore, so removing PID file %s.", pid, bdata(pid_path));
 
-    rc = unlink(bdata(pid_path));
+    rc = unlink((const char *)pid_path->data);
     check(rc == 0, "Failed to unline the PID file %s, man you're so hosed I give up.", bdata(pid_path));
 
     return 0;
@@ -135,6 +135,7 @@ int Unixy_pid_file(bstring path)
     check(rc > 0, "Failed to write PID to file %s", pid_path); 
    
 
+    fclose(pid_file);
     return 0;
 
 error:
@@ -142,13 +143,15 @@ error:
         free(pid_path);
         pid_path = NULL;
     }
+
+    if(pid_file) fclose(pid_file);
     return -1;
 }
 
 
 int Unixy_daemonize()
 {
-    int rc = daemon(0, 0);
+    int rc = daemon(0, 1);
     check(rc == 0, "Failed to daemonize.");
 
     return 0;
