@@ -4,7 +4,6 @@
 #include <string.h>
 #include <config/config.h>
 #include <adt/list.h>
-#include <unistd.h>
 #include <config/db.h>
 
 
@@ -24,13 +23,6 @@ void taskmain(int argc, char **argv)
     check(Config_load_mimetypes() == 0, "Failed to load mime types.");
 
     Server *srv = lnode_get(list_first(servers));
-
-    char wd[MAX_DIR_PATH];
-
-    // TODO: turn this into the official security measures stuff
-    if(chroot(getcwd(wd, MAX_DIR_PATH)) != 0) {
-        log_err("Can't chroot to current working dir, rerun as root.");
-    }
 
     DB_close();
 
