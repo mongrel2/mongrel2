@@ -81,9 +81,7 @@ int Unixy_still_running(bstring pid_path, pid_t *pid)
     check(rc == 0, "You don't have a /proc directory, probably OSX.");
 
     proc_file = bformat("/proc/%d", *pid);
-    debug("Looking for %s", bdata(proc_file));
     rc = stat((const char *)proc_file->data, &sb);
-    debug("stat of that returned %d", rc);
 
     bdestroy(proc_file);
     return rc == 0;
@@ -117,7 +115,7 @@ error:
 
 int Unixy_pid_file(bstring path)
 {
-    FILE *pid_file;
+    FILE *pid_file = NULL;
     int rc = 0;
     struct stat sb;
     char *pid_path = NULL;

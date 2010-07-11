@@ -43,6 +43,9 @@ void taskmain(int argc, char **argv)
         rc = Unixy_drop_priv(&PRIV_DIR);
         check(rc == 0, "Failed to drop priv to the owner of %s", bdata(&PRIV_DIR));
 
+        check(access("/logs", F_OK) == 0, "logs directory doesn't exist in %s or isn't owned right.", bdata(cwd));
+        check(access("/run", F_OK) == 0, "run directory doesn't exist in %s or isn't owned right.", bdata(cwd));
+
         rc = Unixy_daemonize();
         check(rc == 0, "Failed to daemonize, looks like you're hosed.");
 
