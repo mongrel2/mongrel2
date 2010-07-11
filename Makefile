@@ -2,9 +2,9 @@
 CFLAGS=-g -Wall -Isrc
 LIBS=-lzmq -lsqlite3
 
-
+ASM=$(wildcard src/**/*.S src/*.S)
 SOURCES=$(wildcard src/**/*.c src/*.c)
-OBJECTS=$(patsubst %.c,%.o,${SOURCES}) src/task/asm.o
+OBJECTS=$(patsubst %.c,%.o,${SOURCES}) $(patsubst %.S,%.o,${ASM})
 LIB_SRC=$(filter-out src/mongrel2.c,${SOURCES})
 LIB_OBJ=$(filter-out src/mongrel2.o,${OBJECTS})
 TEST_SRC=$(wildcard tests/*.c)
