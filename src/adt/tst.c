@@ -93,7 +93,6 @@ void *tst_search_prefix(tst_t *root, const char *s, size_t len)
     int i = 0;
 
     while(i < len && p) {
-        debug("p: %p, last: %p, s[i]: %c", p, last, s[i]);
         if (s[i] < p->splitchar) {
             p = p->low; 
         } else if (s[i] == p->splitchar) {
@@ -106,7 +105,6 @@ void *tst_search_prefix(tst_t *root, const char *s, size_t len)
             p = p->high; 
         }
     }
-    debug("p: %p, last: %p, s[i]: %c", p, last, s[i]);
 
     if(p) {
         return p->value;
