@@ -2,7 +2,12 @@
 #define _dir_h
 
 #include <stdlib.h>
+
+#ifdef __APPLE__
+#include "mac_specific.h"
+#else
 #include <sys/sendfile.h>
+#endif
 #include <bstring.h>
 
 enum {
@@ -25,6 +30,10 @@ int Dir_stream_file(int file_fd, size_t flen, int sock_fd);
 
 int Dir_serve_file(Dir *dir, bstring, int fd);
 
+#ifdef __APPLE__
+#define Dir_send mac_sendfile
+#else
 #define Dir_send sendfile
+#endif
 
 #endif

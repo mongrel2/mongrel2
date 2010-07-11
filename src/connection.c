@@ -568,7 +568,7 @@ int Connection_read_header(Connection *conn, Request *req)
 
         finished = Request_parse(req, conn->buf, conn->nread, &conn->nparsed);
 
-        check(finished != -1, "Error in parsing: %d, bytes: %d, value: %.*s, parsed: %d", 
+        check(finished != -1, "Error in parsing: %d, bytes: %d, value: %.*s, parsed: %lu", 
                 finished, conn->nread, conn->nread, conn->buf, conn->nparsed);
 
     }

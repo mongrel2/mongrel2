@@ -12,7 +12,11 @@
  *	http://www.opensource.org/licenses/bsd-license.php
  */
 
+#ifdef __APPLE__
+#include <stdlib.h>
+#else
 #include <malloc.h>  /* realloc */
+#endif
 #include <string.h>  /* memset & co */
 
 #include "halloc.h"
