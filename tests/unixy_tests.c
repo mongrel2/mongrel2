@@ -30,9 +30,14 @@ char *test_Unixy_drop_priv_fails()
 {
     bstring dir = Unixy_getcwd();
     mu_assert(dir != NULL, "can't getcwd in chroot test.");
-  
+
     int rc = Unixy_drop_priv(dir);
+
+#ifdef __APPLE__
+    mu_assert(rc == 0, "Should be able to drop priv to cwd on OSX's broke ass security.");
+#else
     mu_assert(rc == -1, "Should not be able to drop priv to cwd.");
+#endif
 
     bdestroy(dir);
     return NULL;
@@ -42,6 +47,7 @@ char *test_Unixy_drop_priv_fails()
 char *test_Unixy_pid_file()
 {
     bstring pid_path = bfromcstr("tests/test.pid");
+    unlink((const char *)pid_path->data);
 
     int rc = Unixy_pid_file(pid_path);
     mu_assert(rc == 0, "Failed to make pid file.");

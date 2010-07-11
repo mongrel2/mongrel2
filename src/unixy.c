@@ -76,9 +76,14 @@ int Unixy_still_running(bstring pid_path, pid_t *pid)
 
     *pid = Unixy_pid_read(pid_path);
     check(*pid != -1, "Failed to read a PID from PID file: %s", bdata(pid_path));
-    proc_file = bformat("/proc/%d", *pid);
+    
+    rc = stat("/proc", &sb);
+    check(rc == 0, "You don't have a /proc directory, probably OSX.");
 
+    proc_file = bformat("/proc/%d", *pid);
+    debug("Looking for %s", bdata(proc_file));
     rc = stat((const char *)proc_file->data, &sb);
+    debug("stat of that returned %d", rc);
 
     bdestroy(proc_file);
     return rc == 0;
