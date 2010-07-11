@@ -2,7 +2,7 @@
 #define _events_h
 
 typedef enum StateEvent {
-    EVENT_START=100,
+    FINISHED=100,
     ACCEPT=101,
     CLOSE=102,
     CONNECT=103,
@@ -11,17 +11,15 @@ typedef enum StateEvent {
     HANDLER=106,
     HTTP_REQ=107,
     MSG_REQ=108,
-    MSG_RESP=109,
-    OPEN=110,
-    PROXY=111,
-    REMOTE_CLOSE=112,
-    REQ_RECV=113,
-    REQ_SENT=114,
-    RESP_RECV=115,
-    RESP_SENT=116,
-    SOCKET_REQ=117,
-    TIMEOUT=118,
-    EVENT_END=119
+    OPEN=109,
+    PROXY=110,
+    REMOTE_CLOSE=111,
+    REQ_RECV=112,
+    REQ_SENT=113,
+    RESP_SENT=114,
+    SOCKET_REQ=115,
+    TIMEOUT=116,
+    EVENT_END=117
 } StateEvent ;
 
 

@@ -80,7 +80,7 @@ int State_exec(State *state, int event, void *data)
 	switch (  state->cs )
 	{
 case 14:
-	if ( (*p) == 110 )
+	if ( (*p) == 109 )
 		goto tr18;
 	goto st0;
 tr0:
@@ -114,7 +114,7 @@ case 2:
 #line 2 "src/state.c"
 	switch( (*p) ) {
 		case 102: goto tr2;
-		case 113: goto tr3;
+		case 112: goto tr3;
 	}
 	goto tr0;
 tr2:
@@ -126,7 +126,7 @@ st15:
 		goto _test_eof15;
 case 15:
 #line 2 "src/state.c"
-	if ( (*p) == 110 )
+	if ( (*p) == 109 )
 		goto tr18;
 	goto tr0;
 tr3:
@@ -141,7 +141,7 @@ case 3:
 	switch( (*p) ) {
 		case 107: goto tr4;
 		case 108: goto tr5;
-		case 117: goto tr6;
+		case 115: goto tr6;
 	}
 	goto tr0;
 tr4:
@@ -157,7 +157,7 @@ case 4:
 		case 102: goto tr2;
 		case 104: goto tr7;
 		case 106: goto tr8;
-		case 111: goto tr9;
+		case 110: goto tr9;
 	}
 	goto tr0;
 tr6:
@@ -175,7 +175,7 @@ case 5:
 #line 2 "src/state.c"
 	switch( (*p) ) {
 		case 102: goto tr2;
-		case 116: goto tr1;
+		case 114: goto tr1;
 	}
 	goto tr0;
 tr8:
@@ -191,7 +191,7 @@ st6:
 		goto _test_eof6;
 case 6:
 #line 2 "src/state.c"
-	if ( (*p) == 114 )
+	if ( (*p) == 113 )
 		goto tr1;
 	goto tr0;
 tr9:
@@ -235,8 +235,8 @@ st10:
 case 10:
 #line 2 "src/state.c"
 	switch( (*p) ) {
-		case 112: goto tr14;
-		case 114: goto tr15;
+		case 111: goto tr14;
+		case 113: goto tr15;
 	}
 	goto tr0;
 tr13:
@@ -289,8 +289,8 @@ case 13:
 		case 104: goto tr17;
 		case 106: goto tr17;
 		case 107: goto tr11;
-		case 111: goto tr17;
-		case 112: goto tr14;
+		case 110: goto tr17;
+		case 111: goto tr14;
 	}
 	goto tr0;
 	}
@@ -352,6 +352,7 @@ int State_finish(State *state)
 
 /* Do not access these directly or alter their order EVER.  */
 const char *EVENT_NAMES[] = {
+    "FINISHED",
     "ACCEPT",
     "CLOSE",
     "CONNECT",
@@ -360,26 +361,20 @@ const char *EVENT_NAMES[] = {
     "HANDLER",
     "HTTP_REQ",
     "MSG_REQ",
-    "MSG_RESP",
     "OPEN",
     "PROXY",
     "REMOTE_CLOSE",
     "REQ_RECV",
     "REQ_SENT",
-    "RESP_RECV",
     "RESP_SENT",
     "SOCKET_REQ",
     "TIMEOUT"};
 
 const char *State_event_name(int event)
 {
-    // TODO: find out why the hell the FSM is actually giving us this
+    if(event == 0) event = FINISHED;
 
-    if(event == 0) {
-        return "NUL";
-    }
+    assert(event >= FINISHED && event < EVENT_END && "Event is outside range.");
 
-    assert(event > EVENT_START && event < EVENT_END && "Event is outside range.");
-
-    return EVENT_NAMES[event - EVENT_START - 1];
+    return EVENT_NAMES[event - FINISHED];
 }

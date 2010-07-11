@@ -3,7 +3,8 @@ CFLAGS=-g -Wall -Isrc
 LIBS=-lzmq -lsqlite3
 
 ASM=$(wildcard src/**/*.S src/*.S)
-SOURCES=$(wildcard src/**/*.c src/*.c)
+RAGEL_TARGETS=src/state.c src/http11/http11_parser.c
+SOURCES=$(wildcard src/**/*.c src/*.c) $(RAGEL_TARGETS)
 OBJECTS=$(patsubst %.c,%.o,${SOURCES}) $(patsubst %.S,%.o,${ASM})
 LIB_SRC=$(filter-out src/mongrel2.c,${SOURCES})
 LIB_OBJ=$(filter-out src/mongrel2.o,${OBJECTS})
@@ -36,9 +37,18 @@ $(TESTS): %: %.c
 	$(CC) $(CFLAGS) $(LIBS) -o $@ $< build/libm2.a
 	$@
 
+src/state.c: src/state.rl src/state_machine.rl
+
+src/http11/http11_parser.c: src/http11/http11_parser.rl src/http11/http11_parser_common.rl
+
 check:
 	@echo Files with potentially dangerous functions.
 	@egrep '[^_.>a-zA-Z0-9](str(n?cpy|n?cat|xfrm|n?dup|str|pbrk|tok|_)|stpn?cpy|a?sn?printf|byte_)' $(filter-out src/bstr/bsafe.c,${SOURCES})
 
 %.o: %.S
 	$(CC) $(CFLAGS) -c $< -o $@
+
+
+%.c: %.rl
+	ragel -G2 $<
+

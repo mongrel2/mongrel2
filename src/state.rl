@@ -97,6 +97,7 @@ int State_finish(State *state)
 
 /* Do not access these directly or alter their order EVER.  */
 const char *EVENT_NAMES[] = {
+    "FINISHED",
     "ACCEPT",
     "CLOSE",
     "CONNECT",
@@ -105,26 +106,20 @@ const char *EVENT_NAMES[] = {
     "HANDLER",
     "HTTP_REQ",
     "MSG_REQ",
-    "MSG_RESP",
     "OPEN",
     "PROXY",
     "REMOTE_CLOSE",
     "REQ_RECV",
     "REQ_SENT",
-    "RESP_RECV",
     "RESP_SENT",
     "SOCKET_REQ",
     "TIMEOUT"};
 
 const char *State_event_name(int event)
 {
-    // TODO: find out why the hell the FSM is actually giving us this
+    if(event == 0) event = FINISHED;
 
-    if(event == 0) {
-        return "NUL";
-    }
+    assert(event >= FINISHED && event < EVENT_END && "Event is outside range.");
 
-    assert(event > EVENT_START && event < EVENT_END && "Event is outside range.");
-
-    return EVENT_NAMES[event - EVENT_START - 1];
+    return EVENT_NAMES[event - FINISHED];
 }

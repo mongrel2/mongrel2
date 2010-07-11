@@ -512,7 +512,7 @@ void Connection_task(void *v)
 
     for(i = 0, next = OPEN; next != CLOSE; i++) {
         next = State_exec(&conn->state, next, (void *)conn);
-        check(next > EVENT_START && next < EVENT_END, "!!! Invalid next event[%d]: %d", i, next);
+        check(next >= FINISHED && next < EVENT_END, "!!! Invalid next event[%d]: %d", i, next);
     }
 
     State_exec(&conn->state, CLOSE, (void *)conn);
