@@ -20,10 +20,7 @@ Server *Server_create(const char *port)
     srv->port = atoi(port);
     check(port > 0, "Can't bind to the given port: %s", port);
 
-    srv->listen_fd = netannounce(TCP, 0, srv->port);
-    check(srv->listen_fd >= 0, "Can't announce on TCP port %d", srv->port);
-
-    check(fdnoblock(srv->listen_fd) == 0, "Failed to set listening port %d nonblocking.", srv->port);
+    srv->listen_fd = 0;
 
     return srv;
 
@@ -72,6 +69,11 @@ void Server_start(Server *srv)
     check(srv->default_host, "No default_host set.");
 
     taskname("SERVER");
+
+    srv->listen_fd = netannounce(TCP, 0, srv->port);
+    check(srv->listen_fd >= 0, "Can't announce on TCP port %d", srv->port);
+
+    check(fdnoblock(srv->listen_fd) == 0, "Failed to set listening port %d nonblocking.", srv->port);
 
     debug("Starting server on port %d", srv->port);
 
