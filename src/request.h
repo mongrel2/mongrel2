@@ -55,4 +55,6 @@ bstring Request_get(Request *parser, bstring field);
 
 #define Request_header_length(R) ((R)->parser.body_start)
 
+bstring Request_to_payload(Request *req, bstring uuid, int fd, const char *buf, size_t len);
+
 #endif

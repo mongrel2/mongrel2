@@ -16,6 +16,36 @@ resp.setsockopt(zmq.IDENTITY, sender_id)
 users = {}
 user_list = []
 
+
+def parse_netstring(ns):
+    len, rest = ns.split(':', 1)
+    len = int(len)
+    return rest[:len], rest[len+1:]
+
+
+class Request(object):
+
+    def __init__(self, sender, conn_id, path, headers, body):
+        self.sender = sender
+        self.path = path
+        self.conn_id = conn_id
+        self.headers = headers
+        self.body = body
+
+
+    @staticmethod
+    def parse(msg):
+        sender, conn_id, path, rest = msg.split(' ', 3)
+        headers, rest = parse_netstring(rest)
+        body, _ = parse_netstring(rest)
+
+        headers = json.loads(headers)
+
+        print "SENDER:", sender, "ID:", conn_id, "PATH:", path, "HEADERS:", headers, "BODY:", repr(body)
+
+        return Request(sender, conn_id, path, headers, body)
+
+
 def send(i, data):
     d = i + ' ' + json.dumps(data)
     resp.send(d)
@@ -29,36 +59,31 @@ while True:
     msg = reqs.recv()
     print "MESSAGE", repr(msg)
 
-    ident, path, data = msg.split(' ', 2)
-    try:
-        data = json.loads(data)
-    except:
-        continue
-
-    print "IDENT:", ident, "MSG:", data
+    req = Request.parse(msg)
+    data = json.loads(req.body)
 
     try:
         if data["type"] == "join":
             deliver(data)
-            users[ident] = data['user']
+            users[req.conn_id] = data['user']
             user_list = [u[1] for u in users.items()]
-            send(ident, {'type': 'userList', 'users': user_list})
+            send(req.conn_id, {'type': 'userList', 'users': user_list})
         elif data["type"] == "leave":
-            if ident in users:
-                data['user'] = users[ident]
-                del users[ident]
+            if req.conn_id in users:
+                data['user'] = users[req.conn_id]
+                del users[req.conn_id]
 
             deliver(data)
             user_list = [u[1] for u in users.items()]
-        elif ident not in users:
-            users[ident] = data['user']
+        elif req.conn_id not in users:
+            users[req.conn_id] = data['user']
         elif data['type'] == "msg":
             idiots = open("idiots").read()
-            who = users.get(ident, "XXX")
+            who = users.get(req.conn_id, "XXX")
             dwho = data.get('user', 'XXX')
             if who in idiots or dwho in idiots:
-                print "IDIOT:", ident
-                send(ident, data)
+                print "IDIOT:", req.conn_id
+                send(req.conn_id, data)
             else:
                 deliver(data)
 

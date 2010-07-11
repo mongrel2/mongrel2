@@ -192,3 +192,40 @@ bstring Request_get(Request *req, bstring field)
 }
 
 
+#define B(K, V) if(V) bformata(headers, ",\"%s\":\"%s\"", bdata(K), bdata(V))
+
+bstring Request_to_payload(Request *req, bstring uuid, int fd, const char *buf, size_t len)
+{
+    bstring headers = bformat("{\"%s\":\"%s\"", bdata(&HTTP_PATH), bdata(req->path));
+    bstring result = NULL;
+    dnode_t *i = NULL;
+
+    B(&HTTP_METHOD, req->request_method);
+    B(&HTTP_VERSION, req->version);
+    B(&HTTP_URI, req->uri);
+    B(&HTTP_QUERY, req->query_string);
+    B(&HTTP_FRAGMENT, req->fragment);
+
+    for(i = dict_first(req->headers); i != NULL; i = dict_next(req->headers, i))
+    {
+        B((bstring)dnode_getkey(i), (bstring)dnode_get(i));
+    }
+
+    bconchar(headers, '}');
+
+    result = bformat("%s %d %s %d:%s,%d:", bdata(uuid), fd, 
+            bdata(Request_path(req)),
+            blength(headers), bdata(headers), len);
+
+    bcatblk(result, buf, len);
+    bconchar(result, ',');
+
+    check(result, "Failed to construct payload result.");
+
+    bdestroy(headers);
+    return result;
+
+error:
+    bdestroy(headers);
+    return NULL;
+}

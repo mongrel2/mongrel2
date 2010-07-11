@@ -31,22 +31,11 @@ char *test_Handler_deliver()
     void *socket = Handler_send_create("tcp://127.0.0.1:12346", "ZED");
     mu_assert(socket != NULL, "Failed to make the send socket.");
 
-    char *message =  "{\"type\":\"join\"}";
-    int rc = Handler_deliver(socket, 12, message, strlen(message));
+    char *message = "{\"type\":\"join\"}";
+    int rc = Handler_deliver(socket, message, strlen(message));
 
     mu_assert(rc == 0, "Failed to deliver the message.");
 
-    zmq_close(socket);
-    return NULL;
-}
-
-char *test_Handler_notify_leave()
-{
-    void *socket = Handler_send_create("tcp://127.0.0.1:12347", "ZED");
-    mu_assert(socket != NULL, "Failed to make the send socket.");
-
-    Handler_notify_leave(socket, 100);
-    
     zmq_close(socket);
     return NULL;
 }
@@ -57,7 +46,7 @@ char *test_Handler_create_destroy()
     Handler *handler = Handler_create("tcp://127.0.0.1:12348", "ZED", "tcp://127.0.0.1:4321", "ZED");
     mu_assert(handler != NULL, "Failed to make the handler.");
 
-    Handler_destroy(handler, 1000);
+    Handler_destroy(handler);
 
     return NULL;
 }
@@ -69,7 +58,6 @@ char * all_tests() {
     mu_run_test(test_Handler_send_create);
     mu_run_test(test_Handler_recv_create);
     mu_run_test(test_Handler_deliver);
-    mu_run_test(test_Handler_notify_leave);
     mu_run_test(test_Handler_create_destroy);
 
     zmq_term(ZMQ_CTX);

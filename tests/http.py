@@ -1,5 +1,7 @@
 import zmq
 import time
+import sys
+import simplejson as json
 
 sender_id = "82209006-86FF-4982-B5EA-D1E29E55D481"
 
@@ -13,34 +15,45 @@ resp = ctx.socket(zmq.PUB)
 resp.connect("tcp://127.0.0.1:9996")
 resp.setsockopt(zmq.IDENTITY, sender_id)
 
+def parse_netstring(ns):
+    len, rest = ns.split(':', 1)
+    len = int(len)
+    return rest[:len], rest[len+1:]
+
+
 class Request(object):
 
-    def __init__(self, ident, headers, body):
-        self.ident = ident
+    def __init__(self, sender, conn_id, path, headers, body):
+        self.sender = sender
+        self.path = path
+        self.conn_id = conn_id
         self.headers = headers
         self.body = body
 
 
-def parse_request(msg):
-    ident, rest = msg.split(' ', 1)
-    length, rest = rest.split(':', 1)
-    length = int(length)
-    headers = rest[0:length]
-    headers = headers.split('\01')[:-1]
-    headers = dict(zip(headers[::2], headers[1::2]))
-    body = rest[length+1:]
+    @staticmethod
+    def parse(msg):
+        sender, conn_id, path, rest = msg.split(' ', 3)
+        headers, rest = parse_netstring(rest)
+        body, _ = parse_netstring(rest)
 
-    return Request(ident, headers, body)
+        headers = json.loads(headers)
+
+        print "SENDER:", sender, "ID:", conn_id, "PATH:", path, "HEADERS:", headers, "BODY:", body
+
+        return Request(sender, conn_id, path, headers, body)
+
 
 
 while True:
-    req = parse_request(reqs.recv())
+    req = Request.parse(reqs.recv())
 
-    response = "<pre>\nIDENT:%r\nHEADERS:%r\nBODY:%r</pre>" % (req.ident, req.headers,
-                                                  req.body)
+    response = "<pre>\nSENDER: %r\nIDENT:%r\nPATH: %r\nHEADERS:%r\nBODY:%r</pre>" % (
+        req.sender, req.conn_id, req.path, 
+        json.dumps(req.headers), req.body)
 
     print response, "\n"
 
-    resp.send(req.ident + " HTTP/1.1 200 OK\r\nContent-Length: %d\r\n\r\n%s" % (
+    resp.send(req.conn_id + " HTTP/1.1 200 OK\r\nContent-Length: %d\r\n\r\n%s" % (
         len(response), response))
 

@@ -8,8 +8,7 @@
 #include <assert.h>
 #include <register.h>
 
-
-struct tagbstring LEAVE_MSG = bsStatic("@* {\"type\":\"leave\"}");
+struct tagbstring LEAVE_MSG = bsStatic("{\"type\":\"leave\"}");
 
 void bstring_free(void *data, void *hint)
 {
@@ -17,13 +16,20 @@ void bstring_free(void *data, void *hint)
 }
 
 
-void Handler_notify_leave(void *socket, int fd)
+void Handler_notify_leave(Handler *handler, int fd)
 {
+    void *socket = handler->send_socket;
     assert(socket && "Socket can't be NULL");
 
-    if(Handler_deliver(socket, fd, bdata(&LEAVE_MSG), blength(&LEAVE_MSG)) == -1) {
+    bstring payload = bformat("%s %d @* 0:,%d:%s,",
+            bdata(handler->send_ident), fd,
+            blength(&LEAVE_MSG), bdata(&LEAVE_MSG));
+
+    if(Handler_deliver(socket, bdata(payload), blength(payload)) == -1) {
         log_err("Can't tell handler %d died.", fd);
     }
+
+    bdestroy(payload);
 }
 
 enum {
@@ -94,7 +100,7 @@ void Handler_task(void *v)
             switch(conn_type) {
                 case 0:
                     log_err("Ident %d is no longer connected.", fd);
-                    Handler_notify_leave(handler->send_socket, fd);
+                    Handler_notify_leave(handler, fd);
                     break;
 
                 case CONN_TYPE_MSG:
@@ -141,7 +147,7 @@ error:
     return;
 }
 
-int Handler_deliver(void *handler_socket, int from_fd, char *buffer, size_t len)
+int Handler_deliver(void *handler_socket, char *buffer, size_t len)
 {
     int rc = 0;
     zmq_msg_t *msg = NULL;
@@ -155,7 +161,7 @@ int Handler_deliver(void *handler_socket, int from_fd, char *buffer, size_t len)
     rc = zmq_msg_init(msg);
     check(rc == 0, "Failed to initialize 0mq message to send.");
 
-    msg_buf = bformat("%d %.*s", from_fd, len, buffer);
+    msg_buf = blk2bstr(buffer, len);
     check(msg_buf, "Failed to allocate message buffer for handler delivery.");
 
     rc = zmq_msg_init_data(msg, bdata(msg_buf), blength(msg_buf), bstring_free, msg_buf);
@@ -225,6 +231,8 @@ Handler *Handler_create(const char *send_spec, const char *send_ident,
     handler->recv_socket = Handler_recv_create(recv_spec, recv_ident);
     check(handler->recv_socket, "Failed to create listener socket.");
 
+    handler->send_ident = bfromcstr(send_ident);
+    handler->recv_ident = bfromcstr(recv_ident);
     return handler;
 error:
 
@@ -233,16 +241,16 @@ error:
 }
 
 
-void Handler_destroy(Handler *handler, int fd)
+void Handler_destroy(Handler *handler)
 {
     if(handler) {
-        if(fd) {
-            Handler_notify_leave(handler->send_socket, fd);
-        }
-
         zmq_close(handler->recv_socket);
         zmq_close(handler->send_socket);
 
+        bdestroy(handler->send_ident);
+        bdestroy(handler->recv_ident);
         free(handler);
     }
 }
+
+
