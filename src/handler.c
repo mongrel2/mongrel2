@@ -248,8 +248,8 @@ error:
 void Handler_destroy(Handler *handler)
 {
     if(handler) {
-        zmq_close(handler->recv_socket);
-        zmq_close(handler->send_socket);
+        if(handler->recv_socket) zmq_close(handler->recv_socket);
+        if(handler->send_socket) zmq_close(handler->send_socket);
 
         bdestroy(handler->send_ident);
         bdestroy(handler->recv_ident);
