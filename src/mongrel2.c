@@ -35,6 +35,12 @@ void taskmain(int argc, char **argv)
 
     DB_close();
 
+    bstring pid_file = bformat("%s%s", bdata(cwd), bdata(&MONGREL2_PID));
+
+    rc = Unixy_remove_dead_pidfile(pid_file);
+    check(rc == 0, "Failed to remove the dead PID file: %s", bdata(pid_file));
+    bdestroy(pid_file);
+
     rc = Unixy_chroot(cwd);
 
     if(rc == 0) {
@@ -45,6 +51,7 @@ void taskmain(int argc, char **argv)
 
         check(access("/logs", F_OK) == 0, "logs directory doesn't exist in %s or isn't owned right.", bdata(cwd));
         check(access("/run", F_OK) == 0, "run directory doesn't exist in %s or isn't owned right.", bdata(cwd));
+
 
         rc = Unixy_daemonize();
         check(rc == 0, "Failed to daemonize, looks like you're hosed.");

@@ -73,12 +73,14 @@ int Unixy_still_running(bstring pid_path, pid_t *pid)
     bstring proc_file = NULL;
     struct stat sb;
     int rc = 0;
+    FILE *proc_test = NULL;
 
     *pid = Unixy_pid_read(pid_path);
     check(*pid != -1, "Failed to read a PID from PID file: %s", bdata(pid_path));
-    
-    rc = stat("/proc", &sb);
-    check(rc == 0, "You don't have a /proc directory, probably OSX.");
+   
+    proc_test = fopen("/proc/uptime", "r");
+    check(proc_test, "You don't have a /proc directory I understand, probably OSX.");
+    fclose(proc_test);
 
     proc_file = bformat("/proc/%d", *pid);
     rc = stat((const char *)proc_file->data, &sb);
@@ -87,6 +89,7 @@ int Unixy_still_running(bstring pid_path, pid_t *pid)
     return rc == 0;
 error:
 
+    if(proc_test) fclose(proc_test);
     bdestroy(proc_file);
     return -1;
 }
@@ -125,11 +128,7 @@ int Unixy_pid_file(bstring path)
     pid_path = bstr2cstr(path, '\0');
 
     rc = stat(pid_path, &sb);
-
-    if(rc == 0) {
-        rc = Unixy_remove_dead_pidfile(path);
-        check(rc == 0, "Failed to remove the dead PID file: %s", pid_path);
-    }
+    check(rc == -1, "PID file already exists, something bad happened.");
 
     // pid file isn't there, open it and make it
     pid_file = fopen(pid_path, "w");
