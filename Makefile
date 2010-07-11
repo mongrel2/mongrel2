@@ -26,9 +26,13 @@ build:
 	@mkdir -p bin
 
 clean:
-	rm -rf build bin lib ${OBJECTS} ${TESTS}
+	rm -rf build bin lib ${OBJECTS} ${TESTS} tests/config.sqlite
 
-tests: build/libm2.a ${TESTS}
+tests: build/libm2.a tests/config.sqlite ${TESTS}
+
+tests/config.sqlite: src/config/config.sql src/config/example.sql
+	sqlite3 $@ < src/config/config.sql
+	sqlite3 $@ < src/config/example.sql
 
 $(TESTS): %: %.c
 	$(CC) $(CFLAGS) $(LIBS) -o $@ $< build/libm2.a
