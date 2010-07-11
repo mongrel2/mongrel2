@@ -76,7 +76,10 @@ int Unixy_still_running(bstring pid_path, pid_t *pid)
     FILE *proc_test = NULL;
 
     *pid = Unixy_pid_read(pid_path);
-    check(*pid != -1, "Failed to read a PID from PID file: %s", bdata(pid_path));
+
+    if(*pid < 0) {
+        return 0;
+    }
    
     proc_test = fopen("/proc/uptime", "r");
     check(proc_test, "You don't have a /proc directory I understand, probably OSX.");
@@ -105,10 +108,13 @@ int Unixy_remove_dead_pidfile(bstring pid_path)
     check(rc != -1, "Failed to figure out if process %d is still running.  You probably don't have /proc or a weird one.", pid);
     check(rc != 1, "Process %d is still running, shut it down first.", pid);
 
-    debug("Process %d is not running anymore, so removing PID file %s.", pid, bdata(pid_path));
-
-    rc = unlink((const char *)pid_path->data);
-    check(rc == 0, "Failed to unline the PID file %s, man you're so hosed I give up.", bdata(pid_path));
+    if(pid == -1) {
+        debug("No previous mongrel running, continuing on.");
+    } else {
+        debug("Process %d is not running anymore, so removing PID file %s.", pid, bdata(pid_path));
+        rc = unlink((const char *)pid_path->data);
+        check(rc == 0, "Failed to unline the PID file %s, man you're so hosed I give up.", bdata(pid_path));
+    }
 
     return 0;
 
