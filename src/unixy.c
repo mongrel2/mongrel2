@@ -159,6 +159,7 @@ error:
 
 int Unixy_daemonize()
 {
+    // daemonize is just too damn eager on closing stuff
     int rc = daemon(0, 1);
     check(rc == 0, "Failed to daemonize.");
 

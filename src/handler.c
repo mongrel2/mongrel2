@@ -75,6 +75,13 @@ void Handler_task(void *v)
 
     taskname("Handler_task");
 
+    handler->send_socket = Handler_send_create(bdata(handler->send_spec), bdata(handler->send_ident));
+    check(handler->send_socket, "Failed to create handler socket.");
+
+    handler->recv_socket = Handler_recv_create(bdata(handler->recv_spec), bdata(handler->recv_ident));
+    check(handler->recv_socket, "Failed to create listener socket.");
+
+
     while(1) {
         zmq_msg_init(inmsg);
 
@@ -225,14 +232,11 @@ Handler *Handler_create(const char *send_spec, const char *send_ident,
     Handler *handler = calloc(sizeof(Handler), 1);
     check(handler, "Memory allocate failed.");
 
-    handler->send_socket = Handler_send_create(send_spec, send_ident);
-    check(handler->send_socket, "Failed to create handler socket.");
-
-    handler->recv_socket = Handler_recv_create(recv_spec, recv_ident);
-    check(handler->recv_socket, "Failed to create listener socket.");
-
     handler->send_ident = bfromcstr(send_ident);
     handler->recv_ident = bfromcstr(recv_ident);
+    handler->recv_spec = bfromcstr(recv_spec);
+    handler->send_spec = bfromcstr(send_spec);
+
     return handler;
 error:
 
@@ -249,6 +253,8 @@ void Handler_destroy(Handler *handler)
 
         bdestroy(handler->send_ident);
         bdestroy(handler->recv_ident);
+        bdestroy(handler->send_spec);
+        bdestroy(handler->recv_spec);
         free(handler);
     }
 }

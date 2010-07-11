@@ -14,6 +14,8 @@ typedef struct Handler {
     void *recv_socket;
     bstring send_ident;
     bstring recv_ident;
+    bstring recv_spec;
+    bstring send_spec;
 } Handler;
 
 void Handler_task(void *v);

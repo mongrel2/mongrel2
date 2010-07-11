@@ -23,7 +23,6 @@ void taskmain(int argc, char **argv)
     bstring cwd = Unixy_getcwd();
     check(cwd, "Couldn't get current working dir.");
 
-    Server_init();
 
     list_t *servers = Config_load_servers(argv[1], argv[2]);
     check(servers, "Failed to load server config from %s for host %s", argv[1], argv[2]);
@@ -34,6 +33,7 @@ void taskmain(int argc, char **argv)
     Server *srv = lnode_get(list_first(servers));
 
     DB_close();
+
 
     bstring pid_file = bformat("%s%s", bdata(cwd), bdata(&MONGREL2_PID));
 
@@ -52,10 +52,10 @@ void taskmain(int argc, char **argv)
         check(access("/logs", F_OK) == 0, "logs directory doesn't exist in %s or isn't owned right.", bdata(cwd));
         check(access("/run", F_OK) == 0, "run directory doesn't exist in %s or isn't owned right.", bdata(cwd));
 
-
         rc = Unixy_daemonize();
         check(rc == 0, "Failed to daemonize, looks like you're hosed.");
 
+        Server_init();
         LOG_FILE = fopen(MONGREL2_LOGS, "a+");
         check(LOG_FILE, "Couldn't open %s log file.", MONGREL2_LOGS);
         setbuf(LOG_FILE, NULL);
