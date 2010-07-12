@@ -28,6 +28,7 @@ clean:
 	rm -rf build bin lib ${OBJECTS} ${TESTS} tests/config.sqlite
 
 tests: build/libm2.a tests/config.sqlite ${TESTS}
+	sh ./tests/runtests.sh
 
 tests/config.sqlite: src/config/config.sql src/config/example.sql
 	sqlite3 $@ < src/config/config.sql
@@ -35,7 +36,6 @@ tests/config.sqlite: src/config/config.sql src/config/example.sql
 
 $(TESTS): %: %.c
 	$(CC) $(CFLAGS) $(LIBS) -o $@ $< build/libm2.a
-	$@
 
 src/state.c: src/state.rl src/state_machine.rl
 
