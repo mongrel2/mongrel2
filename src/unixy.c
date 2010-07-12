@@ -4,6 +4,8 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <signal.h>
 
 
 
@@ -70,10 +72,7 @@ error:
 
 int Unixy_still_running(bstring pid_path, pid_t *pid)
 {
-    bstring proc_file = NULL;
-    struct stat sb;
     int rc = 0;
-    FILE *proc_test = NULL;
 
     *pid = Unixy_pid_read(pid_path);
 
@@ -83,13 +82,8 @@ int Unixy_still_running(bstring pid_path, pid_t *pid)
     
     // If we can signal it, it must be alive.
     rc = kill(*pid, 0);
-
-    bdestroy(proc_file);
     return rc == 0;
 error:
-
-    if(proc_test) fclose(proc_test);
-    bdestroy(proc_file);
     return -1;
 }
 
