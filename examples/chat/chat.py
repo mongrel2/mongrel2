@@ -39,7 +39,7 @@ class Request(object):
         headers, rest = parse_netstring(rest)
         body, _ = parse_netstring(rest)
 
-        headers = json.loads(headers)
+        headers = json.loads(headers) if headers else None
 
         print "SENDER:", sender, "ID:", conn_id, "PATH:", path, "HEADERS:", headers, "BODY:", repr(body)
 

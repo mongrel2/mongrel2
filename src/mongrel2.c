@@ -46,27 +46,28 @@ void taskmain(int argc, char **argv)
     if(rc == 0) {
         debug("All loaded up, time to turn into a server.");
 
-        rc = Unixy_drop_priv(&PRIV_DIR);
-        check(rc == 0, "Failed to drop priv to the owner of %s", bdata(&PRIV_DIR));
-
         check(access("/logs", F_OK) == 0, "logs directory doesn't exist in %s or isn't owned right.", bdata(cwd));
         check(access("/run", F_OK) == 0, "run directory doesn't exist in %s or isn't owned right.", bdata(cwd));
 
         rc = Unixy_daemonize();
         check(rc == 0, "Failed to daemonize, looks like you're hosed.");
 
-        Server_init();
-        LOG_FILE = fopen(MONGREL2_LOGS, "a+");
-        check(LOG_FILE, "Couldn't open %s log file.", MONGREL2_LOGS);
-        setbuf(LOG_FILE, NULL);
+        FILE *log = fopen(MONGREL2_LOGS, "a+");
+        check(log, "Couldn't open %s log file.", MONGREL2_LOGS);
+        setbuf(log, NULL);
+
+        LOG_FILE = log;
 
         rc = Unixy_pid_file(&MONGREL2_PID);
         check(rc == 0, "Failed to make the PID file %s", bdata(&MONGREL2_PID));
 
+        rc = Unixy_drop_priv(&PRIV_DIR);
+        check(rc == 0, "Failed to drop priv to the owner of %s", bdata(&PRIV_DIR));
     } else {
         log_err("Couldn't chroot too %s, assuming running in test mode.", bdata(cwd));
     }
 
+    Server_init();
     Server_start(srv);
 
     return;

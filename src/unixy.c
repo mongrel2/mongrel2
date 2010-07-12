@@ -129,9 +129,8 @@ int Unixy_pid_file(bstring path)
     struct stat sb;
     char *pid_path = NULL;
 
-    check(pid_path == NULL, "PID is already stored in %s", pid_path);
-
     pid_path = bstr2cstr(path, '\0');
+    check(pid_path, "Failed to make the pid path (WTF).");
 
     rc = stat(pid_path, &sb);
     check(rc == -1, "PID file already exists, something bad happened.");
@@ -139,6 +138,7 @@ int Unixy_pid_file(bstring path)
     // pid file isn't there, open it and make it
     pid_file = fopen(pid_path, "w");
     check(pid_file, "Failed to open PID file %s for writing.", pid_path);
+
     rc =  fprintf(pid_file, "%d", getpid());
     check(rc > 0, "Failed to write PID to file %s", pid_path); 
    
