@@ -80,13 +80,9 @@ int Unixy_still_running(bstring pid_path, pid_t *pid)
     if(*pid < 0) {
         return 0;
     }
-   
-    proc_test = fopen("/proc/uptime", "r");
-    check(proc_test, "You don't have a /proc directory I understand, probably OSX.");
-    fclose(proc_test);
-
-    proc_file = bformat("/proc/%d", *pid);
-    rc = stat((const char *)proc_file->data, &sb);
+    
+    // If we can signal it, it must be alive.
+    rc = kill(*pid, 0);
 
     bdestroy(proc_file);
     return rc == 0;
