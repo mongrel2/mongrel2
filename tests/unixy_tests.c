@@ -6,8 +6,8 @@ FILE *LOG_FILE = NULL;
 char *test_Unixy_getcwd()
 {
     bstring dir = Unixy_getcwd();
-    debug("CWD is: %s", bdata(dir));
     mu_assert(dir != NULL, "getcwd failed.");
+    debug("CWD is: %s", bdata(dir));
 
     bdestroy(dir);
     return NULL;

@@ -134,15 +134,12 @@ int Unixy_pid_file(bstring path)
     check(rc > 0, "Failed to write PID to file %s", pid_path); 
    
 
+    if(pid_path) free(pid_path);
     fclose(pid_file);
     return 0;
 
 error:
-    if(pid_path) {
-        free(pid_path);
-        pid_path = NULL;
-    }
-
+    if(pid_path) free(pid_path);
     if(pid_file) fclose(pid_file);
     return -1;
 }
@@ -163,14 +160,17 @@ error:
 
 bstring Unixy_getcwd()
 {
-    char wd[MAX_DIR_PATH];
+    char *wd = calloc(MAX_DIR_PATH + 1, 1);
+    bstring dir = NULL;
 
     check(getcwd(wd, MAX_DIR_PATH-1), "Could not get current working directory.");
     wd[MAX_DIR_PATH] = '\0';
 
-    return bfromcstr(wd);
+    dir = bfromcstr(wd);
 
 error:
-    return NULL;
+    // fall through
+    free(wd);
+    return dir;
 }
 
