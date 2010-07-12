@@ -19,6 +19,9 @@ int Unixy_chroot(bstring path)
     rc = chroot(to_dir);
     check(rc == 0, "Can't chroot to %s, rerun as root.", bdata(path));
 
+    rc = chdir("/");
+    check(rc == 0, "Can't chdir to / directory inside chroot.");
+
     return 0;
 
 error:
@@ -36,11 +39,11 @@ int Unixy_drop_priv(bstring path)
     int rc = stat(from_dir, &sb);
     check(rc == 0, "Failed to stat target chroot directory: %s", bdata(path));
 
-    rc = setgid(sb.st_gid);
-    check(rc == 0, "Failed to change to GID: %d", sb.st_gid);
+    rc = setregid(sb.st_gid, sb.st_gid);
+    check(rc == 0 && getgid() == sb.st_gid && getegid() == sb.st_gid, "Failed to change to GID: %d", sb.st_gid);
 
-    rc = setuid(sb.st_uid);
-    check(rc == 0, "Failed to change to UID: %d", sb.st_uid);
+    rc = setreuid(sb.st_uid, sb.st_uid);
+    check(rc == 0 && getuid() == sb.st_uid && geteuid() == sb.st_uid, "Failed to change to UID: %d", sb.st_uid);
 
     debug("Now running as UID:%d, GID:%d", sb.st_uid, sb.st_gid);
     return 0;
