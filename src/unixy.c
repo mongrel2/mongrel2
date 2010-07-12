@@ -83,8 +83,6 @@ int Unixy_still_running(bstring pid_path, pid_t *pid)
     // If we can signal it, it must be alive.
     rc = kill(*pid, 0);
     return rc == 0;
-error:
-    return -1;
 }
 
 
