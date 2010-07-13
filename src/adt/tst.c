@@ -12,6 +12,9 @@ typedef struct tst_collect_t {
     size_t len;
 } tst_collect_t;
 
+enum {
+    MAX_TRAVERSE_SIZE = 128
+};
 
 static void tst_collect_build(void *value, tst_collect_t *results)
 {
@@ -176,46 +179,65 @@ tst_t *tst_insert(tst_t *p, const char *s, size_t len, void *value)
     return tst_insert_base(p, p, s, len, value);
 }
 
+
+tst_t **tst_resize_queue(tst_t **queue, int q_start, int q_size, int q_max, int new_size)
+{
+    int i = 0;
+    tst_t ** new_queue = calloc(sizeof(tst_t *),  new_size);
+    check(new_queue, "Failed to reallocate queue for traverse");
+
+    for(i = 0; i < q_size; i++) {
+        new_queue[i] = queue[(i + q_start) % q_max];
+    }
+
+    free(queue);
+    return new_queue;
+
+error:
+    free(queue);
+    return NULL;
+}
+
+
+
 void tst_traverse(tst_t *p, tst_traverse_cb cb, void *data)
 {
     if (!p) return;
 
-    int qStart = 0, qSize = 0, maxSize = 128;
-    tst_t **myQueue = malloc(sizeof(tst_t *) * maxSize);
-    check(myQueue, "Failed to malloc queue for traverse");
+    int q_start = 0;
+    int q_size = 0;
+    int q_max = MAX_TRAVERSE_SIZE;
+    tst_t **queue = calloc(sizeof(tst_t *), MAX_TRAVERSE_SIZE);
 
-    myQueue[qStart] = p;
-    qSize++;
+    check(queue, "Failed to malloc queue for traverse");
 
-    while(qSize > 0) {
-        tst_t *cur = myQueue[qStart];
-        qStart = (qStart + 1) % maxSize;
-        qSize--;
+    queue[q_start] = p;
+    q_size++;
+
+    while(q_size > 0) {
+        tst_t *cur = queue[q_start];
+        q_start = (q_start + 1) % q_max;
+        q_size--;
 
         // Resize if we must
-        if(qSize + 3 > maxSize) {
-            int i, newSize = maxSize * 2;
-            tst_t **newQueue = malloc(sizeof(tst_t *) * newSize);
-            check(newQueue, "Failed to reallocate queue for traverse");
-            for(i = 0; i < qSize; i++)
-                newQueue[i] = myQueue[(i + qStart) % maxSize];
-            free(myQueue);
-            qStart = 0;
-            myQueue = newQueue;
-            maxSize = newSize;
+        if(q_size + 3 > q_max) {
+            queue = tst_resize_queue(queue, q_start, q_size, q_max, q_max * 2);
+            q_start = 0;
+            q_max = q_max * 2;
         }
+
         if(cur->value) cb(cur->value, data);
 
-        if(cur->low) myQueue[(qStart + (qSize++)) % maxSize] = cur->low;
-        if(cur->equal) myQueue[(qStart + (qSize++)) % maxSize] = cur->equal;
-        if(cur->high) myQueue[(qStart + (qSize++)) % maxSize] = cur->high;
+        if(cur->low) queue[(q_start + (q_size++)) % q_max] = cur->low;
+        if(cur->equal) queue[(q_start + (q_size++)) % q_max] = cur->equal;
+        if(cur->high) queue[(q_start + (q_size++)) % q_max] = cur->high;
     }
 
-    free(myQueue);
+    free(queue);
     return;
 
 error:
-    if(myQueue) free(myQueue);
+    if(queue) free(queue);
 }
 
 

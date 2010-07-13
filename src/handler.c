@@ -21,7 +21,7 @@ void Handler_notify_leave(Handler *handler, int fd)
     void *socket = handler->send_socket;
     assert(socket && "Socket can't be NULL");
 
-    bstring payload = bformat("%s %d @* 0:,%d:%s,",
+    bstring payload = bformat("%s %d @* 2:{},%d:%s,",
             bdata(handler->send_ident), fd,
             blength(&LEAVE_MSG), bdata(&LEAVE_MSG));
 
