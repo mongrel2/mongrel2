@@ -18,6 +18,9 @@ struct tagbstring PING_PATTERN = bsStatic("@[a-z/]- {\"type\":%s*\"ping\"}");
 
 #define TRACE(C) debug("--> %s(%s:%d) %s:%d ", "" #C, State_event_name(event), event, __FUNCTION__, __LINE__)
 
+enum {
+    MAX_CONTENT_LENGTH = 20 * 1024
+};
 
 inline int Connection_backend_event(Backend *found)
 {
@@ -156,18 +159,35 @@ int connection_http_to_handler(int event, void *data)
 {
     TRACE(http_to_handler);
     Connection *conn = (Connection *)data;
+    int content_len = Request_content_length(conn->req);
+    int header_len = Request_header_length(conn->req);
+    int total = header_len + content_len;
+    int rc = 0;
+    char *body = NULL;
+    bstring result = NULL;
 
     Handler *handler = Request_get_action(conn->req, handler);
     check(handler, "No action for request: %s", bdata(Request_path(conn->req)));
 
-    if(Request_content_length(conn->req) > 0) {
-        sentinel("NOT SUPPORTED YET");
+    if(content_len == 0) {
+        body = "";
+    } else if(content_len > MAX_CONTENT_LENGTH) {
+        rc = Response_send_error(conn->fd, &HTTP_413);
+        check(rc, "Failed to send 413 error response.");
+        sentinel("Request entity is too large: %d", content_len);
+    } else {
+        if(total > BUFFER_SIZE) {
+            conn->buf = realloc(conn->buf, total);
+            body = conn->buf + header_len;
+            rc = fdread(conn->fd, body, content_len);
+            check(rc == content_len, "Failed to read %d content as requested.");
+        } else {
+            // got it already so just start off where it is
+            body = conn->buf + header_len;
+        }
     }
 
-    debug("SEND IDENT: %s, PATH: %s", bdata(handler->send_ident), 
-            bdata(Request_path(conn->req)));
-
-    bstring result = Request_to_payload(conn->req, handler->send_ident, conn->fd, "", 0);
+    result = Request_to_payload(conn->req, handler->send_ident, conn->fd, body, content_len);
 
     check(result, "Failed to create payload for request.");
 
@@ -452,6 +472,7 @@ StateActions CONN_ACTIONS = {
 void Connection_destroy(Connection *conn)
 {
     if(conn) {
+        if(conn->buf) free(conn->buf);
         Request_destroy(conn->req);
         conn->req = NULL;
         free(conn);
@@ -472,6 +493,9 @@ Connection *Connection_create(Server *srv, int fd, int rport, const char *remote
 
     conn->req = Request_create();
     check(conn->req, "Failed to allocate Request.");
+
+    conn->buf = malloc(BUFFER_SIZE + 1);
+    check(conn->buf, "Failed to allocate buffer size: %d", BUFFER_SIZE + 1);
 
     return conn;
 

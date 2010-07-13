@@ -26,7 +26,7 @@ typedef struct Connection {
 
     State state;
     char remote[IPADDR_SIZE+1];
-    char buf[BUFFER_SIZE+1];
+    char *buf;
 } Connection;
 
 void Connection_destroy(Connection *conn);

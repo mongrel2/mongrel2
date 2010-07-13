@@ -4,6 +4,7 @@
 #include <bstring.h>
 
 extern struct tagbstring HTTP_404;
+extern struct tagbstring HTTP_413;
 extern struct tagbstring HTTP_502;
 
 extern struct tagbstring FLASH_RESPONSE;

@@ -9,6 +9,14 @@ struct tagbstring HTTP_404 = bsStatic("HTTP/1.1 404 Not Found\r\n"
     "Content-Length: 9\r\n"
     "Server: Mongrel2\r\n\r\nNot Found");
 
+
+struct tagbstring HTTP_413 = bsStatic("HTTP/1.1 413 Request Entity Too Large\r\n"
+    "Content-Type: text/plain\r\n"
+    "Connection: close\r\n"
+    "Content-Length: 16\r\n"
+    "Server: Mongrel2\r\n\r\nEntity Too Large");
+
+
 struct tagbstring HTTP_502 = bsStatic("HTTP/1.1 502 Bad Gateway\r\n"
     "Content-Type: text/plain\r\n"
     "Connection: close\r\n"
