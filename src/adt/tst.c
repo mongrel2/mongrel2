@@ -180,15 +180,42 @@ void tst_traverse(tst_t *p, tst_traverse_cb cb, void *data)
 {
     if (!p) return;
 
-    if(p->low) tst_traverse(p->low, cb, data);
+    int qStart = 0, qSize = 0, maxSize = 128;
+    tst_t **myQueue = malloc(sizeof(tst_t *) * maxSize);
+    check(myQueue, "Failed to malloc queue for traverse");
 
-    if (p->equal) {
-        tst_traverse(p->equal, cb, data); 
+    myQueue[qStart] = p;
+    qSize++;
+
+    while(qSize > 0) {
+        tst_t *cur = myQueue[qStart];
+        qStart = (qStart + 1) % maxSize;
+        qSize--;
+
+        // Resize if we must
+        if(qSize + 3 > maxSize) {
+            int i, newSize = maxSize * 2;
+            tst_t **newQueue = malloc(sizeof(tst_t *) * newSize);
+            check(newQueue, "Failed to reallocate queue for traverse");
+            for(i = 0; i < qSize; i++)
+                newQueue[i] = myQueue[(i + qStart) % maxSize];
+            free(myQueue);
+            qStart = 0;
+            myQueue = newQueue;
+            maxSize = newSize;
+        }
+        if(cur->value) cb(cur->value, data);
+
+        if(cur->low) myQueue[(qStart + (qSize++)) % maxSize] = cur->low;
+        if(cur->equal) myQueue[(qStart + (qSize++)) % maxSize] = cur->equal;
+        if(cur->high) myQueue[(qStart + (qSize++)) % maxSize] = cur->high;
     }
 
-    if(p->high) tst_traverse(p->high, cb, data); 
+    free(myQueue);
+    return;
 
-    if(p->value) cb(p->value, data);
+error:
+    if(myQueue) free(myQueue);
 }
 
 
