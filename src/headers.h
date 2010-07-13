@@ -12,5 +12,6 @@ extern struct tagbstring HTTP_PATH;
 extern struct tagbstring HTTP_QUERY;
 extern struct tagbstring HTTP_FRAGMENT;
 extern struct tagbstring HTTP_BODY;
+extern struct tagbstring JSON_METHOD;
 
 #endif

@@ -192,7 +192,7 @@ bstring Request_get(Request *req, bstring field)
 }
 
 
-#define B(K, V) if(V) bformata(headers, ",\"%s\":\"%s\"", bdata(K), bdata(V))
+#define B(K, V) if((V) != NULL) bformata(headers, ",\"%s\":\"%s\"", bdata(K), bdata(V))
 
 bstring Request_to_payload(Request *req, bstring uuid, int fd, const char *buf, size_t len)
 {
@@ -200,7 +200,12 @@ bstring Request_to_payload(Request *req, bstring uuid, int fd, const char *buf, 
     bstring result = NULL;
     dnode_t *i = NULL;
 
-    B(&HTTP_METHOD, req->request_method);
+    if(Request_is_json(req)) {
+        B(&HTTP_METHOD, &JSON_METHOD);
+    } else {
+        B(&HTTP_METHOD, req->request_method);
+    }
+
     B(&HTTP_VERSION, req->version);
     B(&HTTP_URI, req->uri);
     B(&HTTP_QUERY, req->query_string);

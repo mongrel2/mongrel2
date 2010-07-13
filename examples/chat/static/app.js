@@ -32,10 +32,10 @@ function addMessage(text) {
 
 state = new FSM({
     start: function(fsm, event) {
-        // var user = prompt('What is your nick?', 'lamenick');
+        var user = prompt('What is your nick?', 'lamenick');
         fsm.messages = {};
         fsm.trans('connecting');
-        Chat.init('zed', fsm);
+        Chat.init(user, fsm);
     },
 
     connecting: {
@@ -59,7 +59,7 @@ state = new FSM({
             }
         },
 
-        LEAVE: function(fsm, event) {
+        DISCONNECT: function(fsm, event) {
             if(event.user) {
                 addMessage('<em><b>' + escapeHTML(event.user) + '</b> left chat.</em>');
                 removeUser(event.user);

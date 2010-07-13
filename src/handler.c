@@ -8,7 +8,8 @@
 #include <assert.h>
 #include <register.h>
 
-struct tagbstring LEAVE_MSG = bsStatic("{\"type\":\"leave\"}");
+struct tagbstring LEAVE_HEADER = bsStatic("{\"METHOD\":\"JSON\"}");
+struct tagbstring LEAVE_MSG = bsStatic("{\"type\":\"disconnect\"}");
 
 void bstring_free(void *data, void *hint)
 {
@@ -21,8 +22,9 @@ void Handler_notify_leave(Handler *handler, int fd)
     void *socket = handler->send_socket;
     assert(socket && "Socket can't be NULL");
 
-    bstring payload = bformat("%s %d @* 2:{},%d:%s,",
+    bstring payload = bformat("%s %d @* %d:%s,%d:%s,",
             bdata(handler->send_ident), fd,
+            blength(&LEAVE_HEADER), bdata(&LEAVE_HEADER),
             blength(&LEAVE_MSG), bdata(&LEAVE_MSG));
 
     if(Handler_deliver(socket, bdata(payload), blength(payload)) == -1) {

@@ -68,7 +68,9 @@ while True:
             users[req.conn_id] = data['user']
             user_list = [u[1] for u in users.items()]
             send(req.conn_id, {'type': 'userList', 'users': user_list})
-        elif data["type"] == "leave":
+        elif data["type"] == "disconnect":
+            print "DISCONNECTED", req.conn_id
+
             if req.conn_id in users:
                 data['user'] = users[req.conn_id]
                 del users[req.conn_id]
