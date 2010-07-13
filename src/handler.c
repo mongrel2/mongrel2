@@ -193,7 +193,7 @@ error:
 void *Handler_send_create(const char *send_spec, const char *identity)
 {
     
-    void *handler_socket = mqsocket(ZMQ_PUB);
+    void *handler_socket = mqsocket(ZMQ_DOWNSTREAM);
     int rc = zmq_setsockopt(handler_socket, ZMQ_IDENTITY, identity, strlen(identity));
     check(rc == 0, "Failed to set handler socket %s identity %s", send_spec, identity);
 
