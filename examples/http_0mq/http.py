@@ -10,6 +10,10 @@ while True:
 
     req = conn.recv()
 
+    if req.is_disconnect():
+        print "DICONNECT"
+        continue
+
     response = "<pre>\nSENDER: %r\nIDENT:%r\nPATH: %r\nHEADERS:%r\nBODY:%r</pre>" % (
         req.sender, req.conn_id, req.path, 
         json.dumps(req.headers), req.body)

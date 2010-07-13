@@ -61,11 +61,17 @@ class Connection(object):
     def recv_json(self):
         """
         Same as regular recv, but assumes the body is JSON and 
-        creates a new attribute names req.data with the decoded
+        creates a new attribute named req.data with the decoded
         payload.  This will throw an error if it is not JSON.
+
+        Normally Request just does this if the METHOD is 'JSON'
+        but you can use this to force it for say HTTP requests.
         """
         req = self.recv()
-        req.data = json.loads(req.body)
+
+        if not req.data:
+            req.data = json.loads(req.body)
+
         return req
 
     def send(self, conn_id, msg):

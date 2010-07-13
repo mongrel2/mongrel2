@@ -19,6 +19,11 @@ class Request(object):
         self.conn_id = conn_id
         self.headers = headers
         self.body = body
+        
+        if self.headers['METHOD'] == 'JSON':
+            self.data = json.loads(body)
+        else:
+            self.data = {}
 
     @staticmethod
     def parse(msg):
@@ -30,4 +35,6 @@ class Request(object):
 
         return Request(sender, conn_id, path, headers, body)
 
-
+    def is_disconnect(self):
+        if self.headers.get('METHOD') == 'JSON':
+            return self.data['type'] == 'disconnect'
