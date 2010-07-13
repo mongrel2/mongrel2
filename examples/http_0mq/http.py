@@ -33,6 +33,7 @@ class Request(object):
 
     @staticmethod
     def parse(msg):
+        print "MESSAGE:", repr(msg)
         sender, conn_id, path, rest = msg.split(' ', 3)
         headers, rest = parse_netstring(rest)
         body, _ = parse_netstring(rest)

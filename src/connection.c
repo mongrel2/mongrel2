@@ -180,7 +180,7 @@ int connection_http_to_handler(int event, void *data)
             conn->buf = realloc(conn->buf, total);
             body = conn->buf + header_len;
             rc = fdread(conn->fd, body, content_len);
-            check(rc == content_len, "Failed to read %d content as requested.");
+            check(rc == content_len, "Failed to read %d content as requested.", content_len);
         } else {
             // got it already so just start off where it is
             body = conn->buf + header_len;
