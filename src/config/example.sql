@@ -103,4 +103,16 @@ INSERT INTO route (path, host_id, target_id, target_type)
         last_insert_rowid(),
         "dir"
     );
+
+INSERT INTO directory (base, prefix, index_file) VALUES (
+    "examples/chat/static/", "/static/", "index.html");
+
+INSERT INTO route (path, host_id, target_id, target_type)
+    VALUES (
+        "/static/",
+        (select id from host where name="localhost"),
+        last_insert_rowid(),
+        "dir"
+    );
+
 commit;
