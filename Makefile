@@ -49,6 +49,7 @@ check:
 	$(CC) $(CFLAGS) -c $< -o $@
 
 
-%.c: %.rl
-	ragel -G2 $<
+ragel:
+	ragel -G2 src/state.rl
+	ragel -G2 src/http11/http11_parser.rl
 
