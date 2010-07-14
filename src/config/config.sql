@@ -35,7 +35,8 @@ CREATE TABLE proxy (id INTEGER PRIMARY KEY,
     addr TEXT,
     port INTEGER);
 
-CREATE TABLE directory (id INTEGER PRIMARY KEY, base TEXT);
+CREATE TABLE directory (id INTEGER PRIMARY KEY,
+    base TEXT, prefix TEXT, index_file TEXT);
 
 CREATE TABLE route (id INTEGER PRIMARY KEY,
     path TEXT,

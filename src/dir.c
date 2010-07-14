@@ -30,6 +30,7 @@ FileRecord *Dir_find_file(bstring path)
 
     check(fr, "Failed to make FileRecord memory.");
 
+    // right here, if p ends with / then add index.html
     int rc = stat(p, &fr->sb);
     check(rc == 0, "File stat failed: %s", bdata(path));
 
@@ -47,6 +48,9 @@ FileRecord *Dir_find_file(bstring path)
     // TODO: get this from a configuration
     fr->content_type = MIME_match_ext(path, &default_type);
     check(fr->content_type, "Should always get a content type back.");
+
+    // we own this now, not the caller
+    fr->full_path = path;
 
     // don't let people who've received big files linger and hog the show
     const char *conn_close = fr->sb.st_size > HOG_MAX ? "close" : "keep-alive";
@@ -92,13 +96,18 @@ error:
 }
 
 
-Dir *Dir_create(const char *base)
+Dir *Dir_create(const char *base, const char *prefix, const char *index_file)
 {
     Dir *dir = calloc(sizeof(Dir), 1);
     check(dir, "Out of memory error.");
 
     dir->base = bfromcstr(base);
-    check(blength(dir->base) < MAX_DIR_PATH, "Base pattern is too long, must be less than %d", MAX_DIR_PATH);
+    check(blength(dir->base) < MAX_DIR_PATH, "Base direcotry is too long, must be less than %d", MAX_DIR_PATH);
+
+    dir->prefix = bfromcstr(prefix);
+    check(blength(dir->prefix) < MAX_DIR_PATH, "Prefix is too long, must be less than %d", MAX_DIR_PATH);
+
+    dir->index_file = bfromcstr(index_file);
 
     return dir;
 error:
@@ -109,8 +118,13 @@ error:
 
 void Dir_destroy(Dir *dir)
 {
-    bdestroy(dir->base);
-    free(dir);
+    if(dir) {
+        bdestroy(dir->base);
+        bdestroy(dir->prefix);
+        bdestroy(dir->index_file);
+        bdestroy(dir->normalized_base);
+        free(dir);
+    }
 }
 
 
@@ -121,23 +135,83 @@ void FileRecord_destroy(FileRecord *file)
         bdestroy(file->date);
         bdestroy(file->last_mod);
         bdestroy(file->header);
+        bdestroy(file->full_path);
         // file->content_type is not owned by us
         free(file);
     }
 }
 
 
+inline int normalize_path(bstring target)
+{
+    ballocmin(target, PATH_MAX);
+
+    char *normalized = realpath((const char *)target->data, NULL);
+    check(normalized, "Failed to normalize path: %s", bdata(target));
+
+    bassigncstr(target, normalized);
+    free(normalized);
+
+    return 0;
+
+error:
+    return 1;
+}
+
+inline int Dir_lazy_normalize_base(Dir *dir)
+{
+    if(dir->normalized_base == NULL) {
+        dir->normalized_base = bstrcpy(dir->base);
+        check(normalize_path(dir->normalized_base) == 0, 
+                "Failed to normalize base path: %s", bdata(dir->normalized_base));
+        debug("Lazy normalized base path %s into %s", 
+                bdata(dir->base), bdata(dir->normalized_base));
+    }
+    return 0;
+
+error:
+    return -1;
+}
+
+
 int Dir_serve_file(Dir *dir, bstring path, int fd)
 {
-    check(pattern_match(bdata(path), blength(path), bdata(dir->base)),
-            "Failed to match Dir base path: %s against PATH %s",
-            bdata(dir->base), bdata(path));
+    FileRecord *file = NULL;
+    bstring target = NULL;
 
-    FileRecord *file = Dir_find_file(path);
-    check(file, "Error opening file: %s", bdata(path));
+    check(Dir_lazy_normalize_base(dir) == 0, "Failed to normalize base path.");
+
+    check(bstrncmp(path, dir->prefix, blength(dir->prefix)) == 0, 
+            "Request for path %s does not start with %s prefix.", 
+            bdata(path), bdata(dir->prefix));
+
+    if(bchar(path, blength(path) - 1) == '/') {
+        target = bformat("%s%s/%s",
+                    bdata(dir->normalized_base),
+                    path->data + blength(dir->prefix),
+                    bdata(dir->index_file));
+    } else {
+        target = bformat("%s/%s",
+                bdata(dir->normalized_base),
+                path->data + blength(dir->prefix));
+    }
+
+    check(target, "Couldn't construct target path for %s", bdata(path));
+
+    check(normalize_path(target) == 0, "Failed to normalize target path.");
+   
+    check(bstrncmp(target, dir->normalized_base, blength(dir->normalized_base)) == 0, 
+            "Request for path %s does not start with %s base after normalizing.", 
+            bdata(target), bdata(dir->base));
+
+    debug("Looking up target: %s", bdata(target));
+
+    // the FileRecord now owns the target
+    file = Dir_find_file(target);
+    check(file, "Error opening file: %s", bdata(target));
 
     int rc = Dir_stream_file(file, fd);
-    check(rc == file->sb.st_size, "Didn't send all of the file, sent %d of %s.", rc, bdata(path));
+    check(rc == file->sb.st_size, "Didn't send all of the file, sent %d of %s.", rc, bdata(target));
 
     FileRecord_destroy(file);
     return 0;

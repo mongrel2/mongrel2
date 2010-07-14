@@ -30,9 +30,10 @@ clean:
 tests: build/libm2.a tests/config.sqlite ${TESTS}
 	sh ./tests/runtests.sh
 
-tests/config.sqlite: src/config/config.sql src/config/example.sql
+tests/config.sqlite: src/config/config.sql src/config/example.sql src/config/mimetypes.sql
 	sqlite3 $@ < src/config/config.sql
 	sqlite3 $@ < src/config/example.sql
+	sqlite3 $@ < src/config/mimetypes.sql
 
 $(TESTS): %: %.c
 	$(CC) $(CFLAGS) $(LIBS) -o $@ $< build/libm2.a

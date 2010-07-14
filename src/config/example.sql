@@ -82,7 +82,8 @@ INSERT INTO route (path, host_id, target_id, target_type)
         "proxy"
     );
 
-INSERT INTO directory (base) VALUES ("/tests/.+");
+INSERT INTO directory (base, prefix, index_file) VALUES (
+    "tests/", "/tests/", "index.html");
 
 INSERT INTO route (path, host_id, target_id, target_type)
     VALUES (
@@ -92,4 +93,14 @@ INSERT INTO route (path, host_id, target_id, target_type)
         "dir"
     );
 
+INSERT INTO directory (base, prefix, index_file) VALUES (
+    "examples/chat/static/", "/chatdemo/", "index.html");
+
+INSERT INTO route (path, host_id, target_id, target_type)
+    VALUES (
+        "/chatdemo/",
+        (select id from host where name="localhost"),
+        last_insert_rowid(),
+        "dir"
+    );
 commit;

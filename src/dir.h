@@ -19,20 +19,24 @@ enum {
 };
 
 typedef struct FileRecord {
-    struct stat sb;
     int fd;
     time_t loaded;
     bstring date;
     bstring last_mod;
     bstring content_type;
     bstring header;
+    bstring full_path;
+    struct stat sb;
 } FileRecord;
 
 typedef struct Dir {
+    bstring prefix;
     bstring base;
+    bstring normalized_base;
+    bstring index_file;
 } Dir;
 
-Dir *Dir_create(const char *base);
+Dir *Dir_create(const char *base, const char *prefix, const char *index_file);
 
 void Dir_destroy(Dir *dir);
 
