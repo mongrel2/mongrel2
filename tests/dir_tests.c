@@ -6,13 +6,13 @@ FILE *LOG_FILE = NULL;
 
 char *test_Dir_find_file() 
 {
-    size_t fsize;
     bstring t1;
 
-    int fd = Dir_find_file(t1 = bfromcstr("tests/sample.json"), &fsize);
-    mu_assert(fd >= 0, "Failed to find the file.");
+    FileRecord *file = Dir_find_file(t1 = bfromcstr("tests/sample.json"));
+    mu_assert(file != NULL, "Failed to find the file.");
 
     bdestroy(t1);
+    FileRecord_destroy(file);
 
     return NULL;
 }

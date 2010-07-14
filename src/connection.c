@@ -584,7 +584,7 @@ int Connection_read_header(Connection *conn, Request *req)
     }
     check(finished, "HEADERS and/or request too big.");
 
-    Request_dump(req);
+    // Request_dump(req);
 
     return conn->nread; 
 

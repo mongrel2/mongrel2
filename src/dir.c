@@ -1,9 +1,5 @@
 #include <dir.h>
-
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <fcntl.h>
-#include <unistd.h>
 #include <dbg.h>
 #include <task/task.h>
 #include <string.h>
@@ -11,51 +7,90 @@
 #include <assert.h>
 #include <mime.h>
 
+struct tagbstring default_type = bsStatic ("text/plain");
 
-int Dir_find_file(bstring path, size_t *out_size)
+const char *RESPONSE_FORMAT = "HTTP/1.1 200 OK\r\n"
+    "Date: %s\r\n"
+    "Content-Type: %s\r\n"
+    "Content-Length: %d\r\n"
+    "Last-Modified: %s\r\n"
+    "ETag: %x-%x\r\n"
+    "Connection: %s\r\n\r\n";
+
+const char *RFC_822_TIME = "%a, %d %b %y %T %z";
+
+enum {
+    HOG_MAX = 1024
+};
+
+FileRecord *Dir_find_file(bstring path)
 {
-    int fd = 0;
-    struct stat sb;
+    FileRecord *fr = calloc(sizeof(FileRecord), 1);
     const char *p = bdata(path);
 
-    // TODO: implement a stat cache and track inode changes in it
-    int rc = stat(p, &sb);
+    check(fr, "Failed to make FileRecord memory.");
+
+    int rc = stat(p, &fr->sb);
     check(rc == 0, "File stat failed: %s", bdata(path));
 
-    *out_size = (size_t)sb.st_size;
+    fr->fd = open(p, O_RDONLY);
+    check(fr->fd >= 0, "Failed to open file but stat worked: %s", bdata(path));
 
-    fd = open(p, O_RDONLY);
-    check(fd >= 0, "Failed to open file but stat worked: %s", bdata(path));
+    fr->loaded = time(NULL);
 
-    return fd;
+    fr->date = bStrfTime(RFC_822_TIME, gmtime(&fr->loaded));
+    check(fr->date, "Failed to format current date.");
+
+    fr->last_mod = bStrfTime(RFC_822_TIME, gmtime(&fr->sb.st_mtime));
+    check(fr->last_mod, "Failed to format last modified time.");
+
+    // TODO: get this from a configuration
+    fr->content_type = MIME_match_ext(path, &default_type);
+    check(fr->content_type, "Should always get a content type back.");
+
+    // don't let people who've received big files linger and hog the show
+    const char *conn_close = fr->sb.st_size > HOG_MAX ? "close" : "keep-alive";
+
+    fr->header = bformat(RESPONSE_FORMAT,
+        bdata(fr->date),
+        bdata(fr->content_type),
+        fr->sb.st_size,
+        bdata(fr->last_mod),
+        fr->sb.st_mtime, fr->sb.st_size,
+        conn_close);
+
+    check(fr->header != NULL, "Failed to create response header.");
+
+    return fr;
 
 error:
-    return -1;
+    FileRecord_destroy(fr);
+    return NULL;
 }
 
 
-int Dir_stream_file(int file_fd, size_t flen, int sock_fd)
+int Dir_stream_file(FileRecord *file, int sock_fd)
 {
     ssize_t sent = 0;
     size_t total = 0;
     off_t offset = 0;
     size_t block_size = MAX_SEND_BUFFER;
 
-    for(total = 0; fdwait(sock_fd, 'w') == 0 && total < flen; total += sent) {
-        sent = Dir_send(sock_fd, file_fd, &offset, block_size);
-        check(sent > 0, "Failed to sendfile on socket: %d from file %d", sock_fd, file_fd);
+    fdwrite(sock_fd, bdata(file->header), blength(file->header));
+
+    for(total = 0; fdwait(sock_fd, 'w') == 0 && total < file->sb.st_size; total += sent) {
+        sent = Dir_send(sock_fd, file->fd, &offset, block_size);
+        check(sent > 0, "Failed to sendfile on socket: %d from file %d", sock_fd, file->fd);
     }
 
-    check(total <= flen, "Wrote way too much, wrote %d but size was %d", (int)total, (int)flen);
+    check(total <= file->sb.st_size, "Wrote way too much, wrote %d but size was %d", (int)total, (int)file->sb.st_size);
 
-    // TODO: with cache system in place we shouldn't close here
-    fdclose(file_fd);
+    fdclose(file->fd);
     return sent;
 
 error:
 
-    // TODO: cache should have to do this on error
-    fdclose(file_fd);
+    fdclose(file->fd);
     return -1;
 }
 
@@ -73,49 +108,45 @@ error:
     return NULL;
 }
 
+
+
 void Dir_destroy(Dir *dir)
 {
     bdestroy(dir->base);
     free(dir);
 }
 
-struct tagbstring default_type = bsStatic ("text/plain");
+
+void FileRecord_destroy(FileRecord *file)
+{
+    if(file) {
+        fdclose(file->fd);
+        bdestroy(file->date);
+        bdestroy(file->last_mod);
+        bdestroy(file->header);
+        // file->content_type is not owned by us
+        free(file);
+    }
+}
 
 
 int Dir_serve_file(Dir *dir, bstring path, int fd)
 {
-    bstring header = NULL;
-    bstring content_type = NULL;
-    int file_fd = -1;
-    size_t flen = 0;
-
     check(pattern_match(bdata(path), blength(path), bdata(dir->base)),
             "Failed to match Dir base path: %s against PATH %s",
             bdata(dir->base), bdata(path));
 
-    file_fd = Dir_find_file(path, &flen);
+    FileRecord *file = Dir_find_file(path);
+    check(file, "Error opening file: %s", bdata(path));
 
-    check(file_fd != -1, "Error opening file: %s", bdata(path));
+    int rc = Dir_stream_file(file, fd);
+    check(rc == file->sb.st_size, "Didn't send all of the file, sent %d of %s.", rc, bdata(path));
 
-    // TODO: get this from a configuration
-    content_type = MIME_match_ext(path, &default_type);
-
-    header = bformat("HTTP/1.1 200 OK\r\nContent-Type: %s\r\nContent-Length: %d\r\nConnection: close\r\n\r\n", 
-            bdata(content_type), flen);
-    check(header != NULL, "Failed to create response header.");
-
-    fdwrite(fd, bdata(header), blength(header));
-
-    int rc = Dir_stream_file(file_fd, flen, fd);
-    check(rc == flen, "Didn't send all of the file, sent %d of %s.", rc, bdata(path));
-
-    bdestroy(header);
-    fdclose(file_fd);
+    FileRecord_destroy(file);
     return 0;
 
 error:
-    bdestroy(header);
-    fdclose(file_fd);
+    FileRecord_destroy(file);
     return -1;
 }
 
