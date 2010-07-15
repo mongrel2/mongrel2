@@ -36,13 +36,15 @@ typedef struct Dir {
     bstring base;
     bstring normalized_base;
     bstring index_file;
+    bstring default_ctype;
 } Dir;
 
-Dir *Dir_create(const char *base, const char *prefix, const char *index_file);
+Dir *Dir_create(const char *base, const char *prefix, const char *index_file,
+        const char *default_ctype);
 
 void Dir_destroy(Dir *dir);
 
-FileRecord *Dir_find_file(bstring path);
+FileRecord *Dir_find_file(bstring path, bstring default_type);
 
 int Dir_stream_file(FileRecord *file, int sock_fd);
 

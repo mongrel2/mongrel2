@@ -8,7 +8,6 @@
 #include <mime.h>
 #include <response.h>
 
-struct tagbstring default_type = bsStatic ("text/plain");
 
 struct tagbstring ETAG_PATTERN = bsStatic("[a-e0-9]+-[a-e0-9]+");
 
@@ -22,11 +21,8 @@ const char *RESPONSE_FORMAT = "HTTP/1.1 200 OK\r\n"
 
 const char *RFC_822_TIME = "%a, %d %b %y %T %z";
 
-enum {
-    HOG_MAX = 1024
-};
 
-FileRecord *Dir_find_file(bstring path)
+FileRecord *Dir_find_file(bstring path, bstring default_type)
 {
     FileRecord *fr = calloc(sizeof(FileRecord), 1);
     const char *p = bdata(path);
@@ -49,7 +45,7 @@ FileRecord *Dir_find_file(bstring path)
     check(fr->last_mod, "Failed to format last modified time.");
 
     // TODO: get this from a configuration
-    fr->content_type = MIME_match_ext(path, &default_type);
+    fr->content_type = MIME_match_ext(path, default_type);
     check(fr->content_type, "Should always get a content type back.");
 
     // we own this now, not the caller
@@ -104,7 +100,7 @@ error:
 }
 
 
-Dir *Dir_create(const char *base, const char *prefix, const char *index_file)
+Dir *Dir_create(const char *base, const char *prefix, const char *index_file, const char *default_ctype)
 {
     Dir *dir = calloc(sizeof(Dir), 1);
     check(dir, "Out of memory error.");
@@ -116,6 +112,7 @@ Dir *Dir_create(const char *base, const char *prefix, const char *index_file)
     check(blength(dir->prefix) < MAX_DIR_PATH, "Prefix is too long, must be less than %d", MAX_DIR_PATH);
 
     dir->index_file = bfromcstr(index_file);
+    dir->default_ctype = bfromcstr(default_ctype);
 
     return dir;
 
@@ -132,6 +129,7 @@ void Dir_destroy(Dir *dir)
         bdestroy(dir->prefix);
         bdestroy(dir->index_file);
         bdestroy(dir->normalized_base);
+        bdestroy(dir->default_ctype);
         free(dir);
     }
 }
@@ -214,7 +212,7 @@ FileRecord *Dir_resolve_file(Dir *dir, bstring path)
             bdata(target), bdata(dir->base));
 
     // the FileRecord now owns the target
-    file = Dir_find_file(target);
+    file = Dir_find_file(target, dir->default_ctype);
     check(file, "Error opening file: %s", bdata(target));
 
     return file;

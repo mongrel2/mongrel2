@@ -75,7 +75,7 @@ char * all_tests() {
 
     Host_add_backend(zedshaw_com, "@chat", strlen("@chat"), BACKEND_HANDLER, NULL);
 
-    Dir *tests = Dir_create("tests/", "/tests/", "index.html");
+    Dir *tests = Dir_create("tests/", "/tests/", "index.html", "text/plain");
 
     Host_add_backend(zedshaw_com, "/tests", strlen("/tests"), BACKEND_DIR, tests);
 

@@ -18,12 +18,12 @@
 
 int Config_dir_load_cb(void *param, int cols, char **data, char **names)
 {
-    arity(4);
+    arity(5);
     Dir **target = (Dir **)param;
 
     debug("Making a dir for %s:%s", data[0], data[1]);
 
-    *target = Dir_create(data[1], data[2], data[3]);
+    *target = Dir_create(data[1], data[2], data[3], data[4]);
 
     check(*target, "Failed to create dir for %s:%s", data[0], data[1]);
 
@@ -78,7 +78,7 @@ int Config_route_load_cb(void *param, int cols, char **data, char **names)
     BackendType type = 0;
     const char *HANDLER_QUERY = "SELECT id, send_spec, send_ident, recv_spec, recv_ident FROM handler WHERE id=%s";
     const char *PROXY_QUERY = "SELECT id, addr, port FROM proxy WHERE id=%s";
-    const char *DIR_QUERY = "SELECT id, base, prefix, index_file FROM directory WHERE id=%s";
+    const char *DIR_QUERY = "SELECT id, base, prefix, index_file, default_ctype FROM directory WHERE id=%s";
 
 
     if(strcmp("handler", data[3]) == 0) {

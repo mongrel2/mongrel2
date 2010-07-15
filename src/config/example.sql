@@ -82,8 +82,8 @@ INSERT INTO route (path, host_id, target_id, target_type)
         "proxy"
     );
 
-INSERT INTO directory (base, prefix, index_file) VALUES (
-    "tests/", "/tests/", "index.html");
+INSERT INTO directory (base, prefix, index_file, default_ctype) VALUES (
+    "tests/", "/tests/", "index.html", "text/plain");
 
 INSERT INTO route (path, host_id, target_id, target_type)
     VALUES (
@@ -93,8 +93,8 @@ INSERT INTO route (path, host_id, target_id, target_type)
         "dir"
     );
 
-INSERT INTO directory (base, prefix, index_file) VALUES (
-    "examples/chat/static/", "/chatdemo/", "index.html");
+INSERT INTO directory (base, prefix, index_file, default_ctype) VALUES (
+    "examples/chat/static/", "/chatdemo/", "index.html", "text/plain");
 
 INSERT INTO route (path, host_id, target_id, target_type)
     VALUES (
@@ -104,8 +104,8 @@ INSERT INTO route (path, host_id, target_id, target_type)
         "dir"
     );
 
-INSERT INTO directory (base, prefix, index_file) VALUES (
-    "examples/chat/static/", "/static/", "index.html");
+INSERT INTO directory (base, prefix, index_file, default_ctype) VALUES (
+    "examples/chat/static/", "/static/", "index.html", "text/plain");
 
 INSERT INTO route (path, host_id, target_id, target_type)
     VALUES (

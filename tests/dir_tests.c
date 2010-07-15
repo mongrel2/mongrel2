@@ -6,10 +6,15 @@ FILE *LOG_FILE = NULL;
 
 char *test_Dir_find_file() 
 {
-    FileRecord *file = Dir_find_file(bfromcstr("tests/sample.json"));
+    bstring ctype = NULL;
+
+    FileRecord *file = Dir_find_file(bfromcstr("tests/sample.json"), 
+            ctype = bfromcstr("text/plain"));
+
     mu_assert(file != NULL, "Failed to find the file.");
 
     FileRecord_destroy(file);
+    bdestroy(ctype);
 
     return NULL;
 }
