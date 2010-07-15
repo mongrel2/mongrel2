@@ -18,11 +18,14 @@ struct tagbstring PING_PATTERN = bsStatic("@[a-z/]- {\"type\":%s*\"ping\"}");
 
 #define TRACE(C) debug("--> %s(%s:%d) %s:%d ", "" #C, State_event_name(event), event, __FUNCTION__, __LINE__)
 
+#define ERROR(F, C, M, ...)  {Response_send_status(F, &HTTP_##C); sentinel(M, ##__VA_ARGS__);}
+#define ERROR_UNLESS(T, F, C, M, ...) if(!(T)) ERROR(F, C, M, ##__VA_ARGS__)
+
 enum {
     MAX_CONTENT_LENGTH = 20 * 1024
 };
 
-inline int Connection_backend_event(Backend *found)
+inline int Connection_backend_event(Backend *found, int fd)
 {
     switch(found->type) {
         case BACKEND_HANDLER:
@@ -32,7 +35,7 @@ inline int Connection_backend_event(Backend *found)
         case BACKEND_PROXY:
             return PROXY;
         default:
-            sentinel("Invalid backend type given: %d", found->type);
+            ERROR(fd, 501, "Invalid backend type: %d", found->type);
     }
 
 error:
@@ -95,26 +98,22 @@ int connection_route_request(int event, void *data)
 
     if(host_name) {
         host = Server_match_backend(conn->server, host_name);
-        // TODO: find out if this should be an error or not
-        check(host, "Request for a host we don't have registered: %s", bdata(host_name));
     } else {
         host = conn->server->default_host;
     }
-    check(host, "Failed to resolve a host for the request, set a default host.");
+    ERROR_UNLESS(host, conn->fd, 404, "Request for a host we don't have registered: %s", bdata(host_name));
 
     Backend *found = Host_match_backend(host, path);
-    check(found, "Handler not found: %s", bdata(path));
+    ERROR_UNLESS(found, conn->fd, 404, "Handler not found: %s", bdata(path));
 
     Request_set_action(conn->req, found);
     conn->req->target_host = host;
 
     bdestroy(host_name);
-    return Connection_backend_event(found);
+    return Connection_backend_event(found, conn->fd);
 
 error:
-    // TODO: need to get the error state resolver working, but this is alright
     bdestroy(host_name);
-    Response_send_error(conn->fd, &HTTP_404);
     return CLOSE;
 }
 
@@ -141,10 +140,9 @@ int connection_msg_to_handler(int event, void *data)
                 conn->fd, conn->buf + header_len, conn->nread - header_len - 1);
 
         rc = Handler_deliver(handler->send_socket, bdata(payload), blength(payload));
-
         bdestroy(payload);
-
-        check(rc != -1, "Failed to deliver to handler: %s", 
+    
+        ERROR_UNLESS(rc != -1, conn->fd, 502, "Failed to deliver to handler: %s", 
                 bdata(Request_path(conn->req)));
     }
 
@@ -172,9 +170,7 @@ int connection_http_to_handler(int event, void *data)
     if(content_len == 0) {
         body = "";
     } else if(content_len > MAX_CONTENT_LENGTH) {
-        rc = Response_send_error(conn->fd, &HTTP_413);
-        check(rc, "Failed to send 413 error response.");
-        sentinel("Request entity is too large: %d", content_len);
+        ERROR(conn->fd, 413, "Request entity is too large: %d", content_len);    
     } else {
         if(total > BUFFER_SIZE) {
             conn->buf = realloc(conn->buf, total);
@@ -188,12 +184,11 @@ int connection_http_to_handler(int event, void *data)
     }
 
     result = Request_to_payload(conn->req, handler->send_ident, conn->fd, body, content_len);
-
     check(result, "Failed to create payload for request.");
 
-
-    Handler_deliver(handler->send_socket, bdata(result), blength(result));
-
+    rc = Handler_deliver(handler->send_socket, bdata(result), blength(result));
+    ERROR_UNLESS(rc != -1, conn->fd, 502, "Failed to deliver to handler: %s", 
+            bdata(Request_path(conn->req)));
 
     bdestroy(result);
     return REQ_SENT;
@@ -309,7 +304,8 @@ int connection_proxy_parse(int event, void *data)
     // unlike other places, we keep the nread rather than reset
     rc = Connection_read_header(conn, conn->req);
     check(rc > 0, "Failed to read another header.");
-    check(Request_is_http(conn->req), "Someone tried to change the protocol on us from HTTP.");
+    ERROR_UNLESS(Request_is_http(conn->req), conn->fd, 400,
+            "Someone tried to change the protocol on us from HTTP.");
 
     // do a light find of this request compared to the last one
     if(!biseq(host, Request_get(conn->req, &HTTP_HOST))) {
@@ -320,18 +316,19 @@ int connection_proxy_parse(int event, void *data)
 
         // query up the path to see if it gets the current request action
         Backend *found = Host_match_backend(target_host, Request_path(conn->req));
-        check(found, "Didn't find next target in proxy chain request.");
+        ERROR_UNLESS(found, conn->fd, 404, 
+                "Handler not found: %s", bdata(Request_path(conn->req)));
 
         if(found != req_action) {
             Request_set_action(conn->req, found);
-            return Connection_backend_event(found);
+            return Connection_backend_event(found, conn->fd);
         } else {
             // TODO: since we found it already, keep it set and reuse
             return HTTP_REQ;
         }
     }
 
-    sentinel("Should all be handled in if-statement above.");
+    ERROR(conn->fd, 500, "Invalid code branch, tell Zed.");
 error:
     return REMOTE_CLOSE;
 }
@@ -343,7 +340,7 @@ int connection_proxy_failed(int event, void *data)
     TRACE(proxy_failed);
     Connection *conn = (Connection *)data;
 
-    Response_send_error(conn->fd, &HTTP_502);
+    Response_send_status(conn->fd, &HTTP_502);
 
     ProxyConnect_destroy(conn->proxy);
 
@@ -398,8 +395,6 @@ int connection_error(int event, void *data)
         connection_proxy_close(event, data);
     }
 
-    debug("ERROR from fd: %d after event: %d", conn->fd, event);
-
     Register_disconnect(conn->fd);
     fdclose(conn->fd);
 
@@ -425,7 +420,7 @@ int connection_identify_request(int event, void *data)
         Register_connect(conn->fd, CONN_TYPE_HTTP);
         return HTTP_REQ;
     } else {
-        sentinel("Invalid request type, TELL ZED.");
+        ERROR(conn->fd, 500, "Invalid code branch, tell Zed.");
     }
 
 error:
@@ -521,7 +516,8 @@ void Connection_task(void *v)
 
     for(i = 0, next = OPEN; next != CLOSE; i++) {
         next = State_exec(&conn->state, next, (void *)conn);
-        check(next >= FINISHED && next < EVENT_END, "!!! Invalid next event[%d]: %d", i, next);
+        ERROR_UNLESS(next >= FINISHED && next < EVENT_END, conn->fd, 500, 
+                "!!! Invalid next event[%d]: %d, Tell ZED!", i, next);
     }
 
     State_exec(&conn->state, CLOSE, (void *)conn);
@@ -572,16 +568,17 @@ int Connection_read_header(Connection *conn, Request *req)
         conn->nread += n;
 
         check(conn->buf[BUFFER_SIZE] == '\0', "Trailing \\0 was clobbered, buffer overflow potentially.");
-
         check(conn->nread < BUFFER_SIZE, "Read too much, FATAL error: nread: %d, buffer size: %d", conn->nread, BUFFER_SIZE);
 
         finished = Request_parse(req, conn->buf, conn->nread, &conn->nparsed);
 
-        check(finished != -1, "Error in parsing: %d, bytes: %d, value: %.*s, parsed: %d", 
+        ERROR_UNLESS(finished != -1, conn->fd, 400, 
+                "Error in parsing: %d, bytes: %d, value: %.*s, parsed: %d", 
                 finished, conn->nread, conn->nread, conn->buf, (int)conn->nparsed);
 
     }
-    check(finished, "HEADERS and/or request too big.");
+
+    ERROR_UNLESS(finished, conn->fd, 400, "HEADERS and/or request too big.");
 
     Request_dump(req);
 

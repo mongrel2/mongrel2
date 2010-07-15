@@ -10,6 +10,8 @@
 
 struct tagbstring default_type = bsStatic ("text/plain");
 
+struct tagbstring ETAG_PATTERN = bsStatic("[a-e0-9]+-[a-e0-9]+");
+
 const char *RESPONSE_FORMAT = "HTTP/1.1 200 OK\r\n"
     "Date: %s\r\n"
     "Content-Type: %s\r\n"
@@ -250,7 +252,6 @@ inline bstring Dir_none_match(Request *req, FileRecord *file, int if_modified_si
 }
 
 
-struct tagbstring ETAG_PATTERN = bsStatic("[a-e0-9]+-[a-e0-9]+");
 
 
 inline bstring Dir_calculate_response(Request *req, FileRecord *file)
@@ -313,7 +314,7 @@ int Dir_serve_file(Request *req, Dir *dir, bstring path, int fd)
     int is_head = is_get ? 0 : biseq(method, &HTTP_HEAD);
 
     if(!(is_get || is_head)) {
-        rc = Response_send_error(fd, &HTTP_405);
+        rc = Response_send_status(fd, &HTTP_405);
         check(rc == blength(&HTTP_405), "Failed to send 405 to client.");
         return -1;
     } else {
@@ -321,7 +322,7 @@ int Dir_serve_file(Request *req, Dir *dir, bstring path, int fd)
         resp = Dir_calculate_response(req, file);
 
         if(resp) {
-            rc = Response_send_error(fd, resp);
+            rc = Response_send_status(fd, resp);
             check(rc == blength(resp), "Failed to send error response on file serving.");
         } else if(is_get) {
             rc = Dir_stream_file(file, fd);
