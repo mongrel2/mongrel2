@@ -82,19 +82,27 @@ INSERT INTO route (path, host_id, target_id, target_type)
         "proxy"
     );
 
-INSERT INTO directory (base, prefix, index_file, default_ctype) VALUES (
-    "tests/", "/tests/", "index.html", "text/plain");
+INSERT INTO directory (base, index_file, default_ctype) VALUES (
+    "tests/", "index.html", "text/plain");
 
 INSERT INTO route (path, host_id, target_id, target_type)
     VALUES (
         "/tests/",
         (select id from host where name="localhost"),
-        last_insert_rowid(),
+        (select id from directory where base="tests/"),
         "dir"
     );
 
-INSERT INTO directory (base, prefix, index_file, default_ctype) VALUES (
-    "examples/chat/static/", "/chatdemo/", "index.html", "text/plain");
+INSERT INTO route (path, host_id, target_id, target_type)
+    VALUES (
+        "/testsmulti/(.*.json)",
+        (select id from host where name="localhost"),
+        (select id from directory where base="tests/"),
+        "dir"
+    );
+
+INSERT INTO directory (base, index_file, default_ctype) VALUES (
+    "examples/chat/static/", "index.html", "text/plain");
 
 INSERT INTO route (path, host_id, target_id, target_type)
     VALUES (
@@ -104,8 +112,8 @@ INSERT INTO route (path, host_id, target_id, target_type)
         "dir"
     );
 
-INSERT INTO directory (base, prefix, index_file, default_ctype) VALUES (
-    "examples/chat/static/", "/static/", "index.html", "text/plain");
+INSERT INTO directory (base, index_file, default_ctype) VALUES (
+    "examples/chat/static/", "index.html", "text/plain");
 
 INSERT INTO route (path, host_id, target_id, target_type)
     VALUES (

@@ -57,7 +57,10 @@ static void header_done_cb(void *data, const char *at, size_t length)
 
     // extract host header
     req->host = Request_get(req, &HTTP_HOST);
-    if(req->host) req->host_name = bHead(req->host, bstrchr(req->host, ':'));
+    int colon = bstrchr(req->host, ':');
+    if(req->host) {
+        req->host_name = colon > 0 ? bHead(req->host, colon) : bstrcpy(req->host);
+    }
     
     // TODO: do something else here like verify the request or call filters
 }

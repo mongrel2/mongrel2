@@ -78,8 +78,10 @@ int Config_route_load_cb(void *param, int cols, char **data, char **names)
     BackendType type = 0;
     const char *HANDLER_QUERY = "SELECT id, send_spec, send_ident, recv_spec, recv_ident FROM handler WHERE id=%s";
     const char *PROXY_QUERY = "SELECT id, addr, port FROM proxy WHERE id=%s";
-    const char *DIR_QUERY = "SELECT id, base, prefix, index_file, default_ctype FROM directory WHERE id=%s";
-
+    const char *DIR_QUERY = "SELECT directory.id as id, base, route.path as "
+        "prefix, index_file, default_ctype FROM route, directory where "
+        "directory.id=target_id and target_type='dir' and target_id=%s "
+        "and route.id=%s";
 
     if(strcmp("handler", data[3]) == 0) {
         query = SQL(HANDLER_QUERY, data[2]);
@@ -99,7 +101,7 @@ int Config_route_load_cb(void *param, int cols, char **data, char **names)
         type = BACKEND_PROXY;
 
     } else if(strcmp("dir", data[3]) == 0) {
-        query = SQL(DIR_QUERY, data[2]);
+        query = SQL(DIR_QUERY, data[2], data[0]);
         rc = DB_exec(query, Config_dir_load_cb, &target);
         check(rc == 0, "Failed to find dir for route: %s (id: %s)",
                 data[1], data[0]);

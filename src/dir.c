@@ -108,7 +108,12 @@ Dir *Dir_create(const char *base, const char *prefix, const char *index_file, co
     dir->base = bfromcstr(base);
     check(blength(dir->base) < MAX_DIR_PATH, "Base direcotry is too long, must be less than %d", MAX_DIR_PATH);
 
-    dir->prefix = bfromcstr(prefix);
+    // dir can come from the routing table so it could have a pattern in it, strip that off
+    bstring pattern = bfromcstr(prefix);
+    int first_paren = bstrchr(pattern, '(');
+    dir->prefix = first_paren >= 0 ? bHead(pattern, first_paren) : bstrcpy(pattern);
+    bdestroy(pattern);
+
     check(blength(dir->prefix) < MAX_DIR_PATH, "Prefix is too long, must be less than %d", MAX_DIR_PATH);
 
     dir->index_file = bfromcstr(index_file);
@@ -290,11 +295,7 @@ inline bstring Dir_calculate_response(Request *req, FileRecord *file)
             return &HTTP_412;
         }
     } else {
-        if(biseqcstr(if_match, "*")) {
-            return &HTTP_412;
-        } else {
-            return &HTTP_404;
-        }
+        return &HTTP_404;
     }
 
     return &HTTP_500;
