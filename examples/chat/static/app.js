@@ -67,7 +67,7 @@ state = new FSM({
         },
 
         USERLIST: function(fsm, event) {
-            setUsers(event.users);
+                addMessage('<em><b>MEMBERS: </b><em>' + escapeHTML(event.users) + '</em>');
         },
 
         CLOSE: function(fsm, event) {
