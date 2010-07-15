@@ -11,3 +11,15 @@ struct tagbstring HTTP_FRAGMENT = bsStatic("FRAGMENT");
 struct tagbstring HTTP_BODY = bsStatic("BODY");
 struct tagbstring JSON_METHOD = bsStatic("JSON");
 
+struct tagbstring HTTP_IF_MATCH = bsStatic("If-Match");
+struct tagbstring HTTP_IF_NONE_MATCH = bsStatic("If-None-Match");
+struct tagbstring HTTP_IF_MODIFIED_SINCE = bsStatic("If-Modified-Since");
+struct tagbstring HTTP_IF_UNMODIFIED_SINCE = bsStatic("If-Unmodified-Since");
+
+
+struct tagbstring HTTP_POST = bsStatic("POST");
+struct tagbstring HTTP_GET = bsStatic("GET");
+struct tagbstring HTTP_HEAD = bsStatic("HEAD");
+struct tagbstring HTTP_DELETE = bsStatic("DELETE");
+struct tagbstring HTTP_PUT = bsStatic("PUT");
+struct tagbstring HTTP_OPTIONS = bsStatic("OPTIONS");

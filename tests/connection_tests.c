@@ -5,6 +5,7 @@
 #include <fcntl.h>
 #include <zmq.h>
 #include <task/task.h>
+#include <dir.h>
 
 FILE *LOG_FILE = NULL;
 

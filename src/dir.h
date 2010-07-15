@@ -12,6 +12,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <request.h>
 
 enum {
     MAX_SEND_BUFFER = 16 * 1024,
@@ -26,6 +27,7 @@ typedef struct FileRecord {
     bstring content_type;
     bstring header;
     bstring full_path;
+    bstring etag;
     struct stat sb;
 } FileRecord;
 
@@ -44,7 +46,7 @@ FileRecord *Dir_find_file(bstring path);
 
 int Dir_stream_file(FileRecord *file, int sock_fd);
 
-int Dir_serve_file(Dir *dir, bstring, int fd);
+int Dir_serve_file(Request *req, Dir *dir, bstring path, int fd);
 
 void FileRecord_destroy(FileRecord *file);
 

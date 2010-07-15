@@ -4,7 +4,7 @@
 #include <adt/tst.h>
 #include <proxy.h>
 #include <handler.h>
-#include <dir.h>
+#include <request.h>
 #include <routing.h>
 
 enum {
@@ -29,7 +29,7 @@ typedef struct Backend {
     union {
         Handler *handler;
         Proxy *proxy;
-        Dir *dir;
+        struct Dir *dir;
     } target;
 } Backend;
 

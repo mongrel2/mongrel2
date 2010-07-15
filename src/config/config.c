@@ -9,6 +9,7 @@
 #include <sqlite3.h>
 #include <assert.h>
 #include <mime.h>
+#include <dir.h>
 
 
 #define arity(N) check(cols == (N), "Wrong number of cols: %d but expect %d", cols, (N))

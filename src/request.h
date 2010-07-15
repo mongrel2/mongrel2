@@ -19,7 +19,7 @@ typedef struct Request {
     bstring path;
     bstring query_string;
     bstring fragment;
-    Host *target_host;
+    struct Host *target_host;
     dict_t *headers;
     struct Backend *action;
     http_parser parser;
@@ -27,15 +27,17 @@ typedef struct Request {
 
 Request *Request_create();
 
-int Request_parse(Request *parser, char *buf, size_t nread, size_t *out_nparsed);
+int Request_parse(Request *req, char *buf, size_t nread, size_t *out_nparsed);
 
-void Request_start(Request *parser);
+void Request_start(Request *req);
 
-void Request_destroy(Request *parser);
+void Request_destroy(Request *req);
 
-void Request_dump(Request *parser);
+void Request_dump(Request *req);
 
-bstring Request_get(Request *parser, bstring field);
+bstring Request_get(Request *req, bstring field);
+
+int Request_get_date(Request *req, bstring field, const char *format);
 
 #define Request_parser(R) (&((R)->parser))
 

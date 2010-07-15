@@ -213,13 +213,12 @@ int connection_http_to_directory(int event, void *data)
 
     Dir *dir = Request_get_action(conn->req, dir);
 
-    int rc = Dir_serve_file(dir, path, conn->fd);
+    int rc = Dir_serve_file(conn->req, dir, path, conn->fd);
     check(rc == 0, "Failed to serve file: %s", bdata(path));
 
     return RESP_SENT;
 
 error:
-    Response_send_error(conn->fd, &HTTP_404);
     return CLOSE;
 }
 
@@ -584,7 +583,7 @@ int Connection_read_header(Connection *conn, Request *req)
     }
     check(finished, "HEADERS and/or request too big.");
 
-    // Request_dump(req);
+    Request_dump(req);
 
     return conn->nread; 
 

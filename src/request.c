@@ -1,3 +1,5 @@
+#define _XOPEN_SOURCE 1
+
 #include <request.h>
 #include <dbg.h>
 #include <stdlib.h>
@@ -5,6 +7,8 @@
 #include <adt/dict.h>
 #include <string.h>
 #include <headers.h>
+
+#include <time.h>
 
 enum {
     MAX_HEADER_COUNT=128 * 10
@@ -184,10 +188,24 @@ bstring Request_get(Request *req, bstring field)
 {
     dnode_t *node = dict_lookup(req->headers, field);
 
-    if(node) {
-        return (bstring)dnode_get(node);
+    return node == NULL ? NULL : (bstring)dnode_get(node);
+}
+
+
+int Request_get_date(Request *req, bstring field, const char *format)
+{
+    struct tm tm_val;
+    bstring value = Request_get(req, field);
+
+    if(value) {
+        memset(&tm_val, 0, sizeof(struct tm));
+        if(strptime(bdata(value), format, &tm_val) == NULL) {
+            return 0;
+        } else {
+            return (int)mktime(&tm_val);
+        }
     } else {
-        return NULL;
+        return 0;
     }
 }
 
