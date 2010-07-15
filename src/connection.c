@@ -92,11 +92,7 @@ int connection_route_request(int event, void *data)
 
     bstring path = Request_path(conn->req);
 
-    // TODO: pre-process these out since we'll have to look them up all the damn time
-    bstring host_header = Request_get(conn->req, &HTTP_HOST);
-    host_name = bHead(host_header, bstrchr(host_header, ':'));
-
-    if(host_name) {
+    if(conn->req->host_name) {
         host = Server_match_backend(conn->server, host_name);
     } else {
         host = conn->server->default_host;
@@ -138,6 +134,8 @@ int connection_msg_to_handler(int event, void *data)
 
         bstring payload = Request_to_payload(conn->req, handler->send_ident,
                 conn->fd, conn->buf + header_len, conn->nread - header_len - 1);
+
+        debug("MSG TO HANDLER: %s", bdata(payload));
 
         rc = Handler_deliver(handler->send_socket, bdata(payload), blength(payload));
         bdestroy(payload);
@@ -185,6 +183,8 @@ int connection_http_to_handler(int event, void *data)
 
     result = Request_to_payload(conn->req, handler->send_ident, conn->fd, body, content_len);
     check(result, "Failed to create payload for request.");
+
+    debug("HTTP TO HANDLER: %s", bdata(result));
 
     rc = Handler_deliver(handler->send_socket, bdata(result), blength(result));
     ERROR_UNLESS(rc != -1, conn->fd, 502, "Failed to deliver to handler: %s", 
@@ -297,7 +297,7 @@ int connection_proxy_parse(int event, void *data)
 
     int rc = 0;
     Connection *conn = (Connection *)data;
-    bstring host = bstrcpy(Request_get(conn->req, &HTTP_HOST));
+    bstring host = bstrcpy(conn->req->host);
     Host *target_host = conn->req->target_host;
     Backend *req_action = conn->req->action;
 
@@ -308,7 +308,7 @@ int connection_proxy_parse(int event, void *data)
             "Someone tried to change the protocol on us from HTTP.");
 
     // do a light find of this request compared to the last one
-    if(!biseq(host, Request_get(conn->req, &HTTP_HOST))) {
+    if(!biseq(host, conn->req->host)) {
         bdestroy(host);
         return PROXY;
     } else {
@@ -579,8 +579,6 @@ int Connection_read_header(Connection *conn, Request *req)
     }
 
     ERROR_UNLESS(finished, conn->fd, 400, "HEADERS and/or request too big.");
-
-    Request_dump(req);
 
     return conn->nread; 
 

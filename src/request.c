@@ -51,10 +51,14 @@ static void header_done_cb(void *data, const char *at, size_t length)
 {
     Request *req = (Request *)data;
 
+    // extract content_len
     const char *clen = bdata(Request_get(req, &HTTP_CONTENT_LENGTH));
-
     if(clen) req->parser.content_len = atoi(clen);
-        
+
+    // extract host header
+    req->host = Request_get(req, &HTTP_HOST);
+    if(req->host) req->host_name = bHead(req->host, bstrchr(req->host, ':'));
+    
     // TODO: do something else here like verify the request or call filters
 }
 
@@ -120,6 +124,8 @@ inline void Request_nuke_parts(Request *req)
     bdestroy(req->path); req->path = NULL;
     bdestroy(req->query_string); req->query_string = NULL;
     bdestroy(req->fragment); req->fragment = NULL;
+    bdestroy(req->host); req->host = NULL;
+    bdestroy(req->host_name); req->host_name = NULL;
 }
 
 void Request_destroy(Request *req)
@@ -156,33 +162,6 @@ int Request_parse(Request *req, char *buf, size_t nread, size_t *out_nparsed)
     return finished;
 }
 
-
-void Request_dump(Request *req)
-{
-    dnode_t *node = NULL;
-
-    if(Request_is_socket(req)) {
-        debug("FLASH SOCKET REQUEST of LENGTH: %d", (int)req->parser.body_start);
-        return;
-    } else if(Request_is_json(req)) {
-        debug("JSON REQUEST of LENGTH: %d", (int)req->parser.body_start);
-    } else if(Request_is_http(req)) {
-        debug("HTTP REQUEST of LENGTH: %d ***********", (int)req->parser.body_start);
-        debug("PATH: %s", bdata(req->path));
-    } else {
-        sentinel("UNKNOWN REQUEST TYPE, TELL ZED.");
-    }
-
-    for(node = dict_first(req->headers); node != NULL; node = dict_next(req->headers, node)) {
-        bstring key = (bstring)dnode_getkey(node);
-        bstring value = (bstring)dnode_get(node);
-
-        debug("%s: %s", bdata(key), bdata(value));
-    }
-
-error:
-    return;
-}
 
 bstring Request_get(Request *req, bstring field)
 {

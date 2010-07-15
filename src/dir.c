@@ -242,7 +242,7 @@ inline bstring Dir_none_match(Request *req, FileRecord *file, int if_modified_si
         return &HTTP_304;
     } else {
         if(if_modified_since) {
-            Dir_if_modified_since(req, file, if_modified_since);
+            return Dir_if_modified_since(req, file, if_modified_since);
         } else {
             return NULL;
         }
@@ -309,9 +309,8 @@ int Dir_serve_file(Request *req, Dir *dir, bstring path, int fd)
     bstring target = NULL;
     bstring resp = NULL;
     int rc = 0;
-    bstring method = Request_get(req, &HTTP_METHOD);
-    int is_get = biseq(method, &HTTP_GET);
-    int is_head = is_get ? 0 : biseq(method, &HTTP_HEAD);
+    int is_get = biseq(req->request_method, &HTTP_GET);
+    int is_head = is_get ? 0 : biseq(req->request_method, &HTTP_HEAD);
 
     if(!(is_get || is_head)) {
         rc = Response_send_status(fd, &HTTP_405);

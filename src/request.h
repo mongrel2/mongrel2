@@ -19,6 +19,8 @@ typedef struct Request {
     bstring path;
     bstring query_string;
     bstring fragment;
+    bstring host;
+    bstring host_name;
     struct Host *target_host;
     dict_t *headers;
     struct Backend *action;
@@ -32,8 +34,6 @@ int Request_parse(Request *req, char *buf, size_t nread, size_t *out_nparsed);
 void Request_start(Request *req);
 
 void Request_destroy(Request *req);
-
-void Request_dump(Request *req);
 
 bstring Request_get(Request *req, bstring field);
 

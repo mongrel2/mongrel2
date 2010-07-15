@@ -16,7 +16,6 @@ struct tagbstring HTTP_IF_NONE_MATCH = bsStatic("If-None-Match");
 struct tagbstring HTTP_IF_MODIFIED_SINCE = bsStatic("If-Modified-Since");
 struct tagbstring HTTP_IF_UNMODIFIED_SINCE = bsStatic("If-Unmodified-Since");
 
-
 struct tagbstring HTTP_POST = bsStatic("POST");
 struct tagbstring HTTP_GET = bsStatic("GET");
 struct tagbstring HTTP_HEAD = bsStatic("HEAD");
