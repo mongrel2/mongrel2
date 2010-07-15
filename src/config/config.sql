@@ -20,7 +20,6 @@ CREATE TABLE server (id INTEGER PRIMARY KEY,
 
 CREATE TABLE host (id INTEGER PRIMARY KEY, 
     server_id INTEGER,
-    default_type TEXT DEFAULT 'text/plain',
     maintenance BOOLEAN DEFAULT 0,
     name TEXT,
     matching TEXT);
