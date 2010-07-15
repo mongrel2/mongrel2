@@ -10,7 +10,12 @@ user_list = []
 
 
 while True:
-    req = conn.recv_json()
+    try:
+        req = conn.recv_json()
+    except:
+        print "FAILED RECV JSON"
+        continue
+
     data = req.data
 
     if data["type"] == "join":
@@ -33,14 +38,7 @@ while True:
         users[req.conn_id] = data['user']
 
     elif data['type'] == "msg":
-        idiots = open("idiots").read()
-        who = users.get(req.conn_id, "XXX")
-        dwho = data.get('user', 'XXX')
-        if who in idiots or dwho in idiots:
-            print "IDIOT:", req.conn_id
-            conn.reply_json(req, data)
-        else:
-            conn.deliver_json(users.keys(), data)
+        conn.deliver_json(users.keys(), data)
 
     print "REGISTERED USERS:", len(users)
 
