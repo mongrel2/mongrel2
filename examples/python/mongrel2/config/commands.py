@@ -62,16 +62,18 @@ def dump_command(db=None):
     """
     print "LOADING DB...."
 
-    from mongrel2.config.model import *
+    from mongrel2.config import model
+    
+    store = model.load_db("sqlite:" + db)
+    servers = store.find(model.Server)
 
-    main = store.get(Server, 1)
-    print "SERVER:", main.uuid, "PORT:", main.port
+    for server in servers:
+        print server
 
-    for host in main.hosts:
-        print "\tHOST:", host.name, host.matching
+        for host in server.hosts:
+            print "\t", host
 
-        for route in host.routes:
-            print "\t\tROUTE:", route.path, "TYPE", route.target_type, route.target_id
-
-
+            for route in host.routes:
+                print "\t\t", route
+                print "\t\t\t", route.target
 
