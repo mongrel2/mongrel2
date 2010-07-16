@@ -31,6 +31,7 @@ def shell_command():
         print "Bye."
 
 
+
 def help_command(**options):
     """
     Prints out help for the commands. 
@@ -60,7 +61,8 @@ def dump_command(db=None):
 
         m2sh dump -db config.sqlite
     """
-    print "LOADING DB...."
+
+    print "LOADING DB: ", db
 
     from mongrel2.config import model
     
