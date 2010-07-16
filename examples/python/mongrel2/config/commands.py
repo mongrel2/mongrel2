@@ -2,6 +2,7 @@ from mongrel2 import config
 from mongrel2.config import args
 import mongrel2.config.commands
 
+
 def shell_command():
     """
     Starts an interactive shell with readline style input so you can
