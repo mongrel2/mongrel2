@@ -51,3 +51,27 @@ def help_command(**options):
         print "Available commands:\n"
         print ", ".join(args.available_commands(config.commands))
         print "\nUse config help -for <command> to find out more."
+
+
+
+def dump_command(db=None):
+    """
+    Simple dump of a config database:
+
+        m2sh dump -db config.sqlite
+    """
+    print "LOADING DB...."
+
+    from mongrel2.config.model import *
+
+    main = store.get(Server, 1)
+    print "SERVER:", main.uuid, "PORT:", main.port
+
+    for host in main.hosts:
+        print "\tHOST:", host.name, host.matching
+
+        for route in host.routes:
+            print "\t\tROUTE:", route.path, "TYPE", route.target_type, route.target_id
+
+
+
