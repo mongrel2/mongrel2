@@ -1,29 +1,22 @@
-from mongrel2.config.model import *
-from uuid import uuid4
+from mongrel2.config import *
 
-store = load_db("sqlite:testconf.sqlite")
-clear_db()
+begin("testconf.sqlite")
 
-main = Server(uuid=uuid4().hex,
-                access_log="/logs/access.log",
-                error_log="/logs/error.log",
-                chroot="/var/www/mongrel2",
-                default_host="mongrel2.org",
-                port=6767,
-                hosts = [
-                    Host(name="mongrel2.org", routes = [
-                        Route(path="/test", 
-                              target=Proxy('localhost', 8080)),
+main = Server(
+    uuid="f400bf85-4538-4f7a-8908-67e313d515c2",
+    access_log="/logs/access.log",
+    error_log="/logs/error.log",
+    chroot="./",
+    default_host="localhost",
+    port=6767,
+    hosts = [
+        Host(name="mongrel2.org", routes={
+            '/tests/': Dir(base='tests/', index_file='index.html',
+                             default_ctype='text/plain')
+        })
+    ]
+)
 
-                        Route(path="/chatdemo/",
-                              target=Dir("tests/", "index.html")),
+commit([main])
 
-                        Route(path="/handlertest",
-                              target=Handler("tcp://127.0.0.1:9998", "",
-                                             "tcp://127.0.0.1:9999", ""))
-                    ])
-                ])
-
-store.add(main)
-store.commit()
 

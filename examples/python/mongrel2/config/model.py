@@ -3,6 +3,7 @@ from storm.locals import *
 database = None
 store = None
 
+
 def load_db(spec):
     global database
     global store
@@ -16,6 +17,29 @@ def load_db(spec):
 def clear_db():
     for table in ["server", "host", "route", "proxy", "directory", "handler"]:
         store.execute("DELETE FROM %s" % table)
+
+
+def begin(config_db):
+    store = load_db("sqlite:" + config_db)
+    clear_db()
+
+
+def commit(servers):
+    for server in servers:
+        store.add(server)
+
+        for host in server.hosts:
+            host.server = server
+            store.add(host)
+
+            host.routes = [Route(path=p, target=t) for p,t in
+                           host.routes.items()]
+
+            for route in host.routes:
+                route.host = host
+                store.add(route)
+
+    store.commit()
 
 
 class Server(object):
@@ -39,14 +63,9 @@ class Server(object):
         self.port = port
         self.hosts = hosts or []
 
-        for host in hosts:
-            host.server = self
-            store.add(host)
-
-
     def __repr__(self):
-        return "Server(id=%d, uuid=%r, access_log=%r, error_log=%r, chroot=%r, default_host=%r, port=%d)" % (
-            self.id, self.uuid, self.access_log, self.error_log, 
+        return "Server(uuid=%r, access_log=%r, error_log=%r, chroot=%r, default_host=%r, port=%d)" % (
+            self.uuid, self.access_log, self.error_log, 
             self.chroot, self.default_host, self.port)
 
 
@@ -68,14 +87,10 @@ class Host(object):
         self.maintenance = maintenance
         self.routes = routes or []
 
-        for route in routes:
-            route.host = self
-            store.add(route)
-
 
     def __repr__(self):
-        return "Host(id=%d, server_id=%d, maintenance=%d, name=%r, matching=%r)" % (
-            self.id, self.server_id, self.maintenance, self.name, self.matching)
+        return "Host(maintenance=%d, name=%r, matching=%r)" % (
+            self.maintenance, self.name, self.matching)
 
 
 
@@ -97,10 +112,9 @@ class Handler(object):
         self.recv_spec = unicode(recv_spec)
         self.recv_ident = unicode(recv_ident)
 
-
     def __repr__(self):
-        return "Handler(id=%d, send_spec=%r, send_ident=%r, recv_spec=%r, recv_ident=%r" % (
-            self.id, self.send_spec, self.send_ident, self.recv_spec,
+        return "Handler(send_spec=%r, send_ident=%r, recv_spec=%r, recv_ident=%r)" % (
+            self.send_spec, self.send_ident, self.recv_spec,
             self.recv_ident)
 
 
@@ -118,8 +132,8 @@ class Proxy(object):
         
 
     def __repr__(self):
-        return "Proxy(id=%d, addr=%r, port=%d)" % (
-            self.id, self.addr, self.port)
+        return "Proxy(addr=%r, port=%d)" % (
+            self.addr, self.port)
 
 
 
@@ -137,8 +151,8 @@ class Dir(object):
         self.default_ctype = unicode(default_ctype)
 
     def __repr__(self):
-        return "Dir(id=%d, base=%r, index_file=%r, default_ctype=%r)" % (
-            self.id, self.base, self.index_file, self.default_ctype)
+        return "Dir(base=%r, index_file=%r, default_ctype=%r)" % (
+            self.base, self.index_file, self.default_ctype)
 
 
 
@@ -179,9 +193,8 @@ class Route(object):
         return targets[0] if targets.count() else None
 
     def __repr__(self):
-        return "Route(id=%d, path=%r, reversed=%r, host_id=%d, target=%r)" % (
-            self.id, self.path, self.reversed, self.host_id, 
-            self.target)
+        return "Route(path=%r, reversed=%r, target=%r)" % (
+            self.path, self.reversed, self.target)
 
 
 Host.routes = ReferenceSet(Host.id, Route.host_id)
@@ -195,7 +208,7 @@ class MIMEType(object):
 
 
     def __repr__(self):
-        return "MIMEType(id=%d, mimetype=%r, extension=%r)" % (
-            self.id, self.mimetype, self.extension)
+        return "MIMEType(mimetype=%r, extension=%r)" % (
+            self.mimetype, self.extension)
 
 

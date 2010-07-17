@@ -78,5 +78,22 @@ def dump_command(db=None):
 
             for route in host.routes:
                 print "\t\t", route
-                print "\t\t\t", route.target
+
+
+def uuid_command(hex=False):
+    """
+    Generates a UUID for you to use in your configurations:
+
+        m2sh uuid
+        m2sh uuid -hex
+
+    The -hex means to print it as a big hex number, which is
+    more efficient but harder to read.
+    """
+    from uuid import uuid4
+
+    if hex:
+        print uuid4().hex
+    else:
+        print str(uuid4())
 
