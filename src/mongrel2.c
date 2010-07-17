@@ -10,8 +10,6 @@
 
 FILE *LOG_FILE = NULL;
 
-const char *MONGREL2_LOGS = "/logs/mongrel2.log";
-struct tagbstring MONGREL2_PID = bsStatic("/run/mongrel2.pid");
 struct tagbstring PRIV_DIR = bsStatic("/");
 
 void taskmain(int argc, char **argv)
@@ -20,9 +18,6 @@ void taskmain(int argc, char **argv)
     int rc = 0;
 
     check(argc == 3, "usage: server config.sqlite default_host");
-    bstring cwd = Unixy_getcwd();
-    check(cwd, "Couldn't get current working dir.");
-
 
     list_t *servers = Config_load_servers(argv[1], argv[2]);
     check(servers, "Failed to load server config from %s for host %s", argv[1], argv[2]);
@@ -35,36 +30,36 @@ void taskmain(int argc, char **argv)
     DB_close();
 
 
-    bstring pid_file = bformat("%s%s", bdata(cwd), bdata(&MONGREL2_PID));
+    bstring pid_file = bformat("%s%s", bdata(srv->chroot), bdata(srv->pid_file));
 
     rc = Unixy_remove_dead_pidfile(pid_file);
     check(rc == 0, "Failed to remove the dead PID file: %s", bdata(pid_file));
     bdestroy(pid_file);
 
-    rc = Unixy_chroot(cwd);
+    rc = Unixy_chroot(srv->chroot);
 
     if(rc == 0) {
         debug("All loaded up, time to turn into a server.");
 
-        check(access("/logs", F_OK) == 0, "logs directory doesn't exist in %s or isn't owned right.", bdata(cwd));
-        check(access("/run", F_OK) == 0, "run directory doesn't exist in %s or isn't owned right.", bdata(cwd));
+        check(access("/logs", F_OK) == 0, "logs directory doesn't exist in %s or isn't owned right.", bdata(srv->chroot));
+        check(access("/run", F_OK) == 0, "run directory doesn't exist in %s or isn't owned right.", bdata(srv->chroot));
 
         rc = Unixy_daemonize();
         check(rc == 0, "Failed to daemonize, looks like you're hosed.");
 
-        FILE *log = fopen(MONGREL2_LOGS, "a+");
-        check(log, "Couldn't open %s log file.", MONGREL2_LOGS);
+        FILE *log = fopen(bdata(srv->error_log), "a+");
+        check(log, "Couldn't open %s log file.", bdata(srv->error_log));
         setbuf(log, NULL);
 
         LOG_FILE = log;
 
-        rc = Unixy_pid_file(&MONGREL2_PID);
-        check(rc == 0, "Failed to make the PID file %s", bdata(&MONGREL2_PID));
+        rc = Unixy_pid_file(srv->pid_file);
+        check(rc == 0, "Failed to make the PID file %s", bdata(srv->pid_file));
 
         rc = Unixy_drop_priv(&PRIV_DIR);
         check(rc == 0, "Failed to drop priv to the owner of %s", bdata(&PRIV_DIR));
     } else {
-        log_err("Couldn't chroot too %s, assuming running in test mode.", bdata(cwd));
+        log_err("Couldn't chroot too %s, assuming running in test mode.", bdata(srv->chroot));
     }
 
     Server_init();

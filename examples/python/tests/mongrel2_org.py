@@ -5,6 +5,7 @@ main = Server(
     access_log="/logs/access.log",
     error_log="/logs/error.log",
     chroot="/var/www/mongrel2",
+    pid_file="/run/mongrel2.pid",
     default_host="mongrel2.org",
     port=6767
 )

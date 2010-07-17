@@ -15,6 +15,7 @@ CREATE TABLE server (id INTEGER PRIMARY KEY,
     access_log TEXT,
     error_log TEXT,
     chroot TEXT DEFAULT '/var/www',
+    pid_File TEXT,
     default_host INTEGER,
     port INTEGER);
 

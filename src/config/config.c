@@ -169,7 +169,7 @@ error:
 
 int Config_server_load_cb(void *param, int cols, char **data, char **names)
 {
-    arity(4);
+    arity(8);
 
     list_t *servers = (list_t *)param;
     Server *srv = NULL;
@@ -179,7 +179,7 @@ int Config_server_load_cb(void *param, int cols, char **data, char **names)
     debug("Configuring server ID: %s, default host: %s, port: %s", 
             data[1], data[2], data[3]);
 
-    srv = Server_create(data[3]);
+    srv = Server_create(data[1], data[3], data[4], data[5], data[6], data[7]);
     check(srv, "Failed to create server %s on port %s", data[2], data[3]);
 
     query = SQL(HOST_QUERY, data[0]);
@@ -203,7 +203,7 @@ error:
 list_t *Config_load_servers(const char *path, const char *name)
 {
     list_t *servers = list_create(LISTCOUNT_T_MAX);
-    const char *SERVER_QUERY = "SELECT id, uuid, default_host, port FROM server WHERE default_host=%Q";
+    const char *SERVER_QUERY = "SELECT id, uuid, default_host, port, chroot, access_log, error_log, pid_file FROM server WHERE default_host=%Q";
     char *query = NULL;
 
     int rc = DB_init(path);

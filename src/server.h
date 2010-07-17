@@ -15,10 +15,17 @@ typedef struct Server {
     int listen_fd;
     Host *default_host;
     RouteMap *hosts;
+    bstring uuid;
+    bstring chroot;
+    bstring access_log;
+    bstring error_log;
+    bstring pid_file;
 } Server;
 
 
-Server *Server_create(const char *port);
+Server *Server_create(const char *uuid, const char *port,
+        const char *chroot, const char *access_log,
+        const char *error_log, const char *pid_file);
 
 void Server_destroy(Server *srv);
 

@@ -1,11 +1,12 @@
 begin transaction;
 
-INSERT INTO server (uuid, access_log, error_log, chroot, default_host, port) 
+INSERT INTO server (uuid, access_log, error_log, pid_file, chroot, default_host, port) 
     VALUES (
         'AC1F8236-5919-4696-9D40-0F38DE9E5861',
-        '/mongrel2/logs/access.log',
-        '/mongrel2/logs/error.log',
-        '/var/www',
+        '/logs/access.log',
+        '/logs/error.log',
+        '/run/mongrel2.pid',
+        './',
         'localhost',
         6767);
 

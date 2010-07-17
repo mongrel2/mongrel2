@@ -9,7 +9,9 @@
 #include <mem/halloc.h>
 #include <routing.h>
 
-Server *Server_create(const char *port)
+Server *Server_create(const char *uuid, const char *port,
+        const char *chroot, const char *access_log,
+        const char *error_log, const char *pid_file)
 {
     Server *srv = h_calloc(sizeof(Server), 1);
     check(srv, "Out of memory.");
@@ -22,6 +24,12 @@ Server *Server_create(const char *port)
 
     srv->listen_fd = 0;
 
+    srv->uuid = bfromcstr(uuid);
+    srv->chroot = bfromcstr(chroot);
+    srv->access_log = bfromcstr(access_log);
+    srv->error_log = bfromcstr(error_log);
+    srv->pid_file = bfromcstr(pid_file);
+
     return srv;
 
 error:
@@ -33,6 +41,12 @@ void Server_destroy(Server *srv)
 {
     if(srv) {
         RouteMap_destroy(srv->hosts);
+        bdestroy(srv->uuid);
+        bdestroy(srv->chroot);
+        bdestroy(srv->access_log);
+        bdestroy(srv->error_log);
+        bdestroy(srv->pid_file);
+
         fdclose(srv->listen_fd);
         h_free(srv);
     }

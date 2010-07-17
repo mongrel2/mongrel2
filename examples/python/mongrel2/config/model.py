@@ -59,16 +59,19 @@ class Server(object):
     error_log = Unicode()
     chroot = Unicode()
     default_host = Unicode()
+    pid_file = Unicode()
     port = Int()
 
     def __init__(self, uuid=None, access_log=None, error_log=None,
-                 chroot=None, default_host=None, port=None, hosts=None):
+                 chroot=None, default_host=None, pid_file=None,
+                 port=None, hosts=None):
         super(Server, self).__init__()
         self.uuid = unicode(uuid)
         self.access_log = unicode(access_log)
         self.error_log = unicode(error_log)
         self.chroot = unicode(chroot)
         self.default_host = unicode(default_host)
+        self.pid_file = unicode(pid_file)
         self.port = port
         self.hosts = hosts or []
 
