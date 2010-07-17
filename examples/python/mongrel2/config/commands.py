@@ -3,6 +3,8 @@ from mongrel2.config import args
 import mongrel2.config.commands
 from uuid import uuid4
 from mongrel2.config import model
+import getpass
+import sys
 
 
 def shell_command():
@@ -159,7 +161,11 @@ def init_command(db=None):
     sql = resource_stream('mongrel2', 'sql/config.sql').read()
     conn = sqlite3.connect(db)
     conn.executescript(sql)
+    conn.close()
    
+    commit_command(db=db, what="init_command", why=" ".join(sys.argv))
+
+
 
 def load_command(db=None, config=None, clear=True):
     """
@@ -173,6 +179,8 @@ def load_command(db=None, config=None, clear=True):
     import imp
     model.begin(db, clear=clear)
     imp.load_source('mongrel2_config_main', config)
+
+    commit_command(db=db, what="load_command", why=" ".join(sys.argv))
 
 
 def config_command(db=None, config=None, clear=True):
@@ -188,4 +196,56 @@ def config_command(db=None, config=None, clear=True):
 
     init_command(db=db)
     load_command(db=db, config=config, clear=clear)
+
+
+def commit_command(db=None, what=None, why=None):
+    """
+    Used to a commit event to the database for other admins to know
+    what is going on with the config.  The system logs quite a lot
+    already for you, like your username, machine name, etc:
+
+        m2sh commit -db test.sqlite -what mongrel2.org \
+            -why "Needed to change paters."
+
+    In future versions it will prevent you from committing as root,
+    because only assholes commit from root.
+
+    Both parameters are arbitrary, but I like to record what I did to
+    different Hosts in servers.
+    """
+    import socket
+
+    store = model.load_db("sqlite:" + db)
+    who = unicode(getpass.getuser())
+
+    if who == u'root':
+        print "Commit from root eh?  Man, you're kind of a tool."
+
+    log = model.Log()
+    log.who = who
+    log.what = unicode(what)
+    log.why = unicode(why)
+    log.location = unicode(socket.gethostname())
+    log.how = u'm2sh'
+
+    store.add(log)
+    store.commit()
+
+    
+
+def log_command(db=None, count=20):
+    """
+    Dumps commit logs:
+
+        m2sh log -db test.sqlite -count 20
+        m2sh log -db test.sqlite
+
+    So you know who to blame.
+    """
+
+    store = model.load_db("sqlite:" + db)
+    logs = store.find(model.Log)
+
+    for log in logs.order_by(model.Log.happened_at)[0:count]:
+        print log
 

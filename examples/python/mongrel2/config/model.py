@@ -207,6 +207,20 @@ class Route(object):
 
 Host.routes = ReferenceSet(Host.id, Route.host_id)
 
+class Log(object):
+    __storm_table__ = "log"
+    id = Int(primary = True)
+    who = Unicode()
+    what = Unicode()
+    happened_at = DateTime()
+    location = Unicode()
+    how = Unicode()
+    why = Unicode()
+
+    def __repr__(self):
+        return "[%s, %s@%s, %s] %s" % (
+            self.happened_at.isoformat(), self.who, self.location, self.what, 
+            self.why)
 
 class MIMEType(object):
     __storm_table__ = "mimetype"

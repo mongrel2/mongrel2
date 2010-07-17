@@ -69,4 +69,12 @@ CREATE TABLE statistic (id SERIAL,
 
 CREATE TABLE mimetype (id INTEGER PRIMARY KEY, mimetype TEXT, extension TEXT);
 
+CREATE TABLE IF NOT EXISTS log(id INTEGER PRIMARY KEY,
+    who TEXT,
+    what TEXT,
+    location TEXT,
+    happened_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    how TEXT,
+    why TEXT);
+    
 commit;
