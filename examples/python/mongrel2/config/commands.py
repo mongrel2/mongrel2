@@ -171,10 +171,8 @@ def load_command(db=None, config=None, clear=True):
     safer later on.
     """
     import imp
-
     model.begin(db, clear=clear)
-
-    imp.load_source('config', config)
+    imp.load_source('mongrel2_config_main', config)
 
 
 def config_command(db=None, config=None, clear=True):
