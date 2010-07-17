@@ -11,7 +11,7 @@ config = {
     'download_url': 'http://pypi.python.org/pypi/mongrel2-python',
     'author_email': 'zedshaw@zedshaw.com',
     'version': '0.2',
-    'scripts': ['bin/m2sh', 'bin/m2conf'],
+    'scripts': ['bin/m2sh'],
     'install_requires': ['nose', 'simplejson', 'pyrepl'],
     'packages': ['mongrel2', 'mongrel2.config'],
     'package_data': {'mongrel2': ['sql/config.sql']},
