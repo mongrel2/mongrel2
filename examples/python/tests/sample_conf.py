@@ -1,6 +1,5 @@
 from mongrel2.config import *
 
-begin("testconf.sqlite")
 
 main = Server(
     uuid="f400bf85-4538-4f7a-8908-67e313d515c2",
@@ -10,7 +9,7 @@ main = Server(
     default_host="localhost",
     port=6767,
     hosts = [
-        Host(name="mongrel2.org", routes={
+        Host(name="localhost", routes={
             '/tests/': Dir(base='tests/', index_file='index.html',
                              default_ctype='text/plain')
         })

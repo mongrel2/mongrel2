@@ -19,9 +19,14 @@ def clear_db():
         store.execute("DELETE FROM %s" % table)
 
 
-def begin(config_db):
+def begin(config_db, clear=False):
     store = load_db("sqlite:" + config_db)
-    clear_db()
+    store.mongrel2_clear=clear
+
+    if clear:
+        clear_db()
+
+    return store
 
 
 def commit(servers):
@@ -39,7 +44,10 @@ def commit(servers):
                 route.host = host
                 store.add(route)
 
-    store.commit()
+    if store.mongrel2_clear:
+        store.commit()
+    else:
+        print "Results won't be committed unless you begin(clear=True)."
 
 
 class Server(object):
