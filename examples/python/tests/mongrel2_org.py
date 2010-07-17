@@ -1,7 +1,5 @@
 from mongrel2.config import *
 
-begin("testconf.sqlite", clear=True)
-
 main = Server(
     uuid="2f62bd5-9e59-49cd-993c-3b6013c28f05",
     access_log="/logs/access.log",
