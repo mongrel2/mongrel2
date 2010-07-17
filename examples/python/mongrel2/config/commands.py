@@ -159,12 +159,15 @@ def init_command(db=None):
     import sqlite3
 
     sql = resource_stream('mongrel2', 'sql/config.sql').read()
+
+    if model.store:
+        model.store.close()
+        model.store = None
+
     conn = sqlite3.connect(db)
     conn.executescript(sql)
-    conn.close()
    
     commit_command(db=db, what="init_command", why=" ".join(sys.argv))
-
 
 
 def load_command(db=None, config=None, clear=True):
@@ -230,7 +233,6 @@ def commit_command(db=None, what=None, why=None):
 
     store.add(log)
     store.commit()
-
     
 
 def log_command(db=None, count=20):

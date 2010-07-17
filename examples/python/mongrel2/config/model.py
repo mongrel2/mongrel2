@@ -8,8 +8,9 @@ def load_db(spec):
     global database
     global store
 
-    database = create_database(spec)
-    store = Store(database)
+    if not store:
+        database = create_database(spec)
+        store = Store(database)
 
     return store
 
