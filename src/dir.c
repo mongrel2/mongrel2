@@ -17,7 +17,7 @@ const char *RESPONSE_FORMAT = "HTTP/1.1 200 OK\r\n"
     "Content-Length: %d\r\n"
     "Last-Modified: %s\r\n"
     "ETag: %s\r\n"
-    "Connection: keep-alive\r\n\r\n";
+    "Connection: close\r\n\r\n";
 
 const char *RFC_822_TIME = "%a, %d %b %y %T %z";
 
