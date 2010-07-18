@@ -54,8 +54,17 @@ int split_first_integers(void * param, int ofs, int len)
         sp->last_pos = ofs;
         return -1;
     } else {
+        int fd = 0;
+        char *endptr = NULL;
         char *s = bdataofs(sp->data, ofs);
-        sp->fds[sp->cur_fd++] = atoi(s);
+        // TODO: it's parser time, this is getting ugly
+        fd = (int)strtol(s, &endptr, 10);
+        if(*endptr == ' ') {
+            sp->fds[sp->cur_fd++] = fd;
+        } else {
+            sp->last_pos = ofs;
+            return -1;
+        }
     }
 
     return 0;
