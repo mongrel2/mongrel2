@@ -1,85 +1,96 @@
-from mongrel2 import handler
-import json
-import glob
 import time
 import struct
-from threading import Thread
-
-sender_id = "9703b4dd-227a-45c4-b7a1-ef62d97962b2"
-
-CONN = handler.Connection(sender_id, "tcp://127.0.0.1:9997",
-                          "tcp://127.0.0.1:9996")
-
-mp3s = glob.glob("*.mp3")
-
-print "PLAYING:", mp3s
-
-CHUNK_SIZE = 5 * 1024
+from threading import Thread, Condition
 
 
-CONNECTED={}
+class ConnectState(object):
+    """
+    Kind of a Queue but not.
+    """
 
-def make_icy_info(data):
-    icy_info_len = len(data)
-    assert icy_info_len % 16 == 0, "Must be multiple of 16."
-    return struct.pack('B', icy_info_len / 16) + data
+    def __init__(self):
+        self.requests ={}
+        self.wait_cond = Condition()
+
+    def add(self, req):
+        self.wait_cond.acquire()
+        self.requests[req.conn_id] = req
+        self.wait_cond.notify()
+        self.wait_cond.release()
 
 
-def stream_mp3(mp3_name):
-    result = open(mp3_name, 'r')
+    def remove(self, req):
+        try:
+            del self.requests[req.conn_id]
+        except:
+            pass
 
-    chunk = result.read(CHUNK_SIZE)
-    icy_info = make_icy_info("StreamTitle='a';")
-    empty_md = make_icy_info("")
+    def count(self):
+        return len(self.requests)
 
-    print CONNECTED.keys(), "ARE CONNECTED"
+    def available(self):
+        self.wait_cond.acquire()
+        self.wait_cond.wait()
+        result = self.count()
+        self.wait_cond.release()
 
-    # the first one has our little header for the song
-    chunk = result.read(CHUNK_SIZE) + icy_info
-    CONN.deliver(CONNECTED, chunk)
+        return result
 
-    # all of them after that are empty
-    while chunk and CONNECTED:
-        chunk = result.read(CHUNK_SIZE)
+    def connected(self):
+        return self.requests.keys()
 
-        if not chunk:
-            break
-        elif len(chunk) < CHUNK_SIZE:
-            chunk += empty_md * (CHUNK_SIZE - len(chunk))
-
-        CONN.deliver(CONNECTED.keys(), chunk + empty_md)
-        time.sleep(0.2)
 
 
 class Streamer(Thread):
 
+    def __init__(self, mp3_files, state, conn, chunk_size):
+        super(Streamer, self).__init__()
+        self.mp3_files = mp3_files
+        self.state = state
+        self.conn = conn
+        self.chunk_size = chunk_size
+
+
+    def make_icy_info(self, data):
+        icy_info_len = len(data)
+        assert icy_info_len % 16 == 0, "Must be multiple of 16."
+        return struct.pack('B', icy_info_len / 16) + data
+
+
+    def stream_mp3(self, mp3_name):
+        result = open(mp3_name, 'r')
+
+        chunk = result.read(self.chunk_size)
+        icy_info = self.make_icy_info("StreamTitle='Just A Funky Test';")
+        empty_md = self.make_icy_info("")
+
+        print self.state.connected(), "Listeners connected."
+
+        # the first one has our little header for the song
+        chunk = result.read(self.chunk_size) + icy_info
+        self.conn.deliver(self.state.connected(), chunk)
+
+        # all of them after that are empty
+        while chunk and self.state.connected():
+            chunk = result.read(self.chunk_size)
+
+            if not chunk:
+                break
+            elif len(chunk) < self.chunk_size:
+                chunk += empty_md * (self.chunk_size - len(chunk))
+
+            self.conn.deliver(self.state.connected(), chunk + empty_md)
+            time.sleep(0.2)
+
+
     def run(self):
-        while True:
-            if CONNECTED:
-                for mp3_name in mp3s:
-                    print "Streaming %s" % mp3_name
-                    stream_mp3(mp3_name)
-                    time.sleep(10)
-            else:
-                time.sleep(0.1)
-
-streamer = Streamer()
-streamer.start()
-
-while True:
-    req = CONN.recv()
-
-    if req.is_disconnect():
-        print "DISCONNECT", req.headers, req.body, req.conn_id
-
-        try:
-            del CONNECTED[req.conn_id]
-        except:
-            print "NOT LISTED, WTF"
-    else:
-        print "REQUEST", req.headers, req.body
-        CONNECTED[req.conn_id] = req
-        CONN.reply_http(req, "", headers={'icy-metaint': CHUNK_SIZE})
+        print "RUNNING"
+        while self.state.available():
+            for mp3_name in self.mp3_files:
+                print "Streaming %s" % mp3_name
+                self.stream_mp3(mp3_name)
+                if not self.state.connected():
+                    break
 
 
 
