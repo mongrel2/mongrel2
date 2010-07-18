@@ -133,8 +133,8 @@ void Handler_task(void *v)
 
                     if(Connection_deliver(fd, payload) == -1) {
                         log_err("Error sending to MSG listener %d, closing them.", fd);
-                        Register_disconnect(fd);
                         Handler_notify_leave(handler->send_socket, fd);
+                        Register_disconnect(fd);
                     }
 
                     bdestroy(payload);
@@ -144,8 +144,8 @@ void Handler_task(void *v)
                     payload = bTail(data, blength(data) - splits.last_pos);
                     if(Connection_deliver_raw(fd, payload) == -1) {
                         log_err("Error sending raw message to HTTP listener %d, closing them.", fd);
-                        Register_disconnect(fd);
                         Handler_notify_leave(handler->send_socket, fd);
+                        Register_disconnect(fd);
                     }
                     bdestroy(payload);
                     break;
@@ -194,7 +194,6 @@ int Handler_deliver(void *handler_socket, char *buffer, size_t len)
 error:
     // TODO: confirm what if this is the right shutdown
     if(msg) free(msg);
-    if(msg_buf) bdestroy(msg_buf);
     return -1;
 }
 
