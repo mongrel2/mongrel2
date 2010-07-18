@@ -53,7 +53,7 @@ python: examples/python/mongrel2/sql/config.sql
 	cd examples/python && sudo python setup.py install
 
 examples/python/mongrel2/sql/config.sql: src/config/config.sql src/config/mimetypes.sql
-	cat $< > $@
+	cat src/config/config.sql src/config/mimetypes.sql > $@
 
 ragel:
 	ragel -G2 src/state.rl

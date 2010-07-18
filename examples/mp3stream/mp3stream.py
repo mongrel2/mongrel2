@@ -20,10 +20,13 @@ class ConnectState(object):
 
 
     def remove(self, req):
+        self.wait_cond.acquire()
         try:
             del self.requests[req.conn_id]
         except:
             pass
+        self.wait_cond.notify()
+        self.wait_cond.release()
 
     def count(self):
         return len(self.requests)

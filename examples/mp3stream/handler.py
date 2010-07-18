@@ -5,8 +5,8 @@ import glob
 
 sender_id = "9703b4dd-227a-45c4-b7a1-ef62d97962b2"
 
-CONN = handler.Connection(sender_id, "tcp://127.0.0.1:9997",
-                          "tcp://127.0.0.1:9996")
+CONN = handler.Connection(sender_id, "tcp://127.0.0.1:9995",
+                          "tcp://127.0.0.1:9994")
 
 MP3_FILES = glob.glob("*.mp3")
 
