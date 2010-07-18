@@ -5,6 +5,8 @@ from uuid import uuid4
 from mongrel2.config import model
 import getpass
 import sys
+import os
+import signal
 
 
 def shell_command():
@@ -250,4 +252,64 @@ def log_command(db=None, count=20):
 
     for log in logs.order_by(model.Log.happened_at)[0:count]:
         print log
+
+
+def start_command(db=None, host=None, sudo=False):
+    """
+    Does a simple start of the given server identified by the host
+    (default_host) parameter:
+
+
+        m2sh start -db config.sqlite -host localhost
+
+    Give the -sudo options if you want it to start mongrel2 as
+    root for you (must have sudo installed).
+    """
+    root_enabler = 'sudo' if sudo else ''
+
+    os.system('%s mongrel2 %s %s' % (root_enabler, db, host))
+
+
+def stop_command(db=None, host=None):
+    """
+    Stops a running mongrel2 process according to the host,
+    and just like start will run sudo for you if you give -sudo:
+
+        m2sh stop -db config.sqlite -host localhost
+
+    You shouldn't need sudo to stop a running mongrel if you
+    are also the user that owns the chroot directory.
+    """
+    pid = get_server_pid(db, host)
+    os.kill(pid, signal.SIGTERM)
+
+
+def running_command(db=None, host=None):
+    """
+    Tells you if the given server is still running:
+
+        m2sh running -db config.sqlite -host localhost
+    """
+
+    pid = get_server_pid(db, host)
+    try:
+        os.kill(pid, 0)
+        print "YES: Mongrel2 server %s running at PID %d" % (host, pid)
+    except OSError:
+        print "NO: Mongrel2 server %s NOT at PID %d" % (host, pid)
+
+
+def get_server_pid(db, host):
+    store = model.load_db("sqlite:" + db)
+    results = store.find(model.Server, model.Server.default_host == unicode(host))
+
+    if results.count() == 0:
+        print "No servers found."
+        return
+
+    server = results[0]
+    pid_file = os.path.realpath(server.chroot + server.pid_file)
+    pid = int(open(pid_file, 'r').read())
+
+    return pid
 

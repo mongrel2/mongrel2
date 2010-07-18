@@ -46,8 +46,8 @@ check:
 	@echo Files with potentially dangerous functions.
 	@egrep '[^_.>a-zA-Z0-9](str(n?cpy|n?cat|xfrm|n?dup|str|pbrk|tok|_)|stpn?cpy|a?sn?printf|byte_)' $(filter-out src/bstr/bsafe.c,${SOURCES})
 
-%.o: %.S
-	$(CC) $(CFLAGS) -c $< -o $@
+install: python all
+	sudo install bin/mongrel2 /usr/local/bin/
 
 python: examples/python/mongrel2/sql/config.sql
 	cd examples/python && sudo python setup.py install
@@ -58,4 +58,7 @@ examples/python/mongrel2/sql/config.sql: src/config/config.sql src/config/mimety
 ragel:
 	ragel -G2 src/state.rl
 	ragel -G2 src/http11/http11_parser.rl
+
+%.o: %.S
+	$(CC) $(CFLAGS) -c $< -o $@
 
