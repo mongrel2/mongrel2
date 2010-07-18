@@ -114,7 +114,6 @@ void Handler_task(void *v)
             int fd = splits.fds[i];
             int conn_type = Register_exists(fd);
 
-            // TODO: this needs reworked, the Register_disconnects are dangerous
             switch(conn_type) {
                 case 0:
                     log_err("Ident %d is no longer connected.", fd);
