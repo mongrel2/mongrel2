@@ -27,7 +27,7 @@ FileRecord *Dir_find_file(bstring path, bstring default_type)
     FileRecord *fr = calloc(sizeof(FileRecord), 1);
     const char *p = bdata(path);
 
-    check(fr, "Failed to make FileRecord memory.");
+    check_mem(fr);
 
     // right here, if p ends with / then add index.html
     int rc = stat(p, &fr->sb);
@@ -84,11 +84,11 @@ int Dir_stream_file(FileRecord *file, int sock_fd)
     size_t block_size = MAX_SEND_BUFFER;
 
     int rc = Dir_send_header(file, sock_fd);
-    check(rc, "Failed to write header to socket.");
+    check_debug(rc, "Failed to write header to socket.");
 
     for(total = 0; fdwait(sock_fd, 'w') == 0 && total < file->sb.st_size; total += sent) {
         sent = Dir_send(sock_fd, file->fd, &offset, block_size);
-        check(sent > 0, "Failed to sendfile on socket: %d from file %d", sock_fd, file->fd);
+        check_debug(sent > 0, "Failed to sendfile on socket: %d from file %d", sock_fd, file->fd);
     }
 
     check(total <= file->sb.st_size, "Wrote way too much, wrote %d but size was %d", (int)total, (int)file->sb.st_size);
@@ -103,7 +103,7 @@ error:
 Dir *Dir_create(const char *base, const char *prefix, const char *index_file, const char *default_ctype)
 {
     Dir *dir = calloc(sizeof(Dir), 1);
-    check(dir, "Out of memory error.");
+    check_mem(dir);
 
     dir->base = bfromcstr(base);
     check(blength(dir->base) < MAX_DIR_PATH, "Base direcotry is too long, must be less than %d", MAX_DIR_PATH);
@@ -177,8 +177,8 @@ inline int Dir_lazy_normalize_base(Dir *dir)
         dir->normalized_base = bstrcpy(dir->base);
         check(normalize_path(dir->normalized_base) == 0, 
                 "Failed to normalize base path: %s", bdata(dir->normalized_base));
-        debug("Lazy normalized base path %s into %s", 
-                bdata(dir->base), bdata(dir->normalized_base));
+
+        debug("Lazy normalized base path %s into %s", bdata(dir->base), bdata(dir->normalized_base));
     }
     return 0;
 
@@ -191,7 +191,8 @@ FileRecord *Dir_resolve_file(Dir *dir, bstring path)
     FileRecord *file = NULL;
     bstring target = NULL;
 
-    check(Dir_lazy_normalize_base(dir) == 0, "Failed to normalize base path.");
+    check(Dir_lazy_normalize_base(dir) == 0, "Failed to normalize base path when requesting %s",
+            bdata(path));
 
     check(bstrncmp(path, dir->prefix, blength(dir->prefix)) == 0, 
             "Request for path %s does not start with %s prefix.", 
@@ -210,15 +211,15 @@ FileRecord *Dir_resolve_file(Dir *dir, bstring path)
 
     check(target, "Couldn't construct target path for %s", bdata(path));
 
-    check(normalize_path(target) == 0, "Failed to normalize target path.");
+    check_debug(normalize_path(target) == 0, "Failed to normalize target path.");
    
-    check(bstrncmp(target, dir->normalized_base, blength(dir->normalized_base)) == 0, 
+    check_debug(bstrncmp(target, dir->normalized_base, blength(dir->normalized_base)) == 0, 
             "Request for path %s does not start with %s base after normalizing.", 
             bdata(target), bdata(dir->base));
 
     // the FileRecord now owns the target
     file = Dir_find_file(target, dir->default_ctype);
-    check(file, "Error opening file: %s", bdata(target));
+    check_debug(file, "Error opening file: %s", bdata(target));
 
     return file;
 
@@ -305,7 +306,6 @@ inline bstring Dir_calculate_response(Request *req, FileRecord *file)
 int Dir_serve_file(Request *req, Dir *dir, bstring path, int fd)
 {
     FileRecord *file = NULL;
-    bstring target = NULL;
     bstring resp = NULL;
     int rc = 0;
     int is_get = biseq(req->request_method, &HTTP_GET);
@@ -313,7 +313,7 @@ int Dir_serve_file(Request *req, Dir *dir, bstring path, int fd)
 
     if(!(is_get || is_head)) {
         rc = Response_send_status(fd, &HTTP_405);
-        check(rc == blength(&HTTP_405), "Failed to send 405 to client.");
+        check_debug(rc == blength(&HTTP_405), "Failed to send 405 to client.");
         return -1;
     } else {
         file = Dir_resolve_file(dir, path);
@@ -321,13 +321,13 @@ int Dir_serve_file(Request *req, Dir *dir, bstring path, int fd)
 
         if(resp) {
             rc = Response_send_status(fd, resp);
-            check(rc == blength(resp), "Failed to send error response on file serving.");
+            check_debug(rc == blength(resp), "Failed to send error response on file serving.");
         } else if(is_get) {
             rc = Dir_stream_file(file, fd);
-            check(rc == file->sb.st_size, "Didn't send all of the file, sent %d of %s.", rc, bdata(target));
+            check_debug(rc == file->sb.st_size, "Didn't send all of the file, sent %d of %s.", rc, bdata(path));
         } else if(is_head) {
             rc = Dir_send_header(file, fd);
-            check(rc, "Failed to write header to socket.");
+            check_debug(rc, "Failed to write header to socket.");
         } else {
             sentinel("How the hell did you get to here. Tell Zed.");
         }
@@ -336,6 +336,7 @@ int Dir_serve_file(Request *req, Dir *dir, bstring path, int fd)
         return 0;
     }
 
+    sentinel("Invalid code branch, Tell Zed you have magic.");
 error:
     FileRecord_destroy(file);
     return -1;

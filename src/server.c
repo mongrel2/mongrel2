@@ -14,7 +14,7 @@ Server *Server_create(const char *uuid, const char *port,
         const char *error_log, const char *pid_file)
 {
     Server *srv = h_calloc(sizeof(Server), 1);
-    check(srv, "Out of memory.");
+    check_mem(srv);
 
     srv->hosts = RouteMap_create();
     check(srv->hosts, "Failed to create host RouteMap.");
@@ -24,11 +24,11 @@ Server *Server_create(const char *uuid, const char *port,
 
     srv->listen_fd = 0;
 
-    srv->uuid = bfromcstr(uuid);
-    srv->chroot = bfromcstr(chroot);
-    srv->access_log = bfromcstr(access_log);
-    srv->error_log = bfromcstr(error_log);
-    srv->pid_file = bfromcstr(pid_file);
+    srv->uuid = bfromcstr(uuid); check_mem(srv->uuid);
+    srv->chroot = bfromcstr(chroot); check_mem(srv->chroot);
+    srv->access_log = bfromcstr(access_log); check_mem(srv->access_log);
+    srv->error_log = bfromcstr(error_log); check_mem(srv->error_log);
+    srv->pid_file = bfromcstr(pid_file); check_mem(srv->pid_file);
 
     return srv;
 
@@ -89,7 +89,7 @@ void Server_start(Server *srv)
 
     check(fdnoblock(srv->listen_fd) == 0, "Failed to set listening port %d nonblocking.", srv->port);
 
-    debug("Starting server on port %d", srv->port);
+    log_info("Starting server on port %d", srv->port);
 
     // TODO: this could cause problems if the tst is too deep, recursion may break
     tst_traverse(srv->default_host->routes->routes, handlers_receive_start, srv);

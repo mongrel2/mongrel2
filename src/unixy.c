@@ -17,7 +17,7 @@ int Unixy_chroot(bstring path)
     check(to_dir && blength(path) > 0, "Invalid or empty path for chroot.");
 
     rc = chroot(to_dir);
-    check(rc == 0, "Can't chroot to %s, rerun as root.", bdata(path));
+    check(rc == 0, "Can't chroot to %s, rerun as root if this is what you want.", bdata(path));
 
     rc = chdir("/");
     check(rc == 0, "Can't chdir to / directory inside chroot.");
@@ -45,7 +45,7 @@ int Unixy_drop_priv(bstring path)
     rc = setreuid(sb.st_uid, sb.st_uid);
     check(rc == 0 && getuid() == sb.st_uid && geteuid() == sb.st_uid, "Failed to change to UID: %d", sb.st_uid);
 
-    debug("Now running as UID:%d, GID:%d", sb.st_uid, sb.st_gid);
+    log_info("Now running as UID:%d, GID:%d", sb.st_uid, sb.st_gid);
     return 0;
 
 error:
@@ -100,11 +100,11 @@ int Unixy_remove_dead_pidfile(bstring pid_path)
     check(rc != 1, "Process %d is still running, shut it down first.", pid);
 
     if(pid == -1) {
-        debug("No previous mongrel running, continuing on.");
+        log_info("No previous Mongrel2 running, continuing on.");
     } else {
-        debug("Process %d is not running anymore, so removing PID file %s.", pid, bdata(pid_path));
+        log_info("Process %d is not running anymore, so removing PID file %s.", pid, bdata(pid_path));
         rc = unlink((const char *)pid_path->data);
-        check(rc == 0, "Failed to unline the PID file %s, man you're so hosed I give up.", bdata(pid_path));
+        check(rc == 0, "Failed to remove the PID file %s, man you're so hosed I give up.", bdata(pid_path));
     }
 
     return 0;
@@ -121,7 +121,7 @@ int Unixy_pid_file(bstring path)
     char *pid_path = NULL;
 
     pid_path = bstr2cstr(path, '\0');
-    check(pid_path, "Failed to make the pid path (WTF).");
+    check_mem(pid_path);
 
     rc = stat(pid_path, &sb);
     check(rc == -1, "PID file already exists, something bad happened.");

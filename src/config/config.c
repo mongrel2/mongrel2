@@ -21,7 +21,7 @@ int Config_dir_load_cb(void *param, int cols, char **data, char **names)
     arity(5);
     Dir **target = (Dir **)param;
 
-    debug("Making a dir for %s:%s", data[0], data[1]);
+    log_info("Loaded dir config for %s:%s", data[0], data[1]);
 
     *target = Dir_create(data[1], data[2], data[3], data[4]);
 
@@ -37,7 +37,7 @@ int Config_handler_load_cb(void *param, int cols, char **data, char **names)
     arity(5);
     Handler **target = (Handler **)param;
 
-    debug("Making a handler for %s:%s:%s:%s:%s", data[0], data[1], data[2],
+    log_info("Loaded handler config for %s:%s:%s:%s:%s", data[0], data[1], data[2],
             data[3], data[4]);
 
     *target = Handler_create(data[1], data[2], data[3], data[4]);
@@ -55,7 +55,7 @@ int Config_proxy_load_cb(void *param, int cols, char **data, char **names)
     arity(3);
     Proxy **target = (Proxy **)param;
 
-    debug("Making a proxy for %s:%s:%s", data[0], data[1], data[2]);
+    log_info("Loaded proxy config for %s:%s:%s", data[0], data[1], data[2]);
 
     *target = Proxy_create(bfromcstr(data[1]), atoi(data[2]));
     check(*target, "Failed to create proxy for %s:%s:%s", data[0], data[1], data[2]);
@@ -90,6 +90,10 @@ int Config_route_load_cb(void *param, int cols, char **data, char **names)
         check(rc == 0, "Failed to find handler for route: %s (id: %s)",
                 data[1], data[0]);
 
+        log_info("ROUTE(%s) %s -> %s:%s (handler)", data[0], data[1],
+                bdata(((Handler *)target)->send_ident),
+                bdata(((Handler*)target)->send_spec));
+
         type = BACKEND_HANDLER;
 
     } else if(strcmp("proxy", data[3]) == 0) {
@@ -97,6 +101,10 @@ int Config_route_load_cb(void *param, int cols, char **data, char **names)
         rc = DB_exec(query, Config_proxy_load_cb, &target);
         check(rc == 0, "Failed to find proxy for route: %s (id: %s)",
                 data[1], data[0]);
+
+        log_info("ROUTE(%s) %s -> %s:%d (proxy)", data[0], data[1],
+                bdata(((Proxy*)target)->server),
+                ((Proxy*)target)->port);
 
         type = BACKEND_PROXY;
 
@@ -140,7 +148,7 @@ int Config_host_load_cb(void *param, int cols, char **data, char **names)
 
     DB_exec(query, Config_route_load_cb, host);
 
-    debug("Adding host %s (id: %s) to server at pattern %s", data[1], data[0], data[2]);
+    log_info("Adding host %s (id: %s) to server at pattern %s", data[1], data[0], data[2]);
 
 
     Server_add_host(srv, bfromcstr(data[2]), host);
@@ -176,7 +184,7 @@ int Config_server_load_cb(void *param, int cols, char **data, char **names)
     const char *HOST_QUERY = "SELECT id, name, matching FROM host where server_id = %s";
     char *query = NULL;
  
-    debug("Configuring server ID: %s, default host: %s, port: %s", 
+    log_info("Configuring server ID: %s, default host: %s, port: %s", 
             data[1], data[2], data[3]);
 
     srv = Server_create(data[1], data[3], data[4], data[5], data[6], data[7]);

@@ -94,7 +94,7 @@ static void header_field_cb(void *data, const char *field, size_t flen,
 Request *Request_create()
 {
     Request *req = calloc(sizeof(Request), 1);
-    check(req, "Out of Memory.");
+    check_mem(req);
 
     req->parser.http_field = header_field_cb;
     req->parser.request_method = request_method_cb;
@@ -106,7 +106,8 @@ Request *Request_create()
     req->parser.header_done = header_done_cb;
 
     req->headers = dict_create(MAX_HEADER_COUNT, (dict_comp_t)bstricmp);
-    check(req->headers, "Out of Memory");
+    check_mem(req->headers);
+
     dict_set_allocator(req->headers, req_alloc_dict, req_free_dict, NULL);
     dict_allow_dupes(req->headers);
 

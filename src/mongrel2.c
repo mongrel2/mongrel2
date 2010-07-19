@@ -20,10 +20,12 @@ void taskmain(int argc, char **argv)
     check(argc == 3, "usage: server config.sqlite default_host");
 
     list_t *servers = Config_load_servers(argv[1], argv[2]);
+
     check(servers, "Failed to load server config from %s for host %s", argv[1], argv[2]);
     check(list_count(servers) == 1, "Currently only support running one server.");
 
-    check(Config_load_mimetypes() == 0, "Failed to load mime types.");
+    rc = Config_load_mimetypes();
+    check(rc == 0, "Failed to load mime types.");
 
     Server *srv = lnode_get(list_first(servers));
 
@@ -39,7 +41,7 @@ void taskmain(int argc, char **argv)
     rc = Unixy_chroot(srv->chroot);
 
     if(rc == 0) {
-        debug("All loaded up, time to turn into a server.");
+        log_info("All loaded up, time to turn into a server.");
 
         check(access("/logs", F_OK) == 0, "logs directory doesn't exist in %s or isn't owned right.", bdata(srv->chroot));
         check(access("/run", F_OK) == 0, "run directory doesn't exist in %s or isn't owned right.", bdata(srv->chroot));

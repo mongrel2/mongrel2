@@ -7,7 +7,7 @@
 Host *Host_create(const char *name)
 {
     Host *host = h_calloc(sizeof(Host), 1);
-    check(host, "Out of memory error.");
+    check_mem(host);
 
     host->name = bfromcstr(name);
     check(blength(host->name) < MAX_HOST_NAME, "Host name too long (max %d): '%s'\n", 
@@ -37,7 +37,7 @@ void Host_destroy(Host *host)
 int Host_add_backend(Host *host, const char *path, size_t path_len, BackendType type, void *target)
 {
     Backend *backend = calloc(sizeof(Backend), 1);
-    check(backend, "Out of Memory");
+    check_mem(backend);
 
     backend->type = type;
 

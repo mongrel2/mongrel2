@@ -1,5 +1,6 @@
 
-CFLAGS=-g -Wall -Isrc -DNDEBUG
+# CFLAGS=-g -Wall -Isrc -DNDEBUG
+CFLAGS=-g -Wall -Isrc
 LIBS=-lzmq -lsqlite3
 
 ASM=$(wildcard src/**/*.S src/*.S)

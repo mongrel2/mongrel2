@@ -24,7 +24,7 @@ void Register_init()
 {
     if(!registrations) {
         registrations = hash_create(HASHCOUNT_T_MAX, fd_comp_func, fd_hash_func);
-        check(registrations, "Failed creating registrations store.");
+        check_mem(registrations);
     }
 
     return;
@@ -79,7 +79,7 @@ int Register_ping(int fd)
     debug("Ping received for ident %d", fd);
     hnode_t *hn = hash_lookup(registrations, (void *)(intptr_t)fd);
 
-    check(hn, "Ping received but %d isn't actually registerd.", fd);
+    check_debug(hn, "Ping received but %d isn't actually registerd.", fd);
     // TODO: implement ping and timeout tracking killing dead connects
     
     return 1;

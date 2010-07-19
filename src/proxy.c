@@ -25,7 +25,7 @@ void rwtask(void*);
 ProxyConnect *ProxyConnect_create(int client_fd, char *buffer, size_t size)
 {
     ProxyConnect *conn = h_malloc(sizeof(ProxyConnect));
-    check(conn, "Failed to allocate ProxyConnect.");
+    check_mem(conn);
     conn->client_fd = client_fd;
     conn->proxy_fd = 0;
     conn->buffer = buffer;
@@ -55,7 +55,7 @@ void Proxy_destroy(Proxy *proxy)
 Proxy *Proxy_create(bstring server, int port)
 {
     Proxy *proxy = h_calloc(sizeof(Proxy), 1);
-    check(proxy, "Failed to create proxy, memory allocation fail.");
+    check_mem(proxy);
     
     proxy->server = server;
     proxy->port = port;

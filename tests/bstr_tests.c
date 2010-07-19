@@ -3605,7 +3605,8 @@ static int test43 (void) {
 
 static int test44_0 (const char * str) {
     int ret = 0, v;
-    bstring b;
+    bstring b = bfromcstr("");
+
     if (NULL == str) {
         ret += 0 <= bassigncstr (NULL, "test");
         debug (".\tbassigncstr (b = %s, NULL)", dumpBstring (b = bfromcstr ("")));
@@ -3624,7 +3625,7 @@ static int test44_0 (const char * str) {
     ret += ((size_t) b->slen) != strlen (str);
     ret += 0 > bassigncstr (b, "xxxxx");
     bwriteprotect(*b)
-        debug (".\tbassigncstr (b = %s, \"%s\")", dumpBstring (b), str);
+        log_info(".\tbassigncstr (b = %s, \"%s\")", dumpBstring (b), str);
     ret += 0 <= (v = bassigncstr (b, str));
     debug (" = %d; b -> %s", v, dumpBstring (b));
     ret += 0 != strcmp (bdatae (b, ""), "xxxxx");
@@ -3656,7 +3657,7 @@ static int test44 (void) {
 
 static int test45_0 (const char * str) {
     int ret = 0, v, len;
-    bstring b;
+    bstring b = bfromcstr("");
     if (NULL == str) {
         ret += 0 <= bassignblk (NULL, "test", 4);
         debug (".\tbassignblk (b = %s, NULL, 1)", dumpBstring (b = bfromcstr ("")));

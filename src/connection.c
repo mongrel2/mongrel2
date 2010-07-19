@@ -16,10 +16,15 @@
 
 struct tagbstring PING_PATTERN = bsStatic("@[a-z/]- {\"type\":%s*\"ping\"}");
 
+#ifdef NDEBUG
+#define TRACE(C)
+#else
 #define TRACE(C) debug("--> %s(%s:%d) %s:%d ", "" #C, State_event_name(event), event, __FUNCTION__, __LINE__)
+#endif
 
-#define ERROR(F, C, M, ...)  {Response_send_status(F, &HTTP_##C); sentinel(M, ##__VA_ARGS__);}
-#define ERROR_UNLESS(T, F, C, M, ...) if(!(T)) ERROR(F, C, M, ##__VA_ARGS__)
+#define error_response(F, C, M, ...)  {Response_send_status(F, &HTTP_##C); sentinel(M, ##__VA_ARGS__);}
+#define error_unless(T, F, C, M, ...) if(!(T)) error_response(F, C, M, ##__VA_ARGS__)
+
 
 enum {
     MAX_CONTENT_LENGTH = 20 * 1024
@@ -35,7 +40,7 @@ inline int Connection_backend_event(Backend *found, int fd)
         case BACKEND_PROXY:
             return PROXY;
         default:
-            ERROR(fd, 501, "Invalid backend type: %d", found->type);
+            error_response(fd, 501, "Invalid backend type: %d", found->type);
     }
 
 error:
@@ -74,7 +79,7 @@ int connection_send_socket_response(int event, void *data)
     Connection *conn = (Connection *)data;
 
     int rc = Response_send_socket_policy(conn->fd);
-    check(rc > 0, "Failed to write Flash socket response.");
+    check_debug(rc > 0, "Failed to write Flash socket response.");
 
     return RESP_SENT;
 
@@ -97,10 +102,10 @@ int connection_route_request(int event, void *data)
     } else {
         host = conn->server->default_host;
     }
-    ERROR_UNLESS(host, conn->fd, 404, "Request for a host we don't have registered: %s", bdata(host_name));
+    error_unless(host, conn->fd, 404, "Request for a host we don't have registered: %s", bdata(host_name));
 
     Backend *found = Host_match_backend(host, path);
-    ERROR_UNLESS(found, conn->fd, 404, "Handler not found: %s", bdata(path));
+    error_unless(found, conn->fd, 404, "Handler not found: %s", bdata(path));
 
     Request_set_action(conn->req, found);
     conn->req->target_host = host;
@@ -140,8 +145,7 @@ int connection_msg_to_handler(int event, void *data)
         rc = Handler_deliver(handler->send_socket, bdata(payload), blength(payload));
         bdestroy(payload);
     
-        ERROR_UNLESS(rc != -1, conn->fd, 502, "Failed to deliver to handler: %s", 
-                bdata(Request_path(conn->req)));
+        check(rc == 0, "Failed to deliver to handler: %s", bdata(Request_path(conn->req)));
     }
 
     return REQ_SENT;
@@ -163,18 +167,18 @@ int connection_http_to_handler(int event, void *data)
     bstring result = NULL;
 
     Handler *handler = Request_get_action(conn->req, handler);
-    check(handler, "No action for request: %s", bdata(Request_path(conn->req)));
+    error_unless(handler, conn->fd, 404, "No action for request: %s", bdata(Request_path(conn->req)));
 
     if(content_len == 0) {
         body = "";
     } else if(content_len > MAX_CONTENT_LENGTH) {
-        ERROR(conn->fd, 413, "Request entity is too large: %d", content_len);    
+        error_response(conn->fd, 413, "Request entity is too large: %d", content_len);    
     } else {
         if(total > BUFFER_SIZE) {
             conn->buf = realloc(conn->buf, total);
             body = conn->buf + header_len;
             rc = fdread(conn->fd, body, content_len);
-            check(rc == content_len, "Failed to read %d content as requested.", content_len);
+            check_debug(rc == content_len, "Failed to read %d content as requested.", content_len);
         } else {
             // got it already so just start off where it is
             body = conn->buf + header_len;
@@ -187,7 +191,7 @@ int connection_http_to_handler(int event, void *data)
     debug("HTTP TO HANDLER: %s", bdata(result));
 
     rc = Handler_deliver(handler->send_socket, bdata(result), blength(result));
-    ERROR_UNLESS(rc != -1, conn->fd, 502, "Failed to deliver to handler: %s", 
+    error_unless(rc != -1, conn->fd, 502, "Failed to deliver to handler: %s", 
             bdata(Request_path(conn->req)));
 
     bdestroy(result);
@@ -209,7 +213,7 @@ int connection_http_to_directory(int event, void *data)
     Dir *dir = Request_get_action(conn->req, dir);
 
     int rc = Dir_serve_file(conn->req, dir, path, conn->fd);
-    check(rc == 0, "Failed to serve file: %s", bdata(path));
+    check_debug(rc == 0, "Failed to serve file: %s", bdata(path));
 
     return RESP_SENT;
 
@@ -228,11 +232,12 @@ int connection_http_to_proxy(int event, void *data)
     ProxyConnect *to_listener = NULL;
 
     conn->proxy = Proxy_connect_backend(proxy, conn->fd);
-    check(conn->proxy, "Failed to connect to backend proxy server: %s:%d",
+
+    check_debug(conn->proxy, "Failed to connect to backend proxy server: %s:%d",
             bdata(proxy->server), proxy->port);
 
     to_listener = Proxy_sync_to_listener(conn->proxy);
-    check(to_listener, "Failed to make the listener side of proxy.");
+    check_debug(to_listener, "Failed to make the listener side of proxy.");
 
     return CONNECT;
 
@@ -254,9 +259,8 @@ int connection_proxy_deliver(int event, void *data)
     int total_len = Request_header_length(conn->req) + Request_content_length(conn->req);
 
     if(total_len < conn->nread) {
-        debug("!!! UNTESTED BRANCH: total=%d, nread=%d", total_len, conn->nread);
         rc = fdwrite(to_proxy->proxy_fd, conn->buf, total_len);
-        check(rc > 0, "Failed to write request to proxy.");
+        check_debug(rc > 0, "Failed to write request to proxy.");
 
         // setting up for the next request to be read
         conn->nread -= total_len;
@@ -266,13 +270,13 @@ int connection_proxy_deliver(int event, void *data)
         do {
             // TODO: look at sendfile or splice to do this instead
             rc = fdsend(to_proxy->proxy_fd, conn->buf, conn->nread);
-            check(rc == conn->nread, "Failed to write full request to proxy after %d read.", conn->nread);
+            check_debug(rc == conn->nread, "Failed to write full request to proxy after %d read.", conn->nread);
 
             total_len -= rc;
 
             if(total_len > 0) {
                 conn->nread = fdrecv(conn->fd, conn->buf, BUFFER_SIZE);
-                check(conn->nread > 0, "Failed to read from client more data with %d left.", total_len);
+                check_debug(conn->nread > 0, "Failed to read from client more data with %d left.", total_len);
             } else {
                 conn->nread = 0;
             }
@@ -280,7 +284,7 @@ int connection_proxy_deliver(int event, void *data)
     } else {
         // not > and not < means ==, so we just write this and try again
         rc = fdsend(to_proxy->proxy_fd, conn->buf, total_len);
-        check(rc == total_len, "Failed to write complete request to proxy, wrote only: %d", rc);
+        check_debug(rc == total_len, "Failed to write complete request to proxy, wrote only: %d", rc);
         conn->nread = 0;
     }
 
@@ -303,8 +307,8 @@ int connection_proxy_parse(int event, void *data)
 
     // unlike other places, we keep the nread rather than reset
     rc = Connection_read_header(conn, conn->req);
-    check(rc > 0, "Failed to read another header.");
-    ERROR_UNLESS(Request_is_http(conn->req), conn->fd, 400,
+    check_debug(rc > 0, "Failed to read another header.");
+    error_unless(Request_is_http(conn->req), conn->fd, 400,
             "Someone tried to change the protocol on us from HTTP.");
 
     // do a light find of this request compared to the last one
@@ -316,7 +320,7 @@ int connection_proxy_parse(int event, void *data)
 
         // query up the path to see if it gets the current request action
         Backend *found = Host_match_backend(target_host, Request_path(conn->req));
-        ERROR_UNLESS(found, conn->fd, 404, 
+        error_unless(found, conn->fd, 404, 
                 "Handler not found: %s", bdata(Request_path(conn->req)));
 
         if(found != req_action) {
@@ -328,7 +332,7 @@ int connection_proxy_parse(int event, void *data)
         }
     }
 
-    ERROR(conn->fd, 500, "Invalid code branch, tell Zed.");
+    error_response(conn->fd, 500, "Invalid code branch, tell Zed.");
 error:
     return REMOTE_CLOSE;
 }
@@ -420,7 +424,7 @@ int connection_identify_request(int event, void *data)
         Register_connect(conn->fd, CONN_TYPE_HTTP);
         return HTTP_REQ;
     } else {
-        ERROR(conn->fd, 500, "Invalid code branch, tell Zed.");
+        error_response(conn->fd, 500, "Invalid code branch, tell Zed.");
     }
 
 error:
@@ -476,7 +480,7 @@ void Connection_destroy(Connection *conn)
 Connection *Connection_create(Server *srv, int fd, int rport, const char *remote)
 {
     Connection *conn = calloc(sizeof(Connection), 1);
-    check(conn, "Out of memory.");
+    check_mem(conn);
 
     conn->server = srv;
     conn->fd = fd;
@@ -486,10 +490,10 @@ Connection *Connection_create(Server *srv, int fd, int rport, const char *remote
     conn->remote[IPADDR_SIZE] = '\0';
 
     conn->req = Request_create();
-    check(conn->req, "Failed to allocate Request.");
+    check_mem(conn->req);
 
     conn->buf = malloc(BUFFER_SIZE + 1);
-    check(conn->buf, "Failed to allocate buffer size: %d", BUFFER_SIZE + 1);
+    check_mem(conn->buf)
 
     return conn;
 
@@ -516,7 +520,7 @@ void Connection_task(void *v)
 
     for(i = 0, next = OPEN; next != CLOSE; i++) {
         next = State_exec(&conn->state, next, (void *)conn);
-        ERROR_UNLESS(next >= FINISHED && next < EVENT_END, conn->fd, 500, 
+        error_unless(next >= FINISHED && next < EVENT_END, conn->fd, 500, 
                 "!!! Invalid next event[%d]: %d, Tell ZED!", i, next);
     }
 
@@ -539,7 +543,7 @@ int Connection_deliver(int to_fd, bstring buf)
 
     bstring b64_buf = bBase64Encode(buf);
     rc = fdsend(to_fd, bdata(b64_buf), blength(b64_buf)+1);
-    check(rc == blength(b64_buf)+1, "Failed to write entire message to conn %d", to_fd);
+    check_debug(rc == blength(b64_buf)+1, "Failed to write entire message to conn %d", to_fd);
 
     bdestroy(b64_buf);
     return 0;
@@ -562,8 +566,8 @@ int Connection_read_header(Connection *conn, Request *req)
 
     while(!finished && conn->nread < BUFFER_SIZE - 1) {
         n = fdread(conn->fd, conn->buf, BUFFER_SIZE - 1 - conn->nread);
-        check(n > 0, "Failed to read from socket after %d read: %d parsed.",
-                conn->nread, (int)conn->nparsed);
+        check_debug(n > 0, "Failed to read from socket after %d read: %d parsed.",
+                    conn->nread, (int)conn->nparsed);
 
         conn->nread += n;
 
@@ -572,13 +576,13 @@ int Connection_read_header(Connection *conn, Request *req)
 
         finished = Request_parse(req, conn->buf, conn->nread, &conn->nparsed);
 
-        ERROR_UNLESS(finished != -1, conn->fd, 400, 
+        error_unless(finished != -1, conn->fd, 400, 
                 "Error in parsing: %d, bytes: %d, value: %.*s, parsed: %d", 
                 finished, conn->nread, conn->nread, conn->buf, (int)conn->nparsed);
 
     }
 
-    ERROR_UNLESS(finished, conn->fd, 400, "HEADERS and/or request too big.");
+    error_unless(finished, conn->fd, 400, "HEADERS and/or request too big.");
 
     return conn->nread; 
 

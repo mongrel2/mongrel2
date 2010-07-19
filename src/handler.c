@@ -171,13 +171,13 @@ int Handler_deliver(void *handler_socket, char *buffer, size_t len)
     msg = calloc(sizeof(zmq_msg_t), 1);
     msg_buf = NULL;
 
-    check(msg, "Failed to allocate 0mq message to send.");
+    check_mem(msg);
 
     rc = zmq_msg_init(msg);
     check(rc == 0, "Failed to initialize 0mq message to send.");
 
     msg_buf = blk2bstr(buffer, len);
-    check(msg_buf, "Failed to allocate message buffer for handler delivery.");
+    check_mem(msg_buf);
 
     rc = zmq_msg_init_data(msg, bdata(msg_buf), blength(msg_buf), bstring_free, msg_buf);
     check(rc == 0, "Failed to init 0mq message data.");
@@ -202,7 +202,7 @@ void *Handler_send_create(const char *send_spec, const char *identity)
     int rc = zmq_setsockopt(handler_socket, ZMQ_IDENTITY, identity, strlen(identity));
     check(rc == 0, "Failed to set handler socket %s identity %s", send_spec, identity);
 
-    debug("Binding handler PUB socket %s with identity: %s", send_spec, identity);
+    log_info("Binding handler PUB socket %s with identity: %s", send_spec, identity);
 
     rc = zmq_bind(handler_socket, send_spec);
     check(rc == 0, "Can't bind handler socket: %s", send_spec);
@@ -221,7 +221,7 @@ void *Handler_recv_create(const char *recv_spec, const char *uuid)
 
     int rc = zmq_setsockopt(listener_socket, ZMQ_SUBSCRIBE, uuid, 0);
     check(rc == 0, "Failed to subscribe listener socket: %s", recv_spec);
-    debug("binding listener SUB socket %s subscribed to: %s", recv_spec, uuid);
+    log_info("Binding listener SUB socket %s subscribed to: %s", recv_spec, uuid);
 
     rc = zmq_bind(listener_socket, recv_spec);
     check(rc == 0, "Can't bind listener socket %s", recv_spec);
@@ -237,7 +237,7 @@ Handler *Handler_create(const char *send_spec, const char *send_ident,
         const char *recv_spec, const char *recv_ident)
 {
     Handler *handler = calloc(sizeof(Handler), 1);
-    check(handler, "Memory allocate failed.");
+    check_mem(handler);
 
     handler->send_ident = bfromcstr(send_ident);
     handler->recv_ident = bfromcstr(recv_ident);

@@ -27,7 +27,7 @@ void RouteMap_destroy(RouteMap *map)
 Route *RouteMap_insert_base(RouteMap *map, bstring prefix, bstring pattern)
 {
     Route *route = h_malloc(sizeof(Route));
-    check(route, "Out of memory.");
+    check_mem(route);
 
     route->pattern = pattern;
     check(route->pattern, "Pattern is required.");
@@ -58,11 +58,10 @@ int RouteMap_insert(RouteMap *map, bstring pattern, void *data)
         prefix = bstrcpy(pattern);
     }
 
-    check(prefix, "Couldn't create prefix: %s", bdata(pattern));
+    check_mem(prefix);
 
     // pattern is owned by RouteMap, prefix is owned by us
     route = RouteMap_insert_base(map, prefix, pattern);
-
     check(route, "Failed to insert route: %s", bdata(pattern));
 
     // TODO: figure out whether we can hattach the data too
@@ -88,7 +87,7 @@ int RouteMap_insert_reversed(RouteMap *map, bstring pattern, void *data)
         reversed_prefix = bstrcpy(pattern);
     }
 
-    check(reversed_prefix, "Failed to create prefix to reverse.");
+    check_mem(reversed_prefix);
     bReverse(reversed_prefix);
 
     // we own reversed_prefix, they own pattern
