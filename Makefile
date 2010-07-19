@@ -1,5 +1,5 @@
 
-CFLAGS=-g -Wall -Isrc
+CFLAGS=-g -Wall -Isrc -DNDEBUG
 LIBS=-lzmq -lsqlite3
 
 ASM=$(wildcard src/**/*.S src/*.S)
@@ -58,6 +58,9 @@ examples/python/mongrel2/sql/config.sql: src/config/config.sql src/config/mimety
 ragel:
 	ragel -G2 src/state.rl
 	ragel -G2 src/http11/http11_parser.rl
+
+valgrind:
+	valgrind --track-fds=yes --log-file=valgrind.log --suppressions=tests/valgrind.sup --gen-suppressions=all ./bin/mongrel2 tests/config.sqlite localhost
 
 %.o: %.S
 	$(CC) $(CFLAGS) -c $< -o $@

@@ -1,0 +1,34 @@
+{
+    zmq_send_1
+        Memcheck:Param
+        socketcall.send(msg)
+        fun:send
+        fun:_ZN3zmq5ctx_t12send_commandEjRKNS_9command_tE
+        fun:_ZN3zmq8object_t12send_commandERNS_9command_tE
+        fun:_ZN3zmq8object_t8send_ownEPNS_13socket_base_tEPNS_7owned_tE
+        fun:_ZN3zmq13socket_base_t4bindEPKc
+        fun:zmq_bind
+        fun:Handler_send_create
+        fun:Handler_task
+        fun:taskstart
+        fun:makecontext
+        obj:*
+}
+
+{
+    zmq_send_2
+        Memcheck:Param
+        socketcall.send(msg)
+        fun:send
+        fun:_ZN3zmq5ctx_t12send_commandEjRKNS_9command_tE
+        fun:_ZN3zmq8object_t12send_commandERNS_9command_tE
+        fun:_ZN3zmq8object_t9send_plugEPNS_7owned_tEb
+        fun:_ZN3zmq13socket_base_t4bindEPKc
+        fun:zmq_bind
+        fun:Handler_send_create
+        fun:Handler_task
+        fun:taskstart
+        fun:makecontext
+        obj:*
+}
+
