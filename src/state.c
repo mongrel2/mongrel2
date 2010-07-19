@@ -1,5 +1,39 @@
 
 #line 1 "src/state.rl"
+/**
+ *
+ * Copyright (c) 2010, Zed A. Shaw and Mongrel2 Project Contributors.
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are
+ * met:
+ * 
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ * 
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ * 
+ *     * Neither the name of the Mongrel2 Project, Zed A. Shaw, nor the names
+ *       of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written
+ *       permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+ * IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <state.h>
@@ -10,7 +44,7 @@
 #define CALL(A, C) if(state->actions && state->actions->A) next = state->actions->A(C, data)
 
 
-#line 52 "src/state.rl"
+#line 86 "src/state.rl"
 
 
 
@@ -25,7 +59,7 @@ static const int StateActions_en_main_Connection_Idle = 2;
 static const int StateActions_en_main_Connection_HTTPRouting = 4;
 
 
-#line 55 "src/state.rl"
+#line 89 "src/state.rl"
 
 int State_init(State *state, StateActions *actions)
 {
@@ -37,7 +71,7 @@ int State_init(State *state, StateActions *actions)
 	 state->cs = StateActions_start;
 	}
 
-#line 61 "src/state.rl"
+#line 95 "src/state.rl"
     return 1;
 }
 
@@ -46,7 +80,7 @@ inline int State_invariant(State *state, int event)
     if ( state->cs == 
 #line 2 "src/state.c"
 0
-#line 66 "src/state.rl"
+#line 100 "src/state.rl"
  ) {
         return -1;
     }
@@ -54,7 +88,7 @@ inline int State_invariant(State *state, int event)
     if ( state->cs >= 
 #line 2 "src/state.c"
 14
-#line 70 "src/state.rl"
+#line 104 "src/state.rl"
  ) {
         return 1;
     }
@@ -84,7 +118,7 @@ case 14:
 		goto tr18;
 	goto st0;
 tr0:
-#line 18 "src/state.rl"
+#line 52 "src/state.rl"
 	{ CALL(error, (*p)); }
 	goto st0;
 #line 2 "src/state.c"
@@ -92,7 +126,7 @@ st0:
  state->cs = 0;
 	goto _out;
 tr18:
-#line 17 "src/state.rl"
+#line 51 "src/state.rl"
 	{ CALL(open, (*p)); }
 	goto st1;
 st1:
@@ -104,7 +138,7 @@ case 1:
 		goto tr1;
 	goto tr0;
 tr1:
-#line 21 "src/state.rl"
+#line 55 "src/state.rl"
 	{ CALL(parse, (*p)); }
 	goto st2;
 st2:
@@ -118,7 +152,7 @@ case 2:
 	}
 	goto tr0;
 tr2:
-#line 20 "src/state.rl"
+#line 54 "src/state.rl"
 	{ CALL(close, (*p)); }
 	goto st15;
 st15:
@@ -130,7 +164,7 @@ case 15:
 		goto tr18;
 	goto tr0;
 tr3:
-#line 22 "src/state.rl"
+#line 56 "src/state.rl"
 	{ CALL(identify_request, (*p)); }
 	goto st3;
 st3:
@@ -145,7 +179,7 @@ case 3:
 	}
 	goto tr0;
 tr4:
-#line 24 "src/state.rl"
+#line 58 "src/state.rl"
 	{ CALL(route_request, (*p)); }
 	goto st4;
 st4:
@@ -161,11 +195,11 @@ case 4:
 	}
 	goto tr0;
 tr6:
-#line 23 "src/state.rl"
+#line 57 "src/state.rl"
 	{ CALL(send_socket_response, (*p)); }
 	goto st5;
 tr7:
-#line 29 "src/state.rl"
+#line 63 "src/state.rl"
 	{ CALL(http_to_directory, (*p)); }
 	goto st5;
 st5:
@@ -179,11 +213,11 @@ case 5:
 	}
 	goto tr0;
 tr8:
-#line 27 "src/state.rl"
+#line 61 "src/state.rl"
 	{ CALL(http_to_handler, (*p)); }
 	goto st6;
 tr10:
-#line 25 "src/state.rl"
+#line 59 "src/state.rl"
 	{ CALL(msg_to_handler, (*p)); }
 	goto st6;
 st6:
@@ -195,7 +229,7 @@ case 6:
 		goto tr1;
 	goto tr0;
 tr9:
-#line 28 "src/state.rl"
+#line 62 "src/state.rl"
 	{ CALL(http_to_proxy, (*p)); {goto st9;} }
 	goto st7;
 st7:
@@ -205,7 +239,7 @@ case 7:
 #line 2 "src/state.c"
 	goto tr0;
 tr5:
-#line 24 "src/state.rl"
+#line 58 "src/state.rl"
 	{ CALL(route_request, (*p)); }
 	goto st8;
 st8:
@@ -226,7 +260,7 @@ case 9:
 	}
 	goto st0;
 tr11:
-#line 32 "src/state.rl"
+#line 66 "src/state.rl"
 	{ CALL(proxy_deliver, (*p)); }
 	goto st10;
 st10:
@@ -240,11 +274,11 @@ case 10:
 	}
 	goto tr0;
 tr13:
-#line 33 "src/state.rl"
+#line 67 "src/state.rl"
 	{ CALL(proxy_failed, (*p)); }
 	goto st11;
 tr14:
-#line 37 "src/state.rl"
+#line 71 "src/state.rl"
 	{ CALL(proxy_close, (*p)); }
 	goto st11;
 st11:
@@ -256,14 +290,14 @@ case 11:
 		goto tr16;
 	goto tr0;
 tr16:
-#line 41 "src/state.rl"
+#line 75 "src/state.rl"
 	{
         p--;
         {goto st2;} 
     }
 	goto st12;
 tr17:
-#line 45 "src/state.rl"
+#line 79 "src/state.rl"
 	{
         CALL(proxy_close, (*p));
         p--;
@@ -277,7 +311,7 @@ case 12:
 #line 2 "src/state.c"
 	goto tr0;
 tr15:
-#line 36 "src/state.rl"
+#line 70 "src/state.rl"
 	{ CALL(proxy_parse, (*p)); }
 	goto st13;
 st13:
@@ -325,11 +359,11 @@ case 13:
 	case 11: 
 	case 12: 
 	case 13: 
-#line 18 "src/state.rl"
+#line 52 "src/state.rl"
 	{ CALL(error, (*p)); }
 	break;
 	case 15: 
-#line 19 "src/state.rl"
+#line 53 "src/state.rl"
 	{ CALL(finish, (*p)); }
 	break;
 #line 2 "src/state.c"
@@ -339,7 +373,7 @@ case 13:
 	_out: {}
 	}
 
-#line 88 "src/state.rl"
+#line 122 "src/state.rl"
 
     return next;
 }
