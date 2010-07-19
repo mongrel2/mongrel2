@@ -284,8 +284,6 @@ taskinfo(int s)
     char *extra;
     int fd = 0;
 
-    // TODO: create a generic status module for stuff like this, web accessible
-  
     fd = open(STATUS_FILE, O_WRONLY | O_CREAT, 0600);
     if(fd < 0) {
         fprint(2, "Error, could not open status file.");
