@@ -69,8 +69,6 @@ void *Cache_lookup(Cache *cache, void *key)
     for(i = i + 1; i < cache->size; i++)
         cache->arr[i].tag--;
 
-    debug("Cache %s", (rdata) ? "Hit" : "Miss");
-
     return rdata;
 
 error:
