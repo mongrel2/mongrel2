@@ -194,14 +194,17 @@ int mqrecv(void *socket, zmq_msg_t *msg, int flags)
 {
     if(mqwait(socket, 'r') == -1) {
         return -1;
-    } else {
-        return zmq_recv(socket, msg, flags);
     }
+
+    return zmq_recv(socket, msg, flags);
 }
 
 int mqsend(void *socket, zmq_msg_t *msg, int flags)
 {
-    mqwait(socket, 'w');
+    if(mqwait(socket, 'w') == -1) {
+        return -1;
+    }
+
     return zmq_send(socket, msg, flags);
 }
 

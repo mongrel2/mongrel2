@@ -216,7 +216,7 @@ int Handler_deliver(void *handler_socket, char *buffer, size_t len)
     rc = zmq_msg_init_data(msg, bdata(msg_buf), blength(msg_buf), bstring_free, msg_buf);
     check(rc == 0, "Failed to init 0mq message data.");
 
-    rc = zmq_send(handler_socket, msg, 0);
+    rc = mqsend(handler_socket, msg, 0);
     check(rc == 0, "Failed to deliver 0mq message to handler.");
 
     if(msg) free(msg);
