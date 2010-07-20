@@ -55,6 +55,7 @@ enum {
 
 typedef struct FileRecord {
     int fd;
+    int users;
     time_t loaded;
     bstring date;
     bstring last_mod;
@@ -84,6 +85,7 @@ int Dir_stream_file(FileRecord *file, int sock_fd);
 
 int Dir_serve_file(Request *req, Dir *dir, bstring path, int fd);
 
+void FileRecord_release(FileRecord *file);
 void FileRecord_destroy(FileRecord *file);
 
 #ifdef __APPLE__
@@ -91,5 +93,7 @@ void FileRecord_destroy(FileRecord *file);
 #else
 #define Dir_send sendfile
 #endif
+
+#define FR_CACHE_SIZE 32
 
 #endif

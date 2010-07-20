@@ -33,6 +33,7 @@
  */
 
 #include <dir.h>
+#include <cache.h>
 #include <fcntl.h>
 #include <dbg.h>
 #include <task/task.h>
@@ -55,10 +56,38 @@ const char *RESPONSE_FORMAT = "HTTP/1.1 200 OK\r\n"
 
 const char *RFC_822_TIME = "%a, %d %b %y %T %z";
 
+static Cache *fr_cache = NULL;
+
+
+static int filerecord_cache_lookup(void *data, void *key) {
+    bstring full_path = (bstring) key;
+    FileRecord *fr = (FileRecord *) data;
+    
+    return !bstrcmp(fr->full_path, full_path);
+}
+
+static void filerecord_cache_evict(void *data) {
+    FileRecord_release((FileRecord *) data);
+}
 
 FileRecord *Dir_find_file(bstring path, bstring default_type)
 {
-    FileRecord *fr = calloc(sizeof(FileRecord), 1);
+    if(fr_cache == NULL) {
+        fr_cache = Cache_create(FR_CACHE_SIZE, filerecord_cache_lookup,
+                                filerecord_cache_evict);
+    }
+    FileRecord *fr;
+    if(fr_cache) {
+        fr = Cache_lookup(fr_cache, path);
+        if(fr) {
+            // We're letting this copy of path go
+            bdestroy(path);
+            fr->users++;
+            return fr;
+        }
+    }
+
+    fr = calloc(sizeof(FileRecord), 1);
     const char *p = bdata(path);
 
     check_mem(fr);
@@ -95,6 +124,11 @@ FileRecord *Dir_find_file(bstring path, bstring default_type)
         bdata(fr->etag));
 
     check(fr->header != NULL, "Failed to create response header.");
+
+    // 1 user for each the cache and the guy who called us
+    fr->users = 2;
+
+    Cache_add(fr_cache, fr);
 
     return fr;
 
@@ -173,6 +207,15 @@ void Dir_destroy(Dir *dir)
     }
 }
 
+void FileRecord_release(FileRecord *file)
+{
+    file->users--;
+    check(file->users >= 0, "User count on file record somehow fell below 0");
+    if(file->users <= 0) FileRecord_destroy(file);
+
+error:
+    return;
+}
 
 void FileRecord_destroy(FileRecord *file)
 {
@@ -258,7 +301,7 @@ FileRecord *Dir_resolve_file(Dir *dir, bstring path)
     return file;
 
 error:
-    FileRecord_destroy(file);
+    FileRecord_release(file);
     return NULL;
 }
 
@@ -366,13 +409,13 @@ int Dir_serve_file(Request *req, Dir *dir, bstring path, int fd)
             sentinel("How the hell did you get to here. Tell Zed.");
         }
 
-        FileRecord_destroy(file);
+        FileRecord_release(file);
         return 0;
     }
 
     sentinel("Invalid code branch, Tell Zed you have magic.");
 error:
-    FileRecord_destroy(file);
+    FileRecord_release(file);
     return -1;
 }
 
