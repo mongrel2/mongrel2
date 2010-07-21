@@ -40,16 +40,21 @@
 #include <adt/list.h>
 #include <bstring.h>
 
-typedef struct RouteMap {
-    tst_t *routes;
-} RouteMap;
-
 typedef struct Route {
     bstring pattern;
     void *data;
 } Route;
 
-RouteMap *RouteMap_create();
+struct RouteMap;
+
+typedef void (*routemap_destroy_cb)(Route *route, struct RouteMap *map);
+
+typedef struct RouteMap {
+    tst_t *routes;
+    routemap_destroy_cb destroy;
+} RouteMap;
+
+RouteMap *RouteMap_create(routemap_destroy_cb destroy);
 
 void RouteMap_destroy(RouteMap *map);
 

@@ -43,6 +43,16 @@
 #include <mem/halloc.h>
 #include <routing.h>
 
+int RUNNING=1;
+
+void host_destroy_cb(Route *r, RouteMap *map)
+{
+    if(r->data) {
+        Host_destroy((Host *)r->data);
+        r->data = NULL;
+    }
+}
+
 Server *Server_create(const char *uuid, const char *port,
         const char *chroot, const char *access_log,
         const char *error_log, const char *pid_file)
@@ -50,7 +60,7 @@ Server *Server_create(const char *uuid, const char *port,
     Server *srv = h_calloc(sizeof(Server), 1);
     check_mem(srv);
 
-    srv->hosts = RouteMap_create();
+    srv->hosts = RouteMap_create(host_destroy_cb);
     check(srv->hosts, "Failed to create host RouteMap.");
 
     srv->port = atoi(port);
@@ -70,6 +80,8 @@ error:
     Server_destroy(srv);
     return NULL;
 }
+
+
 
 void Server_destroy(Server *srv)
 {
@@ -128,7 +140,7 @@ void Server_start(Server *srv)
     // TODO: this could cause problems if the tst is too deep, recursion may break
     tst_traverse(srv->default_host->routes->routes, handlers_receive_start, srv);
 
-    while((cfd = netaccept(srv->listen_fd, remote, &rport)) >= 0) {
+    while(RUNNING && (cfd = netaccept(srv->listen_fd, remote, &rport)) >= 0) {
         debug("Connection from %s:%d to %s:%d", remote, rport, 
                 bdata(srv->default_host->name), srv->port);
 
@@ -136,9 +148,13 @@ void Server_start(Server *srv)
         Connection_accept(conn);
     }
 
+    fdclose(srv->listen_fd);
+    log_info("EXITING! GOODBYE!");
+
     return;
 
 error:
+    log_err("Server startup failed, aborting.");
     taskexitall(1);
 }
 

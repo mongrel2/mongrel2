@@ -43,6 +43,9 @@
 #include <mime.h>
 #include <response.h>
 
+static time_t NOW_DATE = 0;
+static struct tm *NOW_DATE_TM;
+static bstring NOW_DATE_STRING = NULL;
 
 struct tagbstring ETAG_PATTERN = bsStatic("[a-e0-9]+-[a-e0-9]+");
 
@@ -68,6 +71,24 @@ static int filerecord_cache_lookup(void *data, void *key) {
 
 static void filerecord_cache_evict(void *data) {
     FileRecord_release((FileRecord *) data);
+}
+
+
+/**
+ * Trying out this for doing the dates faster.  Instead of calling time constantly
+ * on every request, we just have a 2 second timer going off and updating a global.
+ * That's good enough granularity for practical use, and it let's us later move this
+ * into a generic cache cleaning ticker or timeout ticker.
+ */
+void Dir_ticktock(void *v)
+{
+    do {
+        NOW_DATE = time(NULL);
+        NOW_DATE_TM = gmtime(&NOW_DATE);
+        bdestroy(NOW_DATE_STRING);
+        NOW_DATE_STRING = bStrfTime(RFC_822_TIME, NOW_DATE_TM);
+        taskdelay(2 * 1000);
+    } while(1);
 }
 
 FileRecord *Dir_find_file(bstring path, bstring default_type)
@@ -101,9 +122,6 @@ FileRecord *Dir_find_file(bstring path, bstring default_type)
 
     fr->loaded = time(NULL);
 
-    fr->date = bStrfTime(RFC_822_TIME, gmtime(&fr->loaded));
-    check(fr->date, "Failed to format current date.");
-
     fr->last_mod = bStrfTime(RFC_822_TIME, gmtime(&fr->sb.st_mtime));
     check(fr->last_mod, "Failed to format last modified time.");
 
@@ -117,7 +135,7 @@ FileRecord *Dir_find_file(bstring path, bstring default_type)
     fr->etag = bformat("%x-%x", fr->sb.st_mtime, fr->sb.st_size);
 
     fr->header = bformat(RESPONSE_FORMAT,
-        bdata(fr->date),
+        bdata(NOW_DATE_STRING),
         bdata(fr->content_type),
         fr->sb.st_size,
         bdata(fr->last_mod),
@@ -138,7 +156,6 @@ error:
 }
 
 
-/** Mostly done for readability in the code, but later will be where header caching happens. */
 inline int Dir_send_header(FileRecord *file, int sock_fd)
 {
     return fdsend(sock_fd, bdata(file->header), blength(file->header)) == blength(file->header);
@@ -209,9 +226,11 @@ void Dir_destroy(Dir *dir)
 
 void FileRecord_release(FileRecord *file)
 {
-    file->users--;
-    check(file->users >= 0, "User count on file record somehow fell below 0");
-    if(file->users <= 0) FileRecord_destroy(file);
+    if(file) {
+        file->users--;
+        check(file->users >= 0, "User count on file record somehow fell below 0");
+        if(file->users <= 0) FileRecord_destroy(file);
+    }
 
 error:
     return;
@@ -301,6 +320,7 @@ FileRecord *Dir_resolve_file(Dir *dir, bstring path)
     return file;
 
 error:
+    bdestroy(target);
     FileRecord_release(file);
     return NULL;
 }

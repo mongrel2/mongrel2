@@ -40,16 +40,45 @@
 #include <adt/list.h>
 #include <config/db.h>
 #include <unixy.h>
-
+#include <time.h>
+#include <dir.h>
+#include <signal.h>
+#include <mime.h>
 
 FILE *LOG_FILE = NULL;
 
+extern int RUNNING;
+
 struct tagbstring PRIV_DIR = bsStatic("/");
+
+Server *srv = NULL;
+
+void terminate(int s)
+{
+    debug("SHUTDOWN RECEIVED");
+    RUNNING=0;
+    if(srv) {
+        fdclose(srv->listen_fd);
+    }
+}
+
+void start_terminator()
+{
+    struct sigaction sa, osa;
+    memset(&sa, 0, sizeof sa);
+    sa.sa_handler = terminate;
+    sa.sa_flags = SA_RESTART;
+    sigaction(SIGINT, &sa, &osa);
+}
 
 void taskmain(int argc, char **argv)
 {
     LOG_FILE = stderr;
     int rc = 0;
+
+    // start up the date timer
+    taskcreate(Dir_ticktock, NULL, 10 * 1024);
+    start_terminator();
 
     check(argc == 3, "usage: server config.sqlite default_host");
 
@@ -61,7 +90,7 @@ void taskmain(int argc, char **argv)
     rc = Config_load_mimetypes();
     check(rc == 0, "Failed to load mime types.");
 
-    Server *srv = lnode_get(list_first(servers));
+    srv = lnode_get(list_first(servers));
 
     DB_close();
 
@@ -100,6 +129,13 @@ void taskmain(int argc, char **argv)
 
     Server_init();
     Server_start(srv);
+
+    log_info("SERVER EXITED.");
+    MIME_destroy();
+
+    Server_destroy(srv);
+    zmq_term(ZMQ_CTX);
+    taskexitall(0);
 
     return;
 

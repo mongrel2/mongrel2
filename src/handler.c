@@ -45,6 +45,9 @@
 struct tagbstring LEAVE_HEADER = bsStatic("{\"METHOD\":\"JSON\"}");
 struct tagbstring LEAVE_MSG = bsStatic("{\"type\":\"disconnect\"}");
 
+extern int RUNNING;
+
+
 void bstring_free(void *data, void *hint)
 {
     bdestroy((bstring)hint);
@@ -127,7 +130,7 @@ void Handler_task(void *v)
     check(handler->recv_socket, "Failed to create listener socket.");
 
 
-    while(1) {
+    while(RUNNING) {
         zmq_msg_init(inmsg);
 
         taskstate("recv");
@@ -189,6 +192,7 @@ void Handler_task(void *v)
         }
     }
 
+    debug("HANDLER EXITED.");
     return;
 
 error:

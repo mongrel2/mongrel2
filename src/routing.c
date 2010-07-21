@@ -43,16 +43,35 @@
 
 
 
-RouteMap *RouteMap_create()
+RouteMap *RouteMap_create(routemap_destroy_cb destroy)
 {
     RouteMap *map = h_calloc(sizeof(RouteMap), 1);
+    check_mem(map);
+
+    map->destroy = destroy;
+
     return map;
+
+error:
+    return NULL;
+}
+
+void RouteMap_cleanup(void *value, void *data)
+{
+    Route *route = (Route *)value;
+    RouteMap *map = (RouteMap *)data;
+
+    if(map->destroy) {
+        map->destroy(route, map);
+    }
+
+    bdestroy(route->pattern);
 }
 
 void RouteMap_destroy(RouteMap *map)
 {
-    // TODO: add a callback for destroying the contents, or h_malloc required
     if(map) {
+        tst_traverse(map->routes, RouteMap_cleanup, map);
         tst_destroy(map->routes);
         h_free(map);
     }
