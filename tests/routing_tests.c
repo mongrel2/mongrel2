@@ -22,7 +22,7 @@ error:
 
 char *test_routing_match() 
 {
-    RouteMap *routes = RouteMap_create();
+    RouteMap *routes = RouteMap_create(NULL);
     mu_assert(routes != NULL, "Failed to make the route map.");
     char *route_data1 = "route1";
     char *route_data2 = "route2";
@@ -79,12 +79,6 @@ char *test_routing_match()
     bdestroy(path5);
 
     RouteMap_destroy(routes);
-
-    // TODO: make it so we don't need to do this manually by having RouteMap do it
-    bdestroy(route1);
-    bdestroy(route2);
-    bdestroy(route3);
-    bdestroy(route4);
 
     return NULL;
 }
