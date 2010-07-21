@@ -48,18 +48,16 @@
 FILE *LOG_FILE = NULL;
 
 extern int RUNNING;
+int RELOAD;
 
 struct tagbstring PRIV_DIR = bsStatic("/");
 
-Server *srv = NULL;
 
 void terminate(int s)
 {
     debug("SHUTDOWN RECEIVED");
     RUNNING=0;
-    if(srv) {
-        fdclose(srv->listen_fd);
-    }
+    RELOAD = s == SIGHUP;
 }
 
 void start_terminator()
@@ -70,39 +68,54 @@ void start_terminator()
     sa.sa_flags = SA_RESTART;
     sigaction(SIGINT, &sa, &osa);
     sigaction(SIGTERM, &sa, &osa);
+    sigaction(SIGHUP, &sa, &osa);
 }
 
 
-
-void taskmain(int argc, char **argv)
+Server *load_server(const char *db_file, const char *server_name)
 {
-    LOG_FILE = stderr;
     int rc = 0;
+    list_t *servers = Config_load_servers(db_file, server_name);
 
-    check(argc == 3, "usage: server config.sqlite default_host");
-
-    list_t *servers = Config_load_servers(argv[1], argv[2]);
-
-    check(servers, "Failed to load server config from %s for host %s", argv[1], argv[2]);
+    check(servers, "Failed to load server config from %s for host %s", db_file, server_name);
     check(list_count(servers) == 1, "Currently only support running one server.");
+
+    Server *srv = lnode_get(list_first(servers));
 
     rc = Config_load_mimetypes();
     check(rc == 0, "Failed to load mime types.");
 
-    srv = lnode_get(list_first(servers));
+    list_destroy_nodes(servers);
+    list_destroy(servers);
 
     DB_close();
 
+    return srv;
+error:
 
+    return NULL;
+}
+
+
+int clear_pid_file(Server *srv)
+{
     bstring pid_file = bformat("%s%s", bdata(srv->chroot), bdata(srv->pid_file));
 
-    rc = Unixy_remove_dead_pidfile(pid_file);
+    int rc = Unixy_remove_dead_pidfile(pid_file);
     check(rc == 0, "Failed to remove the dead PID file: %s", bdata(pid_file));
     bdestroy(pid_file);
+    
+    return 0;
+error:
+    return -1;
+}
 
-    rc = Unixy_chroot(srv->chroot);
 
-    if(rc == 0) {
+int attempt_chroot_drop(Server *srv)
+{
+    int rc = 0;
+
+    if(Unixy_chroot(srv->chroot) == 0) {
         log_info("All loaded up, time to turn into a server.");
 
         check(access("/logs", F_OK) == 0, "logs directory doesn't exist in %s or isn't owned right.", bdata(srv->chroot));
@@ -126,21 +139,87 @@ void taskmain(int argc, char **argv)
     } else {
         log_err("Couldn't chroot too %s, assuming running in test mode.", bdata(srv->chroot));
     }
+    return 0;
 
-    // start up the date timer
+error:
+    return -1;
+}
+
+void final_setup()
+{
     taskcreate(Dir_ticktock, NULL, 10 * 1024);
     start_terminator();
-
     Server_init();
-    Server_start(srv);
+}
 
-    log_info("SERVER EXITED.");
+
+void complete_shutdown(Server *srv)
+{
     MIME_destroy();
-
     Server_destroy(srv);
     zmq_term(ZMQ_CTX);
     taskexitall(0);
+}
 
+
+Server *reload_server(Server *old_srv, const char *db_file, const char *server_name)
+{
+    RUNNING = 1;
+
+    MIME_destroy();
+
+    Server *srv = load_server(db_file, server_name);
+    check(srv, "Failed to load new server config.");
+
+    srv->listen_fd = old_srv->listen_fd;
+
+    // TODO: the handlers need to be closed down, or copied over
+
+    return srv;
+
+error:
+
+    return NULL;
+}
+
+
+
+void taskmain(int argc, char **argv)
+{
+    LOG_FILE = stderr;
+    int rc = 0;
+    Server *srv = NULL;
+
+    check(argc == 3, "usage: server config.sqlite default_host");
+
+    srv = load_server(argv[1], argv[2]);
+    check(srv, "Aborting since can't load server.");
+
+    rc = clear_pid_file(srv);
+    check(rc == 0, "PID file failure, aborting rather than trying to start.");
+
+    rc = attempt_chroot_drop(srv);
+    check(rc == 0, "Major failure in chroot/droppriv, aborting."); 
+
+    final_setup();
+
+    while(1) {
+        Server_start(srv);
+
+        if(RELOAD) {
+            log_info("Reload requested, will load %s from %s", argv[1], argv[2]);
+            Server *new_srv = reload_server(srv, argv[1], argv[2]);
+            check(new_srv, "Failed to load the new configuration, will keep the old one.");
+
+            // for this to work handlers need to die more gracefully
+            srv = new_srv;
+        } else {
+            log_info("Shutdown requested, goodbye.");
+            break;
+        }
+    }
+
+    complete_shutdown(srv);
     return;
 
 error:

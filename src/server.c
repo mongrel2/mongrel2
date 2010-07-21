@@ -130,10 +130,12 @@ void Server_start(Server *srv)
 
     taskname("SERVER");
 
-    srv->listen_fd = netannounce(TCP, 0, srv->port);
-    check(srv->listen_fd >= 0, "Can't announce on TCP port %d", srv->port);
+    if(!srv->listen_fd) {
+        srv->listen_fd = netannounce(TCP, 0, srv->port);
+        check(srv->listen_fd >= 0, "Can't announce on TCP port %d", srv->port);
 
-    check(fdnoblock(srv->listen_fd) == 0, "Failed to set listening port %d nonblocking.", srv->port);
+        check(fdnoblock(srv->listen_fd) == 0, "Failed to set listening port %d nonblocking.", srv->port);
+    }
 
     log_info("Starting server on port %d", srv->port);
 
@@ -147,9 +149,6 @@ void Server_start(Server *srv)
         Connection *conn = Connection_create(srv, cfd, rport, remote);
         Connection_accept(conn);
     }
-
-    fdclose(srv->listen_fd);
-    log_info("EXITING! GOODBYE!");
 
     return;
 
