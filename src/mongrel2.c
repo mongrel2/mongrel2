@@ -69,16 +69,15 @@ void start_terminator()
     sa.sa_handler = terminate;
     sa.sa_flags = SA_RESTART;
     sigaction(SIGINT, &sa, &osa);
+    sigaction(SIGTERM, &sa, &osa);
 }
+
+
 
 void taskmain(int argc, char **argv)
 {
     LOG_FILE = stderr;
     int rc = 0;
-
-    // start up the date timer
-    taskcreate(Dir_ticktock, NULL, 10 * 1024);
-    start_terminator();
 
     check(argc == 3, "usage: server config.sqlite default_host");
 
@@ -123,9 +122,14 @@ void taskmain(int argc, char **argv)
 
         rc = Unixy_drop_priv(&PRIV_DIR);
         check(rc == 0, "Failed to drop priv to the owner of %s", bdata(&PRIV_DIR));
+
     } else {
         log_err("Couldn't chroot too %s, assuming running in test mode.", bdata(srv->chroot));
     }
+
+    // start up the date timer
+    taskcreate(Dir_ticktock, NULL, 10 * 1024);
+    start_terminator();
 
     Server_init();
     Server_start(srv);
