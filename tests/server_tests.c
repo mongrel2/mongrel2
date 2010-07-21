@@ -35,7 +35,7 @@ char *test_Server_adds()
     Host *host = Host_create("zedshaw.com");
     mu_assert(host != NULL, "Failed to make host.");
 
-    rc = Server_add_host(srv, host->name, host);
+    rc = Server_add_host(srv, bstrcpy(host->name), host);
     mu_assert(rc == 0, "Failed to add host to server.");
 
     Server_destroy(srv);
