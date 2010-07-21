@@ -284,13 +284,15 @@ taskinfo(int s)
     char *extra;
     int fd = 0;
 
+    unlink(STATUS_FILE);
+
     fd = open(STATUS_FILE, O_WRONLY | O_CREAT, 0600);
     if(fd < 0) {
         fprint(2, "Error, could not open status file.");
         fd = 2;
     }
 
-    fprint(fd, "task list:\n");
+    fprint(fd, "{\"task_list\":[");
     for(i=0; i<nalltask; i++){
         t = alltask[i];
         if(t == taskrunning)
@@ -299,10 +301,12 @@ taskinfo(int s)
             extra = " (ready)";
         else
             extra = "";
-        fprint(fd, "%6d%c %-20s %s%s\n", 
-            t->id, t->system ? 's' : ' ', 
-            t->name, t->state, extra);
+
+        fprint(fd, "{\"id\": %d, \"system\": %d, \"name\": \"%s\", \"state\": \"%s\", \"extra\": \"%s\"}", t->id, t->system ? 1 : 0, t->name, t->state, extra);
+
+        if(i<nalltask-1) fprint(fd, ",\n");
     }
+    fprint(fd, "]}");
 }
 
 /*

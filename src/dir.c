@@ -79,6 +79,8 @@ static void filerecord_cache_evict(void *data) {
  */
 void Dir_ticktock(void *v)
 {
+    taskname("timer");
+
     do {
         NOW_DATE = time(NULL);
         NOW_DATE_TM = gmtime(&NOW_DATE);
