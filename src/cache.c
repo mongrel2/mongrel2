@@ -56,8 +56,10 @@ void *Cache_lookup(Cache *cache, void *key)
     void *rdata = NULL;
     int i;
     for(i = 0; i < cache->size; i++) {
+        if(cache->arr[i].tag > 0)
+            cache->arr[i].tag--;
+
         rdata = cache->arr[i].data;
-        cache->arr[i].tag--;
         if(rdata && cache->lookup(rdata, key)) {
             cache->arr[i].tag = INT_MAX;
             break;
@@ -66,7 +68,8 @@ void *Cache_lookup(Cache *cache, void *key)
     }
 
     for(i = i + 1; i < cache->size; i++)
-        cache->arr[i].tag--;
+        if(cache->arr[i].tag > 0)
+            cache->arr[i].tag--;
 
     return rdata;
 
@@ -83,14 +86,16 @@ void Cache_add(Cache *cache, void *data)
     int min_idx = 0;
     int min_tag = cache->arr[min_idx].tag;
 
-    cache->arr[0].tag--;
+    if(cache->arr[0].tag > 0)
+        cache->arr[0].tag--;
 
     for(i = 1; i < cache->size; i++) {
         if(cache->arr[i].tag < min_tag) {
             min_tag = cache->arr[i].tag;
             min_idx = i;
         }
-        cache->arr[i].tag--;
+        if(cache->arr[i].tag > 0)
+            cache->arr[i].tag--;
     }
     
     if(cache->arr[min_idx].data && cache->evict)
@@ -98,6 +103,27 @@ void Cache_add(Cache *cache, void *data)
     cache->arr[min_idx].data = data;
     cache->arr[min_idx].tag = INT_MAX;
     
+    return;
+
+error:
+    return;
+}
+
+void Cache_evict_object(Cache *cache, void *obj)
+{
+    check(cache, "NULL cache argument to Cache_evict_object");
+    check(cache, "NULL obj argument to Cache_evict_object");
+
+    int i;
+    for(i = 0; i < cache->size; i++) {
+        if(cache->arr[i].data == obj) {
+            if(cache->evict)
+                cache->evict(cache->arr[i].data);
+            cache->arr[i].data = NULL;
+            cache->arr[i].tag = 0;
+        }
+    }
+
     return;
 
 error:

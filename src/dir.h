@@ -62,6 +62,7 @@ typedef struct FileRecord {
     bstring last_mod;
     bstring content_type;
     bstring header;
+    bstring request_path;
     bstring full_path;
     bstring etag;
     struct stat sb;
@@ -99,5 +100,6 @@ void Dir_ticktock(void *v);
 #endif
 
 #define FR_CACHE_SIZE 32
+#define FR_CACHE_TIME_TO_LIVE 10.0
 
 #endif

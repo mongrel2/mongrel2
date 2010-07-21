@@ -25,5 +25,6 @@ Cache *Cache_create(int size, cache_lookup_cb lookup, cache_evict_cb evict);
 void Cache_destroy(Cache *cache);
 void *Cache_lookup(Cache *cache, void *key);
 void Cache_add(Cache *cache, void *data);
+void Cache_evict_object(Cache *cache, void *obj);
 
 #endif

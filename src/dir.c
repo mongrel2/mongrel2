@@ -60,10 +60,10 @@ const char *RESPONSE_FORMAT = "HTTP/1.1 200 OK\r\n"
 const char *RFC_822_TIME = "%a, %d %b %y %T %z";
 
 static int filerecord_cache_lookup(void *data, void *key) {
-    bstring full_path = (bstring) key;
+    bstring request_path = (bstring) key;
     FileRecord *fr = (FileRecord *) data;
     
-    return !bstrcmp(fr->full_path, full_path);
+    return !bstrcmp(fr->request_path, request_path);
 }
 
 static void filerecord_cache_evict(void *data) {
@@ -133,7 +133,6 @@ error:
     FileRecord_destroy(fr);
     return NULL;
 }
-
 
 inline int Dir_send_header(FileRecord *file, int sock_fd)
 {
@@ -280,6 +279,34 @@ FileRecord *Dir_resolve_file(Dir *dir, bstring path)
             "Request for path %s does not start with %s prefix.", 
             bdata(path), bdata(dir->prefix));
 
+    file = Cache_lookup(dir->fr_cache, path);
+    if(file) {
+        const char *p = bdata(file->full_path);
+        struct stat sb;
+
+        if(difftime(NOW_DATE, file->loaded) > FR_CACHE_TIME_TO_LIVE) {
+            int rcstat = stat(p, &sb);
+            if(rcstat != 0 ||
+               file->sb.st_mtime != sb.st_mtime || 
+               file->sb.st_size != sb.st_size) {
+                Cache_evict_object(dir->fr_cache, file);
+                file = NULL;
+            }
+            else
+                file->loaded = NOW_DATE;
+        }
+
+        if(file) {
+            file->users++;
+            return file;
+        }
+    }
+
+    if(file) {
+        file->users++;
+        return file;
+    }
+
     if(bchar(path, blength(path) - 1) == '/') {
         target = bformat("%s%s/%s",
                     bdata(dir->normalized_base),
@@ -299,21 +326,13 @@ FileRecord *Dir_resolve_file(Dir *dir, bstring path)
             "Request for path %s does not start with %s base after normalizing.", 
             bdata(target), bdata(dir->base));
 
-    file = Cache_lookup(dir->fr_cache, target);
-    debug("Cache_lookup(dir->fr_cache, %s) = %s", bdata(target), file ? "Hit" : "Miss");
-    if(file) {
-        // We're letting this copy of path go
-        bdestroy(target);
-        file->users++;
-        return file;
-    }
-
     // the FileRecord now owns the target
     file = Dir_find_file(target, dir->default_ctype);
     check_debug(file, "Error opening file: %s", bdata(target));
 
     // 1 user for each the cache and the guy who called us
     file->users = 2;
+    file->request_path = bstrcpy(path);
     Cache_add(dir->fr_cache, file);
 
 
