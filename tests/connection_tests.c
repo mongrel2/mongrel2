@@ -53,15 +53,15 @@ error:
 
 char *test_Connection_task() 
 {
-    debug(">>>>> XML <<<<<");
-    mu_assert(test_task_with_sample("tests/sample.xml"), "xml failed.");
-    debug(">>>>> JSON <<<<<");
-    mu_assert(test_task_with_sample("tests/sample.json"), "json failed.");
-    debug(">>>>> GARBAGE <<<<<");
-    mu_assert(test_task_with_sample("tests/sample.garbage"), "garbage failed");
-    debug(">>>>>> HTTP <<<<<<");
-
-    mu_assert(test_task_with_sample("tests/sample.http"), "http failed");
+    // TODO: bring these back with a different mechanism
+    // debug(">>>>> XML <<<<<");
+    // mu_assert(test_task_with_sample("tests/sample.xml"), "xml failed.");
+    // debug(">>>>> JSON <<<<<");
+    // mu_assert(test_task_with_sample("tests/sample.json"), "json failed.");
+    // debug(">>>>> GARBAGE <<<<<");
+    // mu_assert(test_task_with_sample("tests/sample.garbage"), "garbage failed");
+    // debug(">>>>>> HTTP <<<<<<");
+    // mu_assert(test_task_with_sample("tests/sample.http"), "http failed");
 
     return NULL;
 }
