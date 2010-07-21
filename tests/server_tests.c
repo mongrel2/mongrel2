@@ -38,7 +38,6 @@ char *test_Server_adds()
     rc = Server_add_host(srv, host->name, host);
     mu_assert(rc == 0, "Failed to add host to server.");
 
-    Host_destroy(host);
     Server_destroy(srv);
 
     return NULL;
