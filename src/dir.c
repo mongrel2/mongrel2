@@ -59,9 +59,6 @@ const char *RESPONSE_FORMAT = "HTTP/1.1 200 OK\r\n"
 
 const char *RFC_822_TIME = "%a, %d %b %y %T %z";
 
-static Cache *fr_cache = NULL;
-
-
 static int filerecord_cache_lookup(void *data, void *key) {
     bstring full_path = (bstring) key;
     FileRecord *fr = (FileRecord *) data;
@@ -93,22 +90,7 @@ void Dir_ticktock(void *v)
 
 FileRecord *Dir_find_file(bstring path, bstring default_type)
 {
-    if(fr_cache == NULL) {
-        fr_cache = Cache_create(FR_CACHE_SIZE, filerecord_cache_lookup,
-                                filerecord_cache_evict);
-    }
-    FileRecord *fr;
-    if(fr_cache) {
-        fr = Cache_lookup(fr_cache, path);
-        if(fr) {
-            // We're letting this copy of path go
-            bdestroy(path);
-            fr->users++;
-            return fr;
-        }
-    }
-
-    fr = calloc(sizeof(FileRecord), 1);
+    FileRecord *fr = calloc(sizeof(FileRecord), 1);
     const char *p = bdata(path);
 
     check_mem(fr);
@@ -142,11 +124,6 @@ FileRecord *Dir_find_file(bstring path, bstring default_type)
         bdata(fr->etag));
 
     check(fr->header != NULL, "Failed to create response header.");
-
-    // 1 user for each the cache and the guy who called us
-    fr->users = 2;
-
-    Cache_add(fr_cache, fr);
 
     return fr;
 
@@ -204,9 +181,16 @@ Dir *Dir_create(const char *base, const char *prefix, const char *index_file, co
     dir->index_file = bfromcstr(index_file);
     dir->default_ctype = bfromcstr(default_ctype);
 
+    dir->fr_cache = Cache_create(FR_CACHE_SIZE, filerecord_cache_lookup,
+                                 filerecord_cache_evict);
+    check(dir->fr_cache, "Failed to create FileRecord cache");
+
     return dir;
 
 error:
+    if(dir)
+        free(dir);
+
     return NULL;
 }
 
@@ -313,9 +297,23 @@ FileRecord *Dir_resolve_file(Dir *dir, bstring path)
             "Request for path %s does not start with %s base after normalizing.", 
             bdata(target), bdata(dir->base));
 
+    file = Cache_lookup(dir->fr_cache, target);
+    debug("Cache_lookup(dir->fr_cache, %s) = %s", bdata(target), file ? "Hit" : "Miss");
+    if(file) {
+        // We're letting this copy of path go
+        bdestroy(target);
+        file->users++;
+        return file;
+    }
+
     // the FileRecord now owns the target
     file = Dir_find_file(target, dir->default_ctype);
     check_debug(file, "Error opening file: %s", bdata(target));
+
+    // 1 user for each the cache and the guy who called us
+    file->users = 2;
+    Cache_add(dir->fr_cache, file);
+
 
     return file;
 

@@ -43,6 +43,7 @@
 #include <sys/sendfile.h>
 #endif
 #include <bstring.h>
+#include <cache.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -67,6 +68,7 @@ typedef struct FileRecord {
 } FileRecord;
 
 typedef struct Dir {
+    Cache *fr_cache;
     bstring prefix;
     bstring base;
     bstring normalized_base;

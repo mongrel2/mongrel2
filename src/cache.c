@@ -52,9 +52,8 @@ error:
 void *Cache_lookup(Cache *cache, void *key)
 {
     check(cache, "NULL cache argument to Cache_lookup");
-    debug("Cache_lookup(%p, %p)\n", cache, key);
-    void *rdata = NULL;
 
+    void *rdata = NULL;
     int i;
     for(i = 0; i < cache->size; i++) {
         rdata = cache->arr[i].data;
@@ -79,7 +78,6 @@ void Cache_add(Cache *cache, void *data)
 {
     check(cache, "NULL cache argument to Cache_add");
     check(data, "Cannot add NULL as data to cache");
-    debug("Cache_add(%p, %p)\n", cache, data);
 
     int i;
     int min_idx = 0;
