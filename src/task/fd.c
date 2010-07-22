@@ -190,7 +190,7 @@ _wait(void *socket, int fd, int rw)
         return -1;
     }
     
-    taskstate("wait %d:%s", socket ? (int)socket : fd, 
+    taskstate("wait %d:%s", socket ? (int)(intptr_t)socket : fd, 
             rw=='r' ? "read" : rw=='w' ? "write" : "error");
 
     bits = 0;
