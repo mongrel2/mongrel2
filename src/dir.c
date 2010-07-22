@@ -248,11 +248,35 @@ error:
     return -1;
 }
 
+FileRecord *FileRecord_cache_check(Dir *dir, bstring path)
+{
+    FileRecord *file = Cache_lookup(dir->fr_cache, path);
+
+    if(file) {
+        time_t now = time(NULL);
+        const char *p = bdata(file->full_path);
+        struct stat sb;
+
+        if(difftime(now, file->loaded) > FR_CACHE_TIME_TO_LIVE) {
+            int rcstat = stat(p, &sb);
+
+            if(rcstat != 0 || file->sb.st_mtime != sb.st_mtime || file->sb.st_size != sb.st_size) {
+                Cache_evict_object(dir->fr_cache, file);
+                file = NULL;
+            } else {
+                file->loaded = now;
+            }
+        }
+    }
+
+    return file;
+}
+
+
 FileRecord *Dir_resolve_file(Dir *dir, bstring path)
 {
     FileRecord *file = NULL;
     bstring target = NULL;
-    time_t now = time(NULL);
 
     check(Dir_lazy_normalize_base(dir) == 0, "Failed to normalize base path when requesting %s",
             bdata(path));
@@ -261,31 +285,10 @@ FileRecord *Dir_resolve_file(Dir *dir, bstring path)
             "Request for path %s does not start with %s prefix.", 
             bdata(path), bdata(dir->prefix));
 
-    file = Cache_lookup(dir->fr_cache, path);
+    file = FileRecord_cache_check(dir, path);
 
     if(file) {
-        const char *p = bdata(file->full_path);
-        struct stat sb;
-
-        if(difftime(now, file->loaded) > FR_CACHE_TIME_TO_LIVE) {
-            int rcstat = stat(p, &sb);
-            if(rcstat != 0 ||
-               file->sb.st_mtime != sb.st_mtime || 
-               file->sb.st_size != sb.st_size) {
-                Cache_evict_object(dir->fr_cache, file);
-                file = NULL;
-            }
-            else
-                file->loaded = now;
-        }
-
-        if(file) {
-            file->users++;
-            return file;
-        }
-    }
-
-    if(file) {
+        // TODO: double check this gives the right users count
         file->users++;
         return file;
     }
