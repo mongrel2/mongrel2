@@ -270,18 +270,43 @@ def start_command(db=None, host=None, sudo=False):
     os.system('%s mongrel2 %s %s' % (root_enabler, db, host))
 
 
-def stop_command(db=None, host=None):
+def stop_command(db=None, host=None, murder=False):
     """
-    Stops a running mongrel2 process according to the host,
-    and just like start will run sudo for you if you give -sudo:
+    Stops a running mongrel2 process according to the host, either
+    gracefully (INT) or murderous (TERM):
 
         m2sh stop -db config.sqlite -host localhost
+        m2sh stop -db config.sqlite -host localhost -murder
 
     You shouldn't need sudo to stop a running mongrel if you
-    are also the user that owns the chroot directory.
+    are also the user that owns the chroot directory or root.
+
+    Normally mongrel2 will wait until connections die off before really
+    leaving, but you can give it the -murder flag and it'll nuke it
+    semi-gracefully.  You can also do it again with -murder if it's waiting
+    for some dead connections and you want it to just quit.
     """
     pid = get_server_pid(db, host)
-    os.kill(pid, signal.SIGTERM)
+    sig = signal.SIGTERM if murder else signal.SIGINT
+
+    os.kill(pid, sig)
+
+
+def reload_command(db=None, host=None):
+    """
+    Causes Mongrel2 to do a soft-reload which will re-read the config
+    database and then attempt to load a whole new configuration without
+    losing connections on the previous one:
+
+        m2sh reload -db config.sqlite -host localhost
+
+    This reload will need access to the config database from within the 
+    chroot for it to work, and it's not totally guaranteed to be 100%
+    reliable, but if you are doing development and need to do quick changes
+    then this is what you do.
+    """
+    pid = get_server_pid(db, host)
+    os.kill(pid, signal.SIGHUP)
 
 
 def running_command(db=None, host=None):

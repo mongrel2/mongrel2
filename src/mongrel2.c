@@ -147,6 +147,13 @@ int attempt_chroot_drop(Server *srv)
 
     } else {
         log_err("Couldn't chroot too %s, assuming running in test mode.", bdata(srv->chroot));
+
+        bstring local_pid = bformat(".%s", bdata(srv->pid_file));
+
+        rc = Unixy_pid_file(local_pid);
+
+        bdestroy(local_pid);
+        check(rc == 0, "Failed to make the PID file %s", bdata(srv->pid_file));
     }
     return 0;
 
