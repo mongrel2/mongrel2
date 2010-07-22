@@ -149,11 +149,12 @@ int attempt_chroot_drop(Server *srv)
         log_err("Couldn't chroot too %s, assuming running in test mode.", bdata(srv->chroot));
 
         bstring local_pid = bformat(".%s", bdata(srv->pid_file));
+        bdestroy(srv->pid_file);
+        srv->pid_file = local_pid;
 
-        rc = Unixy_pid_file(local_pid);
-
-        bdestroy(local_pid);
+        rc = Unixy_pid_file(srv->pid_file);
         check(rc == 0, "Failed to make the PID file %s", bdata(srv->pid_file));
+        
     }
     return 0;
 
@@ -242,8 +243,14 @@ void complete_shutdown(Server *srv)
     }
 
     MIME_destroy();
+
+    debug("Removing pid file %s", bdata(srv->pid_file));
+    unlink((const char *)srv->pid_file->data);
+
     Server_destroy(srv);
+
     zmq_term(ZMQ_CTX);
+
     taskexitall(0);
 }
 
