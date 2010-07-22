@@ -91,8 +91,6 @@ int Dir_serve_file(Request *req, Dir *dir, bstring path, int fd);
 void FileRecord_release(FileRecord *file);
 void FileRecord_destroy(FileRecord *file);
 
-void Dir_ticktock(void *v);
-
 #ifdef __APPLE__
 #define Dir_send mac_sendfile
 #else

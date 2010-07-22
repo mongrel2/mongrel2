@@ -43,10 +43,6 @@
 #include <mime.h>
 #include <response.h>
 
-static time_t NOW_DATE = 0;
-static struct tm *NOW_DATE_TM;
-static bstring NOW_DATE_STRING = NULL;
-
 struct tagbstring ETAG_PATTERN = bsStatic("[a-e0-9]+-[a-e0-9]+");
 
 const char *RESPONSE_FORMAT = "HTTP/1.1 200 OK\r\n"
@@ -70,25 +66,6 @@ static void filerecord_cache_evict(void *data) {
     FileRecord_release((FileRecord *) data);
 }
 
-
-/**
- * Trying out this for doing the dates faster.  Instead of calling time constantly
- * on every request, we just have a 2 second timer going off and updating a global.
- * That's good enough granularity for practical use, and it let's us later move this
- * into a generic cache cleaning ticker or timeout ticker.
- */
-void Dir_ticktock(void *v)
-{
-    taskname("timer");
-
-    do {
-        NOW_DATE = time(NULL);
-        NOW_DATE_TM = gmtime(&NOW_DATE);
-        bdestroy(NOW_DATE_STRING);
-        NOW_DATE_STRING = bStrfTime(RFC_822_TIME, NOW_DATE_TM);
-        taskdelay(2 * 1000);
-    } while(1);
-}
 
 FileRecord *Dir_find_file(bstring path, bstring default_type)
 {
@@ -116,10 +93,14 @@ FileRecord *Dir_find_file(bstring path, bstring default_type)
     // we own this now, not the caller
     fr->full_path = path;
 
+    time_t now = time(NULL);
+
+    fr->date = bStrfTime(RFC_822_TIME, gmtime(&now));
+
     fr->etag = bformat("%x-%x", fr->sb.st_mtime, fr->sb.st_size);
 
     fr->header = bformat(RESPONSE_FORMAT,
-        bdata(NOW_DATE_STRING),
+        bdata(fr->date),
         bdata(fr->content_type),
         fr->sb.st_size,
         bdata(fr->last_mod),
@@ -271,6 +252,7 @@ FileRecord *Dir_resolve_file(Dir *dir, bstring path)
 {
     FileRecord *file = NULL;
     bstring target = NULL;
+    time_t now = time(NULL);
 
     check(Dir_lazy_normalize_base(dir) == 0, "Failed to normalize base path when requesting %s",
             bdata(path));
@@ -280,11 +262,12 @@ FileRecord *Dir_resolve_file(Dir *dir, bstring path)
             bdata(path), bdata(dir->prefix));
 
     file = Cache_lookup(dir->fr_cache, path);
+
     if(file) {
         const char *p = bdata(file->full_path);
         struct stat sb;
 
-        if(difftime(NOW_DATE, file->loaded) > FR_CACHE_TIME_TO_LIVE) {
+        if(difftime(now, file->loaded) > FR_CACHE_TIME_TO_LIVE) {
             int rcstat = stat(p, &sb);
             if(rcstat != 0 ||
                file->sb.st_mtime != sb.st_mtime || 
@@ -293,7 +276,7 @@ FileRecord *Dir_resolve_file(Dir *dir, bstring path)
                 file = NULL;
             }
             else
-                file->loaded = NOW_DATE;
+                file->loaded = now;
         }
 
         if(file) {
