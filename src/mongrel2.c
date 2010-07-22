@@ -50,6 +50,7 @@ FILE *LOG_FILE = NULL;
 
 extern int RUNNING;
 int RELOAD;
+int MURDER;
 
 struct tagbstring PRIV_DIR = bsStatic("/");
 
@@ -59,8 +60,9 @@ void terminate(int s)
 {
     RUNNING=0;
     RELOAD = s == SIGHUP;
+    MURDER = s == SIGTERM;
     if(!RELOAD) {
-        debug("SHUTDOWN REQUESTED.");
+        debug("SHUTDOWN REQUESTED: %s", MURDER ? "MURDER" : "GRACEFUL");
         fdclose(SERVER->listen_fd);
     } else {
         debug("RELOAD RECEIVED, I'll do it on the next request.");
@@ -226,7 +228,7 @@ void complete_shutdown(Server *srv)
     int left = taskwaiting();
 
     debug("Waiting for connections to die: %d", left);
-    while((left = taskwaiting()) > 0) {
+    while((left = taskwaiting()) > 0 && !MURDER) {
         // TODO: after a certain time close all of the connection sockets forcefully
         taskdelay(1000);
         debug("Waiting for connections to die: %d", left);
