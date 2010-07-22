@@ -386,3 +386,13 @@ taskid(void)
     return taskrunning->id;
 }
 
+
+Task *taskself()
+{
+    return taskrunning;
+}
+
+unsigned int  taskgetid(Task *task)
+{
+    return task->id;
+}

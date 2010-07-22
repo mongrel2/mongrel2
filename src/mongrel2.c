@@ -45,6 +45,7 @@
 #include <signal.h>
 #include <mime.h>
 
+
 FILE *LOG_FILE = NULL;
 
 extern int RUNNING;
@@ -52,12 +53,18 @@ int RELOAD;
 
 struct tagbstring PRIV_DIR = bsStatic("/");
 
+Server *SERVER = NULL;
 
 void terminate(int s)
 {
-    debug("SHUTDOWN RECEIVED");
     RUNNING=0;
     RELOAD = s == SIGHUP;
+    if(!RELOAD) {
+        debug("SHUTDOWN REQUESTED.");
+        fdclose(SERVER->listen_fd);
+    } else {
+        debug("RELOAD RECEIVED, I'll do it on the next request.");
+    }
 }
 
 void start_terminator()
@@ -147,18 +154,45 @@ error:
 
 void final_setup()
 {
-    taskcreate(Dir_ticktock, NULL, 10 * 1024);
     start_terminator();
     Server_init();
 }
 
 
-void complete_shutdown(Server *srv)
+void shutdown_handlers(void *value, void *data)
 {
-    MIME_destroy();
-    Server_destroy(srv);
-    zmq_term(ZMQ_CTX);
-    taskexitall(0);
+    Route *route = (Route *)value;
+    Backend *bk = (Backend *)route->data;
+
+    if(bk->type == BACKEND_HANDLER) {
+        Handler *handler = bk->target.handler;
+        handler->running = 0;
+
+        if(tasknuke(taskgetid(handler->task)) == 0) {
+            taskready(handler->task);
+        }
+    }
+}
+
+void close_handlers(void *value, void *data)
+{
+    Route *route = (Route *)value;
+    Backend *bk = (Backend *)route->data;
+
+    if(bk->type == BACKEND_HANDLER) {
+        Handler *handler = bk->target.handler;
+        zmq_close(handler->send_socket); handler->send_socket = NULL;
+        zmq_close(handler->recv_socket); handler->recv_socket = NULL;
+    }
+}
+
+
+void stop_handlers(Server *srv)
+{
+    tst_traverse(srv->default_host->routes->routes, shutdown_handlers, NULL);
+    taskyield();
+    taskdelay(100);
+    tst_traverse(srv->default_host->routes->routes, close_handlers, NULL);
 }
 
 
@@ -168,18 +202,40 @@ Server *reload_server(Server *old_srv, const char *db_file, const char *server_n
 
     MIME_destroy();
 
+    stop_handlers(old_srv);
+
     Server *srv = load_server(db_file, server_name);
     check(srv, "Failed to load new server config.");
 
-    srv->listen_fd = old_srv->listen_fd;
+    srv->listen_fd = dup(old_srv->listen_fd);
 
-    // TODO: the handlers need to be closed down, or copied over
+    fdclose(SERVER->listen_fd);
 
     return srv;
 
 error:
-
     return NULL;
+}
+
+
+void complete_shutdown(Server *srv)
+{
+    fdclose(srv->listen_fd);
+    stop_handlers(srv);
+
+    int left = taskwaiting();
+
+    debug("Waiting for connections to die: %d", left);
+    while((left = taskwaiting()) > 0) {
+        // TODO: after a certain time close all of the connection sockets forcefully
+        taskdelay(1000);
+        debug("Waiting for connections to die: %d", left);
+    }
+
+    MIME_destroy();
+    Server_destroy(srv);
+    zmq_term(ZMQ_CTX);
+    taskexitall(0);
 }
 
 
@@ -188,38 +244,38 @@ void taskmain(int argc, char **argv)
 {
     LOG_FILE = stderr;
     int rc = 0;
-    Server *srv = NULL;
 
     check(argc == 3, "usage: server config.sqlite default_host");
 
-    srv = load_server(argv[1], argv[2]);
-    check(srv, "Aborting since can't load server.");
+    SERVER = load_server(argv[1], argv[2]);
+    check(SERVER, "Aborting since can't load server.");
 
-    rc = clear_pid_file(srv);
+    rc = clear_pid_file(SERVER);
     check(rc == 0, "PID file failure, aborting rather than trying to start.");
 
-    rc = attempt_chroot_drop(srv);
+    rc = attempt_chroot_drop(SERVER);
     check(rc == 0, "Major failure in chroot/droppriv, aborting."); 
 
     final_setup();
 
     while(1) {
-        Server_start(srv);
+        Server_start(SERVER);
 
         if(RELOAD) {
             log_info("Reload requested, will load %s from %s", argv[1], argv[2]);
-            Server *new_srv = reload_server(srv, argv[1], argv[2]);
+            Server *new_srv = reload_server(SERVER, argv[1], argv[2]);
             check(new_srv, "Failed to load the new configuration, will keep the old one.");
 
             // for this to work handlers need to die more gracefully
-            srv = new_srv;
+            
+            SERVER = new_srv;
         } else {
             log_info("Shutdown requested, goodbye.");
             break;
         }
     }
 
-    complete_shutdown(srv);
+    complete_shutdown(SERVER);
     return;
 
 error:

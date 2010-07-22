@@ -34,6 +34,13 @@ char*    taskgetstate(void);
 void    tasksystem(void);
 unsigned int  taskdelay(unsigned int);
 unsigned int  taskid(void);
+unsigned int  taskgetid(Task *task);
+int tasknuke(int id);
+int taskwaiting();
+
+void taskready(Task *t);
+Task *taskself();
+void taskswitch();
 
 struct Tasklist  /* used internally */
 {

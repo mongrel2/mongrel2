@@ -45,7 +45,6 @@
 struct tagbstring LEAVE_HEADER = bsStatic("{\"METHOD\":\"JSON\"}");
 struct tagbstring LEAVE_MSG = bsStatic("{\"type\":\"disconnect\"}");
 
-extern int RUNNING;
 
 
 void bstring_free(void *data, void *hint)
@@ -123,6 +122,8 @@ void Handler_task(void *v)
 
     taskname("Handler_task");
 
+    handler->task = taskself();
+
     handler->send_socket = Handler_send_create(bdata(handler->send_spec), bdata(handler->send_ident));
     check(handler->send_socket, "Failed to create handler socket.");
 
@@ -130,11 +131,16 @@ void Handler_task(void *v)
     check(handler->recv_socket, "Failed to create listener socket.");
 
 
-    while(RUNNING) {
+    while(handler->running) {
         zmq_msg_init(inmsg);
 
         taskstate("recv");
-        rc = mqrecv(handler->recv_socket, inmsg, 0);
+        rc = mqrecv(handler->recv_socket, inmsg, ZMQ_NOBLOCK);
+        if(errno == EAGAIN && !handler->running) {
+            debug("mqrecv returned EAGAIN and we were killed.");
+            break;
+        }
+
         check(rc == 0, "Receive on handler socket failed.");
 
         bassignblk(data, zmq_msg_data(inmsg), zmq_msg_size(inmsg));
@@ -193,12 +199,13 @@ void Handler_task(void *v)
     }
 
     debug("HANDLER EXITED.");
-    return;
+    taskexit(0);
 
 error:
     log_err("HANDLER TASK DIED");
-    return;
+    taskexit(1);
 }
+
 
 int Handler_deliver(void *handler_socket, char *buffer, size_t len)
 {
@@ -243,8 +250,11 @@ void *Handler_send_create(const char *send_spec, const char *identity)
     log_info("Binding handler PUB socket %s with identity: %s", send_spec, identity);
 
     rc = zmq_bind(handler_socket, send_spec);
-    check(rc == 0, "Can't bind handler socket: %s", send_spec);
-
+    while(rc != 0) {
+        taskdelay(1000);
+        debug("Failed to bind send socket trying again.");
+        rc = zmq_bind(handler_socket, send_spec);
+    }
 
     return handler_socket;
 
@@ -262,7 +272,11 @@ void *Handler_recv_create(const char *recv_spec, const char *uuid)
     log_info("Binding listener SUB socket %s subscribed to: %s", recv_spec, uuid);
 
     rc = zmq_bind(listener_socket, recv_spec);
-    check(rc == 0, "Can't bind listener socket %s", recv_spec);
+    while(rc != 0) {
+        taskdelay(1000);
+        debug("Failed to bind recv socket trying again.");
+        rc = zmq_bind(listener_socket, recv_spec);
+    }
 
     return listener_socket;
 
@@ -281,6 +295,7 @@ Handler *Handler_create(const char *send_spec, const char *send_ident,
     handler->recv_ident = bfromcstr(recv_ident);
     handler->recv_spec = bfromcstr(recv_spec);
     handler->send_spec = bfromcstr(send_spec);
+    handler->running = 1;
 
     return handler;
 error:

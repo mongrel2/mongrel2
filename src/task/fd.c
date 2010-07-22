@@ -69,10 +69,13 @@ fdtask(void *v)
             else
                 ms = 5000;
         }
+
         if(zmq_poll(pollfd, npollfd, ms) < 0){
-            if(errno == EINTR)
+            if(errno == EINTR) {
                 continue;
-            fprint(2, "poll: %s\n", strerror(errno));
+            }
+
+            fprint(2, "poll: %d:%s\n", errno, strerror(errno));
             taskexitall(0);
         }
 
@@ -94,6 +97,40 @@ fdtask(void *v)
             taskready(t);
         }
     }
+}
+
+int tasknuke(int id)
+{
+    int i = 0;
+    // TODO: this should shuffle ram around if possible or something
+    for(i = 0; i < npollfd; i++) {
+        if(polltask[i] && polltask[i]->id == id) {
+            pollfd[i].fd = -1;
+            pollfd[i].socket = NULL;
+            pollfd[i].events = 0;
+            pollfd[i].revents = 0;
+            polltask[i] = NULL;
+            return 0;
+        }
+    }
+
+    return -1;
+}
+
+int taskwaiting()
+{
+    // TODO: until we do the cleanup of pollfd better we have
+    // to count them this way
+    int count = 0;
+    int i = 0;
+
+    for(i = 0; i < npollfd; i++) {
+        if(polltask[i] && pollfd[i].events) {
+            count++;
+        }
+    }
+
+    return count;
 }
 
 uint
@@ -153,7 +190,9 @@ _wait(void *socket, int fd, int rw)
         return -1;
     }
     
-    taskstate("fdwait for %s", rw=='r' ? "read" : rw=='w' ? "write" : "error");
+    taskstate("wait %d:%s", socket ? (int)socket : fd, 
+            rw=='r' ? "read" : rw=='w' ? "write" : "error");
+
     bits = 0;
     switch(rw){
     case 'r':
@@ -170,6 +209,7 @@ _wait(void *socket, int fd, int rw)
     pollfd[npollfd].events = bits;
     pollfd[npollfd].revents = 0;
     npollfd++;
+
     taskswitch();
 
     return 0;
@@ -320,4 +360,5 @@ nsec(void)
         return -1;
     return (uvlong)tv.tv_sec*1000*1000*1000 + tv.tv_usec*1000;
 }
+
 

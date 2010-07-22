@@ -37,6 +37,7 @@
 
 #include <stdlib.h>
 #include <bstring.h>
+#include <task/task.h>
 
 enum
 {
@@ -50,6 +51,8 @@ typedef struct Handler {
     bstring recv_ident;
     bstring recv_spec;
     bstring send_spec;
+    Task *task;
+    int running;
 } Handler;
 
 void Handler_task(void *v);
