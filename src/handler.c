@@ -91,84 +91,106 @@ error:
 
 }
 
+inline void handler_cap_payload(bstring payload)
+{
+    if(payload->data[payload->slen - 1] == '\0') {
+        btrunc(payload, blength(payload)-1);
+    } else if(payload->data[payload->slen] != '\0') {
+        bconchar(payload, '\0');
+    }
+}
+
+inline void handler_process_request(Handler *handler, int fd, int conn_type,
+        const char *body_start, size_t body_length)
+{
+    bstring payload = NULL;
+    int rc = 0;
+
+    // TODO: 0 length message will mean close connection
+    if(!conn_type) {
+        log_err("Ident %d is no longer connected.", fd);
+        Handler_notify_leave(handler, fd);
+    } else {
+        payload = blk2bstr(body_start, body_length);
+        
+        if(conn_type == CONN_TYPE_MSG) {
+            handler_cap_payload(payload);
+            rc = Connection_deliver(fd, payload);
+            check(rc != -1, "Error sending to MSG listener %d, closing them.", fd);
+        } else if(conn_type == CONN_TYPE_HTTP) {
+            payload = blk2bstr(body_start, body_length);
+
+            rc = Connection_deliver_raw(fd, payload);
+            check(rc != -1, "Error sending raw message to HTTP listener %d, closing them.", fd);
+        } else {
+            sentinel("Attempt to send to an invalid listener type.  Closing them.");
+        }
+
+        bdestroy(payload);
+    }
+
+    return;
+
+error:
+    bdestroy(payload);
+    Register_disconnect(fd);
+    return;
+}
+
+
+inline int handler_recv_parse(Handler *handler, HandlerParser *parser)
+{
+    check(handler->running, "Called while handler wasn't running, that's not good.");
+
+    zmq_msg_t *inmsg = calloc(sizeof(zmq_msg_t), 1);
+    int rc = 0;
+
+    rc = zmq_msg_init(inmsg);
+    check(rc == 0, "Failed to initialize message.");
+
+    taskstate("recv");
+
+    rc = mqrecv(handler->recv_socket, inmsg, ZMQ_NOBLOCK);
+    check(rc == 0, "Receive on handler socket failed.");
+    check(handler->running, "Received shutdown notification, goodbye.");
+
+    rc = HandlerParser_execute(parser, zmq_msg_data(inmsg), zmq_msg_size(inmsg));
+    check(rc == 1, "Failed to parse message from handler.");
+
+    debug("Parsed message with %d targets, uuid: %s, and body: %d",
+            parser->target_count, bdata(parser->uuid), parser->body_length);
+
+    return 0;
+
+error:
+    // it can leak the inmsg but only in severe error states, otherwise it's owned by zmq
+    return -1;
+}
 
 void Handler_task(void *v)
 {
-    zmq_msg_t *inmsg = calloc(sizeof(zmq_msg_t), 1);
     int rc = 0;
     int i = 0;
     Handler *handler = (Handler *)v;
     HandlerParser parser;
-    bstring payload = NULL;
 
     check(Handler_setup(handler) == 0, "Failed to initialize handler, exiting.");
 
     while(handler->running) {
-        zmq_msg_init(inmsg);
-
-        taskstate("recv");
-        rc = mqrecv(handler->recv_socket, inmsg, ZMQ_NOBLOCK);
-        if(errno == EAGAIN && !handler->running) {
-            debug("mqrecv returned EAGAIN and we were killed.");
-            break;
-        }
-        check(rc == 0, "Receive on handler socket failed.");
-
         taskstate("delivering");
 
-        rc = HandlerParser_execute(&parser, zmq_msg_data(inmsg), zmq_msg_size(inmsg));
-        if(!rc || parser.target_count == 0) {
-            log_err("Failed to parse response from handler.");
+        rc = handler_recv_parse(handler, &parser);
+        if(rc == -1 || parser.target_count == 0) {
             continue;
         }
 
-        debug("Parsed message with %d targets, uuid: %s, and body: %d",
-                parser.target_count, bdata(parser.uuid), parser.body_length);
-        
         for(i = 0; i < parser.target_count; i++) {
             int fd = (int)parser.targets[i];
             int conn_type = Register_exists(fd);
 
-            switch(conn_type) {
-                case 0:
-                    log_err("Ident %d is no longer connected.", fd);
-                    Handler_notify_leave(handler, fd);
-                    break;
-
-                case CONN_TYPE_MSG:
-                    payload = blk2bstr(parser.body_start, parser.body_length);
-
-                    // TODO: find out why this would be happening
-                    if(payload->data[payload->slen - 1] == '\0') {
-                        btrunc(payload, blength(payload)-1);
-                    } else if(payload->data[payload->slen] != '\0') {
-                        bconchar(payload, '\0');
-                    }
-
-                    if(Connection_deliver(fd, payload) == -1) {
-                        log_err("Error sending to MSG listener %d, closing them.", fd);
-                        Register_disconnect(fd);
-                    }
-
-                    break;
-
-                case CONN_TYPE_HTTP:
-                    payload = blk2bstr(parser.body_start, parser.body_length);
-
-                    if(Connection_deliver_raw(fd, payload) == -1) {
-                        log_err("Error sending raw message to HTTP listener %d, closing them.", fd);
-                        Register_disconnect(fd);
-                    }
-                    break;
-
-                default:
-                    log_err("Attempt to send to an invalid listener type.  Closing them.");
-                    Register_disconnect(fd);
-                    break;
-            }
+            handler_process_request(handler, fd, conn_type, parser.body_start, parser.body_length);
         }
 
-        bdestroy(payload);
         bdestroy(parser.uuid);
     }
 
