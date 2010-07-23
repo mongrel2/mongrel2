@@ -56,6 +56,7 @@
     }
 
     action identifier {
+        check(parser->target_count < MAX_TARGETS, "Request contains too many target listeners.");
         parser->targets[parser->target_count++] = strtoul(mark, NULL, 10); 
     }
 

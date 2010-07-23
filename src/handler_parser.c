@@ -42,7 +42,7 @@
 #include <dbg.h>
 
 
-#line 83 "src/handler_parser.rl"
+#line 84 "src/handler_parser.rl"
 
 
 /** Data **/
@@ -55,7 +55,7 @@ static const int HandlerParser_error = 0;
 static const int HandlerParser_en_main = 1;
 
 
-#line 87 "src/handler_parser.rl"
+#line 88 "src/handler_parser.rl"
 
 
 /** exec **/
@@ -76,7 +76,7 @@ int HandlerParser_execute(HandlerParser *parser, const char *buffer, size_t len)
 	cs = HandlerParser_start;
 	}
 
-#line 102 "src/handler_parser.rl"
+#line 103 "src/handler_parser.rl"
     
 #line 2 "src/handler_parser.c"
 	{
@@ -162,11 +162,11 @@ case 5:
 		goto tr8;
 	goto st0;
 tr7:
-#line 62 "src/handler_parser.rl"
+#line 63 "src/handler_parser.rl"
 	{
         targets_start = p;
     }
-#line 66 "src/handler_parser.rl"
+#line 67 "src/handler_parser.rl"
 	{
         check(p-targets_start == target_expected_len, 
                 "Target netstring length is wrong, actual %d expected %d",
@@ -176,9 +176,10 @@ tr7:
 tr11:
 #line 58 "src/handler_parser.rl"
 	{
+        check(parser->target_count < MAX_TARGETS, "Request contains too many target listeners.");
         parser->targets[parser->target_count++] = strtoul(mark, NULL, 10); 
     }
-#line 66 "src/handler_parser.rl"
+#line 67 "src/handler_parser.rl"
 	{
         check(p-targets_start == target_expected_len, 
                 "Target netstring length is wrong, actual %d expected %d",
@@ -193,7 +194,7 @@ case 6:
 		goto tr9;
 	goto st0;
 tr9:
-#line 72 "src/handler_parser.rl"
+#line 73 "src/handler_parser.rl"
 	{ {p++; cs = 9; goto _out;} }
 	goto st9;
 st9:
@@ -202,7 +203,7 @@ case 9:
 #line 2 "src/handler_parser.c"
 	goto st0;
 tr8:
-#line 62 "src/handler_parser.rl"
+#line 63 "src/handler_parser.rl"
 	{
         targets_start = p;
     }
@@ -212,6 +213,7 @@ tr8:
 tr13:
 #line 58 "src/handler_parser.rl"
 	{
+        check(parser->target_count < MAX_TARGETS, "Request contains too many target listeners.");
         parser->targets[parser->target_count++] = strtoul(mark, NULL, 10); 
     }
 #line 46 "src/handler_parser.rl"
@@ -241,7 +243,7 @@ case 8:
 	_out: {}
 	}
 
-#line 103 "src/handler_parser.rl"
+#line 104 "src/handler_parser.rl"
 
     assert(p <= pe && "Buffer overflow after parsing.");
 
@@ -251,13 +253,13 @@ case 8:
     if ( cs == 
 #line 2 "src/handler_parser.c"
 0
-#line 109 "src/handler_parser.rl"
+#line 110 "src/handler_parser.rl"
  ) {
         return -1;
     } else if ( cs >= 
 #line 2 "src/handler_parser.c"
 9
-#line 111 "src/handler_parser.rl"
+#line 112 "src/handler_parser.rl"
  ) {
         return 1;
     } else {
