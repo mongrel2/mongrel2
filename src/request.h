@@ -55,6 +55,7 @@ typedef struct Request {
     bstring fragment;
     bstring host;
     bstring host_name;
+    bstring pattern;
     struct Host *target_host;
     dict_t *headers;
     struct Backend *action;

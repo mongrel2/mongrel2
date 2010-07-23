@@ -56,3 +56,5 @@ struct tagbstring HTTP_HEAD = bsStatic("HEAD");
 struct tagbstring HTTP_DELETE = bsStatic("DELETE");
 struct tagbstring HTTP_PUT = bsStatic("PUT");
 struct tagbstring HTTP_OPTIONS = bsStatic("OPTIONS");
+struct tagbstring HTTP_PATTERN = bsStatic("PATTERN");
+

@@ -145,6 +145,8 @@ inline int handler_recv_parse(Handler *handler, HandlerParser *parser)
     zmq_msg_t *inmsg = calloc(sizeof(zmq_msg_t), 1);
     int rc = 0;
 
+    check_mem(inmsg);
+
     rc = zmq_msg_init(inmsg);
     check(rc == 0, "Failed to initialize message.");
 
@@ -166,6 +168,7 @@ error:
     // it can leak the inmsg but only in severe error states, otherwise it's owned by zmq
     return -1;
 }
+
 
 void Handler_task(void *v)
 {

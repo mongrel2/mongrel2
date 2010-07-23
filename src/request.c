@@ -245,6 +245,7 @@ bstring Request_to_payload(Request *req, bstring uuid, int fd, const char *buf, 
     B(&HTTP_URI, req->uri);
     B(&HTTP_QUERY, req->query_string);
     B(&HTTP_FRAGMENT, req->fragment);
+    B(&HTTP_PATTERN, req->pattern);
 
     for(i = dict_first(req->headers); i != NULL; i = dict_next(req->headers, i))
     {
