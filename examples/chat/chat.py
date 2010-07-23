@@ -19,7 +19,7 @@ while True:
     data = req.data
 
     if data["type"] == "join":
-        conn.deliver_json(users.keys(), data)
+        conn.deliver_json(req.sender, users.keys(), data)
         users[req.conn_id] = data['user']
         user_list = [u[1] for u in users.items()]
         conn.reply_json(req, {'type': 'userList', 'users': user_list})
@@ -31,14 +31,14 @@ while True:
             data['user'] = users[req.conn_id]
             del users[req.conn_id]
 
-        conn.deliver_json(users.keys(), data)
+        conn.deliver_json(req.sender, users.keys(), data)
         user_list = [u[1] for u in users.items()]
 
     elif req.conn_id not in users:
         users[req.conn_id] = data['user']
 
     elif data['type'] == "msg":
-        conn.deliver_json(users.keys(), data)
+        conn.deliver_json(req.sender, users.keys(), data)
 
     print "REGISTERED USERS:", len(users)
 

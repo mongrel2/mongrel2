@@ -33,6 +33,7 @@
  */
 
 #include <handler.h>
+#include <handler_parser.h>
 #include <task/task.h>
 #include <zmq.h>
 #include <dbg.h>
@@ -70,56 +71,9 @@ void Handler_notify_leave(Handler *handler, int fd)
     bdestroy(payload);
 }
 
-enum {
-    MAX_TARGETS=100
-};
 
-struct target_splits {
-    bstring data;
-    int fds[MAX_TARGETS];
-    int cur_fd;
-    int last_pos;
-};
-
-int split_first_integers(void * param, int ofs, int len)
+int Handler_setup(Handler *handler)
 {
-    struct target_splits *sp = (struct target_splits *)param;
-    check(sp->cur_fd < MAX_TARGETS, "Too many targets given on send, max is %d", MAX_TARGETS);
-
-    if(!isdigit(bchar(sp->data, ofs))) {
-        sp->last_pos = ofs;
-        return -1;
-    } else {
-        int fd = 0;
-        char *endptr = NULL;
-        char *s = bdataofs(sp->data, ofs);
-        // TODO: it's parser time, this is getting ugly
-        fd = (int)strtol(s, &endptr, 10);
-        if(*endptr == ' ') {
-            sp->fds[sp->cur_fd++] = fd;
-        } else {
-            sp->last_pos = ofs;
-            return -1;
-        }
-    }
-
-    return 0;
-error:
-    return -1;
-}
-
-
-
-void Handler_task(void *v)
-{
-    zmq_msg_t *inmsg = calloc(sizeof(zmq_msg_t), 1);
-    struct target_splits splits;
-    bstring data = bfromcstr("");
-    int rc = 0;
-    int i = 0;
-    Handler *handler = (Handler *)v;
-    bstring payload = NULL;
-
     taskname("Handler_task");
 
     handler->task = taskself();
@@ -130,6 +84,24 @@ void Handler_task(void *v)
     handler->recv_socket = Handler_recv_create(bdata(handler->recv_spec), bdata(handler->recv_ident));
     check(handler->recv_socket, "Failed to create listener socket.");
 
+    return 0;
+
+error:
+    return -1;
+
+}
+
+
+void Handler_task(void *v)
+{
+    zmq_msg_t *inmsg = calloc(sizeof(zmq_msg_t), 1);
+    int rc = 0;
+    int i = 0;
+    Handler *handler = (Handler *)v;
+    HandlerParser parser;
+    bstring payload = NULL;
+
+    check(Handler_setup(handler) == 0, "Failed to initialize handler, exiting.");
 
     while(handler->running) {
         zmq_msg_init(inmsg);
@@ -140,21 +112,21 @@ void Handler_task(void *v)
             debug("mqrecv returned EAGAIN and we were killed.");
             break;
         }
-
         check(rc == 0, "Receive on handler socket failed.");
 
-        bassignblk(data, zmq_msg_data(inmsg), zmq_msg_size(inmsg));
-
-        splits.cur_fd = 0;
-        splits.last_pos = 0;
-        splits.data = data;
-
-        rc = bsplitcb(data, ' ', 0, split_first_integers, &splits);
-
         taskstate("delivering");
+
+        rc = HandlerParser_execute(&parser, zmq_msg_data(inmsg), zmq_msg_size(inmsg));
+        if(!rc || parser.target_count == 0) {
+            log_err("Failed to parse response from handler.");
+            continue;
+        }
+
+        debug("Parsed message with %d targets, uuid: %s, and body: %d",
+                parser.target_count, bdata(parser.uuid), parser.body_length);
         
-        for(i = 0; i < splits.cur_fd; i++) {
-            int fd = splits.fds[i];
+        for(i = 0; i < parser.target_count; i++) {
+            int fd = (int)parser.targets[i];
             int conn_type = Register_exists(fd);
 
             switch(conn_type) {
@@ -164,7 +136,7 @@ void Handler_task(void *v)
                     break;
 
                 case CONN_TYPE_MSG:
-                    payload = bTail(data, blength(data) - splits.last_pos);
+                    payload = blk2bstr(parser.body_start, parser.body_length);
 
                     // TODO: find out why this would be happening
                     if(payload->data[payload->slen - 1] == '\0') {
@@ -178,16 +150,15 @@ void Handler_task(void *v)
                         Register_disconnect(fd);
                     }
 
-                    bdestroy(payload);
                     break;
 
                 case CONN_TYPE_HTTP:
-                    payload = bTail(data, blength(data) - splits.last_pos);
+                    payload = blk2bstr(parser.body_start, parser.body_length);
+
                     if(Connection_deliver_raw(fd, payload) == -1) {
                         log_err("Error sending raw message to HTTP listener %d, closing them.", fd);
                         Register_disconnect(fd);
                     }
-                    bdestroy(payload);
                     break;
 
                 default:
@@ -196,6 +167,9 @@ void Handler_task(void *v)
                     break;
             }
         }
+
+        bdestroy(payload);
+        bdestroy(parser.uuid);
     }
 
     debug("HANDLER EXITED.");

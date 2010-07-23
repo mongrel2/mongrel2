@@ -74,12 +74,13 @@ class Connection(object):
 
         return req
 
-    def send(self, conn_id, msg):
+    def send(self, uuid, conn_id, msg):
         """
-        Raw send to the given connection ID, mostly used 
+        Raw send to the given connection ID at the given uuid, mostly used 
         internally.
         """
-        self.resp.send(conn_id + ' ' + msg)
+        header = "%s %d:%s," % (uuid, len(str(conn_id)), str(conn_id))
+        self.resp.send(header + ' ' + msg)
 
 
     def reply(self, req, msg):
@@ -88,13 +89,14 @@ class Connection(object):
         This is easier since the req object contains all the info
         needed to do the proper reply addressing.
         """
-        self.send(req.conn_id, msg)
+        self.send(req.sender, req.conn_id, msg)
+
 
     def reply_json(self, req, data):
         """
         Same as reply, but tries to convert data to JSON first.
         """
-        self.send(req.conn_id, json.dumps(data))
+        self.send(req.sender, req.conn_id, json.dumps(data))
 
 
     def reply_http(self, req, body, code=200, status="OK", headers=None):
@@ -106,7 +108,7 @@ class Connection(object):
         self.reply(req, http_response(body, code, status, headers or {}))
 
 
-    def deliver(self, idents, data):
+    def deliver(self, uuid, idents, data):
         """
         This lets you send a single message to many currently
         connected clients.  There's a MAX_IDENTS that you should
@@ -114,22 +116,22 @@ class Connection(object):
         will receive the message once by Mongrel2, but you don't have
         to loop which cuts down on reply volume.
         """
-        self.resp.send(' '.join(idents) + ' ' + data)
+        self.send(uuid, ' '.join(idents), data)
 
 
-    def deliver_json(self, idents, data):
+    def deliver_json(self, uuid, idents, data):
         """
         Same as deliver, but converts to JSON first.
         """
-        self.deliver(idents, json.dumps(data))
+        self.deliver(uuid, idents, json.dumps(data))
 
 
-    def deliver_http(self, idents, body, code=200, status="OK", headers=None):
+    def deliver_http(self, uuid, idents, body, code=200, status="OK", headers=None):
         """
         Same as deliver, but builds an HTTP response, which means, yes,
         you can reply to multiple connected clients waiting for an HTTP 
         response from one handler.  Kinda cool.
         """
-        self.deliver(idents, http_response(body, code, status, headers or {}))
+        self.deliver(uuid, idents, http_response(body, code, status, headers or {}))
 
 
