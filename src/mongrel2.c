@@ -94,6 +94,9 @@ Server *load_server(const char *db_file, const char *server_name)
     rc = Config_load_mimetypes();
     check(rc == 0, "Failed to load mime types.");
 
+    rc = Config_load_settings();
+    check(rc == 0, "Failed to load global settings.");
+
     list_destroy_nodes(servers);
     list_destroy(servers);
 

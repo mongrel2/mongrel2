@@ -39,5 +39,6 @@
 
 list_t *Config_load_servers(const char *path, const char *name);
 int Config_load_mimetypes();
+int Config_load_settings();
 
 #endif

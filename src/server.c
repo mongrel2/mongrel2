@@ -42,6 +42,7 @@
 #include <string.h>
 #include <mem/halloc.h>
 #include <routing.h>
+#include <setting.h>
 
 int RUNNING=1;
 
@@ -101,7 +102,9 @@ void Server_destroy(Server *srv)
 
 void Server_init()
 {
-    mqinit(2);
+    int mq_threads = Setting_get_int("zeromq.threads", 2);
+    log_info("Starting 0MQ with %d threads.", mq_threads);
+    mqinit(mq_threads);
     Register_init();
 }
 
