@@ -3,6 +3,8 @@ from storm.locals import *
 database = None
 store = None
 
+TABLES = ["server", "host", "route", "proxy", "directory", "handler",
+                  "setting"]
 
 def load_db(spec):
     global database
@@ -16,7 +18,7 @@ def load_db(spec):
 
 
 def clear_db():
-    for table in ["server", "host", "route", "proxy", "directory", "handler"]:
+    for table in TABLES:
         store.execute("DELETE FROM %s" % table)
 
 
@@ -30,7 +32,7 @@ def begin(config_db, clear=False):
     return store
 
 
-def commit(servers):
+def commit(servers, settings=None):
     for server in servers:
         store.add(server)
 
@@ -49,6 +51,12 @@ def commit(servers):
         store.commit()
     else:
         print "Results won't be committed unless you begin(clear=True)."
+
+    if settings:
+        for k,v in settings.items():
+            store.add(Setting(unicode(k), unicode(v)))
+
+        store.commit()
 
 
 class Server(object):
@@ -237,4 +245,19 @@ class MIMEType(object):
         return "MIMEType(mimetype=%r, extension=%r)" % (
             self.mimetype, self.extension)
 
+
+class Setting(object):
+    __storm_table__ = "setting"
+    id = Int(primary = True)
+    key = Unicode()
+    value = Unicode()
+
+    def __init__(self, key, value):
+        super(Setting, self).__init__()
+        self.key = key
+        self.value = value
+
+
+    def __repr__(self):
+        return "Setting(key=%r, value=%r)" % (self.key, self.value)
 
