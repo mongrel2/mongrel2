@@ -172,6 +172,8 @@ Dir *Dir_create(const char *base, const char *prefix, const char *index_file, co
     bdestroy(pattern);
 
     check(blength(dir->prefix) < MAX_DIR_PATH, "Prefix is too long, must be less than %d", MAX_DIR_PATH);
+    check(bchar(dir->prefix, 0) == '/', "Dir prefix must start with a / or you break the internet.");
+    check(bchar(dir->prefix, blength(dir->prefix) - 1) == '/', "Dir prefix must END with a / or you break the internet.");
 
     dir->index_file = bfromcstr(index_file);
     dir->default_ctype = bfromcstr(default_ctype);
