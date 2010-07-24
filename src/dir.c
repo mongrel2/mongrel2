@@ -53,6 +53,11 @@ const char *RESPONSE_FORMAT = "HTTP/1.1 200 OK\r\n"
     "ETag: %s\r\n"
     "Connection: close\r\n\r\n";
 
+const char *DIR_REDIRECT_FORMAT = "HTTP/1.1 301 Moved Permanently\r\n"
+    "Location: http://%s%s/\r\n"
+    "Content-Length: 0\r\n"
+    "Connection: close\r\n\r\n";
+
 const char *RFC_822_TIME = "%a, %d %b %y %T %z";
 
 static int filerecord_cache_lookup(void *data, void *key) {
@@ -74,10 +79,18 @@ FileRecord *Dir_find_file(bstring path, bstring default_type)
 
     check_mem(fr);
 
-    // right here, if p ends with / then add index.html
+    // We set the number of users here.  If we cache it, we can add one later
+    fr->users = 1;
+
     int rc = stat(p, &fr->sb);
     check(rc == 0, "File stat failed: %s", bdata(path));
 
+    if(S_ISDIR(fr->sb.st_mode)) {
+        fr->full_path = path;
+        fr->is_dir = 1;
+        return fr;
+    }
+    
     fr->fd = open(p, O_RDONLY);
     check(fr->fd >= 0, "Failed to open file but stat worked: %s", bdata(path));
 
@@ -205,12 +218,14 @@ error:
 void FileRecord_destroy(FileRecord *file)
 {
     if(file) {
-        fdclose(file->fd);
-        bdestroy(file->date);
-        bdestroy(file->last_mod);
-        bdestroy(file->header);
+        if(!file->is_dir) {
+            fdclose(file->fd);
+            bdestroy(file->date);
+            bdestroy(file->last_mod);
+            bdestroy(file->header);
+            bdestroy(file->etag);
+        }
         bdestroy(file->full_path);
-        bdestroy(file->etag);
         // file->content_type is not owned by us
         free(file);
     }
@@ -293,15 +308,18 @@ FileRecord *Dir_resolve_file(Dir *dir, bstring path)
         return file;
     }
 
+    // We subtract one from the blengths below, because dir->prefix includes
+    // a trailing '/'.  If we skip over this in path->data, we drop the '/'
+    // from the URI, breaking the target path
     if(bchar(path, blength(path) - 1) == '/') {
-        target = bformat("%s%s/%s",
+        target = bformat("%s%s%s",
                     bdata(dir->normalized_base),
-                    path->data + blength(dir->prefix),
+                    path->data + blength(dir->prefix) - 1,
                     bdata(dir->index_file));
     } else {
-        target = bformat("%s/%s",
+        target = bformat("%s%s",
                 bdata(dir->normalized_base),
-                path->data + blength(dir->prefix));
+                path->data + blength(dir->prefix) - 1);
     }
 
     check(target, "Couldn't construct target path for %s", bdata(path));
@@ -316,8 +334,8 @@ FileRecord *Dir_resolve_file(Dir *dir, bstring path)
     file = Dir_find_file(target, dir->default_ctype);
     check_debug(file, "Error opening file: %s", bdata(target));
 
-    // 1 user for each the cache and the guy who called us
-    file->users = 2;
+    // Increment the user count because we're adding it to the cache
+    file->users++;
     file->request_path = bstrcpy(path);
     Cache_add(dir->fr_cache, file);
 
@@ -368,6 +386,10 @@ inline bstring Dir_calculate_response(Request *req, FileRecord *file)
     bstring if_none_match = NULL;
 
     if(file) {
+        if(file->is_dir)
+            return bformat(DIR_REDIRECT_FORMAT, bdata(req->host),
+                           bdata(req->uri));
+
         if_match = Request_get(req, &HTTP_IF_MATCH);
 
         if(!if_match || biseqcstr(if_match, "*") || bstring_match(if_match, &ETAG_PATTERN)) {
