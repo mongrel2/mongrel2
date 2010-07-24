@@ -99,6 +99,10 @@ Server *load_server(const char *db_file, const char *server_name)
 
     DB_close();
 
+    srv->listen_fd = netannounce(TCP, 0, srv->port);
+    check(srv->listen_fd >= 0, "Can't announce on TCP port %d", srv->port);
+    check(fdnoblock(srv->listen_fd) == 0, "Failed to set listening port %d nonblocking.", srv->port);
+
     return srv;
 error:
 

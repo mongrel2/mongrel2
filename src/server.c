@@ -130,16 +130,8 @@ void Server_start(Server *srv)
 
     taskname("SERVER");
 
-    if(!srv->listen_fd) {
-        srv->listen_fd = netannounce(TCP, 0, srv->port);
-        check(srv->listen_fd >= 0, "Can't announce on TCP port %d", srv->port);
-
-        check(fdnoblock(srv->listen_fd) == 0, "Failed to set listening port %d nonblocking.", srv->port);
-    }
-
     log_info("Starting server on port %d", srv->port);
 
-    // TODO: this could cause problems if the tst is too deep, recursion may break
     tst_traverse(srv->default_host->routes->routes, handlers_receive_start, srv);
 
     while(RUNNING && (cfd = netaccept(srv->listen_fd, remote, &rport)) >= 0) {
