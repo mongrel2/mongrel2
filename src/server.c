@@ -172,6 +172,8 @@ Host *Server_match_backend(Server *srv, bstring target)
     // TODO: figure out the best matching policy, longest? first? all?
     Route *found = NULL;
 
+    debug("Looking for target host: %s", bdata(target));
+
     list_t *results = RouteMap_match_suffix(srv->hosts, target);
     lnode_t *n = list_first(results);
 
