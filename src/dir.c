@@ -237,12 +237,14 @@ void FileRecord_destroy(FileRecord *file)
 inline int normalize_path(bstring target)
 {
     ballocmin(target, PATH_MAX);
+    char *path_buf = calloc(PATH_MAX+1, 1);
 
-    char *normalized = realpath((const char *)target->data, NULL);
+    // Some platforms (OSX!) don't allocated for you, so we have to
+    char *normalized = realpath((const char *)target->data, path_buf);
     check(normalized, "Failed to normalize path: %s", bdata(target));
 
     bassigncstr(target, normalized);
-    free(normalized);
+    free(path_buf);
 
     return 0;
 
