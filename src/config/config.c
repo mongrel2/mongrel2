@@ -43,6 +43,7 @@
 #include <sqlite3.h>
 #include <assert.h>
 #include <mime.h>
+#include <setting.h>
 #include <dir.h>
 
 
@@ -197,6 +198,18 @@ error:
     return -1;
 }
 
+int Config_settings_load_cb(void *param, int cols, char **data, char **names)
+{
+    arity(3);
+
+    int rc = Setting_add(data[1], data[2]);
+    check(rc == 0, "Failed to add setting %s:%s:%s", data[0], data[1], data[2]);
+
+    return 0;
+error:
+    return -1;
+}
+
 int Config_mimetypes_load_cb(void *param, int cols, char **data, char **names)
 {
     arity(3);
@@ -277,3 +290,18 @@ int Config_load_mimetypes()
 error:
     return -1;
 }
+
+
+int Config_load_settings()
+{
+    const char *SETTING_QUERY = "SELECT id, key, value FROM setting";
+
+    int rc = DB_exec(SETTING_QUERY, Config_settings_load_cb, NULL);
+    check(rc == 0, "Failed to load mimetypes.");
+
+    return 0;
+error:
+    return -1;
+}
+
+

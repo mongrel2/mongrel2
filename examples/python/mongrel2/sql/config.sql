@@ -46,12 +46,7 @@ CREATE TABLE route (id INTEGER PRIMARY KEY,
     target_type TEXT);
 
 
-CREATE TABLE setting (id SERIAL, 
-    other_id INTEGER,
-    other_type TEXT,
-    key TEXT,
-    value TEXT,
-    primary key (id, other_type, other_id));
+CREATE TABLE setting (id INTEGER PRIMARY KEY, key TEXT, value TEXT);
 
 
 CREATE TABLE statistic (id SERIAL, 
