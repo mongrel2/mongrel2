@@ -40,6 +40,8 @@ def shell_command():
 
     except EOFError:
         print "Bye."
+    except KeyboardInterrupt:
+        print "BYE!"
 
 
 
