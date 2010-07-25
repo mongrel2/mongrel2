@@ -335,24 +335,7 @@ One of the best practices is to use a revision control tool to manage your confi
 config needs to change for each box.</p>
 
 <p>While a revision control tool is useful, Mongrel2 also keeps track of who did what to a config database using the log and commit
-commands of m2sh.  They work like this:</p>
-
-<pre class="verbatim">
-[mongrel2@zedshaw mongrel2]$ m2sh log -db config.sqlite
-[2010-07-18T04:14:53, mongrel2@zedshaw, init_command] /usr/bin/m2sh init -db config.sqlite
-[2010-07-18T04:15:06, mongrel2@zedshaw, load_command] /usr/bin/m2sh load -db config.sqlite -config examples/python/tests/mongrel2_org.py
-[2010-07-18T04:22:06, mongrel2@zedshaw, load_command] /usr/bin/m2sh load -db config.sqlite -config examples/python/tests/mongrel2_org.py
-[2010-07-18T04:23:32, mongrel2@zedshaw, load_command] /usr/bin/m2sh load -db config.sqlite -config examples/python/tests/mongrel2_org.py
-[mongrel2@zedshaw mongrel2]$ 
-[mongrel2@zedshaw mongrel2]$ m2sh commit -db config.sqlite -what upgrade -why "Latest code for Mongrel2."
-[mongrel2@zedshaw mongrel2]$ m2sh log -db config.sqlite 
-[2010-07-18T04:14:53, mongrel2@zedshaw, init_command] /usr/bin/m2sh init -db config.sqlite
-[2010-07-18T04:15:06, mongrel2@zedshaw, load_command] /usr/bin/m2sh load -db config.sqlite -config examples/python/tests/mongrel2_org.py
-[2010-07-18T04:22:06, mongrel2@zedshaw, load_command] /usr/bin/m2sh load -db config.sqlite -config examples/python/tests/mongrel2_org.py
-[2010-07-18T04:23:32, mongrel2@zedshaw, load_command] /usr/bin/m2sh load -db config.sqlite -config examples/python/tests/mongrel2_org.py
-[2010-07-18T04:26:16, mongrel2@zedshaw, upgrade] Latest code for Mongrel2.
-[mongrel2@zedshaw mongrel2]$ 
-</pre>
+commands of m2sh.</p>
 
 <p>Fairly simple, but it is maintained even if you reload the configuration and do an init.</p>
 
