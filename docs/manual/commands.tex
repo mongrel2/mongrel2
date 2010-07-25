@@ -1,0 +1,46 @@
+\newcommand{\versal}[1]{\noindent{\Huge #1\kern-.10em}}
+\newcommand{\file}[1]{{\ttfamily\bf #1}}
+\newcommand{\ident}[1]{{\ttfamily\it #1}}
+\newcommand{\shell}[1]{{\ttfamily\it #1}}
+\newcommand{\python}[1]{{\ttfamily\it #1}}
+\newcommand{\ruby}[1]{{\ttfamily\it #1}}
+\newcommand{\book}[2]{{\ttfamily\it #1} by {\it #2}}
+\newcommand{\program}[1]{\ttfamily\it #1}
+
+\newenvironment{aside}[1]
+{
+    \begin{note}
+    \caption{\hfill\it #1}
+    \begin{quote}
+}
+{ \end{quote} \end{note} }
+
+\newenvironment{code}[1]
+{
+    \begin{source}
+    \caption{\hfill\it #1}
+    \sffamily\small
+}
+{\end{source}}
+
+\floatstyle{ruled}
+\newfloat{note}{thp}{lon}
+\floatname{note}{Note}
+\newfloat{source}{thp}{los}
+\floatname{source}{Source}
+\newcommand{\listofnotes}{\listof{note}{List Of Notes}}
+\newcommand{\listofsource}{\listof{source}{List Of Source}}
+
+\newcommand{\rfc}[2]
+    {
+        \begin{center}
+        \ovalbox{
+            \begin{minipage}{.8\textwidth}
+            \begin{center}
+            {\bf #1:} {\it #2}
+            \end{center}
+            \end{minipage}
+        }
+        \end{center}
+    }
+

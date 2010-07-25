@@ -296,7 +296,7 @@ if {[info exists login]} {
 } else {
   html "<a href=''$baseurl/login''>Login</a>"
 }
-</th1><a href="/wiki?name=Donate">Donate!</a></div>
+</th1><a href="/wiki?name=Donate"><b>Donate!</b></a></div>
 ');
 REPLACE INTO config VALUES('footer','<div class="footer">
 Copyright 2010 Zed A. Shaw.  All rights reserved.  <a href="http://mongrel2.org/wiki?name=License">BSD Licensed.</a> Mongrel2 is Trademark by Zed A. Shaw.
