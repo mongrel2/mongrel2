@@ -4,8 +4,8 @@ WEBSITE=zedshaw.com:/usr/local/nginx/html/projects/build_your_own_mongrel
 
 draft: book-final.dvi
 	htlatex book-final.tex
-	sed -i -e 's/\[/\&#91;/g' book-final.html
-	sed -i -e 's/\]/\&#93;/g' book-final.html
+	tidy -quiet -ashtml -omit -ic -m book-final.html
+	sed -f clean.sed book-final.html > book.wiki
 
 book-final.dvi:
 	cp $(SOURCE).tex book-final.tex
