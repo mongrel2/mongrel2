@@ -27,7 +27,7 @@ class="pplr7t-x-x-120">July 2010</span></div>
                                                                   
    <h2 class="likechapterHead"><a 
  id="x1-1000"></a>Preface</h2>
-<!--l. 3--><p class="noindent" >What this manual is for. [ShouldNotBeLink]
+<!--l. 3--><p class="noindent" >What this manual is for. &#91;ShouldNotBeLink&#93;
    <h3 class="likesectionHead"><a 
  id="x1-2000"></a>Typography</h3>
 <!--l. 7--><p class="noindent" >Tell them what all the text formatting means and why the code segments look how
