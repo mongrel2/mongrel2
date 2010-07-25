@@ -25,7 +25,7 @@ fossil clone http://mongrel2.org ~/fossils/mongrel2.fossil
 mkdir mongrel2
 cd mongrel2
 fossil open ~/fossils/mongrel2.fossil
-<verbatim>
+</verbatim>
 
 <p><b>WARNING</b>: Make sure you follow these exactly.  If you get an error "unable to open database file", it's probably because you tried to clone fossils/mongrel2.fossil <em>before</em> you created the ~/fossils/ directory.  Don't blame fossil because you can't read instructions, and don't think git will help you with that.  You seen those flow charts?  Git is like a Ph.D. in DVCS.</p>
 
@@ -352,7 +352,7 @@ commands of m2sh.  They work like this:</p>
 [2010-07-18T04:23:32, mongrel2@zedshaw, load_command] /usr/bin/m2sh load -db config.sqlite -config examples/python/tests/mongrel2_org.py
 [2010-07-18T04:26:16, mongrel2@zedshaw, upgrade] Latest code for Mongrel2.
 [mongrel2@zedshaw mongrel2]$ 
-<verbatim>
+</verbatim>
 
 <p>Fairly simple, but it is maintained even if you reload the configuration and do an init.</p>
 
