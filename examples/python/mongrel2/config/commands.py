@@ -29,11 +29,15 @@ def shell_command():
     try:
 
         while True:
-            cmd = reader.readline()
-            if cmd:
-                args.parse_and_run_command(
-                    cmd.split(' '), mongrel2.config.commands,
-                       default_command=None, exit_on_error=False)
+            try:
+                cmd = reader.readline()
+                if cmd:
+                    args.parse_and_run_command(
+                        cmd.split(' '), mongrel2.config.commands,
+                           default_command=None, exit_on_error=False)
+            except UnicodeDecodeError:
+                print "\nERROR: Sorry, PyRepl and Python hate printing to your screen: UnicodeDecodeError."
+
     except EOFError:
         print "Bye."
 
