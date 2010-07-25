@@ -1,0 +1,7 @@
+<p>This is the connection state machine used in Mongrel2, mostly just here for documentation than anything.</p>
+
+<pre class='verbatim'>
+</pre>
+
+<p>This will be explained more later.
+</p>

@@ -1,0 +1,3 @@
+<h1>Donating To Mongrel2</h1>
+
+<p>The Mongrel2 Project is volunteer run and mostly written by me, <a href="http://zedshaw.com">Zed A. Shaw</a>.  If you believe in the project's goal of a truly programming language agnostic practical bad ass web server, then please donate.  You can also see a list of <a href="http://localhost:8080/wiki?name=Donors">Donors</a> so far.</p>

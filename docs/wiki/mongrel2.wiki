@@ -1,0 +1,61 @@
+<img src="http://localhost:8080/logo" align="right"><p></p>
+
+<h1>About Mongrel2</h1>
+
+<p>Mongrel2 is the complete redesign of the Mongrel web server to be an application, language, and network architecture agnostic web server.  It's written by the original author of Mongrel, and uses the Mongrel HTTP parser, but everything else is new.  The goal is to create a web server specifically designed for web <b>applications</b> over serving files.</p>
+
+<p>Here's the planned features for Mongrel2:</p>
+
+<ul><li><b>Programming language agnostic design<b> that lets you use whatever language you want, even to configure and manage it.
+</b></b></li><li><b>Designed to handle HTTP, Flash XMLSockets, or WebSockets (coming soon)</b> on the same socket transparently, and then route messages from those <b>to <a href="http://zeromq.org">ZeroMQ</a>, HTTP, or raw socket</b> backends.
+</li><li><b>Break the strict request==response mapping and let you translate one request or message into multiple backends</b> to produce a more complex response. This will let you create scalable architectures using any backend language you want.
+</li><li><b>Uses a MVC style configuration design, with sqlite3 as the "Model" and Python scripts as the "View".</b>  There's a m2sh program that lets you manage the server, it's configuration, and logs about configuration activity.
+</li><li><b>Use the proven and rock solid Mongrel HTTP Parser</b> that many other web application servers use.  There have been very few security flaws in this parser, and it actively blocks many attacks due to its design.
+</li><li><b>Use the latest event systems (poll, epoll, kqueue)</b> but rather than force you to understand async events, it will use a <b>fast context switching coroutine system</b> based on ucontext or assembler.
+</li><li><b>Support all of the usual web server features,</b> but it will defer to being designed specifically for applications over high-speed file serving.  Since Mongrel2 will be written in C it should do files pretty well too, but easy application architectures and operations support will come first.</li></ul>
+
+<p>Check out the <a href="http://localhost:8080/wiki?name=GettingStarted">GettingStarted</a> instructions if you want to play with it right now.</p>
+
+<h2>Status</h2>
+
+<ul><li>Completely self-hosting with functioning demonstrations for everything.
+</li><li>Configurable using a Python based configuration system and SQLite3.
+</li><li>Complete HTTP handling and correct proxying, including 0MQ handling of HTTP requests or JSSockets.
+</li><li>Uses poll for both 0MQ and file/socket I/O, with others on the way.
+</li><li>Handles Flash Socket protocol with routing to 0MQ PUB/SUB backends.
+</li><li>Released sample for testing the chat demo in Python, http handlers, and other examples.
+</li><li>Handler libraries in PHP, Python, C++, and Ruby.</li></ul>
+
+<p>Currently being worked on features:</p>
+
+<ul><li>Look at the <a href="http://www.mongrel2.com/reportlist">Tickets</a> to see.</li></ul>
+
+<h2>Documentation</h2>
+
+<p>There isn't a lot of documentation yet since the project is not completely viable.</p>
+
+<ul><li><a href="http://localhost:8080/wiki?name=DesignCriticisms">DesignCriticisms</a>
+</li><li><a href="http://localhost:8080/wiki?name=GettingStarted">GettingStarted</a></li></ul>
+
+<h2>IRC and Mailing Lists</h2>
+
+<ul><li>You can join the <a href="http://librelist.com">Librelist</a> mailing list by emailing <a href="mailto:mongrel2@librelist.com">mongrel2@librelist.com</a>.
+</li><li>There is an IRC channel #mongrel2 on irc.freenode.org</li></ul>
+
+<p>I reserve the right to boot anyone I want off these for being obnoxious, and I arbitrarily define "obnoxious" however I want.</p>
+
+<h2>License</h2>
+
+<p>Mongrel2 is BSD Licensed using the 3 clause BSD license, which basically means you can use it how you want but you can't promote your business activities using the names Mongrel2 Project, or its contributors.</p>
+
+<p>You of course can tell anyone you want that that you're using Mongrel2, that your services or your company are based on Mongrel2.  You just can't say that our <b>project</b> endorses your business without explicit permission.</p>
+
+<p>You can read the full <a href="http://localhost:8080/wiki?name=License">License</a> here.</p>
+
+<h2>Contact</h2>
+
+<p>If you have comments or are interested in sponsoring this work, contact me at <a href="mailto:zedshaw@zedshaw.com">zedshaw@zedshaw.com</a>.</p>
+
+<h2>Credits</h2>
+
+<p>Thanks to <a href="http://twitter.com/adamsiddhi">@adamsiddhi</a> for making the logo.</p>

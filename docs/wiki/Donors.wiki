@@ -1,0 +1,17 @@
+<h1>List Of Mongrel2 Donors</h1>
+
+<p>Some donors request that their names be put on a list of donors to show support for Mongrel, and some wanted everyone to know how much they donated (usually because it was a funny joke).</p>
+
+<ul><li><a href="http://www.onepageperday.com">Matt Murphy</a>
+</li><li>Ben Aτkin ($6.28)
+</li><li>Íslenska lýðnetsfélagið ehf.
+</li><li><font size="1%">Paul T ($1 so funny)</font>
+</li><li>Shane Emmons
+</li><li>Silas Sewell
+</li><li>Kevin Stewart
+</li><li><a href="http://pragmaticbadger.com/">Daniel, Matt &amp; Xian @ Pragmatic Badger</a>
+</li><li>And many more who wanted to remain silent.</li></ul>
+
+<p>If I missed you, just shoot me another <a href="mailto:zedshaw@zedshaw.com">email</a> and I'll put you on.</p>
+
+<p>And again, thanks!  It really helps.</p>
