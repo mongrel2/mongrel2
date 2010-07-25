@@ -15,36 +15,87 @@
   <h2 class="likechapterHead"><a id="x1-1000" name=
   "x1-1000"></a>Preface</h2><!--l. 3-->
 
-  <p class="noindent">What this manual is for. &#91;ShouldNotBeLink&#93;
+  <p class="noindent">This manual will tell you about the most
+  awesome webserver on the planet: Mongrel2. It is written for
+  people with a sense of humor who want to get things done with
+  Mongrel2. That means if you&rsquo;re an operations professional,
+  software developer, hacker, or just curious it&rsquo;s for you.
+  However, if you&rsquo;re too serious and think &rdquo;flowery
+  language&rdquo; (aka good entertaining writing) does not belong
+  in your software manuals then you should just go read the source
+  code and save everyone a huge headache dealing with you. 
+  <!--l. 10-->
+
+  <p class="indent">In case you haven&rsquo;t figured it out, this
+  book will be fun and slightly obnoxious. That&rsquo;s not
+  intended to insult you, but just to keep you interested so that
+  you want to read it.
 
   <h3 class="likesectionHead"><a id="x1-2000" name=
-  "x1-2000"></a>Typography</h3><!--l. 7-->
+  "x1-2000"></a>Typography</h3><!--l. 16-->
 
-  <p class="noindent">Tell them what all the text formatting means
-  and why the code segments look how they do. <!--l. 9-->
+  <p class="noindent">Usually the people running the web can be
+  divided into three types of people: Steves, Edsgers, and Knuths. 
+  <!--l. 19-->
+
+  <p class="indent">The Steves thinks that the entire internet
+  should be a wonderful user experience where all pages are painted
+  in pixel perfect fonts with graphics and coated the most happy
+  happy joy joy of all possible experiences. The Steve&rsquo;s of
+  the internet think the Edsger&rsquo;s of internet are destroying
+  the universe with things like &rdquo;functionality&rdquo;,
+  &rdquo;security&rdquo;, and &rdquo;stability&rdquo;. Just like
+  the real Steves, they would rather everything looks fantastic and
+  then use awesome marketing to cover up any technical flaws. 
+  <!--l. 26-->
+
+  <p class="indent">The Edsgers feel that the internet is totally
+  unsafe and until it is a fully curate and crafted set of academic
+  peer reviewed papers it will continue to be a festering pile of
+  dung. To the Edsgers the world is dangerous and only a truly
+  paranoid attitude toward security and stability will ensure that
+  it becomes safe. They want every single piece of software to
+  reject all reality and be crafted from nothing but pure
+  mathematics, and hate the fact that the Steves want to run around
+  painting the world with useless frivolous colors and words and
+  things that lead to ambiguity and happiness. <!--l. 33-->
+
+  <p class="indent">The typography in this book, and the entire
+  project, is for the Knuths of the world. I like to think of the
+  Knuths as the practical yet professional types with a light sense
+  of humor. They are the ones who are getting things done while
+  still balancing between great typography and solid bug free
+  functionality. They aren&rsquo;t zealots but practical straight
+  forward type of people. <!--l. 38-->
+
+  <p class="indent">This book is written in TeX and written for the
+  Knuths of the internet. <!--l. 40-->
 
   <p class="noindent">
 
   <h3 class="likesectionHead"><a id="x1-3000" name=
-  "x1-3000"></a>Conventions</h3><!--l. 11-->
+  "x1-3000"></a>Conventions</h3><!--l. 42-->
 
   <p class="noindent">More specifics about the code format
-  conventions. <!--l. 13-->
+  conventions. <!--l. 44-->
 
   <p class="noindent">
 
   <h3 class="likesectionHead"><a id="x1-4000" name=
-  "x1-4000"></a>Terminology</h3><!--l. 15-->
+  "x1-4000"></a>Terminology</h3><!--l. 46-->
 
   <p class="noindent">Common terminology they should know in the
-  beginning. <!--l. 17-->
+  beginning. <!--l. 48-->
 
   <p class="noindent">
 
   <h3 class="likesectionHead"><a id="x1-5000" name=
-  "x1-5000"></a>Quick Tour</h3><!--l. 19-->
+  "x1-5000"></a>Quick Tour</h3><!--l. 50-->
 
-  <p class="noindent">Go through the chapters of the book.
+  <p class="noindent">Go through the chapters of the book. 
+  <!--l. 19-->
+
+  <p class="indent">
 
   <h2 class="likechapterHead"><a id="x1-6000" name=
   "x1-6000"></a>Contents</h2>
