@@ -156,6 +156,7 @@ error:
     return -1;
 }
 
+struct tagbstring DIR_PREFIX_REQUIRED = bsStatic("%b//");
 
 Dir *Dir_create(const char *base, const char *prefix, const char *index_file, const char *default_ctype)
 {
@@ -163,7 +164,7 @@ Dir *Dir_create(const char *base, const char *prefix, const char *index_file, co
     check_mem(dir);
 
     dir->base = bfromcstr(base);
-    check(blength(dir->base) < MAX_DIR_PATH, "Base direcotry is too long, must be less than %d", MAX_DIR_PATH);
+    check(blength(dir->base) < MAX_DIR_PATH, "Base directory is too long, must be less than %d", MAX_DIR_PATH);
 
     // dir can come from the routing table so it could have a pattern in it, strip that off
     bstring pattern = bfromcstr(prefix);
@@ -172,8 +173,14 @@ Dir *Dir_create(const char *base, const char *prefix, const char *index_file, co
     bdestroy(pattern);
 
     check(blength(dir->prefix) < MAX_DIR_PATH, "Prefix is too long, must be less than %d", MAX_DIR_PATH);
-    check(bchar(dir->prefix, 0) == '/', "Dir prefix must start with a / or you break the internet.");
-    check(bchar(dir->prefix, blength(dir->prefix) - 1) == '/', "Dir prefix must END with a / or you break the internet.");
+
+    if(blength(dir->prefix) > 1) {
+        check(bstring_match(dir->prefix, &DIR_PREFIX_REQUIRED),
+                "Dir route prefix (%s) must start with / and end with / or else you break the internet.", prefix);
+    } else {
+        check(biseqcstr(dir->prefix, "/"),
+                "Dir route prefix should probably be /%s/ for it to work, or just / if that's what you meant.", bdata(dir->prefix));
+    }
 
     dir->index_file = bfromcstr(index_file);
     dir->default_ctype = bfromcstr(default_ctype);

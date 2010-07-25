@@ -56,7 +56,7 @@ int Config_dir_load_cb(void *param, int cols, char **data, char **names)
     arity(5);
     Dir **target = (Dir **)param;
 
-    log_info("Loaded dir config for %s:%s", data[0], data[1]);
+    log_info("Loaded dir config for %s:%s:%s", data[0], data[1], data[2]);
 
     *target = Dir_create(data[1], data[2], data[3], data[4]);
 
