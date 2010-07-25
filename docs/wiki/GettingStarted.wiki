@@ -182,30 +182,9 @@ Bye.
 
 <h2>Configuring Mongrel2</h2>
 
-<p>We'll now try to configure mongrel using m2sh.  There is a sample configuration we'll play with in examples/python/tests/sample_conf.py
-that looks like this:</p>
+<p>We'll now try to configure mongrel using m2sh.  There is a sample configuration we'll play with in 
+<a href="/artifact?name=32fb2bbf3829cf0ed93efd00817cdc8da1c6f6c8">examples/python/tests/sample_conf.py that looks like this.</a></p>
 
-<pre class="verbatim">
-from mongrel2.config import *
-
-main = Server(
-    uuid="f400bf85-4538-4f7a-8908-67e313d515c2",
-    access_log="/logs/access.log",
-    error_log="/logs/error.log",
-    chroot="./",
-    default_host="localhost",
-    pid_file="/run/mongrel2.pid",
-    port=6767,
-    hosts = [
-        Host(name="localhost", routes={
-            '/tests/': Dir(base='tests/', index_file='index.html',
-                             default_ctype='text/plain')
-        })
-    ]
-)
-
-commit([main])
-</pre>
 
 <p>This is actually Python code that sets up a configuration script.  For now we just use Python since it has some advantages, but later there may be another format.</p>
 
@@ -274,56 +253,8 @@ NO: Mongrel2 server localhost NOT at PID 27812
 
 <h2>A More Complex Configuration</h2>
 
-<p>There is also a config in examples/python/tests/mongrel2_org.py that is the same the one that runs mongrel2.org.  That looks like this:</p>
+<p>There is also a config in <a href="/artifact?name=92e4e01c649d0ceef7d1b3afca715198c05b6723">examples/python/tests/mongrel2_org.py</a> that is the same the one that runs mongrel2.org.</p>
 
-<pre class="verbatim">
-from mongrel2.config import *
-
-main = Server(
-    uuid="2f62bd5-9e59-49cd-993c-3b6013c28f05",
-    access_log="/logs/access.log",
-    error_log="/logs/error.log",
-    chroot="/var/www/mongrel2",
-    pid_file="/run/mongrel2.pid",
-    default_host="mongrel2.org",
-    port=6767
-)
-
-
-test_directory = Dir(base='tests/',
-                     index_file='index.html',
-                     default_ctype='text/plain')
-
-web_app_proxy = Proxy(addr='127.0.0.1', port=8080)
-
-chat_demo_dir = Dir(base='examples/chat/static/', 
-                    index_file='index.html', 
-                    default_ctype='text/plain')
-
-chat_demo = Handler(send_spec='tcp://127.0.0.1:9999',
-                    send_ident='54c6755b-9628-40a4-9a2d-cc82a816345e',
-                    recv_spec='tcp://127.0.0.1:9998', recv_ident='')
-
-handler_test = Handler(send_spec='tcp://127.0.0.1:9997',
-                       send_ident='54c6755b-9628-40a4-9a2d-cc82a816345e',
-                       recv_spec='tcp://127.0.0.1:9996', recv_ident='')
-
-
-mongrel2 = Host(name="mongrel2.org", routes={
-    '@chat': chat_demo,
-    '/handlertest': handler_test,
-    '/chat/': web_app_proxy,
-    '/': web_app_proxy,
-    '/tests/': test_directory,
-    '/testsmulti/(.*.json)': test_directory,
-    '/chatdemo/': chat_demo_dir,
-    '/static/': chat_demo_dir,
-})
-
-main.hosts = [mongrel2]
-
-commit([main])
-</pre>
 
 <p>This one is longer because it sets up a few examples and does a more real server configuration, but just like the previous one it's also
 in Python.</p>
