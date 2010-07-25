@@ -31,6 +31,10 @@ small logos representing companies who agree to sponsor Mongrel2.  If you're
 interested in sponsoring Mongrel2 then contact <a href="mailto:zedshaw@zedshaw.com">zedshaw@zedshaw.com</a> and let me know what
 you'd like to give and who you are.</p>
 
+<p>Keep in mind though that I don't do backroom deals, so even if you donate I will still try to keep the project focused on what
+people are doing with it and what fits my vision for the project.  Donating money gets you focus on your company, not say in my project.
+</p>
+
 <h2>Other Ways To Help</h2>
 
 <p>If you can't donate money but still want to help then there's plenty of things you can do to help the project:</p>
