@@ -14,7 +14,7 @@ Installing, Deploying, Managing, Hacking </h2>
 <div class="author" ><span 
 class="pplr7t-x-x-120">Zed A. Shaw</span></div><br />
 <div class="date" ><span 
-class="pplr7t-x-x-120">June 2010</span></div>
+class="pplr7t-x-x-120">July 2010</span></div>
                                                                   
 
                                                                   
@@ -27,7 +27,7 @@ class="pplr7t-x-x-120">June 2010</span></div>
                                                                   
    <h2 class="likechapterHead"><a 
  id="x1-1000"></a>Preface</h2>
-<!--l. 3--><p class="noindent" >What this manual is for.
+<!--l. 3--><p class="noindent" >What this manual is for. [ShouldNotBeLink]
    <h3 class="likesectionHead"><a 
  id="x1-2000"></a>Typography</h3>
 <!--l. 7--><p class="noindent" >Tell them what all the text formatting means and why the code segments look how
@@ -78,91 +78,117 @@ href="#x1-12000V" id="QQ2-1-12">Contributing</a></span>
                                                                   
 
                                                                   
-<!--l. 25--><p class="indent" >
                                                                   
 
                                                                   
-<!--l. 25--><p class="indent" >
+<!--l. 1--><p class="indent" >
+                                                                  
+
+                                                                  
+<!--l. 1--><p class="indent" >
+                                                                  
+
+                                                                  
+<!--l. 1--><p class="indent" >
                                                                   
 
                                                                   
    <h1 class="partHead"><span class="titlemark">Part&#x00A0;I<br /></span><a 
  id="x1-8000I"></a>Installing</h1>
-<!--l. 27--><p class="noindent" >Soon...
+<!--l. 3--><p class="noindent" >Soon...
                                                                   
 
                                                                   
-<!--l. 29--><p class="indent" >
                                                                   
 
                                                                   
-<!--l. 29--><p class="indent" >
                                                                   
 
                                                                   
-<!--l. 29--><p class="indent" >
+<!--l. 1--><p class="indent" >
+                                                                  
+
+                                                                  
+<!--l. 1--><p class="indent" >
+                                                                  
+
+                                                                  
+<!--l. 1--><p class="indent" >
                                                                   
 
                                                                   
    <h1 class="partHead"><span class="titlemark">Part&#x00A0;II<br /></span><a 
  id="x1-9000II"></a>Deploying</h1>
-<!--l. 31--><p class="noindent" >Soon...
+<!--l. 3--><p class="noindent" >Soon...
                                                                   
 
                                                                   
-<!--l. 33--><p class="indent" >
                                                                   
 
                                                                   
-<!--l. 33--><p class="indent" >
                                                                   
 
                                                                   
-<!--l. 33--><p class="indent" >
+<!--l. 1--><p class="indent" >
+                                                                  
+
+                                                                  
+<!--l. 1--><p class="indent" >
+                                                                  
+
+                                                                  
+<!--l. 1--><p class="indent" >
                                                                   
 
                                                                   
    <h1 class="partHead"><span class="titlemark">Part&#x00A0;III<br /></span><a 
  id="x1-10000III"></a>Managing</h1>
-<!--l. 35--><p class="noindent" >Soon...
+<!--l. 3--><p class="noindent" >Soon...
                                                                   
 
                                                                   
-<!--l. 37--><p class="indent" >
                                                                   
 
                                                                   
-<!--l. 37--><p class="indent" >
                                                                   
 
                                                                   
-<!--l. 37--><p class="indent" >
+<!--l. 1--><p class="indent" >
+                                                                  
+
+                                                                  
+<!--l. 1--><p class="indent" >
+                                                                  
+
+                                                                  
+<!--l. 1--><p class="indent" >
                                                                   
 
                                                                   
    <h1 class="partHead"><span class="titlemark">Part&#x00A0;IV<br /></span><a 
  id="x1-11000IV"></a>Hacking</h1>
-<!--l. 39--><p class="noindent" >Soon...
+<!--l. 3--><p class="noindent" >Soon...
                                                                   
 
                                                                   
-<!--l. 41--><p class="indent" >
                                                                   
 
                                                                   
-<!--l. 41--><p class="indent" >
                                                                   
 
                                                                   
-<!--l. 41--><p class="indent" >
+<!--l. 1--><p class="indent" >
+                                                                  
+
+                                                                  
+<!--l. 1--><p class="indent" >
+                                                                  
+
+                                                                  
+<!--l. 1--><p class="indent" >
                                                                   
 
                                                                   
    <h1 class="partHead"><span class="titlemark">Part&#x00A0;V<br /></span><a 
  id="x1-12000V"></a>Contributing</h1>
-<!--l. 43--><p class="noindent" >Soon...
-    
-
-                                                                  
-
-
+<!--l. 3--><p class="noindent" >Soon...

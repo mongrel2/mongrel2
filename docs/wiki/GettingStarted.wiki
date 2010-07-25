@@ -55,11 +55,11 @@ make install
 Reading symbols from /home/zedshaw/projects/mongrel2/tests/listener_tests...done.
 (gdb) run
 Starting program: /home/zedshaw/projects/mongrel2/tests/listener_tests
-[Thread debugging using libthread_db enabled]
+&#91;Thread debugging using libthread_db enabled&#93;
 ----  
 RUNNING: /home/zedshaw/projects/mongrel2/tests/listener_tests
-[New Thread 0xb7c2ab70 (LWP 2641)]
-[New Thread 0xb7429b70 (LWP 2642)]
+&#91;New Thread 0xb7c2ab70 (LWP 2641)&#93;
+&#91;New Thread 0xb7429b70 (LWP 2642)&#93;
 VEVTVA==
 Program received signal SIGSEGV, Segmentation fault.
 0xb7e1dac0 in strnlen () from /lib/libc.so.6

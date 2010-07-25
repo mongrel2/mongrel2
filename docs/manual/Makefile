@@ -3,7 +3,9 @@ SOURCE=book
 WEBSITE=zedshaw.com:/usr/local/nginx/html/projects/build_your_own_mongrel
 
 draft: book-final.dvi
-	echo "Done"
+	htlatex book-final.tex
+	sed -ei 's/\[/\&#91;/g' book-final.html
+	sed -ei 's/\]/\&#93;/g' book-final.html
 
 book-final.dvi:
 	cp $(SOURCE).tex book-final.tex
