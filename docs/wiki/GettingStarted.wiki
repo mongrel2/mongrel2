@@ -19,13 +19,13 @@
 
 <p>Using fossil, check out the source code:</p>
 
-<verbatim>
+<pre class="verbatim">
 mkdir ~/fossils
 fossil clone http://mongrel2.org ~/fossils/mongrel2.fossil
 mkdir mongrel2
 cd mongrel2
 fossil open ~/fossils/mongrel2.fossil
-</verbatim>
+</pre>
 
 <p><b>WARNING</b>: Make sure you follow these exactly.  If you get an error "unable to open database file", it's probably because you tried to clone fossils/mongrel2.fossil <em>before</em> you created the ~/fossils/ directory.  Don't blame fossil because you can't read instructions, and don't think git will help you with that.  You seen those flow charts?  Git is like a Ph.D. in DVCS.</p>
 
@@ -39,17 +39,17 @@ fossil open ~/fossils/mongrel2.fossil
 
 <p>Now you can try to build it:</p>
 
-<verbatim>
+<pre class="verbatim">
 make clean
 make
 make install
-</verbatim>
+</pre>
 
 <p>Remember, you <b>must have</b> gmake or this will fail.  BSD make won't work for this, but most everyone can get gmake.  When you do the <b>make install</b> it will need sudo to do the actual install, but it will minimize the sudo use.</p>
 
 <p>If you have unit test failures then <a href="http://mongrel2.org/reportlist">submit a ticket</a> with your output in a &lt;verbatim&gt; tag or as an attachment.  If you have a segfault then run that one test under gdb and do a backtrace, like this:</p>
 
-<verbatim>
+<pre class="verbatim">
 ~/projects/mongrel2 $ gdb tests/listener_tests
 ... GDB's stupid license spam ...
 Reading symbols from /home/zedshaw/projects/mongrel2/tests/listener_tests...done.
@@ -76,7 +76,7 @@ Program received signal SIGSEGV, Segmentation fault.
     at tests/listener_tests.c:124
 #13 0x0804f8e6 in taskmainstart (v=0x0) at task.c:349
 (gdb) 
-</verbatim>
+</pre>
 
 <p>This is an actual backtrace I did, with sections cut out for this document.  Please give us the full backtrace so we can track it down, and all the usual information about your platform.</p>
 
@@ -84,9 +84,9 @@ Program received signal SIGSEGV, Segmentation fault.
 
 <p>You can now try to run the test instance of Mongrel2 by doing this:</p>
 
-<verbatim>
+<pre class="verbatim">
 mongrel2 tests/config.sqlite localhost
-</verbatim>
+</pre>
 
 <p>This will start the Mongrel2 server listening on port 6767 and proxying HTTP requests to another web server on port 8080 on localhost.  Start another web server and see if it works.</p>
 
@@ -94,12 +94,12 @@ mongrel2 tests/config.sqlite localhost
 
 <p>Now if you want to run it for real, you need to make a couple of directories and start it as root:</p>
 
-<verbatim>
+<pre class="verbatim">
 mkdir logs
 mkdir run
 mkdir tmp
 sudo mongrel2 tests/config.sqlite localhost
-</verbatim>
+</pre>
 
 <p><b>WARNING</b> Some operating systems live in the 90's and don't include /usr/local/bin in your default PATH.  Add it if you can't find mongrel2.</p>
 
@@ -116,7 +116,7 @@ sudo mongrel2 tests/config.sqlite localhost
 
 <p>Once you do that you can try a few tests using <a href="http://curl.haxx.se/">cUrl</a> to make sure certain things work.  First, you'll want to run a few things in other windows using Python and ZeroMQ.  Run each of these in a separate window so you can watch them:</p>
 
-<verbatim>
+<pre class="verbatim">
 --- window 1 ----
 cd examples/chat
 python www.py
@@ -128,18 +128,18 @@ python chat.py
 --- window 3 ----
 cd example/http_0mq
 python http.py
-</verbatim>
+</pre>
 
 <p>With all of this running and Mongrel2 you can now try some demos out using curl:</p>
 
-<verbatim>
+<pre class="verbatim">
 curl http://localhost:6767/
 curl http://localhost:6767/Zed
 curl http://localhost:6767/tests/sample.html
 curl http://localhost:6767/tests/sample.json
 curl http://localhost:6767/handlertest
 curl http://localhost:6767/chatdemo/
-</verbatim>
+</pre>
 
 <p>Next, try out the chat demo with your browser by going to http://localhost:6767/chatdemo/ yourself.  Probably pretty lonely but there you go, you have chat.  Check out the chat window to watch your message travel around.</p>
 
@@ -162,15 +162,15 @@ There are also libraries for the following languages:</p>
 
 <p>To try out m2sh just do this:</p>
 
-<verbatim>
+<pre class="verbatim">
 m2sh help
 m2sh servers -db tests/config.sqlite
 m2sh hosts -db tests/config.sqlite -host localhost
-</verbatim>
+</pre>
 
 <p>That does a basic dump of your configuration, but you can also use it as a shell with history (thanks to PyRepl):</p>
 
-<verbatim>
+<pre class="verbatim">
 m2sh
 m2> help
 m2> help -for servers
@@ -178,14 +178,14 @@ m2> servers -db tests/config.sqlite
 m2> hosts -db tests/config.sqlite -host localhost
 m2> ^d
 Bye.
-</verbatim>
+</pre>
 
 <h2>Configuring Mongrel2</h2>
 
 <p>We'll now try to configure mongrel using m2sh.  There is a sample configuration we'll play with in examples/python/tests/sample_conf.py
 that looks like this:</p>
 
-<verbatim>
+<pre class="verbatim">
 from mongrel2.config import *
 
 main = Server(
@@ -205,14 +205,14 @@ main = Server(
 )
 
 commit([main])
-</verbatim>
+</pre>
 
 <p>This is actually Python code that sets up a configuration script.  For now we just use Python since it has some advantages, but later there may be another format.</p>
 
 <p>How this works is m2sh will "load" this and it will create your configuration database for you, and it will
 log what you did.  Here's how you do it:</p>
 
-<verbatim>
+<pre class="verbatim">
 m2sh
 m2> init -db test.sqlite
 m2> load -db test.sqlite -config examples/python/tests/sample_conf.py
@@ -225,36 +225,36 @@ m2> hosts -db test.sqlite -host localhost
 Host(maintenance=0, name=u'localhost', matching=u'localhost') :
 	/tests/ : Dir(base=u'tests/', index_file=u'index.html', default_ctype=u'text/plain')
 m2> 
-</verbatim>
+</pre>
 
 <h2>Managing Mongrel2</h2>
 
 <p>You can now try starting this server, and we'll use m2sh to make sure that it starts and your old one stops:</p>
 
-<verbatim>
+<pre class="verbatim">
 m2> running -db tests/config.sqlite -host localhost
 NO: Mongrel2 server localhost NOT at PID 19299
-</verbatim>
+</pre>
 
 <p>If your server is running then do:</p>
 
-<verbatim>
+<pre class="verbatim">
 m2> stop -db tests/config.sqlite -host localhost
-</verbatim>
+</pre>
 
 <p>Now you can start it up and try it out:</p>
 
-<verbatim>
+<pre class="verbatim">
 m2> start -db test.sqlite -host localhost -sudo
 m2> running -db test.sqlite -host localhost
 YES: Mongrel2 server localhost running at PID 27812
 m2> ^d
 Bye.
-</verbatim>
+</pre>
 
 <p>Finally you can try a few curl commands to play with your server and then stop it:</p>
 
-<verbatim>
+<pre class="verbatim">
 ~/projects/mongrel2 $ curl http://localhost:6767/tests/
 hi there
 ~/projects/mongrel2 $ curl -i http://localhost:6767/tests/
@@ -270,13 +270,13 @@ hi there
 ~/projects/mongrel2 $ m2sh stop -db test.sqlite -host localhost
 ~/projects/mongrel2 $ m2sh running -db test.sqlite -host localhost
 NO: Mongrel2 server localhost NOT at PID 27812
-</verbatim>
+</pre>
 
 <h2>A More Complex Configuration</h2>
 
 <p>There is also a config in examples/python/tests/mongrel2_org.py that is the same the one that runs mongrel2.org.  That looks like this:</p>
 
-<verbatim>
+<pre class="verbatim">
 from mongrel2.config import *
 
 main = Server(
@@ -323,7 +323,7 @@ mongrel2 = Host(name="mongrel2.org", routes={
 main.hosts = [mongrel2]
 
 commit([main])
-</verbatim>
+</pre>
 
 <p>This one is longer because it sets up a few examples and does a more real server configuration, but just like the previous one it's also
 in Python.</p>
@@ -337,7 +337,7 @@ config needs to change for each box.</p>
 <p>While a revision control tool is useful, Mongrel2 also keeps track of who did what to a config database using the log and commit
 commands of m2sh.  They work like this:</p>
 
-<verbatim>
+<pre class="verbatim">
 [mongrel2@zedshaw mongrel2]$ m2sh log -db config.sqlite
 [2010-07-18T04:14:53, mongrel2@zedshaw, init_command] /usr/bin/m2sh init -db config.sqlite
 [2010-07-18T04:15:06, mongrel2@zedshaw, load_command] /usr/bin/m2sh load -db config.sqlite -config examples/python/tests/mongrel2_org.py
@@ -352,7 +352,7 @@ commands of m2sh.  They work like this:</p>
 [2010-07-18T04:23:32, mongrel2@zedshaw, load_command] /usr/bin/m2sh load -db config.sqlite -config examples/python/tests/mongrel2_org.py
 [2010-07-18T04:26:16, mongrel2@zedshaw, upgrade] Latest code for Mongrel2.
 [mongrel2@zedshaw mongrel2]$ 
-</verbatim>
+</pre>
 
 <p>Fairly simple, but it is maintained even if you reload the configuration and do an init.</p>
 
