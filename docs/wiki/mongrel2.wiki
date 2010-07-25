@@ -1,4 +1,4 @@
-<img src="http://localhost:8080/logo" align="right"><p></p>
+<img src="/logo" align="right"><p></p>
 
 <h1>About Mongrel2</h1>
 
@@ -14,7 +14,7 @@
 </li><li><b>Use the latest event systems (poll, epoll, kqueue)</b> but rather than force you to understand async events, it will use a <b>fast context switching coroutine system</b> based on ucontext or assembler.
 </li><li><b>Support all of the usual web server features,</b> but it will defer to being designed specifically for applications over high-speed file serving.  Since Mongrel2 will be written in C it should do files pretty well too, but easy application architectures and operations support will come first.</li></ul>
 
-<p>Check out the <a href="http://localhost:8080/wiki?name=GettingStarted">GettingStarted</a> instructions if you want to play with it right now.</p>
+<p>Check out the <a href="/wiki?name=GettingStarted">GettingStarted</a> instructions if you want to play with it right now.</p>
 
 <h2>Status</h2>
 
@@ -34,8 +34,8 @@
 
 <p>There isn't a lot of documentation yet since the project is not completely viable.</p>
 
-<ul><li><a href="http://localhost:8080/wiki?name=DesignCriticisms">DesignCriticisms</a>
-</li><li><a href="http://localhost:8080/wiki?name=GettingStarted">GettingStarted</a></li></ul>
+<ul><li><a href="/wiki?name=DesignCriticisms">DesignCriticisms</a>
+</li><li><a href="/wiki?name=GettingStarted">GettingStarted</a></li></ul>
 
 <h2>IRC and Mailing Lists</h2>
 
@@ -50,7 +50,7 @@
 
 <p>You of course can tell anyone you want that that you're using Mongrel2, that your services or your company are based on Mongrel2.  You just can't say that our <b>project</b> endorses your business without explicit permission.</p>
 
-<p>You can read the full <a href="http://localhost:8080/wiki?name=License">License</a> here.</p>
+<p>You can read the full <a href="/wiki?name=License">License</a> here.</p>
 
 <h2>Contact</h2>
 
