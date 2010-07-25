@@ -170,7 +170,7 @@ tr7:
 	{
         check(p-targets_start == target_expected_len, 
                 "Target netstring length is wrong, actual %d expected %d",
-                p-targets_start, target_expected_len);
+                (int)(p-targets_start), (int)target_expected_len);
     }
 	goto st6;
 tr11:
@@ -183,7 +183,7 @@ tr11:
 	{
         check(p-targets_start == target_expected_len, 
                 "Target netstring length is wrong, actual %d expected %d",
-                p-targets_start, target_expected_len);
+                (int)(p-targets_start), (int)target_expected_len);
     }
 	goto st6;
 st6:

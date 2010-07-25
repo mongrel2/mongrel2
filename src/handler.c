@@ -160,7 +160,7 @@ inline int handler_recv_parse(Handler *handler, HandlerParser *parser)
     check(rc == 1, "Failed to parse message from handler.");
 
     debug("Parsed message with %d targets, uuid: %s, and body: %d",
-            parser->target_count, bdata(parser->uuid), parser->body_length);
+            (int)parser->target_count, bdata(parser->uuid), (int)parser->body_length);
 
     return 0;
 

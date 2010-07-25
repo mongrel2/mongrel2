@@ -67,7 +67,7 @@
     action targets_end {
         check(fpc-targets_start == target_expected_len, 
                 "Target netstring length is wrong, actual %d expected %d",
-                fpc-targets_start, target_expected_len);
+                (int)(fpc-targets_start), (int)target_expected_len);
     }
 
     action done { fbreak; }
