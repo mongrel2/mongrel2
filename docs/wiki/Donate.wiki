@@ -47,6 +47,6 @@ people are doing with it and what fits my vision for the project.  Donating mone
 <li>Creating handler implementations in other languages, the more the better.</li>
 <li>Writing new configuration interfaces to compliment the existing Python based m2sh.</li>
 <li>Thinking up crazy features so we can maybe implement them, and probably tell you to do it as a handler.</li>
-<li>If you're in SF and are using Mongrel2 then I (Zed) will gladly come check out what your doing.  It's like free consulting!</li>
+<li>If you're in SF and are using Mongrel2 then I (Zed) will gladly come check out what you are doing.  It's like free consulting!</li>
 </ul>
 
