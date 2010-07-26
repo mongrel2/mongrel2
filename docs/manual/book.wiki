@@ -97,18 +97,18 @@
     "QQ2-1-45" name="QQ2-1-45">Routing And Host
     Patterns</a></span><br>
     &nbsp;<span class="sectionToc">3.7 <a href="#x1-350003.7" id=
-    "QQ2-1-46" name="QQ2-1-46">Deployment Logs And
+    "QQ2-1-47" name="QQ2-1-47">Deployment Logs And
     Commits</a></span><br>
-    <span class="chapterToc">4 <a href="#x1-360004" id="QQ2-1-48"
-    name="QQ2-1-48">Managing</a></span><br>
+    <span class="chapterToc">4 <a href="#x1-360004" id="QQ2-1-49"
+    name="QQ2-1-49">Managing</a></span><br>
     &nbsp;<span class="sectionToc">4.1 <a href="#x1-370004.1" id=
-    "QQ2-1-49" name="QQ2-1-49">More Advanced m2sh</a></span><br>
-    <span class="chapterToc">5 <a href="#x1-380005" id="QQ2-1-50"
-    name="QQ2-1-50">Hacking</a></span><br>
+    "QQ2-1-50" name="QQ2-1-50">More Advanced m2sh</a></span><br>
+    <span class="chapterToc">5 <a href="#x1-380005" id="QQ2-1-51"
+    name="QQ2-1-51">Hacking</a></span><br>
     &nbsp;<span class="sectionToc">5.1 <a href="#x1-390005.1" id=
-    "QQ2-1-51" name="QQ2-1-51">Writing Your Own m2sh</a></span><br>
-    <span class="chapterToc">6 <a href="#x1-400006" id="QQ2-1-52"
-    name="QQ2-1-52">Contributing</a></span>
+    "QQ2-1-52" name="QQ2-1-52">Writing Your Own m2sh</a></span><br>
+    <span class="chapterToc">6 <a href="#x1-400006" id="QQ2-1-53"
+    name="QQ2-1-53">Contributing</a></span>
   </div><!--l. 1-->
 
   <p class="indent">
@@ -1700,94 +1700,168 @@
   in your patterns:
 
   <ul class="itemize1">
-    <li class="itemize">. (period) all characters.
+    <li class="itemize"><span class=
+    "obeylines-h verb pcrr7t-">.</span> (period) all characters.
 
-    <li class="itemize">%a Letters.
+    <li class="itemize"><span class=
+    "obeylines-h verb pcrr7t-">\a</span> Letters.
 
-    <li class="itemize">%c Control characters.
+    <li class="itemize"><span class=
+    "obeylines-h verb pcrr7t-">\c</span> Control characters.
 
-    <li class="itemize">%d Digits.
+    <li class="itemize"><span class=
+    "obeylines-h verb pcrr7t-">\d</span> Digits.
 
-    <li class="itemize">%l Lowercase letters.
+    <li class="itemize"><span class=
+    "obeylines-h verb pcrr7t-">\l</span> Lowercase letters.
 
-    <li class="itemize">%p Punctuation characters.
+    <li class="itemize"><span class=
+    "obeylines-h verb pcrr7t-">\p</span> Punctuation characters.
 
-    <li class="itemize">%s Space characters.
+    <li class="itemize"><span class=
+    "obeylines-h verb pcrr7t-">\s</span> Space characters.
 
-    <li class="itemize">%u Uppercase letters.
+    <li class="itemize"><span class=
+    "obeylines-h verb pcrr7t-">\u</span> Uppercase letters.
 
-    <li class="itemize">%w Alphanumeric characters.
+    <li class="itemize"><span class=
+    "obeylines-h verb pcrr7t-">\w</span> Alphanumeric characters.
 
-    <li class="itemize">%x Hexadecimal digits.
+    <li class="itemize"><span class=
+    "obeylines-h verb pcrr7t-">\x</span> Hexadecimal digits.
 
-    <li class="itemize">%z The 0 character (null terminator).
+    <li class="itemize"><span class=
+    "obeylines-h verb pcrr7t-">\z</span> The 0 character (null
+    terminator).
 
-    <li class="itemize">%x Escapes x, so %% escapes %, %* escapes
-    *.
+    <li class="itemize"><span class=
+    "obeylines-h verb pcrr7t-">\x</span> Escapes x, so <span class=
+    "obeylines-h verb pcrr7t-">\</span> escapes <span class=
+    "obeylines-h verb pcrr7t-">\</span>, <span class=
+    "obeylines-h verb pcrr7t-">\</span>* escapes *.
 
-    <li class="itemize">Just like a regex &#91;&#93; where it is a class of
-    chars, like &#91;0-9&#93; for all digits.
+    <li class="itemize"><span class=
+    "obeylines-h verb pcrr7t-">&#91;set&#93;</span> Just like a regex &#91;&#93;
+    where it is a class of chars, like &#91;0-9&#93; for all digits.
 
-    <li class="itemize">Inverse character set, so &#91;^0-9&#93; is
-    anything not digits.
+    <li class="itemize"><span class=
+    "obeylines-h verb pcrr7t-">&#91;^set&#93;</span> Inverse character set,
+    so &#91;^0-9&#93; is anything not digits.
 
-    <li class="itemize">x* Longest match of 0 or more x chars.
+    <li class="itemize"><span class=
+    "obeylines-h verb pcrr7t-">x&#8902;</span> Longest match of 0
+    or more x chars.
 
-    <li class="itemize">x+ Longest match of 1 or more x chars.
+    <li class="itemize"><span class=
+    "obeylines-h verb pcrr7t-">x+</span> Longest match of 1 or more
+    x chars.
 
-    <li class="itemize">x- Shortest match of 0 or more x chars.
+    <li class="itemize"><span class=
+    "obeylines-h verb pcrr7t-">x-</span> Shortest match of 0 or
+    more x chars.
 
-    <li class="itemize">x? 0 or 1 match of x char.
+    <li class="itemize"><span class=
+    "obeylines-h verb pcrr7t-">x?</span> 0 or 1 match of x char.
 
-    <li class="itemize">%bxy Balanced match a substring starting
-    with x and ending in y. So %b() will match balanced
+    <li class="itemize"><span class=
+    "obeylines-h verb pcrr7t-">\bxy</span> Balanced match a
+    substring starting with x and ending in y. So <span class=
+    "obeylines-h verb pcrr7t-">\</span>b() will match balanced
     parenthesis.
 
-    <li class="itemize">^ The beginning of a string.
+    <li class="itemize"><span class=
+    "obeylines-h verb pcrr7t-">^</span> The beginning of a string.
 
     <li class="itemize">$ End of the string.
   </ul><!--l. 496-->
 
   <p class="indent">Anything that&rsquo;s not listed here just
-  matches that character. Here&rsquo;s some example routes you can
-  try to get a feel for the system:
+  matches that character. <!--l. 498-->
 
-  <dl class="description">
-    <dt class="description"><span class="pplb7t-">/images/</span>
+  <p class="indent"><a id="x1-34001r3" name="x1-34001r3"></a>
+  <hr class="float">
 
-    <dd class="description">This will just match any path that has
-    /images/ in it without any patterns.
+  <div class="float">
+    <div class="caption">
+      <span class="id">Note 3:</span> <span class=
+      "content"><span class="pplri7t-">Sorry Unicodians, It&rsquo;s
+      All</span> <span class="pplri7t-">ASCII</span></span>
+    </div><!--tex4ht:label?: x1-34001r3 -->
 
-    <dt class="description"><span class="pplb7t-">/</span>
+    <div class="quote">
+      <!--l. 499-->
 
-    <dd class="description">The fastest possible route you can
-    have.
+      <p class="noindent">Yep, I get it. You think that everyone
+      should use UTF-8 or some Unicode encoding for everything. You
+      despise the dominance of the &rsquo;A&rsquo; in ASCII and
+      hate that you can&rsquo;t put your spoken language right in a
+      URL. <!--l. 503-->
 
-    <dt class="description"><span class=
-    "pplb7t-">/images/(.*.jpg)</span>
+      <p class="noindent">Well, I hate to say it, but tough.
+      Protocols are hard enough without having to worry about the
+      bewildering mess that is Unicode. When you sit down to write
+      a network protocol, the last thing you need is a format
+      that&rsquo;s inconsistent, has multiple interpretations,
+      can&rsquo;t be properly capitalized or lowercased, and
+      requires extra translations steps for every operation. With
+      ASCII every computer just knows what it is and it&rsquo;s the
+      fastest for creating wire protocol formats. <!--l. 511-->
 
-    <dd class="description">Match only requests for jpg images in
-    the images directory. Keep in mind that this isn&rsquo;t
-    actually looking in the directory, it&rsquo;s just matching the
-    <span class="pplri7t-">(.*.jpg)</span> pattern.
+      <p class="noindent">This is why, on the internet, you have to
+      do things to URLs to make them ASCII like encoding them with
+      % signs. It&rsquo;s in the standard and it&rsquo;s the smart
+      thing to do. I don&rsquo;t want to have to know the
+      difference between the various accents in your spoken
+      language to route a URL around. I just want to deal with a
+      fixed set of characters and be done with it. Don&rsquo;t
+      blame me or Mongrel2 for this, it&rsquo;s just the way the
+      standard is and the way to get a server that is stable and
+      works. <!--l. 519-->
 
-    <dt class="description"><span class=
-    "pplb7t-">/images/(%a-%-%d+%.jpg)</span>
+      <p class="noindent">Protocols work better when there&rsquo;s
+      less politics in their design. This means you can&rsquo;t put
+      Unicode into your URL patterns. I mean you can try but the
+      behavior is completely undefined.
+    </div>
+  </div>
+  <hr class="endfloat">
+  <!--l. 526-->
 
-    <dd class="description">A more complex example that matches a
-    short sequence of 0 or more letters (remember -), then a dash
-    (%- escapes the -), then 1 or long sequence of digits and
-    finally a .jpg) with the %. escaping the period.
-  </dl><!--l. 508-->
+  <p class="indent">Here&rsquo;s some example routes you can try to
+  get a feel for the system:
+
+  <ul class="itemize1">
+    <li class="itemize"><span class=
+    "obeylines-h verb pcrr7t-">/images/</span> This will just match
+    any path that has /images/ in it without any patterns.
+
+    <li class="itemize"><span class=
+    "obeylines-h verb pcrr7t-">/</span> The fastest possible route
+    you can have.
+
+    <li class="itemize"><span class=
+    "obeylines-h verb pcrr7t-">/images/(.&#8902;.jpg)</span> Match
+    only requests for jpg images in the images directory. Keep in
+    mind that this isn&rsquo;t actually looking in the directory,
+    it&rsquo;s just matching the <span class=
+    "pplri7t-">(.*.jpg)</span> pattern.
+
+    <li class="itemize"><span class=
+    "obeylines-h verb pcrr7t-">/images/(\a-\-\d+\.jpg)</span> A
+    more complex example that matches a short sequence of 0 or more
+    letters (remember -), then a dash (<span class=
+    "obeylines-h verb pcrr7t-">\-</span> escapes the -), then 1 or
+    long sequence of digits and finally a .jpg) with the
+    <span class="obeylines-h verb pcrr7t-">\</span>. escaping the
+    period.
+  </ul><!--l. 537-->
 
   <p class="indent">That should give the idea of how you can use
-  them. <!--l. 511-->
-
-  <p class="noindent">
+  them.
 
   <h3 class="sectionHead"><span class="titlemark">3.7</span> <a id=
   "x1-350003.7" name="x1-350003.7"></a>Deployment Logs And
-  Commits</h3><!--l. 513-->
+  Commits</h3><!--l. 542-->
 
   <p class="noindent">A very nice feature for people doing
   operations work is that m2sh keeps track of all the commands you
@@ -1797,13 +1871,13 @@
   and <span class="pplri7t-">m2sh load</span> commands so you can
   see what&rsquo;s going on. They track who did something, what
   server they did it on, what time they did it, and what they did. 
-  <!--l. 520-->
+  <!--l. 549-->
 
   <p class="indent">To see the logs for your own tests just do
   <span class="pplri7t-">m2sh log -db simple.sqlite</span> and then
   if you want to add a commit log message you use the <span class=
   "pplri7t-">m2sh commit</span> command. Here&rsquo;s an example
-  from mongrel2.org: <!--l. 524-->
+  from mongrel2.org: <!--l. 553-->
 
   <p class="indent"><a id="x1-35001r10" name="x1-35001r10"></a>
   <hr class="float">
@@ -1835,12 +1909,12 @@
       &#91;2010-07-18T20:09:02,&nbsp;mongrel2@zedshaw,&nbsp;load_command&#93;&nbsp;/usr/bin/m2sh&nbsp;config&nbsp;-db&nbsp;config.sqlite&nbsp;-config&nbsp;examples/python/tests/mongrel2_org.py
       &nbsp;<br>
       &gt;&nbsp;m2sh&nbsp;commit&nbsp;-db&nbsp;config.sqlite&nbsp;-what&nbsp;mongrel2.org&nbsp;-why&nbsp;"Testing&nbsp;things&nbsp;out."
-    </div><!--l. 536-->
+    </div><!--l. 565-->
 
     <p class="nopar">
   </div>
   <hr class="endfloat">
-  <!--l. 539-->
+  <!--l. 568-->
 
   <p class="indent">The motivation for this feature is the trend
   that operations store server configurations in revision control
@@ -1849,12 +1923,12 @@
   on each server. In many cases the configuration files also need
   to be reworked or altered for each deployment. With the m2sh log
   and commits system you can augment your revision control with
-  deployment action tracking. <!--l. 545-->
+  deployment action tracking. <!--l. 574-->
 
   <p class="indent">Later versions of Mongrel2 will keep small
   amounts of statistics which will link these actions to changes in
   Mongrel2 behavior like frequent crashing, failures, slowness, or
-  other problems. <!--l. 548-->
+  other problems. <!--l. 577-->
 
   <p class="indent">Basically, there&rsquo;s nowhere to hide.
   Mongrel2 will help operations figure out who needs to get fired

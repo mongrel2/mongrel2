@@ -23,7 +23,7 @@ typedef struct MatchState {
 #define uchar(S) (S)
 
 
-#define L_ESC        '%'
+#define L_ESC        '\\'
 
 
 const char *classend (MatchState *ms, const char *p) {
@@ -39,7 +39,7 @@ const char *classend (MatchState *ms, const char *p) {
         if (*p == '\0')
           log_err("malformed pattern (missing ])");
         if (*(p++) == L_ESC && *p != '\0')
-          p++;  /* skip escapes (e.g. `%]') */
+          p++;  /* skip escapes (e.g. `\\]') */
       } while (*p != ']');
       return p+1;
     }
@@ -188,7 +188,7 @@ const char *match(MatchState *ms, const char *s, const char *p) {
           const char *ep; char previous;
           p += 2;
           if (*p != '[')
-            log_err("missing '[' after %%f in pattern");
+            log_err("missing '[' after \\\\f in pattern");
           ep = classend(ms, p);  /* points to what is next */
           previous = (s == ms->src_init) ? '\0' : *(s-1);
           if (matchbracketclass(uchar(previous), p, ep-1) ||

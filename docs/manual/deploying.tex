@@ -470,40 +470,69 @@ for it to work right.
 Here's the list of characters you can use in your patterns:
 
 \begin{itemize}
-\item . (period) all characters.
-\item \%a Letters.
-\item \%c Control characters.
-\item \%d Digits.
-\item \%l Lowercase letters.
-\item \%p Punctuation characters.
-\item \%s Space characters.
-\item \%u Uppercase letters.
-\item \%w Alphanumeric characters.
-\item \%x Hexadecimal digits.
-\item \%z The 0 character (null terminator).
-\item \%x Escapes x, so \%\% escapes \%, \%* escapes *.
-\item [set] Just like a regex [] where it is a class of chars, like [0-9] for all digits.
-\item [^set] Inverse character set, so [^0-9] is anything not digits.
-\item x* Longest match of 0 or more x chars.
-\item x+ Longest match of 1 or more x chars.
-\item x- Shortest match of 0 or more x chars.
-\item x? 0 or 1 match of x char.
-\item \%bxy Balanced match a substring starting with x and ending in y.  So \%b() will match balanced parenthesis.
-\item ^ The beginning of a string.
+\item \verb|.| (period) all characters.
+\item \verb|\a| Letters.
+\item \verb|\c| Control characters.
+\item \verb|\d| Digits.
+\item \verb|\l| Lowercase letters.
+\item \verb|\p| Punctuation characters.
+\item \verb|\s| Space characters.
+\item \verb|\u| Uppercase letters.
+\item \verb|\w| Alphanumeric characters.
+\item \verb|\x| Hexadecimal digits.
+\item \verb|\z| The 0 character (null terminator).
+\item \verb|\x| Escapes x, so \verb|\| escapes \verb|\|, \verb|\|* escapes *.
+\item \verb|[set]| Just like a regex [] where it is a class of chars, like [0-9] for all digits.
+\item \verb|[^set]| Inverse character set, so [^0-9] is anything not digits.
+\item \verb|x*| Longest match of 0 or more x chars.
+\item \verb|x+| Longest match of 1 or more x chars.
+\item \verb|x-| Shortest match of 0 or more x chars.
+\item \verb|x?| 0 or 1 match of x char.
+\item \verb|\bxy| Balanced match a substring starting with x and ending in y.  So \verb|\|b() will match balanced parenthesis.
+\item \verb|^| The beginning of a string.
 \item \$ End of the string.
 \end{itemize}
 
-Anything that's not listed here just matches that character.  Here's some example routes you can try to get
-a feel for the system:
+Anything that's not listed here just matches that character.  
 
-\begin{description}
-\item [/images/]  This will just match any path that has /images/ in it without any patterns.
-\item [/] The fastest possible route you can have.
-\item [/images/(.*.jpg)] Match only requests for jpg images in the images directory.  Keep in mind that this
+\begin{aside}{Sorry Unicodians, It's All ASCII}
+Yep, I get it.  You think that everyone should use UTF-8 or some Unicode encoding for everything.
+You despise the dominance of the 'A' in ASCII and hate that you can't put your spoken language
+right in a URL.
+
+Well, I hate to say it, but tough.  Protocols are hard enough without having to
+worry about the bewildering mess that is Unicode.  When you sit down to write a
+network protocol, the last thing you need is a format that's inconsistent, has
+multiple interpretations, can't be properly capitalized or lowercased, and
+requires extra translations steps for every operation.  With ASCII every
+computer just knows what it is and it's the fastest for creating wire protocol
+formats.
+
+This is why, on the internet, you have to do things to URLs to make them ASCII
+like encoding them with \% signs.  It's in the standard and it's the smart
+thing to do.  I don't want to have to know the difference between the various
+accents in your spoken language to route a URL around.  I just want to deal
+with a fixed set of characters and be done with it.  Don't blame me or Mongrel2
+for this, it's just the way the standard is and the way to get a server that is
+stable and works.
+
+Protocols work better when there's less politics in their design.  This means
+you can't put Unicode into your URL patterns.  I mean you can try but the
+behavior is completely undefined.
+
+\end{aside}
+
+
+Here's some example routes you can try to get a feel for the system:
+
+\begin{itemize}
+\item \verb|/images/|  This will just match any path that has /images/ in it without any patterns.
+\item \verb|/| The fastest possible route you can have.
+\item \verb|/images/(.*.jpg)| Match only requests for jpg images in the images directory.  Keep in mind that this
     isn't actually looking in the directory, it's just matching the \ident{(.*.jpg)} pattern.
-\item [/images/(\%a-\%-\%d+\%.jpg)] A more complex example that matches a short sequence of 0 or more letters (remember -), then a dash
-    (\%- escapes the -), then 1 or long sequence of digits and finally a .jpg) with the \%. escaping the period.
-\end{description}
+\item \verb|/images/(\a-\-\d+\.jpg)| A more complex example that matches a short sequence of 0 or more letters (remember -), then a dash
+    (\verb|\-| escapes the -), then 1 or long sequence of digits and finally a .jpg) with the \verb|\|. escaping the period.
+\end{itemize}
 
 That should give the idea of how you can use them.
 
