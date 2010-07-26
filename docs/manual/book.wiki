@@ -1720,14 +1720,13 @@
 
     <li class="itemize">%x Hexadecimal digits.
 
-    <li class="itemize">%z The<br class="newline">
-    0 character (null terminator).
+    <li class="itemize">%z The 0 character (null terminator).
 
     <li class="itemize">%x Escapes x, so %% escapes %, %* escapes
     *.
 
-    <li class="itemize">Just like a regex &#91;&rsquo; where it is a
-    class of chars, like &#91;0-9&rsquo; for all digits.
+    <li class="itemize">Just like a regex &#91;&#93; where it is a class of
+    chars, like &#91;0-9&#93; for all digits.
 
     <li class="itemize">Inverse character set, so &#91;^0-9&#93; is
     anything not digits.
