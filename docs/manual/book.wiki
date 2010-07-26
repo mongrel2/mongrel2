@@ -92,21 +92,21 @@
     "QQ2-1-41" name="QQ2-1-41">A More Complex
     Example</a></span><br>
     &nbsp;<span class="sectionToc">3.6 <a href="#x1-330003.6" id=
-    "QQ2-1-42" name="QQ2-1-42">Routing And Host
+    "QQ2-1-43" name="QQ2-1-43">Routing And Host
     Patterns</a></span><br>
     &nbsp;<span class="sectionToc">3.7 <a href="#x1-340003.7" id=
-    "QQ2-1-43" name="QQ2-1-43">Deployment Logs And
+    "QQ2-1-44" name="QQ2-1-44">Deployment Logs And
     Commits</a></span><br>
-    <span class="chapterToc">4 <a href="#x1-350004" id="QQ2-1-44"
-    name="QQ2-1-44">Managing</a></span><br>
+    <span class="chapterToc">4 <a href="#x1-350004" id="QQ2-1-45"
+    name="QQ2-1-45">Managing</a></span><br>
     &nbsp;<span class="sectionToc">4.1 <a href="#x1-360004.1" id=
-    "QQ2-1-45" name="QQ2-1-45">More Advanced m2sh</a></span><br>
-    <span class="chapterToc">5 <a href="#x1-370005" id="QQ2-1-46"
-    name="QQ2-1-46">Hacking</a></span><br>
+    "QQ2-1-46" name="QQ2-1-46">More Advanced m2sh</a></span><br>
+    <span class="chapterToc">5 <a href="#x1-370005" id="QQ2-1-47"
+    name="QQ2-1-47">Hacking</a></span><br>
     &nbsp;<span class="sectionToc">5.1 <a href="#x1-380005.1" id=
-    "QQ2-1-47" name="QQ2-1-47">Writing Your Own m2sh</a></span><br>
-    <span class="chapterToc">6 <a href="#x1-390006" id="QQ2-1-48"
-    name="QQ2-1-48">Contributing</a></span>
+    "QQ2-1-48" name="QQ2-1-48">Writing Your Own m2sh</a></span><br>
+    <span class="chapterToc">6 <a href="#x1-390006" id="QQ2-1-49"
+    name="QQ2-1-49">Contributing</a></span>
   </div><!--l. 1-->
 
   <p class="indent">
@@ -1467,13 +1467,185 @@
 
   <h3 class="sectionHead"><span class="titlemark">3.5</span> <a id=
   "x1-320003.5" name="x1-320003.5"></a>A More Complex Example</h3>
-  <!--l. 369-->
+  <!--l. 368-->
 
-  <p class="noindent">
+  <p class="noindent">All of this knowledge about the Mongrel2
+  configuration structure can now be used to take a look at a more
+  complex example. What we&rsquo;ll do is take a look at this
+  example and I&rsquo;ll just say what&rsquo;s going on, and you
+  try to match what I&rsquo;m saying to the code. Here&rsquo;s the
+  file <span class=
+  "pplb7t-">examples/python/tests/mongrel2&#729;org.py</span>: 
+  <!--l. 372-->
+
+  <p class="indent"><a id="x1-32001r8" name="x1-32001r8"></a>
+  <hr class="float">
+
+  <div class="float">
+    <div class="caption">
+      <span class="id">Source 8:</span> <span class=
+      "content"><span class="pplri7t-">Mongrel2.org Config</span>
+      <span class="pplri7t-">Script</span></span>
+    </div><!--tex4ht:label?: x1-32001r8 -->
+
+    <div class="verbatim" id="verbatim-8">
+      from&nbsp;mongrel2.config&nbsp;import&nbsp;&#8902; &nbsp;<br>
+      &nbsp;<br>
+      main&nbsp;=&nbsp;Server( &nbsp;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;uuid="2f62bd5-9e59-49cd-993c-3b6013c28f05",
+      &nbsp;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;access_log="/logs/access.log",
+      &nbsp;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;error_log="/logs/error.log",
+      &nbsp;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;chroot="./", &nbsp;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;pid_file="/run/mongrel2.pid",
+      &nbsp;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;default_host="mongrel2.org",
+      &nbsp;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;port=6767 &nbsp;<br>
+      ) &nbsp;<br>
+      &nbsp;<br>
+      &nbsp;<br>
+      test_directory&nbsp;=&nbsp;Dir(base='tests/', &nbsp;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;index_file='index.html',
+      &nbsp;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default_ctype='text/plain')
+      &nbsp;<br>
+      &nbsp;<br>
+      web_app_proxy&nbsp;=&nbsp;Proxy(addr='127.0.0.1',&nbsp;port=80)
+      &nbsp;<br>
+      &nbsp;<br>
+      chat_demo_dir&nbsp;=&nbsp;Dir(base='examples/chat/static/',
+      &nbsp;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;index_file='index.html',
+      &nbsp;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default_ctype='text/plain')
+      &nbsp;<br>
+      &nbsp;<br>
+      chat_demo&nbsp;=&nbsp;Handler(send_spec='tcp://127.0.0.1:9999',
+      &nbsp;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;send_ident='54c6755b-9628-40a4-9a2d-cc82a816345e',
+      &nbsp;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;recv_spec='tcp://127.0.0.1:9998',&nbsp;recv_ident='')
+      &nbsp;<br>
+      &nbsp;<br>
+      handler_test&nbsp;=&nbsp;Handler(send_spec='tcp://127.0.0.1:9997',
+      &nbsp;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;send_ident='34f9ceee-cd52-4b7f-b197-88bf2f0ec378',
+      &nbsp;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;recv_spec='tcp://127.0.0.1:9996',&nbsp;recv_ident='')
+      &nbsp;<br>
+      &nbsp;<br>
+      &nbsp;<br>
+      mongrel2&nbsp;=&nbsp;Host(name="mongrel2.org",&nbsp;routes={
+      &nbsp;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;'@chat':&nbsp;chat_demo, &nbsp;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;'/handlertest':&nbsp;handler_test,
+      &nbsp;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;'/chat/':&nbsp;web_app_proxy,
+      &nbsp;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;'/':&nbsp;web_app_proxy, &nbsp;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;'/tests/':&nbsp;test_directory,
+      &nbsp;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;'/testsmulti/(.&#8902;.json)':&nbsp;test_directory,
+      &nbsp;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;'/chatdemo/':&nbsp;chat_demo_dir,
+      &nbsp;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;'/static/':&nbsp;chat_demo_dir,
+      &nbsp;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;'/mp3stream':&nbsp;Handler(
+      &nbsp;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;send_spec='tcp://127.0.0.1:9995',
+      &nbsp;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;send_ident='53f9f1d1-1116-4751-b6ff-4fbe3e43d142',
+      &nbsp;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;recv_spec='tcp://127.0.0.1:9994',&nbsp;recv_ident='')
+      &nbsp;<br>
+      }) &nbsp;<br>
+      &nbsp;<br>
+      main.hosts&nbsp;=&nbsp;&#91;mongrel2&#93; &nbsp;<br>
+      &nbsp;<br>
+      settings&nbsp;=&nbsp;{"zeromq.threads":&nbsp;4} &nbsp;<br>
+      &nbsp;<br>
+      commit(&#91;main&#93;,&nbsp;settings=settings)
+    </div><!--l. 426-->
+
+    <p class="nopar">
+  </div>
+  <hr class="endfloat">
+  <!--l. 429-->
+
+  <p class="indent">If you haven&rsquo;t guessed yet, this
+  configuration is what&rsquo;s used on <a href=
+  "http://mongrel2.org" class="url"><span class=
+  "pcrr7t-">http://mongrel2.org</span></a> to configure the main
+  test system. In it we&rsquo;ve got the following things to check
+  out:
+
+  <ol class="enumerate1">
+    <li class="enumerate" id="x1-32003x1">Our basic server with a
+    default host of mongrel2.org.
+
+    <li class="enumerate" id="x1-32005x2">The route targets are
+    separated out into their own variables, unlike the <span class=
+    "pplb7t-">sample&#729;conf.py</span> file where they&rsquo;re
+    just tossed into one big structure.
+
+    <li class="enumerate" id="x1-32007x3">First target is a
+    <span class="pplri7t-">Dir</span> that serves up files out of
+    the <span class="pplb7t-">tests</span> directory and uses
+    <span class="pplb7t-">index.html</span> as its default file.
+
+    <li class="enumerate" id="x1-32009x4">Next we setup a
+    <span class="pplri7t-">Proxy</span> pointing at the main
+    website&rsquo;s server for testing the proxy.
+
+    <li class="enumerate" id="x1-32011x5">Then there&rsquo;s a
+    <span class="pplri7t-">Dir</span> target for the <a href=
+    "http://mongrel2.org:6767/chatdemo/" class="url"><span class=
+    "pcrr7t-">http://mongrel2.org:6767/chatdemo/</span></a> that
+    we&rsquo;ll look at later.
+
+    <li class="enumerate" id="x1-32013x6">And you have the
+    <span class="pplri7t-">Handler</span> for the same chat demo
+    that does the actual logic of a chat system.
+
+    <li class="enumerate" id="x1-32015x7">After that&rsquo;s a
+    little <span class="pplri7t-">Handler</span> for testing out
+    doing HTTP requests to a handler. Notice how even though the
+    chat demo and this handler use different protocols (chat demo
+    is using JSSockets) you don&rsquo;t have tell mongrel2 that? It
+    figures it out based on how they&rsquo;re being used rather
+    than by configurations.
+
+    <li class="enumerate" id="x1-32017x8">With all those handler
+    targets we can now make the <span class="pplri7t-">mongrel2
+    Host</span> with all the routes assigned once and nice and
+    clean. However look how I was lazy and just tossed the
+    mp3stream demo right into the routes dict? You can totally do
+    this and m2sh will figure it out.
+
+    <li class="enumerate" id="x1-32019x9">We then assign this
+    <span class="pplri7t-">mongrel2</span> variable as the hosts
+    for the <span class="pplri7t-">main</span> server.
+
+    <li class="enumerate" id="x1-32021x10">There is also a settings
+    feature which is just a dict of global settings you can tweak.
+    In this case we&rsquo;re upping the number of threads that 0MQ
+    is using for doing it&rsquo;s operations.
+
+    <li class="enumerate" id="x1-32023x11">Finally, we commit the
+    whole thing to the database by passing in the servers to save
+    and the settings to use.
+  </ol><!--l. 454-->
+
+  <p class="indent">And that my friends is the most complex
+  configuration we have so far.
 
   <h3 class="sectionHead"><span class="titlemark">3.6</span> <a id=
   "x1-330003.6" name="x1-330003.6"></a>Routing And Host
-  Patterns</h3><!--l. 373-->
+  Patterns</h3><!--l. 461-->
 
   <p class="noindent">
 

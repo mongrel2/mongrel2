@@ -365,6 +365,94 @@ the Mongrel2 structure.
 
 \section{A More Complex Example}
 
+All of this knowledge about the Mongrel2 configuration structure can now be used to take a look at 
+a more complex example.  What we'll do is take a look at this example and I'll just say what's 
+going on, and you try to match what I'm saying to the code.  Here's the file \file{examples/python/tests/mongrel2_org.py}:
+
+\begin{code}{Mongrel2.org Config Script}
+\begin{verbatim}
+from mongrel2.config import *
+
+main = Server(
+    uuid="2f62bd5-9e59-49cd-993c-3b6013c28f05",
+    access_log="/logs/access.log",
+    error_log="/logs/error.log",
+    chroot="./",
+    pid_file="/run/mongrel2.pid",
+    default_host="mongrel2.org",
+    port=6767
+)
+
+
+test_directory = Dir(base='tests/',
+                     index_file='index.html',
+                     default_ctype='text/plain')
+
+web_app_proxy = Proxy(addr='127.0.0.1', port=80)
+
+chat_demo_dir = Dir(base='examples/chat/static/', 
+                    index_file='index.html', 
+                    default_ctype='text/plain')
+
+chat_demo = Handler(send_spec='tcp://127.0.0.1:9999',
+                    send_ident='54c6755b-9628-40a4-9a2d-cc82a816345e',
+                    recv_spec='tcp://127.0.0.1:9998', recv_ident='')
+
+handler_test = Handler(send_spec='tcp://127.0.0.1:9997',
+                       send_ident='34f9ceee-cd52-4b7f-b197-88bf2f0ec378',
+                       recv_spec='tcp://127.0.0.1:9996', recv_ident='')
+
+
+mongrel2 = Host(name="mongrel2.org", routes={
+    '@chat': chat_demo,
+    '/handlertest': handler_test,
+    '/chat/': web_app_proxy,
+    '/': web_app_proxy,
+    '/tests/': test_directory,
+    '/testsmulti/(.*.json)': test_directory,
+    '/chatdemo/': chat_demo_dir,
+    '/static/': chat_demo_dir,
+    '/mp3stream': Handler(
+        send_spec='tcp://127.0.0.1:9995',
+        send_ident='53f9f1d1-1116-4751-b6ff-4fbe3e43d142',
+        recv_spec='tcp://127.0.0.1:9994', recv_ident='')
+})
+
+main.hosts = [mongrel2]
+
+settings = {"zeromq.threads": 4}
+
+commit([main], settings=settings)
+\end{verbatim}
+\end{code}
+
+If you haven't guessed yet, this configuration is what's used on \url{http://mongrel2.org}
+to configure the main test system.  In it we've got the following things to check out:
+
+\begin{enumerate}
+\item Our basic server with a default host of mongrel2.org.
+\item The route targets are separated out into their own variables, unlike the \file{sample_conf.py} file
+    where they're just tossed into one big structure.
+\item First target is a \ident{Dir} that serves up files out of the \file{tests} directory and uses \file{index.html}
+    as its default file.
+\item Next we setup a \ident{Proxy} pointing at the main website's server for testing the proxy.
+\item Then there's a \ident{Dir} target for the \url{http://mongrel2.org:6767/chatdemo/} that we'll look at later.
+\item And you have the \ident{Handler} for the same chat demo that does the actual logic of a chat system.
+\item After that's a little \ident{Handler} for testing out doing HTTP requests to a handler.  Notice how even
+    though the chat demo and this handler use different protocols (chat demo is using JSSockets) you don't have
+    tell mongrel2 that?  It figures it out based on how they're being used rather than by configurations.
+\item With all those handler targets we can now make the \ident{mongrel2} \ident{Host} with all the routes
+    assigned once and nice and clean.  However look how I was lazy and just tossed the mp3stream demo
+    right into the routes dict?  You can totally do this and m2sh will figure it out.
+\item We then assign this \ident{mongrel2} variable as the hosts for the \ident{main} server.
+\item There is also a settings feature which is just a dict of global settings you can tweak.  In this case
+    we're upping the number of threads that 0MQ is using for doing it's operations.
+\item Finally, we commit the whole thing to the database by passing in the servers to save and the settings
+    to use.
+\end{enumerate}
+
+And that my friends is the most complex configuration we have so far.
+
 
 \section{Routing And Host Patterns}
 
