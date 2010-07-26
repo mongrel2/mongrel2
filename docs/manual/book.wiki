@@ -67,23 +67,46 @@
     &nbsp;<span class="sectionToc">3.4 <a href="#x1-240003.4" id=
     "QQ2-1-33" name="QQ2-1-33">How A Config Is
     Structured</a></span><br>
-    &nbsp;<span class="sectionToc">3.5 <a href="#x1-250003.5" id=
-    "QQ2-1-34" name="QQ2-1-34">A More Complex
+    &nbsp;&nbsp;<span class="subsectionToc">3.4.1 <a href=
+    "#x1-250003.4.1" id="QQ2-1-34" name=
+    "QQ2-1-34">Server</a></span><br>
+    &nbsp;&nbsp;<span class="subsectionToc">3.4.2 <a href=
+    "#x1-260003.4.2" id="QQ2-1-35" name=
+    "QQ2-1-35">Host</a></span><br>
+    &nbsp;&nbsp;<span class="subsectionToc">3.4.3 <a href=
+    "#x1-270003.4.3" id="QQ2-1-36" name=
+    "QQ2-1-36">Route</a></span><br>
+    &nbsp;&nbsp;<span class="subsectionToc">3.4.4 <a href=
+    "#x1-280003.4.4" id="QQ2-1-37" name=
+    "QQ2-1-37">Dir</a></span><br>
+    &nbsp;&nbsp;<span class="subsectionToc">3.4.5 <a href=
+    "#x1-290003.4.5" id="QQ2-1-38" name=
+    "QQ2-1-38">Proxy</a></span><br>
+    &nbsp;&nbsp;<span class="subsectionToc">3.4.6 <a href=
+    "#x1-300003.4.6" id="QQ2-1-39" name=
+    "QQ2-1-39">Handler</a></span><br>
+    &nbsp;<span class="sectionToc">3.5 <a href="#x1-310003.5" id=
+    "QQ2-1-40" name="QQ2-1-40">A More Complex
     Example</a></span><br>
-    &nbsp;<span class="sectionToc">3.6 <a href="#x1-260003.6" id=
-    "QQ2-1-35" name="QQ2-1-35">Deployment Logs And
+    &nbsp;<span class="sectionToc">3.6 <a href="#x1-320003.6" id=
+    "QQ2-1-41" name="QQ2-1-41">Routing And Host
+    Patterns</a></span><br>
+    &nbsp;<span class="sectionToc">3.7 <a href="#x1-330003.7" id=
+    "QQ2-1-42" name="QQ2-1-42">Deployment Logs And
     Commits</a></span><br>
-    <span class="chapterToc">4 <a href="#x1-270004" id="QQ2-1-36"
-    name="QQ2-1-36">Managing</a></span><br>
-    &nbsp;<span class="sectionToc">4.1 <a href="#x1-280004.1" id=
-    "QQ2-1-37" name="QQ2-1-37">More Advanced m2sh</a></span><br>
-    <span class="chapterToc">5 <a href="#x1-290005" id="QQ2-1-38"
-    name="QQ2-1-38">Hacking</a></span><br>
-    &nbsp;<span class="sectionToc">5.1 <a href="#x1-300005.1" id=
-    "QQ2-1-39" name="QQ2-1-39">Writing Your Own m2sh</a></span><br>
-    <span class="chapterToc">6 <a href="#x1-310006" id="QQ2-1-40"
-    name="QQ2-1-40">Contributing</a></span>
-  </div>
+    <span class="chapterToc">4 <a href="#x1-340004" id="QQ2-1-43"
+    name="QQ2-1-43">Managing</a></span><br>
+    &nbsp;<span class="sectionToc">4.1 <a href="#x1-350004.1" id=
+    "QQ2-1-44" name="QQ2-1-44">More Advanced m2sh</a></span><br>
+    <span class="chapterToc">5 <a href="#x1-360005" id="QQ2-1-45"
+    name="QQ2-1-45">Hacking</a></span><br>
+    &nbsp;<span class="sectionToc">5.1 <a href="#x1-370005.1" id=
+    "QQ2-1-46" name="QQ2-1-46">Writing Your Own m2sh</a></span><br>
+    <span class="chapterToc">6 <a href="#x1-380006" id="QQ2-1-47"
+    name="QQ2-1-47">Contributing</a></span>
+  </div><!--l. 1-->
+
+  <p class="indent">
 
   <h2 class="likechapterHead"><a id="x1-2000" name=
   "x1-2000"></a>Preface</h2><!--l. 3-->
@@ -1057,8 +1080,7 @@
   <hr class="endfloat">
   <!--l. 194-->
 
-  <p class="indent">With this sequence of commands you should have
-  just:
+  <p class="indent">With this sequence of commands you:
 
   <ol class="enumerate1">
     <li class="enumerate" id="x1-23004x1">Create a raw fresh config
@@ -1075,47 +1097,194 @@
 
     <li class="enumerate" id="x1-23012x5">Start this server to try
     it out.
-  </ol>
+  </ol><!--l. 204-->
+
+  <p class="indent">By now you should be getting the hang of the
+  pattern here, which is to use m2sh and little Python
+  configuration &rdquo;script&rdquo; to generate .sqlite files that
+  Mongrel2 understands.
 
   <h3 class="sectionHead"><span class="titlemark">3.4</span> <a id=
   "x1-240003.4" name="x1-240003.4"></a>How A Config Is
   Structured</h3><!--l. 210-->
 
+  <p class="noindent">The base structure of a Mongrel2
+  configuration is:
+
+  <dl class="description">
+    <dt class="description"><span class="pplb7t-">Server</span>
+
+    <dd class="description">This is the root of a config, and you
+    can have multiples of these in one database, even though each
+    start command only runs one at a time.
+
+    <dt class="description"><span class="pplb7t-">Host</span>
+
+    <dd class="description">Servers then have Hosts inside them
+    which say what DNS hostname Mongrel2 should answer for, and you
+    can have multiples of these in each Server.
+
+    <dt class="description"><span class="pplb7t-">Route</span>
+
+    <dd class="description">Hosts have Routes in them which tells
+    Mongrel2 what to do with URL paths and patterns that match
+    them. Routes then have <span class="pplri7t-">Dir</span>,
+    <span class="pplri7t-">Handler</span>, and <span class=
+    "pplri7t-">Proxy</span> items in them.
+
+    <dt class="description"><span class="pplb7t-">Dir</span>
+
+    <dd class="description">A Dir serves files out of a directory,
+    full with 304 and ETag support, default content types, and most
+    of the things you need to serve them.
+
+    <dt class="description"><span class="pplb7t-">Proxy</span>
+
+    <dd class="description">A Proxy takes requests matching the
+    Route they&rsquo;re attached to and sends them to another HTTP
+    server somewhere else. Mongrel2 will then act as a full proxy
+    and also try to keep connections open in keep-alive mode if the
+    browser supports it.
+
+    <dt class="description"><span class="pplb7t-">Handler</span>
+
+    <dd class="description">A Handler is the best part of Mongrel2.
+    It takes HTTP requests, and turns them into nicely packed and
+    processed ZeroMQ messages for your asynchronous handlers.
+  </dl><!--l. 228-->
+
+  <p class="indent">Each of these nested &rdquo;objects&rdquo; then
+  has a set of attributes you can use to configure them, and most
+  of them have reasonable defaults. <!--l. 232-->
+
+  <p class="noindent">
+
+  <h4 class="subsectionHead"><span class="titlemark">3.4.1</span>
+  <a id="x1-250003.4.1" name="x1-250003.4.1"></a>Server</h4>
+  <!--l. 234-->
+
+  <p class="noindent">The server is all about telling Mongrel2
+  where to listen on its port, where to chroot, and general server
+  specific deployment gear.
+
+  <dl class="description">
+    <dt class="description"><span class="pplb7t-">uuid</span>
+
+    <dd class="description">A UUID is used to make sure that each
+    deployed server is unique in your infrastructure. You could
+    easily use any string that&rsquo;s letters, numbers, or -
+    characters.
+
+    <dt class="description"><span class="pplb7t-">chroot</span>
+
+    <dd class="description">This is the directory that Mongrel2
+    should chroot to and drop privileges.
+
+    <dt class="description"><span class=
+    "pplb7t-">access&#729;log</span>
+
+    <dd class="description">The access log file <span class=
+    "pplri7t-">relative to the chroot</span>. Usually starts with a
+    &rsquo;/&rsquo;. Make sure you don&rsquo;t configure your
+    server so that this and other files are accessible, or make
+    this owned by root.
+
+    <dt class="description"><span class=
+    "pplb7t-">error&#729;log</span>
+
+    <dd class="description">The error log file just like
+    access&#729;log.
+
+    <dt class="description"><span class=
+    "pplb7t-">pid&#729;file</span>
+
+    <dd class="description">Like the access log, where within the
+    chroot directory is the pid file stored.
+
+    <dt class="description"><span class=
+    "pplb7t-">default&#729;host</span>
+
+    <dd class="description">The server has a bunch of hosts listed,
+    but it needs to know what the default host is. This is also
+    used as a convenient way to refer to this Server.
+
+    <dt class="description"><span class="pplb7t-">port</span>
+
+    <dd class="description">The port the server should listen on
+    for new connections.
+  </dl><!--l. 250-->
+
+  <p class="noindent">
+
+  <h4 class="subsectionHead"><span class="titlemark">3.4.2</span>
+  <a id="x1-260003.4.2" name="x1-260003.4.2"></a>Host</h4>
+  <!--l. 253-->
+
+  <p class="noindent">
+
+  <h4 class="subsectionHead"><span class="titlemark">3.4.3</span>
+  <a id="x1-270003.4.3" name="x1-270003.4.3"></a>Route</h4>
+  <!--l. 257-->
+
+  <p class="noindent">
+
+  <h4 class="subsectionHead"><span class="titlemark">3.4.4</span>
+  <a id="x1-280003.4.4" name="x1-280003.4.4"></a>Dir</h4>
+  <!--l. 261-->
+
+  <p class="noindent">
+
+  <h4 class="subsectionHead"><span class="titlemark">3.4.5</span>
+  <a id="x1-290003.4.5" name="x1-290003.4.5"></a>Proxy</h4>
+  <!--l. 265-->
+
+  <p class="noindent">
+
+  <h4 class="subsectionHead"><span class="titlemark">3.4.6</span>
+  <a id="x1-300003.4.6" name="x1-300003.4.6"></a>Handler</h4>
+  <!--l. 269-->
+
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">3.5</span> <a id=
-  "x1-250003.5" name="x1-250003.5"></a>A More Complex Example</h3>
-  <!--l. 213-->
+  "x1-310003.5" name="x1-310003.5"></a>A More Complex Example</h3>
+  <!--l. 272-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">3.6</span> <a id=
-  "x1-260003.6" name="x1-260003.6"></a>Deployment Logs And
+  "x1-320003.6" name="x1-320003.6"></a>Routing And Host
+  Patterns</h3><!--l. 276-->
+
+  <p class="noindent">
+
+  <h3 class="sectionHead"><span class="titlemark">3.7</span> <a id=
+  "x1-330003.7" name="x1-330003.7"></a>Deployment Logs And
   Commits</h3>
 
   <h2 class="chapterHead"><span class=
   "titlemark">Chapter&nbsp;4</span><br>
-  <a id="x1-270004" name="x1-270004"></a>Managing</h2>
+  <a id="x1-340004" name="x1-340004"></a>Managing</h2>
 
   <h3 class="sectionHead"><span class="titlemark">4.1</span> <a id=
-  "x1-280004.1" name="x1-280004.1"></a>More Advanced m2sh</h3>
+  "x1-350004.1" name="x1-350004.1"></a>More Advanced m2sh</h3>
   <!--l. 1-->
 
   <p class="indent">
 
   <h2 class="chapterHead"><span class=
   "titlemark">Chapter&nbsp;5</span><br>
-  <a id="x1-290005" name="x1-290005"></a>Hacking</h2>
+  <a id="x1-360005" name="x1-360005"></a>Hacking</h2>
 
   <h3 class="sectionHead"><span class="titlemark">5.1</span> <a id=
-  "x1-300005.1" name="x1-300005.1"></a>Writing Your Own m2sh</h3>
+  "x1-370005.1" name="x1-370005.1"></a>Writing Your Own m2sh</h3>
   <!--l. 1-->
 
   <p class="indent">
 
   <h2 class="chapterHead"><span class=
   "titlemark">Chapter&nbsp;6</span><br>
-  <a id="x1-310006" name="x1-310006"></a>Contributing</h2>
+  <a id="x1-380006" name="x1-380006"></a>Contributing</h2>
   <!--l. 3-->
 
   <p class="noindent">Soon...

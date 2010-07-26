@@ -191,7 +191,7 @@ we would just do this:
 \end{verbatim}
 \end{code}
 
-With this sequence of commands you should have just:
+With this sequence of commands you:
 
 \begin{enumerate}
 \item Create a raw fresh config database name \file{simple.sqlite}
@@ -201,13 +201,76 @@ With this sequence of commands you should have just:
 \item Start this server to try it out.
 \end{enumerate}
 
-
+By now you should be getting the hang of the pattern here, which is to use
+m2sh and little Python configuration "script" to generate .sqlite files
+that Mongrel2 understands.
 
 \section{How A Config Is Structured}
+
+The base structure of a Mongrel2 configuration is:
+
+\begin{description}
+\item[Server] This is the root of a config, and you can have multiples of these in one database,
+    even though each start command only runs one at a time.
+\item[Host] Servers then have Hosts inside them which say what DNS hostname Mongrel2 should answer for, and
+    you can have multiples of these in each Server.
+\item[Route] Hosts have Routes in them which tells Mongrel2 what to do with URL paths and patterns
+    that match them.  Routes then have \ident{Dir}, \ident{Handler}, and \ident{Proxy} items in them.
+\item[Dir] A Dir serves files out of a directory, full with 304 and ETag support, default content types, 
+    and most of the things you need to serve them.
+\item[Proxy] A Proxy takes requests matching the Route they're attached to and sends them to another
+    HTTP server somewhere else.  Mongrel2 will then act as a full proxy and also try to keep connections
+    open in keep-alive mode if the browser supports it.
+\item[Handler] A Handler is the best part of Mongrel2.  It takes HTTP requests, and turns them into 
+    nicely packed and processed ZeroMQ messages for your asynchronous handlers.
+\end{description}
+
+Each of these nested "objects" then has a set of attributes you can use to configure them, and
+most of them have reasonable defaults.
+
+
+\subsection{Server}
+
+The server is all about telling Mongrel2 where to listen on its port, where to chroot,
+and general server specific deployment gear.
+
+\begin{description}
+\item[uuid] A UUID is used to make sure that each deployed server is unique in your infrastructure.
+    You could easily use any string that's letters, numbers, or - characters.
+\item[chroot] This is the directory that Mongrel2 should chroot to and drop privileges.
+\item[access_log] The access log file \emph{relative to the chroot}.  Usually starts with a '/'.  Make sure
+    you don't configure your server so that this and other files are accessible, or make this owned by root.
+\item[error_log] The error log file just like access_log.
+\item[pid_file] Like the access log, where within the chroot directory is the pid file stored.
+\item[default_host] The server has a bunch of hosts listed, but it needs to know what the default host is.  This is also
+    used as a convenient way to refer to this Server.
+\item[port] The port the server should listen on for new connections.
+\end{description}
+
+\subsection{Host}
+
+
+\subsection{Route}
+
+
+
+\subsection{Dir}
+
+
+
+\subsection{Proxy}
+
+
+
+\subsection{Handler}
 
 
 
 \section{A More Complex Example}
+
+
+\section{Routing And Host Patterns}
+
 
 
 \section{Deployment Logs And Commits}
