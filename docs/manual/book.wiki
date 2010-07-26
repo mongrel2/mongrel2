@@ -427,7 +427,7 @@
     <a href="http://pypi.python.org/pypi/pip/0.7.2">pip</a>.
 
     <li class="itemize"><a href=
-    "http://github.com/ellisonbg/pyzmq">PyZMQ</a> for the examples.
+    "http://github.com/zeromq/pyzmq">PyZMQ</a> for the examples.
   </ul><!--l. 32-->
 
   <p class="indent">If you install these things in this order, then
@@ -472,7 +472,7 @@
       &nbsp;<br>
       #&nbsp;install&nbsp;PyZMQ&nbsp;from&nbsp;github &nbsp;<br>
       &gt;&nbsp;sudo&nbsp;pacman&nbsp;-S&nbsp;git &nbsp;<br>
-      &gt;&nbsp;git&nbsp;clone&nbsp;http://github.com/ellisonbg/pyzmq.git
+      &gt;&nbsp;git&nbsp;clone&nbsp;http://github.com/zeromq/pyzmq.git
       &nbsp;<br>
       &gt;&nbsp;sudo&nbsp;python&nbsp;setup.py&nbsp;install
     </div><!--l. 64-->
