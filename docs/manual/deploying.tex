@@ -1,4 +1,57 @@
 \chapter{Deploying}
 
-Soon...
+Mongrel2 is designed to be easy to deploy and \emph{automate} the deployment.
+This is why it uses \href{http://www.sqlite.org/}{SQLite} to store the configuration,
+but \shell{m2sh} as an interface to creating the configuration.  Doing this lets
+you access the configuration using any language that works for you, augment it,
+alter it, migrate it, and automate it.
+
+In this chapter I'm going to show you how to make a basic configuration using
+m2sh and all the commands that are available.  You'll learn how the configuration
+system is structured so that you know what goes where, but in the end it's just
+a simple storage mechanism.
+
+\begin{aside}{Apparently SQL Inspires FUD}
+When I first started talking about Mongrel2 I said I'd store the configuration
+in SQLite and do a Model-View-Controller kind of design.  Immediately people who
+can't read flipped out and though this meant they'd be back in "windows registry hell"
+but with SQL as their only way to access it.  They thought that they'd be stuck writing
+configurations with SQL.  That SQL couldn't possibly configure a web server.
+
+They were wrong on many levels.  Nobody was \emph{ever} going to make \emph{anyone} use
+SQL.  That was repeated over and over, but again, people don't read and love spreading
+FUD.  The SQLite config database is nothing like the Windows Registry.  No other web
+server really uses a true hierarchy, they just cram a relational model into a weirdo
+configuration format.  The real goal was to make a web server that was easy to manage from
+\emph{any} language, and then give people a nice tool to get their job done without
+having to ever touch SQL.  \emph{EVER!}
+
+In the end, what we got despite all this fear mongering is a bad ass configuration
+tool and a design that is simple, elegant, and works fantastic.  If you read that
+Mongrel2 uses SQLite and though this was weird, well welcome to the future.  Sometimes
+it's weird out here (even though, Postfix has been doing this for a decade or more).
+\end{aside}
+
+
+\section{Model-View-Controller}
+
+
+\section{Trying m2sh}
+
+
+\section{A Simple Configuration File}
+
+
+\section{A More Complex Example}
+
+
+\section{How It's Structured}
+
+
+\section{More Advanced m2sh}
+
+
+
+\section{Writing Your Own m2sh}
+
 

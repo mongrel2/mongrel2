@@ -54,12 +54,29 @@
     "QQ2-1-22" name="QQ2-1-22">Up Next</a></span><br>
     <span class="chapterToc">3 <a href="#x1-190003" id="QQ2-1-23"
     name="QQ2-1-23">Deploying</a></span><br>
-    <span class="chapterToc">4 <a href="#x1-200004" id="QQ2-1-24"
-    name="QQ2-1-24">Managing</a></span><br>
-    <span class="chapterToc">5 <a href="#x1-210005" id="QQ2-1-25"
-    name="QQ2-1-25">Hacking</a></span><br>
-    <span class="chapterToc">6 <a href="#x1-220006" id="QQ2-1-26"
-    name="QQ2-1-26">Contributing</a></span>
+    &nbsp;<span class="sectionToc">3.1 <a href="#x1-200003.1" id=
+    "QQ2-1-25" name="QQ2-1-25">Model-View-Controller</a></span><br>
+    &nbsp;<span class="sectionToc">3.2 <a href="#x1-210003.2" id=
+    "QQ2-1-26" name="QQ2-1-26">Trying m2sh</a></span><br>
+    &nbsp;<span class="sectionToc">3.3 <a href="#x1-220003.3" id=
+    "QQ2-1-27" name="QQ2-1-27">A Simple Configuration
+    File</a></span><br>
+    &nbsp;<span class="sectionToc">3.4 <a href="#x1-230003.4" id=
+    "QQ2-1-28" name="QQ2-1-28">A More Complex
+    Example</a></span><br>
+    &nbsp;<span class="sectionToc">3.5 <a href="#x1-240003.5" id=
+    "QQ2-1-29" name="QQ2-1-29">How It&rsquo;s
+    Structured</a></span><br>
+    &nbsp;<span class="sectionToc">3.6 <a href="#x1-250003.6" id=
+    "QQ2-1-30" name="QQ2-1-30">More Advanced m2sh</a></span><br>
+    &nbsp;<span class="sectionToc">3.7 <a href="#x1-260003.7" id=
+    "QQ2-1-31" name="QQ2-1-31">Writing Your Own m2sh</a></span><br>
+    <span class="chapterToc">4 <a href="#x1-270004" id="QQ2-1-32"
+    name="QQ2-1-32">Managing</a></span><br>
+    <span class="chapterToc">5 <a href="#x1-280005" id="QQ2-1-33"
+    name="QQ2-1-33">Hacking</a></span><br>
+    <span class="chapterToc">6 <a href="#x1-290006" id="QQ2-1-34"
+    name="QQ2-1-34">Contributing</a></span>
   </div>
 
   <h2 class="likechapterHead"><a id="x1-2000" name=
@@ -676,13 +693,108 @@
   "titlemark">Chapter&nbsp;3</span><br>
   <a id="x1-190003" name="x1-190003"></a>Deploying</h2><!--l. 3-->
 
-  <p class="noindent">Soon... <!--l. 1-->
+  <p class="noindent">Mongrel2 is designed to be easy to deploy and
+  <span class="pplri7t-">automate</span> the deployment. This is
+  why it uses <a href="http://www.sqlite.org/">SQLite</a> to store
+  the configuration, but <span class="pplri7t-">m2sh</span> as an
+  interface to creating the configuration. Doing this lets you
+  access the configuration using any language that works for you,
+  augment it, alter it, migrate it, and automate it. <!--l. 9-->
 
-  <p class="indent">
+  <p class="indent">In this chapter I&rsquo;m going to show you how
+  to make a basic configuration using m2sh and all the commands
+  that are available. You&rsquo;ll learn how the configuration
+  system is structured so that you know what goes where, but in the
+  end it&rsquo;s just a simple storage mechanism. <!--l. 14-->
+
+  <p class="indent"><a id="x1-19001r2" name="x1-19001r2"></a>
+  <hr class="float">
+
+  <div class="float">
+    <div class="caption">
+      <span class="id">Note 2:</span> <span class=
+      "content"><span class="pplri7t-">Apparently SQL
+      Inspires</span> <span class="pplri7t-">FUD</span></span>
+    </div><!--tex4ht:label?: x1-19001r2 -->
+
+    <div class="quote">
+      <!--l. 15-->
+
+      <p class="noindent">When I first started talking about
+      Mongrel2 I said I&rsquo;d store the configuration in SQLite
+      and do a Model-View-Controller kind of design. Immediately
+      people who can&rsquo;t read flipped out and though this meant
+      they&rsquo;d be back in &rdquo;windows registry hell&rdquo;
+      but with SQL as their only way to access it. They thought
+      that they&rsquo;d be stuck writing configurations with SQL.
+      That SQL couldn&rsquo;t possibly configure a web server. 
+      <!--l. 21-->
+
+      <p class="noindent">They were wrong on many levels. Nobody
+      was <span class="pplri7t-">ever</span> going to make
+      <span class="pplri7t-">anyone</span> use SQL. That was
+      repeated over and over, but again, people don&rsquo;t read
+      and love spreading FUD. The SQLite config database is nothing
+      like the Windows Registry. No other web server really uses a
+      true hierarchy, they just cram a relational model into a
+      weirdo configuration format. The real goal was to make a web
+      server that was easy to manage from <span class=
+      "pplri7t-">any</span> language, and then give people a nice
+      tool to get their job done without having to ever touch SQL.
+      <span class="pplri7t-">EVER!</span> <!--l. 29-->
+
+      <p class="noindent">In the end, what we got despite all this
+      fear mongering is a bad ass configuration tool and a design
+      that is simple, elegant, and works fantastic. If you read
+      that Mongrel2 uses SQLite and though this was weird, well
+      welcome to the future. Sometimes it&rsquo;s weird out here
+      (even though, Postfix has been doing this for a decade or
+      more).
+    </div>
+  </div>
+  <hr class="endfloat">
+
+  <h3 class="sectionHead"><span class="titlemark">3.1</span> <a id=
+  "x1-200003.1" name="x1-200003.1"></a>Model-View-Controller</h3>
+  <!--l. 39-->
+
+  <p class="noindent">
+
+  <h3 class="sectionHead"><span class="titlemark">3.2</span> <a id=
+  "x1-210003.2" name="x1-210003.2"></a>Trying m2sh</h3><!--l. 42-->
+
+  <p class="noindent">
+
+  <h3 class="sectionHead"><span class="titlemark">3.3</span> <a id=
+  "x1-220003.3" name="x1-220003.3"></a>A Simple Configuration
+  File</h3><!--l. 45-->
+
+  <p class="noindent">
+
+  <h3 class="sectionHead"><span class="titlemark">3.4</span> <a id=
+  "x1-230003.4" name="x1-230003.4"></a>A More Complex Example</h3>
+  <!--l. 48-->
+
+  <p class="noindent">
+
+  <h3 class="sectionHead"><span class="titlemark">3.5</span> <a id=
+  "x1-240003.5" name="x1-240003.5"></a>How It&rsquo;s
+  Structured</h3><!--l. 51-->
+
+  <p class="noindent">
+
+  <h3 class="sectionHead"><span class="titlemark">3.6</span> <a id=
+  "x1-250003.6" name="x1-250003.6"></a>More Advanced m2sh</h3>
+  <!--l. 55-->
+
+  <p class="noindent">
+
+  <h3 class="sectionHead"><span class="titlemark">3.7</span> <a id=
+  "x1-260003.7" name="x1-260003.7"></a>Writing Your Own m2sh</h3>
 
   <h2 class="chapterHead"><span class=
   "titlemark">Chapter&nbsp;4</span><br>
-  <a id="x1-200004" name="x1-200004"></a>Managing</h2><!--l. 3-->
+  <a id="x1-270004" name="x1-270004"></a>Managing</h2><!--l. 3-->
 
   <p class="noindent">Soon... <!--l. 1-->
 
@@ -690,7 +802,7 @@
 
   <h2 class="chapterHead"><span class=
   "titlemark">Chapter&nbsp;5</span><br>
-  <a id="x1-210005" name="x1-210005"></a>Hacking</h2><!--l. 3-->
+  <a id="x1-280005" name="x1-280005"></a>Hacking</h2><!--l. 3-->
 
   <p class="noindent">Soon... <!--l. 1-->
 
@@ -698,7 +810,7 @@
 
   <h2 class="chapterHead"><span class=
   "titlemark">Chapter&nbsp;6</span><br>
-  <a id="x1-220006" name="x1-220006"></a>Contributing</h2>
+  <a id="x1-290006" name="x1-290006"></a>Contributing</h2>
   <!--l. 3-->
 
   <p class="noindent">Soon...
