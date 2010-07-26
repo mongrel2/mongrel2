@@ -140,17 +140,80 @@ files.  You can now try building your own configuration that matches this one or
 
 \section{A Simple Configuration File}
 
+To configure a new config database you'll write a Python file that looks a lot like
+a configuration file.  The advantage of using Python is that you can put actual
+real logic in your configuration file in order to make your configuration smarter.
+A great application of this is when your configuration has to change depending on the
+server it is deployed on, but you want to check the configuration file into a revision
+control system.  With Python you just write your configuration like it's code and
+you're set.
+
+The first thing you need to do is initialize a fresh configuration database to get
+started by using \shell{m2sh init} and then you load your configuration using
+\shell{m2sh load}.  As an example, we'll use the example configuration
+from \file{examples/python/tests/sample_conf.py} to make a simple one:
+
+\begin{code}{Simple Little Config Example}
+\begin{verbatim}
+from mongrel2.config import *
+
+main = Server(
+    uuid="f400bf85-4538-4f7a-8908-67e313d515c2",
+    access_log="/logs/access.log",
+    error_log="/logs/error.log",
+    chroot="./",
+    default_host="localhost",
+    pid_file="/run/mongrel2.pid",
+    port=6767,
+    hosts = [
+        Host(name="localhost", routes={
+            '/tests/': Dir(base='tests/', index_file='index.html',
+                             default_ctype='text/plain')
+        })
+    ]
+)
+
+commit([main])
+\end{verbatim}
+\end{code}
+
+If you aren't familiar with Python then this code might look freaky, but it's really
+simple.  Well get into how its structured in a second, but to load this file
+we would just do this:
+
+\begin{code}{Loading The Simple Config}
+\begin{verbatim}
+> m2sh init -db simple.sqlite
+> m2sh load -db simple.sqlite -config examples/python/tests/sample_conf.py
+> m2sh servers -db simple.sqlite
+> m2sh hosts -db simple.sqlite -host localhost
+> m2sh start -db simple.sqlite -host localhost
+\end{verbatim}
+\end{code}
+
+With this sequence of commands you should have just:
+
+\begin{enumerate}
+\item Create a raw fresh config database name \file{simple.sqlite}
+\item Load the \file{sample_conf.py} into it.
+\item List the servers it has configured.
+\item List the hosts that server has, with what routes it has.
+\item Start this server to try it out.
+\end{enumerate}
+
+
+
+\section{How A Config Is Structured}
+
+
 
 \section{A More Complex Example}
 
 
-\section{How It's Structured}
-
-
-\section{More Advanced m2sh}
+\section{Deployment Logs And Commits}
 
 
 
-\section{Writing Your Own m2sh}
+
 
 

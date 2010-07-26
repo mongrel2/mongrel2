@@ -65,21 +65,24 @@
     "QQ2-1-30" name="QQ2-1-30">A Simple Configuration
     File</a></span><br>
     &nbsp;<span class="sectionToc">3.4 <a href="#x1-240003.4" id=
-    "QQ2-1-31" name="QQ2-1-31">A More Complex
-    Example</a></span><br>
-    &nbsp;<span class="sectionToc">3.5 <a href="#x1-250003.5" id=
-    "QQ2-1-32" name="QQ2-1-32">How It&rsquo;s
+    "QQ2-1-33" name="QQ2-1-33">How A Config Is
     Structured</a></span><br>
+    &nbsp;<span class="sectionToc">3.5 <a href="#x1-250003.5" id=
+    "QQ2-1-34" name="QQ2-1-34">A More Complex
+    Example</a></span><br>
     &nbsp;<span class="sectionToc">3.6 <a href="#x1-260003.6" id=
-    "QQ2-1-33" name="QQ2-1-33">More Advanced m2sh</a></span><br>
-    &nbsp;<span class="sectionToc">3.7 <a href="#x1-270003.7" id=
-    "QQ2-1-34" name="QQ2-1-34">Writing Your Own m2sh</a></span><br>
-    <span class="chapterToc">4 <a href="#x1-280004" id="QQ2-1-35"
-    name="QQ2-1-35">Managing</a></span><br>
-    <span class="chapterToc">5 <a href="#x1-290005" id="QQ2-1-36"
-    name="QQ2-1-36">Hacking</a></span><br>
-    <span class="chapterToc">6 <a href="#x1-300006" id="QQ2-1-37"
-    name="QQ2-1-37">Contributing</a></span>
+    "QQ2-1-35" name="QQ2-1-35">Deployment Logs And
+    Commits</a></span><br>
+    <span class="chapterToc">4 <a href="#x1-270004" id="QQ2-1-36"
+    name="QQ2-1-36">Managing</a></span><br>
+    &nbsp;<span class="sectionToc">4.1 <a href="#x1-280004.1" id=
+    "QQ2-1-37" name="QQ2-1-37">More Advanced m2sh</a></span><br>
+    <span class="chapterToc">5 <a href="#x1-290005" id="QQ2-1-38"
+    name="QQ2-1-38">Hacking</a></span><br>
+    &nbsp;<span class="sectionToc">5.1 <a href="#x1-300005.1" id=
+    "QQ2-1-39" name="QQ2-1-39">Writing Your Own m2sh</a></span><br>
+    <span class="chapterToc">6 <a href="#x1-310006" id="QQ2-1-40"
+    name="QQ2-1-40">Contributing</a></span>
   </div>
 
   <h2 class="likechapterHead"><a id="x1-2000" name=
@@ -957,50 +960,162 @@
 
   <h3 class="sectionHead"><span class="titlemark">3.3</span> <a id=
   "x1-230003.3" name="x1-230003.3"></a>A Simple Configuration
-  File</h3><!--l. 144-->
+  File</h3><!--l. 143-->
 
-  <p class="noindent">
+  <p class="noindent">To configure a new config database
+  you&rsquo;ll write a Python file that looks a lot like a
+  configuration file. The advantage of using Python is that you can
+  put actual real logic in your configuration file in order to make
+  your configuration smarter. A great application of this is when
+  your configuration has to change depending on the server it is
+  deployed on, but you want to check the configuration file into a
+  revision control system. With Python you just write your
+  configuration like it&rsquo;s code and you&rsquo;re set. 
+  <!--l. 151-->
+
+  <p class="indent">The first thing you need to do is initialize a
+  fresh configuration database to get started by using <span class=
+  "pplri7t-">m2sh init</span> and then you load your configuration
+  using <span class="pplri7t-">m2sh load</span>. As an example,
+  we&rsquo;ll use the example configuration from <span class=
+  "pplb7t-">examples/python/tests/sample&#729;conf.py</span> to
+  make a simple one: <!--l. 156-->
+
+  <p class="indent"><a id="x1-23001r6" name="x1-23001r6"></a>
+  <hr class="float">
+
+  <div class="float">
+    <div class="caption">
+      <span class="id">Source 6:</span> <span class=
+      "content"><span class="pplri7t-">Simple Little Config</span>
+      <span class="pplri7t-">Example</span></span>
+    </div><!--tex4ht:label?: x1-23001r6 -->
+
+    <div class="verbatim" id="verbatim-6">
+      from&nbsp;mongrel2.config&nbsp;import&nbsp;&#8902; &nbsp;<br>
+      &nbsp;<br>
+      main&nbsp;=&nbsp;Server( &nbsp;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;uuid="f400bf85-4538-4f7a-8908-67e313d515c2",
+      &nbsp;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;access_log="/logs/access.log",
+      &nbsp;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;error_log="/logs/error.log",
+      &nbsp;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;chroot="./", &nbsp;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;default_host="localhost", &nbsp;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;pid_file="/run/mongrel2.pid",
+      &nbsp;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;port=6767, &nbsp;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;hosts&nbsp;=&nbsp;&#91; &nbsp;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Host(name="localhost",&nbsp;routes={
+      &nbsp;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'/tests/':&nbsp;Dir(base='tests/',&nbsp;index_file='index.html',
+      &nbsp;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default_ctype='text/plain')
+      &nbsp;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}) &nbsp;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&#93; &nbsp;<br>
+      ) &nbsp;<br>
+      &nbsp;<br>
+      commit(&#91;main&#93;)
+    </div><!--l. 177-->
+
+    <p class="nopar">
+  </div>
+  <hr class="endfloat">
+  <!--l. 180-->
+
+  <p class="indent">If you aren&rsquo;t familiar with Python then
+  this code might look freaky, but it&rsquo;s really simple. Well
+  get into how its structured in a second, but to load this file we
+  would just do this: <!--l. 184-->
+
+  <p class="indent"><a id="x1-23002r7" name="x1-23002r7"></a>
+  <hr class="float">
+
+  <div class="float">
+    <div class="caption">
+      <span class="id">Source 7:</span> <span class=
+      "content"><span class="pplri7t-">Loading The Simple</span>
+      <span class="pplri7t-">Config</span></span>
+    </div><!--tex4ht:label?: x1-23002r7 -->
+
+    <div class="verbatim" id="verbatim-7">
+      &gt;&nbsp;m2sh&nbsp;init&nbsp;-db&nbsp;simple.sqlite
+      &nbsp;<br>
+      &gt;&nbsp;m2sh&nbsp;load&nbsp;-db&nbsp;simple.sqlite&nbsp;-config&nbsp;examples/python/tests/sample_conf.py
+      &nbsp;<br>
+      &gt;&nbsp;m2sh&nbsp;servers&nbsp;-db&nbsp;simple.sqlite
+      &nbsp;<br>
+      &gt;&nbsp;m2sh&nbsp;hosts&nbsp;-db&nbsp;simple.sqlite&nbsp;-host&nbsp;localhost
+      &nbsp;<br>
+      &gt;&nbsp;m2sh&nbsp;start&nbsp;-db&nbsp;simple.sqlite&nbsp;-host&nbsp;localhost
+    </div><!--l. 191-->
+
+    <p class="nopar">
+  </div>
+  <hr class="endfloat">
+  <!--l. 194-->
+
+  <p class="indent">With this sequence of commands you should have
+  just:
+
+  <ol class="enumerate1">
+    <li class="enumerate" id="x1-23004x1">Create a raw fresh config
+    database name <span class="pplb7t-">simple.sqlite</span>
+
+    <li class="enumerate" id="x1-23006x2">Load the <span class=
+    "pplb7t-">sample&#729;conf.py</span> into it.
+
+    <li class="enumerate" id="x1-23008x3">List the servers it has
+    configured.
+
+    <li class="enumerate" id="x1-23010x4">List the hosts that
+    server has, with what routes it has.
+
+    <li class="enumerate" id="x1-23012x5">Start this server to try
+    it out.
+  </ol>
 
   <h3 class="sectionHead"><span class="titlemark">3.4</span> <a id=
-  "x1-240003.4" name="x1-240003.4"></a>A More Complex Example</h3>
-  <!--l. 147-->
+  "x1-240003.4" name="x1-240003.4"></a>How A Config Is
+  Structured</h3><!--l. 210-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">3.5</span> <a id=
-  "x1-250003.5" name="x1-250003.5"></a>How It&rsquo;s
-  Structured</h3><!--l. 150-->
+  "x1-250003.5" name="x1-250003.5"></a>A More Complex Example</h3>
+  <!--l. 213-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">3.6</span> <a id=
-  "x1-260003.6" name="x1-260003.6"></a>More Advanced m2sh</h3>
-  <!--l. 154-->
-
-  <p class="noindent">
-
-  <h3 class="sectionHead"><span class="titlemark">3.7</span> <a id=
-  "x1-270003.7" name="x1-270003.7"></a>Writing Your Own m2sh</h3>
+  "x1-260003.6" name="x1-260003.6"></a>Deployment Logs And
+  Commits</h3>
 
   <h2 class="chapterHead"><span class=
   "titlemark">Chapter&nbsp;4</span><br>
-  <a id="x1-280004" name="x1-280004"></a>Managing</h2><!--l. 3-->
+  <a id="x1-270004" name="x1-270004"></a>Managing</h2>
 
-  <p class="noindent">Soon... <!--l. 1-->
+  <h3 class="sectionHead"><span class="titlemark">4.1</span> <a id=
+  "x1-280004.1" name="x1-280004.1"></a>More Advanced m2sh</h3>
+  <!--l. 1-->
 
   <p class="indent">
 
   <h2 class="chapterHead"><span class=
   "titlemark">Chapter&nbsp;5</span><br>
-  <a id="x1-290005" name="x1-290005"></a>Hacking</h2><!--l. 3-->
+  <a id="x1-290005" name="x1-290005"></a>Hacking</h2>
 
-  <p class="noindent">Soon... <!--l. 1-->
+  <h3 class="sectionHead"><span class="titlemark">5.1</span> <a id=
+  "x1-300005.1" name="x1-300005.1"></a>Writing Your Own m2sh</h3>
+  <!--l. 1-->
 
   <p class="indent">
 
   <h2 class="chapterHead"><span class=
   "titlemark">Chapter&nbsp;6</span><br>
-  <a id="x1-300006" name="x1-300006"></a>Contributing</h2>
+  <a id="x1-310006" name="x1-310006"></a>Contributing</h2>
   <!--l. 3-->
 
   <p class="noindent">Soon...
