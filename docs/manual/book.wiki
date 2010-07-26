@@ -43,13 +43,12 @@
   with pixel perfect fonts with high gloss visuals and coated with
   the most happy happy joy joy of all possible experiences. To them
   design is paramount and actual stability isn&rsquo;t important
-  unless it interferes with design. The Steve&rsquo;s of the
-  internet think the Edsger&rsquo;s of internet are destroying the
-  universe with things like &rdquo;functionality&rdquo;,
-  &rdquo;security&rdquo;, and &rdquo;stability&rdquo;. Just like
-  the real Steve Jobs, they would rather everything look fantastic
-  and then use awesome marketing to cover up any technical flaws. 
-  <!--l. 29-->
+  unless it interferes with design. The Steves of the internet
+  think the Edsgers of internet are destroying the universe with
+  things like &rdquo;functionality&rdquo;, &rdquo;security&rdquo;,
+  and &rdquo;stability&rdquo;. Just like the real Steve Jobs, they
+  would rather everything look fantastic and then use awesome
+  marketing to cover up any technical flaws. <!--l. 29-->
 
   <p class="indent">The Edsgers feel that the internet is
   completely unsafe and until it is a fully curate and crafted set
