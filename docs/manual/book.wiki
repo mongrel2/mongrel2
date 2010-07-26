@@ -1568,24 +1568,25 @@
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;recv_spec='tcp://127.0.0.1:9996',&nbsp;recv_ident='')
       &nbsp;<br>
       &nbsp;<br>
+      #&nbsp;the&nbsp;r''&nbsp;string&nbsp;syntax&nbsp;means&nbsp;to&nbsp;not&nbsp;interpret&nbsp;any&nbsp;\&nbsp;chars,&nbsp;for&nbsp;regexes
       &nbsp;<br>
       mongrel2&nbsp;=&nbsp;Host(name="mongrel2.org",&nbsp;routes={
       &nbsp;<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;'@chat':&nbsp;chat_demo, &nbsp;<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;'/handlertest':&nbsp;handler_test,
+      &nbsp;&nbsp;&nbsp;&nbsp;r'@chat':&nbsp;chat_demo, &nbsp;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;r'/handlertest':&nbsp;handler_test,
       &nbsp;<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;'/chat/':&nbsp;web_app_proxy,
+      &nbsp;&nbsp;&nbsp;&nbsp;r'/chat/':&nbsp;web_app_proxy,
       &nbsp;<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;'/':&nbsp;web_app_proxy, &nbsp;<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;'/tests/':&nbsp;test_directory,
+      &nbsp;&nbsp;&nbsp;&nbsp;r'/':&nbsp;web_app_proxy, &nbsp;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;r'/tests/':&nbsp;test_directory,
       &nbsp;<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;'/testsmulti/(.&#8902;.json)':&nbsp;test_directory,
+      &nbsp;&nbsp;&nbsp;&nbsp;r'/testsmulti/(.&#8902;.json)':&nbsp;test_directory,
       &nbsp;<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;'/chatdemo/':&nbsp;chat_demo_dir,
+      &nbsp;&nbsp;&nbsp;&nbsp;r'/chatdemo/':&nbsp;chat_demo_dir,
       &nbsp;<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;'/static/':&nbsp;chat_demo_dir,
+      &nbsp;&nbsp;&nbsp;&nbsp;r'/static/':&nbsp;chat_demo_dir,
       &nbsp;<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;'/mp3stream':&nbsp;Handler(
+      &nbsp;&nbsp;&nbsp;&nbsp;r'/mp3stream':&nbsp;Handler(
       &nbsp;<br>
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;send_spec='tcp://127.0.0.1:9995',
       &nbsp;<br>
@@ -1599,13 +1600,13 @@
       &nbsp;<br>
       settings&nbsp;=&nbsp;{"zeromq.threads":&nbsp;4} &nbsp;<br>
       &nbsp;<br>
-      commit(&#91;main&#93;,&nbsp;settings=settings)
-    </div><!--l. 426-->
+      commit(&#91;main&#93;,&nbsp;settings=settings) &nbsp;<br>
+    </div><!--l. 427-->
 
     <p class="nopar">
   </div>
   <hr class="endfloat">
-  <!--l. 429-->
+  <!--l. 430-->
 
   <p class="indent">If you haven&rsquo;t guessed yet, this
   configuration is what&rsquo;s used on <a href=
@@ -1655,7 +1656,10 @@
     Host</span> with all the routes assigned once and nice and
     clean. However look how I was lazy and just tossed the
     mp3stream demo right into the routes dict? You can totally do
-    this and m2sh will figure it out.
+    this and m2sh will figure it out. Remember also that you can
+    use the <span class="obeylines-h verb pcrr7t-">r'blah'</span>
+    string format to not have to double up on your <span class=
+    "obeylines-h verb pcrr7t-">\</span> chars in the patterns.
 
     <li class="enumerate" id="x1-33019x9">We then assign this
     <span class="pplri7t-">mongrel2</span> variable as the hosts
@@ -1669,14 +1673,14 @@
     <li class="enumerate" id="x1-33023x11">Finally, we commit the
     whole thing to the database by passing in the servers to save
     and the settings to use.
-  </ol><!--l. 454-->
+  </ol><!--l. 456-->
 
   <p class="indent">And that my friends is the most complex
   configuration we have so far.
 
   <h3 class="sectionHead"><span class="titlemark">3.6</span> <a id=
   "x1-340003.6" name="x1-340003.6"></a>Routing And Host
-  Patterns</h3><!--l. 459-->
+  Patterns</h3><!--l. 461-->
 
   <p class="noindent">The pattern code was taken from <a href=
   "http://www.lua.org/">Lua</a> and is some of the simplest code
@@ -1687,14 +1691,14 @@
   to find the longest matching prefix and then tests the pattern.
   If the pattern matches then the route works. If the route
   doesn&rsquo;t have a pattern then it&rsquo;s assumed to match and
-  you&rsquo;re done. <!--l. 466-->
+  you&rsquo;re done. <!--l. 468-->
 
   <p class="indent">The only caveat is you have to wrap your
   pattern parts in parenthesis, but these don&rsquo;t mean anything
   other than to delimit where a pattern starts. So instead of
   <span class="pplri7t-">/images/.*.jpg</span> write <span class=
   "pplri7t-">/images/(.*.jpg)</span> for it to work right. 
-  <!--l. 470-->
+  <!--l. 472-->
 
   <p class="indent">Here&rsquo;s the list of characters you can use
   in your patterns:
@@ -1773,10 +1777,15 @@
     "obeylines-h verb pcrr7t-">^</span> The beginning of a string.
 
     <li class="itemize">$ End of the string.
-  </ul><!--l. 496-->
+  </ul><!--l. 498-->
 
   <p class="indent">Anything that&rsquo;s not listed here just
-  matches that character. <!--l. 498-->
+  matches that character. Remember also that when you write the
+  Python code for your scripts you can use the <span class=
+  "obeylines-h verb pcrr7t-">r'blah'</span> string syntax to avoid
+  having to double up on your <span class=
+  "obeylines-h verb pcrr7t-">\</span> characters in the string. 
+  <!--l. 502-->
 
   <p class="indent"><a id="x1-34001r3" name="x1-34001r3"></a>
   <hr class="float">
@@ -1789,13 +1798,13 @@
     </div><!--tex4ht:label?: x1-34001r3 -->
 
     <div class="quote">
-      <!--l. 499-->
+      <!--l. 503-->
 
       <p class="noindent">Yep, I get it. You think that everyone
       should use UTF-8 or some Unicode encoding for everything. You
       despise the dominance of the &rsquo;A&rsquo; in ASCII and
       hate that you can&rsquo;t put your spoken language right in a
-      URL. <!--l. 503-->
+      URL. <!--l. 507-->
 
       <p class="noindent">Well, I hate to say it, but tough.
       Protocols are hard enough without having to worry about the
@@ -1805,7 +1814,7 @@
       can&rsquo;t be properly capitalized or lowercased, and
       requires extra translations steps for every operation. With
       ASCII every computer just knows what it is and it&rsquo;s the
-      fastest for creating wire protocol formats. <!--l. 511-->
+      fastest for creating wire protocol formats. <!--l. 515-->
 
       <p class="noindent">This is why, on the internet, you have to
       do things to URLs to make them ASCII like encoding them with
@@ -1816,7 +1825,7 @@
       fixed set of characters and be done with it. Don&rsquo;t
       blame me or Mongrel2 for this, it&rsquo;s just the way the
       standard is and the way to get a server that is stable and
-      works. <!--l. 519-->
+      works. <!--l. 523-->
 
       <p class="noindent">Protocols work better when there&rsquo;s
       less politics in their design. This means you can&rsquo;t put
@@ -1825,43 +1834,48 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 526-->
+  <!--l. 530-->
 
   <p class="indent">Here&rsquo;s some example routes you can try to
   get a feel for the system:
 
   <ul class="itemize1">
-    <li class="itemize"><span class=
-    "obeylines-h verb pcrr7t-">/images/</span> This will just match
-    any path that has /images/ in it without any patterns.
+    <li class="itemize">r&rdquo;<span class=
+    "obeylines-h verb pcrr7t-">/images/</span>&rdquo; This will
+    just match any path that has /images/ in it without any
+    patterns.
 
-    <li class="itemize"><span class=
-    "obeylines-h verb pcrr7t-">/</span> The fastest possible route
-    you can have.
+    <li class="itemize">r&rdquo;<span class=
+    "obeylines-h verb pcrr7t-">/</span>&rdquo; The fastest possible
+    route you can have.
 
-    <li class="itemize"><span class=
-    "obeylines-h verb pcrr7t-">/images/(.&#8902;.jpg)</span> Match
-    only requests for jpg images in the images directory. Keep in
-    mind that this isn&rsquo;t actually looking in the directory,
-    it&rsquo;s just matching the <span class=
+    <li class="itemize">r&rdquo;<span class=
+    "obeylines-h verb pcrr7t-">/images/(.&#8902;.jpg)</span>&rdquo;
+    Match only requests for jpg images in the images directory.
+    Keep in mind that this isn&rsquo;t actually looking in the
+    directory, it&rsquo;s just matching the <span class=
     "pplri7t-">(.*.jpg)</span> pattern.
 
-    <li class="itemize"><span class=
-    "obeylines-h verb pcrr7t-">/images/(\a-\-\d+\.jpg)</span> A
-    more complex example that matches a short sequence of 0 or more
-    letters (remember -), then a dash (<span class=
+    <li class="itemize">r&rdquo;<span class=
+    "obeylines-h verb pcrr7t-">/images/(\a-\-\d+\.jpg)</span>&rdquo;
+    A more complex example that matches a short sequence of 0 or
+    more letters (remember -), then a dash (<span class=
     "obeylines-h verb pcrr7t-">\-</span> escapes the -), then 1 or
     long sequence of digits and finally a .jpg) with the
     <span class="obeylines-h verb pcrr7t-">\</span>. escaping the
     period.
-  </ul><!--l. 537-->
+  </ul><!--l. 541-->
 
   <p class="indent">That should give the idea of how you can use
-  them.
+  them. Notice also that I&rsquo;m using the Python <span class=
+  "obeylines-h verb pcrr7t-">r"blah"</span> string syntax which is
+  interchangeable with the <span class=
+  "obeylines-h verb pcrr7t-">r'blah'</span> syntax so I don&rsquo;t
+  have to double escape everything.
 
   <h3 class="sectionHead"><span class="titlemark">3.7</span> <a id=
   "x1-350003.7" name="x1-350003.7"></a>Deployment Logs And
-  Commits</h3><!--l. 542-->
+  Commits</h3><!--l. 547-->
 
   <p class="noindent">A very nice feature for people doing
   operations work is that m2sh keeps track of all the commands you
@@ -1871,13 +1885,13 @@
   and <span class="pplri7t-">m2sh load</span> commands so you can
   see what&rsquo;s going on. They track who did something, what
   server they did it on, what time they did it, and what they did. 
-  <!--l. 549-->
+  <!--l. 554-->
 
   <p class="indent">To see the logs for your own tests just do
   <span class="pplri7t-">m2sh log -db simple.sqlite</span> and then
   if you want to add a commit log message you use the <span class=
   "pplri7t-">m2sh commit</span> command. Here&rsquo;s an example
-  from mongrel2.org: <!--l. 553-->
+  from mongrel2.org: <!--l. 558-->
 
   <p class="indent"><a id="x1-35001r10" name="x1-35001r10"></a>
   <hr class="float">
@@ -1909,12 +1923,12 @@
       &#91;2010-07-18T20:09:02,&nbsp;mongrel2@zedshaw,&nbsp;load_command&#93;&nbsp;/usr/bin/m2sh&nbsp;config&nbsp;-db&nbsp;config.sqlite&nbsp;-config&nbsp;examples/python/tests/mongrel2_org.py
       &nbsp;<br>
       &gt;&nbsp;m2sh&nbsp;commit&nbsp;-db&nbsp;config.sqlite&nbsp;-what&nbsp;mongrel2.org&nbsp;-why&nbsp;"Testing&nbsp;things&nbsp;out."
-    </div><!--l. 565-->
+    </div><!--l. 570-->
 
     <p class="nopar">
   </div>
   <hr class="endfloat">
-  <!--l. 568-->
+  <!--l. 573-->
 
   <p class="indent">The motivation for this feature is the trend
   that operations store server configurations in revision control
@@ -1923,12 +1937,12 @@
   on each server. In many cases the configuration files also need
   to be reworked or altered for each deployment. With the m2sh log
   and commits system you can augment your revision control with
-  deployment action tracking. <!--l. 574-->
+  deployment action tracking. <!--l. 579-->
 
   <p class="indent">Later versions of Mongrel2 will keep small
   amounts of statistics which will link these actions to changes in
   Mongrel2 behavior like frequent crashing, failures, slowness, or
-  other problems. <!--l. 577-->
+  other problems. <!--l. 582-->
 
   <p class="indent">Basically, there&rsquo;s nowhere to hide.
   Mongrel2 will help operations figure out who needs to get fired
