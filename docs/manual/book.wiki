@@ -1645,15 +1645,87 @@
 
   <h3 class="sectionHead"><span class="titlemark">3.6</span> <a id=
   "x1-330003.6" name="x1-330003.6"></a>Routing And Host
-  Patterns</h3><!--l. 461-->
+  Patterns</h3><!--l. 459-->
+
+  <p class="noindent">The pattern code was taken from <a href=
+  "http://www.lua.org/">Lua</a> and is some of the simplest code
+  for doing fast pattern matches. It is very much like regular
+  expressions except it removes a lot of features you don&rsquo;t
+  need for routes. How Mongrel2 to uses them is it takes routes and
+  breaks them into a prefix and pattern part. It then uses routes
+  to find the longest matching prefix and then tests the pattern.
+  If the pattern matches then the route works. If the route
+  doesn&rsquo;t have a pattern then it&rsquo;s assumed to match and
+  you&rsquo;re done. <!--l. 466-->
+
+  <p class="indent">The only caveat is you have to wrap your
+  pattern parts in parenthesis, but these don&rsquo;t mean anything
+  other than to delimit where a pattern starts. So instead of
+  <span class="pplri7t-">/images/.*.jpg</span> write <span class=
+  "pplri7t-">/images/(.*.jpg)</span> for it to work right. 
+  <!--l. 470-->
+
+  <p class="indent">Here&rsquo;s the list of characters you can use
+  in your patterns:
+
+  <ul class="itemize1">
+    <li class="itemize">. (period) all characters.
+
+    <li class="itemize">%a Letters.
+
+    <li class="itemize">%c Control characters.
+
+    <li class="itemize">%d Digits.
+
+    <li class="itemize">%l Lowercase letters.
+
+    <li class="itemize">%p Punctuation characters.
+
+    <li class="itemize">%s Space characters.
+
+    <li class="itemize">%u Uppercase letters.
+
+    <li class="itemize">%w Alphanumeric characters.
+
+    <li class="itemize">%x Hexadecimal digits.
+
+    <li class="itemize">%z The<br class="newline">
+    0 character (null terminator).
+
+    <li class="itemize">%x Escapes x, so %% escapes %, %* escapes
+    *.
+
+    <li class="itemize">Just like a regex &#91;&rsquo; where it is a
+    class of chars, like &#91;0-9&rsquo; for all digits.
+
+    <li class="itemize">Inverse character set, so &#91;^0-9&#93; is
+    anything not digits.
+
+    <li class="itemize">x* Longest match of 0 or more x chars.
+
+    <li class="itemize">x+ Longest match of 1 or more x chars.
+
+    <li class="itemize">x- Shortest match of 0 or more x chars.
+
+    <li class="itemize">x? 0 or 1 match of x char.
+
+    <li class="itemize">%bxy Balanced match a substring starting
+    with x and ending in y. So %b() will match balanced
+    parenthesis.
+
+    <li class="itemize">^ The beginning of a string.
+
+    <li class="itemize">$ End of the string.
+  </ul><!--l. 496-->
+
+  <p class="indent">Anything that&rsquo;s not listed here just
+  matches that character. <!--l. 499-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">3.7</span> <a id=
   "x1-340003.7" name="x1-340003.7"></a>Deployment Logs And
-  Commits</h3><!--l. 1-->
-
-  <p class="indent">
+  Commits</h3>
 
   <h2 class="chapterHead"><span class=
   "titlemark">Chapter&nbsp;4</span><br>

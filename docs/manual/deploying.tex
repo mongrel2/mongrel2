@@ -456,6 +456,44 @@ And that my friends is the most complex configuration we have so far.
 
 \section{Routing And Host Patterns}
 
+The pattern code was taken from \href{http://www.lua.org/}{Lua} and is some of the simplest 
+code for doing fast pattern matches.  It is very much like regular expressions except it removes
+a lot of features you don't need for routes.  How Mongrel2 to uses them is it takes routes and breaks
+them into a prefix and pattern part.  It then uses routes to find the longest matching prefix and then
+tests the pattern.  If the pattern matches then the route works.  If the route doesn't have a pattern
+then it's assumed to match and you're done.
+
+The only caveat is you have to wrap your pattern parts in parenthesis, but these don't mean anything
+other than to delimit where a pattern starts.  So instead of \shell{/images/.*.jpg} write \shell{/images/(.*.jpg)}
+for it to work right.
+
+Here's the list of characters you can use in your patterns:
+
+\begin{itemize}
+\item . (period) all characters.
+\item \%a Letters.
+\item \%c Control characters.
+\item \%d Digits.
+\item \%l Lowercase letters.
+\item \%p Punctuation characters.
+\item \%s Space characters.
+\item \%u Uppercase letters.
+\item \%w Alphanumeric characters.
+\item \%x Hexadecimal digits.
+\item \%z The \\0 character (null terminator).
+\item \%x Escapes x, so \%\% escapes \%, \%* escapes *.
+\item [set] Just like a regex [' where it is a class of chars, like [0-9' for all digits.
+\item [^set] Inverse character set, so [^0-9] is anything not digits.
+\item x* Longest match of 0 or more x chars.
+\item x+ Longest match of 1 or more x chars.
+\item x- Shortest match of 0 or more x chars.
+\item x? 0 or 1 match of x char.
+\item \%bxy Balanced match a substring starting with x and ending in y.  So \%b() will match balanced parenthesis.
+\item ^ The beginning of a string.
+\item \$ End of the string.
+\end{itemize}
+
+Anything that's not listed here just matches that character.
 
 
 \section{Deployment Logs And Commits}
