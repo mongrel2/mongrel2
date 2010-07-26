@@ -78,39 +78,35 @@
   "x1-3000"></a>Contents</h2>
 
   <div class="tableofcontents">
-    &nbsp;<span class="sectionToc">0.1 <a href="#x1-50000.1" id=
-    "QQ2-1-5" name="QQ2-1-5">The Big Picture</a></span><br>
-    &nbsp;&nbsp;<span class="subsectionToc">0.1.1 <a href=
-    "#x1-60000.1.1" id="QQ2-1-6" name="QQ2-1-6">Language
-    Agnostic</a></span><br>
-    &nbsp;&nbsp;<span class="subsectionToc">0.1.2 <a href=
-    "#x1-70000.1.2" id="QQ2-1-7" name=
-    "QQ2-1-7">Asyncrhonous</a></span><br>
-    &nbsp;&nbsp;<span class="subsectionToc">0.1.3 <a href=
-    "#x1-80000.1.3" id="QQ2-1-8" name="QQ2-1-8">Message
-    Protocol</a></span><br>
-    &nbsp;&nbsp;<span class="subsectionToc">0.1.4 <a href=
-    "#x1-90000.1.4" id="QQ2-1-9" name="QQ2-1-9">Application
-    Oriented</a></span><br>
-    &nbsp;&nbsp;<span class="subsectionToc">0.1.5 <a href=
-    "#x1-100000.1.5" id="QQ2-1-10" name="QQ2-1-10">Automated
-    Management</a></span><br>
-    &nbsp;<span class="sectionToc">0.2 <a href="#x1-110000.2" id=
-    "QQ2-1-11" name="QQ2-1-11">Using This Manual</a></span><br>
-    <span class="partToc">I&nbsp;&nbsp;<a href="#x1-12000I" id=
-    "QQ2-1-12" name="QQ2-1-12">Installing</a></span><br>
-    <span class="partToc">II&nbsp;&nbsp;<a href="#x1-13000II" id=
-    "QQ2-1-13" name="QQ2-1-13">Deploying</a></span><br>
-    <span class="partToc">III&nbsp;&nbsp;<a href="#x1-14000III" id=
-    "QQ2-1-14" name="QQ2-1-14">Managing</a></span><br>
-    <span class="partToc">IV&nbsp;&nbsp;<a href="#x1-15000IV" id=
-    "QQ2-1-15" name="QQ2-1-15">Hacking</a></span><br>
-    <span class="partToc">V&nbsp;&nbsp;<a href="#x1-16000V" id=
-    "QQ2-1-16" name="QQ2-1-16">Contributing</a></span>
+    <span class="chapterToc">1 <a href="#x1-40001" id="QQ2-1-4"
+    name="QQ2-1-4">Introduction</a></span><br>
+    &nbsp;<span class="sectionToc">1.1 <a href="#x1-50001.1" id=
+    "QQ2-1-5" name="QQ2-1-5">Language Agnostic</a></span><br>
+    &nbsp;<span class="sectionToc">1.2 <a href="#x1-60001.2" id=
+    "QQ2-1-6" name="QQ2-1-6">Asynchronous</a></span><br>
+    &nbsp;<span class="sectionToc">1.3 <a href="#x1-70001.3" id=
+    "QQ2-1-7" name="QQ2-1-7">Message Protocol</a></span><br>
+    &nbsp;<span class="sectionToc">1.4 <a href="#x1-80001.4" id=
+    "QQ2-1-8" name="QQ2-1-8">Application Oriented</a></span><br>
+    &nbsp;<span class="sectionToc">1.5 <a href="#x1-90001.5" id=
+    "QQ2-1-9" name="QQ2-1-9">Automated Management</a></span><br>
+    &nbsp;<span class="sectionToc">1.6 <a href="#x1-100001.6" id=
+    "QQ2-1-10" name="QQ2-1-10">Using This Manual</a></span><br>
+    <span class="partToc">I&nbsp;&nbsp;<a href="#x1-11000I" id=
+    "QQ2-1-11" name="QQ2-1-11">Installing</a></span><br>
+    <span class="partToc">II&nbsp;&nbsp;<a href="#x1-12000II" id=
+    "QQ2-1-12" name="QQ2-1-12">Deploying</a></span><br>
+    <span class="partToc">III&nbsp;&nbsp;<a href="#x1-13000III" id=
+    "QQ2-1-13" name="QQ2-1-13">Managing</a></span><br>
+    <span class="partToc">IV&nbsp;&nbsp;<a href="#x1-14000IV" id=
+    "QQ2-1-14" name="QQ2-1-14">Hacking</a></span><br>
+    <span class="partToc">V&nbsp;&nbsp;<a href="#x1-15000V" id=
+    "QQ2-1-15" name="QQ2-1-15">Contributing</a></span>
   </div>
 
-  <h2 class="likechapterHead"><a id="x1-4000" name=
-  "x1-4000"></a>Introduction</h2><!--l. 3-->
+  <h2 class="chapterHead"><span class=
+  "titlemark">Chapter&nbsp;1</span><br>
+  <a id="x1-40001" name="x1-40001"></a>Introduction</h2><!--l. 3-->
 
   <p class="noindent">Mongrel2 is a web server. HTTP requests come
   in, HTTP responses go out. Request, response. There is nothing
@@ -135,64 +131,168 @@
   once. Plenty of language specific web servers like Node.js and
   Jetty have asynchronous operation, but then they&rsquo;re not
   language agnostic <span class="footnote-mark"><a href=
-  "book-final2.html#fn1x0"><sup class=
+  "book-final2.html#fn1x2"><sup class=
   "textsuperscript">1</sup></a></span><a id="x1-4001f1" name=
   "x1-4001f1"></a>. Other web servers will let you talk to any
   language as a backend, but they insist on using HTTP proxying or
   FastCGI which is <span class="pplb7t-">not</span> friendly to
   asynchronous operations. <!--l. 22-->
 
-  <p class="indent">As you&rsquo;ll see in the next section,
-  Mongrel2 tries to get these features right by using the right
-  algorithms and technology to make them coexist.
+  <p class="indent">Mongrel2 is the only web server I know of that
+  actively tries to focus on these features as a cohesive whole.
 
-  <h3 class="sectionHead"><span class="titlemark">0.1</span> <a id=
-  "x1-50000.1" name="x1-50000.1"></a>The Big Picture</h3>
-  <!--l. 29-->
+  <h3 class="sectionHead"><span class="titlemark">1.1</span> <a id=
+  "x1-50001.1" name="x1-50001.1"></a>Language Agnostic</h3>
+  <!--l. 28-->
 
-  <p class="noindent">
+  <p class="noindent">The term &rdquo;language agnostic&rdquo; came
+  from people who read about Mongrel2 in the early days and it
+  means that Mongrel2 does <span class="pplb7t-">not</span> try to
+  promote or any one language over any others. Mongrel2 does not
+  care if you run a &rdquo;Python shop&rdquo; or if you&rsquo;re a
+  die hard PHP fan or if you hate PHP and love only Ruby on Rails.
+  Mongrel2 only knows about HTTP requests, HTTP responses, async
+  messages, and getting them to your gear to meet those
+  requirements. <!--l. 35-->
 
-  <h4 class="subsectionHead"><span class="titlemark">0.1.1</span>
-  <a id="x1-60000.1.1" name="x1-60000.1.1"></a>Language
-  Agnostic</h4><!--l. 32-->
-
-  <p class="noindent">
-
-  <h4 class="subsectionHead"><span class="titlemark">0.1.2</span>
-  <a id="x1-70000.1.2" name="x1-70000.1.2"></a>Asyncrhonous</h4>
-  <!--l. 35-->
-
-  <p class="noindent">
-
-  <h4 class="subsectionHead"><span class="titlemark">0.1.3</span>
-  <a id="x1-80000.1.3" name="x1-80000.1.3"></a>Message
-  Protocol</h4><!--l. 38-->
-
-  <p class="noindent">
-
-  <h4 class="subsectionHead"><span class="titlemark">0.1.4</span>
-  <a id="x1-90000.1.4" name="x1-90000.1.4"></a>Application
-  Oriented</h4><!--l. 41-->
+  <p class="indent">Language Agnosticism is the most important
+  feature of Mongrel2 and it&rsquo;s entire purpose stems from the
+  desire to reduce the amount of programming language religion in
+  the world. Real people want to get things done, not wanker on
+  which technology is the best or force other people to use their
+  favorite toys. Instead Mongrel2 works to just be great for every
+  language and make it easy to use what works best for a given
+  problem. <!--l. 43-->
 
   <p class="noindent">
 
-  <h4 class="subsectionHead"><span class="titlemark">0.1.5</span>
-  <a id="x1-100000.1.5" name="x1-100000.1.5"></a>Automated
-  Management</h4><!--l. 44-->
+  <h3 class="sectionHead"><span class="titlemark">1.2</span> <a id=
+  "x1-60001.2" name="x1-60001.2"></a>Asynchronous</h3><!--l. 45-->
+
+  <p class="noindent">Many web servers are
+  &rdquo;asynchronous&rdquo; internally, and some others force you
+  to know way too much about how they work internally to get
+  anything done. What makes Mongrel2&rsquo;s version of
+  asynchronous messaging different is it extends to <span class=
+  "pplb7t-">outside</span> the Mongrel2 server. This is a powerful
+  concept that even your backends can operate asynchronously using
+  simple identification of connected clients. <!--l. 51-->
+
+  <p class="indent">Other servers assume that every request is
+  received by a browser, then sent to a backend, and then directly
+  sent out to the client and that&rsquo;s it. Mongrel2 assumes that
+  there is a connected client, and it sends requests to backends,
+  but it makes no assumptions about how those backends respond to
+  the clients. All it requires is that the backend application send
+  messages addressed to the client and it will write them on the
+  socket. <!--l. 58-->
+
+  <p class="indent">Because of this design Mongrel2 can easily
+  house both classic HTTP clients, keep-alive style HTTP client,
+  chunked encoding responses, JSSockets, or WebSockets using the
+  same code. <!--l. 63-->
 
   <p class="noindent">
 
-  <h3 class="sectionHead"><span class="titlemark">0.2</span> <a id=
-  "x1-110000.2" name="x1-110000.2"></a>Using This Manual</h3>
+  <h3 class="sectionHead"><span class="titlemark">1.3</span> <a id=
+  "x1-70001.3" name="x1-70001.3"></a>Message Protocol</h3>
+  <!--l. 65-->
+
+  <p class="noindent">In order to properly do asynchronous
+  messaging in a language agnostic way, Mongrel2 needed a good base
+  protocol that allowed for different messaging styles and worked
+  with many different languages. HTTP proxying already does this,
+  although it&rsquo;s not asynchronous at all. What gives Mongrel2
+  its special powers is ZeroMQ, a language and transport mechanism
+  agnostic messaging system that does <span class=
+  "pplb7t-">not</span> require a centralized messaging server to
+  operate. <!--l. 72-->
+
+  <p class="indent">Using ZeroMQ lets Mongrel2 talk to a huge
+  number of languages, operate within any kind of network
+  architecture, and do it with a very simple communication model
+  and API that most programmers can understand. <!--l. 77-->
+
+  <p class="noindent">
+
+  <h3 class="sectionHead"><span class="titlemark">1.4</span> <a id=
+  "x1-80001.4" name="x1-80001.4"></a>Application Oriented</h3>
+  <!--l. 79-->
+
+  <p class="noindent">Web servers today are written as if it was
+  still 1995 and all anyone needs to do is serve files, maybe some
+  graphics. Today&rsquo;s web applications are not about serving
+  files, they&rsquo;re about serving application logic <span class=
+  "pplb7t-">and</span> doing it asynchronously. The advent of the
+  bewildering numbers of ways to hack HTTP into an async messaging
+  protocol<span class="footnote-mark"><a href=
+  "book-final3.html#fn2x2"><sup class=
+  "textsuperscript">2</sup></a></span><a id="x1-8001f2" name=
+  "x1-8001f2"></a> is proof enough that the pressure is on for web
+  server to be for applications with highly interactive interfaces.
+  <!--l. 87-->
+
+  <p class="indent">Mongrel2 can still serve files just fine. In
+  fact, it&rsquo;s got very accurate and easy to understand file
+  serving code. However, Mongrel2 will always be about
+  applications. Fast scalable awesome asynchronous or synchronous
+  applications that need to use languages that mere mortals can
+  work with like PHP. If there&rsquo;s ever a choice, apps win.
+
+  <h3 class="sectionHead"><span class="titlemark">1.5</span> <a id=
+  "x1-90001.5" name="x1-90001.5"></a>Automated Management</h3>
+  <!--l. 94-->
+
+  <p class="noindent">The language agnostic philosophy even extends
+  to the configuration system where you can use any language you
+  need to configure it and manage it, as long as the results are a
+  SQLite3 database Mongrel2 can read and work with to run. There
+  are great tools for managing this database already written in
+  Python, but if you hate Python then you can write anything you
+  want. <!--l. 100-->
+
+  <p class="indent">This pattern is established with servers like
+  Postfix, Exim, Sendmail, qmail, and others that convert
+  configuration files to half-assed SQL databases. Mongrel2
+  effectively adopts a Model-View-Controller design for its
+  configuration system, the same way every web application is
+  designed today. The Model is a SQlite3 database file, which any
+  programming language can access. The Controller is a Mongrel2
+  process that reads this file and sets itself up accordingly. 
+  <!--l. 108-->
+
+  <p class="indent">The View is a Python script called m2sh that
+  gives you a command line &rdquo;UI&rdquo; to configure and setup
+  the Mongrel2 sqlite model. It gives you commands for managing it,
+  crafting configurations, looking at them, the works. 
+  <!--l. 112-->
+
+  <p class="indent">But most importantly, <span class="pplb7t-">you
+  can write your own</span>. You don&rsquo;t have to wait for a
+  Mongrel2 developer to craft a configuration file parser for your
+  favorite language, or use some hack job Nagios Perl junk to
+  automate or scan it. It&rsquo;s SQlite3 with a solid simple
+  schema and well written Python code showing you how it works. 
+  <!--l. 118-->
+
+  <p class="indent">Nothing stops you from automating the hell out
+  of Mongrel2 with that. <!--l. 121-->
+
+  <p class="noindent">
+
+  <h3 class="sectionHead"><span class="titlemark">1.6</span> <a id=
+  "x1-100001.6" name="x1-100001.6"></a>Using This Manual</h3>
   <!--l. 1-->
 
   <p class="indent"><!--l. 1-->
 
+  <p class="indent"><!--l. 1-->
+
   <p class="indent">
 
   <h1 class="partHead"><span class=
-  "titlemark">Part&nbsp;I<br></span><a id="x1-12000I" name=
-  "x1-12000I"></a>Installing</h1><!--l. 3-->
+  "titlemark">Part&nbsp;I<br></span><a id="x1-11000I" name=
+  "x1-11000I"></a>Installing</h1><!--l. 3-->
 
   <p class="noindent">Soon... <!--l. 1-->
 
@@ -203,8 +303,8 @@
   <p class="indent">
 
   <h1 class="partHead"><span class=
-  "titlemark">Part&nbsp;II<br></span><a id="x1-13000II" name=
-  "x1-13000II"></a>Deploying</h1><!--l. 3-->
+  "titlemark">Part&nbsp;II<br></span><a id="x1-12000II" name=
+  "x1-12000II"></a>Deploying</h1><!--l. 3-->
 
   <p class="noindent">Soon... <!--l. 1-->
 
@@ -215,8 +315,8 @@
   <p class="indent">
 
   <h1 class="partHead"><span class=
-  "titlemark">Part&nbsp;III<br></span><a id="x1-14000III" name=
-  "x1-14000III"></a>Managing</h1><!--l. 3-->
+  "titlemark">Part&nbsp;III<br></span><a id="x1-13000III" name=
+  "x1-13000III"></a>Managing</h1><!--l. 3-->
 
   <p class="noindent">Soon... <!--l. 1-->
 
@@ -227,8 +327,8 @@
   <p class="indent">
 
   <h1 class="partHead"><span class=
-  "titlemark">Part&nbsp;IV<br></span><a id="x1-15000IV" name=
-  "x1-15000IV"></a>Hacking</h1><!--l. 3-->
+  "titlemark">Part&nbsp;IV<br></span><a id="x1-14000IV" name=
+  "x1-14000IV"></a>Hacking</h1><!--l. 3-->
 
   <p class="noindent">Soon... <!--l. 1-->
 
@@ -239,8 +339,8 @@
   <p class="indent">
 
   <h1 class="partHead"><span class=
-  "titlemark">Part&nbsp;V<br></span><a id="x1-16000V" name=
-  "x1-16000V"></a>Contributing</h1><!--l. 3-->
+  "titlemark">Part&nbsp;V<br></span><a id="x1-15000V" name=
+  "x1-15000V"></a>Contributing</h1><!--l. 3-->
 
   <p class="noindent">Soon...
 
