@@ -1181,7 +1181,7 @@
     should chroot to and drop privileges.
 
     <dt class="description"><span class=
-    "pplb7t-">access&#729;log</span>
+    "pplb7t-">access</span><span class="pplb7t-">_log</span>
 
     <dd class="description">The access log file <span class=
     "pplri7t-">relative to the chroot</span>. Usually starts with a
@@ -1190,19 +1190,19 @@
     this owned by root.
 
     <dt class="description"><span class=
-    "pplb7t-">error&#729;log</span>
+    "pplb7t-">error</span><span class="pplb7t-">_log</span>
 
     <dd class="description">The error log file just like
     access&#729;log.
 
     <dt class="description"><span class=
-    "pplb7t-">pid&#729;file</span>
+    "pplb7t-">pid</span><span class="pplb7t-">_file</span>
 
     <dd class="description">Like the access log, where within the
     chroot directory is the pid file stored.
 
     <dt class="description"><span class=
-    "pplb7t-">default&#729;host</span>
+    "pplb7t-">default</span><span class="pplb7t-">_host</span>
 
     <dd class="description">The server has a bunch of hosts listed,
     but it needs to know what the default host is. This is also

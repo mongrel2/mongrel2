@@ -238,11 +238,11 @@ and general server specific deployment gear.
 \item[uuid] A UUID is used to make sure that each deployed server is unique in your infrastructure.
     You could easily use any string that's letters, numbers, or - characters.
 \item[chroot] This is the directory that Mongrel2 should chroot to and drop privileges.
-\item[access_log] The access log file \emph{relative to the chroot}.  Usually starts with a '/'.  Make sure
+\item[access\_log] The access log file \emph{relative to the chroot}.  Usually starts with a '/'.  Make sure
     you don't configure your server so that this and other files are accessible, or make this owned by root.
-\item[error_log] The error log file just like access_log.
-\item[pid_file] Like the access log, where within the chroot directory is the pid file stored.
-\item[default_host] The server has a bunch of hosts listed, but it needs to know what the default host is.  This is also
+\item[error\_log] The error log file just like access_log.
+\item[pid\_file] Like the access log, where within the chroot directory is the pid file stored.
+\item[default\_host] The server has a bunch of hosts listed, but it needs to know what the default host is.  This is also
     used as a convenient way to refer to this Server.
 \item[port] The port the server should listen on for new connections.
 \end{description}
