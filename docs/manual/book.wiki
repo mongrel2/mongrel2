@@ -92,16 +92,34 @@
     "QQ2-1-9" name="QQ2-1-9">Automated Management</a></span><br>
     &nbsp;<span class="sectionToc">1.6 <a href="#x1-100001.6" id=
     "QQ2-1-10" name="QQ2-1-10">Using This Manual</a></span><br>
-    <span class="partToc">I&nbsp;&nbsp;<a href="#x1-11000I" id=
-    "QQ2-1-11" name="QQ2-1-11">Installing</a></span><br>
-    <span class="partToc">II&nbsp;&nbsp;<a href="#x1-12000II" id=
-    "QQ2-1-12" name="QQ2-1-12">Deploying</a></span><br>
-    <span class="partToc">III&nbsp;&nbsp;<a href="#x1-13000III" id=
-    "QQ2-1-13" name="QQ2-1-13">Managing</a></span><br>
-    <span class="partToc">IV&nbsp;&nbsp;<a href="#x1-14000IV" id=
-    "QQ2-1-14" name="QQ2-1-14">Hacking</a></span><br>
-    <span class="partToc">V&nbsp;&nbsp;<a href="#x1-15000V" id=
-    "QQ2-1-15" name="QQ2-1-15">Contributing</a></span>
+    <span class="chapterToc">2 <a href="#x1-110002" id="QQ2-1-11"
+    name="QQ2-1-11">Installing</a></span><br>
+    &nbsp;<span class="sectionToc">2.1 <a href="#x1-120002.1" id=
+    "QQ2-1-12" name="QQ2-1-12">Install Dependencies</a></span><br>
+    &nbsp;<span class="sectionToc">2.2 <a href="#x1-130002.2" id=
+    "QQ2-1-14" name="QQ2-1-14">Building Mongrel2</a></span><br>
+    &nbsp;&nbsp;<span class="subsectionToc">2.2.1 <a href=
+    "#x1-140002.2.1" id="QQ2-1-15" name="QQ2-1-15">Using
+    Fossil</a></span><br>
+    &nbsp;&nbsp;<span class="subsectionToc">2.2.2 <a href=
+    "#x1-150002.2.2" id="QQ2-1-17" name="QQ2-1-17">Using The .zip
+    File</a></span><br>
+    &nbsp;<span class="sectionToc">2.3 <a href="#x1-160002.3" id=
+    "QQ2-1-18" name="QQ2-1-18">Building And
+    Installing</a></span><br>
+    &nbsp;<span class="sectionToc">2.4 <a href="#x1-170002.4" id=
+    "QQ2-1-20" name="QQ2-1-20">Testing The
+    Installation</a></span><br>
+    &nbsp;<span class="sectionToc">2.5 <a href="#x1-180002.5" id=
+    "QQ2-1-22" name="QQ2-1-22">Up Next</a></span><br>
+    <span class="chapterToc">3 <a href="#x1-190003" id="QQ2-1-23"
+    name="QQ2-1-23">Deploying</a></span><br>
+    <span class="chapterToc">4 <a href="#x1-200004" id="QQ2-1-24"
+    name="QQ2-1-24">Managing</a></span><br>
+    <span class="chapterToc">5 <a href="#x1-210005" id="QQ2-1-25"
+    name="QQ2-1-25">Hacking</a></span><br>
+    <span class="chapterToc">6 <a href="#x1-220006" id="QQ2-1-26"
+    name="QQ2-1-26">Contributing</a></span>
   </div>
 
   <h2 class="chapterHead"><span class=
@@ -117,14 +135,15 @@
   <!--l. 9-->
 
   <p class="indent">What makes Mongrel2 special is how it satisfies
-  these requests in a <span class="pplb7t-">language</span>
-  <span class="pplb7t-">agnostic</span> and <span class=
-  "pplb7t-">asynchronous</span> way using a <span class=
-  "pplb7t-">simple messaging protocol</span> to talk to
-  <span class="pplb7t-">applications</span> not just serve files.
+  these requests in a <span class="pplri7t-">language</span>
+  <span class="pplri7t-">agnostic</span> and <span class=
+  "pplri7t-">asynchronous</span> way using a <span class=
+  "pplri7t-">simple messaging protocol</span> to talk to
+  <span class="pplri7t-">applications</span> not just serve files.
   Mongrel2 is also designed to be incredibly easy to <span class=
-  "pplb7t-">automatically manage</span> it as part of your
-  infrastructure. <!--l. 15-->
+  "pplri7t-">automatically</span> <span class=
+  "pplri7t-">manage</span> it as part of your infrastructure. 
+  <!--l. 15-->
 
   <p class="indent">Other web servers do some of these things, but
   they either do them in a bastardized way or not all of them at
@@ -135,7 +154,7 @@
   "textsuperscript">1</sup></a></span><a id="x1-4001f1" name=
   "x1-4001f1"></a>. Other web servers will let you talk to any
   language as a backend, but they insist on using HTTP proxying or
-  FastCGI which is <span class="pplb7t-">not</span> friendly to
+  FastCGI which is <span class="pplri7t-">not</span> friendly to
   asynchronous operations. <!--l. 22-->
 
   <p class="indent">Mongrel2 is the only web server I know of that
@@ -147,7 +166,7 @@
 
   <p class="noindent">The term &rdquo;language agnostic&rdquo; came
   from people who read about Mongrel2 in the early days and it
-  means that Mongrel2 does <span class="pplb7t-">not</span> try to
+  means that Mongrel2 does <span class="pplri7t-">not</span> try to
   promote or any one language over any others. Mongrel2 does not
   care if you run a &rdquo;Python shop&rdquo; or if you&rsquo;re a
   die hard PHP fan or if you hate PHP and love only Ruby on Rails.
@@ -174,7 +193,7 @@
   to know way too much about how they work internally to get
   anything done. What makes Mongrel2&rsquo;s version of
   asynchronous messaging different is it extends to <span class=
-  "pplb7t-">outside</span> the Mongrel2 server. This is a powerful
+  "pplri7t-">outside</span> the Mongrel2 server. This is a powerful
   concept that even your backends can operate asynchronously using
   simple identification of connected clients. <!--l. 51-->
 
@@ -205,7 +224,7 @@
   although it&rsquo;s not asynchronous at all. What gives Mongrel2
   its special powers is ZeroMQ, a language and transport mechanism
   agnostic messaging system that does <span class=
-  "pplb7t-">not</span> require a centralized messaging server to
+  "pplri7t-">not</span> require a centralized messaging server to
   operate. <!--l. 72-->
 
   <p class="indent">Using ZeroMQ lets Mongrel2 talk to a huge
@@ -223,7 +242,7 @@
   still 1995 and all anyone needs to do is serve files, maybe some
   graphics. Today&rsquo;s web applications are not about serving
   files, they&rsquo;re about serving application logic <span class=
-  "pplb7t-">and</span> doing it asynchronously. The advent of the
+  "pplri7t-">and</span> doing it asynchronously. The advent of the
   bewildering numbers of ways to hack HTTP into an async messaging
   protocol<span class="footnote-mark"><a href=
   "book-final3.html#fn2x2"><sup class=
@@ -267,13 +286,13 @@
   crafting configurations, looking at them, the works. 
   <!--l. 112-->
 
-  <p class="indent">But most importantly, <span class="pplb7t-">you
-  can write your own</span>. You don&rsquo;t have to wait for a
-  Mongrel2 developer to craft a configuration file parser for your
-  favorite language, or use some hack job Nagios Perl junk to
-  automate or scan it. It&rsquo;s SQlite3 with a solid simple
-  schema and well written Python code showing you how it works. 
-  <!--l. 118-->
+  <p class="indent">But most importantly, <span class=
+  "pplri7t-">you can write your own</span>. You don&rsquo;t have to
+  wait for a Mongrel2 developer to craft a configuration file
+  parser for your favorite language, or use some hack job Nagios
+  Perl junk to automate or scan it. It&rsquo;s SQlite3 with a solid
+  simple schema and well written Python code showing you how it
+  works. <!--l. 118-->
 
   <p class="indent">Nothing stops you from automating the hell out
   of Mongrel2 with that. <!--l. 121-->
@@ -286,7 +305,7 @@
 
   <p class="noindent">This manual is intended to be fun to read, so
   probably the best way to use it is to actually <span class=
-  "pplb7t-">read it</span>. <!--l. 126-->
+  "pplri7t-">read it</span>. <!--l. 126-->
 
   <p class="indent">I know, revolutionary right. I mean, who has
   time to read and learn about something these days. You just want
@@ -307,63 +326,380 @@
   won&rsquo;t need something, because you&rsquo;re not a
   programmer, or you&rsquo;re not in operations, you should learn
   it. Doing so will make the parts you do need clearer and give you
-  better ideas for later. <!--l. 1-->
+  better ideas for later.
 
-  <p class="indent"><!--l. 1-->
+  <h2 class="chapterHead"><span class=
+  "titlemark">Chapter&nbsp;2</span><br>
+  <a id="x1-110002" name="x1-110002"></a>Installing</h2><!--l. 3-->
+
+  <p class="noindent">Mongrel2 is designed to build on most modern
+  Unix systems, specifically Linux and Mac OSX. It is written in C
+  (<span class="pplri7t-">not Ruby</span>) and uses fairly vanilla
+  C and standard libraries, except for one piece that implements
+  the internal coroutines. Other than this you should be able to
+  compile and install Mongrel2 with nothing more than <span class=
+  "pplri7t-">make all install</span> after you&rsquo;ve installed
+  all the dependencies. <!--l. 10-->
+
+  <p class="indent">Now, if when I said dependencies you started to
+  groan at having to install software to use my software, well my
+  friend, welcome to the future. You said you don&rsquo;t want
+  people reinventing the wheel right? Great, that means you need to
+  install software for my software to work. It&rsquo;s either that
+  or wait 10 years for me to build everything from scratch like
+  some arrogant jackass. <!--l. 17-->
+
+  <p class="indent">We good now? Great, let&rsquo;s get started.
+
+  <h3 class="sectionHead"><span class="titlemark">2.1</span> <a id=
+  "x1-120002.1" name="x1-120002.1"></a>Install Dependencies</h3>
+  <!--l. 21-->
+
+  <p class="noindent">To get everything working you will need the
+  following dependencies:
+
+  <ul class="itemize1">
+    <li class="itemize">GNU make (gmake).
+
+    <li class="itemize"><a href="http://zeromq.org">ZeroMQ</a> for
+    the messaging.
+
+    <li class="itemize"><a href="http://python.org">Python 2.6</a>
+    for the m2sh management and examples.
+
+    <li class="itemize"><a href=
+    "http://www.sqlite.org/">SQLite3</a> and make sure <span class=
+    "pplri7t-">Python</span> has the ability to access SQLite3.
+
+    <li class="itemize"><a href=
+    "http://pypi.python.org/pypi/distribute">distribute</a> and
+    <a href="http://pypi.python.org/pypi/pip/0.7.2">pip</a>.
+
+    <li class="itemize"><a href=
+    "http://github.com/ellisonbg/pyzmq">PyZMQ</a> for the examples.
+  </ul><!--l. 32-->
+
+  <p class="indent">If you install these things in this order, then
+  everything should be good. Typically people run into problems if
+  they do this out of order, for example trying to install Mongrel2
+  before they have distribute and pip installed. <!--l. 36-->
+
+  <p class="indent">Since every system is different it is difficult
+  to tell you exactly how to install required packages for your OS,
+  but here&rsquo;s how I did it on my computer: <!--l. 40-->
+
+  <p class="indent"><a id="x1-12001r1" name="x1-12001r1"></a>
+  <hr class="float">
+
+  <div class="float">
+    <div class="caption">
+      <span class="id">Source 1:</span> <span class=
+      "content"><span class="pplri7t-">Installing Dependencies
+      on</span> <span class="pplri7t-">ArchLinux</span></span>
+    </div><!--tex4ht:label?: x1-12001r1 -->
+
+    <div class="verbatim" id="verbatim-1">
+      #&nbsp;install&nbsp;ZeroMQ &nbsp;<br>
+      &gt;&nbsp;wget&nbsp;http://www.zeromq.org/local--files/area:download/zeromq-2.0.7.tar.gz
+      &nbsp;<br>
+      &gt;&nbsp;tar&nbsp;-xzvf&nbsp;zeromq-2.0.7.tar.gz &nbsp;<br>
+      &gt;&nbsp;cd&nbsp;zeromq-2.0.7/ &nbsp;<br>
+      &gt;&nbsp;./configure &nbsp;<br>
+      &gt;&nbsp;make &nbsp;<br>
+      &gt;&nbsp;sudo&nbsp;make&nbsp;install &nbsp;<br>
+      &nbsp;<br>
+      #&nbsp;install&nbsp;python &nbsp;<br>
+      &gt;&nbsp;sudo&nbsp;pacman&nbsp;-S&nbsp;python &nbsp;<br>
+      &nbsp;<br>
+      #&nbsp;install&nbsp;sqlite3 &nbsp;<br>
+      &gt;&nbsp;sudo&nbsp;pacman&nbsp;-S&nbsp;sqlite3 &nbsp;<br>
+      &nbsp;<br>
+      #&nbsp;install&nbsp;distribute&nbsp;and&nbsp;pip &nbsp;<br>
+      &gt;&nbsp;sudo&nbsp;pacman&nbsp;-S&nbsp;python-pip &nbsp;<br>
+      &gt;&nbsp;sudo&nbsp;pip&nbsp;install&nbsp;distribute
+      &nbsp;<br>
+      &nbsp;<br>
+      #&nbsp;install&nbsp;PyZMQ&nbsp;from&nbsp;github &nbsp;<br>
+      &gt;&nbsp;sudo&nbsp;pacman&nbsp;-S&nbsp;git &nbsp;<br>
+      &gt;&nbsp;git&nbsp;clone&nbsp;http://github.com/ellisonbg/pyzmq.git
+      &nbsp;<br>
+      &gt;&nbsp;sudo&nbsp;python&nbsp;setup.py&nbsp;install
+    </div><!--l. 64-->
+
+    <p class="nopar">
+  </div>
+  <hr class="endfloat">
+  <!--l. 67-->
+
+  <p class="indent">If you run into parts that your OS is missing,
+  which is likely on Debian and SuSE systems, then you&rsquo;ll
+  have to go and figure out how to install it.
+
+  <h3 class="sectionHead"><span class="titlemark">2.2</span> <a id=
+  "x1-130002.2" name="x1-130002.2"></a>Building Mongrel2</h3>
+  <!--l. 74-->
+
+  <p class="noindent">If everything went well you should be able to
+  grab the Mongrel2 source and try building it. There&rsquo;s two
+  ways you can get the source code to Mongrel2: <!--l. 78-->
 
   <p class="indent">
 
-  <h1 class="partHead"><span class=
-  "titlemark">Part&nbsp;I<br></span><a id="x1-11000I" name=
-  "x1-11000I"></a>Installing</h1><!--l. 3-->
+  <ol class="enumerate1">
+    <li class="enumerate" id="x1-13002x1">Install <a href=
+    "http://fossil-scm.org">Fossil SCM</a> and check out the
+    source.
+
+    <li class="enumerate" id="x1-13004x2">Grab the source .zip
+    release and install it from there.
+  </ol><!--l. 83-->
+
+  <p class="noindent">
+
+  <h4 class="subsectionHead"><span class="titlemark">2.2.1</span>
+  <a id="x1-140002.2.1" name="x1-140002.2.1"></a>Using Fossil</h4>
+  <!--l. 85-->
+
+  <p class="noindent">Since it&rsquo;s early in Mongrel2
+  development we recommend you get fossil and install it so you can
+  track the latest fixes and development. Here&rsquo;s the easiest
+  way to do that: <!--l. 89-->
+
+  <p class="indent">
+
+  <ol class="enumerate1">
+    <li class="enumerate" id="x1-14002x1">Go to <a href=
+    "http://www.fossil-scm.org/download.html">the fossil download
+    page</a> and grab the binary that fits your system, or the
+    source tar.gz.
+
+    <li class="enumerate" id="x1-14004x2">Follow their <a href=
+    "http://fossil-scm.org/index.html/doc/tip/www/build.wiki">install
+    instructions</a> to get it on your system.
+
+    <li class="enumerate" id="x1-14006x3">If you find that your
+    version of fossil ends up having problems with mongrel2.org let
+    us know since we might need to upgrade.
+  </ol><!--l. 98-->
+
+  <p class="indent">Once you have fossil you can then get the
+  Mongrel2 source and open it up: <!--l. 100-->
+
+  <p class="indent"><a id="x1-14007r2" name="x1-14007r2"></a>
+  <hr class="float">
+
+  <div class="float">
+    <div class="caption">
+      <span class="id">Source 2:</span> <span class=
+      "content"><span class="pplri7t-">Cloning The Mongrel2</span>
+      <span class="pplri7t-">Source</span></span>
+    </div><!--tex4ht:label?: x1-14007r2 -->
+
+    <div class="verbatim" id="verbatim-2">
+      &gt;&nbsp;mkdir&nbsp;~/fossils &nbsp;<br>
+      &gt;&nbsp;fossil&nbsp;clone&nbsp;http://mongrel2.org&nbsp;~/fossils/mongrel2.fossil
+      &nbsp;<br>
+      &gt;&nbsp;mkdir&nbsp;mongrel2 &nbsp;<br>
+      &gt;&nbsp;cd&nbsp;mongrel2 &nbsp;<br>
+      &gt;&nbsp;fossil&nbsp;open&nbsp;~/fossils/mongrel2.fossil
+    </div><!--l. 107-->
+
+    <p class="nopar">
+  </div>
+  <hr class="endfloat">
+  <!--l. 110-->
+
+  <p class="indent">Make sure you do this in order (just like with
+  every set of instructions you should follow) or else you&rsquo;ll
+  get errors. For example, if you don&rsquo;t make the <span class=
+  "pplb7t-">&nbsp;/fossils</span> directory then you&rsquo;ll get
+  an error saying fossil can&rsquo;t open your file to clone. Well,
+  that&rsquo;s because you <span class="pplri7t-">didn&rsquo;t make
+  the</span> <span class="pplri7t-">&nbsp;/fossils
+  directory</span>. Just pay attention and don&rsquo;t blame fossil
+  if you can&rsquo;t.
+
+  <h4 class="subsectionHead"><span class="titlemark">2.2.2</span>
+  <a id="x1-150002.2.2" name="x1-150002.2.2"></a>Using The .zip
+  File</h4><!--l. 119-->
+
+  <p class="noindent">If you don&rsquo;t want to install fossil
+  then you will need to get the .zip file from our site and install
+  it that way. Since the code is new you have <span class=
+  "pplri7t-">no guarantees</span> that this will work at all or
+  that you will get a stable server. We have not made an official
+  release, so using the .zip file is effectively a lame way of
+  avoiding using fossil. <!--l. 125-->
+
+  <p class="indent">
+
+  <ol class="enumerate1">
+    <li class="enumerate" id="x1-15002x1">Login as an anonymous
+    user <a href="http://mongrel2.org/login">at mongrel2.org</a>.
+
+    <li class="enumerate" id="x1-15004x2">Go to the <a href=
+    "http://mongrel2.org/info/tip">latest source tip</a>.
+
+    <li class="enumerate" id="x1-15006x3">Click on the &rdquo;ZIP
+    archive&rdquo; link to download the latest zip file of the
+    source.
+
+    <li class="enumerate" id="x1-15008x4">Unzip this file and cd
+    into the resulting directory.
+  </ol><!--l. 133-->
+
+  <p class="noindent">
+
+  <h3 class="sectionHead"><span class="titlemark">2.3</span> <a id=
+  "x1-160002.3" name="x1-160002.3"></a>Building And Installing</h3>
+  <!--l. 135-->
+
+  <p class="noindent">Once you have the source ready to go you can
+  build it and then install it with one command: <span class=
+  "pplri7t-">make all install</span> <!--l. 138-->
+
+  <p class="indent">There is no <span class=
+  "pplri7t-">./configure</span> for Mongrel2 since we avoid too
+  many OS specific differences or shield those away with good
+  feature checks in the code. <!--l. 141-->
+
+  <p class="indent">The end result of this should be: <!--l. 143-->
+
+  <p class="indent">
+
+  <ol class="enumerate1">
+    <li class="enumerate" id="x1-16002x1">Mongrel2 builds and
+    compiles without errors.
+
+    <li class="enumerate" id="x1-16004x2">All the unit tests run,
+    please tell us about failures.
+
+    <li class="enumerate" id="x1-16006x3">The Python libraries that
+    m2sh needs get installed.
+
+    <li class="enumerate" id="x1-16008x4">The m2sh itself gets
+    installed.
+
+    <li class="enumerate" id="x1-16010x5">Finally the mongrel2
+    binary gets installed.
+  </ol><!--l. 151-->
+
+  <p class="indent">If any of these stages fail, then you can
+  simply try to fix them and then run: <span class=
+  "pplri7t-">make</span> <span class="pplri7t-">clean all
+  install</span> which will do everything all over again. 
+  <!--l. 154-->
+
+  <p class="indent">The most common error is if you didn&rsquo;t
+  install pip or distribute and insist on using your own
+  system&rsquo;s package management. Do <span class=
+  "pplri7t-">not</span> report bugs about your own flavor of
+  Linux&rsquo;s stupidity about versions and how it installs
+  Python. If you don&rsquo;t want to use the package system every
+  other Python programmer uses then you&rsquo;re on your own. 
+  <!--l. 160-->
+
+  <p class="indent"><a id="x1-16011r1" name="x1-16011r1"></a>
+  <hr class="float">
+
+  <div class="float">
+    <div class="caption">
+      <span class="id">Note 1:</span> <span class=
+      "content"><span class="pplri7t-">Use Virtualenv If You
+      Fear</span> <span class="pplri7t-">Pip</span></span>
+    </div><!--tex4ht:label?: x1-16011r1 -->
+
+    <div class="quote">
+      <!--l. 161-->
+
+      <p class="noindent">For those who still want to use the
+      package management but want to use pip and distribute I
+      suggest you check out <a href=
+      "http://pypi.python.org/pypi/virtualenv">virtualenv</a>. What
+      virtualenv does is create a little &rdquo;chroot
+      install&rdquo; of just the packages you need using pip or
+      distribute. When you don&rsquo;t want them anymore you can
+      just delete one directory and you&rsquo;re fine.
+    </div>
+  </div>
+  <hr class="endfloat">
+
+  <h3 class="sectionHead"><span class="titlemark">2.4</span> <a id=
+  "x1-170002.4" name="x1-170002.4"></a>Testing The
+  Installation</h3><!--l. 171-->
+
+  <p class="noindent">When you are done you probably want to make
+  sure that it installed correctly. There&rsquo;s a test
+  configuration file in <span class=
+  "pplb7t-">tests/config.sqlite</span> that you can use to try it
+  out: <!--l. 175-->
+
+  <p class="indent"><a id="x1-17001r3" name="x1-17001r3"></a>
+  <hr class="float">
+
+  <div class="float">
+    <div class="caption">
+      <span class="id">Source 3:</span> <span class=
+      "content"><span class="pplri7t-">First Test</span>
+      <span class="pplri7t-">Run</span></span>
+    </div><!--tex4ht:label?: x1-17001r3 -->
+
+    <div class="verbatim" id="verbatim-3">
+      &gt;&nbsp;mkdir&nbsp;run &nbsp;<br>
+      &gt;&nbsp;mkdir&nbsp;logs &nbsp;<br>
+      &gt;&nbsp;mkdir&nbsp;tmp &nbsp;<br>
+      &gt;&nbsp;m2sh&nbsp;dump&nbsp;-db&nbsp;tests/config.sqlite
+      &nbsp;<br>
+      &gt;&nbsp;m2sh&nbsp;start&nbsp;-db&nbsp;tests/config.sqlite&nbsp;-host&nbsp;localhost
+    </div><!--l. 182-->
+
+    <p class="nopar">
+  </div>
+  <hr class="endfloat">
+  <!--l. 185-->
+
+  <p class="indent">That&rsquo;s it. Just hit CTRL-c for now and
+  we&rsquo;ll get into playing with this setup later.
+
+  <h3 class="sectionHead"><span class="titlemark">2.5</span> <a id=
+  "x1-180002.5" name="x1-180002.5"></a>Up Next</h3><!--l. 190-->
+
+  <p class="noindent">You now should have a working Mongrel2 system
+  installed and the m2sh configuration interface ready to go. In
+  the rest of this manual we&rsquo;ll be simply learning how to do
+  more with Mongrel2 like making our own configs, writing handlers,
+  and other fun stuff. <!--l. 1-->
+
+  <p class="indent">
+
+  <h2 class="chapterHead"><span class=
+  "titlemark">Chapter&nbsp;3</span><br>
+  <a id="x1-190003" name="x1-190003"></a>Deploying</h2><!--l. 3-->
 
   <p class="noindent">Soon... <!--l. 1-->
 
-  <p class="indent"><!--l. 1-->
-
-  <p class="indent"><!--l. 1-->
-
   <p class="indent">
 
-  <h1 class="partHead"><span class=
-  "titlemark">Part&nbsp;II<br></span><a id="x1-12000II" name=
-  "x1-12000II"></a>Deploying</h1><!--l. 3-->
+  <h2 class="chapterHead"><span class=
+  "titlemark">Chapter&nbsp;4</span><br>
+  <a id="x1-200004" name="x1-200004"></a>Managing</h2><!--l. 3-->
 
   <p class="noindent">Soon... <!--l. 1-->
 
-  <p class="indent"><!--l. 1-->
-
-  <p class="indent"><!--l. 1-->
-
   <p class="indent">
 
-  <h1 class="partHead"><span class=
-  "titlemark">Part&nbsp;III<br></span><a id="x1-13000III" name=
-  "x1-13000III"></a>Managing</h1><!--l. 3-->
+  <h2 class="chapterHead"><span class=
+  "titlemark">Chapter&nbsp;5</span><br>
+  <a id="x1-210005" name="x1-210005"></a>Hacking</h2><!--l. 3-->
 
   <p class="noindent">Soon... <!--l. 1-->
 
-  <p class="indent"><!--l. 1-->
-
-  <p class="indent"><!--l. 1-->
-
   <p class="indent">
 
-  <h1 class="partHead"><span class=
-  "titlemark">Part&nbsp;IV<br></span><a id="x1-14000IV" name=
-  "x1-14000IV"></a>Hacking</h1><!--l. 3-->
-
-  <p class="noindent">Soon... <!--l. 1-->
-
-  <p class="indent"><!--l. 1-->
-
-  <p class="indent"><!--l. 1-->
-
-  <p class="indent">
-
-  <h1 class="partHead"><span class=
-  "titlemark">Part&nbsp;V<br></span><a id="x1-15000V" name=
-  "x1-15000V"></a>Contributing</h1><!--l. 3-->
+  <h2 class="chapterHead"><span class=
+  "titlemark">Chapter&nbsp;6</span><br>
+  <a id="x1-220006" name="x1-220006"></a>Contributing</h2>
+  <!--l. 3-->
 
   <p class="noindent">Soon...
 

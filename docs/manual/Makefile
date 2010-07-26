@@ -1,4 +1,4 @@
-JUNK_FILES=book-final.* *.aux *.log styles/*.aux
+JUNK_FILES=book-final.* *.aux *.log styles/*.aux book-final*
 SOURCE=book
 WEBSITE=zedshaw.com:/usr/local/nginx/html/projects/build_your_own_mongrel
 

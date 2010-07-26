@@ -1,3 +1,194 @@
-\part{Installing}
+\chapter{Installing}
 
-Soon...
+Mongrel2 is designed to build on most modern Unix systems, specifically Linux
+and Mac OSX.  It is written in C (\emph{not Ruby}) and uses fairly vanilla
+C and standard libraries, except for one piece that implements the internal
+coroutines.  Other than this you should be able to compile and install Mongrel2
+with nothing more than \shell{make all install} after you've installed
+all the dependencies.
+
+Now, if when I said dependencies you started to groan at having to install
+software to use my software, well my friend, welcome to the future.  You
+said you don't want people reinventing the wheel right?  Great, that means
+you need to install software for my software to work.  It's either that or
+wait 10 years for me to build everything from scratch like some arrogant
+jackass.
+
+We good now?  Great, let's get started.
+
+\section{Install Dependencies}
+
+To get everything working you will need the following dependencies:
+
+\begin{itemize}
+\item GNU make (gmake).
+\item \href{http://zeromq.org}{ZeroMQ} for the messaging.
+\item \href{http://python.org}{Python 2.6} for the m2sh management and examples.
+\item \href{http://www.sqlite.org/}{SQLite3} and make sure \emph{Python} has the ability to access SQLite3.
+\item \href{http://pypi.python.org/pypi/distribute}{distribute} and \href{http://pypi.python.org/pypi/pip/0.7.2}{pip}.
+\item \href{http://github.com/ellisonbg/pyzmq}{PyZMQ} for the examples.
+\end{itemize}
+
+If you install these things in this order, then everything should be good.
+Typically people run into problems if they do this out of order, for example
+trying to install Mongrel2 before they have distribute and pip installed.
+
+Since every system is different it is difficult to tell you exactly how to
+install required packages for your OS, but here's how I did it on my computer:
+
+
+\begin{code}{Installing Dependencies on ArchLinux}
+\begin{verbatim}
+# install ZeroMQ
+> wget http://www.zeromq.org/local--files/area:download/zeromq-2.0.7.tar.gz
+> tar -xzvf zeromq-2.0.7.tar.gz
+> cd zeromq-2.0.7/
+> ./configure
+> make
+> sudo make install
+
+# install python
+> sudo pacman -S python
+
+# install sqlite3
+> sudo pacman -S sqlite3
+
+# install distribute and pip
+> sudo pacman -S python-pip
+> sudo pip install distribute
+
+# install PyZMQ from github
+> sudo pacman -S git
+> git clone http://github.com/ellisonbg/pyzmq.git
+> sudo python setup.py install
+\end{verbatim}
+\end{code}
+
+If you run into parts that your OS is missing, which is likely on
+Debian and SuSE systems, then you'll have to go and figure out 
+how to install it.
+
+
+\section{Building Mongrel2}
+
+If everything went well you should be able to grab the Mongrel2 source
+and try building it.  There's two ways you can get the source code to
+Mongrel2:
+
+\begin{enumerate}
+\item Install \href{http://fossil-scm.org}{Fossil SCM} and check out the source.
+\item Grab the source .zip release and install it from there.
+\end{enumerate}
+
+\subsection{Using Fossil}
+
+Since it's early in Mongrel2 development we recommend you get fossil and install it
+so you can track the latest fixes and development.  Here's the easiest way to
+do that:
+
+\begin{enumerate}
+\item Go to \href{http://www.fossil-scm.org/download.html}{the fossil download page} and
+    grab the binary that fits your system, or the source tar.gz.
+\item Follow their \href{http://fossil-scm.org/index.html/doc/tip/www/build.wiki}{install instructions}
+    to get it on your system.
+\item If you find that your version of fossil ends up having problems with mongrel2.org let us know since
+    we might need to upgrade.
+\end{enumerate}
+
+Once you have fossil you can then get the Mongrel2 source and open it up:
+
+\begin{code}{Cloning The Mongrel2 Source}
+\begin{verbatim}
+> mkdir ~/fossils
+> fossil clone http://mongrel2.org ~/fossils/mongrel2.fossil
+> mkdir mongrel2
+> cd mongrel2
+> fossil open ~/fossils/mongrel2.fossil
+\end{verbatim}
+\end{code}
+
+Make sure you do this in order (just like with every set of instructions you should follow)
+or else you'll get errors.  For example, if you don't make the \file{~/fossils} directory
+then you'll get an error saying fossil can't open your file to clone.  Well, that's because
+you \emph{didn't make the ~/fossils directory}.  Just pay attention and don't blame fossil
+if you can't.
+
+
+\subsection{Using The .zip File}
+
+If you don't want to install fossil then you will need to get the .zip file
+from our site and install it that way.  Since the code is new you have \emph{no guarantees}
+that this will work at all or that you will get a stable server.  We have not made an
+official release, so using the .zip file is effectively a lame way of avoiding using
+fossil.
+
+\begin{enumerate}
+\item Login as an anonymous user \href{http://mongrel2.org/login}{at mongrel2.org}.
+\item Go to the \href{http://mongrel2.org/info/tip}{latest source tip}.
+\item Click on the "ZIP archive" link to download the latest zip file of the source.
+\item Unzip this file and cd into the resulting directory.
+\end{enumerate}
+
+
+\section{Building And Installing}
+
+Once you have the source ready to go you can build it and then install it with
+one command:  \shell{make all install}
+
+There is no \shell{./configure} for Mongrel2 since we avoid too many OS specific
+differences or shield those away with good feature checks in the code.
+
+The end result of this should be:
+
+\begin{enumerate}
+\item Mongrel2 builds and compiles without errors.
+\item All the unit tests run, please tell us about failures.
+\item The Python libraries that m2sh needs get installed.
+\item The m2sh itself gets installed.
+\item Finally the mongrel2 binary gets installed.
+\end{enumerate}
+
+If any of these stages fail, then you can simply try to fix them and then
+run:  \shell{make clean all install} which will do everything all over again.
+
+The most common error is if you didn't install pip or distribute and insist
+on using your own system's package management.  Do \emph{not} report bugs about
+your own flavor of Linux's stupidity about versions and how it installs Python.
+If you don't want to use the package system every other Python programmer uses
+then you're on your own.
+
+\begin{aside}{Use Virtualenv If You Fear Pip}
+For those who still want to use the package management but want to use pip and
+distribute I suggest you check out \href{http://pypi.python.org/pypi/virtualenv}{virtualenv}.
+What virtualenv does is create a little "chroot install" of just the packages
+you need using pip or distribute.  When you don't want them anymore you can just
+delete one directory and you're fine.
+\end{aside}
+
+
+\section{Testing The Installation}
+
+When you are done you probably want to make sure that it installed correctly.
+There's a test configuration file in \file{tests/config.sqlite} that you can 
+use to try it out:
+
+\begin{code}{First Test Run}
+\begin{verbatim}
+> mkdir run
+> mkdir logs
+> mkdir tmp
+> m2sh dump -db tests/config.sqlite
+> m2sh start -db tests/config.sqlite -host localhost
+\end{verbatim}
+\end{code}
+
+That's it.  Just hit CTRL-c for now and we'll get into playing with this
+setup later.
+
+\section{Up Next}
+
+You now should have a working Mongrel2 system installed and the m2sh configuration
+interface ready to go.  In the rest of this manual we'll be simply learning how
+to do more with Mongrel2 like making our own configs, writing handlers, and other
+fun stuff.
+
