@@ -510,8 +510,41 @@ That should give the idea of how you can use them.
 
 \section{Deployment Logs And Commits}
 
+A very nice feature for people doing operations work is that m2sh keeps track of all the
+commands you run on it while you work, and lets you add little commit logs to the 
+log for documentation later.  These commit logs are then maintained even across 
+\shell{m2sh init} and \shell{m2sh load} commands so you can see what's going on.  They 
+track who did something, what server they did it on, what time they did it, and what they
+did.
 
+To see the logs for your own tests just do \shell{m2sh log -db simple.sqlite} and then
+if you want to add a commit log message you use the \shell{m2sh commit} command.
+Here's an example from mongrel2.org:
 
+\begin{code}{Example Commit Log}
+\begin{verbatim}
+> m2sh log -db config.sqlite 
+[2010-07-18T04:14:53, mongrel2@zedshaw, init_command] /usr/bin/m2sh init -db config.sqlite
+[2010-07-18T04:15:06, mongrel2@zedshaw, load_command] /usr/bin/m2sh load -db config.sqlite -config examples/python/tests/mongrel2_org.py
+[2010-07-18T04:22:06, mongrel2@zedshaw, load_command] /usr/bin/m2sh load -db config.sqlite -config examples/python/tests/mongrel2_org.py
+[2010-07-18T04:23:32, mongrel2@zedshaw, load_command] /usr/bin/m2sh load -db config.sqlite -config examples/python/tests/mongrel2_org.py
+[2010-07-18T04:26:16, mongrel2@zedshaw, upgrade] Latest code for Mongrel2.
+[2010-07-18T18:05:59, mongrel2@zedshaw, load_command] /usr/bin/m2sh load -db config.sqlite -config examples/python/tests/mongrel2_org.py
+[2010-07-18T20:09:01, mongrel2@zedshaw, init_command] /usr/bin/m2sh config -db config.sqlite -config examples/python/tests/mongrel2_org.py
+[2010-07-18T20:09:02, mongrel2@zedshaw, load_command] /usr/bin/m2sh config -db config.sqlite -config examples/python/tests/mongrel2_org.py
+> m2sh commit -db config.sqlite -what mongrel2.org -why "Testing things out."
+\end{verbatim}
+\end{code}
 
+The motivation for this feature is the trend that operations store server configurations
+in revision control systems like git or etckeeper.  This works great for holding the configuration
+files, but it doesn't tell you what happened on each server.  In many cases the configuration
+files also need to be reworked or altered for each deployment.  With the m2sh log and commits
+system you can augment your revision control with deployment action tracking.
 
+Later versions of Mongrel2 will keep small amounts of statistics which will link these actions
+to changes in Mongrel2 behavior like frequent crashing, failures, slowness, or other problems.
+
+Basically, there's nowhere to hide.  Mongrel2 will help operations figure out who needs to
+get fired the next time Twitter goes down.
 
