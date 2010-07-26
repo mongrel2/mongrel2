@@ -1,6 +1,579 @@
 \chapter{Managing}
 
-\section{More Advanced m2sh}
+Mongrel2 is designed to be easy to deploy and \emph{automate} the deployment.
+This is why it uses \href{http://www.sqlite.org/}{SQLite} to store the configuration,
+but \shell{m2sh} as an interface to creating the configuration.  Doing this lets
+you access the configuration using any language that works for you, augment it,
+alter it, migrate it, and automate it.
+
+In this chapter I'm going to show you how to make a basic configuration using
+m2sh and all the commands that are available.  You'll learn how the configuration
+system is structured so that you know what goes where, but in the end it's just
+a simple storage mechanism.
+
+\begin{aside}{Apparently SQL Inspires FUD}
+When I first started talking about Mongrel2 I said I'd store the configuration
+in SQLite and do a Model-View-Controller kind of design.  Immediately people who
+can't read flipped out and though this meant they'd be back in "windows registry hell"
+but with SQL as their only way to access it.  They thought that they'd be stuck writing
+configurations with SQL.  That SQL couldn't possibly configure a web server.
+
+They were wrong on many levels.  Nobody was \emph{ever} going to make \emph{anyone} use
+SQL.  That was repeated over and over, but again, people don't read and love spreading
+FUD.  The SQLite config database is nothing like the Windows Registry.  No other web
+server really uses a true hierarchy, they just cram a relational model into a weirdo
+configuration format.  The real goal was to make a web server that was easy to manage from
+\emph{any} language, and then give people a nice tool to get their job done without
+having to ever touch SQL.  \emph{EVER!}
+
+In the end, what we got despite all this fear mongering is a bad ass configuration
+tool and a design that is simple, elegant, and works fantastic.  If you read that
+Mongrel2 uses SQLite and though this was weird, well welcome to the future.  Sometimes
+it's weird out here (even though, Postfix has been doing this for a decade or more).
+\end{aside}
 
 
+\section{Model-View-Controller}
+
+When you hear Model-View-Controller you think about web applications.  This is a design pattern
+where you place different concerns into different parts of your system and try not to mix them
+too much.  For an interactive application, if you keep the part that stores data (Model) separated
+from the logic (Controller) and use another piece to display and interact with the user (View) then
+it's easier to change the system and adapt it over time to new features.
+
+The power of MVC is simply that these things really are separate orthogonal pieces that get
+ugly if they're mixed together.  There's not math or theory that says why, just lots of 
+experience has told us it's usually a bad idea.  When you start mixing them you find out that
+it's hard to change for new requirements later because you've sprinkled logic all over your
+web pages.  Or you can't update your database because there's all these stored procedures that
+assume the tables are a certain way.
+
+Mongrel2 needed a way to allow you to use various languages and tools to automate its configuration.
+Letting you automate your deployments is the entire point of the server.  The idea was that if we
+gave you the Controller and the Model, then you can craft any \emph{View} you wanted, and there's
+no better Model than a SQL database like SQLite.  It's embeddable, easily accessed from C or any
+language, portable, small, fast enough, and full of all the features you need and then some.
+
+What you are doing when you use m2sh to configure a configuration for Mongrel2 is working with
+a View we've given you to create a Model for the Mongrel2 server to work with.  That's it, and
+you can create your own View if you want.  It could be automated deployment scripts, a web
+interface, monitoring scripts, anything you need.
+
+The point is, if you just want to get Mongrel2 up and running, then use m2sh.  If you want to
+do more advanced stuff, then get into the configuration database schema and see what you can
+do.  The structure of the database very closely matches Mongrel2's internal structure, so 
+understanding that means you understand how Mongrel2 works.  This is a vast improvement over
+other web servers like Apache where you've got no idea why one stanza has to go in a particular
+place, or why information has to be duplicated.
+
+With Mongrel2 it's all right there.
+
+
+\section{Trying m2sh}
+
+To give this configuration system a try you just need to run the test configuration used
+in the unit tests.  Let's try doing a few of the most basic commands with this configuration:
+
+\begin{code}{Sample m2sh Commands}
+\begin{verbatim}
+> m2sh dump -db tests/config.sqlite
+> m2sh servers -db tests/config.sqlite
+> m2sh hosts -db tests/config.sqlite -host localhost
+> m2sh running -db tests/config.sqlite -host localhost
+> m2sh start -db tests/config.sqlite -host localhost
+\end{verbatim}
+\end{code}
+
+At this point you should have seen some raw dumps of the database, lists of servers and hosts,
+seen that mongrel2 is not running, and then started it.  You can find out about all the commands
+and get help for them with \shell{m2sh help} or \shell{ms2h help -for command}.
+
+You can now try doing some simple starting, stopping and reloading using sudo (make sure you CTRL-c
+to exit from the previous start command):
+
+\begin{code}{Starting, Stopping, Reloading}
+\begin{verbatim}
+> m2sh start -db tests/config.sqlite -host localhost -sudo
+> tail logs/error.log
+> m2sh reload -db tests/config.sqlite -host localhost
+> tail logs/error.log
+> curl http://localhost:8080/
+> tail logs/error.log
+> m2sh running -db tests/config.sqlite -host localhost
+> m2sh stop -db tests/config.sqlite -host localhost
+\end{verbatim}
+\end{code}
+
+Awesome right?  Using just this one little Python management script you 
+are able to completely manage a mongrel2 instance without having to hack
+on a config file at all.  But you probably need to know how this is all 
+working anyway.
+
+
+\subsection{What The Hell Just Happened?}
+
+You now have done nearly everything you can to a configuration, but you might not know exactly
+what's going on.  Here's an explanation of what's going on behind the scenes:
+
+\begin{enumerate}
+\item When you did \shell{m2sh start} with the \shell{-sudo} option it actually runs
+    \shell{sudo mongrel2 tests/config.sqlite localhost} to start the server.
+\item Mongrel2 is now running in the background as a daemon process, just like a regular server
+    however what it did was chroot to the current directory and then drop privileges so that 
+    they match the owner of that directory (you).  Use \shell{ps aux} to take a look.
+\item With Mongrel2 running you can look in the logs/error.log file to see what it said.  It should
+    be a bunch of debug logging but check out the messages, nice and detailed.
+\item Next you did a soft reload with \shell{m2sh reload} and you should notice that your mongrel2
+    process was able to load the new config \emph{without restarting}.
+\item However, there's a slight bug that doesn't do the reload until the next request is served, that's
+    what the \shell{curl http://localhost:8080/} was for.
+\item Now that you can see this reload work in the \file{logs/error.log} you used \shell{m2sh running} to
+    see if it's running.  This command is just reading the config database to find out where the PID file
+    is (\file{run/mongrel2.pid}) and then checking if that process is running.
+\item Finally, you tell mongrel2 to stop, and since it dropped privileges to be owned by you, you can do
+    that without having to use sudo.
+\end{enumerate}
+
+All of this is happening by reading the \file{tests/config.sqlite} file and not reading any configuration
+files.  You can now try building your own configuration that matches this one or some others.
+
+
+\section{A Simple Configuration File}
+
+To configure a new config database you'll write a Python file that looks a lot like
+a configuration file.  The advantage of using Python is that you can put actual
+real logic in your configuration file in order to make your configuration smarter.
+A great application of this is when your configuration has to change depending on the
+server it is deployed on, but you want to check the configuration file into a revision
+control system.  With Python you just write your configuration like it's code and
+you're set.
+
+The first thing you need to do is initialize a fresh configuration database to get
+started by using \shell{m2sh init} and then you load your configuration using
+\shell{m2sh load}.  As an example, we'll use the example configuration
+from \file{examples/python/tests/sample_conf.py} to make a simple one:
+
+\begin{code}{Simple Little Config Example}
+\begin{verbatim}
+from mongrel2.config import *
+
+main = Server(
+    uuid="f400bf85-4538-4f7a-8908-67e313d515c2",
+    access_log="/logs/access.log",
+    error_log="/logs/error.log",
+    chroot="./",
+    default_host="localhost",
+    pid_file="/run/mongrel2.pid",
+    port=6767,
+    hosts = [
+        Host(name="localhost", routes={
+            '/tests/': Dir(base='tests/', index_file='index.html',
+                             default_ctype='text/plain')
+        })
+    ]
+)
+
+commit([main])
+\end{verbatim}
+\end{code}
+
+If you aren't familiar with Python then this code might look freaky, but it's really
+simple.  Well get into how its structured in a second, but to load this file
+we would just do this:
+
+\begin{code}{Loading The Simple Config}
+\begin{verbatim}
+> m2sh init -db simple.sqlite
+> m2sh load -db simple.sqlite -config examples/python/tests/sample_conf.py
+> m2sh servers -db simple.sqlite
+> m2sh hosts -db simple.sqlite -host localhost
+> m2sh start -db simple.sqlite -host localhost
+\end{verbatim}
+\end{code}
+
+With this sequence of commands you:
+
+\begin{enumerate}
+\item Create a raw fresh config database name \file{simple.sqlite}
+\item Load the \file{sample_conf.py} into it.
+\item List the servers it has configured.
+\item List the hosts that server has, with what routes it has.
+\item Start this server to try it out.
+\end{enumerate}
+
+By now you should be getting the hang of the pattern here, which is to use
+m2sh and little Python configuration "script" to generate .sqlite files
+that Mongrel2 understands.
+
+\section{How A Config Is Structured}
+
+The base structure of a Mongrel2 configuration is:
+
+\begin{description}
+\item[Server] This is the root of a config, and you can have multiples of these in one database,
+    even though each start command only runs one at a time.
+\item[Host] Servers then have Hosts inside them which say what DNS hostname Mongrel2 should answer for, and
+    you can have multiples of these in each Server.
+\item[Route] Hosts have Routes in them which tells Mongrel2 what to do with URL paths and patterns
+    that match them.  Routes then have \ident{Dir}, \ident{Handler}, and \ident{Proxy} items in them.
+\item[Dir] A Dir serves files out of a directory, full with 304 and ETag support, default content types, 
+    and most of the things you need to serve them.
+\item[Proxy] A Proxy takes requests matching the Route they're attached to and sends them to another
+    HTTP server somewhere else.  Mongrel2 will then act as a full proxy and also try to keep connections
+    open in keep-alive mode if the browser supports it.
+\item[Handler] A Handler is the best part of Mongrel2.  It takes HTTP requests, and turns them into 
+    nicely packed and processed ZeroMQ messages for your asynchronous handlers.
+\end{description}
+
+Each of these nested "objects" then has a set of attributes you can use to configure them, and
+most of them have reasonable defaults.
+
+
+\subsection{Server}
+
+The server is all about telling Mongrel2 where to listen on its port, where to chroot,
+and general server specific deployment gear.
+
+\begin{description}
+\item[uuid] A UUID is used to make sure that each deployed server is unique in your infrastructure.
+    You could easily use any string that's letters, numbers, or - characters.
+\item[chroot] This is the directory that Mongrel2 should chroot to and drop privileges.
+\item[access\_log] The access log file \emph{relative to the chroot}.  Usually starts with a '/'.  Make sure
+    you don't configure your server so that this and other files are accessible, or make this owned by root.
+\item[error\_log] The error log file just like access_log.
+\item[pid\_file] Like the access log, where within the chroot directory is the pid file stored.
+\item[default\_host] The server has a bunch of hosts listed, but it needs to know what the default host is.  This is also
+    used as a convenient way to refer to this Server.
+\item[port] The port the server should listen on for new connections.
+\end{description}
+
+
+\subsection{Host}
+
+A host is matched using a kind of \emph{inverse route} that matches the ending of \ident{Host:}
+headers against a pattern.  You'll see how this works when we talk about routes, but for now
+you just need to know that request to the \ident{Server.port} are routed based on these \ident{Host}
+configurations the \ident{Server} contains.
+
+\begin{description}
+\item[name] The name that you use to talk about this Host in the server configuration.
+\item[matching] This is a pattern that's used to match incoming Host headers for routing purposes.
+\item[server] If you want to set the server separately you can use this attribute.
+\item[maintenance] This will a setting for the future that will let you have Mongrel2 throw up a maintenance page
+    for this host.
+\item[routes] This is a dict (hashmap) of the URL patterns mapped to the targets that should be run.
+\end{description}
+
+
+\subsection{Route}
+
+The \ident{Route} is the workhorse of the whole system.  It uses some very fancy but still simple
+code in Mongrel2 to translate \ident{Host:} headers to \ident{Hosts} and URL paths to \ident{Handlers},
+\ident{Dirs}, and \ident{Proxies}.
+
+\begin{description}
+\item[path] This is path \emph{pattern} that matches a route.  The pattern uses the Mongrel2 pattern langauge
+    which is a reduced version of the Lua pattern matching system.
+\item[reversed] Determines if this pattern is reversed, which is useful for matching file extensions, hostnames,
+    and other naming systems where the ending is really the prefix.  Usually you don't set this.
+\item[host] If you want to set the host manually then you can use this attribute.
+\item[target] This is the target that should handle the request, either a \ident{Dir}, \ident{Handler}, \ident{Proxy}.
+\end{description}
+
+Later on you'll learn about the pattern matching that's used, but it's basically a stripped down version of your
+normal regular expressions, but with a few convenient syntaxes for doing simple string matching.  When you configure
+a route you write something like \file{/images/(.*.jpg)} and the part before the '(' is used as a fast matched
+prefix while the part after is considered a pattern to match.  When a request comes in, Mongrel2 quickly finds the
+longest prefix that matches the URL, and then tests its pattern if there is one.  If the pattern is valid then the
+request goes through.  If not then 404.
+
+
+\subsection{Dir}
+
+A \ident{Dir} is a simple directory serving route target that serves files out of a directory.  It has caching
+built-in, handles if-modified-since, etags, and all the various bizarre HTTP caching mechanisms as RFC accurate
+as possible.  It also has default content types and index files.
+
+\begin{description}
+\item[base]  This is the base directory \emph{from the chroot} that is served.  Files should not
+    be served outside of this base directory even in the chroot.
+\item[index_file] This is the default index file to use if a request doesn't give one.  The \ident{Dir}
+    also will do redirects if a request for a directory doesn't end in a / slash.
+\item[default_ctype] The default Content-Type to use if none matches the MIMEType table.
+\end{description}
+
+Currently we don't offer more parameters for configuration, but eventually you'll be able to tweak more and
+more of the settings to control out Dirs work.
+
+\subsection{Proxy}
+
+A Proxy is a Ghetto.  It is used so that you can use Mongrel2 but not have to throw
+out your existing infrastructure.  Mongrel2 goes to great pains to make sure that it
+implements a fast and dead accurate proxy system internally, but no matter how good it
+is it can't compete with ZeroMQ handlers.  The idea with giving Proxy functionality is
+you can point Mongrel2 at existing servers, and then slowly carve out pieces that 
+will work as handlers.
+
+
+\begin{description}
+\item[addr] The DNS address of the server.
+\item[port] The port to connect to.
+\end{description}
+
+Requests that match a Proxy route are still parsed by Mongrel2's incredibly accurate
+HTTP parser so that your backend servers should not be receiving badly formatted
+HTTP requests.  Responses from a Proxy server however are sent unaltered to the
+browser directly.
+
+
+\subsection{Handler}
+
+Now we get to the best part, the ZeroMQ \ident{Handlers} that will receive asynchronous requests
+from Mongrel2.  You need to use the ZeroMQ syntax for configuring them, but this means with one
+configuration format you can use handlers that are using udp, tcp, unix, or pgm transports.  Most
+testing has been done with tcp transports the most.
+
+\begin{description}
+\item[send_spec]  This is the 0MQ sender specification, something like "tcp://127.0.0.1:9999" will
+    use tcp to connect to a server on 127.0.0.1 at port 9999.  The type of socket used is a DOWNSTREAM
+    socket so that handlers receive messages in round-robin style.
+\item[send_ident] This is an identifier (usually a UUID) that will be used to register the send
+    socket.  Doing this makes it so that messages are persisted between crashes.
+\item[recv_spec] Same as the send spec, but it's for receiving responses from Handlers.  The type of
+    socket used is a SUB socket so that a cluster of Mongrel2 servers will receive handler responses
+    but only the one with the right recv_ident will process it.
+\item[recv_ident] This is another UUID if you want the receive socket to subscribe to its messages.
+    Handlers properly mention the send_ident on all returned messages, so you should either set this
+    to nothing and don't subscribe, or set it to the same as send_ident.
+\end{description}
+
+The interesting thing about the \ident{Handler} configuration is you don't have to say where the
+actual backend handlers live.  Notice you aren't declaring large clusters of proxies, proxy selection
+methods, or anything else other than two 0MQ endpoints and some identifiers?  This is because Mongrel2 is
+\emph{binding} these sockets and listening.  Mongrel2 doesn't actively connect to backends, they connect
+to Mongrel2.  This means if you want to fire up 10 more handlers, you just start them.  No need to restart
+or reconfigure Mongrel2 to make them active.
+
+
+\subsection{Others}
+
+There's also \ident{Log}, \ident{MIMEType}, and \ident{Setting} objects/tables you can work
+with, but we'll get into those later since you don't need to know about them to understand
+the Mongrel2 structure.
+
+
+
+\section{A More Complex Example}
+
+All of this knowledge about the Mongrel2 configuration structure can now be used to take a look at 
+a more complex example.  What we'll do is take a look at this example and I'll just say what's 
+going on, and you try to match what I'm saying to the code.  Here's the file \file{examples/python/tests/mongrel2_org.py}:
+
+\begin{code}{Mongrel2.org Config Script}
+\begin{verbatim}
+from mongrel2.config import *
+
+main = Server(
+    uuid="2f62bd5-9e59-49cd-993c-3b6013c28f05",
+    access_log="/logs/access.log",
+    error_log="/logs/error.log",
+    chroot="./",
+    pid_file="/run/mongrel2.pid",
+    default_host="mongrel2.org",
+    port=6767
+)
+
+
+test_directory = Dir(base='tests/',
+                     index_file='index.html',
+                     default_ctype='text/plain')
+
+web_app_proxy = Proxy(addr='127.0.0.1', port=80)
+
+chat_demo_dir = Dir(base='examples/chat/static/', 
+                    index_file='index.html', 
+                    default_ctype='text/plain')
+
+chat_demo = Handler(send_spec='tcp://127.0.0.1:9999',
+                    send_ident='54c6755b-9628-40a4-9a2d-cc82a816345e',
+                    recv_spec='tcp://127.0.0.1:9998', recv_ident='')
+
+handler_test = Handler(send_spec='tcp://127.0.0.1:9997',
+                       send_ident='34f9ceee-cd52-4b7f-b197-88bf2f0ec378',
+                       recv_spec='tcp://127.0.0.1:9996', recv_ident='')
+
+
+mongrel2 = Host(name="mongrel2.org", routes={
+    '@chat': chat_demo,
+    '/handlertest': handler_test,
+    '/chat/': web_app_proxy,
+    '/': web_app_proxy,
+    '/tests/': test_directory,
+    '/testsmulti/(.*.json)': test_directory,
+    '/chatdemo/': chat_demo_dir,
+    '/static/': chat_demo_dir,
+    '/mp3stream': Handler(
+        send_spec='tcp://127.0.0.1:9995',
+        send_ident='53f9f1d1-1116-4751-b6ff-4fbe3e43d142',
+        recv_spec='tcp://127.0.0.1:9994', recv_ident='')
+})
+
+main.hosts = [mongrel2]
+
+settings = {"zeromq.threads": 4}
+
+commit([main], settings=settings)
+\end{verbatim}
+\end{code}
+
+If you haven't guessed yet, this configuration is what's used on \url{http://mongrel2.org}
+to configure the main test system.  In it we've got the following things to check out:
+
+\begin{enumerate}
+\item Our basic server with a default host of mongrel2.org.
+\item The route targets are separated out into their own variables, unlike the \file{sample_conf.py} file
+    where they're just tossed into one big structure.
+\item First target is a \ident{Dir} that serves up files out of the \file{tests} directory and uses \file{index.html}
+    as its default file.
+\item Next we setup a \ident{Proxy} pointing at the main website's server for testing the proxy.
+\item Then there's a \ident{Dir} target for the \url{http://mongrel2.org:6767/chatdemo/} that we'll look at later.
+\item And you have the \ident{Handler} for the same chat demo that does the actual logic of a chat system.
+\item After that's a little \ident{Handler} for testing out doing HTTP requests to a handler.  Notice how even
+    though the chat demo and this handler use different protocols (chat demo is using JSSockets) you don't have
+    tell mongrel2 that?  It figures it out based on how they're being used rather than by configurations.
+\item With all those handler targets we can now make the \ident{mongrel2} \ident{Host} with all the routes
+    assigned once and nice and clean.  However look how I was lazy and just tossed the mp3stream demo
+    right into the routes dict?  You can totally do this and m2sh will figure it out.
+\item We then assign this \ident{mongrel2} variable as the hosts for the \ident{main} server.
+\item There is also a settings feature which is just a dict of global settings you can tweak.  In this case
+    we're upping the number of threads that 0MQ is using for doing it's operations.
+\item Finally, we commit the whole thing to the database by passing in the servers to save and the settings
+    to use.
+\end{enumerate}
+
+And that my friends is the most complex configuration we have so far.
+
+
+\section{Routing And Host Patterns}
+
+The pattern code was taken from \href{http://www.lua.org/}{Lua} and is some of the simplest 
+code for doing fast pattern matches.  It is very much like regular expressions except it removes
+a lot of features you don't need for routes.  How Mongrel2 to uses them is it takes routes and breaks
+them into a prefix and pattern part.  It then uses routes to find the longest matching prefix and then
+tests the pattern.  If the pattern matches then the route works.  If the route doesn't have a pattern
+then it's assumed to match and you're done.
+
+The only caveat is you have to wrap your pattern parts in parenthesis, but these don't mean anything
+other than to delimit where a pattern starts.  So instead of \shell{/images/.*.jpg} write \shell{/images/(.*.jpg)}
+for it to work right.
+
+Here's the list of characters you can use in your patterns:
+
+\begin{itemize}
+\item \verb|.| (period) all characters.
+\item \verb|\a| Letters.
+\item \verb|\c| Control characters.
+\item \verb|\d| Digits.
+\item \verb|\l| Lowercase letters.
+\item \verb|\p| Punctuation characters.
+\item \verb|\s| Space characters.
+\item \verb|\u| Uppercase letters.
+\item \verb|\w| Alphanumeric characters.
+\item \verb|\x| Hexadecimal digits.
+\item \verb|\z| The 0 character (null terminator).
+\item \verb|\x| Escapes x, so \verb|\| escapes \verb|\|, \verb|\|* escapes *.
+\item \verb|[set]| Just like a regex [] where it is a class of chars, like [0-9] for all digits.
+\item \verb|[^set]| Inverse character set, so [^0-9] is anything not digits.
+\item \verb|x*| Longest match of 0 or more x chars.
+\item \verb|x+| Longest match of 1 or more x chars.
+\item \verb|x-| Shortest match of 0 or more x chars.
+\item \verb|x?| 0 or 1 match of x char.
+\item \verb|\bxy| Balanced match a substring starting with x and ending in y.  So \verb|\|b() will match balanced parenthesis.
+\item \verb|^| The beginning of a string.
+\item \$ End of the string.
+\end{itemize}
+
+Anything that's not listed here just matches that character.  
+
+\begin{aside}{Sorry Unicodians, It's All ASCII}
+Yep, I get it.  You think that everyone should use UTF-8 or some Unicode encoding for everything.
+You despise the dominance of the 'A' in ASCII and hate that you can't put your spoken language
+right in a URL.
+
+Well, I hate to say it, but tough.  Protocols are hard enough without having to
+worry about the bewildering mess that is Unicode.  When you sit down to write a
+network protocol, the last thing you need is a format that's inconsistent, has
+multiple interpretations, can't be properly capitalized or lowercased, and
+requires extra translations steps for every operation.  With ASCII every
+computer just knows what it is and it's the fastest for creating wire protocol
+formats.
+
+This is why, on the internet, you have to do things to URLs to make them ASCII
+like encoding them with \% signs.  It's in the standard and it's the smart
+thing to do.  I don't want to have to know the difference between the various
+accents in your spoken language to route a URL around.  I just want to deal
+with a fixed set of characters and be done with it.  Don't blame me or Mongrel2
+for this, it's just the way the standard is and the way to get a server that is
+stable and works.
+
+Protocols work better when there's less politics in their design.  This means
+you can't put Unicode into your URL patterns.  I mean you can try but the
+behavior is completely undefined.
+
+\end{aside}
+
+
+Here's some example routes you can try to get a feel for the system:
+
+\begin{itemize}
+\item \verb|/images/|  This will just match any path that has /images/ in it without any patterns.
+\item \verb|/| The fastest possible route you can have.
+\item \verb|/images/(.*.jpg)| Match only requests for jpg images in the images directory.  Keep in mind that this
+    isn't actually looking in the directory, it's just matching the \ident{(.*.jpg)} pattern.
+\item \verb|/images/(\a-\-\d+\.jpg)| A more complex example that matches a short sequence of 0 or more letters (remember -), then a dash
+    (\verb|\-| escapes the -), then 1 or long sequence of digits and finally a .jpg) with the \verb|\|. escaping the period.
+\end{itemize}
+
+That should give the idea of how you can use them.
+
+
+\section{Deployment Logs And Commits}
+
+A very nice feature for people doing operations work is that m2sh keeps track of all the
+commands you run on it while you work, and lets you add little commit logs to the 
+log for documentation later.  These commit logs are then maintained even across 
+\shell{m2sh init} and \shell{m2sh load} commands so you can see what's going on.  They 
+track who did something, what server they did it on, what time they did it, and what they
+did.
+
+To see the logs for your own tests just do \shell{m2sh log -db simple.sqlite} and then
+if you want to add a commit log message you use the \shell{m2sh commit} command.
+Here's an example from mongrel2.org:
+
+\begin{code}{Example Commit Log}
+\begin{verbatim}
+> m2sh log -db config.sqlite 
+[2010-07-18T04:14:53, mongrel2@zedshaw, init_command] /usr/bin/m2sh init -db config.sqlite
+[2010-07-18T04:15:06, mongrel2@zedshaw, load_command] /usr/bin/m2sh load -db config.sqlite -config examples/python/tests/mongrel2_org.py
+[2010-07-18T04:22:06, mongrel2@zedshaw, load_command] /usr/bin/m2sh load -db config.sqlite -config examples/python/tests/mongrel2_org.py
+[2010-07-18T04:23:32, mongrel2@zedshaw, load_command] /usr/bin/m2sh load -db config.sqlite -config examples/python/tests/mongrel2_org.py
+[2010-07-18T04:26:16, mongrel2@zedshaw, upgrade] Latest code for Mongrel2.
+[2010-07-18T18:05:59, mongrel2@zedshaw, load_command] /usr/bin/m2sh load -db config.sqlite -config examples/python/tests/mongrel2_org.py
+[2010-07-18T20:09:01, mongrel2@zedshaw, init_command] /usr/bin/m2sh config -db config.sqlite -config examples/python/tests/mongrel2_org.py
+[2010-07-18T20:09:02, mongrel2@zedshaw, load_command] /usr/bin/m2sh config -db config.sqlite -config examples/python/tests/mongrel2_org.py
+> m2sh commit -db config.sqlite -what mongrel2.org -why "Testing things out."
+\end{verbatim}
+\end{code}
+
+The motivation for this feature is the trend that operations store server configurations
+in revision control systems like git or etckeeper.  This works great for holding the configuration
+files, but it doesn't tell you what happened on each server.  In many cases the configuration
+files also need to be reworked or altered for each deployment.  With the m2sh log and commits
+system you can augment your revision control with deployment action tracking.
+
+Later versions of Mongrel2 will keep small amounts of statistics which will link these actions
+to changes in Mongrel2 behavior like frequent crashing, failures, slowness, or other problems.
+
+Basically, there's nowhere to hide.  Mongrel2 will help operations figure out who needs to
+get fired the next time Twitter goes down.
 
