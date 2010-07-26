@@ -38,7 +38,7 @@
   divided into three types of people: Steves, Edsgers, and Knuths. 
   <!--l. 19-->
 
-  <p class="indent">The Steves thinks that the entire internet
+  <p class="indent">The Steves think that the entire internet
   should be a wonderful user experience where all pages are crafted
   with pixel perfect fonts with high gloss visuals and coated with
   the most happy happy joy joy of all possible experiences. To them
@@ -60,7 +60,7 @@
   reject all reality and be crafted from nothing but pure
   mathematics, and hate the fact that the Steves want to run around
   painting the world with useless frivolous colors and words and
-  things that lead to ambiguity and happiness. <!--l. 36-->
+  things that lead to ambiguity and happiness. <!--l. 38-->
 
   <p class="indent">The typography in this book, and the entire
   project, is for the Knuths of the world. I like to think of the
@@ -68,31 +68,31 @@
   of humor. They are the ones who are getting things done while
   still balancing between great typography and solid bug free
   functionality. They aren&rsquo;t zealots but practical straight
-  forward type of people. <!--l. 41-->
+  forward type of people. <!--l. 45-->
 
   <p class="indent">That is why this book is written in TeX and why
-  it uses whatever fonts TeX uses. <!--l. 43-->
+  it uses whatever fonts TeX uses. <!--l. 47-->
 
   <p class="noindent">
 
   <h3 class="likesectionHead"><a id="x1-3000" name=
-  "x1-3000"></a>Conventions</h3><!--l. 45-->
+  "x1-3000"></a>Conventions</h3><!--l. 49-->
 
   <p class="noindent">More specifics about the code format
-  conventions. <!--l. 47-->
+  conventions. <!--l. 51-->
 
   <p class="noindent">
 
   <h3 class="likesectionHead"><a id="x1-4000" name=
-  "x1-4000"></a>Terminology</h3><!--l. 49-->
+  "x1-4000"></a>Terminology</h3><!--l. 53-->
 
   <p class="noindent">Common terminology they should know in the
-  beginning. <!--l. 51-->
+  beginning. <!--l. 55-->
 
   <p class="noindent">
 
   <h3 class="likesectionHead"><a id="x1-5000" name=
-  "x1-5000"></a>Quick Tour</h3><!--l. 53-->
+  "x1-5000"></a>Quick Tour</h3><!--l. 57-->
 
   <p class="noindent">Go through the chapters of the book. 
   <!--l. 19-->
