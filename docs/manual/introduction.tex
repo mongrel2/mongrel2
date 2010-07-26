@@ -1,3 +1,47 @@
 \chapter*{Introduction}
 
-Tell them what Mongrel2 is and why it's cool as hell.
+Mongrel2 is a web server.  HTTP requests come in, HTTP responses go out.
+Request, response.  There is nothing revolutionary or extravagant in what
+Mongrel2 does with a browser, apart from supporting fancy asynchronous socket
+protocols.  To the browser, Mongrel2 is just this nice web server that has
+WebSockets and Flash Sockets in it.  That's it.
+
+What makes Mongrel2 special is how it satisfies these requests in a {\bf
+language agnostic} and {\bf asynchronous} way using a {\bf simple messaging
+protocol} to talk to {\bf applications} not just serve files.  Mongrel2 is also
+designed to be incredibly easy to {\bf automatically manage} it as part of your
+infrastructure.
+
+Other web servers do some of these things, but they either do them in a bastardized
+way or not all of them at once.  Plenty of language specific web servers like Node.js
+and Jetty have asynchronous operation, but then they're not language agnostic
+\footnote{Who the hell wants to code Javascript all day?  Yuck.}.  Other web servers
+will let you talk to any language as a backend, but they insist on using HTTP
+proxying or FastCGI which is {\bf not} friendly to asynchronous operations.
+
+As you'll see in the next section, Mongrel2 tries to get these features right by
+using the right algorithms and technology to make them coexist.
+
+
+\section{The Big Picture}
+
+
+\subsection{Language Agnostic}
+
+
+\subsection{Asyncrhonous}
+
+
+\subsection{Message Protocol}
+
+
+\subsection{Application Oriented}
+
+
+\subsection{Automated Management}
+
+
+\section{Using This Manual}
+
+
+

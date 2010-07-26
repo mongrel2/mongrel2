@@ -24,7 +24,7 @@
   language&rdquo; (aka good entertaining writing) does not belong
   in your software manuals then you should just go read the source
   code and save everyone a huge headache dealing with you. 
-  <!--l. 10-->
+  <!--l. 11-->
 
   <p class="indent">In case you haven&rsquo;t figured it out, this
   book will be fun and slightly obnoxious. That&rsquo;s not
@@ -32,11 +32,11 @@
   you want to read it.
 
   <h3 class="likesectionHead"><a id="x1-2000" name=
-  "x1-2000"></a>Typography</h3><!--l. 16-->
+  "x1-2000"></a>Typography</h3><!--l. 18-->
 
   <p class="noindent">Usually the people running the web can be
   divided into three types of people: Steves, Edsgers, and Knuths. 
-  <!--l. 19-->
+  <!--l. 21-->
 
   <p class="indent">The Steves think that the entire internet
   should be a wonderful user experience where all pages are crafted
@@ -48,7 +48,7 @@
   things like &rdquo;functionality&rdquo;, &rdquo;security&rdquo;,
   and &rdquo;stability&rdquo;. Just like the real Steve Jobs, they
   would rather everything look fantastic and then use awesome
-  marketing to cover up any technical flaws. <!--l. 29-->
+  marketing to cover up any technical flaws. <!--l. 31-->
 
   <p class="indent">The Edsgers feel that the internet is
   completely unsafe and until it is a fully curate and crafted set
@@ -59,7 +59,7 @@
   reject all reality and be crafted from nothing but pure
   mathematics, and hate the fact that the Steves want to run around
   painting the world with useless frivolous colors and words and
-  things that lead to ambiguity and happiness. <!--l. 38-->
+  things that lead to ambiguity and happiness. <!--l. 40-->
 
   <p class="indent">The typography in this book, and the entire
   project, is for the Knuths of the world. I like to think of the
@@ -67,68 +67,132 @@
   of humor. They are the ones who are getting things done while
   still balancing between great typography and solid bug free
   functionality. They aren&rsquo;t zealots but practical straight
-  forward type of people. <!--l. 45-->
+  forward type of people. <!--l. 47-->
 
   <p class="indent">That is why this book is written in TeX and why
-  it uses whatever fonts TeX uses. <!--l. 47-->
-
-  <p class="noindent">
-
-  <h3 class="likesectionHead"><a id="x1-3000" name=
-  "x1-3000"></a>Conventions</h3><!--l. 49-->
-
-  <p class="noindent">More specifics about the code format
-  conventions. <!--l. 51-->
-
-  <p class="noindent">
-
-  <h3 class="likesectionHead"><a id="x1-4000" name=
-  "x1-4000"></a>Terminology</h3><!--l. 53-->
-
-  <p class="noindent">Common terminology they should know in the
-  beginning. <!--l. 55-->
-
-  <p class="noindent">
-
-  <h3 class="likesectionHead"><a id="x1-5000" name=
-  "x1-5000"></a>Quick Tour</h3><!--l. 57-->
-
-  <p class="noindent">Go through the chapters of the book. 
-  <!--l. 19-->
+  it uses whatever fonts TeX uses. <!--l. 19-->
 
   <p class="indent">
 
-  <h2 class="likechapterHead"><a id="x1-6000" name=
-  "x1-6000"></a>Contents</h2>
+  <h2 class="likechapterHead"><a id="x1-3000" name=
+  "x1-3000"></a>Contents</h2>
 
   <div class="tableofcontents">
-    <span class="partToc">I&nbsp;&nbsp;<a href="#x1-8000I" id=
-    "QQ2-1-8" name="QQ2-1-8">Installing</a></span><br>
-    <span class="partToc">II&nbsp;&nbsp;<a href="#x1-9000II" id=
-    "QQ2-1-9" name="QQ2-1-9">Deploying</a></span><br>
-    <span class="partToc">III&nbsp;&nbsp;<a href="#x1-10000III" id=
-    "QQ2-1-10" name="QQ2-1-10">Managing</a></span><br>
-    <span class="partToc">IV&nbsp;&nbsp;<a href="#x1-11000IV" id=
-    "QQ2-1-11" name="QQ2-1-11">Hacking</a></span><br>
-    <span class="partToc">V&nbsp;&nbsp;<a href="#x1-12000V" id=
-    "QQ2-1-12" name="QQ2-1-12">Contributing</a></span>
+    &nbsp;<span class="sectionToc">0.1 <a href="#x1-50000.1" id=
+    "QQ2-1-5" name="QQ2-1-5">The Big Picture</a></span><br>
+    &nbsp;&nbsp;<span class="subsectionToc">0.1.1 <a href=
+    "#x1-60000.1.1" id="QQ2-1-6" name="QQ2-1-6">Language
+    Agnostic</a></span><br>
+    &nbsp;&nbsp;<span class="subsectionToc">0.1.2 <a href=
+    "#x1-70000.1.2" id="QQ2-1-7" name=
+    "QQ2-1-7">Asyncrhonous</a></span><br>
+    &nbsp;&nbsp;<span class="subsectionToc">0.1.3 <a href=
+    "#x1-80000.1.3" id="QQ2-1-8" name="QQ2-1-8">Message
+    Protocol</a></span><br>
+    &nbsp;&nbsp;<span class="subsectionToc">0.1.4 <a href=
+    "#x1-90000.1.4" id="QQ2-1-9" name="QQ2-1-9">Application
+    Oriented</a></span><br>
+    &nbsp;&nbsp;<span class="subsectionToc">0.1.5 <a href=
+    "#x1-100000.1.5" id="QQ2-1-10" name="QQ2-1-10">Automated
+    Management</a></span><br>
+    &nbsp;<span class="sectionToc">0.2 <a href="#x1-110000.2" id=
+    "QQ2-1-11" name="QQ2-1-11">Using This Manual</a></span><br>
+    <span class="partToc">I&nbsp;&nbsp;<a href="#x1-12000I" id=
+    "QQ2-1-12" name="QQ2-1-12">Installing</a></span><br>
+    <span class="partToc">II&nbsp;&nbsp;<a href="#x1-13000II" id=
+    "QQ2-1-13" name="QQ2-1-13">Deploying</a></span><br>
+    <span class="partToc">III&nbsp;&nbsp;<a href="#x1-14000III" id=
+    "QQ2-1-14" name="QQ2-1-14">Managing</a></span><br>
+    <span class="partToc">IV&nbsp;&nbsp;<a href="#x1-15000IV" id=
+    "QQ2-1-15" name="QQ2-1-15">Hacking</a></span><br>
+    <span class="partToc">V&nbsp;&nbsp;<a href="#x1-16000V" id=
+    "QQ2-1-16" name="QQ2-1-16">Contributing</a></span>
   </div>
 
-  <h2 class="likechapterHead"><a id="x1-7000" name=
-  "x1-7000"></a>Introduction</h2><!--l. 3-->
+  <h2 class="likechapterHead"><a id="x1-4000" name=
+  "x1-4000"></a>Introduction</h2><!--l. 3-->
 
-  <p class="noindent">Tell them what Mongrel2 is and why it&rsquo;s
-  cool as hell. <!--l. 1-->
+  <p class="noindent">Mongrel2 is a web server. HTTP requests come
+  in, HTTP responses go out. Request, response. There is nothing
+  revolutionary or extravagant in what Mongrel2 does with a
+  browser, apart from supporting fancy asynchronous socket
+  protocols. To the browser, Mongrel2 is just this nice web server
+  that has WebSockets and Flash Sockets in it. That&rsquo;s it. 
+  <!--l. 9-->
 
-  <p class="indent"><!--l. 1-->
+  <p class="indent">What makes Mongrel2 special is how it satisfies
+  these requests in a <span class="pplb7t-">language</span>
+  <span class="pplb7t-">agnostic</span> and <span class=
+  "pplb7t-">asynchronous</span> way using a <span class=
+  "pplb7t-">simple messaging protocol</span> to talk to
+  <span class="pplb7t-">applications</span> not just serve files.
+  Mongrel2 is also designed to be incredibly easy to <span class=
+  "pplb7t-">automatically manage</span> it as part of your
+  infrastructure. <!--l. 15-->
+
+  <p class="indent">Other web servers do some of these things, but
+  they either do them in a bastardized way or not all of them at
+  once. Plenty of language specific web servers like Node.js and
+  Jetty have asynchronous operation, but then they&rsquo;re not
+  language agnostic <span class="footnote-mark"><a href=
+  "book-final2.html#fn1x0"><sup class=
+  "textsuperscript">1</sup></a></span><a id="x1-4001f1" name=
+  "x1-4001f1"></a>. Other web servers will let you talk to any
+  language as a backend, but they insist on using HTTP proxying or
+  FastCGI which is <span class="pplb7t-">not</span> friendly to
+  asynchronous operations. <!--l. 22-->
+
+  <p class="indent">As you&rsquo;ll see in the next section,
+  Mongrel2 tries to get these features right by using the right
+  algorithms and technology to make them coexist.
+
+  <h3 class="sectionHead"><span class="titlemark">0.1</span> <a id=
+  "x1-50000.1" name="x1-50000.1"></a>The Big Picture</h3>
+  <!--l. 29-->
+
+  <p class="noindent">
+
+  <h4 class="subsectionHead"><span class="titlemark">0.1.1</span>
+  <a id="x1-60000.1.1" name="x1-60000.1.1"></a>Language
+  Agnostic</h4><!--l. 32-->
+
+  <p class="noindent">
+
+  <h4 class="subsectionHead"><span class="titlemark">0.1.2</span>
+  <a id="x1-70000.1.2" name="x1-70000.1.2"></a>Asyncrhonous</h4>
+  <!--l. 35-->
+
+  <p class="noindent">
+
+  <h4 class="subsectionHead"><span class="titlemark">0.1.3</span>
+  <a id="x1-80000.1.3" name="x1-80000.1.3"></a>Message
+  Protocol</h4><!--l. 38-->
+
+  <p class="noindent">
+
+  <h4 class="subsectionHead"><span class="titlemark">0.1.4</span>
+  <a id="x1-90000.1.4" name="x1-90000.1.4"></a>Application
+  Oriented</h4><!--l. 41-->
+
+  <p class="noindent">
+
+  <h4 class="subsectionHead"><span class="titlemark">0.1.5</span>
+  <a id="x1-100000.1.5" name="x1-100000.1.5"></a>Automated
+  Management</h4><!--l. 44-->
+
+  <p class="noindent">
+
+  <h3 class="sectionHead"><span class="titlemark">0.2</span> <a id=
+  "x1-110000.2" name="x1-110000.2"></a>Using This Manual</h3>
+  <!--l. 1-->
 
   <p class="indent"><!--l. 1-->
 
   <p class="indent">
 
   <h1 class="partHead"><span class=
-  "titlemark">Part&nbsp;I<br></span><a id="x1-8000I" name=
-  "x1-8000I"></a>Installing</h1><!--l. 3-->
+  "titlemark">Part&nbsp;I<br></span><a id="x1-12000I" name=
+  "x1-12000I"></a>Installing</h1><!--l. 3-->
 
   <p class="noindent">Soon... <!--l. 1-->
 
@@ -139,8 +203,8 @@
   <p class="indent">
 
   <h1 class="partHead"><span class=
-  "titlemark">Part&nbsp;II<br></span><a id="x1-9000II" name=
-  "x1-9000II"></a>Deploying</h1><!--l. 3-->
+  "titlemark">Part&nbsp;II<br></span><a id="x1-13000II" name=
+  "x1-13000II"></a>Deploying</h1><!--l. 3-->
 
   <p class="noindent">Soon... <!--l. 1-->
 
@@ -151,8 +215,8 @@
   <p class="indent">
 
   <h1 class="partHead"><span class=
-  "titlemark">Part&nbsp;III<br></span><a id="x1-10000III" name=
-  "x1-10000III"></a>Managing</h1><!--l. 3-->
+  "titlemark">Part&nbsp;III<br></span><a id="x1-14000III" name=
+  "x1-14000III"></a>Managing</h1><!--l. 3-->
 
   <p class="noindent">Soon... <!--l. 1-->
 
@@ -163,8 +227,8 @@
   <p class="indent">
 
   <h1 class="partHead"><span class=
-  "titlemark">Part&nbsp;IV<br></span><a id="x1-11000IV" name=
-  "x1-11000IV"></a>Hacking</h1><!--l. 3-->
+  "titlemark">Part&nbsp;IV<br></span><a id="x1-15000IV" name=
+  "x1-15000IV"></a>Hacking</h1><!--l. 3-->
 
   <p class="noindent">Soon... <!--l. 1-->
 
@@ -175,8 +239,8 @@
   <p class="indent">
 
   <h1 class="partHead"><span class=
-  "titlemark">Part&nbsp;V<br></span><a id="x1-12000V" name=
-  "x1-12000V"></a>Contributing</h1><!--l. 3-->
+  "titlemark">Part&nbsp;V<br></span><a id="x1-16000V" name=
+  "x1-16000V"></a>Contributing</h1><!--l. 3-->
 
   <p class="noindent">Soon...
 
