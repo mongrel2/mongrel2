@@ -55,54 +55,54 @@
     &nbsp;<span class="sectionToc">2.6 <a href="#x1-190002.6" id=
     "QQ2-1-24" name="QQ2-1-24">Up Next</a></span><br>
     <span class="chapterToc">3 <a href="#x1-200003" id="QQ2-1-25"
-    name="QQ2-1-25">Deploying</a></span><br>
+    name="QQ2-1-25">Managing</a></span><br>
     &nbsp;<span class="sectionToc">3.1 <a href="#x1-210003.1" id=
-    "QQ2-1-26" name="QQ2-1-26">More Advanced m2sh</a></span><br>
-    <span class="chapterToc">4 <a href="#x1-220004" id="QQ2-1-27"
-    name="QQ2-1-27">Managing</a></span><br>
-    &nbsp;<span class="sectionToc">4.1 <a href="#x1-230004.1" id=
-    "QQ2-1-29" name="QQ2-1-29">Model-View-Controller</a></span><br>
-    &nbsp;<span class="sectionToc">4.2 <a href="#x1-240004.2" id=
-    "QQ2-1-30" name="QQ2-1-30">Trying m2sh</a></span><br>
-    &nbsp;&nbsp;<span class="subsectionToc">4.2.1 <a href=
-    "#x1-250004.2.1" id="QQ2-1-33" name="QQ2-1-33">What The Hell
+    "QQ2-1-27" name="QQ2-1-27">Model-View-Controller</a></span><br>
+    &nbsp;<span class="sectionToc">3.2 <a href="#x1-220003.2" id=
+    "QQ2-1-28" name="QQ2-1-28">Trying m2sh</a></span><br>
+    &nbsp;&nbsp;<span class="subsectionToc">3.2.1 <a href=
+    "#x1-230003.2.1" id="QQ2-1-31" name="QQ2-1-31">What The Hell
     Just Happened?</a></span><br>
-    &nbsp;<span class="sectionToc">4.3 <a href="#x1-260004.3" id=
-    "QQ2-1-34" name="QQ2-1-34">A Simple Configuration
+    &nbsp;<span class="sectionToc">3.3 <a href="#x1-240003.3" id=
+    "QQ2-1-32" name="QQ2-1-32">A Simple Configuration
     File</a></span><br>
-    &nbsp;<span class="sectionToc">4.4 <a href="#x1-270004.4" id=
-    "QQ2-1-37" name="QQ2-1-37">How A Config Is
+    &nbsp;<span class="sectionToc">3.4 <a href="#x1-250003.4" id=
+    "QQ2-1-35" name="QQ2-1-35">How A Config Is
     Structured</a></span><br>
-    &nbsp;&nbsp;<span class="subsectionToc">4.4.1 <a href=
-    "#x1-280004.4.1" id="QQ2-1-38" name=
-    "QQ2-1-38">Server</a></span><br>
-    &nbsp;&nbsp;<span class="subsectionToc">4.4.2 <a href=
-    "#x1-290004.4.2" id="QQ2-1-39" name=
-    "QQ2-1-39">Host</a></span><br>
-    &nbsp;&nbsp;<span class="subsectionToc">4.4.3 <a href=
-    "#x1-300004.4.3" id="QQ2-1-40" name=
-    "QQ2-1-40">Route</a></span><br>
-    &nbsp;&nbsp;<span class="subsectionToc">4.4.4 <a href=
-    "#x1-310004.4.4" id="QQ2-1-41" name=
-    "QQ2-1-41">Dir</a></span><br>
-    &nbsp;&nbsp;<span class="subsectionToc">4.4.5 <a href=
-    "#x1-320004.4.5" id="QQ2-1-42" name=
-    "QQ2-1-42">Proxy</a></span><br>
-    &nbsp;&nbsp;<span class="subsectionToc">4.4.6 <a href=
-    "#x1-330004.4.6" id="QQ2-1-43" name=
-    "QQ2-1-43">Handler</a></span><br>
-    &nbsp;&nbsp;<span class="subsectionToc">4.4.7 <a href=
-    "#x1-340004.4.7" id="QQ2-1-44" name=
-    "QQ2-1-44">Others</a></span><br>
-    &nbsp;<span class="sectionToc">4.5 <a href="#x1-350004.5" id=
-    "QQ2-1-45" name="QQ2-1-45">A More Complex
+    &nbsp;&nbsp;<span class="subsectionToc">3.4.1 <a href=
+    "#x1-260003.4.1" id="QQ2-1-36" name=
+    "QQ2-1-36">Server</a></span><br>
+    &nbsp;&nbsp;<span class="subsectionToc">3.4.2 <a href=
+    "#x1-270003.4.2" id="QQ2-1-37" name=
+    "QQ2-1-37">Host</a></span><br>
+    &nbsp;&nbsp;<span class="subsectionToc">3.4.3 <a href=
+    "#x1-280003.4.3" id="QQ2-1-38" name=
+    "QQ2-1-38">Route</a></span><br>
+    &nbsp;&nbsp;<span class="subsectionToc">3.4.4 <a href=
+    "#x1-290003.4.4" id="QQ2-1-39" name=
+    "QQ2-1-39">Dir</a></span><br>
+    &nbsp;&nbsp;<span class="subsectionToc">3.4.5 <a href=
+    "#x1-300003.4.5" id="QQ2-1-40" name=
+    "QQ2-1-40">Proxy</a></span><br>
+    &nbsp;&nbsp;<span class="subsectionToc">3.4.6 <a href=
+    "#x1-310003.4.6" id="QQ2-1-41" name=
+    "QQ2-1-41">Handler</a></span><br>
+    &nbsp;&nbsp;<span class="subsectionToc">3.4.7 <a href=
+    "#x1-320003.4.7" id="QQ2-1-42" name=
+    "QQ2-1-42">Others</a></span><br>
+    &nbsp;<span class="sectionToc">3.5 <a href="#x1-330003.5" id=
+    "QQ2-1-43" name="QQ2-1-43">A More Complex
     Example</a></span><br>
-    &nbsp;<span class="sectionToc">4.6 <a href="#x1-360004.6" id=
-    "QQ2-1-47" name="QQ2-1-47">Routing And Host
+    &nbsp;<span class="sectionToc">3.6 <a href="#x1-340003.6" id=
+    "QQ2-1-45" name="QQ2-1-45">Routing And Host
     Patterns</a></span><br>
-    &nbsp;<span class="sectionToc">4.7 <a href="#x1-370004.7" id=
-    "QQ2-1-49" name="QQ2-1-49">Deployment Logs And
+    &nbsp;<span class="sectionToc">3.7 <a href="#x1-350003.7" id=
+    "QQ2-1-47" name="QQ2-1-47">Deployment Logs And
     Commits</a></span><br>
+    <span class="chapterToc">4 <a href="#x1-360004" id="QQ2-1-49"
+    name="QQ2-1-49">Deploying</a></span><br>
+    &nbsp;<span class="sectionToc">4.1 <a href="#x1-370004.1" id=
+    "QQ2-1-50" name="QQ2-1-50">More Advanced m2sh</a></span><br>
     <span class="chapterToc">5 <a href="#x1-380005" id="QQ2-1-51"
     name="QQ2-1-51">Hacking</a></span><br>
     &nbsp;<span class="sectionToc">5.1 <a href="#x1-390005.1" id=
@@ -754,17 +754,7 @@
 
   <h2 class="chapterHead"><span class=
   "titlemark">Chapter&nbsp;3</span><br>
-  <a id="x1-200003" name="x1-200003"></a>Deploying</h2>
-
-  <h3 class="sectionHead"><span class="titlemark">3.1</span> <a id=
-  "x1-210003.1" name="x1-210003.1"></a>More Advanced m2sh</h3>
-  <!--l. 1-->
-
-  <p class="indent">
-
-  <h2 class="chapterHead"><span class=
-  "titlemark">Chapter&nbsp;4</span><br>
-  <a id="x1-220004" name="x1-220004"></a>Managing</h2><!--l. 3-->
+  <a id="x1-200003" name="x1-200003"></a>Managing</h2><!--l. 3-->
 
   <p class="noindent">Mongrel2 is designed to be easy to deploy and
   <span class="pplri7t-">automate</span> the deployment. This is
@@ -780,7 +770,7 @@
   system is structured so that you know what goes where, but in the
   end it&rsquo;s just a simple storage mechanism. <!--l. 14-->
 
-  <p class="indent"><a id="x1-22001r2" name="x1-22001r2"></a>
+  <p class="indent"><a id="x1-20001r2" name="x1-20001r2"></a>
   <hr class="float">
 
   <div class="float">
@@ -788,7 +778,7 @@
       <span class="id">Note 2:</span> <span class=
       "content"><span class="pplri7t-">Apparently SQL
       Inspires</span> <span class="pplri7t-">FUD</span></span>
-    </div><!--tex4ht:label?: x1-22001r2 -->
+    </div><!--tex4ht:label?: x1-20001r2 -->
 
     <div class="quote">
       <!--l. 15-->
@@ -827,8 +817,8 @@
   </div>
   <hr class="endfloat">
 
-  <h3 class="sectionHead"><span class="titlemark">4.1</span> <a id=
-  "x1-230004.1" name="x1-230004.1"></a>Model-View-Controller</h3>
+  <h3 class="sectionHead"><span class="titlemark">3.1</span> <a id=
+  "x1-210003.1" name="x1-210003.1"></a>Model-View-Controller</h3>
   <!--l. 38-->
 
   <p class="noindent">When you hear Model-View-Controller you think
@@ -883,15 +873,15 @@
 
   <p class="noindent">
 
-  <h3 class="sectionHead"><span class="titlemark">4.2</span> <a id=
-  "x1-240004.2" name="x1-240004.2"></a>Trying m2sh</h3><!--l. 74-->
+  <h3 class="sectionHead"><span class="titlemark">3.2</span> <a id=
+  "x1-220003.2" name="x1-220003.2"></a>Trying m2sh</h3><!--l. 74-->
 
   <p class="noindent">To give this configuration system a try you
   just need to run the test configuration used in the unit tests.
   Let&rsquo;s try doing a few of the most basic commands with this
   configuration: <!--l. 77-->
 
-  <p class="indent"><a id="x1-24001r5" name="x1-24001r5"></a>
+  <p class="indent"><a id="x1-22001r5" name="x1-22001r5"></a>
   <hr class="float">
 
   <div class="float">
@@ -899,7 +889,7 @@
       <span class="id">Source 5:</span> <span class=
       "content"><span class="pplri7t-">Sample m2sh</span>
       <span class="pplri7t-">Commands</span></span>
-    </div><!--tex4ht:label?: x1-24001r5 -->
+    </div><!--tex4ht:label?: x1-22001r5 -->
 
     <div class="verbatim" id="verbatim-5">
       &gt;&nbsp;m2sh&nbsp;dump&nbsp;-db&nbsp;tests/config.sqlite
@@ -930,7 +920,7 @@
   stopping and reloading using sudo (make sure you CTRL-c to exit
   from the previous start command): <!--l. 94-->
 
-  <p class="indent"><a id="x1-24002r6" name="x1-24002r6"></a>
+  <p class="indent"><a id="x1-22002r6" name="x1-22002r6"></a>
   <hr class="float">
 
   <div class="float">
@@ -938,7 +928,7 @@
       <span class="id">Source 6:</span> <span class=
       "content"><span class="pplri7t-">Starting, Stopping,</span>
       <span class="pplri7t-">Reloading</span></span>
-    </div><!--tex4ht:label?: x1-24002r6 -->
+    </div><!--tex4ht:label?: x1-22002r6 -->
 
     <div class="verbatim" id="verbatim-6">
       &gt;&nbsp;m2sh&nbsp;start&nbsp;-db&nbsp;tests/config.sqlite&nbsp;-host&nbsp;localhost&nbsp;-sudo
@@ -964,8 +954,8 @@
   mongrel2 instance without having to hack on a config file at all.
   But you probably need to know how this is all working anyway.
 
-  <h4 class="subsectionHead"><span class="titlemark">4.2.1</span>
-  <a id="x1-250004.2.1" name="x1-250004.2.1"></a>What The Hell Just
+  <h4 class="subsectionHead"><span class="titlemark">3.2.1</span>
+  <a id="x1-230003.2.1" name="x1-230003.2.1"></a>What The Hell Just
   Happened?</h4><!--l. 115-->
 
   <p class="noindent">You now have done nearly everything you can
@@ -976,35 +966,35 @@
   <p class="indent">
 
   <ol class="enumerate1">
-    <li class="enumerate" id="x1-25002x1">When you did <span class=
+    <li class="enumerate" id="x1-23002x1">When you did <span class=
     "pplri7t-">m2sh start</span> with the <span class=
     "pplri7t-">-sudo</span> option it actually runs <span class=
     "pplri7t-">sudo</span> <span class="pplri7t-">mongrel2
     tests/config.sqlite localhost</span> to start the server.
 
-    <li class="enumerate" id="x1-25004x2">Mongrel2 is now running
+    <li class="enumerate" id="x1-23004x2">Mongrel2 is now running
     in the background as a daemon process, just like a regular
     server however what it did was chroot to the current directory
     and then drop privileges so that they match the owner of that
     directory (you). Use <span class="pplri7t-">ps aux</span> to
     take a look.
 
-    <li class="enumerate" id="x1-25006x3">With Mongrel2 running you
+    <li class="enumerate" id="x1-23006x3">With Mongrel2 running you
     can look in the logs/error.log file to see what it said. It
     should be a bunch of debug logging but check out the messages,
     nice and detailed.
 
-    <li class="enumerate" id="x1-25008x4">Next you did a soft
+    <li class="enumerate" id="x1-23008x4">Next you did a soft
     reload with <span class="pplri7t-">m2sh reload</span> and you
     should notice that your mongrel2 process was able to load the
     new config <span class="pplri7t-">without restarting</span>.
 
-    <li class="enumerate" id="x1-25010x5">However, there&rsquo;s a
+    <li class="enumerate" id="x1-23010x5">However, there&rsquo;s a
     slight bug that doesn&rsquo;t do the reload until the next
     request is served, that&rsquo;s what the <span class=
     "pplri7t-">curl http://localhost:8080/</span> was for.
 
-    <li class="enumerate" id="x1-25012x6">Now that you can see this
+    <li class="enumerate" id="x1-23012x6">Now that you can see this
     reload work in the <span class="pplb7t-">logs/error.log</span>
     you used <span class="pplri7t-">m2sh running</span> to see if
     it&rsquo;s running. This command is just reading the config
@@ -1012,7 +1002,7 @@
     "pplb7t-">run/mongrel2.pid</span>) and then checking if that
     process is running.
 
-    <li class="enumerate" id="x1-25014x7">Finally, you tell
+    <li class="enumerate" id="x1-23014x7">Finally, you tell
     mongrel2 to stop, and since it dropped privileges to be owned
     by you, you can do that without having to use sudo.
   </ol><!--l. 137-->
@@ -1025,8 +1015,8 @@
 
   <p class="noindent">
 
-  <h3 class="sectionHead"><span class="titlemark">4.3</span> <a id=
-  "x1-260004.3" name="x1-260004.3"></a>A Simple Configuration
+  <h3 class="sectionHead"><span class="titlemark">3.3</span> <a id=
+  "x1-240003.3" name="x1-240003.3"></a>A Simple Configuration
   File</h3><!--l. 143-->
 
   <p class="noindent">To configure a new config database
@@ -1048,7 +1038,7 @@
   "pplb7t-">examples/python/tests/sample&#729;conf.py</span> to
   make a simple one: <!--l. 156-->
 
-  <p class="indent"><a id="x1-26001r7" name="x1-26001r7"></a>
+  <p class="indent"><a id="x1-24001r7" name="x1-24001r7"></a>
   <hr class="float">
 
   <div class="float">
@@ -1056,7 +1046,7 @@
       <span class="id">Source 7:</span> <span class=
       "content"><span class="pplri7t-">Simple Little Config</span>
       <span class="pplri7t-">Example</span></span>
-    </div><!--tex4ht:label?: x1-26001r7 -->
+    </div><!--tex4ht:label?: x1-24001r7 -->
 
     <div class="verbatim" id="verbatim-7">
       from&nbsp;mongrel2.config&nbsp;import&nbsp;&#8902; &nbsp;<br>
@@ -1097,7 +1087,7 @@
   get into how its structured in a second, but to load this file we
   would just do this: <!--l. 184-->
 
-  <p class="indent"><a id="x1-26002r8" name="x1-26002r8"></a>
+  <p class="indent"><a id="x1-24002r8" name="x1-24002r8"></a>
   <hr class="float">
 
   <div class="float">
@@ -1105,7 +1095,7 @@
       <span class="id">Source 8:</span> <span class=
       "content"><span class="pplri7t-">Loading The Simple</span>
       <span class="pplri7t-">Config</span></span>
-    </div><!--tex4ht:label?: x1-26002r8 -->
+    </div><!--tex4ht:label?: x1-24002r8 -->
 
     <div class="verbatim" id="verbatim-8">
       &gt;&nbsp;m2sh&nbsp;init&nbsp;-db&nbsp;simple.sqlite
@@ -1127,19 +1117,19 @@
   <p class="indent">With this sequence of commands you:
 
   <ol class="enumerate1">
-    <li class="enumerate" id="x1-26004x1">Create a raw fresh config
+    <li class="enumerate" id="x1-24004x1">Create a raw fresh config
     database name <span class="pplb7t-">simple.sqlite</span>
 
-    <li class="enumerate" id="x1-26006x2">Load the <span class=
+    <li class="enumerate" id="x1-24006x2">Load the <span class=
     "pplb7t-">sample&#729;conf.py</span> into it.
 
-    <li class="enumerate" id="x1-26008x3">List the servers it has
+    <li class="enumerate" id="x1-24008x3">List the servers it has
     configured.
 
-    <li class="enumerate" id="x1-26010x4">List the hosts that
+    <li class="enumerate" id="x1-24010x4">List the hosts that
     server has, with what routes it has.
 
-    <li class="enumerate" id="x1-26012x5">Start this server to try
+    <li class="enumerate" id="x1-24012x5">Start this server to try
     it out.
   </ol><!--l. 204-->
 
@@ -1148,8 +1138,8 @@
   configuration &rdquo;script&rdquo; to generate .sqlite files that
   Mongrel2 understands.
 
-  <h3 class="sectionHead"><span class="titlemark">4.4</span> <a id=
-  "x1-270004.4" name="x1-270004.4"></a>How A Config Is
+  <h3 class="sectionHead"><span class="titlemark">3.4</span> <a id=
+  "x1-250003.4" name="x1-250003.4"></a>How A Config Is
   Structured</h3><!--l. 210-->
 
   <p class="noindent">The base structure of a Mongrel2
@@ -1203,8 +1193,8 @@
 
   <p class="noindent">
 
-  <h4 class="subsectionHead"><span class="titlemark">4.4.1</span>
-  <a id="x1-280004.4.1" name="x1-280004.4.1"></a>Server</h4>
+  <h4 class="subsectionHead"><span class="titlemark">3.4.1</span>
+  <a id="x1-260003.4.1" name="x1-260003.4.1"></a>Server</h4>
   <!--l. 234-->
 
   <p class="noindent">The server is all about telling Mongrel2
@@ -1260,8 +1250,8 @@
 
   <p class="noindent">
 
-  <h4 class="subsectionHead"><span class="titlemark">4.4.2</span>
-  <a id="x1-290004.4.2" name="x1-290004.4.2"></a>Host</h4>
+  <h4 class="subsectionHead"><span class="titlemark">3.4.2</span>
+  <a id="x1-270003.4.2" name="x1-270003.4.2"></a>Host</h4>
   <!--l. 253-->
 
   <p class="noindent">A host is matched using a kind of
@@ -1304,8 +1294,8 @@
 
   <p class="noindent">
 
-  <h4 class="subsectionHead"><span class="titlemark">4.4.3</span>
-  <a id="x1-300004.4.3" name="x1-300004.4.3"></a>Route</h4>
+  <h4 class="subsectionHead"><span class="titlemark">3.4.3</span>
+  <a id="x1-280003.4.3" name="x1-280003.4.3"></a>Route</h4>
   <!--l. 270-->
 
   <p class="noindent">The <span class="pplri7t-">Route</span> is
@@ -1359,8 +1349,8 @@
 
   <p class="noindent">
 
-  <h4 class="subsectionHead"><span class="titlemark">4.4.4</span>
-  <a id="x1-310004.4.4" name="x1-310004.4.4"></a>Dir</h4>
+  <h4 class="subsectionHead"><span class="titlemark">3.4.4</span>
+  <a id="x1-290003.4.4" name="x1-290003.4.4"></a>Dir</h4>
   <!--l. 293-->
 
   <p class="noindent">A <span class="pplri7t-">Dir</span> is a
@@ -1400,8 +1390,8 @@
 
   <p class="noindent">
 
-  <h4 class="subsectionHead"><span class="titlemark">4.4.5</span>
-  <a id="x1-320004.4.5" name="x1-320004.4.5"></a>Proxy</h4>
+  <h4 class="subsectionHead"><span class="titlemark">3.4.5</span>
+  <a id="x1-300003.4.5" name="x1-300003.4.5"></a>Proxy</h4>
   <!--l. 310-->
 
   <p class="noindent">A Proxy is a Ghetto. It is used so that you
@@ -1431,8 +1421,8 @@
 
   <p class="noindent">
 
-  <h4 class="subsectionHead"><span class="titlemark">4.4.6</span>
-  <a id="x1-330004.4.6" name="x1-330004.4.6"></a>Handler</h4>
+  <h4 class="subsectionHead"><span class="titlemark">3.4.6</span>
+  <a id="x1-310003.4.6" name="x1-310003.4.6"></a>Handler</h4>
   <!--l. 331-->
 
   <p class="noindent">Now we get to the best part, the ZeroMQ
@@ -1493,8 +1483,8 @@
 
   <p class="noindent">
 
-  <h4 class="subsectionHead"><span class="titlemark">4.4.7</span>
-  <a id="x1-340004.4.7" name="x1-340004.4.7"></a>Others</h4>
+  <h4 class="subsectionHead"><span class="titlemark">3.4.7</span>
+  <a id="x1-320003.4.7" name="x1-320003.4.7"></a>Others</h4>
   <!--l. 360-->
 
   <p class="noindent">There&rsquo;s also <span class=
@@ -1506,8 +1496,8 @@
 
   <p class="noindent">
 
-  <h3 class="sectionHead"><span class="titlemark">4.5</span> <a id=
-  "x1-350004.5" name="x1-350004.5"></a>A More Complex Example</h3>
+  <h3 class="sectionHead"><span class="titlemark">3.5</span> <a id=
+  "x1-330003.5" name="x1-330003.5"></a>A More Complex Example</h3>
   <!--l. 368-->
 
   <p class="noindent">All of this knowledge about the Mongrel2
@@ -1519,7 +1509,7 @@
   "pplb7t-">examples/python/tests/mongrel2&#729;org.py</span>: 
   <!--l. 372-->
 
-  <p class="indent"><a id="x1-35001r9" name="x1-35001r9"></a>
+  <p class="indent"><a id="x1-33001r9" name="x1-33001r9"></a>
   <hr class="float">
 
   <div class="float">
@@ -1527,7 +1517,7 @@
       <span class="id">Source 9:</span> <span class=
       "content"><span class="pplri7t-">Mongrel2.org Config</span>
       <span class="pplri7t-">Script</span></span>
-    </div><!--tex4ht:label?: x1-35001r9 -->
+    </div><!--tex4ht:label?: x1-33001r9 -->
 
     <div class="verbatim" id="verbatim-9">
       from&nbsp;mongrel2.config&nbsp;import&nbsp;&#8902; &nbsp;<br>
@@ -1625,34 +1615,34 @@
   out:
 
   <ol class="enumerate1">
-    <li class="enumerate" id="x1-35003x1">Our basic server with a
+    <li class="enumerate" id="x1-33003x1">Our basic server with a
     default host of mongrel2.org.
 
-    <li class="enumerate" id="x1-35005x2">The route targets are
+    <li class="enumerate" id="x1-33005x2">The route targets are
     separated out into their own variables, unlike the <span class=
     "pplb7t-">sample&#729;conf.py</span> file where they&rsquo;re
     just tossed into one big structure.
 
-    <li class="enumerate" id="x1-35007x3">First target is a
+    <li class="enumerate" id="x1-33007x3">First target is a
     <span class="pplri7t-">Dir</span> that serves up files out of
     the <span class="pplb7t-">tests</span> directory and uses
     <span class="pplb7t-">index.html</span> as its default file.
 
-    <li class="enumerate" id="x1-35009x4">Next we setup a
+    <li class="enumerate" id="x1-33009x4">Next we setup a
     <span class="pplri7t-">Proxy</span> pointing at the main
     website&rsquo;s server for testing the proxy.
 
-    <li class="enumerate" id="x1-35011x5">Then there&rsquo;s a
+    <li class="enumerate" id="x1-33011x5">Then there&rsquo;s a
     <span class="pplri7t-">Dir</span> target for the <a href=
     "http://mongrel2.org:6767/chatdemo/" class="url"><span class=
     "pcrr7t-">http://mongrel2.org:6767/chatdemo/</span></a> that
     we&rsquo;ll look at later.
 
-    <li class="enumerate" id="x1-35013x6">And you have the
+    <li class="enumerate" id="x1-33013x6">And you have the
     <span class="pplri7t-">Handler</span> for the same chat demo
     that does the actual logic of a chat system.
 
-    <li class="enumerate" id="x1-35015x7">After that&rsquo;s a
+    <li class="enumerate" id="x1-33015x7">After that&rsquo;s a
     little <span class="pplri7t-">Handler</span> for testing out
     doing HTTP requests to a handler. Notice how even though the
     chat demo and this handler use different protocols (chat demo
@@ -1660,23 +1650,23 @@
     figures it out based on how they&rsquo;re being used rather
     than by configurations.
 
-    <li class="enumerate" id="x1-35017x8">With all those handler
+    <li class="enumerate" id="x1-33017x8">With all those handler
     targets we can now make the <span class="pplri7t-">mongrel2
     Host</span> with all the routes assigned once and nice and
     clean. However look how I was lazy and just tossed the
     mp3stream demo right into the routes dict? You can totally do
     this and m2sh will figure it out.
 
-    <li class="enumerate" id="x1-35019x9">We then assign this
+    <li class="enumerate" id="x1-33019x9">We then assign this
     <span class="pplri7t-">mongrel2</span> variable as the hosts
     for the <span class="pplri7t-">main</span> server.
 
-    <li class="enumerate" id="x1-35021x10">There is also a settings
+    <li class="enumerate" id="x1-33021x10">There is also a settings
     feature which is just a dict of global settings you can tweak.
     In this case we&rsquo;re upping the number of threads that 0MQ
     is using for doing it&rsquo;s operations.
 
-    <li class="enumerate" id="x1-35023x11">Finally, we commit the
+    <li class="enumerate" id="x1-33023x11">Finally, we commit the
     whole thing to the database by passing in the servers to save
     and the settings to use.
   </ol><!--l. 454-->
@@ -1684,8 +1674,8 @@
   <p class="indent">And that my friends is the most complex
   configuration we have so far.
 
-  <h3 class="sectionHead"><span class="titlemark">4.6</span> <a id=
-  "x1-360004.6" name="x1-360004.6"></a>Routing And Host
+  <h3 class="sectionHead"><span class="titlemark">3.6</span> <a id=
+  "x1-340003.6" name="x1-340003.6"></a>Routing And Host
   Patterns</h3><!--l. 459-->
 
   <p class="noindent">The pattern code was taken from <a href=
@@ -1788,7 +1778,7 @@
   <p class="indent">Anything that&rsquo;s not listed here just
   matches that character. <!--l. 498-->
 
-  <p class="indent"><a id="x1-36001r3" name="x1-36001r3"></a>
+  <p class="indent"><a id="x1-34001r3" name="x1-34001r3"></a>
   <hr class="float">
 
   <div class="float">
@@ -1796,7 +1786,7 @@
       <span class="id">Note 3:</span> <span class=
       "content"><span class="pplri7t-">Sorry Unicodians, It&rsquo;s
       All</span> <span class="pplri7t-">ASCII</span></span>
-    </div><!--tex4ht:label?: x1-36001r3 -->
+    </div><!--tex4ht:label?: x1-34001r3 -->
 
     <div class="quote">
       <!--l. 499-->
@@ -1869,8 +1859,8 @@
   <p class="indent">That should give the idea of how you can use
   them.
 
-  <h3 class="sectionHead"><span class="titlemark">4.7</span> <a id=
-  "x1-370004.7" name="x1-370004.7"></a>Deployment Logs And
+  <h3 class="sectionHead"><span class="titlemark">3.7</span> <a id=
+  "x1-350003.7" name="x1-350003.7"></a>Deployment Logs And
   Commits</h3><!--l. 542-->
 
   <p class="noindent">A very nice feature for people doing
@@ -1889,7 +1879,7 @@
   "pplri7t-">m2sh commit</span> command. Here&rsquo;s an example
   from mongrel2.org: <!--l. 553-->
 
-  <p class="indent"><a id="x1-37001r10" name="x1-37001r10"></a>
+  <p class="indent"><a id="x1-35001r10" name="x1-35001r10"></a>
   <hr class="float">
 
   <div class="float">
@@ -1897,7 +1887,7 @@
       <span class="id">Source 10:</span> <span class=
       "content"><span class="pplri7t-">Example Commit</span>
       <span class="pplri7t-">Log</span></span>
-    </div><!--tex4ht:label?: x1-37001r10 -->
+    </div><!--tex4ht:label?: x1-35001r10 -->
 
     <div class="verbatim" id="verbatim-10">
       &gt;&nbsp;m2sh&nbsp;log&nbsp;-db&nbsp;config.sqlite
@@ -1943,6 +1933,16 @@
   <p class="indent">Basically, there&rsquo;s nowhere to hide.
   Mongrel2 will help operations figure out who needs to get fired
   the next time Twitter goes down. <!--l. 1-->
+
+  <p class="indent">
+
+  <h2 class="chapterHead"><span class=
+  "titlemark">Chapter&nbsp;4</span><br>
+  <a id="x1-360004" name="x1-360004"></a>Deploying</h2>
+
+  <h3 class="sectionHead"><span class="titlemark">4.1</span> <a id=
+  "x1-370004.1" name="x1-370004.1"></a>More Advanced m2sh</h3>
+  <!--l. 1-->
 
   <p class="indent">
 
