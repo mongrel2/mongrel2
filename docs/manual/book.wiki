@@ -1750,13 +1750,47 @@
   </ul><!--l. 496-->
 
   <p class="indent">Anything that&rsquo;s not listed here just
-  matches that character. <!--l. 499-->
+  matches that character. Here&rsquo;s some example routes you can
+  try to get a feel for the system:
+
+  <dl class="description">
+    <dt class="description"><span class="pplb7t-">/images/</span>
+
+    <dd class="description">This will just match any path that has
+    /images/ in it without any patterns.
+
+    <dt class="description"><span class="pplb7t-">/</span>
+
+    <dd class="description">The fastest possible route you can
+    have.
+
+    <dt class="description"><span class=
+    "pplb7t-">/images/(.*.jpg)</span>
+
+    <dd class="description">Match only requests for jpg images in
+    the images directory. Keep in mind that this isn&rsquo;t
+    actually looking in the directory, it&rsquo;s just matching the
+    <span class="pplri7t-">(.*.jpg)</span> pattern.
+
+    <dt class="description"><span class=
+    "pplb7t-">/images/(%a-%-%d+%.jpg)</span>
+
+    <dd class="description">A more complex example that matches a
+    short sequence of 0 or more letters (remember -), then a dash
+    (%- escapes the -), then 1 or long sequence of digits and
+    finally a .jpg) with the %. escaping the period.
+  </dl><!--l. 508-->
+
+  <p class="indent">That should give the idea of how you can use
+  them. <!--l. 511-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">3.7</span> <a id=
   "x1-350003.7" name="x1-350003.7"></a>Deployment Logs And
-  Commits</h3>
+  Commits</h3><!--l. 1-->
+
+  <p class="indent">
 
   <h2 class="chapterHead"><span class=
   "titlemark">Chapter&nbsp;4</span><br>
