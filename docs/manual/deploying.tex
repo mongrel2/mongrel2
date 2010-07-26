@@ -247,22 +247,119 @@ and general server specific deployment gear.
 \item[port] The port the server should listen on for new connections.
 \end{description}
 
+
 \subsection{Host}
+
+A host is matched using a kind of \emph{inverse route} that matches the ending of \ident{Host:}
+headers against a pattern.  You'll see how this works when we talk about routes, but for now
+you just need to know that request to the \ident{Server.port} are routed based on these \ident{Host}
+configurations the \ident{Server} contains.
+
+\begin{description}
+\item[name] The name that you use to talk about this Host in the server configuration.
+\item[matching] This is a pattern that's used to match incoming Host headers for routing purposes.
+\item[server] If you want to set the server separately you can use this attribute.
+\item[maintenance] This will a setting for the future that will let you have Mongrel2 throw up a maintenance page
+    for this host.
+\item[routes] This is a dict (hashmap) of the URL patterns mapped to the targets that should be run.
+\end{description}
 
 
 \subsection{Route}
 
+The \ident{Route} is the workhorse of the whole system.  It uses some very fancy but still simple
+code in Mongrel2 to translate \ident{Host:} headers to \ident{Hosts} and URL paths to \ident{Handlers},
+\ident{Dirs}, and \ident{Proxies}.
+
+\begin{description}
+\item[path] This is path \emph{pattern} that matches a route.  The pattern uses the Mongrel2 pattern langauge
+    which is a reduced version of the Lua pattern matching system.
+\item[reversed] Determines if this pattern is reversed, which is useful for matching file extensions, hostnames,
+    and other naming systems where the ending is really the prefix.  Usually you don't set this.
+\item[host] If you want to set the host manually then you can use this attribute.
+\item[target] This is the target that should handle the request, either a \ident{Dir}, \ident{Handler}, \ident{Proxy}.
+\end{description}
+
+Later on you'll learn about the pattern matching that's used, but it's basically a stripped down version of your
+normal regular expressions, but with a few convenient syntaxes for doing simple string matching.  When you configure
+a route you write something like \file{/images/(.*.jpg)} and the part before the '(' is used as a fast matched
+prefix while the part after is considered a pattern to match.  When a request comes in, Mongrel2 quickly finds the
+longest prefix that matches the URL, and then tests its pattern if there is one.  If the pattern is valid then the
+request goes through.  If not then 404.
 
 
 \subsection{Dir}
 
+A \ident{Dir} is a simple directory serving route target that serves files out of a directory.  It has caching
+built-in, handles if-modified-since, etags, and all the various bizarre HTTP caching mechanisms as RFC accurate
+as possible.  It also has default content types and index files.
 
+\begin{description}
+\item[base]  This is the base directory \emph{from the chroot} that is served.  Files should not
+    be served outside of this base directory even in the chroot.
+\item[index_file] This is the default index file to use if a request doesn't give one.  The \ident{Dir}
+    also will do redirects if a request for a directory doesn't end in a / slash.
+\item[default_ctype] The default Content-Type to use if none matches the MIMEType table.
+\end{description}
+
+Currently we don't offer more parameters for configuration, but eventually you'll be able to tweak more and
+more of the settings to control out Dirs work.
 
 \subsection{Proxy}
 
+A Proxy is a Ghetto.  It is used so that you can use Mongrel2 but not have to throw
+out your existing infrastructure.  Mongrel2 goes to great pains to make sure that it
+implements a fast and dead accurate proxy system internally, but no matter how good it
+is it can't compete with ZeroMQ handlers.  The idea with giving Proxy functionality is
+you can point Mongrel2 at existing servers, and then slowly carve out pieces that 
+will work as handlers.
+
+
+\begin{description}
+\item[addr] The DNS address of the server.
+\item[port] The port to connect to.
+\end{description}
+
+Requests that match a Proxy route are still parsed by Mongrel2's incredibly accurate
+HTTP parser so that your backend servers should not be receiving badly formatted
+HTTP requests.  Responses from a Proxy server however are sent unaltered to the
+browser directly.
 
 
 \subsection{Handler}
+
+Now we get to the best part, the ZeroMQ \ident{Handlers} that will receive asynchronous requests
+from Mongrel2.  You need to use the ZeroMQ syntax for configuring them, but this means with one
+configuration format you can use handlers that are using udp, tcp, unix, or pgm transports.  Most
+testing has been done with tcp transports the most.
+
+\begin{description}
+\item[send_spec]  This is the 0MQ sender specification, something like "tcp://127.0.0.1:9999" will
+    use tcp to connect to a server on 127.0.0.1 at port 9999.  The type of socket used is a DOWNSTREAM
+    socket so that handlers receive messages in round-robin style.
+\item[send_ident] This is an identifier (usually a UUID) that will be used to register the send
+    socket.  Doing this makes it so that messages are persisted between crashes.
+\item[recv_spec] Same as the send spec, but it's for receiving responses from Handlers.  The type of
+    socket used is a SUB socket so that a cluster of Mongrel2 servers will receive handler responses
+    but only the one with the right recv_ident will process it.
+\item[recv_ident] This is another UUID if you want the receive socket to subscribe to its messages.
+    Handlers properly mention the send_ident on all returned messages, so you should either set this
+    to nothing and don't subscribe, or set it to the same as send_ident.
+\end{description}
+
+The interesting thing about the \ident{Handler} configuration is you don't have to say where the
+actual backend handlers live.  Notice you aren't declaring large clusters of proxies, proxy selection
+methods, or anything else other than two 0MQ endpoints and some identifiers?  This is because Mongrel2 is
+\emph{binding} these sockets and listening.  Mongrel2 doesn't actively connect to backends, they connect
+to Mongrel2.  This means if you want to fire up 10 more handlers, you just start them.  No need to restart
+or reconfigure Mongrel2 to make them active.
+
+
+\subsection{Others}
+
+There's also \ident{Log}, \ident{MIMEType}, and \ident{Setting} objects/tables you can work
+with, but we'll get into those later since you don't need to know about them to understand
+the Mongrel2 structure.
 
 
 

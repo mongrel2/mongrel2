@@ -85,25 +85,28 @@
     &nbsp;&nbsp;<span class="subsectionToc">3.4.6 <a href=
     "#x1-300003.4.6" id="QQ2-1-39" name=
     "QQ2-1-39">Handler</a></span><br>
-    &nbsp;<span class="sectionToc">3.5 <a href="#x1-310003.5" id=
-    "QQ2-1-40" name="QQ2-1-40">A More Complex
+    &nbsp;&nbsp;<span class="subsectionToc">3.4.7 <a href=
+    "#x1-310003.4.7" id="QQ2-1-40" name=
+    "QQ2-1-40">Others</a></span><br>
+    &nbsp;<span class="sectionToc">3.5 <a href="#x1-320003.5" id=
+    "QQ2-1-41" name="QQ2-1-41">A More Complex
     Example</a></span><br>
-    &nbsp;<span class="sectionToc">3.6 <a href="#x1-320003.6" id=
-    "QQ2-1-41" name="QQ2-1-41">Routing And Host
+    &nbsp;<span class="sectionToc">3.6 <a href="#x1-330003.6" id=
+    "QQ2-1-42" name="QQ2-1-42">Routing And Host
     Patterns</a></span><br>
-    &nbsp;<span class="sectionToc">3.7 <a href="#x1-330003.7" id=
-    "QQ2-1-42" name="QQ2-1-42">Deployment Logs And
+    &nbsp;<span class="sectionToc">3.7 <a href="#x1-340003.7" id=
+    "QQ2-1-43" name="QQ2-1-43">Deployment Logs And
     Commits</a></span><br>
-    <span class="chapterToc">4 <a href="#x1-340004" id="QQ2-1-43"
-    name="QQ2-1-43">Managing</a></span><br>
-    &nbsp;<span class="sectionToc">4.1 <a href="#x1-350004.1" id=
-    "QQ2-1-44" name="QQ2-1-44">More Advanced m2sh</a></span><br>
-    <span class="chapterToc">5 <a href="#x1-360005" id="QQ2-1-45"
-    name="QQ2-1-45">Hacking</a></span><br>
-    &nbsp;<span class="sectionToc">5.1 <a href="#x1-370005.1" id=
-    "QQ2-1-46" name="QQ2-1-46">Writing Your Own m2sh</a></span><br>
-    <span class="chapterToc">6 <a href="#x1-380006" id="QQ2-1-47"
-    name="QQ2-1-47">Contributing</a></span>
+    <span class="chapterToc">4 <a href="#x1-350004" id="QQ2-1-44"
+    name="QQ2-1-44">Managing</a></span><br>
+    &nbsp;<span class="sectionToc">4.1 <a href="#x1-360004.1" id=
+    "QQ2-1-45" name="QQ2-1-45">More Advanced m2sh</a></span><br>
+    <span class="chapterToc">5 <a href="#x1-370005" id="QQ2-1-46"
+    name="QQ2-1-46">Hacking</a></span><br>
+    &nbsp;<span class="sectionToc">5.1 <a href="#x1-380005.1" id=
+    "QQ2-1-47" name="QQ2-1-47">Writing Your Own m2sh</a></span><br>
+    <span class="chapterToc">6 <a href="#x1-390006" id="QQ2-1-48"
+    name="QQ2-1-48">Contributing</a></span>
   </div><!--l. 1-->
 
   <p class="indent">
@@ -1212,7 +1215,7 @@
 
     <dd class="description">The port the server should listen on
     for new connections.
-  </dl><!--l. 250-->
+  </dl><!--l. 251-->
 
   <p class="noindent">
 
@@ -1220,71 +1223,289 @@
   <a id="x1-260003.4.2" name="x1-260003.4.2"></a>Host</h4>
   <!--l. 253-->
 
+  <p class="noindent">A host is matched using a kind of
+  <span class="pplri7t-">inverse route</span> that matches the
+  ending of <span class="pplri7t-">Host:</span> headers against a
+  pattern. You&rsquo;ll see how this works when we talk about
+  routes, but for now you just need to know that request to the
+  <span class="pplri7t-">Server.port</span> are routed based on
+  these <span class="pplri7t-">Host</span> configurations the
+  <span class="pplri7t-">Server</span> contains.
+
+  <dl class="description">
+    <dt class="description"><span class="pplb7t-">name</span>
+
+    <dd class="description">The name that you use to talk about
+    this Host in the server configuration.
+
+    <dt class="description"><span class="pplb7t-">matching</span>
+
+    <dd class="description">This is a pattern that&rsquo;s used to
+    match incoming Host headers for routing purposes.
+
+    <dt class="description"><span class="pplb7t-">server</span>
+
+    <dd class="description">If you want to set the server
+    separately you can use this attribute.
+
+    <dt class="description"><span class=
+    "pplb7t-">maintenance</span>
+
+    <dd class="description">This will a setting for the future that
+    will let you have Mongrel2 throw up a maintenance page for this
+    host.
+
+    <dt class="description"><span class="pplb7t-">routes</span>
+
+    <dd class="description">This is a dict (hashmap) of the URL
+    patterns mapped to the targets that should be run.
+  </dl><!--l. 268-->
+
   <p class="noindent">
 
   <h4 class="subsectionHead"><span class="titlemark">3.4.3</span>
   <a id="x1-270003.4.3" name="x1-270003.4.3"></a>Route</h4>
-  <!--l. 257-->
+  <!--l. 270-->
+
+  <p class="noindent">The <span class="pplri7t-">Route</span> is
+  the workhorse of the whole system. It uses some very fancy but
+  still simple code in Mongrel2 to translate <span class=
+  "pplri7t-">Host:</span> headers to <span class=
+  "pplri7t-">Hosts</span> and URL paths to <span class=
+  "pplri7t-">Handlers</span>, <span class="pplri7t-">Dirs</span>,
+  and <span class="pplri7t-">Proxies</span>.
+
+  <dl class="description">
+    <dt class="description"><span class="pplb7t-">path</span>
+
+    <dd class="description">This is path <span class=
+    "pplri7t-">pattern</span> that matches a route. The pattern
+    uses the Mongrel2 pattern langauge which is a reduced version
+    of the Lua pattern matching system.
+
+    <dt class="description"><span class="pplb7t-">reversed</span>
+
+    <dd class="description">Determines if this pattern is reversed,
+    which is useful for matching file extensions, hostnames, and
+    other naming systems where the ending is really the prefix.
+    Usually you don&rsquo;t set this.
+
+    <dt class="description"><span class="pplb7t-">host</span>
+
+    <dd class="description">If you want to set the host manually
+    then you can use this attribute.
+
+    <dt class="description"><span class="pplb7t-">target</span>
+
+    <dd class="description">This is the target that should handle
+    the request, either a <span class="pplri7t-">Dir</span>,
+    <span class="pplri7t-">Handler</span>, <span class=
+    "pplri7t-">Proxy</span>.
+  </dl><!--l. 283-->
+
+  <p class="indent">Later on you&rsquo;ll learn about the pattern
+  matching that&rsquo;s used, but it&rsquo;s basically a stripped
+  down version of your normal regular expressions, but with a few
+  convenient syntaxes for doing simple string matching. When you
+  configure a route you write something like <span class=
+  "pplb7t-">/images/(.*.jpg)</span> and the part before the
+  &rsquo;(&rsquo; is used as a fast matched prefix while the part
+  after is considered a pattern to match. When a request comes in,
+  Mongrel2 quickly finds the longest prefix that matches the URL,
+  and then tests its pattern if there is one. If the pattern is
+  valid then the request goes through. If not then 404. 
+  <!--l. 291-->
 
   <p class="noindent">
 
   <h4 class="subsectionHead"><span class="titlemark">3.4.4</span>
   <a id="x1-280003.4.4" name="x1-280003.4.4"></a>Dir</h4>
-  <!--l. 261-->
+  <!--l. 293-->
+
+  <p class="noindent">A <span class="pplri7t-">Dir</span> is a
+  simple directory serving route target that serves files out of a
+  directory. It has caching built-in, handles if-modified-since,
+  etags, and all the various bizarre HTTP caching mechanisms as RFC
+  accurate as possible. It also has default content types and index
+  files.
+
+  <dl class="description">
+    <dt class="description"><span class="pplb7t-">base</span>
+
+    <dd class="description">This is the base directory <span class=
+    "pplri7t-">from the chroot</span> that is served. Files should
+    not be served outside of this base directory even in the
+    chroot.
+
+    <dt class="description"><span class=
+    "pplb7t-">index&#729;file</span>
+
+    <dd class="description">This is the default index file to use
+    if a request doesn&rsquo;t give one. The <span class=
+    "pplri7t-">Dir</span> also will do redirects if a request for a
+    directory doesn&rsquo;t end in a / slash.
+
+    <dt class="description"><span class=
+    "pplb7t-">default&#729;ctype</span>
+
+    <dd class="description">The default Content-Type to use if none
+    matches the MIMEType table.
+  </dl><!--l. 305-->
+
+  <p class="indent">Currently we don&rsquo;t offer more parameters
+  for configuration, but eventually you&rsquo;ll be able to tweak
+  more and more of the settings to control out Dirs work. 
+  <!--l. 308-->
 
   <p class="noindent">
 
   <h4 class="subsectionHead"><span class="titlemark">3.4.5</span>
   <a id="x1-290003.4.5" name="x1-290003.4.5"></a>Proxy</h4>
-  <!--l. 265-->
+  <!--l. 310-->
+
+  <p class="noindent">A Proxy is a Ghetto. It is used so that you
+  can use Mongrel2 but not have to throw out your existing
+  infrastructure. Mongrel2 goes to great pains to make sure that it
+  implements a fast and dead accurate proxy system internally, but
+  no matter how good it is it can&rsquo;t compete with ZeroMQ
+  handlers. The idea with giving Proxy functionality is you can
+  point Mongrel2 at existing servers, and then slowly carve out
+  pieces that will work as handlers.
+
+  <dl class="description">
+    <dt class="description"><span class="pplb7t-">addr</span>
+
+    <dd class="description">The DNS address of the server.
+
+    <dt class="description"><span class="pplb7t-">port</span>
+
+    <dd class="description">The port to connect to.
+  </dl><!--l. 323-->
+
+  <p class="indent">Requests that match a Proxy route are still
+  parsed by Mongrel2&rsquo;s incredibly accurate HTTP parser so
+  that your backend servers should not be receiving badly formatted
+  HTTP requests. Responses from a Proxy server however are sent
+  unaltered to the browser directly. <!--l. 329-->
 
   <p class="noindent">
 
   <h4 class="subsectionHead"><span class="titlemark">3.4.6</span>
   <a id="x1-300003.4.6" name="x1-300003.4.6"></a>Handler</h4>
-  <!--l. 269-->
+  <!--l. 331-->
+
+  <p class="noindent">Now we get to the best part, the ZeroMQ
+  <span class="pplri7t-">Handlers</span> that will receive
+  asynchronous requests from Mongrel2. You need to use the ZeroMQ
+  syntax for configuring them, but this means with one
+  configuration format you can use handlers that are using udp,
+  tcp, unix, or pgm transports. Most testing has been done with tcp
+  transports the most.
+
+  <dl class="description">
+    <dt class="description"><span class=
+    "pplb7t-">send&#729;spec</span>
+
+    <dd class="description">This is the 0MQ sender specification,
+    something like &rdquo;tcp://127.0.0.1:9999&rdquo; will use tcp
+    to connect to a server on 127.0.0.1 at port 9999. The type of
+    socket used is a DOWNSTREAM socket so that handlers receive
+    messages in round-robin style.
+
+    <dt class="description"><span class=
+    "pplb7t-">send&#729;ident</span>
+
+    <dd class="description">This is an identifier (usually a UUID)
+    that will be used to register the send socket. Doing this makes
+    it so that messages are persisted between crashes.
+
+    <dt class="description"><span class=
+    "pplb7t-">recv&#729;spec</span>
+
+    <dd class="description">Same as the send spec, but it&rsquo;s
+    for receiving responses from Handlers. The type of socket used
+    is a SUB socket so that a cluster of Mongrel2 servers will
+    receive handler responses but only the one with the right
+    recv&#729;ident will process it.
+
+    <dt class="description"><span class=
+    "pplb7t-">recv&#729;ident</span>
+
+    <dd class="description">This is another UUID if you want the
+    receive socket to subscribe to its messages. Handlers properly
+    mention the send&#729;ident on all returned messages, so you
+    should either set this to nothing and don&rsquo;t subscribe, or
+    set it to the same as send&#729;ident.
+  </dl><!--l. 350-->
+
+  <p class="indent">The interesting thing about the <span class=
+  "pplri7t-">Handler</span> configuration is you don&rsquo;t have
+  to say where the actual backend handlers live. Notice you
+  aren&rsquo;t declaring large clusters of proxies, proxy selection
+  methods, or anything else other than two 0MQ endpoints and some
+  identifiers? This is because Mongrel2 is <span class=
+  "pplri7t-">binding</span> these sockets and listening. Mongrel2
+  doesn&rsquo;t actively connect to backends, they connect to
+  Mongrel2. This means if you want to fire up 10 more handlers, you
+  just start them. No need to restart or reconfigure Mongrel2 to
+  make them active. <!--l. 358-->
+
+  <p class="noindent">
+
+  <h4 class="subsectionHead"><span class="titlemark">3.4.7</span>
+  <a id="x1-310003.4.7" name="x1-310003.4.7"></a>Others</h4>
+  <!--l. 360-->
+
+  <p class="noindent">There&rsquo;s also <span class=
+  "pplri7t-">Log</span>, <span class="pplri7t-">MIMEType</span>,
+  and <span class="pplri7t-">Setting</span> objects/tables you can
+  work with, but we&rsquo;ll get into those later since you
+  don&rsquo;t need to know about them to understand the Mongrel2
+  structure. <!--l. 366-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">3.5</span> <a id=
-  "x1-310003.5" name="x1-310003.5"></a>A More Complex Example</h3>
-  <!--l. 272-->
+  "x1-320003.5" name="x1-320003.5"></a>A More Complex Example</h3>
+  <!--l. 369-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">3.6</span> <a id=
-  "x1-320003.6" name="x1-320003.6"></a>Routing And Host
-  Patterns</h3><!--l. 276-->
+  "x1-330003.6" name="x1-330003.6"></a>Routing And Host
+  Patterns</h3><!--l. 373-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">3.7</span> <a id=
-  "x1-330003.7" name="x1-330003.7"></a>Deployment Logs And
-  Commits</h3>
+  "x1-340003.7" name="x1-340003.7"></a>Deployment Logs And
+  Commits</h3><!--l. 1-->
+
+  <p class="indent">
 
   <h2 class="chapterHead"><span class=
   "titlemark">Chapter&nbsp;4</span><br>
-  <a id="x1-340004" name="x1-340004"></a>Managing</h2>
+  <a id="x1-350004" name="x1-350004"></a>Managing</h2>
 
   <h3 class="sectionHead"><span class="titlemark">4.1</span> <a id=
-  "x1-350004.1" name="x1-350004.1"></a>More Advanced m2sh</h3>
+  "x1-360004.1" name="x1-360004.1"></a>More Advanced m2sh</h3>
   <!--l. 1-->
 
   <p class="indent">
 
   <h2 class="chapterHead"><span class=
   "titlemark">Chapter&nbsp;5</span><br>
-  <a id="x1-360005" name="x1-360005"></a>Hacking</h2>
+  <a id="x1-370005" name="x1-370005"></a>Hacking</h2>
 
   <h3 class="sectionHead"><span class="titlemark">5.1</span> <a id=
-  "x1-370005.1" name="x1-370005.1"></a>Writing Your Own m2sh</h3>
+  "x1-380005.1" name="x1-380005.1"></a>Writing Your Own m2sh</h3>
   <!--l. 1-->
 
   <p class="indent">
 
   <h2 class="chapterHead"><span class=
   "titlemark">Chapter&nbsp;6</span><br>
-  <a id="x1-380006" name="x1-380006"></a>Contributing</h2>
+  <a id="x1-390006" name="x1-390006"></a>Contributing</h2>
   <!--l. 3-->
 
   <p class="noindent">Soon...
