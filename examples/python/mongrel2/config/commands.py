@@ -322,10 +322,12 @@ def running_command(db=None, host=None):
         m2sh running -db config.sqlite -host localhost
     """
 
-    pid = get_server_pid(db, host)
     try:
+        pid = get_server_pid(db, host)
         os.kill(pid, 0)
         print "YES: Mongrel2 server %s running at PID %d" % (host, pid)
+    except IOError:
+        print "PID file not found"
     except OSError:
         print "NO: Mongrel2 server %s NOT at PID %d" % (host, pid)
 
@@ -340,6 +342,8 @@ def get_server_pid(db, host):
 
     server = results[0]
     pid_file = os.path.realpath(server.chroot + server.pid_file)
+    if not os.path.isfile(pid_file):
+        raise IOError
     pid = int(open(pid_file, 'r').read())
 
     return pid
