@@ -37,7 +37,7 @@ inline rlim_t get_max_fd() {
 
     if(maxfd == 0 && getrlimit(RLIMIT_NOFILE, &rl) == 0) {
         maxfd = rl.rlim_cur > MAXFD ? MAXFD : rl.rlim_cur;
-        log_info("maximum number of file descriptors is %ud\n", maxfd);
+        log_info("maximum number of file descriptors is %u\n", (unsigned int)maxfd);
     }
 
     return maxfd;

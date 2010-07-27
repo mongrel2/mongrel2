@@ -156,7 +156,7 @@ error:
     return -1;
 }
 
-struct tagbstring DIR_PREFIX_REQUIRED = bsStatic("%b//");
+struct tagbstring DIR_PREFIX_REQUIRED = bsStatic("^/.*/$");
 
 Dir *Dir_create(const char *base, const char *prefix, const char *index_file, const char *default_ctype)
 {
