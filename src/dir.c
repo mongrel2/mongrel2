@@ -156,7 +156,6 @@ error:
     return -1;
 }
 
-struct tagbstring DIR_PREFIX_REQUIRED = bsStatic("^/.*/$");
 
 Dir *Dir_create(const char *base, const char *prefix, const char *index_file, const char *default_ctype)
 {
@@ -174,13 +173,8 @@ Dir *Dir_create(const char *base, const char *prefix, const char *index_file, co
 
     check(blength(dir->prefix) < MAX_DIR_PATH, "Prefix is too long, must be less than %d", MAX_DIR_PATH);
 
-    if(blength(dir->prefix) > 1) {
-        check(bstring_match(dir->prefix, &DIR_PREFIX_REQUIRED),
+    check(bchar(dir->prefix, 0) == '/' && bchar(dir->prefix, blength(dir->prefix)-1) == '/',
                 "Dir route prefix (%s) must start with / and end with / or else you break the internet.", prefix);
-    } else {
-        check(biseqcstr(dir->prefix, "/"),
-                "Dir route prefix should probably be /%s/ for it to work, or just / if that's what you meant.", bdata(dir->prefix));
-    }
 
     dir->index_file = bfromcstr(index_file);
     dir->default_ctype = bfromcstr(default_ctype);

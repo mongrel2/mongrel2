@@ -11,7 +11,7 @@ main = Server(
     port=6767,
     hosts = [
         Host(name="localhost", routes={
-            r'/tests/': Dir(base='tests/', index_file='index.html',
+            r'/t2/': Dir(base='tests/', index_file='index.html',
                              default_ctype='text/plain')
         })
     ]
