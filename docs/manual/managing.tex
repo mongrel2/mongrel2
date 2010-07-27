@@ -151,7 +151,7 @@ you're set.
 The first thing you need to do is initialize a fresh configuration database to get
 started by using \shell{m2sh init} and then you load your configuration using
 \shell{m2sh load}.  As an example, we'll use the example configuration
-from \file{examples/python/tests/sample_conf.py} to make a simple one:
+from \file{examples/python/tests/sample\_conf.py} to make a simple one:
 
 \begin{code}{Simple Little Config Example}
 \begin{verbatim}
@@ -195,7 +195,7 @@ With this sequence of commands you:
 
 \begin{enumerate}
 \item Create a raw fresh config database name \file{simple.sqlite}
-\item Load the \file{sample_conf.py} into it.
+\item Load the \file{sample\_conf.py} into it.
 \item List the servers it has configured.
 \item List the hosts that server has, with what routes it has.
 \item Start this server to try it out.
@@ -240,7 +240,7 @@ and general server specific deployment gear.
 \item[chroot] This is the directory that Mongrel2 should chroot to and drop privileges.
 \item[access\_log] The access log file \emph{relative to the chroot}.  Usually starts with a '/'.  Make sure
     you don't configure your server so that this and other files are accessible, or make this owned by root.
-\item[error\_log] The error log file just like access_log.
+\item[error\_log] The error log file just like access\_log.
 \item[pid\_file] Like the access log, where within the chroot directory is the pid file stored.
 \item[default\_host] The server has a bunch of hosts listed, but it needs to know what the default host is.  This is also
     used as a convenient way to refer to this Server.
@@ -297,9 +297,9 @@ as possible.  It also has default content types and index files.
 \begin{description}
 \item[base]  This is the base directory \emph{from the chroot} that is served.  Files should not
     be served outside of this base directory even in the chroot.
-\item[index_file] This is the default index file to use if a request doesn't give one.  The \ident{Dir}
+\item[index\_file] This is the default index file to use if a request doesn't give one.  The \ident{Dir}
     also will do redirects if a request for a directory doesn't end in a / slash.
-\item[default_ctype] The default Content-Type to use if none matches the MIMEType table.
+\item[default\_ctype] The default Content-Type to use if none matches the MIMEType table.
 \end{description}
 
 Currently we don't offer more parameters for configuration, but eventually you'll be able to tweak more and
@@ -334,17 +334,17 @@ configuration format you can use handlers that are using udp, tcp, unix, or pgm 
 testing has been done with tcp transports the most.
 
 \begin{description}
-\item[send_spec]  This is the 0MQ sender specification, something like "tcp://127.0.0.1:9999" will
+\item[send\_spec]  This is the 0MQ sender specification, something like "tcp://127.0.0.1:9999" will
     use tcp to connect to a server on 127.0.0.1 at port 9999.  The type of socket used is a DOWNSTREAM
     socket so that handlers receive messages in round-robin style.
-\item[send_ident] This is an identifier (usually a UUID) that will be used to register the send
+\item[send\_ident] This is an identifier (usually a UUID) that will be used to register the send
     socket.  Doing this makes it so that messages are persisted between crashes.
-\item[recv_spec] Same as the send spec, but it's for receiving responses from Handlers.  The type of
+\item[recv\_spec] Same as the send spec, but it's for receiving responses from Handlers.  The type of
     socket used is a SUB socket so that a cluster of Mongrel2 servers will receive handler responses
-    but only the one with the right recv_ident will process it.
-\item[recv_ident] This is another UUID if you want the receive socket to subscribe to its messages.
-    Handlers properly mention the send_ident on all returned messages, so you should either set this
-    to nothing and don't subscribe, or set it to the same as send_ident.
+    but only the one with the right recv\_ident will process it.
+\item[recv\_ident] This is another UUID if you want the receive socket to subscribe to its messages.
+    Handlers properly mention the send\_ident on all returned messages, so you should either set this
+    to nothing and don't subscribe, or set it to the same as send\_ident.
 \end{description}
 
 The interesting thing about the \ident{Handler} configuration is you don't have to say where the
@@ -367,7 +367,7 @@ the Mongrel2 structure.
 
 All of this knowledge about the Mongrel2 configuration structure can now be used to take a look at 
 a more complex example.  What we'll do is take a look at this example and I'll just say what's 
-going on, and you try to match what I'm saying to the code.  Here's the file \file{examples/python/tests/mongrel2_org.py}:
+going on, and you try to match what I'm saying to the code.  Here's the file \file{examples/python/tests/mongrel2\_org.py}:
 
 \begin{code}{Mongrel2.org Config Script}
 \begin{verbatim}
@@ -432,7 +432,7 @@ to configure the main test system.  In it we've got the following things to chec
 
 \begin{enumerate}
 \item Our basic server with a default host of mongrel2.org.
-\item The route targets are separated out into their own variables, unlike the \file{sample_conf.py} file
+\item The route targets are separated out into their own variables, unlike the \file{sample\_conf.py} file
     where they're just tossed into one big structure.
 \item First target is a \ident{Dir} that serves up files out of the \file{tests} directory and uses \file{index.html}
     as its default file.
@@ -485,7 +485,7 @@ Here's the list of characters you can use in your patterns:
 \item \verb|\z| The 0 character (null terminator).
 \item \verb|\x| Escapes x, so \verb|\| escapes \verb|\|, \verb|\|* escapes *.
 \item \verb|[set]| Just like a regex [] where it is a class of chars, like [0-9] for all digits.
-\item \verb|[^set]| Inverse character set, so [^0-9] is anything not digits.
+\item \verb|[^set]| Inverse character set, so [\^0-9] is anything not digits.
 \item \verb|x*| Longest match of 0 or more x chars.
 \item \verb|x+| Longest match of 1 or more x chars.
 \item \verb|x-| Shortest match of 0 or more x chars.

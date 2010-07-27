@@ -1035,8 +1035,8 @@
   "pplri7t-">m2sh init</span> and then you load your configuration
   using <span class="pplri7t-">m2sh load</span>. As an example,
   we&rsquo;ll use the example configuration from <span class=
-  "pplb7t-">examples/python/tests/sample&#729;conf.py</span> to
-  make a simple one: <!--l. 156-->
+  "pplb7t-">examples/python/tests/sample</span><span class=
+  "pplb7t-">_conf.py</span> to make a simple one: <!--l. 156-->
 
   <p class="indent"><a id="x1-24001r7" name="x1-24001r7"></a>
   <hr class="float">
@@ -1121,7 +1121,8 @@
     database name <span class="pplb7t-">simple.sqlite</span>
 
     <li class="enumerate" id="x1-24006x2">Load the <span class=
-    "pplb7t-">sample&#729;conf.py</span> into it.
+    "pplb7t-">sample</span><span class="pplb7t-">_conf.py</span>
+    into it.
 
     <li class="enumerate" id="x1-24008x3">List the servers it has
     configured.
@@ -1227,7 +1228,7 @@
     "pplb7t-">error</span><span class="pplb7t-">_log</span>
 
     <dd class="description">The error log file just like
-    access&#729;log.
+    access_log.
 
     <dt class="description"><span class=
     "pplb7t-">pid</span><span class="pplb7t-">_file</span>
@@ -1369,7 +1370,7 @@
     chroot.
 
     <dt class="description"><span class=
-    "pplb7t-">index&#729;file</span>
+    "pplb7t-">index</span><span class="pplb7t-">_file</span>
 
     <dd class="description">This is the default index file to use
     if a request doesn&rsquo;t give one. The <span class=
@@ -1377,7 +1378,7 @@
     directory doesn&rsquo;t end in a / slash.
 
     <dt class="description"><span class=
-    "pplb7t-">default&#729;ctype</span>
+    "pplb7t-">default</span><span class="pplb7t-">_ctype</span>
 
     <dd class="description">The default Content-Type to use if none
     matches the MIMEType table.
@@ -1435,7 +1436,7 @@
 
   <dl class="description">
     <dt class="description"><span class=
-    "pplb7t-">send&#729;spec</span>
+    "pplb7t-">send</span><span class="pplb7t-">_spec</span>
 
     <dd class="description">This is the 0MQ sender specification,
     something like &rdquo;tcp://127.0.0.1:9999&rdquo; will use tcp
@@ -1444,29 +1445,29 @@
     messages in round-robin style.
 
     <dt class="description"><span class=
-    "pplb7t-">send&#729;ident</span>
+    "pplb7t-">send</span><span class="pplb7t-">_ident</span>
 
     <dd class="description">This is an identifier (usually a UUID)
     that will be used to register the send socket. Doing this makes
     it so that messages are persisted between crashes.
 
     <dt class="description"><span class=
-    "pplb7t-">recv&#729;spec</span>
+    "pplb7t-">recv</span><span class="pplb7t-">_spec</span>
 
     <dd class="description">Same as the send spec, but it&rsquo;s
     for receiving responses from Handlers. The type of socket used
     is a SUB socket so that a cluster of Mongrel2 servers will
     receive handler responses but only the one with the right
-    recv&#729;ident will process it.
+    recv_ident will process it.
 
     <dt class="description"><span class=
-    "pplb7t-">recv&#729;ident</span>
+    "pplb7t-">recv</span><span class="pplb7t-">_ident</span>
 
     <dd class="description">This is another UUID if you want the
     receive socket to subscribe to its messages. Handlers properly
-    mention the send&#729;ident on all returned messages, so you
-    should either set this to nothing and don&rsquo;t subscribe, or
-    set it to the same as send&#729;ident.
+    mention the send_ident on all returned messages, so you should
+    either set this to nothing and don&rsquo;t subscribe, or set it
+    to the same as send_ident.
   </dl><!--l. 350-->
 
   <p class="indent">The interesting thing about the <span class=
@@ -1506,8 +1507,8 @@
   example and I&rsquo;ll just say what&rsquo;s going on, and you
   try to match what I&rsquo;m saying to the code. Here&rsquo;s the
   file <span class=
-  "pplb7t-">examples/python/tests/mongrel2&#729;org.py</span>: 
-  <!--l. 372-->
+  "pplb7t-">examples/python/tests/mongrel2</span><span class=
+  "pplb7t-">_org.py</span>: <!--l. 372-->
 
   <p class="indent"><a id="x1-33001r9" name="x1-33001r9"></a>
   <hr class="float">
@@ -1621,8 +1622,8 @@
 
     <li class="enumerate" id="x1-33005x2">The route targets are
     separated out into their own variables, unlike the <span class=
-    "pplb7t-">sample&#729;conf.py</span> file where they&rsquo;re
-    just tossed into one big structure.
+    "pplb7t-">sample</span><span class="pplb7t-">_conf.py</span>
+    file where they&rsquo;re just tossed into one big structure.
 
     <li class="enumerate" id="x1-33007x3">First target is a
     <span class="pplri7t-">Dir</span> that serves up files out of
@@ -1750,7 +1751,8 @@
 
     <li class="itemize"><span class=
     "obeylines-h verb pcrr7t-">&#91;^set&#93;</span> Inverse character set,
-    so &#91;^0-9&#93; is anything not digits.
+    so &#91;<img src="book-final0x.png" alt="^ 0 " class="circ">-9&#93; is
+    anything not digits.
 
     <li class="itemize"><span class=
     "obeylines-h verb pcrr7t-">x&#8902;</span> Longest match of 0
