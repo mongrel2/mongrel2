@@ -5,6 +5,9 @@
 #include <stdio.h>
 #include <signal.h>
 #include <sys/socket.h>
+#include <sys/resource.h>
+
+#include <dbg.h>
 
 enum
 {
@@ -27,6 +30,18 @@ void *ZMQ_CTX = NULL;
 #ifndef MSG_NOSIGNAL
 #define MSG_NOSIGNAL 0
 #endif
+
+inline rlim_t get_max_fd() {
+    static rlim_t maxfd = 0;
+    struct rlimit rl;
+
+    if(maxfd == 0 && getrlimit(RLIMIT_NOFILE, &rl) == 0) {
+        maxfd = rl.rlim_cur > MAXFD ? MAXFD : rl.rlim_cur;
+        log_info("maximum number of file descriptors is %ud\n", maxfd);
+    }
+
+    return maxfd;
+}
 
 void mqinit(int threads)
 {
@@ -185,7 +200,7 @@ _wait(void *socket, int fd, int rw)
         taskcreate(fdtask, 0, FDSTACK);
     }
 
-    if(npollfd >= MAXFD){
+    if(npollfd >= get_max_fd()){
         errno = EBUSY;
         return -1;
     }
