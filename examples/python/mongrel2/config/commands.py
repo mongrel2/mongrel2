@@ -7,6 +7,7 @@ import getpass
 import sys
 import os
 import signal
+from sqlite3 import OperationalError
 
 
 def shell_command():
@@ -76,18 +77,26 @@ def dump_command(db=None):
     """
 
     print "LOADING DB: ", db
+
+    try:
+        if not (os.path.isfile(db) and os.access(db, os.R_OK)):
+            raise IOError
     
-    store = model.begin(db)
-    servers = store.find(model.Server)
+        store = model.begin(db)
+        servers = store.find(model.Server)
 
-    for server in servers:
-        print server
+        for server in servers:
+            print server
 
-        for host in server.hosts:
-            print "\t", host
+            for host in server.hosts:
+                print "\t", host
 
-            for route in host.routes:
-                print "\t\t", route
+                for route in host.routes:
+                    print "\t\t", route
+    except IOError:
+        print "%s not readable" % db
+    except OperationalError, exc:
+        print "SQLite error: %s" % exc
 
 
 def uuid_command(hex=False):
@@ -112,47 +121,63 @@ def servers_command(db=None):
 
         m2sh servers -db config.sqlite
     """
-    store = model.begin(db)
-    servers = store.find(model.Server)
-    for server in servers:
-        print "-------"
-        print server.default_host, server.uuid
+    try:
+        if not os.path.isfile(db):
+            raise IOError
 
-        for host in server.hosts:
-            print "\t", host.id, ':', host.name
+        store = model.begin(db)
+        servers = store.find(model.Server)
+        for server in servers:
+            print "-------"
+            print server.default_host, server.uuid
+
+            for host in server.hosts:
+                print "\t", host.id, ':', host.name
+    except IOError:
+        print "%s not readable" % db
+    except OperationalError, exc:
+        print "SQLite error: %s" % exc
 
 
 def hosts_command(db=None, uuid="", host=""):
     """
     List all the hosts in the given server identified by UUID or host.
 
-        m2sh servers -db config.sqlite -uuid f400bf85-4538-4f7a-8908-67e313d515c2
-        m2sh servers -db config.sqlite -host localhost
+        m2sh hosts -db config.sqlite -uuid f400bf85-4538-4f7a-8908-67e313d515c2
+        m2sh hosts -db config.sqlite -host localhost
 
     The -host parameter is the default_host for the server.
     """
-    store = model.begin(db)
-    results = None
+    try:
+        if not (os.path.isfile(db) and os.access(db, os.R_OK)):
+            raise IOError
 
-    if uuid:
-        results = store.find(model.Server, model.Server.uuid == unicode(uuid))
-    elif host:
-        results = store.find(model.Server, model.Server.default_host == unicode(host))
-    else:
-        print "ERROR: Must give a -host or -uuid."
-        return
+        store = model.begin(db)
+        results = None
 
-    if results.count():
-        server = results[0]
-        hosts = store.find(model.Host, model.Host.server_id == server.id)
-        for host in hosts:
-            print "--------"
-            print host, ":"
-            for route in host.routes:
-                print "\t", route.path, ':', route.target
+        if uuid:
+            results = store.find(model.Server, model.Server.uuid == unicode(uuid))
+        elif host:
+            results = store.find(model.Server, model.Server.default_host == unicode(host))
+        else:
+            print "ERROR: Must give a -host or -uuid."
+            return
+
+        if results.count():
+            server = results[0]
+            hosts = store.find(model.Host, model.Host.server_id == server.id)
+            for host in hosts:
+                print "--------"
+                print host, ":"
+                for route in host.routes:
+                    print "\t", route.path, ':', route.target
             
-    else:
-        print "No servers found."
+        else:
+            print "No servers found."
+    except IOError:
+        print "%s not readable" % db
+    except OperationalError, exc:
+        print "SQLite error: %s" % exc
 
 
 def init_command(db=None):
@@ -172,10 +197,17 @@ def init_command(db=None):
         model.store.close()
         model.store = None
 
-    conn = sqlite3.connect(db)
-    conn.executescript(sql)
+    try:
+        if not os.access(db, os.W_OK):
+            raise IOError
+        conn = sqlite3.connect(db)
+        conn.executescript(sql)
    
-    commit_command(db=db, what="init_command", why=" ".join(sys.argv))
+        commit_command(db=db, what="init_command", why=" ".join(sys.argv))
+    except IOError:
+        print "File not writable: %s" % db
+    except OperationalError, exc:
+        print "Error: %s" % exc
 
 
 def load_command(db=None, config=None, clear=True):
@@ -188,10 +220,18 @@ def load_command(db=None, config=None, clear=True):
     safer later on.
     """
     import imp
-    model.begin(db, clear=clear)
-    imp.load_source('mongrel2_config_main', config)
+    try:
+        if not (os.path.isfile(db) and os.access(db, os.R_OK)):
+            raise IOError 
 
-    commit_command(db=db, what="load_command", why=" ".join(sys.argv))
+        model.begin(db, clear=clear)
+        imp.load_source('mongrel2_config_main', config)
+
+        commit_command(db=db, what="load_command", why=" ".join(sys.argv))
+    except IOError:
+        print "%s not readable" % db
+    except OperationalError, exc:
+        print "SQLite error: %s" % exc
 
 
 def config_command(db=None, config=None, clear=True):
