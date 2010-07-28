@@ -26,9 +26,16 @@ int Action_exec(Action *action, Profile *prof)
             bdata(action->depends));
 
     pid_t pid = fork();
-    check(pid >= 0, "fork failed, WTF.  How can fork fail?");
+    check(pid >= 0, "Fork failed, WTF.  How can fork fail?");
 
     if(pid == 0) {
+        rc = Unixy_drop_priv(action->profile_dir);
+
+        if(rc != 0) {
+            log_err("Not fatal, but we couldn't drop priv for %s",
+                    bdata(action->name));
+        }
+
         rc = execle(bdata(prof->command), bdata(prof->command), NULL, environ);
         check(rc != -1, "Failed to exec command: %s", bdata(prof->command));
     } else {
@@ -194,6 +201,9 @@ void taskmain(int argc, char *argv[])
 
     rc = chdir(argv[1]);
     check(rc == 0, "Couldn't change to %s profile dir.", argv[1]);
+
+    rc = Unixy_pid_file(pid_file);
+    check(rc == 0, "Failed to make the PID file: %s", bdata(pid_file));
 
     FILE *log = fopen("error.log", "a+");
     check(log, "Couldn't open error.log");
