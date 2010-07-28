@@ -198,7 +198,7 @@ def init_command(db=None):
         model.store = None
 
     try:
-        if not os.access(db, os.W_OK):
+        if os.path.isfile(db) and not os.access(db, os.W_OK):
             raise IOError
         conn = sqlite3.connect(db)
         conn.executescript(sql)
