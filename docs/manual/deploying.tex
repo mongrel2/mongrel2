@@ -1,6 +1,60 @@
 \chapter{Deploying}
 
-\section{More Advanced m2sh}
+It's not possible to tell you how to create a deployment of Mongrel2 for your
+environment.  You probably have your own special brand of crazy that you are
+forced to work with (or that you created) and you'll need to bend Mongrel2 to
+your will.  That's fine, Mongrel2 should be fairly flexible to deployments
+within a fixed set of design considerations.
+
+What this chapter will do is show you how \emph{I} currently deploy Mongrel2 in
+a few scenarios.  This way you can see how it's being done for my small setup,
+and then extrapolate from there for your own.  As we come up with more best
+deployment and automation we'll update this chapter to reflect them.
+
+Another important thing this chapter will do is give you a set of recipes for
+common thing you'll need to do at times.
+
+
+\section{Mongrel2 Deployment Requirements}
+
+It may seem obvious but I'll go over the things you probably need in order to
+continue on in this section:
+
+\begin{description}
+\item [Mongrel2] I know, hard to believe, but you actually need to have Mongrel2 installed.
+\item [m2sh] Again, not sure why but some folks think they don't need this.  Unless you've
+    got your own written you need \shell{m2sh}.
+\item [Python] Obviously if you have \shell{m2sh} then you have Python, but some systems
+    (like Debian) don't install all of Python.  Make sure your Python setup is good.
+\item [root] You'll need root access on your box.  Either through sudo or some other means.
+\item [Basic Python Coding] Right now you should be able to do some basic Python.  If you can't 
+    code Python then you can probably muddle through this and you may learn something, but learning
+    Python will be important later.  If you don't know Python and want a good introduction then I
+    will pimp my book \href{http://learnpythonthehardway.org}{Learn Python The Hard Way} which is a
+    totally free book that teaches Python as if you know nothing.  Give it a try, or any of the other
+    free books I mention, but \emph{don't} read "Dive Into Python" as it is a horrible introduction.
+\end{description}
+
+That will get you going at first, and as we go we'll do various other setups to 
+get our application working.
+
+
+\section{The mongrel2.org Configuration}
+
+The configuration we'll go over is the one we use at \url{http://mongrel2.org:6767/}
+to run all the demos.  This server is a test server that can go down if we aren't 
+careful so the main site doesn't totally run on it yet.  What we'll be configuring
+and deploying is:
+
+\begin{description}
+\item [mongrel2 on port 6767] A mongrel2 server on port 6767.
+\item [deployment chroot] Where this mongrel2 will live.
+\item [chat demo] Starting the Python backend and the configuring the directory with the
+    frontend code in it.
+\item [handlertest] This will be a basic test that just echos back HTTP requests.
+\item [tests directory] A simple Dir target that serves files out of tests.
+\item [mp3streamer] An mp3streamer applicatio
+\end{description}
 
 
 
