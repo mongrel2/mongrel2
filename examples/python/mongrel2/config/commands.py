@@ -121,10 +121,11 @@ def servers_command(db=None):
 
         m2sh servers -db config.sqlite
     """
-    try:
-        if not os.path.isfile(db):
-            raise IOError
+    if not os.path.isfile(db):
+        print "ERROR: Cannot access database file %s" % db
+        return
 
+    try:
         store = model.begin(db)
         servers = store.find(model.Server)
         for server in servers:
@@ -133,8 +134,7 @@ def servers_command(db=None):
 
             for host in server.hosts:
                 print "\t", host.id, ':', host.name
-    except IOError:
-        print "%s not readable" % db
+
     except OperationalError, exc:
         print "SQLite error: %s" % exc
 
@@ -148,10 +148,13 @@ def hosts_command(db=None, uuid="", host=""):
 
     The -host parameter is the default_host for the server.
     """
-    try:
-        if not (os.path.isfile(db) and os.access(db, os.R_OK)):
-            raise IOError
 
+
+    if not (os.path.isfile(db) and os.access(db, os.R_OK)):
+        print "Cannot read database file %s" % db
+        return
+
+    try:
         store = model.begin(db)
         results = None
 
@@ -174,8 +177,6 @@ def hosts_command(db=None, uuid="", host=""):
             
         else:
             print "No servers found."
-    except IOError:
-        print "%s not readable" % db
     except OperationalError, exc:
         print "SQLite error: %s" % exc
 
@@ -197,15 +198,15 @@ def init_command(db=None):
         model.store.close()
         model.store = None
 
+    if os.path.isfile(db) and not os.access(db, os.W_OK):
+        print "Cannot access database file %s" % db
+        return
+
     try:
-        if os.path.isfile(db) and not os.access(db, os.W_OK):
-            raise IOError
         conn = sqlite3.connect(db)
         conn.executescript(sql)
    
         commit_command(db=db, what="init_command", why=" ".join(sys.argv))
-    except IOError:
-        print "File not writable: %s" % db
     except OperationalError, exc:
         print "Error: %s" % exc
 
@@ -220,16 +221,17 @@ def load_command(db=None, config=None, clear=True):
     safer later on.
     """
     import imp
+
+    if not (os.path.isfile(db) and os.access(db, os.R_OK)):
+        print "Cannot access database file %s" % db
+        return
+
     try:
-        if not (os.path.isfile(db) and os.access(db, os.R_OK)):
-            raise IOError 
 
         model.begin(db, clear=clear)
         imp.load_source('mongrel2_config_main', config)
 
         commit_command(db=db, what="load_command", why=" ".join(sys.argv))
-    except IOError:
-        print "%s not readable" % db
     except OperationalError, exc:
         print "SQLite error: %s" % exc
 
@@ -333,6 +335,8 @@ def stop_command(db=None, host=None, murder=False):
     for some dead connections and you want it to just quit.
     """
     pid = get_server_pid(db, host)
+    if not pid: return
+
     sig = signal.SIGTERM if murder else signal.SIGINT
 
     os.kill(pid, sig)
@@ -352,6 +356,8 @@ def reload_command(db=None, host=None):
     then this is what you do.
     """
     pid = get_server_pid(db, host)
+    if not pid: return
+
     os.kill(pid, signal.SIGHUP)
 
 
@@ -362,12 +368,12 @@ def running_command(db=None, host=None):
         m2sh running -db config.sqlite -host localhost
     """
 
+    pid = get_server_pid(db, host)
+    if not pid: return
+
     try:
-        pid = get_server_pid(db, host)
         os.kill(pid, 0)
         print "YES: Mongrel2 server %s running at PID %d" % (host, pid)
-    except IOError:
-        print "PID file not found"
     except OSError:
         print "NO: Mongrel2 server %s NOT at PID %d" % (host, pid)
 
@@ -378,12 +384,15 @@ def get_server_pid(db, host):
 
     if results.count() == 0:
         print "No servers found."
-        return
+        return None
 
     server = results[0]
     pid_file = os.path.realpath(server.chroot + server.pid_file)
+
     if not os.path.isfile(pid_file):
-        raise IOError
+        print "ERROR: PID file %s not found." % pid_file
+        return None
+
     pid = int(open(pid_file, 'r').read())
 
     return pid
