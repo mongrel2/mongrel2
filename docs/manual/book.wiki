@@ -139,8 +139,60 @@
     "QQ2-1-75" name="QQ2-1-75">Further Improvements</a></span><br>
     <span class="chapterToc">5 <a href="#x1-500005" id="QQ2-1-76"
     name="QQ2-1-76">Hacking</a></span><br>
-    <span class="chapterToc">6 <a href="#x1-510006" id="QQ2-1-78"
-    name="QQ2-1-78">Contributing</a></span>
+    &nbsp;<span class="sectionToc">5.1 <a href="#x1-510005.1" id=
+    "QQ2-1-78" name="QQ2-1-78">Front-end Goodies</a></span><br>
+    &nbsp;&nbsp;<span class="subsectionToc">5.1.1 <a href=
+    "#x1-520005.1.1" id="QQ2-1-79" name=
+    "QQ2-1-79">HTTP</a></span><br>
+    &nbsp;&nbsp;<span class="subsectionToc">5.1.2 <a href=
+    "#x1-530005.1.2" id="QQ2-1-80" name=
+    "QQ2-1-80">Proxying</a></span><br>
+    &nbsp;&nbsp;<span class="subsectionToc">5.1.3 <a href=
+    "#x1-540005.1.3" id="QQ2-1-81" name=
+    "QQ2-1-81">JSSocket</a></span><br>
+    &nbsp;&nbsp;<span class="subsectionToc">5.1.4 <a href=
+    "#x1-550005.1.4" id="QQ2-1-82" name="QQ2-1-82">Long
+    Poll</a></span><br>
+    &nbsp;&nbsp;<span class="subsectionToc">5.1.5 <a href=
+    "#x1-560005.1.5" id="QQ2-1-83" name=
+    "QQ2-1-83">Streaming</a></span><br>
+    &nbsp;&nbsp;<span class="subsectionToc">5.1.6 <a href=
+    "#x1-570005.1.6" id="QQ2-1-84" name="QQ2-1-84">N:M
+    Responses</a></span><br>
+    &nbsp;<span class="sectionToc">5.2 <a href="#x1-580005.2" id=
+    "QQ2-1-85" name="QQ2-1-85">Introduction to 0MQ</a></span><br>
+    &nbsp;<span class="sectionToc">5.3 <a href="#x1-590005.3" id=
+    "QQ2-1-86" name="QQ2-1-86">Handlers And Formats</a></span><br>
+    &nbsp;<span class="sectionToc">5.4 <a href="#x1-600005.4" id=
+    "QQ2-1-87" name="QQ2-1-87">Python Handler API</a></span><br>
+    &nbsp;<span class="sectionToc">5.5 <a href="#x1-610005.5" id=
+    "QQ2-1-88" name="QQ2-1-88">Basic Handler Demo</a></span><br>
+    &nbsp;<span class="sectionToc">5.6 <a href="#x1-620005.6" id=
+    "QQ2-1-89" name="QQ2-1-89">Chat Demo</a></span><br>
+    &nbsp;<span class="sectionToc">5.7 <a href="#x1-630005.7" id=
+    "QQ2-1-90" name="QQ2-1-90">MP3 Streaming Demo</a></span><br>
+    &nbsp;<span class="sectionToc">5.8 <a href="#x1-640005.8" id=
+    "QQ2-1-91" name="QQ2-1-91">Other Language APIs</a></span><br>
+    &nbsp;&nbsp;<span class="subsectionToc">5.8.1 <a href=
+    "#x1-650005.8.1" id="QQ2-1-92" name="QQ2-1-92">Ruby Handler
+    API</a></span><br>
+    &nbsp;&nbsp;<span class="subsectionToc">5.8.2 <a href=
+    "#x1-660005.8.2" id="QQ2-1-93" name="QQ2-1-93">C++ Handler
+    API</a></span><br>
+    &nbsp;&nbsp;<span class="subsectionToc">5.8.3 <a href=
+    "#x1-670005.8.3" id="QQ2-1-94" name="QQ2-1-94">PHP Handler
+    API</a></span><br>
+    &nbsp;&nbsp;<span class="subsectionToc">5.8.4 <a href=
+    "#x1-680005.8.4" id="QQ2-1-95" name="QQ2-1-95">Writing Your
+    Own</a></span><br>
+    &nbsp;<span class="sectionToc">5.9 <a href="#x1-690005.9" id=
+    "QQ2-1-96" name="QQ2-1-96">Config Database
+    Schema</a></span><br>
+    &nbsp;&nbsp;<span class="subsectionToc">5.9.1 <a href=
+    "#x1-700005.9.1" id="QQ2-1-97" name="QQ2-1-97">Writing Your Own
+    m2sh</a></span><br>
+    <span class="chapterToc">6 <a href="#x1-710006" id="QQ2-1-98"
+    name="QQ2-1-98">Contributing</a></span>
   </div><!--l. 1-->
 
   <p class="indent">
@@ -4884,9 +4936,126 @@
   </div>
   <hr class="endfloat">
 
+  <h3 class="sectionHead"><span class="titlemark">5.1</span> <a id=
+  "x1-510005.1" name="x1-510005.1"></a>Front-end Goodies</h3>
+  <!--l. 52-->
+
+  <p class="noindent">
+
+  <h4 class="subsectionHead"><span class="titlemark">5.1.1</span>
+  <a id="x1-520005.1.1" name="x1-520005.1.1"></a>HTTP</h4>
+  <!--l. 55-->
+
+  <p class="noindent">
+
+  <h4 class="subsectionHead"><span class="titlemark">5.1.2</span>
+  <a id="x1-530005.1.2" name="x1-530005.1.2"></a>Proxying</h4>
+  <!--l. 58-->
+
+  <p class="noindent">
+
+  <h4 class="subsectionHead"><span class="titlemark">5.1.3</span>
+  <a id="x1-540005.1.3" name="x1-540005.1.3"></a>JSSocket</h4>
+  <!--l. 61-->
+
+  <p class="noindent">
+
+  <h4 class="subsectionHead"><span class="titlemark">5.1.4</span>
+  <a id="x1-550005.1.4" name="x1-550005.1.4"></a>Long Poll</h4>
+  <!--l. 64-->
+
+  <p class="noindent">
+
+  <h4 class="subsectionHead"><span class="titlemark">5.1.5</span>
+  <a id="x1-560005.1.5" name="x1-560005.1.5"></a>Streaming</h4>
+  <!--l. 67-->
+
+  <p class="noindent">
+
+  <h4 class="subsectionHead"><span class="titlemark">5.1.6</span>
+  <a id="x1-570005.1.6" name="x1-570005.1.6"></a>N:M Responses</h4>
+  <!--l. 71-->
+
+  <p class="noindent">
+
+  <h3 class="sectionHead"><span class="titlemark">5.2</span> <a id=
+  "x1-580005.2" name="x1-580005.2"></a>Introduction to 0MQ</h3>
+  <!--l. 74-->
+
+  <p class="noindent">
+
+  <h3 class="sectionHead"><span class="titlemark">5.3</span> <a id=
+  "x1-590005.3" name="x1-590005.3"></a>Handlers And Formats</h3>
+  <!--l. 77-->
+
+  <p class="noindent">
+
+  <h3 class="sectionHead"><span class="titlemark">5.4</span> <a id=
+  "x1-600005.4" name="x1-600005.4"></a>Python Handler API</h3>
+  <!--l. 80-->
+
+  <p class="noindent">
+
+  <h3 class="sectionHead"><span class="titlemark">5.5</span> <a id=
+  "x1-610005.5" name="x1-610005.5"></a>Basic Handler Demo</h3>
+  <!--l. 83-->
+
+  <p class="noindent">
+
+  <h3 class="sectionHead"><span class="titlemark">5.6</span> <a id=
+  "x1-620005.6" name="x1-620005.6"></a>Chat Demo</h3><!--l. 86-->
+
+  <p class="noindent">
+
+  <h3 class="sectionHead"><span class="titlemark">5.7</span> <a id=
+  "x1-630005.7" name="x1-630005.7"></a>MP3 Streaming Demo</h3>
+  <!--l. 89-->
+
+  <p class="noindent">
+
+  <h3 class="sectionHead"><span class="titlemark">5.8</span> <a id=
+  "x1-640005.8" name="x1-640005.8"></a>Other Language APIs</h3>
+  <!--l. 92-->
+
+  <p class="noindent">
+
+  <h4 class="subsectionHead"><span class="titlemark">5.8.1</span>
+  <a id="x1-650005.8.1" name="x1-650005.8.1"></a>Ruby Handler
+  API</h4><!--l. 95-->
+
+  <p class="noindent">
+
+  <h4 class="subsectionHead"><span class="titlemark">5.8.2</span>
+  <a id="x1-660005.8.2" name="x1-660005.8.2"></a>C++ Handler
+  API</h4><!--l. 98-->
+
+  <p class="noindent">
+
+  <h4 class="subsectionHead"><span class="titlemark">5.8.3</span>
+  <a id="x1-670005.8.3" name="x1-670005.8.3"></a>PHP Handler
+  API</h4><!--l. 101-->
+
+  <p class="noindent">
+
+  <h4 class="subsectionHead"><span class="titlemark">5.8.4</span>
+  <a id="x1-680005.8.4" name="x1-680005.8.4"></a>Writing Your
+  Own</h4><!--l. 104-->
+
+  <p class="noindent">
+
+  <h3 class="sectionHead"><span class="titlemark">5.9</span> <a id=
+  "x1-690005.9" name="x1-690005.9"></a>Config Database Schema</h3>
+  <!--l. 107-->
+
+  <p class="noindent">
+
+  <h4 class="subsectionHead"><span class="titlemark">5.9.1</span>
+  <a id="x1-700005.9.1" name="x1-700005.9.1"></a>Writing Your Own
+  m2sh</h4>
+
   <h2 class="chapterHead"><span class=
   "titlemark">Chapter&nbsp;6</span><br>
-  <a id="x1-510006" name="x1-510006"></a>Contributing</h2>
+  <a id="x1-710006" name="x1-710006"></a>Contributing</h2>
   <!--l. 3-->
 
   <p class="noindent">Soon...
