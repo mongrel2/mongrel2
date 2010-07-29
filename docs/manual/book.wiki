@@ -104,15 +104,33 @@
     &nbsp;<span class="sectionToc">4.1 <a href="#x1-370004.1" id=
     "QQ2-1-50" name="QQ2-1-50">Mongrel2 Deployment
     Requirements</a></span><br>
-    &nbsp;<span class="sectionToc">4.2 <a href="#x1-380004.2" id=
-    "QQ2-1-51" name="QQ2-1-51">The mongrel2.org
+    &nbsp;&nbsp;<span class="subsectionToc">4.1.1 <a href=
+    "#x1-380004.1.1" id="QQ2-1-52" name="QQ2-1-52">Introduction
+    procer</a></span><br>
+    &nbsp;&nbsp;<span class="subsectionToc">4.1.2 <a href=
+    "#x1-390004.1.2" id="QQ2-1-53" name="QQ2-1-53">Installing
+    procer</a></span><br>
+    &nbsp;<span class="sectionToc">4.2 <a href="#x1-400004.2" id=
+    "QQ2-1-55" name="QQ2-1-55">The Plan</a></span><br>
+    &nbsp;<span class="sectionToc">4.3 <a href="#x1-410004.3" id=
+    "QQ2-1-56" name="QQ2-1-56">Step 1: The Deployment
+    Area</a></span><br>
+    &nbsp;<span class="sectionToc">4.4 <a href="#x1-420004.4" id=
+    "QQ2-1-57" name="QQ2-1-57">Step 2: The mongrel2.org
     Configuration</a></span><br>
-    <span class="chapterToc">5 <a href="#x1-390005" id="QQ2-1-52"
-    name="QQ2-1-52">Hacking</a></span><br>
-    &nbsp;<span class="sectionToc">5.1 <a href="#x1-400005.1" id=
-    "QQ2-1-53" name="QQ2-1-53">Writing Your Own m2sh</a></span><br>
-    <span class="chapterToc">6 <a href="#x1-410006" id="QQ2-1-54"
-    name="QQ2-1-54">Contributing</a></span>
+    &nbsp;<span class="sectionToc">4.5 <a href="#x1-430004.5" id=
+    "QQ2-1-58" name="QQ2-1-58">Step 3: Setup procer</a></span><br>
+    &nbsp;<span class="sectionToc">4.6 <a href="#x1-440004.6" id=
+    "QQ2-1-59" name="QQ2-1-59">Step 4: Static
+    Content</a></span><br>
+    &nbsp;<span class="sectionToc">4.7 <a href="#x1-450004.7" id=
+    "QQ2-1-60" name="QQ2-1-60">Step 5: Testing It</a></span><br>
+    <span class="chapterToc">5 <a href="#x1-460005" id="QQ2-1-61"
+    name="QQ2-1-61">Hacking</a></span><br>
+    &nbsp;<span class="sectionToc">5.1 <a href="#x1-470005.1" id=
+    "QQ2-1-62" name="QQ2-1-62">Writing Your Own m2sh</a></span><br>
+    <span class="chapterToc">6 <a href="#x1-480006" id="QQ2-1-63"
+    name="QQ2-1-63">Contributing</a></span>
   </div><!--l. 1-->
 
   <p class="indent">
@@ -2779,32 +2797,23 @@
   "titlemark">Chapter&nbsp;4</span><br>
   <a id="x1-360004" name="x1-360004"></a>Deploying</h2><!--l. 3-->
 
-  <p class="noindent">It&rsquo;s not possible to tell you how to
-  create a deployment of Mongrel2 for your environment. You
-  probably have your own special brand of crazy that you are forced
-  to work with (or that you created) and you&rsquo;ll need to bend
-  Mongrel2 to your will. That&rsquo;s fine, Mongrel2 should be
-  fairly flexible to deployments within a fixed set of design
-  considerations. <!--l. 9-->
-
-  <p class="indent">What this chapter will do is show you how
-  <span class="pplri7t-">I</span> currently deploy Mongrel2 in a
-  few scenarios. This way you can see how it&rsquo;s being done for
-  my small setup, and then extrapolate from there for your own. As
-  we come up with more best deployment and automation we&rsquo;ll
-  update this chapter to reflect them. <!--l. 14-->
-
-  <p class="indent">Another important thing this chapter will do is
-  give you a set of recipes for common thing you&rsquo;ll need to
-  do at times.
+  <p class="noindent">I am now going to try to get you to setup a
+  small tiny little version of a good deployment that matches the
+  <a href="http://mongrel2.org" class="url"><span class=
+  "pcrr7t-">http://mongrel2.org</span></a> site&rsquo;s
+  configuration with all the examples running. This configuration
+  will give you all the tools you need to make automated and
+  managed deployments, but it is using small scale tools. The idea
+  is that you learn what is involved in a nice easy to manage setup
+  using simple things first, then you can extrapolate that out into
+  your own setup or something better.
 
   <h3 class="sectionHead"><span class="titlemark">4.1</span> <a id=
   "x1-370004.1" name="x1-370004.1"></a>Mongrel2 Deployment
-  Requirements</h3><!--l. 20-->
+  Requirements</h3><!--l. 14-->
 
   <p class="noindent">It may seem obvious but I&rsquo;ll go over
-  the things you probably need in order to continue on in this
-  section:
+  the things you need in order to continue on in this section:
 
   <dl class="description">
     <dt class="description"><span class="pplb7t-">Mongrel2</span>
@@ -2834,27 +2843,267 @@
     Coding</span>
 
     <dd class="description">Right now you should be able to do some
-    basic Python. If you can&rsquo;t code Python then you can
-    probably muddle through this and you may learn something, but
-    learning Python will be important later. If you don&rsquo;t
-    know Python and want a good introduction then I will pimp my
-    book <a href="http://learnpythonthehardway.org">Learn Python
-    The Hard Way</a> which is a totally free book that teaches
-    Python as if you know nothing. Give it a try, or any of the
-    other free books I mention, but <span class=
-    "pplri7t-">don&rsquo;t</span> read &rdquo;Dive Into
-    Python&rdquo; as it is a horrible introduction.
-  </dl><!--l. 38-->
+    basic Python.
+  </dl><!--l. 27-->
 
   <p class="indent">That will get you going at first, and as we go
   we&rsquo;ll do various other setups to get our application
-  working. <!--l. 42-->
+  working. <!--l. 30-->
+
+  <p class="indent"><a id="x1-37001r4" name="x1-37001r4"></a>
+  <hr class="float">
+
+  <div class="float">
+    <div class="caption">
+      <span class="id">Note 4:</span> <span class=
+      "content"><span class="pplri7t-">Learning</span> <span class=
+      "pplri7t-">Python</span></span>
+    </div><!--tex4ht:label?: x1-37001r4 -->
+
+    <div class="quote">
+      <!--l. 31-->
+
+      <p class="noindent">Why should you learn programming? The
+      trend is that if you are a system administrator who
+      can&rsquo;t code then you are on your way out. Eventually
+      you&rsquo;ll be in charge of automating systems not manually
+      managing them, and if you don&rsquo;t believe me then what do
+      you think all those managed service companies are doing?
+      Alright, so you need to learn to code, but most of the books
+      suck for really learning if you know nothing. <!--l. 37-->
+
+      <p class="noindent">This is why I started my own book
+      <span class="pplri7t-">Learn Python The Hard Way</span> for
+      people who know nothing about programming but need or want to
+      learn. It teaches Python but it mostly teaches all the things
+      programmers actually learn before they learn programming.
+      When you&rsquo;re done with my book you&rsquo;ll have you
+      &rdquo;programming brown belt&rdquo;. That means you can then
+      move onto one of many other free online books and really
+      learn programming, and have a higher chance of actually
+      learning it. <!--l. 45-->
+
+      <p class="noindent">If you can&rsquo;t code Python then you
+      can probably muddle through this and you may learn something,
+      but learning Python will be important later. If you
+      don&rsquo;t know Python and want a good introduction then I
+      will pimp my book <a href=
+      "http://learnpythonthehardway.org">Learn Python The Hard
+      Way</a> which is a totally free book that teaches Python as
+      if you know nothing. Give it a try, or any of the other free
+      books I mention <!--l. 52-->
+
+      <p class="noindent">But <span class=
+      "pplri7t-">don&rsquo;t</span> read &rdquo;Dive Into
+      Python&rdquo; as it is a horrible introduction.
+    </div>
+  </div>
+  <hr class="endfloat">
+
+  <h4 class="subsectionHead"><span class="titlemark">4.1.1</span>
+  <a id="x1-380004.1.1" name="x1-380004.1.1"></a>Introduction
+  procer</h4><!--l. 57-->
+
+  <p class="noindent">When I started working on this little manual
+  I wanted to get you into setting up a well managed and automated
+  deployment system. The <span class="pplri7t-">m2sh</span> program
+  does much of the automation you need, but Mongrel2 also has to
+  talk to quite a few separate little pieces that run as separate
+  processes. Trying to juggle all these processes without a tool to
+  help is a nightmare. You end up writing init scripts and merging
+  them into your boot process and all sorts of crazy antics just so
+  you can run a stupid hello world demo. <!--l. 65-->
+
+  <p class="indent">What I needed was a &rdquo;user space process
+  manager&rdquo;. These are programs that run other programs, but
+  more importantly try to keep those other programs running without
+  much human intervention. When you need to deploy a ton of
+  processes that all have to be running, these USPMs are fantastic.
+  They usually read some startup profile describing what needs to
+  start and what they depend on, and then it kicks everything into
+  gear and watches them. If any of the processes crash they try to
+  restart them. Very simple. <!--l. 72-->
+
+  <p class="indent">There&rsquo;s just one catch, all of them suck.
+  There&rsquo;s <a href=
+  "http://cr.yp.to/daemontools.html">daemontools</a> which barely
+  builds (if at all) and then assumes that daemons don&rsquo;t
+  fork. Stupid. There&rsquo;s <a href=
+  "http://www.fefe.de/minit/">minit</a> which bafflingly required
+  dietlibc to even compile and assumed it was going to be the one
+  true init (not user space at all). There&rsquo;s <a href=
+  "http://www.nico.schottelius.org/software/cinit/">cinit</a> which
+  got through a compile then barfed on its documentation, and the
+  end result is some huge number of weird shell scripts to make it
+  work, and again it wants to be the one true init. Finally
+  <a href="http://smarden.org/runit/">runit</a> is some of the
+  worst C code I&rsquo;ve seen in years. <!--l. 81-->
+
+  <p class="indent">After trying every single one I just gave up.
+  Either they didn&rsquo;t build, were too complex, expected to be
+  the one true init, poorly documented, not maintained, and
+  definitely not going to work for this manual. My only choice was
+  to shave a yak and write my own. <!--l. 85-->
+
+  <p class="indent">The end result is <span class=
+  "pplri7t-">procer</span> which lives in <span class=
+  "pplb7t-">examples/procer</span> and does most of what you need
+  in a USPM. It works a lot like daemontools or minit but is much
+  simpler with these differences: <!--l. 89-->
+
+  <p class="indent">
+
+  <ol class="enumerate1">
+    <li class="enumerate" id="x1-38002x1">It is much simpler, with
+    only a single command to start all your stuff and keep it
+    running.
+
+    <li class="enumerate" id="x1-38004x2">It will build anywhere
+    Mongrel2 will build because it reuses the <span class=
+    "pplb7t-">libm2.a</span> library from the Mongrel2 project.
+
+    <li class="enumerate" id="x1-38006x3">It doesn&rsquo;t want to
+    be the one true init, or expect to be running constantly even.
+    You can start it and stop it and it will only run what&rsquo;s
+    not already running.
+
+    <li class="enumerate" id="x1-38008x4">It has dependency
+    management so that you can have processes start only after
+    others have finished.
+
+    <li class="enumerate" id="x1-38010x5">It still uses simple
+    files to configure itself that are in separate directories.
+
+    <li class="enumerate" id="x1-38012x6">It can be run as root,
+    and like Mongrel2 it will drop privileges to the owner of the
+    profile directory before it runs the command. This is
+    incredibly useful because it lets you setup scripts that run as
+    other users without much configuration or fuss.
+
+    <li class="enumerate" id="x1-38014x7">It is dinky tiny and well
+    written so you can understand it, even though it&rsquo;s
+    written in C.
+
+    <li class="enumerate" id="x1-38016x8">Best of all, I can use it
+    in this book and you won&rsquo;t go insane trying to install it
+    or use it like the others.
+  </ol><!--l. 108-->
+
+  <p class="indent">Of course, if you have something else you like
+  then please use it. Anything that automates process management
+  will be your friend. In this manual, to keep things simple and
+  easily understood I&rsquo;ll be using <span class=
+  "pplri7t-">procer</span> to tell you how to setup everything. 
+  <!--l. 112-->
 
   <p class="noindent">
 
+  <h4 class="subsectionHead"><span class="titlemark">4.1.2</span>
+  <a id="x1-390004.1.2" name="x1-390004.1.2"></a>Installing
+  procer</h4><!--l. 114-->
+
+  <p class="noindent">Installing procer is very easy. It&rsquo;s a
+  single little binary and it lives in <span class=
+  "pplb7t-">examples/procer</span> in the Mongrel2 source.
+  Here&rsquo;s how you&rsquo;d install it totally from scratch as
+  if you hadn&rsquo;t even build Mongrel2 yet: <!--l. 118-->
+
+  <p class="indent"><a id="x1-39001r11" name="x1-39001r11"></a>
+  <hr class="float">
+
+  <div class="float">
+    <div class="caption">
+      <span class="id">Source 11:</span> <span class=
+      "content"><span class="pplri7t-">Install</span> <span class=
+      "pplri7t-">procer</span></span>
+    </div><!--tex4ht:label?: x1-39001r11 -->
+
+    <div class="fancyvrb" id="fancyvrb11">
+      <a id="x1-39003r1" name="x1-39003r1"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;cd</span><span class=
+      "pcrr7t-x-x-90">&nbsp;projects/mongrel2</span><br class=
+      "fancyvrb">
+      <a id="x1-39005r2" name="x1-39005r2"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;make</span><span class=
+      "pcrr7t-x-x-90">&nbsp;clean</span><span class=
+      "pcrr7t-x-x-90">&nbsp;all</span><span class=
+      "pcrr7t-x-x-90">&nbsp;install</span><br class="fancyvrb">
+      <a id="x1-39007r3" name="x1-39007r3"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;cd</span><span class=
+      "pcrr7t-x-x-90">&nbsp;examples/procer</span><br class=
+      "fancyvrb">
+      <a id="x1-39009r4" name="x1-39009r4"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;make</span><span class=
+      "pcrr7t-x-x-90">&nbsp;clean</span><span class=
+      "pcrr7t-x-x-90">&nbsp;all</span><span class=
+      "pcrr7t-x-x-90">&nbsp;install</span>
+    </div>
+  </div>
+  <hr class="endfloat">
+  <!--l. 127-->
+
+  <p class="indent">That&rsquo;s the entire install process, and
+  now procer is in <span class="pplb7t-">/usr/local/bin</span> so
+  you can use it. In the rest of this chapter you&rsquo;ll learn
+  how to use <span class="pplri7t-">procer</span> by just setting
+  up the Mongrel2 demo completely and messing around with it.
+
   <h3 class="sectionHead"><span class="titlemark">4.2</span> <a id=
-  "x1-380004.2" name="x1-380004.2"></a>The mongrel2.org
-  Configuration</h3><!--l. 44-->
+  "x1-400004.2" name="x1-400004.2"></a>The Plan</h3><!--l. 134-->
+
+  <p class="noindent">We need to plan this deployment to make sure
+  we get the end result correct: <!--l. 136-->
+
+  <p class="indent">
+
+  <ol class="enumerate1">
+    <li class="enumerate" id="x1-40002x1">Create a deployment area
+    where everything will live.
+
+    <li class="enumerate" id="x1-40004x2">Create a config.sqlite
+    that will work with the demos in <span class=
+    "pplri7t-">examples</span>.
+
+    <li class="enumerate" id="x1-40006x3">Setup procer to run
+    mongrel2 and the three demo Python scripts for chat,
+    handlertest, and mp3stream, and have it run the fake backend
+    web.py project so we have something to proxy to.
+
+    <li class="enumerate" id="x1-40008x4">Get all the static file
+    content working.
+
+    <li class="enumerate" id="x1-40010x5">Test out that procer is
+    keeping things running and play with taking things down and up
+    and using <span class="pplri7t-">m2sh</span> to work with the
+    deployment.
+  </ol><!--l. 146-->
+
+  <p class="indent">Once you have this setup working you can then
+  start to make your own deployments and tweak things as you need
+  for your own applications. Remember that the goal is to get you
+  to <span class="pplri7t-">automate</span> everything as much as
+  possible, so you can go further than this then do it. 
+  <!--l. 151-->
+
+  <p class="noindent">
+
+  <h3 class="sectionHead"><span class="titlemark">4.3</span> <a id=
+  "x1-410004.3" name="x1-410004.3"></a>Step 1: The Deployment
+  Area</h3><!--l. 153-->
+
+  <p class="noindent">
+
+  <h3 class="sectionHead"><span class="titlemark">4.4</span> <a id=
+  "x1-420004.4" name="x1-420004.4"></a>Step 2: The mongrel2.org
+  Configuration</h3><!--l. 155-->
 
   <p class="noindent">The configuration we&rsquo;ll go over is the
   one we use at <a href="http://mongrel2.org:6767/" class=
@@ -2896,21 +3145,41 @@
     "pplb7t-">mp3streamer</span>
 
     <dd class="description">An mp3streamer applicatio
-  </dl>
+  </dl><!--l. 171-->
+
+  <p class="noindent">
+
+  <h3 class="sectionHead"><span class="titlemark">4.5</span> <a id=
+  "x1-430004.5" name="x1-430004.5"></a>Step 3: Setup procer</h3>
+  <!--l. 173-->
+
+  <p class="noindent">
+
+  <h3 class="sectionHead"><span class="titlemark">4.6</span> <a id=
+  "x1-440004.6" name="x1-440004.6"></a>Step 4: Static Content</h3>
+  <!--l. 175-->
+
+  <p class="noindent">
+
+  <h3 class="sectionHead"><span class="titlemark">4.7</span> <a id=
+  "x1-450004.7" name="x1-450004.7"></a>Step 5: Testing It</h3>
+  <!--l. 1-->
+
+  <p class="indent">
 
   <h2 class="chapterHead"><span class=
   "titlemark">Chapter&nbsp;5</span><br>
-  <a id="x1-390005" name="x1-390005"></a>Hacking</h2>
+  <a id="x1-460005" name="x1-460005"></a>Hacking</h2>
 
   <h3 class="sectionHead"><span class="titlemark">5.1</span> <a id=
-  "x1-400005.1" name="x1-400005.1"></a>Writing Your Own m2sh</h3>
+  "x1-470005.1" name="x1-470005.1"></a>Writing Your Own m2sh</h3>
   <!--l. 1-->
 
   <p class="indent">
 
   <h2 class="chapterHead"><span class=
   "titlemark">Chapter&nbsp;6</span><br>
-  <a id="x1-410006" name="x1-410006"></a>Contributing</h2>
+  <a id="x1-480006" name="x1-480006"></a>Contributing</h2>
   <!--l. 3-->
 
   <p class="noindent">Soon...

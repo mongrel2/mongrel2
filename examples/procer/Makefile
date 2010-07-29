@@ -12,4 +12,4 @@ clean:
 	rm -f *.o procer
 
 install:
-	install procer /usr/local/bin/
+	sudo install procer /usr/local/bin/

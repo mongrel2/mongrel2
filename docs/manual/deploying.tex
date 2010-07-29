@@ -1,24 +1,18 @@
 \chapter{Deploying}
 
-It's not possible to tell you how to create a deployment of Mongrel2 for your
-environment.  You probably have your own special brand of crazy that you are
-forced to work with (or that you created) and you'll need to bend Mongrel2 to
-your will.  That's fine, Mongrel2 should be fairly flexible to deployments
-within a fixed set of design considerations.
-
-What this chapter will do is show you how \emph{I} currently deploy Mongrel2 in
-a few scenarios.  This way you can see how it's being done for my small setup,
-and then extrapolate from there for your own.  As we come up with more best
-deployment and automation we'll update this chapter to reflect them.
-
-Another important thing this chapter will do is give you a set of recipes for
-common thing you'll need to do at times.
+I am now going to try to get you to setup a small tiny little version of a good
+deployment that matches the \url{http://mongrel2.org} site's configuration with
+all the examples running.  This configuration will give you all the tools you 
+need to make automated and managed deployments, but it is using small scale tools.
+The idea is that you learn what is involved in a nice easy to manage setup using simple
+things first, then you can extrapolate that out into your own setup or something
+better.
 
 
 \section{Mongrel2 Deployment Requirements}
 
-It may seem obvious but I'll go over the things you probably need in order to
-continue on in this section:
+It may seem obvious but I'll go over the things you need in order to continue
+on in this section:
 
 \begin{description}
 \item [Mongrel2] I know, hard to believe, but you actually need to have Mongrel2 installed.
@@ -27,19 +21,136 @@ continue on in this section:
 \item [Python] Obviously if you have \shell{m2sh} then you have Python, but some systems
     (like Debian) don't install all of Python.  Make sure your Python setup is good.
 \item [root] You'll need root access on your box.  Either through sudo or some other means.
-\item [Basic Python Coding] Right now you should be able to do some basic Python.  If you can't 
-    code Python then you can probably muddle through this and you may learn something, but learning
-    Python will be important later.  If you don't know Python and want a good introduction then I
-    will pimp my book \href{http://learnpythonthehardway.org}{Learn Python The Hard Way} which is a
-    totally free book that teaches Python as if you know nothing.  Give it a try, or any of the other
-    free books I mention, but \emph{don't} read "Dive Into Python" as it is a horrible introduction.
+\item [Basic Python Coding] Right now you should be able to do some basic Python. 
 \end{description}
 
 That will get you going at first, and as we go we'll do various other setups to 
 get our application working.
 
+\begin{aside}{Learning Python}
+Why should you learn programming?  The trend is that if you are a system administrator
+who can't code then you are on your way out.  Eventually you'll be in charge of automating
+systems not manually managing them, and if you don't believe me then what do you think all
+those managed service companies are doing?  Alright, so you need to learn to code, but
+most of the books suck for really learning if you know nothing.
 
-\section{The mongrel2.org Configuration}
+This is why I started my own book \emph{Learn Python The Hard Way} for people
+who know nothing about programming but need or want to learn.  It teaches
+Python but it mostly teaches all the things programmers actually learn before
+they learn programming.  When you're done with my book you'll have you
+"programming brown belt".  That means you can then move onto one of many other
+free online books and really learn programming, and have a higher chance of
+actually learning it.
+
+If you can't code Python then you can probably muddle through this and you may
+learn something, but learning Python will be important later.  If you don't
+know Python and want a good introduction then I will pimp my book
+\href{http://learnpythonthehardway.org}{Learn Python The Hard Way} which is a
+totally free book that teaches Python as if you know nothing.  Give it a try,
+or any of the other free books I mention
+
+But \emph{don't} read "Dive Into Python" as it is a horrible introduction.
+\end{aside}
+
+\subsection{Introduction procer}
+
+When I started working on this little manual I wanted to get you into setting up
+a well managed and automated deployment system.  The \shell{m2sh} program does 
+much of the automation you need, but Mongrel2 also has to talk to quite a few 
+separate little pieces that run as separate processes.  Trying to juggle all these
+processes without a tool to help is a nightmare.  You end up writing init scripts
+and merging them into your boot process and all sorts of crazy antics just so you
+can run a stupid hello world demo.
+
+What I needed was a "user space process manager".  These are programs that run other
+programs, but more importantly try to keep those other programs running without much
+human intervention.  When you need to deploy a ton of processes that all have to
+be running, these USPMs are fantastic.  They usually read some startup profile describing
+what needs to start and what they depend on, and then it kicks everything into gear
+and watches them.  If any of the processes crash they try to restart them.  Very simple.
+
+There's just one catch, all of them suck.  There's \href{http://cr.yp.to/daemontools.html}{daemontools}
+which barely builds (if at all) and then assumes that daemons don't fork.  Stupid.  There's 
+\href{http://www.fefe.de/minit/}{minit} which bafflingly required dietlibc to even compile
+and assumed it was going to be the one true init (not user space at all).  There's 
+\href{http://www.nico.schottelius.org/software/cinit/}{cinit} which got through a compile
+then barfed on its documentation, and the end result is some huge number of weird 
+shell scripts to make it work, and again it wants to be the one true init.  Finally 
+\href{http://smarden.org/runit/}{runit} is some of the worst C code I've seen in years.
+
+After trying every single one I just gave up.  Either they didn't build, were too complex,
+expected to be the one true init, poorly documented, not maintained, and definitely not
+going to work for this manual.  My only choice was to shave a yak and write my own.
+
+The end result is \shell{procer} which lives in \file{examples/procer} and does
+most of what you need in a USPM.  It works a lot like daemontools or minit but
+is much simpler with these differences:
+
+\begin{enumerate}
+\item It is much simpler, with only a single command to start all your stuff and
+    keep it running.
+\item It will build anywhere Mongrel2 will build because it reuses the \file{libm2.a}
+    library from the Mongrel2 project.
+\item It doesn't want to be the one true init, or expect to be running constantly even.
+    You can start it and stop it and it will only run what's not already running.
+\item It has dependency management so that you can have processes start only after others
+    have finished.
+\item It still uses simple files to configure itself that are in separate directories.
+\item It can be run as root, and like Mongrel2 it will drop privileges to the owner 
+    of the profile directory before it runs the command.  This is incredibly useful because
+    it lets you setup scripts that run as other users without much configuration or fuss.
+\item It is dinky tiny and well written so you can understand it, even though it's written
+    in C.
+\item Best of all, I can use it in this book and you won't go insane trying to install it
+    or use it like the others.
+\end{enumerate}
+
+Of course, if you have something else you like then please use it.  Anything that automates
+process management will be your friend.  In this manual, to keep things simple and easily
+understood I'll be using \shell{procer} to tell you how to setup everything.
+
+\subsection{Installing procer}
+
+Installing procer is very easy.  It's a single little binary and it lives in 
+\file{examples/procer} in the Mongrel2 source.  Here's how you'd install it
+totally from scratch as if you hadn't even build Mongrel2 yet:
+
+\begin{code}{Install procer}
+\begin{Verbatim}
+> cd projects/mongrel2
+> make clean all install
+> cd examples/procer
+> make clean all install
+\end{Verbatim}
+\end{code}
+
+That's the entire install process, and now procer is in \file{/usr/local/bin}
+so you can use it.  In the rest of this chapter you'll learn how to use \shell{procer}
+by just setting up the Mongrel2 demo completely and messing around with it.
+
+
+\section{The Plan}
+
+We need to plan this deployment to make sure we get the end result correct:
+
+\begin{enumerate}
+\item Create a deployment area where everything will live.
+\item Create a config.sqlite that will work with the demos in \shell{examples}.
+\item Setup procer to run mongrel2 and the three demo Python scripts for chat, handlertest, and mp3stream,
+    and have it run the fake backend web.py project so we have something to proxy to.
+\item Get all the static file content working.
+\item Test out that procer is keeping things running and play with taking things down and up and using
+    \shell{m2sh} to work with the deployment.
+\end{enumerate}
+
+Once you have this setup working you can then start to make your own
+deployments and tweak things as you need for your own applications.  Remember
+that the goal is to get you to \emph{automate} everything as much as possible,
+so you can go further than this then do it.
+
+\section{Step 1: The Deployment Area}
+
+\section{Step 2: The mongrel2.org Configuration}
 
 The configuration we'll go over is the one we use at \url{http://mongrel2.org:6767/}
 to run all the demos.  This server is a test server that can go down if we aren't 
@@ -56,5 +167,11 @@ and deploying is:
 \item [mp3streamer] An mp3streamer applicatio
 \end{description}
 
+
+\section{Step 3: Setup procer}
+
+\section{Step 4: Static Content}
+
+\section{Step 5: Testing It}
 
 
