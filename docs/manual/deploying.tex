@@ -212,7 +212,7 @@ What we've done here is the following:
 Now we're ready to get the configuration working.  Here's the thing though, you should 
 try to alter the configuration yourself.  I've already given you the file and you are
 going to have to make the changes to meet the requirements for this deployment directory.
-Here's what yo have to change in \file{config.py} to make everything work right:
+Here's what you have to change in \file{config.py} to make everything work right:
 
 \begin{enumerate}
 \item Get rid of the \ident{test\_directory} handler since we won't need it and
@@ -383,7 +383,6 @@ correctly.
 
 # see if mongrel2 is running
 > ps ax | grep mongrel2
- 9223 ?        Sl     0:26 python /home/zedshaw/projects/mongrel2/examples/chat/chat.py
 17944 ?        Ssl    0:00 mongrel2 config.sqlite localhost
 
 \end{Verbatim}

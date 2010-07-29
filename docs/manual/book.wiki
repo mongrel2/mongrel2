@@ -3357,7 +3357,7 @@
   try to alter the configuration yourself. I&rsquo;ve already given
   you the file and you are going to have to make the changes to
   meet the requirements for this deployment directory. Here&rsquo;s
-  what yo have to change in <span class="pplb7t-">config.py</span>
+  what you have to change in <span class="pplb7t-">config.py</span>
   to make everything work right: <!--l. 217-->
 
   <p class="indent">
@@ -4022,26 +4022,6 @@
       "pcrr7t-x-x-90">&nbsp;mongrel2</span><br class="fancyvrb">
       <a id="x1-43142r14" name="x1-43142r14"></a><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
-      "pcrr7t-x-x-90">&nbsp;</span><span class=
-      "pcrr7t-x-x-90">&nbsp;9223</span><span class=
-      "pcrr7t-x-x-90">&nbsp;?</span><span class=
-      "pcrr7t-x-x-90">&nbsp;</span><span class=
-      "pcrr7t-x-x-90">&nbsp;</span><span class=
-      "pcrr7t-x-x-90">&nbsp;</span><span class=
-      "pcrr7t-x-x-90">&nbsp;</span><span class=
-      "pcrr7t-x-x-90">&nbsp;</span><span class=
-      "pcrr7t-x-x-90">&nbsp;</span><span class=
-      "pcrr7t-x-x-90">&nbsp;</span><span class=
-      "pcrr7t-x-x-90">&nbsp;Sl</span><span class=
-      "pcrr7t-x-x-90">&nbsp;</span><span class=
-      "pcrr7t-x-x-90">&nbsp;</span><span class=
-      "pcrr7t-x-x-90">&nbsp;</span><span class=
-      "pcrr7t-x-x-90">&nbsp;</span><span class=
-      "pcrr7t-x-x-90">&nbsp;0:26</span><span class=
-      "pcrr7t-x-x-90">&nbsp;python</span><span class=
-      "pcrr7t-x-x-90">&nbsp;/home/zedshaw/projects/mongrel2/examples/chat/chat.py</span><br class="fancyvrb">
-      <a id="x1-43144r15" name="x1-43144r15"></a><span class=
-      "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;17944</span><span class=
       "pcrr7t-x-x-90">&nbsp;?</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
@@ -4059,13 +4039,13 @@
       "pcrr7t-x-x-90">&nbsp;mongrel2</span><span class=
       "pcrr7t-x-x-90">&nbsp;config.sqlite</span><span class=
       "pcrr7t-x-x-90">&nbsp;localhost</span><br class="fancyvrb">
-      <a id="x1-43146r16" name="x1-43146r16"></a><span class=
+      <a id="x1-43144r15" name="x1-43144r15"></a><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span>
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 392-->
+  <!--l. 391-->
 
   <p class="indent">To watch <span class="pplri7t-">procer</span>
   in action, try doing <span class="pplri7t-">m2sh stop -db
@@ -4076,7 +4056,7 @@
 
   <h4 class="subsectionHead"><span class="titlemark">4.5.1</span>
   <a id="x1-440004.5.1" name="x1-440004.5.1"></a>The Python
-  Examples</h4><!--l. 399-->
+  Examples</h4><!--l. 398-->
 
   <p class="noindent">We&rsquo;ve got a good setup of <span class=
   "pplri7t-">procer</span> going and it keeps Mongrel2 running so
@@ -4088,7 +4068,7 @@
   mongrel2 source is in <span class=
   "pplb7t-">&nbsp;/projects/mongrel2</span> you will change
   <span class="pplb7t-">profiles/chat/run</span> to be like this: 
-  <!--l. 407-->
+  <!--l. 406-->
 
   <p class="indent"><a id="x1-44001r18" name="x1-44001r18"></a>
   <hr class="float">
@@ -4143,7 +4123,7 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 421-->
+  <!--l. 420-->
 
   <p class="indent">This little script uses some funky features you
   might not be familiar with but which are nice to learn, so
@@ -4170,7 +4150,7 @@
     echo the magic variable <span class=
     "obeylines-h verb pcrr7t-">$!</span> to the <span class=
     "pplb7t-">chat.pid</span> file in the profile directory.
-  </ol><!--l. 439-->
+  </ol><!--l. 438-->
 
   <p class="indent">When you run this manually you should see
   something like this:
@@ -4223,11 +4203,11 @@
     "pcrr7t-">&nbsp;kill</span><span class=
     "pcrr7t-">&nbsp;-TERM</span><span class=
     "pcrr7t-">&nbsp;19305</span>
-  </div><!--l. 451-->
+  </div><!--l. 450-->
 
   <p class="indent">After all that you can then try out
   <span class="pplri7t-">procer</span> again to see if it properly
-  runs the chat demo as well as mongrel2: <!--l. 454-->
+  runs the chat demo as well as mongrel2: <!--l. 453-->
 
   <p class="indent"><a id="x1-44042r19" name="x1-44042r19"></a>
   <hr class="float">
@@ -4410,17 +4390,17 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 477-->
+  <!--l. 476-->
 
   <p class="indent">If you go look at <span class=
   "pplb7t-">profiles/error.log</span> you&rsquo;ll see that
   <span class="pplri7t-">procer</span> is also running each of them
   as the right user with chat being run as you, but Mongrel2 being
-  run as root so it can chroot/drop priv properly. <!--l. 481-->
+  run as root so it can chroot/drop priv properly. <!--l. 480-->
 
   <p class="indent">Rather than give you a walk through each of
   these setups, here&rsquo;s the run scripts for the remaining
-  files: <!--l. 484-->
+  files: <!--l. 483-->
 
   <p class="indent"><a id="x1-44079r20" name="x1-44079r20"></a>
   <hr class="float">
@@ -4580,12 +4560,12 @@
 
   <h4 class="subsectionHead"><span class="titlemark">4.5.2</span>
   <a id="x1-450004.5.2" name="x1-450004.5.2"></a>Testing The New
-  Setup</h4><!--l. 526-->
+  Setup</h4><!--l. 525-->
 
   <p class="noindent">Once everything is running and <span class=
   "pplri7t-">procer</span> is maintaining it you just need to see
   if things work. Here&rsquo;s some curl commands to try: 
-  <!--l. 529-->
+  <!--l. 528-->
 
   <p class="indent"><a id="x1-45001r21" name="x1-45001r21"></a>
   <hr class="float">
@@ -4622,7 +4602,7 @@
 
   <h4 class="subsectionHead"><span class="titlemark">4.5.3</span>
   <a id="x1-460004.5.3" name="x1-460004.5.3"></a>Nice Features of
-  Procer</h4><!--l. 541-->
+  Procer</h4><!--l. 540-->
 
   <p class="noindent">There&rsquo;s some nice subtle features you
   get from using <span class="pplri7t-">procer</span> to run your
@@ -4663,21 +4643,21 @@
     stuff it needs then goes back to supervising. This means you
     can change the configs for procer then just kick it over and
     it&rsquo;ll do the right thing.
-  </dl><!--l. 561-->
+  </dl><!--l. 560-->
 
   <p class="indent">The key thing though is that you now have the
   whole application for the mongrel2.org demo up and running,
   including automated process management, configuration, and
-  managing everything. <!--l. 565-->
+  managing everything. <!--l. 564-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">4.6</span> <a id=
   "x1-470004.6" name="x1-470004.6"></a>Step 4: Static Content</h3>
-  <!--l. 567-->
+  <!--l. 566-->
 
   <p class="noindent">The final thing we have to do is get the
-  static content we need to try out the chat demo: <!--l. 570-->
+  static content we need to try out the chat demo: <!--l. 569-->
 
   <p class="indent"><a id="x1-47001r22" name="x1-47001r22"></a>
   <hr class="float">
@@ -4715,7 +4695,7 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 578-->
+  <!--l. 577-->
 
   <p class="indent">If you get a good response then you should be
   able to go to <a href="http://localhost:6767/chatdemo/" class=
@@ -4728,11 +4708,11 @@
 
   <h3 class="sectionHead"><span class="titlemark">4.7</span> <a id=
   "x1-480004.7" name="x1-480004.7"></a>Step 5: Testing And
-  Troubleshooting</h3><!--l. 586-->
+  Troubleshooting</h3><!--l. 585-->
 
   <p class="noindent">You should have been testing the
   configuration as you went, but the main things to test are: 
-  <!--l. 589-->
+  <!--l. 588-->
 
   <p class="indent">
 
@@ -4763,32 +4743,32 @@
     <li class="enumerate" id="x1-48012x6">Stop <span class=
     "pplri7t-">procer</span> and then start it again to see if it
     properly doesn&rsquo;t step on things.
-  </ol><!--l. 604-->
+  </ol><!--l. 603-->
 
   <p class="indent">If you run into problems then just make sure
   that you can run each little piece and that you got the files you
   were supposed to make are correct. The best tool to use is
-  <span class="pplri7t-">diff</span>. <!--l. 608-->
+  <span class="pplri7t-">diff</span>. <!--l. 607-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">4.8</span> <a id=
   "x1-490004.8" name="x1-490004.8"></a>Further Improvements</h3>
-  <!--l. 611-->
+  <!--l. 610-->
 
   <p class="noindent">That ends this chapter, and at this point you
   should know how to setup nearly everything Mongrel2 has to offer
   right now. You should have a good idea of how <span class=
   "pplri7t-">procer</span> will work or not for your real
   deployments, and how it&rsquo;s used by me for my own
-  deployments. <!--l. 616-->
+  deployments. <!--l. 615-->
 
   <p class="indent">A <span class="pplri7t-">major</span>
   improvement that we may eventually make is automating setup of
   <span class="pplri7t-">procer</span> profiles, and just better
   overall management of the profiles with <span class=
   "pplri7t-">m2sh</span>. If you feel like hacking on that, just go
-  ahead and try and let us know. <!--l. 621-->
+  ahead and try and let us know. <!--l. 620-->
 
   <p class="indent">Other than that, automate, automate, automate. 
   <!--l. 1-->
