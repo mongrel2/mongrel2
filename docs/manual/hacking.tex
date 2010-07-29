@@ -70,7 +70,7 @@ beliefs peddled by the people who write the standards.  In HTTP it was two thing
 which the creators of HTTP have actually pack-peddled on:  Accept everything, and 
 keep-alives with pipe-lines.
 
-The truth is, if you want a secure server of *any* kind blindly accepting every 
+The truth is, if you want a secure server of \emph{any} kind blindly accepting every 
 single thing any idiots sends you is going to open your server up to a huge number
 of attacks.  If you look at every attack on existing HTTP servers you'll find that 
 about 80\% of them are exploiting ambiguous parts of the HTTP grammar to pass
@@ -81,7 +81,7 @@ tell you \emph{why} the request was bad, just like a compiler.  This doesn't mea
 Mongrel2 is ruthless, but it definitely doesn't tolerate ambiguity or stupidity.
 
 Mongrel2 completey supports keep-alives because now, since it's not using Ruby 
-\emph{at all} it can scale up beyong 1024 file descriptors.  Ruby was limited
+\emph{at all} it can scale up beyond 1024 file descriptors.  Ruby was limited
 in the number of open files a process could have, so the original Mongrel had
 to break keep-alive and kill connections in order to save itself from greedy
 browsers that never close them.  Mongrel2 doesn't have this limitation so it
@@ -205,7 +205,7 @@ handlers to M browsers.  Not exactly sure what you could write with that but
 it's probably something really damn cool.
 
 
-\section{Introduction to 0MQ}
+\section{Introduction to ZeroMQ}
 
 
 Learning to use \href{http://zeromq.org}{ZeroMQ} is a bit outside the scope of this book, but I'll give you
@@ -231,10 +231,12 @@ this:
     is fairly weak.
 \end{description}
 
-What ZeroMQ does is create an API that looks a lot like sockets, and feels the same, but
-gives you the messaging styles you actually want.  By simply specifying the type of socket
-based on a few settings you can have multicast, request/reply, and many other styles.  Here's
-the list of ones currently implemented (as documented in \shell{man zmq\_socket}):
+What ZeroMQ does is create an API that looks a lot like sockets, and feels the
+same, but gives you the messaging styles you actually want.  By simply
+specifying the type of socket when you call
+\href{http://api.zeromq.org/zmq\_socket.html}{zmq\_socket} you can have
+multicast, request/reply, and many other styles.  Here's the list of ones
+currently implemented (as documented in \shell{man zmq\_socket}):
 
 \begin{description}
 \item [ZMQ\_REQ ZMQ\_REP]  Your classic strict REQuest/REPly sockets, that work much like 
@@ -252,6 +254,137 @@ the list of ones currently implemented (as documented in \shell{man zmq\_socket}
     TCP connection.
 \end{description}
 
+The next thing ZeroMQ does is it separates these types of \emph{messaging} from the underlying 
+transport protocol and gives you a simple URL-like syntax for specifying that: \shell{tcp://127.0.0.1:9999/}
+for example.  The types of transports that you can use when you call \href{http://api.zeromq.org/zmq\_bind.html}{zmq\_bind}
+and \href{http://api.zeromq.org/zmq\_connect.html}{zmq\_connect} are:
+
+\begin{description}
+\item [tcp://] This is a plain old TCP socket with a host and portnumber.
+\item [ipc://] This uses Unix inter-process communication like domain sockets, mq, or whatever is available.
+\item [pgm://] Reliable multicast messaging that uses raw IP layering and requires special privileges.
+\item [epgm://] The "encapsulated" version that uses regular UDP to do reliable multicast messaging.
+\end{description}
+
+Finally, ZeroMQ then divorces who binds and connects from the above two
+configurations.  This means that unlike classic sockets who connects and who
+binds doesn't matter for the direction or kind of message.  All that really
+matters is whether the connection makes sense for your application.  For
+example, in Mongrel2 the server does a bind on the handler ports so that
+handlers can connect at will, which gives your handlers a nice "zero config"
+setup.  Mongrel2 doesn't need to know about handlers, they just need to know
+about Mongrel2.
+
+How this last part works, and why it works, is that when clients or servers
+connect or disconnect, ZeroMQ \emph{doesn't blow up}.  In TCP, if I have a
+server, and then 10 clients connect, when one of them disconnects in the middle
+of a message I lose the message and get an error.  With ZeroMQ, clients
+connecting to a socket don't trigger an event, and disconnecting doesn't do
+anything other than hold or drop messages.  This is why you don't have to care
+about who binds or connects, because it's just an addressing mechanism, not a
+\emph{state management} mechanism.
+
+Another way to put this feature is there's no \emph{accept} in ZeroMQ.  Clients
+connect and go at will and the server is just reading messages off when they're
+available or sending them out for clients.
+
+
+\subsection{A Quick Python ZeroMQ Example}
+
+I've written a simple abstraction over ZeroMQ that fits the Mongrel2 usage of it, but
+I think learning how you'd write your own ZeroMQ simple echo server in Python will
+help you get a handle on it.  First the client then the server:
+
+\begin{code}{Simple Python ZeroMQ Client}
+\begin{Verbatim}
+import zmq
+
+ctx = zmq.Context()
+s = ctx.socket(zmq.SUB)
+s.connect("tcp://127.0.0.1:5566")
+s.setsockopt(zmq.SUBSCRIBE, '')
+
+msg = s.recv()
+print "MSG: ", repr(msg)
+\end{Verbatim}
+\end{code}
+
+
+\begin{code}{Simple Python ZeroMQ Server}
+\begin{Verbatim}
+import zmq
+import time
+
+ctx = zmq.Context()
+s = ctx.socket(zmq.PUB)
+s.bind("tcp://127.0.0.1:5566")
+
+while True:
+    s.send("HELLO")
+    time.sleep(1)
+\end{Verbatim}
+\end{code}
+
+
+You can then run these two in different windows and they will talk to each
+other.  Try playing around with different socket types and transports to see
+what they do.  Notice that for a PUB/SUB setup we have to use \ident{setsockopt}
+to subscribe the nothing ('').  This is the same no matter what language you
+use.
+
+Here's an example that does the sme thing but with REQ/REP style of messages.
+
+\begin{code}{ZeroMQ REQ/REP Client}
+\begin{Verbatim}
+import zmq
+
+ctx = zmq.Context()
+s = ctx.socket(zmq.REQ)
+s.connect("tcp://127.0.0.1:5566")
+
+s.send('HI FROM CLIENT')
+
+msg = s.recv()
+print "MSG: ", repr(msg)
+\end{Verbatim}
+\end{code}
+
+
+\begin{code}{ZeroMQ REQ/REP Server}
+\begin{Verbatim}
+import zmq
+
+ctx = zmq.Context()
+s = ctx.socket(zmq.REP)
+s.bind("tcp://127.0.0.1:5566")
+
+while True:
+    print "GOT BACK", repr(s.recv())
+    s.send("HELLO")
+\end{Verbatim}
+\end{code}
+
+As you can see when you run this it's more like your classic web server style of messaging
+where a client requests something with an initial message, and the server replies.  Try getting
+the order wrong and see how ZeroMQ aborts and tells you it's wrong.  REQ sockets \emph{must} send
+first then recv, and REP sockets \emph{must} recv then send.
+
+\begin{aside}{There's Always A Size In ZeroMQ Land}
+The lack of a reliable framing mechanism in TCP was a crime against humanity.  What I mean by a
+"frame" is a simple indicator that a message in a stream has a certain length.  If you preface
+each message in TCP with the length of the data you're about to send then you avoid all manner
+of annoyance, attacks, and bugs.  Something as simple as a single byte that says you're sending up
+to 128 more bytes, with an extra bit to indicate the last byte would have saved the world much
+pain.
+
+This is basically what ZeroMQ has done, and so much more.  ZeroMQ pulls out all the tricks to make
+sure that the message you receive is totally cooked, fully sized, and transports it faster than
+TCP can actually send it.  It does this by framing things intelligently, using compression, reducing
+copying, and just generally being awesome.
+
+Of course, the only limitation is that it can't really \emph{stream} things, but then again nobody
+really does true streaming.  They always end up having to bolt on some framing of some kind.
+\end{aside}
 
 
 \section{Handlers And Formats}

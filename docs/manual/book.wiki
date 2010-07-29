@@ -163,39 +163,43 @@
     "#x1-580005.1.7" id="QQ2-1-87" name="QQ2-1-87">N:M
     Responses</a></span><br>
     &nbsp;<span class="sectionToc">5.2 <a href="#x1-590005.2" id=
-    "QQ2-1-88" name="QQ2-1-88">Introduction to 0MQ</a></span><br>
-    &nbsp;<span class="sectionToc">5.3 <a href="#x1-600005.3" id=
-    "QQ2-1-89" name="QQ2-1-89">Handlers And Formats</a></span><br>
-    &nbsp;<span class="sectionToc">5.4 <a href="#x1-610005.4" id=
-    "QQ2-1-90" name="QQ2-1-90">Python Handler API</a></span><br>
-    &nbsp;<span class="sectionToc">5.5 <a href="#x1-620005.5" id=
-    "QQ2-1-91" name="QQ2-1-91">Basic Handler Demo</a></span><br>
-    &nbsp;<span class="sectionToc">5.6 <a href="#x1-630005.6" id=
-    "QQ2-1-92" name="QQ2-1-92">Chat Demo</a></span><br>
-    &nbsp;<span class="sectionToc">5.7 <a href="#x1-640005.7" id=
-    "QQ2-1-93" name="QQ2-1-93">MP3 Streaming Demo</a></span><br>
-    &nbsp;<span class="sectionToc">5.8 <a href="#x1-650005.8" id=
-    "QQ2-1-94" name="QQ2-1-94">Other Language APIs</a></span><br>
+    "QQ2-1-88" name="QQ2-1-88">Introduction to
+    ZeroMQ</a></span><br>
+    &nbsp;&nbsp;<span class="subsectionToc">5.2.1 <a href=
+    "#x1-600005.2.1" id="QQ2-1-89" name="QQ2-1-89">A Quick Python
+    ZeroMQ Example</a></span><br>
+    &nbsp;<span class="sectionToc">5.3 <a href="#x1-610005.3" id=
+    "QQ2-1-95" name="QQ2-1-95">Handlers And Formats</a></span><br>
+    &nbsp;<span class="sectionToc">5.4 <a href="#x1-620005.4" id=
+    "QQ2-1-96" name="QQ2-1-96">Python Handler API</a></span><br>
+    &nbsp;<span class="sectionToc">5.5 <a href="#x1-630005.5" id=
+    "QQ2-1-97" name="QQ2-1-97">Basic Handler Demo</a></span><br>
+    &nbsp;<span class="sectionToc">5.6 <a href="#x1-640005.6" id=
+    "QQ2-1-98" name="QQ2-1-98">Chat Demo</a></span><br>
+    &nbsp;<span class="sectionToc">5.7 <a href="#x1-650005.7" id=
+    "QQ2-1-99" name="QQ2-1-99">MP3 Streaming Demo</a></span><br>
+    &nbsp;<span class="sectionToc">5.8 <a href="#x1-660005.8" id=
+    "QQ2-1-100" name="QQ2-1-100">Other Language APIs</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">5.8.1 <a href=
-    "#x1-660005.8.1" id="QQ2-1-95" name="QQ2-1-95">Ruby Handler
+    "#x1-670005.8.1" id="QQ2-1-101" name="QQ2-1-101">Ruby Handler
     API</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">5.8.2 <a href=
-    "#x1-670005.8.2" id="QQ2-1-96" name="QQ2-1-96">C++ Handler
+    "#x1-680005.8.2" id="QQ2-1-102" name="QQ2-1-102">C++ Handler
     API</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">5.8.3 <a href=
-    "#x1-680005.8.3" id="QQ2-1-97" name="QQ2-1-97">PHP Handler
+    "#x1-690005.8.3" id="QQ2-1-103" name="QQ2-1-103">PHP Handler
     API</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">5.8.4 <a href=
-    "#x1-690005.8.4" id="QQ2-1-98" name="QQ2-1-98">Writing Your
+    "#x1-700005.8.4" id="QQ2-1-104" name="QQ2-1-104">Writing Your
     Own</a></span><br>
-    &nbsp;<span class="sectionToc">5.9 <a href="#x1-700005.9" id=
-    "QQ2-1-99" name="QQ2-1-99">Config Database
+    &nbsp;<span class="sectionToc">5.9 <a href="#x1-710005.9" id=
+    "QQ2-1-105" name="QQ2-1-105">Config Database
     Schema</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">5.9.1 <a href=
-    "#x1-710005.9.1" id="QQ2-1-100" name="QQ2-1-100">Writing Your
+    "#x1-720005.9.1" id="QQ2-1-106" name="QQ2-1-106">Writing Your
     Own m2sh</a></span><br>
-    <span class="chapterToc">6 <a href="#x1-720006" id="QQ2-1-101"
-    name="QQ2-1-101">Contributing</a></span>
+    <span class="chapterToc">6 <a href="#x1-730006" id="QQ2-1-107"
+    name="QQ2-1-107">Contributing</a></span>
   </div><!--l. 1-->
 
   <p class="indent">
@@ -4990,23 +4994,24 @@
       <!--l. 73-->
 
       <p class="noindent">The truth is, if you want a secure server
-      of *any* kind blindly accepting every single thing any idiots
-      sends you is going to open your server up to a huge number of
-      attacks. If you look at every attack on existing HTTP servers
-      you&rsquo;ll find that about 80% of them are exploiting
-      ambiguous parts of the HTTP grammar to pass through malicious
-      content or overflow buffers. In Mongrel2 we use a parser that
-      rejects invalid requests from first basic principles using
-      technology that&rsquo;s 30 years old and backed by solid
-      mathematics. Not only does MOngrel2 reject bad requests, but
-      it can tell you <span class="pplri7t-">why</span> the request
-      was bad, just like a compiler. This doesn&rsquo;t mean
-      Mongrel2 is ruthless, but it definitely doesn&rsquo;t
-      tolerate ambiguity or stupidity. <!--l. 83-->
+      of <span class="pplri7t-">any</span> kind blindly accepting
+      every single thing any idiots sends you is going to open your
+      server up to a huge number of attacks. If you look at every
+      attack on existing HTTP servers you&rsquo;ll find that about
+      80% of them are exploiting ambiguous parts of the HTTP
+      grammar to pass through malicious content or overflow
+      buffers. In Mongrel2 we use a parser that rejects invalid
+      requests from first basic principles using technology
+      that&rsquo;s 30 years old and backed by solid mathematics.
+      Not only does MOngrel2 reject bad requests, but it can tell
+      you <span class="pplri7t-">why</span> the request was bad,
+      just like a compiler. This doesn&rsquo;t mean Mongrel2 is
+      ruthless, but it definitely doesn&rsquo;t tolerate ambiguity
+      or stupidity. <!--l. 83-->
 
       <p class="noindent">Mongrel2 completey supports keep-alives
       because now, since it&rsquo;s not using Ruby <span class=
-      "pplri7t-">at all</span> it can scale up beyong 1024 file
+      "pplri7t-">at all</span> it can scale up beyond 1024 file
       descriptors. Ruby was limited in the number of open files a
       process could have, so the original Mongrel had to break
       keep-alive and kill connections in order to save itself from
@@ -5225,7 +5230,7 @@
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">5.2</span> <a id=
-  "x1-590005.2" name="x1-590005.2"></a>Introduction to 0MQ</h3>
+  "x1-590005.2" name="x1-590005.2"></a>Introduction to ZeroMQ</h3>
   <!--l. 211-->
 
   <p class="noindent">Learning to use <a href=
@@ -5266,10 +5271,12 @@
   <p class="indent">What ZeroMQ does is create an API that looks a
   lot like sockets, and feels the same, but gives you the messaging
   styles you actually want. By simply specifying the type of socket
-  based on a few settings you can have multicast, request/reply,
-  and many other styles. Here&rsquo;s the list of ones currently
-  implemented (as documented in <span class="pplri7t-">man
-  zmq</span><span class="pplri7t-">_socket</span>):
+  when you call <a href=
+  "http://api.zeromq.org/zmq_socket.html">zmq_socket</a> you can
+  have multicast, request/reply, and many other styles.
+  Here&rsquo;s the list of ones currently implemented (as
+  documented in <span class="pplri7t-">man zmq</span><span class=
+  "pplri7t-">_socket</span>):
 
   <dl class="description">
     <dt class="description"><span class=
@@ -5309,80 +5316,452 @@
     between two peers, basically like a better TCP connection.
   </dl><!--l. 257-->
 
+  <p class="indent">The next thing ZeroMQ does is it separates
+  these types of <span class="pplri7t-">messaging</span> from the
+  underlying transport protocol and gives you a simple URL-like
+  syntax for specifying that: <span class=
+  "pplri7t-">tcp://127.0.0.1:9999/</span> for example. The types of
+  transports that you can use when you call <a href=
+  "http://api.zeromq.org/zmq_bind.html">zmq_bind</a> and <a href=
+  "http://api.zeromq.org/zmq_connect.html">zmq_connect</a> are:
+
+  <dl class="description">
+    <dt class="description"><span class="pplb7t-">tcp://</span>
+
+    <dd class="description">This is a plain old TCP socket with a
+    host and portnumber.
+
+    <dt class="description"><span class="pplb7t-">ipc://</span>
+
+    <dd class="description">This uses Unix inter-process
+    communication like domain sockets, mq, or whatever is
+    available.
+
+    <dt class="description"><span class="pplb7t-">pgm://</span>
+
+    <dd class="description">Reliable multicast messaging that uses
+    raw IP layering and requires special privileges.
+
+    <dt class="description"><span class="pplb7t-">epgm://</span>
+
+    <dd class="description">The &rdquo;encapsulated&rdquo; version
+    that uses regular UDP to do reliable multicast messaging.
+  </dl><!--l. 269-->
+
+  <p class="indent">Finally, ZeroMQ then divorces who binds and
+  connects from the above two configurations. This means that
+  unlike classic sockets who connects and who binds doesn&rsquo;t
+  matter for the direction or kind of message. All that really
+  matters is whether the connection makes sense for your
+  application. For example, in Mongrel2 the server does a bind on
+  the handler ports so that handlers can connect at will, which
+  gives your handlers a nice &rdquo;zero config&rdquo; setup.
+  Mongrel2 doesn&rsquo;t need to know about handlers, they just
+  need to know about Mongrel2. <!--l. 278-->
+
+  <p class="indent">How this last part works, and why it works, is
+  that when clients or servers connect or disconnect, ZeroMQ
+  <span class="pplri7t-">doesn&rsquo;t blow up</span>. In TCP, if I
+  have a server, and then 10 clients connect, when one of them
+  disconnects in the middle of a message I lose the message and get
+  an error. With ZeroMQ, clients connecting to a socket don&rsquo;t
+  trigger an event, and disconnecting doesn&rsquo;t do anything
+  other than hold or drop messages. This is why you don&rsquo;t
+  have to care about who binds or connects, because it&rsquo;s just
+  an addressing mechanism, not a <span class="pplri7t-">state
+  management</span> mechanism. <!--l. 287-->
+
+  <p class="indent">Another way to put this feature is
+  there&rsquo;s no <span class="pplri7t-">accept</span> in ZeroMQ.
+  Clients connect and go at will and the server is just reading
+  messages off when they&rsquo;re available or sending them out for
+  clients. <!--l. 292-->
+
   <p class="noindent">
 
+  <h4 class="subsectionHead"><span class="titlemark">5.2.1</span>
+  <a id="x1-600005.2.1" name="x1-600005.2.1"></a>A Quick Python
+  ZeroMQ Example</h4><!--l. 294-->
+
+  <p class="noindent">I&rsquo;ve written a simple abstraction over
+  ZeroMQ that fits the Mongrel2 usage of it, but I think learning
+  how you&rsquo;d write your own ZeroMQ simple echo server in
+  Python will help you get a handle on it. First the client then
+  the server: <!--l. 298-->
+
+  <p class="indent"><a id="x1-60001r23" name="x1-60001r23"></a>
+  <hr class="float">
+
+  <div class="float">
+    <div class="caption">
+      <span class="id">Source 23:</span> <span class=
+      "content"><span class="pplri7t-">Simple Python ZeroMQ</span>
+      <span class="pplri7t-">Client</span></span>
+    </div><!--tex4ht:label?: x1-60001r23 -->
+
+    <div class="fancyvrb" id="fancyvrb25">
+      <a id="x1-60003r1" name="x1-60003r1"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;import</span><span class=
+      "pcrr7t-x-x-90">&nbsp;zmq</span><br class="fancyvrb">
+      <a id="x1-60005r2" name="x1-60005r2"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-60007r3" name="x1-60007r3"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;ctx</span><span class=
+      "pcrr7t-x-x-90">&nbsp;=</span><span class=
+      "pcrr7t-x-x-90">&nbsp;zmq.Context()</span><br class=
+      "fancyvrb">
+      <a id="x1-60009r4" name="x1-60009r4"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;s</span><span class=
+      "pcrr7t-x-x-90">&nbsp;=</span><span class=
+      "pcrr7t-x-x-90">&nbsp;ctx.socket(zmq.SUB)</span><br class=
+      "fancyvrb">
+      <a id="x1-60011r5" name="x1-60011r5"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;s.connect("tcp://127.0.0.1:5566")</span><br class="fancyvrb">
+      <a id="x1-60013r6" name="x1-60013r6"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;s.setsockopt(zmq.SUBSCRIBE,</span><span class="pcrr7t-x-x-90">&nbsp;'')</span><br class="fancyvrb">
+      <a id="x1-60015r7" name="x1-60015r7"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-60017r8" name="x1-60017r8"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;msg</span><span class=
+      "pcrr7t-x-x-90">&nbsp;=</span><span class=
+      "pcrr7t-x-x-90">&nbsp;s.recv()</span><br class="fancyvrb">
+      <a id="x1-60019r9" name="x1-60019r9"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;print</span><span class=
+      "pcrr7t-x-x-90">&nbsp;"MSG:</span><span class=
+      "pcrr7t-x-x-90">&nbsp;",</span><span class=
+      "pcrr7t-x-x-90">&nbsp;repr(msg)</span>
+    </div>
+  </div>
+  <hr class="endfloat">
+  <!--l. 313-->
+
+  <p class="indent"><a id="x1-60020r24" name="x1-60020r24"></a>
+  <hr class="float">
+
+  <div class="float">
+    <div class="caption">
+      <span class="id">Source 24:</span> <span class=
+      "content"><span class="pplri7t-">Simple Python ZeroMQ</span>
+      <span class="pplri7t-">Server</span></span>
+    </div><!--tex4ht:label?: x1-60020r24 -->
+
+    <div class="fancyvrb" id="fancyvrb26">
+      <a id="x1-60022r1" name="x1-60022r1"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;import</span><span class=
+      "pcrr7t-x-x-90">&nbsp;zmq</span><br class="fancyvrb">
+      <a id="x1-60024r2" name="x1-60024r2"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;import</span><span class=
+      "pcrr7t-x-x-90">&nbsp;time</span><br class="fancyvrb">
+      <a id="x1-60026r3" name="x1-60026r3"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-60028r4" name="x1-60028r4"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;ctx</span><span class=
+      "pcrr7t-x-x-90">&nbsp;=</span><span class=
+      "pcrr7t-x-x-90">&nbsp;zmq.Context()</span><br class=
+      "fancyvrb">
+      <a id="x1-60030r5" name="x1-60030r5"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;s</span><span class=
+      "pcrr7t-x-x-90">&nbsp;=</span><span class=
+      "pcrr7t-x-x-90">&nbsp;ctx.socket(zmq.PUB)</span><br class=
+      "fancyvrb">
+      <a id="x1-60032r6" name="x1-60032r6"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;s.bind("tcp://127.0.0.1:5566")</span><br class="fancyvrb">
+      <a id="x1-60034r7" name="x1-60034r7"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-60036r8" name="x1-60036r8"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;while</span><span class=
+      "pcrr7t-x-x-90">&nbsp;True:</span><br class="fancyvrb">
+      <a id="x1-60038r9" name="x1-60038r9"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;s.send("HELLO")</span><br class=
+      "fancyvrb">
+      <a id="x1-60040r10" name="x1-60040r10"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;time.sleep(1)</span>
+    </div>
+  </div>
+  <hr class="endfloat">
+  <!--l. 329-->
+
+  <p class="indent">You can then run these two in different windows
+  and they will talk to each other. Try playing around with
+  different socket types and transports to see what they do. Notice
+  that for a PUB/SUB setup we have to use <span class=
+  "pplri7t-">setsockopt</span> to subscribe the nothing (&rdquo;).
+  This is the same no matter what language you use. <!--l. 335-->
+
+  <p class="indent">Here&rsquo;s an example that does the sme thing
+  but with REQ/REP style of messages. <!--l. 337-->
+
+  <p class="indent"><a id="x1-60041r25" name="x1-60041r25"></a>
+  <hr class="float">
+
+  <div class="float">
+    <div class="caption">
+      <span class="id">Source 25:</span> <span class=
+      "content"><span class="pplri7t-">ZeroMQ REQ/REP</span>
+      <span class="pplri7t-">Client</span></span>
+    </div><!--tex4ht:label?: x1-60041r25 -->
+
+    <div class="fancyvrb" id="fancyvrb27">
+      <a id="x1-60043r1" name="x1-60043r1"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;import</span><span class=
+      "pcrr7t-x-x-90">&nbsp;zmq</span><br class="fancyvrb">
+      <a id="x1-60045r2" name="x1-60045r2"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-60047r3" name="x1-60047r3"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;ctx</span><span class=
+      "pcrr7t-x-x-90">&nbsp;=</span><span class=
+      "pcrr7t-x-x-90">&nbsp;zmq.Context()</span><br class=
+      "fancyvrb">
+      <a id="x1-60049r4" name="x1-60049r4"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;s</span><span class=
+      "pcrr7t-x-x-90">&nbsp;=</span><span class=
+      "pcrr7t-x-x-90">&nbsp;ctx.socket(zmq.REQ)</span><br class=
+      "fancyvrb">
+      <a id="x1-60051r5" name="x1-60051r5"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;s.connect("tcp://127.0.0.1:5566")</span><br class="fancyvrb">
+      <a id="x1-60053r6" name="x1-60053r6"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-60055r7" name="x1-60055r7"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;s.send('HI</span><span class=
+      "pcrr7t-x-x-90">&nbsp;FROM</span><span class=
+      "pcrr7t-x-x-90">&nbsp;CLIENT')</span><br class="fancyvrb">
+      <a id="x1-60057r8" name="x1-60057r8"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-60059r9" name="x1-60059r9"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;msg</span><span class=
+      "pcrr7t-x-x-90">&nbsp;=</span><span class=
+      "pcrr7t-x-x-90">&nbsp;s.recv()</span><br class="fancyvrb">
+      <a id="x1-60061r10" name="x1-60061r10"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;print</span><span class=
+      "pcrr7t-x-x-90">&nbsp;"MSG:</span><span class=
+      "pcrr7t-x-x-90">&nbsp;",</span><span class=
+      "pcrr7t-x-x-90">&nbsp;repr(msg)</span>
+    </div>
+  </div>
+  <hr class="endfloat">
+  <!--l. 353-->
+
+  <p class="indent"><a id="x1-60062r26" name="x1-60062r26"></a>
+  <hr class="float">
+
+  <div class="float">
+    <div class="caption">
+      <span class="id">Source 26:</span> <span class=
+      "content"><span class="pplri7t-">ZeroMQ REQ/REP</span>
+      <span class="pplri7t-">Server</span></span>
+    </div><!--tex4ht:label?: x1-60062r26 -->
+
+    <div class="fancyvrb" id="fancyvrb28">
+      <a id="x1-60064r1" name="x1-60064r1"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;import</span><span class=
+      "pcrr7t-x-x-90">&nbsp;zmq</span><br class="fancyvrb">
+      <a id="x1-60066r2" name="x1-60066r2"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-60068r3" name="x1-60068r3"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;ctx</span><span class=
+      "pcrr7t-x-x-90">&nbsp;=</span><span class=
+      "pcrr7t-x-x-90">&nbsp;zmq.Context()</span><br class=
+      "fancyvrb">
+      <a id="x1-60070r4" name="x1-60070r4"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;s</span><span class=
+      "pcrr7t-x-x-90">&nbsp;=</span><span class=
+      "pcrr7t-x-x-90">&nbsp;ctx.socket(zmq.REP)</span><br class=
+      "fancyvrb">
+      <a id="x1-60072r5" name="x1-60072r5"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;s.bind("tcp://127.0.0.1:5566")</span><br class="fancyvrb">
+      <a id="x1-60074r6" name="x1-60074r6"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-60076r7" name="x1-60076r7"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;while</span><span class=
+      "pcrr7t-x-x-90">&nbsp;True:</span><br class="fancyvrb">
+      <a id="x1-60078r8" name="x1-60078r8"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;print</span><span class=
+      "pcrr7t-x-x-90">&nbsp;"GOT</span><span class=
+      "pcrr7t-x-x-90">&nbsp;BACK",</span><span class=
+      "pcrr7t-x-x-90">&nbsp;repr(s.recv())</span><br class=
+      "fancyvrb">
+      <a id="x1-60080r9" name="x1-60080r9"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;s.send("HELLO")</span>
+    </div>
+  </div>
+  <hr class="endfloat">
+  <!--l. 367-->
+
+  <p class="indent">As you can see when you run this it&rsquo;s
+  more like your classic web server style of messaging where a
+  client requests something with an initial message, and the server
+  replies. Try getting the order wrong and see how ZeroMQ aborts
+  and tells you it&rsquo;s wrong. REQ sockets <span class=
+  "pplri7t-">must</span> send first then recv, and REP sockets
+  <span class="pplri7t-">must</span> recv then send. <!--l. 372-->
+
+  <p class="indent"><a id="x1-60081r8" name="x1-60081r8"></a>
+  <hr class="float">
+
+  <div class="float">
+    <div class="caption">
+      <span class="id">Note 8:</span> <span class=
+      "content"><span class="pplri7t-">There&rsquo;s Always A Size
+      In ZeroMQ</span> <span class="pplri7t-">Land</span></span>
+    </div><!--tex4ht:label?: x1-60081r8 -->
+
+    <div class="quote">
+      <!--l. 373-->
+
+      <p class="noindent">The lack of a reliable framing mechanism
+      in TCP was a crime against humanity. What I mean by a
+      &rdquo;frame&rdquo; is a simple indicator that a message in a
+      stream has a certain length. If you preface each message in
+      TCP with the length of the data you&rsquo;re about to send
+      then you avoid all manner of annoyance, attacks, and bugs.
+      Something as simple as a single byte that says you&rsquo;re
+      sending up to 128 more bytes, with an extra bit to indicate
+      the last byte would have saved the world much pain. 
+      <!--l. 380-->
+
+      <p class="noindent">This is basically what ZeroMQ has done,
+      and so much more. ZeroMQ pulls out all the tricks to make
+      sure that the message you receive is totally cooked, fully
+      sized, and transports it faster than TCP can actually send
+      it. It does this by framing things intelligently, using
+      compression, reducing copying, and just generally being
+      awesome. <!--l. 385-->
+
+      <p class="noindent">Of course, the only limitation is that it
+      can&rsquo;t really <span class="pplri7t-">stream</span>
+      things, but then again nobody really does true streaming.
+      They always end up having to bolt on some framing of some
+      kind.
+    </div>
+  </div>
+  <hr class="endfloat">
+
   <h3 class="sectionHead"><span class="titlemark">5.3</span> <a id=
-  "x1-600005.3" name="x1-600005.3"></a>Handlers And Formats</h3>
-  <!--l. 260-->
+  "x1-610005.3" name="x1-610005.3"></a>Handlers And Formats</h3>
+  <!--l. 393-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">5.4</span> <a id=
-  "x1-610005.4" name="x1-610005.4"></a>Python Handler API</h3>
-  <!--l. 263-->
+  "x1-620005.4" name="x1-620005.4"></a>Python Handler API</h3>
+  <!--l. 396-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">5.5</span> <a id=
-  "x1-620005.5" name="x1-620005.5"></a>Basic Handler Demo</h3>
-  <!--l. 266-->
+  "x1-630005.5" name="x1-630005.5"></a>Basic Handler Demo</h3>
+  <!--l. 399-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">5.6</span> <a id=
-  "x1-630005.6" name="x1-630005.6"></a>Chat Demo</h3><!--l. 269-->
+  "x1-640005.6" name="x1-640005.6"></a>Chat Demo</h3><!--l. 402-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">5.7</span> <a id=
-  "x1-640005.7" name="x1-640005.7"></a>MP3 Streaming Demo</h3>
-  <!--l. 272-->
+  "x1-650005.7" name="x1-650005.7"></a>MP3 Streaming Demo</h3>
+  <!--l. 405-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">5.8</span> <a id=
-  "x1-650005.8" name="x1-650005.8"></a>Other Language APIs</h3>
-  <!--l. 275-->
+  "x1-660005.8" name="x1-660005.8"></a>Other Language APIs</h3>
+  <!--l. 408-->
 
   <p class="noindent">
 
   <h4 class="subsectionHead"><span class="titlemark">5.8.1</span>
-  <a id="x1-660005.8.1" name="x1-660005.8.1"></a>Ruby Handler
-  API</h4><!--l. 278-->
+  <a id="x1-670005.8.1" name="x1-670005.8.1"></a>Ruby Handler
+  API</h4><!--l. 411-->
 
   <p class="noindent">
 
   <h4 class="subsectionHead"><span class="titlemark">5.8.2</span>
-  <a id="x1-670005.8.2" name="x1-670005.8.2"></a>C++ Handler
-  API</h4><!--l. 281-->
+  <a id="x1-680005.8.2" name="x1-680005.8.2"></a>C++ Handler
+  API</h4><!--l. 414-->
 
   <p class="noindent">
 
   <h4 class="subsectionHead"><span class="titlemark">5.8.3</span>
-  <a id="x1-680005.8.3" name="x1-680005.8.3"></a>PHP Handler
-  API</h4><!--l. 284-->
+  <a id="x1-690005.8.3" name="x1-690005.8.3"></a>PHP Handler
+  API</h4><!--l. 417-->
 
   <p class="noindent">
 
   <h4 class="subsectionHead"><span class="titlemark">5.8.4</span>
-  <a id="x1-690005.8.4" name="x1-690005.8.4"></a>Writing Your
-  Own</h4><!--l. 287-->
+  <a id="x1-700005.8.4" name="x1-700005.8.4"></a>Writing Your
+  Own</h4><!--l. 420-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">5.9</span> <a id=
-  "x1-700005.9" name="x1-700005.9"></a>Config Database Schema</h3>
-  <!--l. 290-->
+  "x1-710005.9" name="x1-710005.9"></a>Config Database Schema</h3>
+  <!--l. 423-->
 
   <p class="noindent">
 
   <h4 class="subsectionHead"><span class="titlemark">5.9.1</span>
-  <a id="x1-710005.9.1" name="x1-710005.9.1"></a>Writing Your Own
+  <a id="x1-720005.9.1" name="x1-720005.9.1"></a>Writing Your Own
   m2sh</h4>
 
   <h2 class="chapterHead"><span class=
   "titlemark">Chapter&nbsp;6</span><br>
-  <a id="x1-720006" name="x1-720006"></a>Contributing</h2>
+  <a id="x1-730006" name="x1-730006"></a>Contributing</h2>
   <!--l. 3-->
 
   <p class="noindent">Soon...
