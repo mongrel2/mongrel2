@@ -1,4 +1,48 @@
 \chapter{Hacking}
 
-\section{Writing Your Own m2sh}
+This chapter is all about making cool things with Mongrel2.  It covers all the non-deployment
+features that you get from the browser side and the handler/backend side of your application.
+I'll show you how the chat demo works for the async web sockets.  I'll get into writing your
+own handlers using a few other demos.  I'll cover some of the interesting things you can
+do with Mongrel2 you can't do with other servers.  Finally I'll get into practical things
+when to do proxying and when to use a 0MQ handler.
+
+For the majority of this chapter I'll be using Python, but the demos should translate to
+the other languages that are implemented.  I'll periodically show how another language
+does one of the demos so you can get the idea that Mongrel2 is \emph{language agnostic}.
+In no way should you take me using Python in this chapter to mean you can't use something
+else for your handlers.
+
+Currently supported languages are:
+
+\begin{description}
+\item [Python] When you installed the \shell{m2sh} gear you also got a \ident{mongrel2} Python library.
+\item [Ruby] Ruby support, and probably the most extensive supported language, with good Rack support, by \href{http://github.com/perplexes/m2r}{perplexes on github}.
+\item [C++] C++ support by \href{http://github.com/akrennmair/mongrel2-cpp}{akrennmair on github}
+\item [PHP] PHP support by \href{http://github.com/winks/m2php}{winks on github}.
+\item [C] You can also write handlers in C using the Mongrel2 library, but is really rough, so not recommended.
+\item [Others?] \href{http://zeromq.org}{ZeroMQ} supports Ada, Basic, C, C++, Common Lisp, Erlang, Go, Haskell, Java, Lua, .NET, Objective-C, ooc, Perl, PHP, Python, and Ruby so after reading this chapter you can easily write handlers in any of those languages too.
+\end{description}
+
+However, no matter how many languages Mongrel2 supports, you will still have applications that
+can't fit into 0MQ handlers and just work better as classic web apps.  Either because you've
+already written them and have existing infrastructure, or because of some architectural issues
+that require it to run traditionally.  Because of that Mongrel2 supports \emph{HTTP proxying}
+which allows you to route requests to basic web server backends that don't support 0MQ.
+
+\begin{aside}{What About FastCGI/AJP/CGI/SCGI/WSGI/Rack?}
+Nothing prevents you from writing your own connector between Mongrel2 and your 
+deployment protocol of choice.  If you need to run FastCGI or AJP in your environment
+then your best bet is to just make a handler that translates Mongrel2 requests
+to the protocol you need and back.  The Mongrel2 format is very easy to parse and
+translate so you should be able to do it no problem.
+
+However, Mongrel2 itself doesn't support any of these directly.  Doing so would bring
+back the language specific infections that cause other web servers to go south.  The 
+design of most of these protocols tend to be either before the modern web, or specific
+to one particular language.  Instead of trying to cater to all the possible languages
+out there, Mongrel2 just gives the tools to connect to it yourself.
+\end{aside}
+
+
 

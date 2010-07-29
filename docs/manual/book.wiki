@@ -139,9 +139,7 @@
     "QQ2-1-75" name="QQ2-1-75">Further Improvements</a></span><br>
     <span class="chapterToc">5 <a href="#x1-500005" id="QQ2-1-76"
     name="QQ2-1-76">Hacking</a></span><br>
-    &nbsp;<span class="sectionToc">5.1 <a href="#x1-510005.1" id=
-    "QQ2-1-77" name="QQ2-1-77">Writing Your Own m2sh</a></span><br>
-    <span class="chapterToc">6 <a href="#x1-520006" id="QQ2-1-78"
+    <span class="chapterToc">6 <a href="#x1-510006" id="QQ2-1-78"
     name="QQ2-1-78">Contributing</a></span>
   </div><!--l. 1-->
 
@@ -4617,8 +4615,8 @@
     cuts down on a lot of your setup time and development time
     because it will <span class="pplri7t-">properly</span> restart
     things for you. This means you can simply make changes to code
-    or configs, and then just kill it and it&rsquo;ll kick over
-    automatically.
+    or configs, and then just kill the process and procer will kick
+    it back over automatically.
 
     <dt class="description"><span class="pplb7t-">easy
     automation</span>
@@ -4777,17 +4775,115 @@
 
   <h2 class="chapterHead"><span class=
   "titlemark">Chapter&nbsp;5</span><br>
-  <a id="x1-500005" name="x1-500005"></a>Hacking</h2>
+  <a id="x1-500005" name="x1-500005"></a>Hacking</h2><!--l. 3-->
 
-  <h3 class="sectionHead"><span class="titlemark">5.1</span> <a id=
-  "x1-510005.1" name="x1-510005.1"></a>Writing Your Own m2sh</h3>
-  <!--l. 1-->
+  <p class="noindent">This chapter is all about making cool things
+  with Mongrel2. It covers all the non-deployment features that you
+  get from the browser side and the handler/backend side of your
+  application. I&rsquo;ll show you how the chat demo works for the
+  async web sockets. I&rsquo;ll get into writing your own handlers
+  using a few other demos. I&rsquo;ll cover some of the interesting
+  things you can do with Mongrel2 you can&rsquo;t do with other
+  servers. Finally I&rsquo;ll get into practical things when to do
+  proxying and when to use a 0MQ handler. <!--l. 10-->
 
-  <p class="indent">
+  <p class="indent">For the majority of this chapter I&rsquo;ll be
+  using Python, but the demos should translate to the other
+  languages that are implemented. I&rsquo;ll periodically show how
+  another language does one of the demos so you can get the idea
+  that Mongrel2 is <span class="pplri7t-">language agnostic</span>.
+  In no way should you take me using Python in this chapter to mean
+  you can&rsquo;t use something else for your handlers. 
+  <!--l. 16-->
+
+  <p class="indent">Currently supported languages are:
+
+  <dl class="description">
+    <dt class="description"><span class="pplb7t-">Python</span>
+
+    <dd class="description">When you installed the <span class=
+    "pplri7t-">m2sh</span> gear you also got a <span class=
+    "pplri7t-">mongrel2</span> Python library.
+
+    <dt class="description"><span class="pplb7t-">Ruby</span>
+
+    <dd class="description">Ruby support, and probably the most
+    extensive supported language, with good Rack support, by
+    <a href="http://github.com/perplexes/m2r">perplexes on
+    github</a>.
+
+    <dt class="description"><span class="pplb7t-">C++</span>
+
+    <dd class="description">C++ support by <a href=
+    "http://github.com/akrennmair/mongrel2-cpp">akrennmair on
+    github</a>
+
+    <dt class="description"><span class="pplb7t-">PHP</span>
+
+    <dd class="description">PHP support by <a href=
+    "http://github.com/winks/m2php">winks on github</a>.
+
+    <dt class="description"><span class="pplb7t-">C</span>
+
+    <dd class="description">You can also write handlers in C using
+    the Mongrel2 library, but is really rough, so not recommended.
+
+    <dt class="description"><span class="pplb7t-">Others?</span>
+
+    <dd class="description"><a href="http://zeromq.org">ZeroMQ</a>
+    supports Ada, Basic, C, C++, Common Lisp, Erlang, Go, Haskell,
+    Java, Lua, .NET, Objective-C, ooc, Perl, PHP, Python, and Ruby
+    so after reading this chapter you can easily write handlers in
+    any of those languages too.
+  </dl><!--l. 27-->
+
+  <p class="indent">However, no matter how many languages Mongrel2
+  supports, you will still have applications that can&rsquo;t fit
+  into 0MQ handlers and just work better as classic web apps.
+  Either because you&rsquo;ve already written them and have
+  existing infrastructure, or because of some architectural issues
+  that require it to run traditionally. Because of that Mongrel2
+  supports <span class="pplri7t-">HTTP proxying</span> which allows
+  you to route requests to basic web server backends that
+  don&rsquo;t support 0MQ. <!--l. 33-->
+
+  <p class="indent"><a id="x1-50001r5" name="x1-50001r5"></a>
+  <hr class="float">
+
+  <div class="float">
+    <div class="caption">
+      <span class="id">Note 5:</span> <span class=
+      "content"><span class="pplri7t-">What About</span>
+      <span class=
+      "pplri7t-">FastCGI/AJP/CGI/SCGI/WSGI/Rack?</span></span>
+    </div><!--tex4ht:label?: x1-50001r5 -->
+
+    <div class="quote">
+      <!--l. 34-->
+
+      <p class="noindent">Nothing prevents you from writing your
+      own connector between Mongrel2 and your deployment protocol
+      of choice. If you need to run FastCGI or AJP in your
+      environment then your best bet is to just make a handler that
+      translates Mongrel2 requests to the protocol you need and
+      back. The Mongrel2 format is very easy to parse and translate
+      so you should be able to do it no problem. <!--l. 40-->
+
+      <p class="noindent">However, Mongrel2 itself doesn&rsquo;t
+      support any of these directly. Doing so would bring back the
+      language specific infections that cause other web servers to
+      go south. The design of most of these protocols tend to be
+      either before the modern web, or specific to one particular
+      language. Instead of trying to cater to all the possible
+      languages out there, Mongrel2 just gives the tools to connect
+      to it yourself.
+    </div>
+  </div>
+  <hr class="endfloat">
 
   <h2 class="chapterHead"><span class=
   "titlemark">Chapter&nbsp;6</span><br>
-  <a id="x1-520006" name="x1-520006"></a>Contributing</h2>
+  <a id="x1-510006" name="x1-510006"></a>Contributing</h2>
   <!--l. 3-->
 
   <p class="noindent">Soon...
