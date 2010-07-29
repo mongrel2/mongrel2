@@ -120,19 +120,29 @@
     Configuration</a></span><br>
     &nbsp;<span class="sectionToc">4.5 <a href="#x1-430004.5" id=
     "QQ2-1-60" name="QQ2-1-60">Step 3: Setup procer</a></span><br>
-    &nbsp;<span class="sectionToc">4.6 <a href="#x1-440004.6" id=
-    "QQ2-1-61" name="QQ2-1-61">Step 4: Static
+    &nbsp;&nbsp;<span class="subsectionToc">4.5.1 <a href=
+    "#x1-440004.5.1" id="QQ2-1-65" name="QQ2-1-65">The Python
+    Examples</a></span><br>
+    &nbsp;&nbsp;<span class="subsectionToc">4.5.2 <a href=
+    "#x1-450004.5.2" id="QQ2-1-69" name="QQ2-1-69">Testing The New
+    Setup</a></span><br>
+    &nbsp;&nbsp;<span class="subsectionToc">4.5.3 <a href=
+    "#x1-460004.5.3" id="QQ2-1-71" name="QQ2-1-71">Nice Features of
+    Procer</a></span><br>
+    &nbsp;<span class="sectionToc">4.6 <a href="#x1-470004.6" id=
+    "QQ2-1-72" name="QQ2-1-72">Step 4: Static
     Content</a></span><br>
-    &nbsp;<span class="sectionToc">4.7 <a href="#x1-450004.7" id=
-    "QQ2-1-62" name="QQ2-1-62">Step 5: Testing It</a></span><br>
-    &nbsp;<span class="sectionToc">4.8 <a href="#x1-460004.8" id=
-    "QQ2-1-63" name="QQ2-1-63">Further Improvements</a></span><br>
-    <span class="chapterToc">5 <a href="#x1-470005" id="QQ2-1-64"
-    name="QQ2-1-64">Hacking</a></span><br>
-    &nbsp;<span class="sectionToc">5.1 <a href="#x1-480005.1" id=
-    "QQ2-1-65" name="QQ2-1-65">Writing Your Own m2sh</a></span><br>
-    <span class="chapterToc">6 <a href="#x1-490006" id="QQ2-1-66"
-    name="QQ2-1-66">Contributing</a></span>
+    &nbsp;<span class="sectionToc">4.7 <a href="#x1-480004.7" id=
+    "QQ2-1-74" name="QQ2-1-74">Step 5: Testing And
+    Troubleshooting</a></span><br>
+    &nbsp;<span class="sectionToc">4.8 <a href="#x1-490004.8" id=
+    "QQ2-1-75" name="QQ2-1-75">Further Improvements</a></span><br>
+    <span class="chapterToc">5 <a href="#x1-500005" id="QQ2-1-76"
+    name="QQ2-1-76">Hacking</a></span><br>
+    &nbsp;<span class="sectionToc">5.1 <a href="#x1-510005.1" id=
+    "QQ2-1-77" name="QQ2-1-77">Writing Your Own m2sh</a></span><br>
+    <span class="chapterToc">6 <a href="#x1-520006" id="QQ2-1-78"
+    name="QQ2-1-78">Contributing</a></span>
   </div><!--l. 1-->
 
   <p class="indent">
@@ -3192,11 +3202,17 @@
       "pcrr7t-x-x-90">&nbsp;deployment</span><span class=
       "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
       "pcrr7t-x-x-90">&nbsp;mkdir</span><span class=
-      "pcrr7t-x-x-90">&nbsp;profiles</span><br class="fancyvrb">
+      "pcrr7t-x-x-90">&nbsp;static</span><br class="fancyvrb">
       <a id="x1-41027r13" name="x1-41027r13"></a><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
-      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      "pcrr7t-x-x-90">&nbsp;deployment</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;mkdir</span><span class=
+      "pcrr7t-x-x-90">&nbsp;profiles</span><br class="fancyvrb">
       <a id="x1-41029r14" name="x1-41029r14"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-41031r15" name="x1-41031r15"></a><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;#</span><span class=
       "pcrr7t-x-x-90">&nbsp;create</span><span class=
@@ -3207,13 +3223,13 @@
       "pcrr7t-x-x-90">&nbsp;for</span><span class=
       "pcrr7t-x-x-90">&nbsp;each</span><span class=
       "pcrr7t-x-x-90">&nbsp;thing</span><br class="fancyvrb">
-      <a id="x1-41031r15" name="x1-41031r15"></a><span class=
+      <a id="x1-41033r16" name="x1-41033r16"></a><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;deployment</span><span class=
       "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
       "pcrr7t-x-x-90">&nbsp;cd</span><span class=
       "pcrr7t-x-x-90">&nbsp;profiles/</span><br class="fancyvrb">
-      <a id="x1-41033r16" name="x1-41033r16"></a><span class=
+      <a id="x1-41035r17" name="x1-41035r17"></a><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;deployment/profiles</span><span class=
       "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
@@ -3223,19 +3239,19 @@
       "pcrr7t-x-x-90">&nbsp;handlertest</span><span class=
       "pcrr7t-x-x-90">&nbsp;web</span><span class=
       "pcrr7t-x-x-90">&nbsp;mongrel2</span><br class="fancyvrb">
-      <a id="x1-41035r17" name="x1-41035r17"></a><span class=
+      <a id="x1-41037r18" name="x1-41037r18"></a><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
-      <a id="x1-41037r18" name="x1-41037r18"></a><span class=
+      <a id="x1-41039r19" name="x1-41039r19"></a><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;deployment/profiles</span><span class=
       "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
       "pcrr7t-x-x-90">&nbsp;cd</span><span class=
       "pcrr7t-x-x-90">&nbsp;..</span><br class="fancyvrb">
-      <a id="x1-41039r19" name="x1-41039r19"></a><span class=
+      <a id="x1-41041r20" name="x1-41041r20"></a><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
-      <a id="x1-41041r20" name="x1-41041r20"></a><span class=
+      <a id="x1-41043r21" name="x1-41043r21"></a><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;#</span><span class=
       "pcrr7t-x-x-90">&nbsp;setup</span><span class=
@@ -3243,7 +3259,7 @@
       "pcrr7t-x-x-90">&nbsp;mongrel2</span><span class=
       "pcrr7t-x-x-90">&nbsp;database</span><span class=
       "pcrr7t-x-x-90">&nbsp;initially</span><br class="fancyvrb">
-      <a id="x1-41043r21" name="x1-41043r21"></a><span class=
+      <a id="x1-41045r22" name="x1-41045r22"></a><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;deployment</span><span class=
       "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
@@ -3252,10 +3268,10 @@
       "pcrr7t-x-x-90">&nbsp;-db</span><span class=
       "pcrr7t-x-x-90">&nbsp;config.sqlite</span><br class=
       "fancyvrb">
-      <a id="x1-41045r22" name="x1-41045r22"></a><span class=
+      <a id="x1-41047r23" name="x1-41047r23"></a><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
-      <a id="x1-41047r23" name="x1-41047r23"></a><span class=
+      <a id="x1-41049r24" name="x1-41049r24"></a><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;#</span><span class=
       "pcrr7t-x-x-90">&nbsp;copy</span><span class=
@@ -3267,28 +3283,28 @@
       "pcrr7t-x-x-90">&nbsp;source</span><span class=
       "pcrr7t-x-x-90">&nbsp;to</span><span class=
       "pcrr7t-x-x-90">&nbsp;here</span><br class="fancyvrb">
-      <a id="x1-41049r24" name="x1-41049r24"></a><span class=
+      <a id="x1-41051r25" name="x1-41051r25"></a><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;deployment</span><span class=
       "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
       "pcrr7t-x-x-90">&nbsp;cp</span><span class=
       "pcrr7t-x-x-90">&nbsp;~/projects/mongrel2/examples/python/tests/mongrel2_org.py</span><span class="pcrr7t-x-x-90">&nbsp;config.py</span><br class="fancyvrb">
-      <a id="x1-41051r25" name="x1-41051r25"></a><span class=
+      <a id="x1-41053r26" name="x1-41053r26"></a><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
-      <a id="x1-41053r26" name="x1-41053r26"></a><span class=
+      <a id="x1-41055r27" name="x1-41055r27"></a><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;#</span><span class=
       "pcrr7t-x-x-90">&nbsp;see</span><span class=
       "pcrr7t-x-x-90">&nbsp;our</span><span class=
       "pcrr7t-x-x-90">&nbsp;end</span><span class=
       "pcrr7t-x-x-90">&nbsp;results</span><br class="fancyvrb">
-      <a id="x1-41055r27" name="x1-41055r27"></a><span class=
+      <a id="x1-41057r28" name="x1-41057r28"></a><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;deployment</span><span class=
       "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
       "pcrr7t-x-x-90">&nbsp;ls</span><br class="fancyvrb">
-      <a id="x1-41057r28" name="x1-41057r28"></a><span class=
+      <a id="x1-41059r29" name="x1-41059r29"></a><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;config.py</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
@@ -3299,13 +3315,13 @@
       "pcrr7t-x-x-90">&nbsp;run</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;tmp</span><br class="fancyvrb">
-      <a id="x1-41059r29" name="x1-41059r29"></a><span class=
+      <a id="x1-41061r30" name="x1-41061r30"></a><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span>
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 196-->
+  <!--l. 197-->
 
   <p class="indent">Hopefully you&rsquo;re starting to see how you
   could easily automate this so that you don&rsquo;t have to do
@@ -3313,34 +3329,34 @@
   the sausage&rdquo; so that you know where everything goes. Future
   versions of <span class="pplri7t-">m2sh</span> will most likely
   create deployment directories like this automatically. 
-  <!--l. 201-->
+  <!--l. 202-->
 
   <p class="indent">What we&rsquo;ve done here is the following:
 
   <ol class="enumerate1">
-    <li class="enumerate" id="x1-41061x1">Setup a &nbsp;/deployment
+    <li class="enumerate" id="x1-41063x1">Setup a &nbsp;/deployment
     directory we&rsquo;ll put everything inside.
 
-    <li class="enumerate" id="x1-41063x2">Created run, tmp, logs,
+    <li class="enumerate" id="x1-41065x2">Created run, tmp, logs,
     and profiles that Mongrel2 and procer need to run.
 
-    <li class="enumerate" id="x1-41065x3">In profiles we started
+    <li class="enumerate" id="x1-41067x3">In profiles we started
     dirs for chat, mp3stream, handlertest, web, and mongrel2 that
     procer will read files out of to get all our gear up and
     running.
 
-    <li class="enumerate" id="x1-41067x4">Initialized the
+    <li class="enumerate" id="x1-41069x4">Initialized the
     config.sqlite file we&rsquo;ll be filling in with our modififed
     config.py.
 
-    <li class="enumerate" id="x1-41069x5">Copied the
+    <li class="enumerate" id="x1-41071x5">Copied the
     mongrel2_org.py example file over to our deployment so we can
     modify it.
   </ol>
 
   <h3 class="sectionHead"><span class="titlemark">4.4</span> <a id=
   "x1-420004.4" name="x1-420004.4"></a>Step 2: The mongrel2.org
-  Configuration</h3><!--l. 215-->
+  Configuration</h3><!--l. 216-->
 
   <p class="noindent">Now we&rsquo;re ready to get the
   configuration working. Here&rsquo;s the thing though, you should
@@ -3348,7 +3364,7 @@
   you the file and you are going to have to make the changes to
   meet the requirements for this deployment directory. Here&rsquo;s
   what yo have to change in <span class="pplb7t-">config.py</span>
-  to make everything work right: <!--l. 220-->
+  to make everything work right: <!--l. 221-->
 
   <p class="indent">
 
@@ -3374,22 +3390,28 @@
     all the existing ones. This is optional but probably good idea
     to get in the habit now.
 
-    <li class="enumerate" id="x1-42010x5">Finally, change any
+    <li class="enumerate" id="x1-42010x5">Change the <span class=
+    "pplri7t-">port</span> for <span class=
+    "pplri7t-">web</span><span class=
+    "pplri7t-">_app</span><span class="pplri7t-">_proxy</span> so
+    it points to 8080 instead of 80.
+
+    <li class="enumerate" id="x1-42012x6">Finally, change any
     mention of &rdquo;mongrel2.org&rdquo; into
     &rdquo;localhost&rdquo; so that you can run it locally.
-  </ol><!--l. 232-->
+  </ol><!--l. 234-->
 
   <p class="indent">Once you have that all edited, you should be
   able to run <span class="pplri7t-">m2sh load -db
   config.sqlite</span> <span class="pplri7t-">-config
   config.py</span> and it&rsquo;ll just load it up. Try using
   <span class="pplri7t-">m2sh servers</span> and <span class=
-  "pplri7t-">m2sh hosts</span> to take a peek. <!--l. 237-->
+  "pplri7t-">m2sh hosts</span> to take a peek. <!--l. 239-->
 
   <p class="indent">To test it out at this stage you can just run
-  the config.sqlite that you did with these commands: <!--l. 240-->
+  the config.sqlite that you did with these commands: <!--l. 242-->
 
-  <p class="indent"><a id="x1-42011r13" name="x1-42011r13"></a>
+  <p class="indent"><a id="x1-42013r13" name="x1-42013r13"></a>
   <hr class="float">
 
   <div class="float">
@@ -3397,10 +3419,10 @@
       <span class="id">Source 13:</span> <span class=
       "content"><span class="pplri7t-">Testing The Initial</span>
       <span class="pplri7t-">Configuration</span></span>
-    </div><!--tex4ht:label?: x1-42011r13 -->
+    </div><!--tex4ht:label?: x1-42013r13 -->
 
     <div class="fancyvrb" id="fancyvrb13">
-      <a id="x1-42013r1" name="x1-42013r1"></a><span class=
+      <a id="x1-42015r1" name="x1-42015r1"></a><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
       "pcrr7t-x-x-90">&nbsp;m2sh</span><span class=
@@ -3409,10 +3431,10 @@
       "pcrr7t-x-x-90">&nbsp;config.sqlite</span><span class=
       "pcrr7t-x-x-90">&nbsp;-host</span><span class=
       "pcrr7t-x-x-90">&nbsp;localhost</span><br class="fancyvrb">
-      <a id="x1-42015r2" name="x1-42015r2"></a><span class=
+      <a id="x1-42017r2" name="x1-42017r2"></a><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;^C</span><br class="fancyvrb">
-      <a id="x1-42017r3" name="x1-42017r3"></a><span class=
+      <a id="x1-42019r3" name="x1-42019r3"></a><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
       "pcrr7t-x-x-90">&nbsp;m2sh</span><span class=
@@ -3422,13 +3444,13 @@
       "pcrr7t-x-x-90">&nbsp;-host</span><span class=
       "pcrr7t-x-x-90">&nbsp;localhost</span><span class=
       "pcrr7t-x-x-90">&nbsp;-sudo</span><br class="fancyvrb">
-      <a id="x1-42019r4" name="x1-42019r4"></a><span class=
+      <a id="x1-42021r4" name="x1-42021r4"></a><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
       "pcrr7t-x-x-90">&nbsp;less</span><span class=
       "pcrr7t-x-x-90">&nbsp;run/mongrel2.logs</span><br class=
       "fancyvrb">
-      <a id="x1-42021r5" name="x1-42021r5"></a><span class=
+      <a id="x1-42023r5" name="x1-42023r5"></a><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
       "pcrr7t-x-x-90">&nbsp;m2sh</span><span class=
@@ -3441,7 +3463,7 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 250-->
+  <!--l. 252-->
 
   <p class="indent">That&rsquo;s enough to make sure it runs, but
   you&rsquo;ve got nothing running so it mostly won&rsquo;t work at
@@ -3451,39 +3473,1347 @@
   "x1-430004.5" name="x1-430004.5"></a>Step 3: Setup procer</h3>
   <!--l. 259-->
 
+  <p class="noindent">Now we want to make <span class=
+  "pplri7t-">procer</span> start everything for us and keep it
+  running. How <span class="pplri7t-">procer</span> works is you
+  put a few special files into a directory in <span class=
+  "pplb7t-">profiles</span>. This directory (say <span class=
+  "pplb7t-">chat</span>) is the profile for that app, and when you
+  start <span class="pplri7t-">procer</span> you point it at the
+  main <span class="pplb7t-">profiles</span> directory it tries to
+  run it. It&rsquo;s dead simple, and very easy to automate so
+  we&rsquo;ll do it by hand and then you can do some automation
+  later. <!--l. 267-->
+
+  <p class="indent">Let&rsquo;s first setup a basic config that
+  gets our skeleton profiles and make sure procer can run
+  everything. <!--l. 270-->
+
+  <p class="indent"><a id="x1-43001r14" name="x1-43001r14"></a>
+  <hr class="float">
+
+  <div class="float">
+    <div class="caption">
+      <span class="id">Source 14:</span> <span class=
+      "content"><span class="pplri7t-">Skeleton procer</span>
+      <span class="pplri7t-">Setup</span></span>
+    </div><!--tex4ht:label?: x1-43001r14 -->
+
+    <div class="fancyvrb" id="fancyvrb14">
+      <a id="x1-43003r1" name="x1-43003r1"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;~/deployment</span><span class=
+      "pcrr7t-x-x-90">&nbsp;$</span><span class=
+      "pcrr7t-x-x-90">&nbsp;cd</span><span class=
+      "pcrr7t-x-x-90">&nbsp;profiles/</span><br class="fancyvrb">
+      <a id="x1-43005r2" name="x1-43005r2"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;~/deployment/profiles</span><span class="pcrr7t-x-x-90">&nbsp;$</span><span class="pcrr7t-x-x-90">&nbsp;ls</span><br class="fancyvrb">
+      <a id="x1-43007r3" name="x1-43007r3"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;chat</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;handlertest</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;mongrel2</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;mp3stream web</span><br class=
+      "fancyvrb">
+      <a id="x1-43009r4" name="x1-43009r4"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-43011r5" name="x1-43011r5"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;#</span><span class=
+      "pcrr7t-x-x-90">&nbsp;make</span><span class=
+      "pcrr7t-x-x-90">&nbsp;all</span><span class=
+      "pcrr7t-x-x-90">&nbsp;the</span><span class=
+      "pcrr7t-x-x-90">&nbsp;restart</span><span class=
+      "pcrr7t-x-x-90">&nbsp;settings</span><br class="fancyvrb">
+      <a id="x1-43013r6" name="x1-43013r6"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;~/deployment/profiles</span><span class="pcrr7t-x-x-90">&nbsp;$</span><span class="pcrr7t-x-x-90">&nbsp;for</span><span class="pcrr7t-x-x-90">&nbsp;i</span><span class="pcrr7t-x-x-90">&nbsp;in</span><span class="pcrr7t-x-x-90">&nbsp;&#8902;;</span><span class="pcrr7t-x-x-90">&nbsp;do</span><span class="pcrr7t-x-x-90">&nbsp;touch</span><span class="pcrr7t-x-x-90">&nbsp;$i/restart;</span><span class="pcrr7t-x-x-90">&nbsp;done</span><br class="fancyvrb">
+      <a id="x1-43015r7" name="x1-43015r7"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-43017r8" name="x1-43017r8"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;#</span><span class=
+      "pcrr7t-x-x-90">&nbsp;make</span><span class=
+      "pcrr7t-x-x-90">&nbsp;all</span><span class=
+      "pcrr7t-x-x-90">&nbsp;the</span><span class=
+      "pcrr7t-x-x-90">&nbsp;empty</span><span class=
+      "pcrr7t-x-x-90">&nbsp;dependencies</span><br class=
+      "fancyvrb">
+      <a id="x1-43019r9" name="x1-43019r9"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;~/deployment/profiles</span><span class="pcrr7t-x-x-90">&nbsp;$</span><span class="pcrr7t-x-x-90">&nbsp;for</span><span class="pcrr7t-x-x-90">&nbsp;i</span><span class="pcrr7t-x-x-90">&nbsp;in</span><span class="pcrr7t-x-x-90">&nbsp;&#8902;;</span><span class="pcrr7t-x-x-90">&nbsp;do</span><span class="pcrr7t-x-x-90">&nbsp;touch</span><span class="pcrr7t-x-x-90">&nbsp;$i/depends;</span><span class="pcrr7t-x-x-90">&nbsp;done</span><br class="fancyvrb">
+      <a id="x1-43021r10" name="x1-43021r10"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-43023r11" name="x1-43023r11"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;#</span><span class=
+      "pcrr7t-x-x-90">&nbsp;setup</span><span class=
+      "pcrr7t-x-x-90">&nbsp;the</span><span class=
+      "pcrr7t-x-x-90">&nbsp;pid_files</span><span class=
+      "pcrr7t-x-x-90">&nbsp;to</span><span class=
+      "pcrr7t-x-x-90">&nbsp;some</span><span class=
+      "pcrr7t-x-x-90">&nbsp;sort</span><span class=
+      "pcrr7t-x-x-90">&nbsp;of</span><span class=
+      "pcrr7t-x-x-90">&nbsp;default</span><br class="fancyvrb">
+      <a id="x1-43025r12" name="x1-43025r12"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;~/deployment/profiles</span><span class="pcrr7t-x-x-90">&nbsp;$</span><span class="pcrr7t-x-x-90">&nbsp;for</span><span class="pcrr7t-x-x-90">&nbsp;i</span><span class="pcrr7t-x-x-90">&nbsp;in</span><span class="pcrr7t-x-x-90">&nbsp;&#8902;;</span><span class="pcrr7t-x-x-90">&nbsp;do</span><span class="pcrr7t-x-x-90">&nbsp;echo</span><span class="pcrr7t-x-x-90">&nbsp;$PWD/$i/$i.pid</span><span class="pcrr7t-x-x-90">&nbsp;&gt;</span><span class="pcrr7t-x-x-90">&nbsp;$i/pid_file;</span><span class="pcrr7t-x-x-90">&nbsp;done</span><br class="fancyvrb">
+      <a id="x1-43027r13" name="x1-43027r13"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;~/deployment/profiles</span><span class="pcrr7t-x-x-90">&nbsp;$</span><span class="pcrr7t-x-x-90">&nbsp;cat</span><span class="pcrr7t-x-x-90">&nbsp;chat/pid_file</span><br class="fancyvrb">
+      <a id="x1-43029r14" name="x1-43029r14"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-43031r15" name="x1-43031r15"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;#</span><span class=
+      "pcrr7t-x-x-90">&nbsp;get</span><span class=
+      "pcrr7t-x-x-90">&nbsp;the</span><span class=
+      "pcrr7t-x-x-90">&nbsp;run</span><span class=
+      "pcrr7t-x-x-90">&nbsp;script</span><span class=
+      "pcrr7t-x-x-90">&nbsp;setup</span><span class=
+      "pcrr7t-x-x-90">&nbsp;to</span><span class=
+      "pcrr7t-x-x-90">&nbsp;do</span><span class=
+      "pcrr7t-x-x-90">&nbsp;nothing</span><br class="fancyvrb">
+      <a id="x1-43033r16" name="x1-43033r16"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;~/deployment/profiles</span><span class="pcrr7t-x-x-90">&nbsp;$</span><span class="pcrr7t-x-x-90">&nbsp;for</span><span class="pcrr7t-x-x-90">&nbsp;i</span><span class="pcrr7t-x-x-90">&nbsp;in</span><span class="pcrr7t-x-x-90">&nbsp;&#8902;;</span><span class="pcrr7t-x-x-90">&nbsp;do</span><span class="pcrr7t-x-x-90">&nbsp;echo</span><span class="pcrr7t-x-x-90">&nbsp;'#!/bin/sh'</span><span class="pcrr7t-x-x-90">&nbsp;&gt;</span><span class="pcrr7t-x-x-90">&nbsp;$i/run;</span><span class="pcrr7t-x-x-90">&nbsp;done</span><br class="fancyvrb">
+      <a id="x1-43035r17" name="x1-43035r17"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;~/deployment/profiles</span><span class="pcrr7t-x-x-90">&nbsp;$</span><span class="pcrr7t-x-x-90">&nbsp;for</span><span class="pcrr7t-x-x-90">&nbsp;i</span><span class="pcrr7t-x-x-90">&nbsp;in</span><span class="pcrr7t-x-x-90">&nbsp;&#8902;;</span><span class="pcrr7t-x-x-90">&nbsp;do</span><span class="pcrr7t-x-x-90">&nbsp;chmod</span><span class="pcrr7t-x-x-90">&nbsp;u+x</span><span class="pcrr7t-x-x-90">&nbsp;$i/run;</span><span class="pcrr7t-x-x-90">&nbsp;done</span><br class="fancyvrb">
+      <a id="x1-43037r18" name="x1-43037r18"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-43039r19" name="x1-43039r19"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;#</span><span class=
+      "pcrr7t-x-x-90">&nbsp;check</span><span class=
+      "pcrr7t-x-x-90">&nbsp;out</span><span class=
+      "pcrr7t-x-x-90">&nbsp;what</span><span class=
+      "pcrr7t-x-x-90">&nbsp;we</span><span class=
+      "pcrr7t-x-x-90">&nbsp;did</span><br class="fancyvrb">
+      <a id="x1-43041r20" name="x1-43041r20"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;~/deployment/profiles</span><span class="pcrr7t-x-x-90">&nbsp;$</span><span class="pcrr7t-x-x-90">&nbsp;ls</span><span class="pcrr7t-x-x-90">&nbsp;-lR</span>
+    </div>
+  </div>
+  <hr class="endfloat">
+  <!--l. 295-->
+
+  <p class="indent">With all of that you can then try to run
+  <span class="pplri7t-">procer</span> to watch it fail but still
+  try to run everything:
+
+  <div class="fancyvrb" id="fancyvrb15">
+    <a id="x1-43043r1" name="x1-43043r1"></a><span class=
+    "pcrr7t-">&nbsp;</span><span class=
+    "pcrr7t-">&nbsp;&gt;</span><span class=
+    "pcrr7t-">&nbsp;sudo</span><span class=
+    "pcrr7t-">&nbsp;procer</span><span class=
+    "pcrr7t-">&nbsp;$PWD</span><span class=
+    "pcrr7t-">&nbsp;$PWD/../run/procer.pid</span><br class=
+    "fancyvrb">
+    <a id="x1-43045r2" name="x1-43045r2"></a><span class=
+    "pcrr7t-">&nbsp;</span><span class=
+    "pcrr7t-">&nbsp;&gt;</span><span class=
+    "pcrr7t-">&nbsp;less</span><span class=
+    "pcrr7t-">&nbsp;error.log</span>
+  </div><!--l. 303-->
+
+  <p class="indent">This is assuming that you are still in the
+  <span class="pplb7t-">profiles</span> directory and what you
+  should a file <span class="pplb7t-">error.log</span> get created
+  and probably some messages printed to the screen. Just ignore any
+  mention of Mongrel2 since that&rsquo;s probably just cruft from
+  the <span class="pplb7t-">libm2.a</span> we haven&rsquo;t
+  removed. <!--l. 309-->
+
+  <p class="indent">Take a look in the <span class=
+  "pplb7t-">error.log</span> and you&rsquo;ll see it&rsquo;s not
+  necessarily errors but information on how things were run. What
+  you should see is something like this for each profile: 
+  <!--l. 313-->
+
+  <p class="indent"><a id="x1-43046r15" name="x1-43046r15"></a>
+  <hr class="float">
+
+  <div class="float">
+    <div class="caption">
+      <span class="id">Source 15:</span> <span class=
+      "content"><span class="pplri7t-">First Dummy Run Of</span>
+      <span class="pplri7t-">procer</span></span>
+    </div><!--tex4ht:label?: x1-43046r15 -->
+
+    <div class="fancyvrb" id="fancyvrb16">
+      <a id="x1-43048r1" name="x1-43048r1"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;DEBUG</span><span class=
+      "pcrr7t-x-x-90">&nbsp;procer.c:232:</span><span class=
+      "pcrr7t-x-x-90">&nbsp;Loading</span><span class=
+      "pcrr7t-x-x-90">&nbsp;5</span><span class=
+      "pcrr7t-x-x-90">&nbsp;actions.</span><br class="fancyvrb">
+      <a id="x1-43050r2" name="x1-43050r2"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;DEBUG</span><span class=
+      "pcrr7t-x-x-90">&nbsp;procer.c:83:</span><span class=
+      "pcrr7t-x-x-90">&nbsp;STARTED</span><span class=
+      "pcrr7t-x-x-90">&nbsp;chat</span><br class="fancyvrb">
+      <a id="x1-43052r3" name="x1-43052r3"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;ERROR</span><span class=
+      "pcrr7t-x-x-90">&nbsp;Failed</span><span class=
+      "pcrr7t-x-x-90">&nbsp;to</span><span class=
+      "pcrr7t-x-x-90">&nbsp;open</span><span class=
+      "pcrr7t-x-x-90">&nbsp;PID</span><span class=
+      "pcrr7t-x-x-90">&nbsp;file</span><span class=
+      "pcrr7t-x-x-90">&nbsp;/home/zedshaw/deployment/profiles/chat/chat.pid</span><span class="pcrr7t-x-x-90">&nbsp;for</span><span class="pcrr7t-x-x-90">&nbsp;reading.</span><br class="fancyvrb">
+      <a id="x1-43054r4" name="x1-43054r4"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;ERROR</span><span class=
+      "pcrr7t-x-x-90">&nbsp;Failed</span><span class=
+      "pcrr7t-x-x-90">&nbsp;to</span><span class=
+      "pcrr7t-x-x-90">&nbsp;open</span><span class=
+      "pcrr7t-x-x-90">&nbsp;PID</span><span class=
+      "pcrr7t-x-x-90">&nbsp;file</span><span class=
+      "pcrr7t-x-x-90">&nbsp;/home/zedshaw/deployment/profiles/chat/chat.pid</span><span class="pcrr7t-x-x-90">&nbsp;for</span><span class="pcrr7t-x-x-90">&nbsp;reading.</span><br class="fancyvrb">
+      <a id="x1-43056r5" name="x1-43056r5"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;INFO</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;No</span><span class=
+      "pcrr7t-x-x-90">&nbsp;previous</span><span class=
+      "pcrr7t-x-x-90">&nbsp;Mongrel2</span><span class=
+      "pcrr7t-x-x-90">&nbsp;running,</span><span class=
+      "pcrr7t-x-x-90">&nbsp;continuing</span><span class=
+      "pcrr7t-x-x-90">&nbsp;on.</span><br class="fancyvrb">
+      <a id="x1-43058r6" name="x1-43058r6"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;DEBUG</span><span class=
+      "pcrr7t-x-x-90">&nbsp;procer.c:37:</span><span class=
+      "pcrr7t-x-x-90">&nbsp;ACTION:</span><span class=
+      "pcrr7t-x-x-90">&nbsp;command=/home/zedshaw/deployment/profiles/chat/run,</span><span class="pcrr7t-x-x-90">&nbsp;pid_file=/home/zedshaw/deployment/profiles/chat/chat.pid,</span><span class="pcrr7t-x-x-90">&nbsp;restart=1,</span><span class="pcrr7t-x-x-90">&nbsp;depends=(null)</span><br class="fancyvrb">
+      <a id="x1-43060r7" name="x1-43060r7"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;DEBUG</span><span class=
+      "pcrr7t-x-x-90">&nbsp;procer.c:56:</span><span class=
+      "pcrr7t-x-x-90">&nbsp;WAITING</span><span class=
+      "pcrr7t-x-x-90">&nbsp;FOR</span><span class=
+      "pcrr7t-x-x-90">&nbsp;CHILD.</span><br class="fancyvrb">
+      <a id="x1-43062r8" name="x1-43062r8"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;INFO</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;Now</span><span class=
+      "pcrr7t-x-x-90">&nbsp;running</span><span class=
+      "pcrr7t-x-x-90">&nbsp;as</span><span class=
+      "pcrr7t-x-x-90">&nbsp;UID:1000,</span><span class=
+      "pcrr7t-x-x-90">&nbsp;GID:1000</span><br class="fancyvrb">
+      <a id="x1-43064r9" name="x1-43064r9"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;DEBUG</span><span class=
+      "pcrr7t-x-x-90">&nbsp;procer.c:60:</span><span class=
+      "pcrr7t-x-x-90">&nbsp;Command</span><span class=
+      "pcrr7t-x-x-90">&nbsp;ran</span><span class=
+      "pcrr7t-x-x-90">&nbsp;and</span><span class=
+      "pcrr7t-x-x-90">&nbsp;exited</span><span class=
+      "pcrr7t-x-x-90">&nbsp;successfully,</span><span class=
+      "pcrr7t-x-x-90">&nbsp;now</span><span class=
+      "pcrr7t-x-x-90">&nbsp;looking</span><span class=
+      "pcrr7t-x-x-90">&nbsp;for</span><span class=
+      "pcrr7t-x-x-90">&nbsp;the</span><span class=
+      "pcrr7t-x-x-90">&nbsp;PID</span><span class=
+      "pcrr7t-x-x-90">&nbsp;file.</span><br class="fancyvrb">
+      <a id="x1-43066r10" name="x1-43066r10"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;ERROR</span><span class=
+      "pcrr7t-x-x-90">&nbsp;chat</span><span class=
+      "pcrr7t-x-x-90">&nbsp;didn't</span><span class=
+      "pcrr7t-x-x-90">&nbsp;make</span><span class=
+      "pcrr7t-x-x-90">&nbsp;pidfile</span><span class=
+      "pcrr7t-x-x-90">&nbsp;/home/zedshaw/deployment/profiles/chat/chat.pid.</span>
+    </div>
+  </div>
+  <hr class="endfloat">
+  <!--l. 328-->
+
+  <p class="indent">I&rsquo;ve cleaned this up a bit, and again
+  ignore that it&rsquo;s saying &rdquo;Mongrel2&rdquo;,
+  that&rsquo;s just cruft from the library since it was originally
+  designed for Mongrel2. What you can see here is the following:
+
+  <ol class="enumerate1">
+    <li class="enumerate" id="x1-43068x1">It starts up and says it
+    found 5 profiles.
+
+    <li class="enumerate" id="x1-43070x2">It starts chat, and says
+    there&rsquo;s no PID file so good to continue.
+
+    <li class="enumerate" id="x1-43072x3">It reports what ACTION
+    it&rsquo;s running, so you can see the config.
+
+    <li class="enumerate" id="x1-43074x4">It spawns off your
+    <span class="pplb7t-">run</span> script, <span class=
+    "pplri7t-">drops privilege</span> and says it&rsquo;s WAITING
+    for your script to exit.
+
+    <li class="enumerate" id="x1-43076x5">After your script runs it
+    looks for the PID file you gave in <span class=
+    "pplb7t-">pid</span><span class="pplb7t-">_file</span> and if
+    its not there then it exits that action.
+
+    <li class="enumerate" id="x1-43078x6">It does this for all of
+    them and since none of them run right <span class=
+    "pplri7t-">procer</span> exits.
+  </ol><!--l. 342-->
+
+  <p class="indent">Next up lets get Mongrel2 running inside
+  <span class="pplri7t-">procer</span>: <!--l. 344-->
+
+  <p class="indent"><a id="x1-43079r16" name="x1-43079r16"></a>
+  <hr class="float">
+
+  <div class="float">
+    <div class="caption">
+      <span class="id">Source 16:</span> <span class=
+      "content"><span class="pplri7t-">procer Config For</span>
+      <span class="pplri7t-">Mongrel2</span></span>
+    </div><!--tex4ht:label?: x1-43079r16 -->
+
+    <div class="fancyvrb" id="fancyvrb17">
+      <a id="x1-43081r1" name="x1-43081r1"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;cd</span><span class=
+      "pcrr7t-x-x-90">&nbsp;~/deployment</span><br class=
+      "fancyvrb">
+      <a id="x1-43083r2" name="x1-43083r2"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;#</span><span class=
+      "pcrr7t-x-x-90">&nbsp;make</span><span class=
+      "pcrr7t-x-x-90">&nbsp;mongrel2</span><span class=
+      "pcrr7t-x-x-90">&nbsp;run</span><span class=
+      "pcrr7t-x-x-90">&nbsp;as</span><span class=
+      "pcrr7t-x-x-90">&nbsp;root</span><br class="fancyvrb">
+      <a id="x1-43085r3" name="x1-43085r3"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;sudo</span><span class=
+      "pcrr7t-x-x-90">&nbsp;chown</span><span class=
+      "pcrr7t-x-x-90">&nbsp;root.root</span><span class=
+      "pcrr7t-x-x-90">&nbsp;profiles/mongrel2</span><br class=
+      "fancyvrb">
+      <a id="x1-43087r4" name="x1-43087r4"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-43089r5" name="x1-43089r5"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;#</span><span class=
+      "pcrr7t-x-x-90">&nbsp;tell</span><span class=
+      "pcrr7t-x-x-90">&nbsp;procer</span><span class=
+      "pcrr7t-x-x-90">&nbsp;where</span><span class=
+      "pcrr7t-x-x-90">&nbsp;mongrel2</span><span class=
+      "pcrr7t-x-x-90">&nbsp;puts</span><span class=
+      "pcrr7t-x-x-90">&nbsp;its</span><span class=
+      "pcrr7t-x-x-90">&nbsp;pid_file</span><br class="fancyvrb">
+      <a id="x1-43091r6" name="x1-43091r6"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;#</span><span class=
+      "pcrr7t-x-x-90">&nbsp;notice</span><span class=
+      "pcrr7t-x-x-90">&nbsp;the</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;not</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;on</span><span class=
+      "pcrr7t-x-x-90">&nbsp;this</span><br class="fancyvrb">
+      <a id="x1-43093r7" name="x1-43093r7"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;echo</span><span class=
+      "pcrr7t-x-x-90">&nbsp;"$PWD/run/mongrel2.pid"</span><span class="pcrr7t-x-x-90">&nbsp;&gt;</span><span class="pcrr7t-x-x-90">&nbsp;profiles/mongrel2/pid_file</span><br class="fancyvrb">
+      <a id="x1-43095r8" name="x1-43095r8"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-43097r9" name="x1-43097r9"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;#</span><span class=
+      "pcrr7t-x-x-90">&nbsp;make</span><span class=
+      "pcrr7t-x-x-90">&nbsp;the</span><span class=
+      "pcrr7t-x-x-90">&nbsp;run</span><span class=
+      "pcrr7t-x-x-90">&nbsp;script</span><span class=
+      "pcrr7t-x-x-90">&nbsp;start</span><span class=
+      "pcrr7t-x-x-90">&nbsp;mongrel2</span><span class=
+      "pcrr7t-x-x-90">&nbsp;(notice</span><span class=
+      "pcrr7t-x-x-90">&nbsp;the</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;on</span><span class=
+      "pcrr7t-x-x-90">&nbsp;this)</span><br class="fancyvrb">
+      <a id="x1-43099r10" name="x1-43099r10"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;echo</span><span class=
+      "pcrr7t-x-x-90">&nbsp;"cd</span><span class=
+      "pcrr7t-x-x-90">&nbsp;$PWD"</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;profiles/mongrel2/run</span><br class=
+      "fancyvrb">
+      <a id="x1-43101r11" name="x1-43101r11"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;echo</span><span class=
+      "pcrr7t-x-x-90">&nbsp;"m2sh</span><span class=
+      "pcrr7t-x-x-90">&nbsp;start</span><span class=
+      "pcrr7t-x-x-90">&nbsp;-db</span><span class=
+      "pcrr7t-x-x-90">&nbsp;config.sqlite</span><span class=
+      "pcrr7t-x-x-90">&nbsp;-host</span><span class=
+      "pcrr7t-x-x-90">&nbsp;localhost"</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;profiles/mongrel2/run</span><br class=
+      "fancyvrb">
+      <a id="x1-43103r12" name="x1-43103r12"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-43105r13" name="x1-43105r13"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;#</span><span class=
+      "pcrr7t-x-x-90">&nbsp;check</span><span class=
+      "pcrr7t-x-x-90">&nbsp;out</span><span class=
+      "pcrr7t-x-x-90">&nbsp;the</span><span class=
+      "pcrr7t-x-x-90">&nbsp;results</span><br class="fancyvrb">
+      <a id="x1-43107r14" name="x1-43107r14"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;cat</span><span class=
+      "pcrr7t-x-x-90">&nbsp;profiles/mongrel2/run</span><br class=
+      "fancyvrb">
+      <a id="x1-43109r15" name="x1-43109r15"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;#!/bin/sh</span><br class="fancyvrb">
+      <a id="x1-43111r16" name="x1-43111r16"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;cd</span><span class=
+      "pcrr7t-x-x-90">&nbsp;/home/zedshaw/deployment</span><br class="fancyvrb">
+      <a id="x1-43113r17" name="x1-43113r17"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;m2sh</span><span class=
+      "pcrr7t-x-x-90">&nbsp;start</span><span class=
+      "pcrr7t-x-x-90">&nbsp;-db</span><span class=
+      "pcrr7t-x-x-90">&nbsp;config.sqlite</span><span class=
+      "pcrr7t-x-x-90">&nbsp;-host</span><span class=
+      "pcrr7t-x-x-90">&nbsp;localhost</span>
+    </div>
+  </div>
+  <hr class="endfloat">
+  <!--l. 366-->
+
+  <p class="indent">Obviously you don&rsquo;t have to use a series
+  of <span class="pplri7t-">echo</span> commands to make these
+  scripts. You can edit them just fine, we&rsquo;re just doing it
+  this way so that you can follow along easier. <!--l. 370-->
+
+  <p class="indent">Now, make sure you don&rsquo;t have any other
+  Mongrel2 processes running and then start procer again to see if
+  it starts this configuration correctly. <!--l. 375-->
+
+  <p class="indent"><a id="x1-43114r17" name="x1-43114r17"></a>
+  <hr class="float">
+
+  <div class="float">
+    <div class="caption">
+      <span class="id">Source 17:</span> <span class=
+      "content"><span class="pplri7t-">Using procer To Run</span>
+      <span class="pplri7t-">Mongrel2</span></span>
+    </div><!--tex4ht:label?: x1-43114r17 -->
+
+    <div class="fancyvrb" id="fancyvrb18">
+      <a id="x1-43116r1" name="x1-43116r1"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;cd</span><span class=
+      "pcrr7t-x-x-90">&nbsp;~/deployment</span><br class=
+      "fancyvrb">
+      <a id="x1-43118r2" name="x1-43118r2"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;#</span><span class=
+      "pcrr7t-x-x-90">&nbsp;clear</span><span class=
+      "pcrr7t-x-x-90">&nbsp;out</span><span class=
+      "pcrr7t-x-x-90">&nbsp;the</span><span class=
+      "pcrr7t-x-x-90">&nbsp;error.log</span><span class=
+      "pcrr7t-x-x-90">&nbsp;for</span><span class=
+      "pcrr7t-x-x-90">&nbsp;testing</span><br class="fancyvrb">
+      <a id="x1-43120r3" name="x1-43120r3"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;rm</span><span class=
+      "pcrr7t-x-x-90">&nbsp;profiles/error.log</span><br class=
+      "fancyvrb">
+      <a id="x1-43122r4" name="x1-43122r4"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-43124r5" name="x1-43124r5"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;#</span><span class=
+      "pcrr7t-x-x-90">&nbsp;start</span><span class=
+      "pcrr7t-x-x-90">&nbsp;procer</span><br class="fancyvrb">
+      <a id="x1-43126r6" name="x1-43126r6"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;sudo</span><span class=
+      "pcrr7t-x-x-90">&nbsp;procer</span><span class=
+      "pcrr7t-x-x-90">&nbsp;$PWD/profiles</span><span class=
+      "pcrr7t-x-x-90">&nbsp;$PWD/procer.pid</span><br class=
+      "fancyvrb">
+      <a id="x1-43128r7" name="x1-43128r7"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-43130r8" name="x1-43130r8"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;#</span><span class=
+      "pcrr7t-x-x-90">&nbsp;see</span><span class=
+      "pcrr7t-x-x-90">&nbsp;if</span><span class=
+      "pcrr7t-x-x-90">&nbsp;procer</span><span class=
+      "pcrr7t-x-x-90">&nbsp;is</span><span class=
+      "pcrr7t-x-x-90">&nbsp;running</span><br class="fancyvrb">
+      <a id="x1-43132r9" name="x1-43132r9"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;ps</span><span class=
+      "pcrr7t-x-x-90">&nbsp;ax</span><span class=
+      "pcrr7t-x-x-90">&nbsp;|</span><span class=
+      "pcrr7t-x-x-90">&nbsp;grep</span><span class=
+      "pcrr7t-x-x-90">&nbsp;procer</span><br class="fancyvrb">
+      <a id="x1-43134r10" name="x1-43134r10"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;17934</span><span class=
+      "pcrr7t-x-x-90">&nbsp;?</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;Ss</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;0:00</span><span class=
+      "pcrr7t-x-x-90">&nbsp;procer</span><span class=
+      "pcrr7t-x-x-90">&nbsp;/home/zedshaw/deployment/profiles</span><span class="pcrr7t-x-x-90">&nbsp;/home/zedshaw/deployment/procer.pid</span><br class="fancyvrb">
+      <a id="x1-43136r11" name="x1-43136r11"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-43138r12" name="x1-43138r12"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;#</span><span class=
+      "pcrr7t-x-x-90">&nbsp;see</span><span class=
+      "pcrr7t-x-x-90">&nbsp;if</span><span class=
+      "pcrr7t-x-x-90">&nbsp;mongrel2</span><span class=
+      "pcrr7t-x-x-90">&nbsp;is</span><span class=
+      "pcrr7t-x-x-90">&nbsp;running</span><br class="fancyvrb">
+      <a id="x1-43140r13" name="x1-43140r13"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;ps</span><span class=
+      "pcrr7t-x-x-90">&nbsp;ax</span><span class=
+      "pcrr7t-x-x-90">&nbsp;|</span><span class=
+      "pcrr7t-x-x-90">&nbsp;grep</span><span class=
+      "pcrr7t-x-x-90">&nbsp;mongrel2</span><br class="fancyvrb">
+      <a id="x1-43142r14" name="x1-43142r14"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;9223</span><span class=
+      "pcrr7t-x-x-90">&nbsp;?</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;Sl</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;0:26</span><span class=
+      "pcrr7t-x-x-90">&nbsp;python</span><span class=
+      "pcrr7t-x-x-90">&nbsp;/home/zedshaw/projects/mongrel2/examples/chat/chat.py</span><br class="fancyvrb">
+      <a id="x1-43144r15" name="x1-43144r15"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;17944</span><span class=
+      "pcrr7t-x-x-90">&nbsp;?</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;Ssl</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;0:00</span><span class=
+      "pcrr7t-x-x-90">&nbsp;mongrel2</span><span class=
+      "pcrr7t-x-x-90">&nbsp;config.sqlite</span><span class=
+      "pcrr7t-x-x-90">&nbsp;localhost</span><br class="fancyvrb">
+      <a id="x1-43146r16" name="x1-43146r16"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span>
+    </div>
+  </div>
+  <hr class="endfloat">
+  <!--l. 396-->
+
+  <p class="indent">To watch <span class="pplri7t-">procer</span>
+  in action, try doing <span class="pplri7t-">m2sh stop -db
+  config.sqlite -host localhost</span> <span class=
+  "pplri7t-">-murder</span> and then look at <span class=
+  "pplb7t-">profiles/error.log</span> and watch Mongrel2 come right
+  back.
+
+  <h4 class="subsectionHead"><span class="titlemark">4.5.1</span>
+  <a id="x1-440004.5.1" name="x1-440004.5.1"></a>The Python
+  Examples</h4><!--l. 403-->
+
+  <p class="noindent">We&rsquo;ve got a good setup of <span class=
+  "pplri7t-">procer</span> going and it keeps Mongrel2 running so
+  let&rsquo;s setup a similar thing for each of our little Python
+  demos that we&rsquo;ll need. In order to do this though we sort
+  of have to &rdquo;hack&rdquo; in making them daemonize and create
+  PID files with a little shell script help. Let&rsquo;s start with
+  the <span class="pplri7t-">chat</span> demo and assuming your
+  mongrel2 source is in <span class=
+  "pplb7t-">&nbsp;/projects/mongrel2</span> you will change
+  <span class="pplb7t-">profiles/chat/run</span> to be like this: 
+  <!--l. 411-->
+
+  <p class="indent"><a id="x1-44001r18" name="x1-44001r18"></a>
+  <hr class="float">
+
+  <div class="float">
+    <div class="caption">
+      <span class="id">Source 18:</span> <span class=
+      "content"><span class="pplri7t-">Run Script For Chat</span>
+      <span class="pplri7t-">Demo</span></span>
+    </div><!--tex4ht:label?: x1-44001r18 -->
+
+    <div class="fancyvrb" id="fancyvrb19">
+      <a id="x1-44003r1" name="x1-44003r1"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;#!/bin/sh</span><br class="fancyvrb">
+      <a id="x1-44005r2" name="x1-44005r2"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;set</span><span class=
+      "pcrr7t-x-x-90">&nbsp;-e</span><br class="fancyvrb">
+      <a id="x1-44007r3" name="x1-44007r3"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-44009r4" name="x1-44009r4"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;DEPLOY=/home/YOU/deployment</span><br class="fancyvrb">
+      <a id="x1-44011r5" name="x1-44011r5"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;SOURCE=/home/YOU/projects/mongrel2</span><br class="fancyvrb">
+      <a id="x1-44013r6" name="x1-44013r6"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-44015r7" name="x1-44015r7"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;cd</span><span class=
+      "pcrr7t-x-x-90">&nbsp;$SOURCE/examples/chat</span><br class=
+      "fancyvrb">
+      <a id="x1-44017r8" name="x1-44017r8"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;nohup</span><span class=
+      "pcrr7t-x-x-90">&nbsp;python</span><span class=
+      "pcrr7t-x-x-90">&nbsp;chat.py</span><span class=
+      "pcrr7t-x-x-90">&nbsp;2&gt;&amp;1</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;chat.log</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&amp;</span><br class="fancyvrb">
+      <a id="x1-44019r9" name="x1-44019r9"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;echo</span><span class=
+      "pcrr7t-x-x-90">&nbsp;$!</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;$DEPLOY/profiles/chat/chat.pid</span>
+    </div>
+  </div>
+  <hr class="endfloat">
+  <!--l. 425-->
+
+  <p class="indent">This little script uses some funky features you
+  might not be familiar with but which are nice to learn, so
+  let&rsquo;s take a look:
+
+  <ol class="enumerate1">
+    <li class="enumerate" id="x1-44021x1">The first trick is
+    <span class="pplri7t-">set -e</span> which tell bash to bail if
+    there&rsquo;s any errors in your script. This is a <span class=
+    "pplri7t-">huge</span> life saver in system scripts.
+
+    <li class="enumerate" id="x1-44023x2">Next you point some
+    variables at where the deployment and Mongrel2 source live,
+    remembering to not type YOU but your username.
+
+    <li class="enumerate" id="x1-44025x3">After that you run the
+    <span class="pplb7t-">chat.py</span> but you use a program
+    called <span class="pplri7t-">nohup</span>. This basically
+    daemonizes your script by redirecting output and preventing the
+    program from exiting, and then you background it with
+    <span class="obeylines-h verb pcrr7t-">&amp;</span>.
+
+    <li class="enumerate" id="x1-44027x4">The final thing we do is
+    echo the magic variable <span class=
+    "obeylines-h verb pcrr7t-">$!</span> to the <span class=
+    "pplb7t-">chat.pid</span> file in the profile directory.
+  </ol><!--l. 443-->
+
+  <p class="indent">When you run this manually you should see
+  something like this:
+
+  <div class="fancyvrb" id="fancyvrb20">
+    <a id="x1-44029r1" name="x1-44029r1"></a><span class=
+    "pcrr7t-">&nbsp;</span><span class=
+    "pcrr7t-">&nbsp;&gt;</span><span class=
+    "pcrr7t-">&nbsp;./profiles/chat/run</span><br class="fancyvrb">
+    <a id="x1-44031r2" name="x1-44031r2"></a><span class=
+    "pcrr7t-">&nbsp;</span><span class=
+    "pcrr7t-">&nbsp;</span><span class=
+    "pcrr7t-">&nbsp;nohup:</span><span class=
+    "pcrr7t-">&nbsp;redirecting</span><span class=
+    "pcrr7t-">&nbsp;stderr</span><span class=
+    "pcrr7t-">&nbsp;to</span><span class=
+    "pcrr7t-">&nbsp;stdout</span><br class="fancyvrb">
+    <a id="x1-44033r3" name="x1-44033r3"></a><span class=
+    "pcrr7t-">&nbsp;</span><span class=
+    "pcrr7t-">&nbsp;</span><br class="fancyvrb">
+    <a id="x1-44035r4" name="x1-44035r4"></a><span class=
+    "pcrr7t-">&nbsp;</span><span class=
+    "pcrr7t-">&nbsp;&gt;</span><span class=
+    "pcrr7t-">&nbsp;ps</span><span class=
+    "pcrr7t-">&nbsp;ax</span><span class=
+    "pcrr7t-">&nbsp;|</span><span class=
+    "pcrr7t-">&nbsp;grep</span><span class=
+    "pcrr7t-">&nbsp;chat</span><br class="fancyvrb">
+    <a id="x1-44037r5" name="x1-44037r5"></a><span class=
+    "pcrr7t-">&nbsp;</span><span class=
+    "pcrr7t-">&nbsp;19305</span><span class=
+    "pcrr7t-">&nbsp;pts/1</span><span class=
+    "pcrr7t-">&nbsp;</span><span class=
+    "pcrr7t-">&nbsp;</span><span class=
+    "pcrr7t-">&nbsp;</span><span class=
+    "pcrr7t-">&nbsp;Sl</span><span class=
+    "pcrr7t-">&nbsp;</span><span class=
+    "pcrr7t-">&nbsp;</span><span class=
+    "pcrr7t-">&nbsp;</span><span class=
+    "pcrr7t-">&nbsp;</span><span class=
+    "pcrr7t-">&nbsp;0:00</span><span class=
+    "pcrr7t-">&nbsp;python</span><span class=
+    "pcrr7t-">&nbsp;chat.py</span><br class="fancyvrb">
+    <a id="x1-44039r6" name="x1-44039r6"></a><span class=
+    "pcrr7t-">&nbsp;</span><span class=
+    "pcrr7t-">&nbsp;</span><br class="fancyvrb">
+    <a id="x1-44041r7" name="x1-44041r7"></a><span class=
+    "pcrr7t-">&nbsp;</span><span class=
+    "pcrr7t-">&nbsp;&gt;</span><span class=
+    "pcrr7t-">&nbsp;kill</span><span class=
+    "pcrr7t-">&nbsp;-TERM</span><span class=
+    "pcrr7t-">&nbsp;19305</span>
+  </div><!--l. 455-->
+
+  <p class="indent">After all that you can then try out
+  <span class="pplri7t-">procer</span> again to see if it properly
+  runs the chat demo as well as mongrel2: <!--l. 458-->
+
+  <p class="indent"><a id="x1-44042r19" name="x1-44042r19"></a>
+  <hr class="float">
+
+  <div class="float">
+    <div class="caption">
+      <span class="id">Source 19:</span> <span class=
+      "content"><span class="pplri7t-">Running procer With
+      Chat</span> <span class="pplri7t-">Demo</span></span>
+    </div><!--tex4ht:label?: x1-44042r19 -->
+
+    <div class="fancyvrb" id="fancyvrb21">
+      <a id="x1-44044r1" name="x1-44044r1"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;#</span><span class=
+      "pcrr7t-x-x-90">&nbsp;run</span><span class=
+      "pcrr7t-x-x-90">&nbsp;procer</span><span class=
+      "pcrr7t-x-x-90">&nbsp;to</span><span class=
+      "pcrr7t-x-x-90">&nbsp;get</span><span class=
+      "pcrr7t-x-x-90">&nbsp;stuff</span><span class=
+      "pcrr7t-x-x-90">&nbsp;started</span><br class="fancyvrb">
+      <a id="x1-44046r2" name="x1-44046r2"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;sudo</span><span class=
+      "pcrr7t-x-x-90">&nbsp;procer</span><span class=
+      "pcrr7t-x-x-90">&nbsp;$PWD/profiles</span><span class=
+      "pcrr7t-x-x-90">&nbsp;$PWD/run/procer.pid</span><br class=
+      "fancyvrb">
+      <a id="x1-44048r3" name="x1-44048r3"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-44050r4" name="x1-44050r4"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;#</span><span class=
+      "pcrr7t-x-x-90">&nbsp;see</span><span class=
+      "pcrr7t-x-x-90">&nbsp;if</span><span class=
+      "pcrr7t-x-x-90">&nbsp;it's</span><span class=
+      "pcrr7t-x-x-90">&nbsp;all</span><span class=
+      "pcrr7t-x-x-90">&nbsp;running</span><br class="fancyvrb">
+      <a id="x1-44052r5" name="x1-44052r5"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;ps</span><span class=
+      "pcrr7t-x-x-90">&nbsp;ax</span><span class=
+      "pcrr7t-x-x-90">&nbsp;|</span><span class=
+      "pcrr7t-x-x-90">&nbsp;grep</span><span class=
+      "pcrr7t-x-x-90">&nbsp;procer</span><br class="fancyvrb">
+      <a id="x1-44054r6" name="x1-44054r6"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;19607</span><span class=
+      "pcrr7t-x-x-90">&nbsp;?</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;Ss</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;0:00</span><span class=
+      "pcrr7t-x-x-90">&nbsp;procer</span><span class=
+      "pcrr7t-x-x-90">&nbsp;/home/zedshaw/deployment/profiles</span><span class="pcrr7t-x-x-90">&nbsp;/home/zedshaw/deployment/run/procer.pid</span><br class="fancyvrb">
+      <a id="x1-44056r7" name="x1-44056r7"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-44058r8" name="x1-44058r8"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;ps</span><span class=
+      "pcrr7t-x-x-90">&nbsp;ax</span><span class=
+      "pcrr7t-x-x-90">&nbsp;|</span><span class=
+      "pcrr7t-x-x-90">&nbsp;grep</span><span class=
+      "pcrr7t-x-x-90">&nbsp;mongrel2</span><br class="fancyvrb">
+      <a id="x1-44060r9" name="x1-44060r9"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;19621</span><span class=
+      "pcrr7t-x-x-90">&nbsp;?</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;Ssl</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;0:00</span><span class=
+      "pcrr7t-x-x-90">&nbsp;mongrel2</span><span class=
+      "pcrr7t-x-x-90">&nbsp;config.sqlite</span><span class=
+      "pcrr7t-x-x-90">&nbsp;localhost</span><br class="fancyvrb">
+      <a id="x1-44062r10" name="x1-44062r10"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-44064r11" name="x1-44064r11"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;ps</span><span class=
+      "pcrr7t-x-x-90">&nbsp;ax</span><span class=
+      "pcrr7t-x-x-90">&nbsp;|</span><span class=
+      "pcrr7t-x-x-90">&nbsp;grep</span><span class=
+      "pcrr7t-x-x-90">&nbsp;chat</span><br class="fancyvrb">
+      <a id="x1-44066r12" name="x1-44066r12"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;19609</span><span class=
+      "pcrr7t-x-x-90">&nbsp;?</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;Sl</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;0:00</span><span class=
+      "pcrr7t-x-x-90">&nbsp;python</span><span class=
+      "pcrr7t-x-x-90">&nbsp;chat.py</span><br class="fancyvrb">
+      <a id="x1-44068r13" name="x1-44068r13"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-44070r14" name="x1-44070r14"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;#</span><span class=
+      "pcrr7t-x-x-90">&nbsp;try</span><span class=
+      "pcrr7t-x-x-90">&nbsp;killing</span><span class=
+      "pcrr7t-x-x-90">&nbsp;chat</span><span class=
+      "pcrr7t-x-x-90">&nbsp;to</span><span class=
+      "pcrr7t-x-x-90">&nbsp;see</span><span class=
+      "pcrr7t-x-x-90">&nbsp;if</span><span class=
+      "pcrr7t-x-x-90">&nbsp;it</span><span class=
+      "pcrr7t-x-x-90">&nbsp;comes</span><span class=
+      "pcrr7t-x-x-90">&nbsp;back</span><br class="fancyvrb">
+      <a id="x1-44072r15" name="x1-44072r15"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;kill</span><span class=
+      "pcrr7t-x-x-90">&nbsp;-TERM</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&lsquo;cat</span><span class=
+      "pcrr7t-x-x-90">&nbsp;profiles/chat/chat.pid&lsquo;</span><br class="fancyvrb">
+      <a id="x1-44074r16" name="x1-44074r16"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-44076r17" name="x1-44076r17"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;ps</span><span class=
+      "pcrr7t-x-x-90">&nbsp;ax</span><span class=
+      "pcrr7t-x-x-90">&nbsp;|</span><span class=
+      "pcrr7t-x-x-90">&nbsp;grep</span><span class=
+      "pcrr7t-x-x-90">&nbsp;chat</span><br class="fancyvrb">
+      <a id="x1-44078r18" name="x1-44078r18"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;19669</span><span class=
+      "pcrr7t-x-x-90">&nbsp;?</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;Sl</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;0:00</span><span class=
+      "pcrr7t-x-x-90">&nbsp;python</span><span class=
+      "pcrr7t-x-x-90">&nbsp;chat.py</span>
+    </div>
+  </div>
+  <hr class="endfloat">
+  <!--l. 481-->
+
+  <p class="indent">If you go look at <span class=
+  "pplb7t-">profiles/error.log</span> you&rsquo;ll see that
+  <span class="pplri7t-">procer</span> is also running each of them
+  as the right user with chat being run as you, but Mongrel2 being
+  run as root so it can chroot/drop priv properly. <!--l. 485-->
+
+  <p class="indent">Rather than give you a walk through each of
+  these setups, here&rsquo;s the run scripts for the remaining
+  files: <!--l. 488-->
+
+  <p class="indent"><a id="x1-44079r20" name="x1-44079r20"></a>
+  <hr class="float">
+
+  <div class="float">
+    <div class="caption">
+      <span class="id">Source 20:</span> <span class=
+      "content"><span class="pplri7t-">Remaining Run</span>
+      <span class="pplri7t-">Scripts</span></span>
+    </div><!--tex4ht:label?: x1-44079r20 -->
+
+    <div class="fancyvrb" id="fancyvrb22">
+      <a id="x1-44081r1" name="x1-44081r1"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;---</span><span class=
+      "pcrr7t-x-x-90">&nbsp;profiles/handlertest/run</span><br class="fancyvrb">
+      <a id="x1-44083r2" name="x1-44083r2"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;#!/bin/sh</span><br class="fancyvrb">
+      <a id="x1-44085r3" name="x1-44085r3"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;set</span><span class=
+      "pcrr7t-x-x-90">&nbsp;-e</span><br class="fancyvrb">
+      <a id="x1-44087r4" name="x1-44087r4"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-44089r5" name="x1-44089r5"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;DEPLOY=/home/zedshaw/deployment</span><br class="fancyvrb">
+      <a id="x1-44091r6" name="x1-44091r6"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;SOURCE=/home/zedshaw/projects/mongrel2</span><br class="fancyvrb">
+      <a id="x1-44093r7" name="x1-44093r7"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-44095r8" name="x1-44095r8"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;cd</span><span class=
+      "pcrr7t-x-x-90">&nbsp;$SOURCE/examples/http_0mq</span><br class="fancyvrb">
+      <a id="x1-44097r9" name="x1-44097r9"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;nohup</span><span class=
+      "pcrr7t-x-x-90">&nbsp;python</span><span class=
+      "pcrr7t-x-x-90">&nbsp;http.py</span><span class=
+      "pcrr7t-x-x-90">&nbsp;2&gt;&amp;1</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;http.log</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&amp;</span><br class="fancyvrb">
+      <a id="x1-44099r10" name="x1-44099r10"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;echo</span><span class=
+      "pcrr7t-x-x-90">&nbsp;$!</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;$DEPLOY/profiles/handlertest/handlertest.pid</span><br class="fancyvrb">
+      <a id="x1-44101r11" name="x1-44101r11"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-44103r12" name="x1-44103r12"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-44105r13" name="x1-44105r13"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;---</span><span class=
+      "pcrr7t-x-x-90">&nbsp;profiles/mp3stream/run</span><br class=
+      "fancyvrb">
+      <a id="x1-44107r14" name="x1-44107r14"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;#!/bin/sh</span><br class="fancyvrb">
+      <a id="x1-44109r15" name="x1-44109r15"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;set</span><span class=
+      "pcrr7t-x-x-90">&nbsp;-e</span><br class="fancyvrb">
+      <a id="x1-44111r16" name="x1-44111r16"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-44113r17" name="x1-44113r17"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;DEPLOY=/home/zedshaw/deployment</span><br class="fancyvrb">
+      <a id="x1-44115r18" name="x1-44115r18"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;SOURCE=/home/zedshaw/projects/mongrel2</span><br class="fancyvrb">
+      <a id="x1-44117r19" name="x1-44117r19"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-44119r20" name="x1-44119r20"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;cd</span><span class=
+      "pcrr7t-x-x-90">&nbsp;$SOURCE/examples/mp3stream</span><br class="fancyvrb">
+      <a id="x1-44121r21" name="x1-44121r21"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;nohup</span><span class=
+      "pcrr7t-x-x-90">&nbsp;python</span><span class=
+      "pcrr7t-x-x-90">&nbsp;handler.py</span><span class=
+      "pcrr7t-x-x-90">&nbsp;2&gt;&amp;1</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;mp3stream.log</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&amp;</span><br class="fancyvrb">
+      <a id="x1-44123r22" name="x1-44123r22"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;echo</span><span class=
+      "pcrr7t-x-x-90">&nbsp;$!</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;$DEPLOY/profiles/mp3stream/mp3stream.pid</span><br class="fancyvrb">
+      <a id="x1-44125r23" name="x1-44125r23"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-44127r24" name="x1-44127r24"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;---</span><span class=
+      "pcrr7t-x-x-90">&nbsp;profiles/web/run</span><br class=
+      "fancyvrb">
+      <a id="x1-44129r25" name="x1-44129r25"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;#!/bin/sh</span><br class="fancyvrb">
+      <a id="x1-44131r26" name="x1-44131r26"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;set</span><span class=
+      "pcrr7t-x-x-90">&nbsp;-e</span><br class="fancyvrb">
+      <a id="x1-44133r27" name="x1-44133r27"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-44135r28" name="x1-44135r28"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;DEPLOY=/home/zedshaw/deployment</span><br class="fancyvrb">
+      <a id="x1-44137r29" name="x1-44137r29"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;SOURCE=/home/zedshaw/projects/mongrel2</span><br class="fancyvrb">
+      <a id="x1-44139r30" name="x1-44139r30"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-44141r31" name="x1-44141r31"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;cd</span><span class=
+      "pcrr7t-x-x-90">&nbsp;$SOURCE/examples/chat</span><br class=
+      "fancyvrb">
+      <a id="x1-44143r32" name="x1-44143r32"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;nohup</span><span class=
+      "pcrr7t-x-x-90">&nbsp;python</span><span class=
+      "pcrr7t-x-x-90">&nbsp;www.py</span><span class=
+      "pcrr7t-x-x-90">&nbsp;2&gt;&amp;1</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;www.log</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&amp;</span><br class="fancyvrb">
+      <a id="x1-44145r33" name="x1-44145r33"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;echo</span><span class=
+      "pcrr7t-x-x-90">&nbsp;$!</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;$DEPLOY/profiles/web/web.pid</span><br class="fancyvrb">
+      <a id="x1-44147r34" name="x1-44147r34"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span>
+    </div>
+  </div>
+  <hr class="endfloat">
+
+  <h4 class="subsectionHead"><span class="titlemark">4.5.2</span>
+  <a id="x1-450004.5.2" name="x1-450004.5.2"></a>Testing The New
+  Setup</h4><!--l. 530-->
+
+  <p class="noindent">Once everything is running and <span class=
+  "pplri7t-">procer</span> is maintaining it you just need to see
+  if things work. Here&rsquo;s some curl commands to try: 
+  <!--l. 533-->
+
+  <p class="indent"><a id="x1-45001r21" name="x1-45001r21"></a>
+  <hr class="float">
+
+  <div class="float">
+    <div class="caption">
+      <span class="id">Source 21:</span> <span class=
+      "content"><span class="pplri7t-">Testing With</span>
+      <span class="pplri7t-">Curl</span></span>
+    </div><!--tex4ht:label?: x1-45001r21 -->
+
+    <div class="fancyvrb" id="fancyvrb23">
+      <a id="x1-45003r1" name="x1-45003r1"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;curl</span><span class=
+      "pcrr7t-x-x-90">&nbsp;http://localhost:6767/</span><br class=
+      "fancyvrb">
+      <a id="x1-45005r2" name="x1-45005r2"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;Hello,</span><span class=
+      "pcrr7t-x-x-90">&nbsp;World!</span><br class="fancyvrb">
+      <a id="x1-45007r3" name="x1-45007r3"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;curl</span><span class=
+      "pcrr7t-x-x-90">&nbsp;http://localhost:6767/handlertest</span><br class="fancyvrb">
+      <a id="x1-45009r4" name="x1-45009r4"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;...</span>
+    </div>
+  </div>
+  <hr class="endfloat">
+
+  <h4 class="subsectionHead"><span class="titlemark">4.5.3</span>
+  <a id="x1-460004.5.3" name="x1-460004.5.3"></a>Nice Features of
+  Procer</h4><!--l. 545-->
+
+  <p class="noindent">There&rsquo;s some nice subtle features you
+  get from using <span class="pplri7t-">procer</span> to run your
+  stuff:
+
+  <dl class="description">
+    <dt class="description"><span class="pplb7t-">faster
+    development</span>
+
+    <dd class="description">A great thing about <span class=
+    "pplri7t-">procer</span> is once you get all of this setup it
+    cuts down on a lot of your setup time and development time
+    because it will <span class="pplri7t-">properly</span> restart
+    things for you. This means you can simply make changes to code
+    or configs, and then just kill it and it&rsquo;ll kick over
+    automatically.
+
+    <dt class="description"><span class="pplb7t-">easy
+    automation</span>
+
+    <dd class="description">You should start to see how you could
+    automate creating profiles for new processes since the setup is
+    consistent.
+
+    <dt class="description"><span class=
+    "pplb7t-">profiles/run.log</span>
+
+    <dd class="description">All your commands will have their
+    output sent to this file so you can see how they might be
+    blowing up in your scripts.
+
+    <dt class="description"><span class="pplb7t-">restart state
+    maintained</span>
+
+    <dd class="description">Since procer is just tracking PID files
+    and processes, if you shut it down, it won&rsquo;t kill the
+    world. When you start it back up it just starts new stuff or
+    stuff it needs then goes back to supervising. This means you
+    can change the configs for procer then just kick it over and
+    it&rsquo;ll do the right thing.
+  </dl><!--l. 565-->
+
+  <p class="indent">The key thing though is that you now have the
+  whole application for the mongrel2.org demo up and running,
+  including automated process management, configuration, and
+  managing everything. <!--l. 569-->
+
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">4.6</span> <a id=
-  "x1-440004.6" name="x1-440004.6"></a>Step 4: Static Content</h3>
-  <!--l. 261-->
+  "x1-470004.6" name="x1-470004.6"></a>Step 4: Static Content</h3>
+  <!--l. 571-->
 
-  <p class="noindent">
+  <p class="noindent">The final thing we have to do is get the
+  static content we need to try out the chat demo: <!--l. 574-->
+
+  <p class="indent"><a id="x1-47001r22" name="x1-47001r22"></a>
+  <hr class="float">
+
+  <div class="float">
+    <div class="caption">
+      <span class="id">Source 22:</span> <span class=
+      "content"><span class="pplri7t-">Setting Up Static</span>
+      <span class="pplri7t-">Content</span></span>
+    </div><!--tex4ht:label?: x1-47001r22 -->
+
+    <div class="fancyvrb" id="fancyvrb24">
+      <a id="x1-47003r1" name="x1-47003r1"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;cp</span><span class=
+      "pcrr7t-x-x-90">&nbsp;-r</span><span class=
+      "pcrr7t-x-x-90">&nbsp;mongrel2/examples/chat/static</span><span class="pcrr7t-x-x-90">&nbsp;static/chatdemo</span><br class="fancyvrb">
+      <a id="x1-47005r2" name="x1-47005r2"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;m2sh</span><span class=
+      "pcrr7t-x-x-90">&nbsp;stop</span><span class=
+      "pcrr7t-x-x-90">&nbsp;-db</span><span class=
+      "pcrr7t-x-x-90">&nbsp;config.sqlite</span><span class=
+      "pcrr7t-x-x-90">&nbsp;-host</span><span class=
+      "pcrr7t-x-x-90">&nbsp;localhost</span><span class=
+      "pcrr7t-x-x-90">&nbsp;-murder</span><br class="fancyvrb">
+      <a id="x1-47007r3" name="x1-47007r3"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;curl</span><span class=
+      "pcrr7t-x-x-90">&nbsp;-I</span><span class=
+      "pcrr7t-x-x-90">&nbsp;http://localhost:6767/chatdemo/</span>
+    </div>
+  </div>
+  <hr class="endfloat">
+  <!--l. 582-->
+
+  <p class="indent">If you get a good response then you should be
+  able to go to <a href="http://localhost:6767/chatdemo/" class=
+  "url"><span class=
+  "pcrr7t-">http://localhost:6767/chatdemo/</span></a> and the chat
+  should work. Notice also that you just killed mongrel2 with
+  <span class="pplri7t-">m2sh</span> and it came back because of
+  <span class="pplri7t-">procer</span>. If you do your curl check
+  to fast then you might miss it so just wait a bit.
 
   <h3 class="sectionHead"><span class="titlemark">4.7</span> <a id=
-  "x1-450004.7" name="x1-450004.7"></a>Step 5: Testing It</h3>
-  <!--l. 264-->
+  "x1-480004.7" name="x1-480004.7"></a>Step 5: Testing And
+  Troubleshooting</h3><!--l. 590-->
+
+  <p class="noindent">You should have been testing the
+  configuration as you went, but the main things to test are: 
+  <!--l. 593-->
+
+  <p class="indent">
+
+  <ol class="enumerate1">
+    <li class="enumerate" id="x1-48002x1">The /chatdemo/ works and
+    you can send messages, try a few different browsers.
+
+    <li class="enumerate" id="x1-48004x2">You can get a simple
+    message from the /handlertest/ and that&rsquo;s about it.
+
+    <li class="enumerate" id="x1-48006x3">See if you can get the
+    mp3streamer to stream some mp3s. Put a few in its directory
+    then kill it so <span class="pplri7t-">procer</span> bring it
+    back. Then point <span class="pplri7t-">mplayer</span> at
+    <a href="http://localhost:6767/mp3stream" class=
+    "url"><span class=
+    "pcrr7t-">http://localhost:6767/mp3stream</span></a> and it
+    should work.
+
+    <li class="enumerate" id="x1-48008x4">Check that you can make
+    the proxy go to the web.py app you start in the chat
+    demo&rsquo;s directory.
+
+    <li class="enumerate" id="x1-48010x5">See if you can stop
+    things and have <span class="pplri7t-">procer</span> bring them
+    back.
+
+    <li class="enumerate" id="x1-48012x6">Stop <span class=
+    "pplri7t-">procer</span> and then start it again to see if it
+    properly doesn&rsquo;t step on things.
+  </ol><!--l. 608-->
+
+  <p class="indent">If you run into problems then just make sure
+  that you can run each little piece and that you got the files you
+  were supposed to make are correct. The best tool to use is
+  <span class="pplri7t-">diff</span>. <!--l. 612-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">4.8</span> <a id=
-  "x1-460004.8" name="x1-460004.8"></a>Further Improvements</h3>
+  "x1-490004.8" name="x1-490004.8"></a>Further Improvements</h3>
+  <!--l. 615-->
+
+  <p class="noindent">That ends this chapter, and at this point you
+  should know how to setup nearly everything Mongrel2 has to offer
+  right now. You should have a good idea of how <span class=
+  "pplri7t-">procer</span> will work or not for your real
+  deployments, and how it&rsquo;s used by me for my own
+  deployments. <!--l. 620-->
+
+  <p class="indent">A <span class="pplri7t-">major</span>
+  improvement that we may eventually make is automating setup of
+  <span class="pplri7t-">procer</span> profiles, and just better
+  overall management of the profiles with <span class=
+  "pplri7t-">m2sh</span>. If you feel like hacking on that, just go
+  ahead and try and let us know. <!--l. 625-->
+
+  <p class="indent">Other than that, automate, automate, automate. 
   <!--l. 1-->
 
   <p class="indent">
 
   <h2 class="chapterHead"><span class=
   "titlemark">Chapter&nbsp;5</span><br>
-  <a id="x1-470005" name="x1-470005"></a>Hacking</h2>
+  <a id="x1-500005" name="x1-500005"></a>Hacking</h2>
 
   <h3 class="sectionHead"><span class="titlemark">5.1</span> <a id=
-  "x1-480005.1" name="x1-480005.1"></a>Writing Your Own m2sh</h3>
+  "x1-510005.1" name="x1-510005.1"></a>Writing Your Own m2sh</h3>
   <!--l. 1-->
 
   <p class="indent">
 
   <h2 class="chapterHead"><span class=
   "titlemark">Chapter&nbsp;6</span><br>
-  <a id="x1-490006" name="x1-490006"></a>Contributing</h2>
+  <a id="x1-520006" name="x1-520006"></a>Contributing</h2>
   <!--l. 3-->
 
   <p class="noindent">Soon...

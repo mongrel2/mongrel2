@@ -172,6 +172,7 @@ but feel free to change this up later if you find a better way.
 deployment > mkdir run
 deployment > mkdir tmp
 deployment > mkdir logs
+deployment > mkdir static
 deployment > mkdir profiles
 
 # create the procer profile dirs for each thing
@@ -225,6 +226,7 @@ Here's what yo have to change in \file{config.py} to make everything work right:
 \item Use the \shell{m2sh uuid} command to make some new UUIDs for all the 
     existing ones.  This is optional but probably good idea to get in the 
     habit now.
+\item Change the \ident{port} for \ident{web\_app\_proxy} so it points to 8080 instead of 80.
 \item Finally, change any mention of "mongrel2.org" into "localhost" so that you
     can run it locally.
 \end{enumerate}
@@ -254,14 +256,372 @@ right after.
 
 \section{Step 3: Setup procer}
 
+Now we want to make \shell{procer} start everything for us and keep
+it running.  How \shell{procer} works is you put a few special
+files into a directory in \file{profiles}.  This directory (say \file{chat})
+is the profile for that app, and when you start \shell{procer} you
+point it at the main \file{profiles} directory it tries to run it.
+It's dead simple, and very easy to automate so we'll do it by hand
+and then you can do some automation later.
 
+Let's first setup a basic config that gets our skeleton profiles
+and make sure procer can run everything.
+
+\begin{code}{Skeleton procer Setup}
+\begin{Verbatim}
+~/deployment $ cd profiles/
+~/deployment/profiles $ ls
+chat  handlertest  mongrel2  mp3stream	web
+
+# make all the restart settings
+~/deployment/profiles $ for i in *; do touch $i/restart; done
+
+# make all the empty dependencies
+~/deployment/profiles $ for i in *; do touch $i/depends; done
+
+# setup the pid_files to some sort of default
+~/deployment/profiles $ for i in *; do echo $PWD/$i/$i.pid > $i/pid_file; done
+~/deployment/profiles $ cat chat/pid_file 
+
+# get the run script setup to do nothing
+~/deployment/profiles $ for i in *; do echo '#!/bin/sh' > $i/run; done
+~/deployment/profiles $ for i in *; do chmod u+x $i/run; done
+
+# check out what we did
+~/deployment/profiles $ ls -lR
+\end{Verbatim}
+\end{code}
+
+With all of that you can then try to run \shell{procer} to watch
+it fail but still try to run everything:
+
+\begin{Verbatim}
+> sudo procer $PWD $PWD/../run/procer.pid
+> less error.log
+\end{Verbatim}
+
+This is assuming that you are still in the \file{profiles} directory
+and what you should a file \file{error.log} get created and 
+probably some messages printed to the screen.  Just ignore any
+mention of Mongrel2 since that's probably just cruft from the \file{libm2.a}
+we haven't removed.
+
+Take a look in the \file{error.log} and you'll see it's not necessarily
+errors but information on how things were run.  What you should
+see is something like this for each profile:
+
+\begin{code}{First Dummy Run Of procer}
+\begin{Verbatim}
+DEBUG procer.c:232: Loading 5 actions.
+DEBUG procer.c:83: STARTED chat
+ERROR Failed to open PID file /home/zedshaw/deployment/profiles/chat/chat.pid for reading.
+ERROR Failed to open PID file /home/zedshaw/deployment/profiles/chat/chat.pid for reading.
+INFO  No previous Mongrel2 running, continuing on.
+DEBUG procer.c:37: ACTION: command=/home/zedshaw/deployment/profiles/chat/run, pid_file=/home/zedshaw/deployment/profiles/chat/chat.pid, restart=1, depends=(null)
+DEBUG procer.c:56: WAITING FOR CHILD.
+INFO  Now running as UID:1000, GID:1000
+DEBUG procer.c:60: Command ran and exited successfully, now looking for the PID file.
+ERROR chat didn't make pidfile /home/zedshaw/deployment/profiles/chat/chat.pid.
+\end{Verbatim}
+\end{code}
+
+I've cleaned this up a bit, and again ignore that it's saying "Mongrel2", 
+that's just cruft from the library since it was originally designed
+for Mongrel2.  What you can see here is the following:
+
+\begin{enumerate}
+\item It starts up and says it found 5 profiles.
+\item It starts chat, and says there's no PID file so good to continue.
+\item It reports what ACTION it's running, so you can see the config.
+\item It spawns off your \file{run} script, \emph{drops privilege}
+     and says it's WAITING for your script to exit.
+\item After your script runs it looks for the PID file you gave in \file{pid\_file} and if its not there then it exits that action.
+\item It does this for all of them and since none of them run right \shell{procer} exits.
+\end{enumerate}
+
+Next up lets get Mongrel2 running inside \shell{procer}:
+
+\begin{code}{procer Config For Mongrel2}
+\begin{Verbatim}
+> cd ~/deployment
+# make mongrel2 run as root
+> sudo chown root.root profiles/mongrel2
+
+# tell procer where mongrel2 puts its pid_file
+# notice the > not >> on this
+> echo "$PWD/run/mongrel2.pid" > profiles/mongrel2/pid_file
+
+# make the run script start mongrel2 (notice the >> on this)
+> echo "cd $PWD" >> profiles/mongrel2/run
+> echo "m2sh start -db config.sqlite -host localhost" >> profiles/mongrel2/run
+
+# check out the results
+> cat profiles/mongrel2/run
+#!/bin/sh
+cd /home/zedshaw/deployment
+m2sh start -db config.sqlite -host localhost
+\end{Verbatim}
+\end{code}
+
+Obviously you don't have to use a series of \shell{echo} commands to
+make these scripts.  You can edit them just fine, we're just doing it
+this way so that you can follow along easier.
+
+Now, make sure you don't have any other Mongrel2 processes running
+and then start procer again to see if it starts this configuration
+correctly.
+
+
+\begin{code}{Using procer To Run Mongrel2}
+\begin{Verbatim}
+> cd ~/deployment
+# clear out the error.log for testing
+> rm profiles/error.log 
+
+# start procer 
+> sudo procer $PWD/profiles $PWD/procer.pid
+
+# see if procer is running
+> ps ax | grep procer
+17934 ?        Ss     0:00 procer /home/zedshaw/deployment/profiles /home/zedshaw/deployment/procer.pid
+
+# see if mongrel2 is running
+> ps ax | grep mongrel2
+ 9223 ?        Sl     0:26 python /home/zedshaw/projects/mongrel2/examples/chat/chat.py
+17944 ?        Ssl    0:00 mongrel2 config.sqlite localhost
+
+\end{Verbatim}
+\end{code}
+
+To watch \shell{procer} in action, try doing \shell{m2sh stop -db config.sqlite
+-host localhost -murder} and then look at \file{profiles/error.log} and watch
+Mongrel2 come right back.
+
+
+\subsection{The Python Examples}
+
+We've got a good setup of \shell{procer} going and it keeps Mongrel2 
+running so let's setup a similar thing for each of our little
+Python demos that we'll need.  In order to do this though we sort
+of have to "hack" in making them daemonize and create PID files with
+a little shell script help.  Let's start with the \ident{chat} demo
+and assuming your mongrel2 source is in \file{~/projects/mongrel2} 
+you will change \file{profiles/chat/run} to be like this:
+
+\begin{code}{Run Script For Chat Demo}
+\begin{Verbatim}
+#!/bin/sh
+set -e
+
+DEPLOY=/home/YOU/deployment
+SOURCE=/home/YOU/projects/mongrel2
+
+cd $SOURCE/examples/chat
+nohup python chat.py 2>&1 > chat.log &
+echo $! > $DEPLOY/profiles/chat/chat.pid
+\end{Verbatim}
+\end{code}
+
+This little script uses some funky features you might not be familiar
+with but which are nice to learn, so let's take a look:
+
+
+
+\begin{enumerate}
+\item The first trick is \shell{set -e} which tell bash to bail if there's 
+    any errors in your script.  This is a \emph{huge} life saver in system
+    scripts.
+\item Next you point some variables at where the deployment and Mongrel2 source
+    live, remembering to not type YOU but your username.
+\item After that you run the \file{chat.py} but you use a program called \shell{nohup}.  
+    This basically daemonizes your script by redirecting output and 
+    preventing the program from exiting, and then you background it with \verb|&|.
+\item The final thing we do is echo the magic variable \verb|$!| to the 
+    \file{chat.pid} file in the profile directory.
+\end{enumerate}
+
+When you run this manually you should see something like this:
+
+\begin{Verbatim}
+> ./profiles/chat/run 
+ nohup: redirecting stderr to stdout
+
+> ps ax | grep chat
+19305 pts/1    Sl     0:00 python chat.py
+
+> kill -TERM 19305
+\end{Verbatim}
+
+After all that you can then try out \shell{procer} again to see if it
+properly runs the chat demo as well as mongrel2:
+
+\begin{code}{Running procer With Chat Demo}
+\begin{Verbatim}
+# run procer to get stuff started
+> sudo procer $PWD/profiles $PWD/run/procer.pid
+
+# see if it's all running
+> ps ax | grep procer
+19607 ?        Ss     0:00 procer /home/zedshaw/deployment/profiles /home/zedshaw/deployment/run/procer.pid
+
+> ps ax | grep mongrel2
+19621 ?        Ssl    0:00 mongrel2 config.sqlite localhost
+
+> ps ax | grep chat
+19609 ?        Sl     0:00 python chat.py
+
+# try killing chat to see if it comes back
+> kill -TERM `cat profiles/chat/chat.pid`
+
+> ps ax | grep chat
+19669 ?        Sl     0:00 python chat.py
+\end{Verbatim}
+\end{code}
+
+If you go look at \file{profiles/error.log} you'll see that \shell{procer}
+is also running each of them as the right user with chat being run 
+as you, but Mongrel2 being run as root so it can chroot/drop priv properly.
+
+Rather than give you a walk through each of these setups, here's the
+run scripts for the remaining files:
+
+\begin{code}{Remaining Run Scripts}
+\begin{Verbatim}
+--- profiles/handlertest/run 
+#!/bin/sh
+set -e
+
+DEPLOY=/home/zedshaw/deployment
+SOURCE=/home/zedshaw/projects/mongrel2
+
+cd $SOURCE/examples/http_0mq
+nohup python http.py 2>&1 > http.log &
+echo $! > $DEPLOY/profiles/handlertest/handlertest.pid
+
+
+--- profiles/mp3stream/run 
+#!/bin/sh
+set -e
+
+DEPLOY=/home/zedshaw/deployment
+SOURCE=/home/zedshaw/projects/mongrel2
+
+cd $SOURCE/examples/mp3stream
+nohup python handler.py 2>&1 > mp3stream.log &
+echo $! > $DEPLOY/profiles/mp3stream/mp3stream.pid
+
+--- profiles/web/run 
+#!/bin/sh
+set -e
+
+DEPLOY=/home/zedshaw/deployment
+SOURCE=/home/zedshaw/projects/mongrel2
+
+cd $SOURCE/examples/chat
+nohup python www.py 2>&1 > www.log &
+echo $! > $DEPLOY/profiles/web/web.pid
+
+\end{Verbatim}
+\end{code}
+
+
+\subsection{Testing The New Setup}
+
+Once everything is running and \shell{procer} is maintaining it you 
+just need to see if things work.  Here's some curl commands to try:
+
+\begin{code}{Testing With Curl}
+\begin{Verbatim}
+> curl http://localhost:6767/
+Hello, World!
+> curl http://localhost:6767/handlertest
+...
+\end{Verbatim}
+\end{code}
+
+
+\subsection{Nice Features of Procer}
+
+There's some nice subtle features you get from using \shell{procer}
+to run your stuff:
+
+\begin{description}
+\item [faster development]  A great thing about \shell{procer} is once you get all of this setup
+    it cuts down on a lot of your setup time and development time because
+    it will \emph{properly} restart things for you.  This means you can
+    simply make changes to code or configs, and then just kill it and
+    it'll kick over automatically.
+\item [easy automation]  You should start to see how you could automate creating
+    profiles for new processes since the setup is consistent.
+\item [profiles/run.log]  All your commands will have their output sent to
+    this file so you can see how they might be blowing up in your scripts.
+\item [restart state maintained]  Since procer is just tracking PID files and 
+    processes, if you shut it down, it won't kill the world.  When you start
+    it back up it just starts new stuff or stuff it needs then goes back to
+    supervising.  This means you can change the configs for procer then just   
+    kick it over and it'll do the right thing.
+\end{description}
+
+The key thing though is that you now have the whole application for
+the mongrel2.org demo up and running, including automated process management,
+configuration, and managing everything.
 
 \section{Step 4: Static Content}
 
-\section{Step 5: Testing It}
+The final thing we have to do is get the static content we need to try
+out the chat demo:
 
+\begin{code}{Setting Up Static Content}
+\begin{Verbatim}
+> cp -r mongrel2/examples/chat/static static/chatdemo
+> m2sh stop -db config.sqlite -host localhost -murder
+> curl -I http://localhost:6767/chatdemo/
+\end{Verbatim}
+\end{code}
+
+If you get a good response then you should be able to go to 
+\url{http://localhost:6767/chatdemo/} and the chat should work.  Notice
+also that you just killed mongrel2 with \shell{m2sh} and it came back
+because of \shell{procer}.  If you do your curl check to fast then
+you might miss it so just wait a bit.
+
+\section{Step 5: Testing And Troubleshooting}
+
+You should have been testing the configuration as you went, but the
+main things to test are:
+
+\begin{enumerate}
+\item The /chatdemo/ works and you can send messages, try a few different
+    browsers.
+\item You can get a simple message from the /handlertest/ and that's about it.
+\item See if you can get the mp3streamer to stream some mp3s.  Put a few 
+    in its directory then kill it so \shell{procer} bring it back.  Then
+    point \shell{mplayer} at \url{http://localhost:6767/mp3stream} and
+    it should work.
+\item Check that you can make the proxy go to the web.py app you start
+    in the chat demo's directory.
+\item See if you can stop things and have \shell{procer} bring them back.
+\item Stop \shell{procer} and then start it again to see if it properly
+    doesn't step on things.
+\end{enumerate}
+
+If you run into problems then just make sure that you can run each little
+piece and that you got the files you were supposed to make are correct.
+The best tool to use is \shell{diff}.
 
 \section{Further Improvements}
 
+
+That ends this chapter, and at this point you should know how to setup
+nearly everything Mongrel2 has to offer right now.  You should have a good
+idea of how \shell{procer} will work or not for your real deployments, and
+how it's used by me for my own deployments.
+
+A \emph{major} improvement that we may eventually make is automating
+setup of \shell{procer} profiles, and just better overall management
+of the profiles with \shell{m2sh}.  If you feel like hacking on that,
+just go ahead and try and let us know.
+
+Other than that, automate, automate, automate.
 
 
