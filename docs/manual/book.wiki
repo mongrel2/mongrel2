@@ -102,13 +102,17 @@
     <span class="chapterToc">4 <a href="#x1-360004" id="QQ2-1-49"
     name="QQ2-1-49">Deploying</a></span><br>
     &nbsp;<span class="sectionToc">4.1 <a href="#x1-370004.1" id=
-    "QQ2-1-50" name="QQ2-1-50">More Advanced m2sh</a></span><br>
-    <span class="chapterToc">5 <a href="#x1-380005" id="QQ2-1-51"
-    name="QQ2-1-51">Hacking</a></span><br>
-    &nbsp;<span class="sectionToc">5.1 <a href="#x1-390005.1" id=
-    "QQ2-1-52" name="QQ2-1-52">Writing Your Own m2sh</a></span><br>
-    <span class="chapterToc">6 <a href="#x1-400006" id="QQ2-1-53"
-    name="QQ2-1-53">Contributing</a></span>
+    "QQ2-1-50" name="QQ2-1-50">Mongrel2 Deployment
+    Requirements</a></span><br>
+    &nbsp;<span class="sectionToc">4.2 <a href="#x1-380004.2" id=
+    "QQ2-1-51" name="QQ2-1-51">The mongrel2.org
+    Configuration</a></span><br>
+    <span class="chapterToc">5 <a href="#x1-390005" id="QQ2-1-52"
+    name="QQ2-1-52">Hacking</a></span><br>
+    &nbsp;<span class="sectionToc">5.1 <a href="#x1-400005.1" id=
+    "QQ2-1-53" name="QQ2-1-53">Writing Your Own m2sh</a></span><br>
+    <span class="chapterToc">6 <a href="#x1-410006" id="QQ2-1-54"
+    name="QQ2-1-54">Contributing</a></span>
   </div><!--l. 1-->
 
   <p class="indent">
@@ -428,16 +432,19 @@
 
     <li class="itemize"><a href=
     "http://github.com/zeromq/pyzmq">PyZMQ</a> for the examples.
-  </ul><!--l. 32-->
+
+    <li class="itemize"><a href="http://webpy.org/">web.py</a> for
+    the examples.
+  </ul><!--l. 33-->
 
   <p class="indent">If you install these things in this order, then
   everything should be good. Typically people run into problems if
   they do this out of order, for example trying to install Mongrel2
-  before they have distribute and pip installed. <!--l. 36-->
+  before they have distribute and pip installed. <!--l. 37-->
 
   <p class="indent">Since every system is different it is difficult
   to tell you exactly how to install required packages for your OS,
-  but here&rsquo;s how I did it on my computer: <!--l. 40-->
+  but here&rsquo;s how I did it on my computer: <!--l. 41-->
 
   <p class="indent"><a id="x1-12001r1" name="x1-12001r1"></a>
   <hr class="float">
@@ -449,38 +456,146 @@
       on</span> <span class="pplri7t-">ArchLinux</span></span>
     </div><!--tex4ht:label?: x1-12001r1 -->
 
-    <div class="verbatim" id="verbatim-1">
-      #&nbsp;install&nbsp;ZeroMQ &nbsp;<br>
-      &gt;&nbsp;wget&nbsp;http://www.zeromq.org/local--files/area:download/zeromq-2.0.7.tar.gz
-      &nbsp;<br>
-      &gt;&nbsp;tar&nbsp;-xzvf&nbsp;zeromq-2.0.7.tar.gz &nbsp;<br>
-      &gt;&nbsp;cd&nbsp;zeromq-2.0.7/ &nbsp;<br>
-      &gt;&nbsp;./configure &nbsp;<br>
-      &gt;&nbsp;make &nbsp;<br>
-      &gt;&nbsp;sudo&nbsp;make&nbsp;install &nbsp;<br>
-      &nbsp;<br>
-      #&nbsp;install&nbsp;python &nbsp;<br>
-      &gt;&nbsp;sudo&nbsp;pacman&nbsp;-S&nbsp;python &nbsp;<br>
-      &nbsp;<br>
-      #&nbsp;install&nbsp;sqlite3 &nbsp;<br>
-      &gt;&nbsp;sudo&nbsp;pacman&nbsp;-S&nbsp;sqlite3 &nbsp;<br>
-      &nbsp;<br>
-      #&nbsp;install&nbsp;distribute&nbsp;and&nbsp;pip &nbsp;<br>
-      &gt;&nbsp;sudo&nbsp;pacman&nbsp;-S&nbsp;python-pip &nbsp;<br>
-      &gt;&nbsp;sudo&nbsp;pip&nbsp;install&nbsp;distribute
-      &nbsp;<br>
-      &nbsp;<br>
-      #&nbsp;install&nbsp;PyZMQ&nbsp;from&nbsp;github &nbsp;<br>
-      &gt;&nbsp;sudo&nbsp;pacman&nbsp;-S&nbsp;git &nbsp;<br>
-      &gt;&nbsp;git&nbsp;clone&nbsp;http://github.com/zeromq/pyzmq.git
-      &nbsp;<br>
-      &gt;&nbsp;sudo&nbsp;python&nbsp;setup.py&nbsp;install
-    </div><!--l. 64-->
-
-    <p class="nopar">
+    <div class="fancyvrb" id="fancyvrb1">
+      <a id="x1-12003r1" name="x1-12003r1"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;#</span><span class=
+      "pcrr7t-x-x-90">&nbsp;install</span><span class=
+      "pcrr7t-x-x-90">&nbsp;ZeroMQ</span><br class="fancyvrb">
+      <a id="x1-12005r2" name="x1-12005r2"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;wget</span><span class=
+      "pcrr7t-x-x-90">&nbsp;http://www.zeromq.org/local--files/area:download/zeromq-2.0.7.tar.gz</span><br class="fancyvrb">
+      <a id="x1-12007r3" name="x1-12007r3"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;tar</span><span class=
+      "pcrr7t-x-x-90">&nbsp;-xzvf</span><span class=
+      "pcrr7t-x-x-90">&nbsp;zeromq-2.0.7.tar.gz</span><br class=
+      "fancyvrb">
+      <a id="x1-12009r4" name="x1-12009r4"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;cd</span><span class=
+      "pcrr7t-x-x-90">&nbsp;zeromq-2.0.7/</span><br class=
+      "fancyvrb">
+      <a id="x1-12011r5" name="x1-12011r5"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;./configure</span><br class="fancyvrb">
+      <a id="x1-12013r6" name="x1-12013r6"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;make</span><br class="fancyvrb">
+      <a id="x1-12015r7" name="x1-12015r7"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;sudo</span><span class=
+      "pcrr7t-x-x-90">&nbsp;make</span><span class=
+      "pcrr7t-x-x-90">&nbsp;install</span><br class="fancyvrb">
+      <a id="x1-12017r8" name="x1-12017r8"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-12019r9" name="x1-12019r9"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;#</span><span class=
+      "pcrr7t-x-x-90">&nbsp;install</span><span class=
+      "pcrr7t-x-x-90">&nbsp;python</span><br class="fancyvrb">
+      <a id="x1-12021r10" name="x1-12021r10"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;sudo</span><span class=
+      "pcrr7t-x-x-90">&nbsp;pacman</span><span class=
+      "pcrr7t-x-x-90">&nbsp;-S</span><span class=
+      "pcrr7t-x-x-90">&nbsp;python</span><br class="fancyvrb">
+      <a id="x1-12023r11" name="x1-12023r11"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-12025r12" name="x1-12025r12"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;#</span><span class=
+      "pcrr7t-x-x-90">&nbsp;install</span><span class=
+      "pcrr7t-x-x-90">&nbsp;sqlite3</span><br class="fancyvrb">
+      <a id="x1-12027r13" name="x1-12027r13"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;sudo</span><span class=
+      "pcrr7t-x-x-90">&nbsp;pacman</span><span class=
+      "pcrr7t-x-x-90">&nbsp;-S</span><span class=
+      "pcrr7t-x-x-90">&nbsp;sqlite3</span><br class="fancyvrb">
+      <a id="x1-12029r14" name="x1-12029r14"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-12031r15" name="x1-12031r15"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;#</span><span class=
+      "pcrr7t-x-x-90">&nbsp;install</span><span class=
+      "pcrr7t-x-x-90">&nbsp;distribute</span><span class=
+      "pcrr7t-x-x-90">&nbsp;and</span><span class=
+      "pcrr7t-x-x-90">&nbsp;pip</span><br class="fancyvrb">
+      <a id="x1-12033r16" name="x1-12033r16"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;sudo</span><span class=
+      "pcrr7t-x-x-90">&nbsp;pacman</span><span class=
+      "pcrr7t-x-x-90">&nbsp;-S</span><span class=
+      "pcrr7t-x-x-90">&nbsp;python-pip</span><br class="fancyvrb">
+      <a id="x1-12035r17" name="x1-12035r17"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;sudo</span><span class=
+      "pcrr7t-x-x-90">&nbsp;pip</span><span class=
+      "pcrr7t-x-x-90">&nbsp;install</span><span class=
+      "pcrr7t-x-x-90">&nbsp;distribute</span><br class="fancyvrb">
+      <a id="x1-12037r18" name="x1-12037r18"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-12039r19" name="x1-12039r19"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;#</span><span class=
+      "pcrr7t-x-x-90">&nbsp;install</span><span class=
+      "pcrr7t-x-x-90">&nbsp;PyZMQ</span><span class=
+      "pcrr7t-x-x-90">&nbsp;from</span><span class=
+      "pcrr7t-x-x-90">&nbsp;github</span><br class="fancyvrb">
+      <a id="x1-12041r20" name="x1-12041r20"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;sudo</span><span class=
+      "pcrr7t-x-x-90">&nbsp;pacman</span><span class=
+      "pcrr7t-x-x-90">&nbsp;-S</span><span class=
+      "pcrr7t-x-x-90">&nbsp;git</span><br class="fancyvrb">
+      <a id="x1-12043r21" name="x1-12043r21"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;git</span><span class=
+      "pcrr7t-x-x-90">&nbsp;clone</span><span class=
+      "pcrr7t-x-x-90">&nbsp;http://github.com/zeromq/pyzmq.git</span><br class="fancyvrb">
+      <a id="x1-12045r22" name="x1-12045r22"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;sudo</span><span class=
+      "pcrr7t-x-x-90">&nbsp;python</span><span class=
+      "pcrr7t-x-x-90">&nbsp;setup.py</span><span class=
+      "pcrr7t-x-x-90">&nbsp;install</span><br class="fancyvrb">
+      <a id="x1-12047r23" name="x1-12047r23"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-12049r24" name="x1-12049r24"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;#</span><span class=
+      "pcrr7t-x-x-90">&nbsp;web.py</span><br class="fancyvrb">
+      <a id="x1-12051r25" name="x1-12051r25"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;sudo</span><span class=
+      "pcrr7t-x-x-90">&nbsp;pip</span><span class=
+      "pcrr7t-x-x-90">&nbsp;install</span><span class=
+      "pcrr7t-x-x-90">&nbsp;web.py</span>
+    </div>
   </div>
   <hr class="endfloat">
-  <!--l. 67-->
+  <!--l. 71-->
 
   <p class="indent">If you run into parts that your OS is missing,
   which is likely on Debian and SuSE systems, then you&rsquo;ll
@@ -488,11 +603,11 @@
 
   <h3 class="sectionHead"><span class="titlemark">2.2</span> <a id=
   "x1-130002.2" name="x1-130002.2"></a>Building Mongrel2</h3>
-  <!--l. 74-->
+  <!--l. 78-->
 
   <p class="noindent">If everything went well you should be able to
   grab the Mongrel2 source and try building it. There&rsquo;s two
-  ways you can get the source code to Mongrel2: <!--l. 78-->
+  ways you can get the source code to Mongrel2: <!--l. 82-->
 
   <p class="indent">
 
@@ -503,18 +618,18 @@
 
     <li class="enumerate" id="x1-13004x2">Grab the source .zip
     release and install it from there.
-  </ol><!--l. 83-->
+  </ol><!--l. 87-->
 
   <p class="noindent">
 
   <h4 class="subsectionHead"><span class="titlemark">2.2.1</span>
   <a id="x1-140002.2.1" name="x1-140002.2.1"></a>Using Fossil</h4>
-  <!--l. 85-->
+  <!--l. 89-->
 
   <p class="noindent">Since it&rsquo;s early in Mongrel2
   development we recommend you get fossil and install it so you can
   track the latest fixes and development. Here&rsquo;s the easiest
-  way to do that: <!--l. 89-->
+  way to do that: <!--l. 93-->
 
   <p class="indent">
 
@@ -531,10 +646,10 @@
     <li class="enumerate" id="x1-14006x3">If you find that your
     version of fossil ends up having problems with mongrel2.org let
     us know since we might need to upgrade.
-  </ol><!--l. 98-->
+  </ol><!--l. 102-->
 
   <p class="indent">Once you have fossil you can then get the
-  Mongrel2 source and open it up: <!--l. 100-->
+  Mongrel2 source and open it up: <!--l. 104-->
 
   <p class="indent"><a id="x1-14007r2" name="x1-14007r2"></a>
   <hr class="float">
@@ -546,19 +661,39 @@
       <span class="pplri7t-">Source</span></span>
     </div><!--tex4ht:label?: x1-14007r2 -->
 
-    <div class="verbatim" id="verbatim-2">
-      &gt;&nbsp;mkdir&nbsp;~/fossils &nbsp;<br>
-      &gt;&nbsp;fossil&nbsp;clone&nbsp;http://mongrel2.org&nbsp;~/fossils/mongrel2.fossil
-      &nbsp;<br>
-      &gt;&nbsp;mkdir&nbsp;mongrel2 &nbsp;<br>
-      &gt;&nbsp;cd&nbsp;mongrel2 &nbsp;<br>
-      &gt;&nbsp;fossil&nbsp;open&nbsp;~/fossils/mongrel2.fossil
-    </div><!--l. 107-->
-
-    <p class="nopar">
+    <div class="fancyvrb" id="fancyvrb2">
+      <a id="x1-14009r1" name="x1-14009r1"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;mkdir</span><span class=
+      "pcrr7t-x-x-90">&nbsp;~/fossils</span><br class="fancyvrb">
+      <a id="x1-14011r2" name="x1-14011r2"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;fossil</span><span class=
+      "pcrr7t-x-x-90">&nbsp;clone</span><span class=
+      "pcrr7t-x-x-90">&nbsp;http://mongrel2.org</span><span class=
+      "pcrr7t-x-x-90">&nbsp;~/fossils/mongrel2.fossil</span><br class="fancyvrb">
+      <a id="x1-14013r3" name="x1-14013r3"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;mkdir</span><span class=
+      "pcrr7t-x-x-90">&nbsp;mongrel2</span><br class="fancyvrb">
+      <a id="x1-14015r4" name="x1-14015r4"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;cd</span><span class=
+      "pcrr7t-x-x-90">&nbsp;mongrel2</span><br class="fancyvrb">
+      <a id="x1-14017r5" name="x1-14017r5"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;fossil</span><span class=
+      "pcrr7t-x-x-90">&nbsp;open</span><span class=
+      "pcrr7t-x-x-90">&nbsp;~/fossils/mongrel2.fossil</span>
+    </div>
   </div>
   <hr class="endfloat">
-  <!--l. 110-->
+  <!--l. 114-->
 
   <p class="indent">Make sure you do this in order (just like with
   every set of instructions you should follow) or else you&rsquo;ll
@@ -572,7 +707,7 @@
 
   <h4 class="subsectionHead"><span class="titlemark">2.2.2</span>
   <a id="x1-150002.2.2" name="x1-150002.2.2"></a>Using The .zip
-  File</h4><!--l. 119-->
+  File</h4><!--l. 123-->
 
   <p class="noindent">If you don&rsquo;t want to install fossil
   then you will need to get the .zip file from our site and install
@@ -580,7 +715,7 @@
   "pplri7t-">no guarantees</span> that this will work at all or
   that you will get a stable server. We have not made an official
   release, so using the .zip file is effectively a lame way of
-  avoiding using fossil. <!--l. 125-->
+  avoiding using fossil. <!--l. 129-->
 
   <p class="indent">
 
@@ -597,24 +732,24 @@
 
     <li class="enumerate" id="x1-15008x4">Unzip this file and cd
     into the resulting directory.
-  </ol><!--l. 133-->
+  </ol><!--l. 137-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">2.3</span> <a id=
   "x1-160002.3" name="x1-160002.3"></a>Building And Installing</h3>
-  <!--l. 135-->
+  <!--l. 139-->
 
   <p class="noindent">Once you have the source ready to go you can
   build it and then install it with one command: <span class=
-  "pplri7t-">make all install</span> <!--l. 138-->
+  "pplri7t-">make all install</span> <!--l. 142-->
 
   <p class="indent">There is no <span class=
   "pplri7t-">./configure</span> for Mongrel2 since we avoid too
   many OS specific differences or shield those away with good
-  feature checks in the code. <!--l. 141-->
+  feature checks in the code. <!--l. 145-->
 
-  <p class="indent">The end result of this should be: <!--l. 143-->
+  <p class="indent">The end result of this should be: <!--l. 147-->
 
   <p class="indent">
 
@@ -633,13 +768,13 @@
 
     <li class="enumerate" id="x1-16010x5">Finally the mongrel2
     binary gets installed.
-  </ol><!--l. 151-->
+  </ol><!--l. 155-->
 
   <p class="indent">If any of these stages fail, then you can
   simply try to fix them and then run: <span class=
   "pplri7t-">make</span> <span class="pplri7t-">clean all
   install</span> which will do everything all over again. 
-  <!--l. 154-->
+  <!--l. 158-->
 
   <p class="indent">The most common error is if you didn&rsquo;t
   install pip or distribute and insist on using your own
@@ -648,7 +783,7 @@
   Linux&rsquo;s stupidity about versions and how it installs
   Python. If you don&rsquo;t want to use the package system every
   other Python programmer uses then you&rsquo;re on your own. 
-  <!--l. 160-->
+  <!--l. 164-->
 
   <p class="indent"><a id="x1-16011r1" name="x1-16011r1"></a>
   <hr class="float">
@@ -661,7 +796,7 @@
     </div><!--tex4ht:label?: x1-16011r1 -->
 
     <div class="quote">
-      <!--l. 161-->
+      <!--l. 165-->
 
       <p class="noindent">For those who still want to use the
       package management but want to use pip and distribute I
@@ -677,13 +812,13 @@
 
   <h3 class="sectionHead"><span class="titlemark">2.4</span> <a id=
   "x1-170002.4" name="x1-170002.4"></a>Testing The
-  Installation</h3><!--l. 171-->
+  Installation</h3><!--l. 175-->
 
   <p class="noindent">When you are done you probably want to make
   sure that it installed correctly. There&rsquo;s a test
   configuration file in <span class=
   "pplb7t-">tests/config.sqlite</span> that you can use to try it
-  out: <!--l. 175-->
+  out: <!--l. 179-->
 
   <p class="indent"><a id="x1-17001r3" name="x1-17001r3"></a>
   <hr class="float">
@@ -695,26 +830,50 @@
       <span class="pplri7t-">Run</span></span>
     </div><!--tex4ht:label?: x1-17001r3 -->
 
-    <div class="verbatim" id="verbatim-3">
-      &gt;&nbsp;mkdir&nbsp;run &nbsp;<br>
-      &gt;&nbsp;mkdir&nbsp;logs &nbsp;<br>
-      &gt;&nbsp;mkdir&nbsp;tmp &nbsp;<br>
-      &gt;&nbsp;m2sh&nbsp;dump&nbsp;-db&nbsp;tests/config.sqlite
-      &nbsp;<br>
-      &gt;&nbsp;m2sh&nbsp;start&nbsp;-db&nbsp;tests/config.sqlite&nbsp;-host&nbsp;localhost
-    </div><!--l. 182-->
-
-    <p class="nopar">
+    <div class="fancyvrb" id="fancyvrb3">
+      <a id="x1-17003r1" name="x1-17003r1"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;mkdir</span><span class=
+      "pcrr7t-x-x-90">&nbsp;run</span><br class="fancyvrb">
+      <a id="x1-17005r2" name="x1-17005r2"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;mkdir</span><span class=
+      "pcrr7t-x-x-90">&nbsp;logs</span><br class="fancyvrb">
+      <a id="x1-17007r3" name="x1-17007r3"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;mkdir</span><span class=
+      "pcrr7t-x-x-90">&nbsp;tmp</span><br class="fancyvrb">
+      <a id="x1-17009r4" name="x1-17009r4"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;m2sh</span><span class=
+      "pcrr7t-x-x-90">&nbsp;dump</span><span class=
+      "pcrr7t-x-x-90">&nbsp;-db</span><span class=
+      "pcrr7t-x-x-90">&nbsp;tests/config.sqlite</span><br class=
+      "fancyvrb">
+      <a id="x1-17011r5" name="x1-17011r5"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;m2sh</span><span class=
+      "pcrr7t-x-x-90">&nbsp;start</span><span class=
+      "pcrr7t-x-x-90">&nbsp;-db</span><span class=
+      "pcrr7t-x-x-90">&nbsp;tests/config.sqlite</span><span class=
+      "pcrr7t-x-x-90">&nbsp;-host</span><span class=
+      "pcrr7t-x-x-90">&nbsp;localhost</span>
+    </div>
   </div>
   <hr class="endfloat">
-  <!--l. 185-->
+  <!--l. 189-->
 
   <p class="indent">That&rsquo;s it. Just hit CTRL-c for now and
   we&rsquo;ll get into playing with this setup later.
 
   <h3 class="sectionHead"><span class="titlemark">2.5</span> <a id=
   "x1-180002.5" name="x1-180002.5"></a>Upgrading from trunk</h3>
-  <!--l. 189-->
+  <!--l. 193-->
 
   <p class="indent"><a id="x1-18001r4" name="x1-18001r4"></a>
   <hr class="float">
@@ -726,23 +885,34 @@
       <span class="pplri7t-">checkout</span></span>
     </div><!--tex4ht:label?: x1-18001r4 -->
 
-    <div class="verbatim" id="verbatim-4">
-      &gt;&nbsp;cd&nbsp;mongrel2 &nbsp;<br>
-      &gt;&nbsp;fossil&nbsp;pull&nbsp;http://mongrel2.org
-      &nbsp;<br>
-      &gt;&nbsp;fossil&nbsp;update
-    </div><!--l. 194-->
-
-    <p class="nopar">
+    <div class="fancyvrb" id="fancyvrb4">
+      <a id="x1-18003r1" name="x1-18003r1"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;cd</span><span class=
+      "pcrr7t-x-x-90">&nbsp;mongrel2</span><br class="fancyvrb">
+      <a id="x1-18005r2" name="x1-18005r2"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;fossil</span><span class=
+      "pcrr7t-x-x-90">&nbsp;pull</span><span class=
+      "pcrr7t-x-x-90">&nbsp;http://mongrel2.org</span><br class=
+      "fancyvrb">
+      <a id="x1-18007r3" name="x1-18007r3"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;fossil</span><span class=
+      "pcrr7t-x-x-90">&nbsp;update</span>
+    </div>
   </div>
   <hr class="endfloat">
-  <!--l. 197-->
+  <!--l. 201-->
 
   <p class="noindent">Don&rsquo;t forget <span class=
   "pplri7t-">make clean all install</span>.
 
   <h3 class="sectionHead"><span class="titlemark">2.6</span> <a id=
-  "x1-190002.6" name="x1-190002.6"></a>Up Next</h3><!--l. 202-->
+  "x1-190002.6" name="x1-190002.6"></a>Up Next</h3><!--l. 206-->
 
   <p class="noindent">You now should have a working Mongrel2 system
   installed and the m2sh configuration interface ready to go. In
@@ -891,19 +1061,51 @@
       <span class="pplri7t-">Commands</span></span>
     </div><!--tex4ht:label?: x1-22001r5 -->
 
-    <div class="verbatim" id="verbatim-5">
-      &gt;&nbsp;m2sh&nbsp;dump&nbsp;-db&nbsp;tests/config.sqlite
-      &nbsp;<br>
-      &gt;&nbsp;m2sh&nbsp;servers&nbsp;-db&nbsp;tests/config.sqlite
-      &nbsp;<br>
-      &gt;&nbsp;m2sh&nbsp;hosts&nbsp;-db&nbsp;tests/config.sqlite&nbsp;-host&nbsp;localhost
-      &nbsp;<br>
-      &gt;&nbsp;m2sh&nbsp;running&nbsp;-db&nbsp;tests/config.sqlite&nbsp;-host&nbsp;localhost
-      &nbsp;<br>
-      &gt;&nbsp;m2sh&nbsp;start&nbsp;-db&nbsp;tests/config.sqlite&nbsp;-host&nbsp;localhost
-    </div><!--l. 84-->
-
-    <p class="nopar">
+    <div class="fancyvrb" id="fancyvrb5">
+      <a id="x1-22003r1" name="x1-22003r1"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;m2sh</span><span class=
+      "pcrr7t-x-x-90">&nbsp;dump</span><span class=
+      "pcrr7t-x-x-90">&nbsp;-db</span><span class=
+      "pcrr7t-x-x-90">&nbsp;tests/config.sqlite</span><br class=
+      "fancyvrb">
+      <a id="x1-22005r2" name="x1-22005r2"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;m2sh</span><span class=
+      "pcrr7t-x-x-90">&nbsp;servers</span><span class=
+      "pcrr7t-x-x-90">&nbsp;-db</span><span class=
+      "pcrr7t-x-x-90">&nbsp;tests/config.sqlite</span><br class=
+      "fancyvrb">
+      <a id="x1-22007r3" name="x1-22007r3"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;m2sh</span><span class=
+      "pcrr7t-x-x-90">&nbsp;hosts</span><span class=
+      "pcrr7t-x-x-90">&nbsp;-db</span><span class=
+      "pcrr7t-x-x-90">&nbsp;tests/config.sqlite</span><span class=
+      "pcrr7t-x-x-90">&nbsp;-host</span><span class=
+      "pcrr7t-x-x-90">&nbsp;localhost</span><br class="fancyvrb">
+      <a id="x1-22009r4" name="x1-22009r4"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;m2sh</span><span class=
+      "pcrr7t-x-x-90">&nbsp;running</span><span class=
+      "pcrr7t-x-x-90">&nbsp;-db</span><span class=
+      "pcrr7t-x-x-90">&nbsp;tests/config.sqlite</span><span class=
+      "pcrr7t-x-x-90">&nbsp;-host</span><span class=
+      "pcrr7t-x-x-90">&nbsp;localhost</span><br class="fancyvrb">
+      <a id="x1-22011r5" name="x1-22011r5"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;m2sh</span><span class=
+      "pcrr7t-x-x-90">&nbsp;start</span><span class=
+      "pcrr7t-x-x-90">&nbsp;-db</span><span class=
+      "pcrr7t-x-x-90">&nbsp;tests/config.sqlite</span><span class=
+      "pcrr7t-x-x-90">&nbsp;-host</span><span class=
+      "pcrr7t-x-x-90">&nbsp;localhost</span>
+    </div>
   </div>
   <hr class="endfloat">
   <!--l. 87-->
@@ -920,7 +1122,7 @@
   stopping and reloading using sudo (make sure you CTRL-c to exit
   from the previous start command): <!--l. 94-->
 
-  <p class="indent"><a id="x1-22002r6" name="x1-22002r6"></a>
+  <p class="indent"><a id="x1-22012r6" name="x1-22012r6"></a>
   <hr class="float">
 
   <div class="float">
@@ -928,23 +1130,71 @@
       <span class="id">Source 6:</span> <span class=
       "content"><span class="pplri7t-">Starting, Stopping,</span>
       <span class="pplri7t-">Reloading</span></span>
-    </div><!--tex4ht:label?: x1-22002r6 -->
+    </div><!--tex4ht:label?: x1-22012r6 -->
 
-    <div class="verbatim" id="verbatim-6">
-      &gt;&nbsp;m2sh&nbsp;start&nbsp;-db&nbsp;tests/config.sqlite&nbsp;-host&nbsp;localhost&nbsp;-sudo
-      &nbsp;<br>
-      &gt;&nbsp;tail&nbsp;logs/error.log &nbsp;<br>
-      &gt;&nbsp;m2sh&nbsp;reload&nbsp;-db&nbsp;tests/config.sqlite&nbsp;-host&nbsp;localhost
-      &nbsp;<br>
-      &gt;&nbsp;tail&nbsp;logs/error.log &nbsp;<br>
-      &gt;&nbsp;curl&nbsp;http://localhost:8080/ &nbsp;<br>
-      &gt;&nbsp;tail&nbsp;logs/error.log &nbsp;<br>
-      &gt;&nbsp;m2sh&nbsp;running&nbsp;-db&nbsp;tests/config.sqlite&nbsp;-host&nbsp;localhost
-      &nbsp;<br>
-      &gt;&nbsp;m2sh&nbsp;stop&nbsp;-db&nbsp;tests/config.sqlite&nbsp;-host&nbsp;localhost
-    </div><!--l. 104-->
-
-    <p class="nopar">
+    <div class="fancyvrb" id="fancyvrb6">
+      <a id="x1-22014r1" name="x1-22014r1"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;m2sh</span><span class=
+      "pcrr7t-x-x-90">&nbsp;start</span><span class=
+      "pcrr7t-x-x-90">&nbsp;-db</span><span class=
+      "pcrr7t-x-x-90">&nbsp;tests/config.sqlite</span><span class=
+      "pcrr7t-x-x-90">&nbsp;-host</span><span class=
+      "pcrr7t-x-x-90">&nbsp;localhost</span><span class=
+      "pcrr7t-x-x-90">&nbsp;-sudo</span><br class="fancyvrb">
+      <a id="x1-22016r2" name="x1-22016r2"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;tail</span><span class=
+      "pcrr7t-x-x-90">&nbsp;logs/error.log</span><br class=
+      "fancyvrb">
+      <a id="x1-22018r3" name="x1-22018r3"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;m2sh</span><span class=
+      "pcrr7t-x-x-90">&nbsp;reload</span><span class=
+      "pcrr7t-x-x-90">&nbsp;-db</span><span class=
+      "pcrr7t-x-x-90">&nbsp;tests/config.sqlite</span><span class=
+      "pcrr7t-x-x-90">&nbsp;-host</span><span class=
+      "pcrr7t-x-x-90">&nbsp;localhost</span><br class="fancyvrb">
+      <a id="x1-22020r4" name="x1-22020r4"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;tail</span><span class=
+      "pcrr7t-x-x-90">&nbsp;logs/error.log</span><br class=
+      "fancyvrb">
+      <a id="x1-22022r5" name="x1-22022r5"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;curl</span><span class=
+      "pcrr7t-x-x-90">&nbsp;http://localhost:8080/</span><br class=
+      "fancyvrb">
+      <a id="x1-22024r6" name="x1-22024r6"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;tail</span><span class=
+      "pcrr7t-x-x-90">&nbsp;logs/error.log</span><br class=
+      "fancyvrb">
+      <a id="x1-22026r7" name="x1-22026r7"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;m2sh</span><span class=
+      "pcrr7t-x-x-90">&nbsp;running</span><span class=
+      "pcrr7t-x-x-90">&nbsp;-db</span><span class=
+      "pcrr7t-x-x-90">&nbsp;tests/config.sqlite</span><span class=
+      "pcrr7t-x-x-90">&nbsp;-host</span><span class=
+      "pcrr7t-x-x-90">&nbsp;localhost</span><br class="fancyvrb">
+      <a id="x1-22028r8" name="x1-22028r8"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;m2sh</span><span class=
+      "pcrr7t-x-x-90">&nbsp;stop</span><span class=
+      "pcrr7t-x-x-90">&nbsp;-db</span><span class=
+      "pcrr7t-x-x-90">&nbsp;tests/config.sqlite</span><span class=
+      "pcrr7t-x-x-90">&nbsp;-host</span><span class=
+      "pcrr7t-x-x-90">&nbsp;localhost</span>
+    </div>
   </div>
   <hr class="endfloat">
   <!--l. 107-->
@@ -1048,36 +1298,168 @@
       <span class="pplri7t-">Example</span></span>
     </div><!--tex4ht:label?: x1-24001r7 -->
 
-    <div class="verbatim" id="verbatim-7">
-      from&nbsp;mongrel2.config&nbsp;import&nbsp;&#8902; &nbsp;<br>
-      &nbsp;<br>
-      main&nbsp;=&nbsp;Server( &nbsp;<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;uuid="f400bf85-4538-4f7a-8908-67e313d515c2",
-      &nbsp;<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;access_log="/logs/access.log",
-      &nbsp;<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;error_log="/logs/error.log",
-      &nbsp;<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;chroot="./", &nbsp;<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;default_host="localhost", &nbsp;<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;pid_file="/run/mongrel2.pid",
-      &nbsp;<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;port=6767, &nbsp;<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;hosts&nbsp;=&nbsp;&#91; &nbsp;<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Host(name="localhost",&nbsp;routes={
-      &nbsp;<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'/tests/':&nbsp;Dir(base='tests/',&nbsp;index_file='index.html',
-      &nbsp;<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default_ctype='text/plain')
-      &nbsp;<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}) &nbsp;<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;&#93; &nbsp;<br>
-      ) &nbsp;<br>
-      &nbsp;<br>
-      commit(&#91;main&#93;)
-    </div><!--l. 177-->
-
-    <p class="nopar">
+    <div class="fancyvrb" id="fancyvrb7">
+      <a id="x1-24003r1" name="x1-24003r1"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;from</span><span class=
+      "pcrr7t-x-x-90">&nbsp;mongrel2.config</span><span class=
+      "pcrr7t-x-x-90">&nbsp;import</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&#8902;</span><br class="fancyvrb">
+      <a id="x1-24005r2" name="x1-24005r2"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-24007r3" name="x1-24007r3"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;main</span><span class=
+      "pcrr7t-x-x-90">&nbsp;=</span><span class=
+      "pcrr7t-x-x-90">&nbsp;Server(</span><br class="fancyvrb">
+      <a id="x1-24009r4" name="x1-24009r4"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;uuid="f400bf85-4538-4f7a-8908-67e313d515c2",</span><br class="fancyvrb">
+      <a id="x1-24011r5" name="x1-24011r5"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;access_log="/logs/access.log",</span><br class="fancyvrb">
+      <a id="x1-24013r6" name="x1-24013r6"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;error_log="/logs/error.log",</span><br class="fancyvrb">
+      <a id="x1-24015r7" name="x1-24015r7"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;chroot="./",</span><br class=
+      "fancyvrb">
+      <a id="x1-24017r8" name="x1-24017r8"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;default_host="localhost",</span><br class="fancyvrb">
+      <a id="x1-24019r9" name="x1-24019r9"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;pid_file="/run/mongrel2.pid",</span><br class="fancyvrb">
+      <a id="x1-24021r10" name="x1-24021r10"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;port=6767,</span><br class="fancyvrb">
+      <a id="x1-24023r11" name="x1-24023r11"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;hosts</span><span class=
+      "pcrr7t-x-x-90">&nbsp;=</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&#91;</span><br class="fancyvrb">
+      <a id="x1-24025r12" name="x1-24025r12"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;Host(name="localhost",</span><span class="pcrr7t-x-x-90">&nbsp;routes={</span><br class="fancyvrb">
+      <a id="x1-24027r13" name="x1-24027r13"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;'/tests/':</span><span class=
+      "pcrr7t-x-x-90">&nbsp;Dir(base='tests/',</span><span class=
+      "pcrr7t-x-x-90">&nbsp;index_file='index.html',</span><br class="fancyvrb">
+      <a id="x1-24029r14" name="x1-24029r14"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;default_ctype='text/plain')</span><br class="fancyvrb">
+      <a id="x1-24031r15" name="x1-24031r15"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;})</span><br class="fancyvrb">
+      <a id="x1-24033r16" name="x1-24033r16"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&#93;</span><br class="fancyvrb">
+      <a id="x1-24035r17" name="x1-24035r17"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;)</span><br class="fancyvrb">
+      <a id="x1-24037r18" name="x1-24037r18"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-24039r19" name="x1-24039r19"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;commit(&#91;main&#93;)</span>
+    </div>
   </div>
   <hr class="endfloat">
   <!--l. 180-->
@@ -1087,7 +1469,7 @@
   get into how its structured in a second, but to load this file we
   would just do this: <!--l. 184-->
 
-  <p class="indent"><a id="x1-24002r8" name="x1-24002r8"></a>
+  <p class="indent"><a id="x1-24040r8" name="x1-24040r8"></a>
   <hr class="float">
 
   <div class="float">
@@ -1095,21 +1477,53 @@
       <span class="id">Source 8:</span> <span class=
       "content"><span class="pplri7t-">Loading The Simple</span>
       <span class="pplri7t-">Config</span></span>
-    </div><!--tex4ht:label?: x1-24002r8 -->
+    </div><!--tex4ht:label?: x1-24040r8 -->
 
-    <div class="verbatim" id="verbatim-8">
-      &gt;&nbsp;m2sh&nbsp;init&nbsp;-db&nbsp;simple.sqlite
-      &nbsp;<br>
-      &gt;&nbsp;m2sh&nbsp;load&nbsp;-db&nbsp;simple.sqlite&nbsp;-config&nbsp;examples/python/tests/sample_conf.py
-      &nbsp;<br>
-      &gt;&nbsp;m2sh&nbsp;servers&nbsp;-db&nbsp;simple.sqlite
-      &nbsp;<br>
-      &gt;&nbsp;m2sh&nbsp;hosts&nbsp;-db&nbsp;simple.sqlite&nbsp;-host&nbsp;localhost
-      &nbsp;<br>
-      &gt;&nbsp;m2sh&nbsp;start&nbsp;-db&nbsp;simple.sqlite&nbsp;-host&nbsp;localhost
-    </div><!--l. 191-->
-
-    <p class="nopar">
+    <div class="fancyvrb" id="fancyvrb8">
+      <a id="x1-24042r1" name="x1-24042r1"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;m2sh</span><span class=
+      "pcrr7t-x-x-90">&nbsp;init</span><span class=
+      "pcrr7t-x-x-90">&nbsp;-db</span><span class=
+      "pcrr7t-x-x-90">&nbsp;simple.sqlite</span><br class=
+      "fancyvrb">
+      <a id="x1-24044r2" name="x1-24044r2"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;m2sh</span><span class=
+      "pcrr7t-x-x-90">&nbsp;load</span><span class=
+      "pcrr7t-x-x-90">&nbsp;-db</span><span class=
+      "pcrr7t-x-x-90">&nbsp;simple.sqlite</span><span class=
+      "pcrr7t-x-x-90">&nbsp;-config</span><span class=
+      "pcrr7t-x-x-90">&nbsp;examples/python/tests/sample_conf.py</span><br class="fancyvrb">
+      <a id="x1-24046r3" name="x1-24046r3"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;m2sh</span><span class=
+      "pcrr7t-x-x-90">&nbsp;servers</span><span class=
+      "pcrr7t-x-x-90">&nbsp;-db</span><span class=
+      "pcrr7t-x-x-90">&nbsp;simple.sqlite</span><br class=
+      "fancyvrb">
+      <a id="x1-24048r4" name="x1-24048r4"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;m2sh</span><span class=
+      "pcrr7t-x-x-90">&nbsp;hosts</span><span class=
+      "pcrr7t-x-x-90">&nbsp;-db</span><span class=
+      "pcrr7t-x-x-90">&nbsp;simple.sqlite</span><span class=
+      "pcrr7t-x-x-90">&nbsp;-host</span><span class=
+      "pcrr7t-x-x-90">&nbsp;localhost</span><br class="fancyvrb">
+      <a id="x1-24050r5" name="x1-24050r5"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;m2sh</span><span class=
+      "pcrr7t-x-x-90">&nbsp;start</span><span class=
+      "pcrr7t-x-x-90">&nbsp;-db</span><span class=
+      "pcrr7t-x-x-90">&nbsp;simple.sqlite</span><span class=
+      "pcrr7t-x-x-90">&nbsp;-host</span><span class=
+      "pcrr7t-x-x-90">&nbsp;localhost</span>
+    </div>
   </div>
   <hr class="endfloat">
   <!--l. 194-->
@@ -1117,20 +1531,20 @@
   <p class="indent">With this sequence of commands you:
 
   <ol class="enumerate1">
-    <li class="enumerate" id="x1-24004x1">Create a raw fresh config
+    <li class="enumerate" id="x1-24052x1">Create a raw fresh config
     database name <span class="pplb7t-">simple.sqlite</span>
 
-    <li class="enumerate" id="x1-24006x2">Load the <span class=
+    <li class="enumerate" id="x1-24054x2">Load the <span class=
     "pplb7t-">sample</span><span class="pplb7t-">_conf.py</span>
     into it.
 
-    <li class="enumerate" id="x1-24008x3">List the servers it has
+    <li class="enumerate" id="x1-24056x3">List the servers it has
     configured.
 
-    <li class="enumerate" id="x1-24010x4">List the hosts that
+    <li class="enumerate" id="x1-24058x4">List the hosts that
     server has, with what routes it has.
 
-    <li class="enumerate" id="x1-24012x5">Start this server to try
+    <li class="enumerate" id="x1-24060x5">Start this server to try
     it out.
   </ol><!--l. 204-->
 
@@ -1520,91 +1934,476 @@
       <span class="pplri7t-">Script</span></span>
     </div><!--tex4ht:label?: x1-33001r9 -->
 
-    <div class="verbatim" id="verbatim-9">
-      from&nbsp;mongrel2.config&nbsp;import&nbsp;&#8902; &nbsp;<br>
-      &nbsp;<br>
-      main&nbsp;=&nbsp;Server( &nbsp;<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;uuid="2f62bd5-9e59-49cd-993c-3b6013c28f05",
-      &nbsp;<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;access_log="/logs/access.log",
-      &nbsp;<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;error_log="/logs/error.log",
-      &nbsp;<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;chroot="./", &nbsp;<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;pid_file="/run/mongrel2.pid",
-      &nbsp;<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;default_host="mongrel2.org",
-      &nbsp;<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;port=6767 &nbsp;<br>
-      ) &nbsp;<br>
-      &nbsp;<br>
-      &nbsp;<br>
-      test_directory&nbsp;=&nbsp;Dir(base='tests/', &nbsp;<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;index_file='index.html',
-      &nbsp;<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default_ctype='text/plain')
-      &nbsp;<br>
-      &nbsp;<br>
-      web_app_proxy&nbsp;=&nbsp;Proxy(addr='127.0.0.1',&nbsp;port=80)
-      &nbsp;<br>
-      &nbsp;<br>
-      chat_demo_dir&nbsp;=&nbsp;Dir(base='examples/chat/static/',
-      &nbsp;<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;index_file='index.html',
-      &nbsp;<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default_ctype='text/plain')
-      &nbsp;<br>
-      &nbsp;<br>
-      chat_demo&nbsp;=&nbsp;Handler(send_spec='tcp://127.0.0.1:9999',
-      &nbsp;<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;send_ident='54c6755b-9628-40a4-9a2d-cc82a816345e',
-      &nbsp;<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;recv_spec='tcp://127.0.0.1:9998',&nbsp;recv_ident='')
-      &nbsp;<br>
-      &nbsp;<br>
-      handler_test&nbsp;=&nbsp;Handler(send_spec='tcp://127.0.0.1:9997',
-      &nbsp;<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;send_ident='34f9ceee-cd52-4b7f-b197-88bf2f0ec378',
-      &nbsp;<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;recv_spec='tcp://127.0.0.1:9996',&nbsp;recv_ident='')
-      &nbsp;<br>
-      &nbsp;<br>
-      #&nbsp;the&nbsp;r''&nbsp;string&nbsp;syntax&nbsp;means&nbsp;to&nbsp;not&nbsp;interpret&nbsp;any&nbsp;\&nbsp;chars,&nbsp;for&nbsp;regexes
-      &nbsp;<br>
-      mongrel2&nbsp;=&nbsp;Host(name="mongrel2.org",&nbsp;routes={
-      &nbsp;<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;r'@chat':&nbsp;chat_demo, &nbsp;<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;r'/handlertest':&nbsp;handler_test,
-      &nbsp;<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;r'/chat/':&nbsp;web_app_proxy,
-      &nbsp;<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;r'/':&nbsp;web_app_proxy, &nbsp;<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;r'/tests/':&nbsp;test_directory,
-      &nbsp;<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;r'/testsmulti/(.&#8902;.json)':&nbsp;test_directory,
-      &nbsp;<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;r'/chatdemo/':&nbsp;chat_demo_dir,
-      &nbsp;<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;r'/static/':&nbsp;chat_demo_dir,
-      &nbsp;<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;r'/mp3stream':&nbsp;Handler(
-      &nbsp;<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;send_spec='tcp://127.0.0.1:9995',
-      &nbsp;<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;send_ident='53f9f1d1-1116-4751-b6ff-4fbe3e43d142',
-      &nbsp;<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;recv_spec='tcp://127.0.0.1:9994',&nbsp;recv_ident='')
-      &nbsp;<br>
-      }) &nbsp;<br>
-      &nbsp;<br>
-      main.hosts&nbsp;=&nbsp;&#91;mongrel2&#93; &nbsp;<br>
-      &nbsp;<br>
-      settings&nbsp;=&nbsp;{"zeromq.threads":&nbsp;4} &nbsp;<br>
-      &nbsp;<br>
-      commit(&#91;main&#93;,&nbsp;settings=settings) &nbsp;<br>
-    </div><!--l. 427-->
-
-    <p class="nopar">
+    <div class="fancyvrb" id="fancyvrb9">
+      <a id="x1-33003r1" name="x1-33003r1"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;from</span><span class=
+      "pcrr7t-x-x-90">&nbsp;mongrel2.config</span><span class=
+      "pcrr7t-x-x-90">&nbsp;import</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&#8902;</span><br class="fancyvrb">
+      <a id="x1-33005r2" name="x1-33005r2"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-33007r3" name="x1-33007r3"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;main</span><span class=
+      "pcrr7t-x-x-90">&nbsp;=</span><span class=
+      "pcrr7t-x-x-90">&nbsp;Server(</span><br class="fancyvrb">
+      <a id="x1-33009r4" name="x1-33009r4"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;uuid="2f62bd5-9e59-49cd-993c-3b6013c28f05",</span><br class="fancyvrb">
+      <a id="x1-33011r5" name="x1-33011r5"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;access_log="/logs/access.log",</span><br class="fancyvrb">
+      <a id="x1-33013r6" name="x1-33013r6"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;error_log="/logs/error.log",</span><br class="fancyvrb">
+      <a id="x1-33015r7" name="x1-33015r7"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;chroot="./",</span><br class=
+      "fancyvrb">
+      <a id="x1-33017r8" name="x1-33017r8"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;pid_file="/run/mongrel2.pid",</span><br class="fancyvrb">
+      <a id="x1-33019r9" name="x1-33019r9"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;default_host="mongrel2.org",</span><br class="fancyvrb">
+      <a id="x1-33021r10" name="x1-33021r10"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;port=6767</span><br class="fancyvrb">
+      <a id="x1-33023r11" name="x1-33023r11"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;)</span><br class="fancyvrb">
+      <a id="x1-33025r12" name="x1-33025r12"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-33027r13" name="x1-33027r13"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-33029r14" name="x1-33029r14"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;test_directory</span><span class=
+      "pcrr7t-x-x-90">&nbsp;=</span><span class=
+      "pcrr7t-x-x-90">&nbsp;Dir(base='tests/',</span><br class=
+      "fancyvrb">
+      <a id="x1-33031r15" name="x1-33031r15"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;index_file='index.html',</span><br class="fancyvrb">
+      <a id="x1-33033r16" name="x1-33033r16"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;default_ctype='text/plain')</span><br class="fancyvrb">
+      <a id="x1-33035r17" name="x1-33035r17"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-33037r18" name="x1-33037r18"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;web_app_proxy</span><span class=
+      "pcrr7t-x-x-90">&nbsp;=</span><span class=
+      "pcrr7t-x-x-90">&nbsp;Proxy(addr='127.0.0.1',</span><span class="pcrr7t-x-x-90">&nbsp;port=80)</span><br class="fancyvrb">
+      <a id="x1-33039r19" name="x1-33039r19"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-33041r20" name="x1-33041r20"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;chat_demo_dir</span><span class=
+      "pcrr7t-x-x-90">&nbsp;=</span><span class=
+      "pcrr7t-x-x-90">&nbsp;Dir(base='examples/chat/static/',</span><br class="fancyvrb">
+      <a id="x1-33043r21" name="x1-33043r21"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;index_file='index.html',</span><br class="fancyvrb">
+      <a id="x1-33045r22" name="x1-33045r22"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;default_ctype='text/plain')</span><br class="fancyvrb">
+      <a id="x1-33047r23" name="x1-33047r23"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-33049r24" name="x1-33049r24"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;chat_demo</span><span class=
+      "pcrr7t-x-x-90">&nbsp;=</span><span class=
+      "pcrr7t-x-x-90">&nbsp;Handler(send_spec='tcp://127.0.0.1:9999',</span><br class="fancyvrb">
+      <a id="x1-33051r25" name="x1-33051r25"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;send_ident='54c6755b-9628-40a4-9a2d-cc82a816345e',</span><br class="fancyvrb">
+      <a id="x1-33053r26" name="x1-33053r26"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;recv_spec='tcp://127.0.0.1:9998',</span><span class="pcrr7t-x-x-90">&nbsp;recv_ident='')</span><br class="fancyvrb">
+      <a id="x1-33055r27" name="x1-33055r27"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-33057r28" name="x1-33057r28"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;handler_test</span><span class=
+      "pcrr7t-x-x-90">&nbsp;=</span><span class=
+      "pcrr7t-x-x-90">&nbsp;Handler(send_spec='tcp://127.0.0.1:9997',</span><br class="fancyvrb">
+      <a id="x1-33059r29" name="x1-33059r29"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;send_ident='34f9ceee-cd52-4b7f-b197-88bf2f0ec378',</span><br class="fancyvrb">
+      <a id="x1-33061r30" name="x1-33061r30"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;recv_spec='tcp://127.0.0.1:9996',</span><span class="pcrr7t-x-x-90">&nbsp;recv_ident='')</span><br class="fancyvrb">
+      <a id="x1-33063r31" name="x1-33063r31"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-33065r32" name="x1-33065r32"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;#</span><span class=
+      "pcrr7t-x-x-90">&nbsp;the</span><span class=
+      "pcrr7t-x-x-90">&nbsp;r''</span><span class=
+      "pcrr7t-x-x-90">&nbsp;string</span><span class=
+      "pcrr7t-x-x-90">&nbsp;syntax</span><span class=
+      "pcrr7t-x-x-90">&nbsp;means</span><span class=
+      "pcrr7t-x-x-90">&nbsp;to</span><span class=
+      "pcrr7t-x-x-90">&nbsp;not</span><span class=
+      "pcrr7t-x-x-90">&nbsp;interpret</span><span class=
+      "pcrr7t-x-x-90">&nbsp;any</span><span class=
+      "pcrr7t-x-x-90">&nbsp;\</span><span class=
+      "pcrr7t-x-x-90">&nbsp;chars,</span><span class=
+      "pcrr7t-x-x-90">&nbsp;for</span><span class=
+      "pcrr7t-x-x-90">&nbsp;regexes</span><br class="fancyvrb">
+      <a id="x1-33067r33" name="x1-33067r33"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;mongrel2</span><span class=
+      "pcrr7t-x-x-90">&nbsp;=</span><span class=
+      "pcrr7t-x-x-90">&nbsp;Host(name="mongrel2.org",</span><span class="pcrr7t-x-x-90">&nbsp;routes={</span><br class="fancyvrb">
+      <a id="x1-33069r34" name="x1-33069r34"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;r'@chat':</span><span class=
+      "pcrr7t-x-x-90">&nbsp;chat_demo,</span><br class="fancyvrb">
+      <a id="x1-33071r35" name="x1-33071r35"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;r'/handlertest':</span><span class=
+      "pcrr7t-x-x-90">&nbsp;handler_test,</span><br class=
+      "fancyvrb">
+      <a id="x1-33073r36" name="x1-33073r36"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;r'/chat/':</span><span class=
+      "pcrr7t-x-x-90">&nbsp;web_app_proxy,</span><br class=
+      "fancyvrb">
+      <a id="x1-33075r37" name="x1-33075r37"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;r'/':</span><span class=
+      "pcrr7t-x-x-90">&nbsp;web_app_proxy,</span><br class=
+      "fancyvrb">
+      <a id="x1-33077r38" name="x1-33077r38"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;r'/tests/':</span><span class=
+      "pcrr7t-x-x-90">&nbsp;test_directory,</span><br class=
+      "fancyvrb">
+      <a id="x1-33079r39" name="x1-33079r39"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;r'/testsmulti/(.&#8902;.json)':</span><span class="pcrr7t-x-x-90">&nbsp;test_directory,</span><br class="fancyvrb">
+      <a id="x1-33081r40" name="x1-33081r40"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;r'/chatdemo/':</span><span class=
+      "pcrr7t-x-x-90">&nbsp;chat_demo_dir,</span><br class=
+      "fancyvrb">
+      <a id="x1-33083r41" name="x1-33083r41"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;r'/static/':</span><span class=
+      "pcrr7t-x-x-90">&nbsp;chat_demo_dir,</span><br class=
+      "fancyvrb">
+      <a id="x1-33085r42" name="x1-33085r42"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;r'/mp3stream':</span><span class=
+      "pcrr7t-x-x-90">&nbsp;Handler(</span><br class="fancyvrb">
+      <a id="x1-33087r43" name="x1-33087r43"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;send_spec='tcp://127.0.0.1:9995',</span><br class="fancyvrb">
+      <a id="x1-33089r44" name="x1-33089r44"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;send_ident='53f9f1d1-1116-4751-b6ff-4fbe3e43d142',</span><br class="fancyvrb">
+      <a id="x1-33091r45" name="x1-33091r45"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;recv_spec='tcp://127.0.0.1:9994',</span><span class="pcrr7t-x-x-90">&nbsp;recv_ident='')</span><br class="fancyvrb">
+      <a id="x1-33093r46" name="x1-33093r46"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;})</span><br class="fancyvrb">
+      <a id="x1-33095r47" name="x1-33095r47"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-33097r48" name="x1-33097r48"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;main.hosts</span><span class=
+      "pcrr7t-x-x-90">&nbsp;=</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&#91;mongrel2&#93;</span><br class="fancyvrb">
+      <a id="x1-33099r49" name="x1-33099r49"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-33101r50" name="x1-33101r50"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;settings</span><span class=
+      "pcrr7t-x-x-90">&nbsp;=</span><span class=
+      "pcrr7t-x-x-90">&nbsp;{"zeromq.threads":</span><span class=
+      "pcrr7t-x-x-90">&nbsp;4}</span><br class="fancyvrb">
+      <a id="x1-33103r51" name="x1-33103r51"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-33105r52" name="x1-33105r52"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;commit(&#91;main&#93;,</span><span class=
+      "pcrr7t-x-x-90">&nbsp;settings=settings)</span><br class=
+      "fancyvrb">
+      <a id="x1-33107r53" name="x1-33107r53"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span>
+    </div>
   </div>
   <hr class="endfloat">
   <!--l. 430-->
@@ -1617,34 +2416,34 @@
   out:
 
   <ol class="enumerate1">
-    <li class="enumerate" id="x1-33003x1">Our basic server with a
+    <li class="enumerate" id="x1-33109x1">Our basic server with a
     default host of mongrel2.org.
 
-    <li class="enumerate" id="x1-33005x2">The route targets are
+    <li class="enumerate" id="x1-33111x2">The route targets are
     separated out into their own variables, unlike the <span class=
     "pplb7t-">sample</span><span class="pplb7t-">_conf.py</span>
     file where they&rsquo;re just tossed into one big structure.
 
-    <li class="enumerate" id="x1-33007x3">First target is a
+    <li class="enumerate" id="x1-33113x3">First target is a
     <span class="pplri7t-">Dir</span> that serves up files out of
     the <span class="pplb7t-">tests</span> directory and uses
     <span class="pplb7t-">index.html</span> as its default file.
 
-    <li class="enumerate" id="x1-33009x4">Next we setup a
+    <li class="enumerate" id="x1-33115x4">Next we setup a
     <span class="pplri7t-">Proxy</span> pointing at the main
     website&rsquo;s server for testing the proxy.
 
-    <li class="enumerate" id="x1-33011x5">Then there&rsquo;s a
+    <li class="enumerate" id="x1-33117x5">Then there&rsquo;s a
     <span class="pplri7t-">Dir</span> target for the <a href=
     "http://mongrel2.org:6767/chatdemo/" class="url"><span class=
     "pcrr7t-">http://mongrel2.org:6767/chatdemo/</span></a> that
     we&rsquo;ll look at later.
 
-    <li class="enumerate" id="x1-33013x6">And you have the
+    <li class="enumerate" id="x1-33119x6">And you have the
     <span class="pplri7t-">Handler</span> for the same chat demo
     that does the actual logic of a chat system.
 
-    <li class="enumerate" id="x1-33015x7">After that&rsquo;s a
+    <li class="enumerate" id="x1-33121x7">After that&rsquo;s a
     little <span class="pplri7t-">Handler</span> for testing out
     doing HTTP requests to a handler. Notice how even though the
     chat demo and this handler use different protocols (chat demo
@@ -1652,7 +2451,7 @@
     figures it out based on how they&rsquo;re being used rather
     than by configurations.
 
-    <li class="enumerate" id="x1-33017x8">With all those handler
+    <li class="enumerate" id="x1-33123x8">With all those handler
     targets we can now make the <span class="pplri7t-">mongrel2
     Host</span> with all the routes assigned once and nice and
     clean. However look how I was lazy and just tossed the
@@ -1662,16 +2461,16 @@
     string format to not have to double up on your <span class=
     "obeylines-h verb pcrr7t-">\</span> chars in the patterns.
 
-    <li class="enumerate" id="x1-33019x9">We then assign this
+    <li class="enumerate" id="x1-33125x9">We then assign this
     <span class="pplri7t-">mongrel2</span> variable as the hosts
     for the <span class="pplri7t-">main</span> server.
 
-    <li class="enumerate" id="x1-33021x10">There is also a settings
+    <li class="enumerate" id="x1-33127x10">There is also a settings
     feature which is just a dict of global settings you can tweak.
     In this case we&rsquo;re upping the number of threads that 0MQ
     is using for doing it&rsquo;s operations.
 
-    <li class="enumerate" id="x1-33023x11">Finally, we commit the
+    <li class="enumerate" id="x1-33129x11">Finally, we commit the
     whole thing to the database by passing in the servers to save
     and the settings to use.
   </ol><!--l. 456-->
@@ -1905,29 +2704,53 @@
       <span class="pplri7t-">Log</span></span>
     </div><!--tex4ht:label?: x1-35001r10 -->
 
-    <div class="verbatim" id="verbatim-10">
-      &gt;&nbsp;m2sh&nbsp;log&nbsp;-db&nbsp;config.sqlite
-      &nbsp;<br>
-      &#91;2010-07-18T04:14:53,&nbsp;mongrel2@zedshaw,&nbsp;init_command&#93;&nbsp;/usr/bin/m2sh&nbsp;init&nbsp;-db&nbsp;config.sqlite
-      &nbsp;<br>
-      &#91;2010-07-18T04:15:06,&nbsp;mongrel2@zedshaw,&nbsp;load_command&#93;&nbsp;/usr/bin/m2sh&nbsp;load&nbsp;-db&nbsp;config.sqlite&nbsp;-config&nbsp;examples/python/tests/mongrel2_org.py
-      &nbsp;<br>
-      &#91;2010-07-18T04:22:06,&nbsp;mongrel2@zedshaw,&nbsp;load_command&#93;&nbsp;/usr/bin/m2sh&nbsp;load&nbsp;-db&nbsp;config.sqlite&nbsp;-config&nbsp;examples/python/tests/mongrel2_org.py
-      &nbsp;<br>
-      &#91;2010-07-18T04:23:32,&nbsp;mongrel2@zedshaw,&nbsp;load_command&#93;&nbsp;/usr/bin/m2sh&nbsp;load&nbsp;-db&nbsp;config.sqlite&nbsp;-config&nbsp;examples/python/tests/mongrel2_org.py
-      &nbsp;<br>
-      &#91;2010-07-18T04:26:16,&nbsp;mongrel2@zedshaw,&nbsp;upgrade&#93;&nbsp;Latest&nbsp;code&nbsp;for&nbsp;Mongrel2.
-      &nbsp;<br>
-      &#91;2010-07-18T18:05:59,&nbsp;mongrel2@zedshaw,&nbsp;load_command&#93;&nbsp;/usr/bin/m2sh&nbsp;load&nbsp;-db&nbsp;config.sqlite&nbsp;-config&nbsp;examples/python/tests/mongrel2_org.py
-      &nbsp;<br>
-      &#91;2010-07-18T20:09:01,&nbsp;mongrel2@zedshaw,&nbsp;init_command&#93;&nbsp;/usr/bin/m2sh&nbsp;config&nbsp;-db&nbsp;config.sqlite&nbsp;-config&nbsp;examples/python/tests/mongrel2_org.py
-      &nbsp;<br>
-      &#91;2010-07-18T20:09:02,&nbsp;mongrel2@zedshaw,&nbsp;load_command&#93;&nbsp;/usr/bin/m2sh&nbsp;config&nbsp;-db&nbsp;config.sqlite&nbsp;-config&nbsp;examples/python/tests/mongrel2_org.py
-      &nbsp;<br>
-      &gt;&nbsp;m2sh&nbsp;commit&nbsp;-db&nbsp;config.sqlite&nbsp;-what&nbsp;mongrel2.org&nbsp;-why&nbsp;"Testing&nbsp;things&nbsp;out."
-    </div><!--l. 570-->
-
-    <p class="nopar">
+    <div class="fancyvrb" id="fancyvrb10">
+      <a id="x1-35003r1" name="x1-35003r1"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;m2sh</span><span class=
+      "pcrr7t-x-x-90">&nbsp;log</span><span class=
+      "pcrr7t-x-x-90">&nbsp;-db</span><span class=
+      "pcrr7t-x-x-90">&nbsp;config.sqlite</span><br class=
+      "fancyvrb">
+      <a id="x1-35005r2" name="x1-35005r2"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&#91;2010-07-18T04:14:53,</span><span class="pcrr7t-x-x-90">&nbsp;mongrel2@zedshaw,</span><span class="pcrr7t-x-x-90">&nbsp;init_command&#93;</span><span class="pcrr7t-x-x-90">&nbsp;/usr/bin/m2sh</span><span class="pcrr7t-x-x-90">&nbsp;init</span><span class="pcrr7t-x-x-90">&nbsp;-db</span><span class="pcrr7t-x-x-90">&nbsp;config.sqlite</span><br class="fancyvrb">
+      <a id="x1-35007r3" name="x1-35007r3"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&#91;2010-07-18T04:15:06,</span><span class="pcrr7t-x-x-90">&nbsp;mongrel2@zedshaw,</span><span class="pcrr7t-x-x-90">&nbsp;load_command&#93;</span><span class="pcrr7t-x-x-90">&nbsp;/usr/bin/m2sh</span><span class="pcrr7t-x-x-90">&nbsp;load</span><span class="pcrr7t-x-x-90">&nbsp;-db</span><span class="pcrr7t-x-x-90">&nbsp;config.sqlite</span><span class="pcrr7t-x-x-90">&nbsp;-config</span><span class="pcrr7t-x-x-90">&nbsp;examples/python/tests/mongrel2_org.py</span><br class="fancyvrb">
+      <a id="x1-35009r4" name="x1-35009r4"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&#91;2010-07-18T04:22:06,</span><span class="pcrr7t-x-x-90">&nbsp;mongrel2@zedshaw,</span><span class="pcrr7t-x-x-90">&nbsp;load_command&#93;</span><span class="pcrr7t-x-x-90">&nbsp;/usr/bin/m2sh</span><span class="pcrr7t-x-x-90">&nbsp;load</span><span class="pcrr7t-x-x-90">&nbsp;-db</span><span class="pcrr7t-x-x-90">&nbsp;config.sqlite</span><span class="pcrr7t-x-x-90">&nbsp;-config</span><span class="pcrr7t-x-x-90">&nbsp;examples/python/tests/mongrel2_org.py</span><br class="fancyvrb">
+      <a id="x1-35011r5" name="x1-35011r5"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&#91;2010-07-18T04:23:32,</span><span class="pcrr7t-x-x-90">&nbsp;mongrel2@zedshaw,</span><span class="pcrr7t-x-x-90">&nbsp;load_command&#93;</span><span class="pcrr7t-x-x-90">&nbsp;/usr/bin/m2sh</span><span class="pcrr7t-x-x-90">&nbsp;load</span><span class="pcrr7t-x-x-90">&nbsp;-db</span><span class="pcrr7t-x-x-90">&nbsp;config.sqlite</span><span class="pcrr7t-x-x-90">&nbsp;-config</span><span class="pcrr7t-x-x-90">&nbsp;examples/python/tests/mongrel2_org.py</span><br class="fancyvrb">
+      <a id="x1-35013r6" name="x1-35013r6"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&#91;2010-07-18T04:26:16,</span><span class="pcrr7t-x-x-90">&nbsp;mongrel2@zedshaw,</span><span class="pcrr7t-x-x-90">&nbsp;upgrade&#93;</span><span class="pcrr7t-x-x-90">&nbsp;Latest</span><span class="pcrr7t-x-x-90">&nbsp;code</span><span class="pcrr7t-x-x-90">&nbsp;for</span><span class="pcrr7t-x-x-90">&nbsp;Mongrel2.</span><br class="fancyvrb">
+      <a id="x1-35015r7" name="x1-35015r7"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&#91;2010-07-18T18:05:59,</span><span class="pcrr7t-x-x-90">&nbsp;mongrel2@zedshaw,</span><span class="pcrr7t-x-x-90">&nbsp;load_command&#93;</span><span class="pcrr7t-x-x-90">&nbsp;/usr/bin/m2sh</span><span class="pcrr7t-x-x-90">&nbsp;load</span><span class="pcrr7t-x-x-90">&nbsp;-db</span><span class="pcrr7t-x-x-90">&nbsp;config.sqlite</span><span class="pcrr7t-x-x-90">&nbsp;-config</span><span class="pcrr7t-x-x-90">&nbsp;examples/python/tests/mongrel2_org.py</span><br class="fancyvrb">
+      <a id="x1-35017r8" name="x1-35017r8"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&#91;2010-07-18T20:09:01,</span><span class="pcrr7t-x-x-90">&nbsp;mongrel2@zedshaw,</span><span class="pcrr7t-x-x-90">&nbsp;init_command&#93;</span><span class="pcrr7t-x-x-90">&nbsp;/usr/bin/m2sh</span><span class="pcrr7t-x-x-90">&nbsp;config</span><span class="pcrr7t-x-x-90">&nbsp;-db</span><span class="pcrr7t-x-x-90">&nbsp;config.sqlite</span><span class="pcrr7t-x-x-90">&nbsp;-config</span><span class="pcrr7t-x-x-90">&nbsp;examples/python/tests/mongrel2_org.py</span><br class="fancyvrb">
+      <a id="x1-35019r9" name="x1-35019r9"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&#91;2010-07-18T20:09:02,</span><span class="pcrr7t-x-x-90">&nbsp;mongrel2@zedshaw,</span><span class="pcrr7t-x-x-90">&nbsp;load_command&#93;</span><span class="pcrr7t-x-x-90">&nbsp;/usr/bin/m2sh</span><span class="pcrr7t-x-x-90">&nbsp;config</span><span class="pcrr7t-x-x-90">&nbsp;-db</span><span class="pcrr7t-x-x-90">&nbsp;config.sqlite</span><span class="pcrr7t-x-x-90">&nbsp;-config</span><span class="pcrr7t-x-x-90">&nbsp;examples/python/tests/mongrel2_org.py</span><br class="fancyvrb">
+      <a id="x1-35021r10" name="x1-35021r10"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;m2sh</span><span class=
+      "pcrr7t-x-x-90">&nbsp;commit</span><span class=
+      "pcrr7t-x-x-90">&nbsp;-db</span><span class=
+      "pcrr7t-x-x-90">&nbsp;config.sqlite</span><span class=
+      "pcrr7t-x-x-90">&nbsp;-what</span><span class=
+      "pcrr7t-x-x-90">&nbsp;mongrel2.org</span><span class=
+      "pcrr7t-x-x-90">&nbsp;-why</span><span class=
+      "pcrr7t-x-x-90">&nbsp;"Testing</span><span class=
+      "pcrr7t-x-x-90">&nbsp;things</span><span class=
+      "pcrr7t-x-x-90">&nbsp;out."</span>
+    </div>
   </div>
   <hr class="endfloat">
   <!--l. 573-->
@@ -1954,27 +2777,140 @@
 
   <h2 class="chapterHead"><span class=
   "titlemark">Chapter&nbsp;4</span><br>
-  <a id="x1-360004" name="x1-360004"></a>Deploying</h2>
+  <a id="x1-360004" name="x1-360004"></a>Deploying</h2><!--l. 3-->
+
+  <p class="noindent">It&rsquo;s not possible to tell you how to
+  create a deployment of Mongrel2 for your environment. You
+  probably have your own special brand of crazy that you are forced
+  to work with (or that you created) and you&rsquo;ll need to bend
+  Mongrel2 to your will. That&rsquo;s fine, Mongrel2 should be
+  fairly flexible to deployments within a fixed set of design
+  considerations. <!--l. 9-->
+
+  <p class="indent">What this chapter will do is show you how
+  <span class="pplri7t-">I</span> currently deploy Mongrel2 in a
+  few scenarios. This way you can see how it&rsquo;s being done for
+  my small setup, and then extrapolate from there for your own. As
+  we come up with more best deployment and automation we&rsquo;ll
+  update this chapter to reflect them. <!--l. 14-->
+
+  <p class="indent">Another important thing this chapter will do is
+  give you a set of recipes for common thing you&rsquo;ll need to
+  do at times.
 
   <h3 class="sectionHead"><span class="titlemark">4.1</span> <a id=
-  "x1-370004.1" name="x1-370004.1"></a>More Advanced m2sh</h3>
-  <!--l. 1-->
+  "x1-370004.1" name="x1-370004.1"></a>Mongrel2 Deployment
+  Requirements</h3><!--l. 20-->
 
-  <p class="indent">
+  <p class="noindent">It may seem obvious but I&rsquo;ll go over
+  the things you probably need in order to continue on in this
+  section:
+
+  <dl class="description">
+    <dt class="description"><span class="pplb7t-">Mongrel2</span>
+
+    <dd class="description">I know, hard to believe, but you
+    actually need to have Mongrel2 installed.
+
+    <dt class="description"><span class="pplb7t-">m2sh</span>
+
+    <dd class="description">Again, not sure why but some folks
+    think they don&rsquo;t need this. Unless you&rsquo;ve got your
+    own written you need <span class="pplri7t-">m2sh</span>.
+
+    <dt class="description"><span class="pplb7t-">Python</span>
+
+    <dd class="description">Obviously if you have <span class=
+    "pplri7t-">m2sh</span> then you have Python, but some systems
+    (like Debian) don&rsquo;t install all of Python. Make sure your
+    Python setup is good.
+
+    <dt class="description"><span class="pplb7t-">root</span>
+
+    <dd class="description">You&rsquo;ll need root access on your
+    box. Either through sudo or some other means.
+
+    <dt class="description"><span class="pplb7t-">Basic Python
+    Coding</span>
+
+    <dd class="description">Right now you should be able to do some
+    basic Python. If you can&rsquo;t code Python then you can
+    probably muddle through this and you may learn something, but
+    learning Python will be important later. If you don&rsquo;t
+    know Python and want a good introduction then I will pimp my
+    book <a href="http://learnpythonthehardway.org">Learn Python
+    The Hard Way</a> which is a totally free book that teaches
+    Python as if you know nothing. Give it a try, or any of the
+    other free books I mention, but <span class=
+    "pplri7t-">don&rsquo;t</span> read &rdquo;Dive Into
+    Python&rdquo; as it is a horrible introduction.
+  </dl><!--l. 38-->
+
+  <p class="indent">That will get you going at first, and as we go
+  we&rsquo;ll do various other setups to get our application
+  working. <!--l. 42-->
+
+  <p class="noindent">
+
+  <h3 class="sectionHead"><span class="titlemark">4.2</span> <a id=
+  "x1-380004.2" name="x1-380004.2"></a>The mongrel2.org
+  Configuration</h3><!--l. 44-->
+
+  <p class="noindent">The configuration we&rsquo;ll go over is the
+  one we use at <a href="http://mongrel2.org:6767/" class=
+  "url"><span class="pcrr7t-">http://mongrel2.org:6767/</span></a>
+  to run all the demos. This server is a test server that can go
+  down if we aren&rsquo;t careful so the main site doesn&rsquo;t
+  totally run on it yet. What we&rsquo;ll be configuring and
+  deploying is:
+
+  <dl class="description">
+    <dt class="description"><span class="pplb7t-">mongrel2 on port
+    6767</span>
+
+    <dd class="description">A mongrel2 server on port 6767.
+
+    <dt class="description"><span class="pplb7t-">deployment
+    chroot</span>
+
+    <dd class="description">Where this mongrel2 will live.
+
+    <dt class="description"><span class="pplb7t-">chat demo</span>
+
+    <dd class="description">Starting the Python backend and the
+    configuring the directory with the frontend code in it.
+
+    <dt class="description"><span class=
+    "pplb7t-">handlertest</span>
+
+    <dd class="description">This will be a basic test that just
+    echos back HTTP requests.
+
+    <dt class="description"><span class="pplb7t-">tests
+    directory</span>
+
+    <dd class="description">A simple Dir target that serves files
+    out of tests.
+
+    <dt class="description"><span class=
+    "pplb7t-">mp3streamer</span>
+
+    <dd class="description">An mp3streamer applicatio
+  </dl>
 
   <h2 class="chapterHead"><span class=
   "titlemark">Chapter&nbsp;5</span><br>
-  <a id="x1-380005" name="x1-380005"></a>Hacking</h2>
+  <a id="x1-390005" name="x1-390005"></a>Hacking</h2>
 
   <h3 class="sectionHead"><span class="titlemark">5.1</span> <a id=
-  "x1-390005.1" name="x1-390005.1"></a>Writing Your Own m2sh</h3>
+  "x1-400005.1" name="x1-400005.1"></a>Writing Your Own m2sh</h3>
   <!--l. 1-->
 
   <p class="indent">
 
   <h2 class="chapterHead"><span class=
   "titlemark">Chapter&nbsp;6</span><br>
-  <a id="x1-400006" name="x1-400006"></a>Contributing</h2>
+  <a id="x1-410006" name="x1-410006"></a>Contributing</h2>
   <!--l. 3-->
 
   <p class="noindent">Soon...

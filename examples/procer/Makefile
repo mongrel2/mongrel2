@@ -10,3 +10,6 @@ procer: rampart.o profile.o procer.o
 
 clean:
 	rm -f *.o procer
+
+install:
+	install procer /usr/local/bin/

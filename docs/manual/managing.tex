@@ -75,13 +75,13 @@ To give this configuration system a try you just need to run the test configurat
 in the unit tests.  Let's try doing a few of the most basic commands with this configuration:
 
 \begin{code}{Sample m2sh Commands}
-\begin{verbatim}
+\begin{Verbatim}
 > m2sh dump -db tests/config.sqlite
 > m2sh servers -db tests/config.sqlite
 > m2sh hosts -db tests/config.sqlite -host localhost
 > m2sh running -db tests/config.sqlite -host localhost
 > m2sh start -db tests/config.sqlite -host localhost
-\end{verbatim}
+\end{Verbatim}
 \end{code}
 
 At this point you should have seen some raw dumps of the database, lists of servers and hosts,
@@ -92,7 +92,7 @@ You can now try doing some simple starting, stopping and reloading using sudo (m
 to exit from the previous start command):
 
 \begin{code}{Starting, Stopping, Reloading}
-\begin{verbatim}
+\begin{Verbatim}
 > m2sh start -db tests/config.sqlite -host localhost -sudo
 > tail logs/error.log
 > m2sh reload -db tests/config.sqlite -host localhost
@@ -101,7 +101,7 @@ to exit from the previous start command):
 > tail logs/error.log
 > m2sh running -db tests/config.sqlite -host localhost
 > m2sh stop -db tests/config.sqlite -host localhost
-\end{verbatim}
+\end{Verbatim}
 \end{code}
 
 Awesome right?  Using just this one little Python management script you 
@@ -154,7 +154,7 @@ started by using \shell{m2sh init} and then you load your configuration using
 from \file{examples/python/tests/sample\_conf.py} to make a simple one:
 
 \begin{code}{Simple Little Config Example}
-\begin{verbatim}
+\begin{Verbatim}
 from mongrel2.config import *
 
 main = Server(
@@ -174,7 +174,7 @@ main = Server(
 )
 
 commit([main])
-\end{verbatim}
+\end{Verbatim}
 \end{code}
 
 If you aren't familiar with Python then this code might look freaky, but it's really
@@ -182,13 +182,13 @@ simple.  Well get into how its structured in a second, but to load this file
 we would just do this:
 
 \begin{code}{Loading The Simple Config}
-\begin{verbatim}
+\begin{Verbatim}
 > m2sh init -db simple.sqlite
 > m2sh load -db simple.sqlite -config examples/python/tests/sample_conf.py
 > m2sh servers -db simple.sqlite
 > m2sh hosts -db simple.sqlite -host localhost
 > m2sh start -db simple.sqlite -host localhost
-\end{verbatim}
+\end{Verbatim}
 \end{code}
 
 With this sequence of commands you:
@@ -370,7 +370,7 @@ a more complex example.  What we'll do is take a look at this example and I'll j
 going on, and you try to match what I'm saying to the code.  Here's the file \file{examples/python/tests/mongrel2\_org.py}:
 
 \begin{code}{Mongrel2.org Config Script}
-\begin{verbatim}
+\begin{Verbatim}
 from mongrel2.config import *
 
 main = Server(
@@ -424,7 +424,7 @@ settings = {"zeromq.threads": 4}
 
 commit([main], settings=settings)
 
-\end{verbatim}
+\end{Verbatim}
 \end{code}
 
 If you haven't guessed yet, this configuration is what's used on \url{http://mongrel2.org}
@@ -556,7 +556,7 @@ if you want to add a commit log message you use the \shell{m2sh commit} command.
 Here's an example from mongrel2.org:
 
 \begin{code}{Example Commit Log}
-\begin{verbatim}
+\begin{Verbatim}
 > m2sh log -db config.sqlite 
 [2010-07-18T04:14:53, mongrel2@zedshaw, init_command] /usr/bin/m2sh init -db config.sqlite
 [2010-07-18T04:15:06, mongrel2@zedshaw, load_command] /usr/bin/m2sh load -db config.sqlite -config examples/python/tests/mongrel2_org.py
@@ -567,7 +567,7 @@ Here's an example from mongrel2.org:
 [2010-07-18T20:09:01, mongrel2@zedshaw, init_command] /usr/bin/m2sh config -db config.sqlite -config examples/python/tests/mongrel2_org.py
 [2010-07-18T20:09:02, mongrel2@zedshaw, load_command] /usr/bin/m2sh config -db config.sqlite -config examples/python/tests/mongrel2_org.py
 > m2sh commit -db config.sqlite -what mongrel2.org -why "Testing things out."
-\end{verbatim}
+\end{Verbatim}
 \end{code}
 
 The motivation for this feature is the trend that operations store server configurations

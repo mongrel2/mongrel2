@@ -11,17 +11,28 @@ FILE *LOG_FILE = NULL;
 
 extern char **environ;
 
-void hardsleep(int sec)
+inline void hardsleep(int sec)
 {
     taskyield();
     sleep(sec);
 }
 
+
+inline void redirect_output(const char *run_log)
+{
+    freopen(run_log, "a+", stdout);
+    setbuf(stdout, NULL);
+    freopen(run_log, "a+", stderr);
+    setbuf(stdout, NULL);
+    freopen("/dev/null", "r", stdin);
+}
+
+
 int Action_exec(Action *action, Profile *prof)
 {
     int rc = 0;
 
-    debug("PROFILE: command=%s, pid_file=%s, restart=%d, depends=%s",
+    debug("ACTION: command=%s, pid_file=%s, restart=%d, depends=%s",
             bdata(prof->command), bdata(prof->pid_file), prof->restart,
             bdata(action->depends));
 
@@ -36,11 +47,7 @@ int Action_exec(Action *action, Profile *prof)
                     bdata(action->name));
         }
 
-        freopen("run.log", "a+", stdout);
-        setbuf(stdout, NULL);
-        freopen("run.log", "a+", stderr);
-        setbuf(stdout, NULL);
-        freopen("/dev/null", "r", stdin);
+        redirect_output("run.log");
 
         rc = execle(bdata(prof->command), bdata(prof->command), NULL, environ);
         check(rc != -1, "Failed to exec command: %s", bdata(prof->command));
@@ -101,7 +108,7 @@ void Action_task(void *v)
         hardsleep(1);
     }
 
-    debug("PROFILE %s exited.", action->name);
+    debug("ACTION %s exited.", action->name);
 
 error:
     Rampart_failed(&action->after);

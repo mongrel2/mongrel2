@@ -27,6 +27,7 @@ To get everything working you will need the following dependencies:
 \item \href{http://www.sqlite.org/}{SQLite3} and make sure \emph{Python} has the ability to access SQLite3.
 \item \href{http://pypi.python.org/pypi/distribute}{distribute} and \href{http://pypi.python.org/pypi/pip/0.7.2}{pip}.
 \item \href{http://github.com/zeromq/pyzmq}{PyZMQ} for the examples.
+\item \href{http://webpy.org/}{web.py} for the examples.
 \end{itemize}
 
 If you install these things in this order, then everything should be good.
@@ -38,7 +39,7 @@ install required packages for your OS, but here's how I did it on my computer:
 
 
 \begin{code}{Installing Dependencies on ArchLinux}
-\begin{verbatim}
+\begin{Verbatim}
 # install ZeroMQ
 > wget http://www.zeromq.org/local--files/area:download/zeromq-2.0.7.tar.gz
 > tar -xzvf zeromq-2.0.7.tar.gz
@@ -61,7 +62,10 @@ install required packages for your OS, but here's how I did it on my computer:
 > sudo pacman -S git
 > git clone http://github.com/zeromq/pyzmq.git
 > sudo python setup.py install
-\end{verbatim}
+
+# web.py
+> sudo pip install web.py
+\end{Verbatim}
 \end{code}
 
 If you run into parts that your OS is missing, which is likely on
@@ -98,13 +102,13 @@ do that:
 Once you have fossil you can then get the Mongrel2 source and open it up:
 
 \begin{code}{Cloning The Mongrel2 Source}
-\begin{verbatim}
+\begin{Verbatim}
 > mkdir ~/fossils
 > fossil clone http://mongrel2.org ~/fossils/mongrel2.fossil
 > mkdir mongrel2
 > cd mongrel2
 > fossil open ~/fossils/mongrel2.fossil
-\end{verbatim}
+\end{Verbatim}
 \end{code}
 
 Make sure you do this in order (just like with every set of instructions you should follow)
@@ -173,13 +177,13 @@ There's a test configuration file in \file{tests/config.sqlite} that you can
 use to try it out:
 
 \begin{code}{First Test Run}
-\begin{verbatim}
+\begin{Verbatim}
 > mkdir run
 > mkdir logs
 > mkdir tmp
 > m2sh dump -db tests/config.sqlite
 > m2sh start -db tests/config.sqlite -host localhost
-\end{verbatim}
+\end{Verbatim}
 \end{code}
 
 That's it.  Just hit CTRL-c for now and we'll get into playing with this
@@ -187,11 +191,11 @@ setup later.
 
 \section{Upgrading from trunk}
 \begin{code}{Update your checkout}
-\begin{verbatim}
+\begin{Verbatim}
 > cd mongrel2
 > fossil pull http://mongrel2.org
 > fossil update
-\end{verbatim}
+\end{Verbatim}
 \end{code}
 
 Don't forget \shell{make clean all install}.
