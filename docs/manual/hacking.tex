@@ -163,18 +163,95 @@ they get their head straight and specify something that mere mortals can hope to
 
 \subsection{JSSocket}
 
+The Mongrel2 chat demo uses JSSocket to do its magic, and it works great, but it requires
+Flash, and oh man do I absolutely hate flash.  However, it works, and works now, and works in every
+browser, even really old busted ones.  That meant it's the first thing we implemented and 
+the one we'll keep for a while until it proves itself not useful.  The chat demo we'll
+cover will show you how to hook this up for fast async messaging and presence detection.
+
 
 \subsection{Long Poll}
+
+Mongrel2 just works as if everything is an HTTP long poll, it's just that normal request/responses
+are super fast long polls.  For the most part you don't even need to know this exists, it's just
+how things are and they make perfect sense.  You get requests from a certain server with a 
+certain connected identity, and then you send stuff to that target.  That's it.  If you send it
+one response, or a stream of them, or setup a long poll configuration, then that's up to you.
 
 
 \subsection{Streaming}
 
+Because everything that Mongrel2 is asynchronous, and it allows you to target any connected listeners
+from your handlers, even with partial messages, you can easily do efficient streaming applications.  ZeroMQ
+is an incredibly efficient transport mechanism, and with it you can send tons of information to many
+browsers or clients at once.  This means streaming video and MP3 streams to listeners is very 
+trivial.  We'll cover the mp3stream example where you get to see a simple implementation of the ICY
+MP3 streaming protocol.
 
 \subsection{N:M Responses}
 
+What makes streaming, async messaging, and long poll designs so efficient in Mongrel2 is you can send 
+\emph{one} message and target up to 128 with that one message.  This means sending large scale replies
+to many browsers requires less copying of the message and less transports.
+
+In addition to this, you can setup Mongrel2 with the help of some 0MQ to send
+one request from a browser to as many target handlers as you like.  You can
+even send them messages using \href{http://code.google.com/p/openpgm/}{OpenPGM}
+for sending UDP messages reliably to clusters of computers.
+
+This means that Mongrel2 is the only web server capable of sending one request
+from a browser to N backends at once, and then return the replies from these
+handlers to M browsers.  Not exactly sure what you could write with that but
+it's probably something really damn cool.
 
 
 \section{Introduction to 0MQ}
+
+
+Learning to use \href{http://zeromq.org}{ZeroMQ} is a bit outside the scope of this book, but I'll give you
+a quick introduction to it so that you can explore it further.  It is a very simple
+system so hopefully you can figure it out from here.
+
+What ZeroMQ ends up being is "sockets the way programmers think sockets work."  Programmers
+usually hear about TCP or UDP sockets and they think in a naive way that they work like
+this:
+
+\begin{description}
+\item [TCP] Programmers think these are streamed sequential messages, so if
+   they send a "message" that's 10k long then when the receiver gets it and read
+   from the TCP socket they get a single 10k message in reply.  This only works in
+   small messages and not on the internet, so it's easy to see how it would seem
+   to work that way.  The reality is you can get messages of any size, and without
+   some framing mechanism you wouldn't know where one messages ends or beings.
+   TCP is a \emph{streaming protocol}.
+
+\item [UDP] Programmers think UDP sockets are single fast \emph{reliable} messages
+    that can be sent to one or more target clients.  They at least know UDP has a fixed
+    upper bound size, but they don't get that UDP is very unreliable and that the addressing
+    is fairly weak.
+\end{description}
+
+What ZeroMQ does is create an API that looks a lot like sockets, and feels the same, but
+gives you the messaging styles you actually want.  By simply specifying the type of socket
+based on a few settings you can have multicast, request/reply, and many other styles.  Here's
+the list of ones currently implemented (as documented in \shell{man zmq\_socket}):
+
+\begin{description}
+\item [ZMQ\_REQ ZMQ\_REP]  Your classic strict REQuest/REPly sockets, that work much like 
+    HTTP request/response semantics.  These are more strict and lock-step, but are slower
+    because of the extra overhead in keeping the state organized.
+\item [ZMQ\_PUB ZMQ\_SUB]  These are PUBlish/SUBscribe sockets and work as a decentralized 
+    asynchronous messaging.  PUB sockets just send out messages to multiple subscribers, without
+    expecting a reply.  SUB sockets just read messages that are sent to them, and can subscribe
+    to prefixes on the messages.
+\item [ZMQ\_DOWNSTREAM ZMQ\_UPSTREAM] DOWN/UP sockets are more like asynchronous round-robin 
+    sockets.  They work like PUB/SUB, but instead of the message going to all subscribers that
+    are subscribed or not, a DOWN/UP socket will have a message go to just one of the receivers
+    in a cluster.  This is a lot like having a round-robin proxy configuration in your web server.
+\item [ZMQ\_PAIR] A PAIR is just a direct connection between two peers, basically like a better
+    TCP connection.
+\end{description}
+
 
 
 \section{Handlers And Formats}

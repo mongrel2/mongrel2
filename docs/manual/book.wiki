@@ -5152,96 +5152,227 @@
 
   <h4 class="subsectionHead"><span class="titlemark">5.1.4</span>
   <a id="x1-550005.1.4" name="x1-550005.1.4"></a>JSSocket</h4>
-  <!--l. 167-->
+  <!--l. 166-->
+
+  <p class="noindent">The Mongrel2 chat demo uses JSSocket to do
+  its magic, and it works great, but it requires Flash, and oh man
+  do I absolutely hate flash. However, it works, and works now, and
+  works in every browser, even really old busted ones. That meant
+  it&rsquo;s the first thing we implemented and the one we&rsquo;ll
+  keep for a while until it proves itself not useful. The chat demo
+  we&rsquo;ll cover will show you how to hook this up for fast
+  async messaging and presence detection. <!--l. 173-->
 
   <p class="noindent">
 
   <h4 class="subsectionHead"><span class="titlemark">5.1.5</span>
   <a id="x1-560005.1.5" name="x1-560005.1.5"></a>Long Poll</h4>
-  <!--l. 170-->
+  <!--l. 175-->
+
+  <p class="noindent">Mongrel2 just works as if everything is an
+  HTTP long poll, it&rsquo;s just that normal request/responses are
+  super fast long polls. For the most part you don&rsquo;t even
+  need to know this exists, it&rsquo;s just how things are and they
+  make perfect sense. You get requests from a certain server with a
+  certain connected identity, and then you send stuff to that
+  target. That&rsquo;s it. If you send it one response, or a stream
+  of them, or setup a long poll configuration, then that&rsquo;s up
+  to you. <!--l. 182-->
 
   <p class="noindent">
 
   <h4 class="subsectionHead"><span class="titlemark">5.1.6</span>
   <a id="x1-570005.1.6" name="x1-570005.1.6"></a>Streaming</h4>
-  <!--l. 173-->
+  <!--l. 184-->
+
+  <p class="noindent">Because everything that Mongrel2 is
+  asynchronous, and it allows you to target any connected listeners
+  from your handlers, even with partial messages, you can easily do
+  efficient streaming applications. ZeroMQ is an incredibly
+  efficient transport mechanism, and with it you can send tons of
+  information to many browsers or clients at once. This means
+  streaming video and MP3 streams to listeners is very trivial.
+  We&rsquo;ll cover the mp3stream example where you get to see a
+  simple implementation of the ICY MP3 streaming protocol. 
+  <!--l. 191-->
 
   <p class="noindent">
 
   <h4 class="subsectionHead"><span class="titlemark">5.1.7</span>
   <a id="x1-580005.1.7" name="x1-580005.1.7"></a>N:M Responses</h4>
-  <!--l. 177-->
+  <!--l. 193-->
+
+  <p class="noindent">What makes streaming, async messaging, and
+  long poll designs so efficient in Mongrel2 is you can send
+  <span class="pplri7t-">one</span> message and target up to 128
+  with that one message. This means sending large scale replies to
+  many browsers requires less copying of the message and less
+  transports. <!--l. 197-->
+
+  <p class="indent">In addition to this, you can setup Mongrel2
+  with the help of some 0MQ to send one request from a browser to
+  as many target handlers as you like. You can even send them
+  messages using <a href=
+  "http://code.google.com/p/openpgm/">OpenPGM</a> for sending UDP
+  messages reliably to clusters of computers. <!--l. 202-->
+
+  <p class="indent">This means that Mongrel2 is the only web server
+  capable of sending one request from a browser to N backends at
+  once, and then return the replies from these handlers to M
+  browsers. Not exactly sure what you could write with that but
+  it&rsquo;s probably something really damn cool. <!--l. 208-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">5.2</span> <a id=
   "x1-590005.2" name="x1-590005.2"></a>Introduction to 0MQ</h3>
-  <!--l. 180-->
+  <!--l. 211-->
+
+  <p class="noindent">Learning to use <a href=
+  "http://zeromq.org">ZeroMQ</a> is a bit outside the scope of this
+  book, but I&rsquo;ll give you a quick introduction to it so that
+  you can explore it further. It is a very simple system so
+  hopefully you can figure it out from here. <!--l. 215-->
+
+  <p class="indent">What ZeroMQ ends up being is &rdquo;sockets the
+  way programmers think sockets work.&rdquo; Programmers usually
+  hear about TCP or UDP sockets and they think in a naive way that
+  they work like this:
+
+  <dl class="description">
+    <dt class="description"><span class="pplb7t-">TCP</span>
+
+    <dd class="description">Programmers think these are streamed
+    sequential messages, so if they send a &rdquo;message&rdquo;
+    that&rsquo;s 10k long then when the receiver gets it and read
+    from the TCP socket they get a single 10k message in reply.
+    This only works in small messages and not on the internet, so
+    it&rsquo;s easy to see how it would seem to work that way. The
+    reality is you can get messages of any size, and without some
+    framing mechanism you wouldn&rsquo;t know where one messages
+    ends or beings. TCP is a <span class="pplri7t-">streaming
+    protocol</span>.
+
+    <dt class="description"><span class="pplb7t-">UDP</span>
+
+    <dd class="description">Programmers think UDP sockets are
+    single fast <span class="pplri7t-">reliable</span> messages
+    that can be sent to one or more target clients. They at least
+    know UDP has a fixed upper bound size, but they don&rsquo;t get
+    that UDP is very unreliable and that the addressing is fairly
+    weak.
+  </dl><!--l. 234-->
+
+  <p class="indent">What ZeroMQ does is create an API that looks a
+  lot like sockets, and feels the same, but gives you the messaging
+  styles you actually want. By simply specifying the type of socket
+  based on a few settings you can have multicast, request/reply,
+  and many other styles. Here&rsquo;s the list of ones currently
+  implemented (as documented in <span class="pplri7t-">man
+  zmq</span><span class="pplri7t-">_socket</span>):
+
+  <dl class="description">
+    <dt class="description"><span class=
+    "pplb7t-">ZMQ</span><span class="pplb7t-">_REQ
+    ZMQ</span><span class="pplb7t-">_REP</span>
+
+    <dd class="description">Your classic strict REQuest/REPly
+    sockets, that work much like HTTP request/response semantics.
+    These are more strict and lock-step, but are slower because of
+    the extra overhead in keeping the state organized.
+
+    <dt class="description"><span class=
+    "pplb7t-">ZMQ</span><span class="pplb7t-">_PUB
+    ZMQ</span><span class="pplb7t-">_SUB</span>
+
+    <dd class="description">These are PUBlish/SUBscribe sockets and
+    work as a decentralized asynchronous messaging. PUB sockets
+    just send out messages to multiple subscribers, without
+    expecting a reply. SUB sockets just read messages that are sent
+    to them, and can subscribe to prefixes on the messages.
+
+    <dt class="description"><span class=
+    "pplb7t-">ZMQ</span><span class="pplb7t-">_DOWNSTREAM
+    ZMQ</span><span class="pplb7t-">_UPSTREAM</span>
+
+    <dd class="description">DOWN/UP sockets are more like
+    asynchronous round-robin sockets. They work like PUB/SUB, but
+    instead of the message going to all subscribers that are
+    subscribed or not, a DOWN/UP socket will have a message go to
+    just one of the receivers in a cluster. This is a lot like
+    having a round-robin proxy configuration in your web server.
+
+    <dt class="description"><span class=
+    "pplb7t-">ZMQ</span><span class="pplb7t-">_PAIR</span>
+
+    <dd class="description">A PAIR is just a direct connection
+    between two peers, basically like a better TCP connection.
+  </dl><!--l. 257-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">5.3</span> <a id=
   "x1-600005.3" name="x1-600005.3"></a>Handlers And Formats</h3>
-  <!--l. 183-->
+  <!--l. 260-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">5.4</span> <a id=
   "x1-610005.4" name="x1-610005.4"></a>Python Handler API</h3>
-  <!--l. 186-->
+  <!--l. 263-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">5.5</span> <a id=
   "x1-620005.5" name="x1-620005.5"></a>Basic Handler Demo</h3>
-  <!--l. 189-->
+  <!--l. 266-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">5.6</span> <a id=
-  "x1-630005.6" name="x1-630005.6"></a>Chat Demo</h3><!--l. 192-->
+  "x1-630005.6" name="x1-630005.6"></a>Chat Demo</h3><!--l. 269-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">5.7</span> <a id=
   "x1-640005.7" name="x1-640005.7"></a>MP3 Streaming Demo</h3>
-  <!--l. 195-->
+  <!--l. 272-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">5.8</span> <a id=
   "x1-650005.8" name="x1-650005.8"></a>Other Language APIs</h3>
-  <!--l. 198-->
+  <!--l. 275-->
 
   <p class="noindent">
 
   <h4 class="subsectionHead"><span class="titlemark">5.8.1</span>
   <a id="x1-660005.8.1" name="x1-660005.8.1"></a>Ruby Handler
-  API</h4><!--l. 201-->
+  API</h4><!--l. 278-->
 
   <p class="noindent">
 
   <h4 class="subsectionHead"><span class="titlemark">5.8.2</span>
   <a id="x1-670005.8.2" name="x1-670005.8.2"></a>C++ Handler
-  API</h4><!--l. 204-->
+  API</h4><!--l. 281-->
 
   <p class="noindent">
 
   <h4 class="subsectionHead"><span class="titlemark">5.8.3</span>
   <a id="x1-680005.8.3" name="x1-680005.8.3"></a>PHP Handler
-  API</h4><!--l. 207-->
+  API</h4><!--l. 284-->
 
   <p class="noindent">
 
   <h4 class="subsectionHead"><span class="titlemark">5.8.4</span>
   <a id="x1-690005.8.4" name="x1-690005.8.4"></a>Writing Your
-  Own</h4><!--l. 210-->
+  Own</h4><!--l. 287-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">5.9</span> <a id=
   "x1-700005.9" name="x1-700005.9"></a>Config Database Schema</h3>
-  <!--l. 213-->
+  <!--l. 290-->
 
   <p class="noindent">
 
