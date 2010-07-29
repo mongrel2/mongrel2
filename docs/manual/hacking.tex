@@ -20,7 +20,7 @@ Currently supported languages are:
 \item [Ruby] Ruby support, and probably the most extensive supported language, with good Rack support, by \href{http://github.com/perplexes/m2r}{perplexes on github}.
 \item [C++] C++ support by \href{http://github.com/akrennmair/mongrel2-cpp}{akrennmair on github}
 \item [PHP] PHP support by \href{http://github.com/winks/m2php}{winks on github}.
-\item [C] You can also write handlers in C using the Mongrel2 library, but is really rough, so not recommended.
+\item [C] You can also write handlers in C using the Mongrel2 library, but is really rough, so not recommended yet.  A C library will come though.
 \item [Others?] \href{http://zeromq.org}{ZeroMQ} supports Ada, Basic, C, C++, Common Lisp, Erlang, Go, Haskell, Java, Lua, .NET, Objective-C, ooc, Perl, PHP, Python, and Ruby so after reading this chapter you can easily write handlers in any of those languages too.
 \end{description}
 
@@ -35,7 +35,8 @@ Nothing prevents you from writing your own connector between Mongrel2 and your
 deployment protocol of choice.  If you need to run FastCGI or AJP in your environment
 then your best bet is to just make a handler that translates Mongrel2 requests
 to the protocol you need and back.  The Mongrel2 format is very easy to parse and
-translate so you should be able to do it no problem.
+translate so you should be able to do it no problem.  The Ruby library already supports
+Rack as an example, and Python will support WSGI soon.
 
 However, Mongrel2 itself doesn't support any of these directly.  Doing so would bring
 back the language specific infections that cause other web servers to go south.  The 

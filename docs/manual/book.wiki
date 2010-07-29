@@ -4826,7 +4826,8 @@
     <dt class="description"><span class="pplb7t-">C</span>
 
     <dd class="description">You can also write handlers in C using
-    the Mongrel2 library, but is really rough, so not recommended.
+    the Mongrel2 library, but is really rough, so not recommended
+    yet. A C library will come though.
 
     <dt class="description"><span class="pplb7t-">Others?</span>
 
@@ -4867,7 +4868,9 @@
       environment then your best bet is to just make a handler that
       translates Mongrel2 requests to the protocol you need and
       back. The Mongrel2 format is very easy to parse and translate
-      so you should be able to do it no problem. <!--l. 40-->
+      so you should be able to do it no problem. The Ruby library
+      already supports Rack as an example, and Python will support
+      WSGI soon. <!--l. 41-->
 
       <p class="noindent">However, Mongrel2 itself doesn&rsquo;t
       support any of these directly. Doing so would bring back the
