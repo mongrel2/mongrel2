@@ -36,6 +36,12 @@ int Action_exec(Action *action, Profile *prof)
                     bdata(action->name));
         }
 
+        freopen("run.log", "a+", stdout);
+        setbuf(stdout, NULL);
+        freopen("run.log", "a+", stderr);
+        setbuf(stdout, NULL);
+        freopen("/dev/null", "r", stdin);
+
         rc = execle(bdata(prof->command), bdata(prof->command), NULL, environ);
         check(rc != -1, "Failed to exec command: %s", bdata(prof->command));
     } else {
