@@ -105,7 +105,7 @@
     "QQ2-1-50" name="QQ2-1-50">Mongrel2 Deployment
     Requirements</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">4.1.1 <a href=
-    "#x1-380004.1.1" id="QQ2-1-52" name="QQ2-1-52">Introduction
+    "#x1-380004.1.1" id="QQ2-1-52" name="QQ2-1-52">Introducing
     procer</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">4.1.2 <a href=
     "#x1-390004.1.2" id="QQ2-1-53" name="QQ2-1-53">Installing
@@ -116,21 +116,23 @@
     "QQ2-1-56" name="QQ2-1-56">Step 1: The Deployment
     Area</a></span><br>
     &nbsp;<span class="sectionToc">4.4 <a href="#x1-420004.4" id=
-    "QQ2-1-57" name="QQ2-1-57">Step 2: The mongrel2.org
+    "QQ2-1-58" name="QQ2-1-58">Step 2: The mongrel2.org
     Configuration</a></span><br>
     &nbsp;<span class="sectionToc">4.5 <a href="#x1-430004.5" id=
-    "QQ2-1-58" name="QQ2-1-58">Step 3: Setup procer</a></span><br>
+    "QQ2-1-60" name="QQ2-1-60">Step 3: Setup procer</a></span><br>
     &nbsp;<span class="sectionToc">4.6 <a href="#x1-440004.6" id=
-    "QQ2-1-59" name="QQ2-1-59">Step 4: Static
+    "QQ2-1-61" name="QQ2-1-61">Step 4: Static
     Content</a></span><br>
     &nbsp;<span class="sectionToc">4.7 <a href="#x1-450004.7" id=
-    "QQ2-1-60" name="QQ2-1-60">Step 5: Testing It</a></span><br>
-    <span class="chapterToc">5 <a href="#x1-460005" id="QQ2-1-61"
-    name="QQ2-1-61">Hacking</a></span><br>
-    &nbsp;<span class="sectionToc">5.1 <a href="#x1-470005.1" id=
-    "QQ2-1-62" name="QQ2-1-62">Writing Your Own m2sh</a></span><br>
-    <span class="chapterToc">6 <a href="#x1-480006" id="QQ2-1-63"
-    name="QQ2-1-63">Contributing</a></span>
+    "QQ2-1-62" name="QQ2-1-62">Step 5: Testing It</a></span><br>
+    &nbsp;<span class="sectionToc">4.8 <a href="#x1-460004.8" id=
+    "QQ2-1-63" name="QQ2-1-63">Further Improvements</a></span><br>
+    <span class="chapterToc">5 <a href="#x1-470005" id="QQ2-1-64"
+    name="QQ2-1-64">Hacking</a></span><br>
+    &nbsp;<span class="sectionToc">5.1 <a href="#x1-480005.1" id=
+    "QQ2-1-65" name="QQ2-1-65">Writing Your Own m2sh</a></span><br>
+    <span class="chapterToc">6 <a href="#x1-490006" id="QQ2-1-66"
+    name="QQ2-1-66">Contributing</a></span>
   </div><!--l. 1-->
 
   <p class="indent">
@@ -2901,7 +2903,7 @@
   <hr class="endfloat">
 
   <h4 class="subsectionHead"><span class="titlemark">4.1.1</span>
-  <a id="x1-380004.1.1" name="x1-380004.1.1"></a>Introduction
+  <a id="x1-380004.1.1" name="x1-380004.1.1"></a>Introducing
   procer</h4><!--l. 57-->
 
   <p class="noindent">When I started working on this little manual
@@ -2937,19 +2939,20 @@
   end result is some huge number of weird shell scripts to make it
   work, and again it wants to be the one true init. Finally
   <a href="http://smarden.org/runit/">runit</a> is some of the
-  worst C code I&rsquo;ve seen in years. <!--l. 81-->
+  worst C code I&rsquo;ve seen in years and has the same weird
+  design as daemontools. <!--l. 82-->
 
   <p class="indent">After trying every single one I just gave up.
   Either they didn&rsquo;t build, were too complex, expected to be
   the one true init, poorly documented, not maintained, and
   definitely not going to work for this manual. My only choice was
-  to shave a yak and write my own. <!--l. 85-->
+  to shave a yak and write my own. <!--l. 86-->
 
   <p class="indent">The end result is <span class=
   "pplri7t-">procer</span> which lives in <span class=
   "pplb7t-">examples/procer</span> and does most of what you need
   in a USPM. It works a lot like daemontools or minit but is much
-  simpler with these differences: <!--l. 89-->
+  simpler with these differences: <!--l. 90-->
 
   <p class="indent">
 
@@ -2967,46 +2970,51 @@
     You can start it and stop it and it will only run what&rsquo;s
     not already running.
 
-    <li class="enumerate" id="x1-38008x4">It has dependency
+    <li class="enumerate" id="x1-38008x4">It assumes that programs
+    will always daemonize and create a PID file. This turns out to
+    be way easier to manage than what daemontools does, so
+    I&rsquo;m sort of baffled why daemontools is how it is.
+
+    <li class="enumerate" id="x1-38010x5">It has dependency
     management so that you can have processes start only after
     others have finished.
 
-    <li class="enumerate" id="x1-38010x5">It still uses simple
+    <li class="enumerate" id="x1-38012x6">It still uses simple
     files to configure itself that are in separate directories.
 
-    <li class="enumerate" id="x1-38012x6">It can be run as root,
+    <li class="enumerate" id="x1-38014x7">It can be run as root,
     and like Mongrel2 it will drop privileges to the owner of the
     profile directory before it runs the command. This is
     incredibly useful because it lets you setup scripts that run as
     other users without much configuration or fuss.
 
-    <li class="enumerate" id="x1-38014x7">It is dinky tiny and well
+    <li class="enumerate" id="x1-38016x8">It is dinky tiny and well
     written so you can understand it, even though it&rsquo;s
     written in C.
 
-    <li class="enumerate" id="x1-38016x8">Best of all, I can use it
+    <li class="enumerate" id="x1-38018x9">Best of all, I can use it
     in this book and you won&rsquo;t go insane trying to install it
     or use it like the others.
-  </ol><!--l. 108-->
+  </ol><!--l. 112-->
 
   <p class="indent">Of course, if you have something else you like
   then please use it. Anything that automates process management
   will be your friend. In this manual, to keep things simple and
   easily understood I&rsquo;ll be using <span class=
   "pplri7t-">procer</span> to tell you how to setup everything. 
-  <!--l. 112-->
+  <!--l. 116-->
 
   <p class="noindent">
 
   <h4 class="subsectionHead"><span class="titlemark">4.1.2</span>
   <a id="x1-390004.1.2" name="x1-390004.1.2"></a>Installing
-  procer</h4><!--l. 114-->
+  procer</h4><!--l. 118-->
 
   <p class="noindent">Installing procer is very easy. It&rsquo;s a
   single little binary and it lives in <span class=
   "pplb7t-">examples/procer</span> in the Mongrel2 source.
   Here&rsquo;s how you&rsquo;d install it totally from scratch as
-  if you hadn&rsquo;t even build Mongrel2 yet: <!--l. 118-->
+  if you hadn&rsquo;t even build Mongrel2 yet: <!--l. 122-->
 
   <p class="indent"><a id="x1-39001r11" name="x1-39001r11"></a>
   <hr class="float">
@@ -3048,7 +3056,7 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 127-->
+  <!--l. 131-->
 
   <p class="indent">That&rsquo;s the entire install process, and
   now procer is in <span class="pplb7t-">/usr/local/bin</span> so
@@ -3057,10 +3065,10 @@
   up the Mongrel2 demo completely and messing around with it.
 
   <h3 class="sectionHead"><span class="titlemark">4.2</span> <a id=
-  "x1-400004.2" name="x1-400004.2"></a>The Plan</h3><!--l. 134-->
+  "x1-400004.2" name="x1-400004.2"></a>The Plan</h3><!--l. 138-->
 
   <p class="noindent">We need to plan this deployment to make sure
-  we get the end result correct: <!--l. 136-->
+  we get the end result correct: <!--l. 140-->
 
   <p class="indent">
 
@@ -3084,102 +3092,398 @@
     keeping things running and play with taking things down and up
     and using <span class="pplri7t-">m2sh</span> to work with the
     deployment.
-  </ol><!--l. 146-->
+  </ol><!--l. 150-->
 
   <p class="indent">Once you have this setup working you can then
   start to make your own deployments and tweak things as you need
   for your own applications. Remember that the goal is to get you
   to <span class="pplri7t-">automate</span> everything as much as
   possible, so you can go further than this then do it. 
-  <!--l. 151-->
+  <!--l. 155-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">4.3</span> <a id=
   "x1-410004.3" name="x1-410004.3"></a>Step 1: The Deployment
-  Area</h3><!--l. 153-->
+  Area</h3><!--l. 157-->
 
-  <p class="noindent">
+  <p class="noindent">We&rsquo;ll need a place to put all this
+  stuff and run it so that Mongrel2 can chroot there, procer knows
+  where its profiles are, and its all nice and clean. For these
+  instructions we&rsquo;re just going to make some directories in
+  your home directory, but feel free to change this up later if you
+  find a better way. <!--l. 162-->
+
+  <p class="indent"><a id="x1-41001r12" name="x1-41001r12"></a>
+  <hr class="float">
+
+  <div class="float">
+    <div class="caption">
+      <span class="id">Source 12:</span> <span class=
+      "content"><span class="pplri7t-">Make Deployment</span>
+      <span class="pplri7t-">Directories</span></span>
+    </div><!--tex4ht:label?: x1-41001r12 -->
+
+    <div class="fancyvrb" id="fancyvrb12">
+      <a id="x1-41003r1" name="x1-41003r1"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;#</span><span class=
+      "pcrr7t-x-x-90">&nbsp;go</span><span class=
+      "pcrr7t-x-x-90">&nbsp;home</span><span class=
+      "pcrr7t-x-x-90">&nbsp;first</span><br class="fancyvrb">
+      <a id="x1-41005r2" name="x1-41005r2"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;cd</span><span class=
+      "pcrr7t-x-x-90">&nbsp;~/</span><br class="fancyvrb">
+      <a id="x1-41007r3" name="x1-41007r3"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-41009r4" name="x1-41009r4"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;#</span><span class=
+      "pcrr7t-x-x-90">&nbsp;create</span><span class=
+      "pcrr7t-x-x-90">&nbsp;the</span><span class=
+      "pcrr7t-x-x-90">&nbsp;deployment</span><span class=
+      "pcrr7t-x-x-90">&nbsp;dir</span><br class="fancyvrb">
+      <a id="x1-41011r5" name="x1-41011r5"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;mkdir</span><span class=
+      "pcrr7t-x-x-90">&nbsp;deployment</span><br class="fancyvrb">
+      <a id="x1-41013r6" name="x1-41013r6"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;cd</span><span class=
+      "pcrr7t-x-x-90">&nbsp;deployment/</span><br class="fancyvrb">
+      <a id="x1-41015r7" name="x1-41015r7"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-41017r8" name="x1-41017r8"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;#</span><span class=
+      "pcrr7t-x-x-90">&nbsp;fill</span><span class=
+      "pcrr7t-x-x-90">&nbsp;it</span><span class=
+      "pcrr7t-x-x-90">&nbsp;with</span><span class=
+      "pcrr7t-x-x-90">&nbsp;the</span><span class=
+      "pcrr7t-x-x-90">&nbsp;directories</span><span class=
+      "pcrr7t-x-x-90">&nbsp;we</span><span class=
+      "pcrr7t-x-x-90">&nbsp;need</span><br class="fancyvrb">
+      <a id="x1-41019r9" name="x1-41019r9"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;deployment</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;mkdir</span><span class=
+      "pcrr7t-x-x-90">&nbsp;run</span><br class="fancyvrb">
+      <a id="x1-41021r10" name="x1-41021r10"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;deployment</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;mkdir</span><span class=
+      "pcrr7t-x-x-90">&nbsp;tmp</span><br class="fancyvrb">
+      <a id="x1-41023r11" name="x1-41023r11"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;deployment</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;mkdir</span><span class=
+      "pcrr7t-x-x-90">&nbsp;logs</span><br class="fancyvrb">
+      <a id="x1-41025r12" name="x1-41025r12"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;deployment</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;mkdir</span><span class=
+      "pcrr7t-x-x-90">&nbsp;profiles</span><br class="fancyvrb">
+      <a id="x1-41027r13" name="x1-41027r13"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-41029r14" name="x1-41029r14"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;#</span><span class=
+      "pcrr7t-x-x-90">&nbsp;create</span><span class=
+      "pcrr7t-x-x-90">&nbsp;the</span><span class=
+      "pcrr7t-x-x-90">&nbsp;procer</span><span class=
+      "pcrr7t-x-x-90">&nbsp;profile</span><span class=
+      "pcrr7t-x-x-90">&nbsp;dirs</span><span class=
+      "pcrr7t-x-x-90">&nbsp;for</span><span class=
+      "pcrr7t-x-x-90">&nbsp;each</span><span class=
+      "pcrr7t-x-x-90">&nbsp;thing</span><br class="fancyvrb">
+      <a id="x1-41031r15" name="x1-41031r15"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;deployment</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;cd</span><span class=
+      "pcrr7t-x-x-90">&nbsp;profiles/</span><br class="fancyvrb">
+      <a id="x1-41033r16" name="x1-41033r16"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;deployment/profiles</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;mkdir</span><span class=
+      "pcrr7t-x-x-90">&nbsp;chat</span><span class=
+      "pcrr7t-x-x-90">&nbsp;mp3stream</span><span class=
+      "pcrr7t-x-x-90">&nbsp;handlertest</span><span class=
+      "pcrr7t-x-x-90">&nbsp;web</span><span class=
+      "pcrr7t-x-x-90">&nbsp;mongrel2</span><br class="fancyvrb">
+      <a id="x1-41035r17" name="x1-41035r17"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-41037r18" name="x1-41037r18"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;deployment/profiles</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;cd</span><span class=
+      "pcrr7t-x-x-90">&nbsp;..</span><br class="fancyvrb">
+      <a id="x1-41039r19" name="x1-41039r19"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-41041r20" name="x1-41041r20"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;#</span><span class=
+      "pcrr7t-x-x-90">&nbsp;setup</span><span class=
+      "pcrr7t-x-x-90">&nbsp;the</span><span class=
+      "pcrr7t-x-x-90">&nbsp;mongrel2</span><span class=
+      "pcrr7t-x-x-90">&nbsp;database</span><span class=
+      "pcrr7t-x-x-90">&nbsp;initially</span><br class="fancyvrb">
+      <a id="x1-41043r21" name="x1-41043r21"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;deployment</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;m2sh</span><span class=
+      "pcrr7t-x-x-90">&nbsp;init</span><span class=
+      "pcrr7t-x-x-90">&nbsp;-db</span><span class=
+      "pcrr7t-x-x-90">&nbsp;config.sqlite</span><br class=
+      "fancyvrb">
+      <a id="x1-41045r22" name="x1-41045r22"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-41047r23" name="x1-41047r23"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;#</span><span class=
+      "pcrr7t-x-x-90">&nbsp;copy</span><span class=
+      "pcrr7t-x-x-90">&nbsp;the</span><span class=
+      "pcrr7t-x-x-90">&nbsp;mongrel2_conf.py</span><span class=
+      "pcrr7t-x-x-90">&nbsp;sample</span><span class=
+      "pcrr7t-x-x-90">&nbsp;from</span><span class=
+      "pcrr7t-x-x-90">&nbsp;the</span><span class=
+      "pcrr7t-x-x-90">&nbsp;source</span><span class=
+      "pcrr7t-x-x-90">&nbsp;to</span><span class=
+      "pcrr7t-x-x-90">&nbsp;here</span><br class="fancyvrb">
+      <a id="x1-41049r24" name="x1-41049r24"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;deployment</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;cp</span><span class=
+      "pcrr7t-x-x-90">&nbsp;~/projects/mongrel2/examples/python/tests/mongrel2_org.py</span><span class="pcrr7t-x-x-90">&nbsp;config.py</span><br class="fancyvrb">
+      <a id="x1-41051r25" name="x1-41051r25"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-41053r26" name="x1-41053r26"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;#</span><span class=
+      "pcrr7t-x-x-90">&nbsp;see</span><span class=
+      "pcrr7t-x-x-90">&nbsp;our</span><span class=
+      "pcrr7t-x-x-90">&nbsp;end</span><span class=
+      "pcrr7t-x-x-90">&nbsp;results</span><br class="fancyvrb">
+      <a id="x1-41055r27" name="x1-41055r27"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;deployment</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;ls</span><br class="fancyvrb">
+      <a id="x1-41057r28" name="x1-41057r28"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;config.py</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;config.sqlite</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;logs profiles</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;run</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;tmp</span><br class="fancyvrb">
+      <a id="x1-41059r29" name="x1-41059r29"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span>
+    </div>
+  </div>
+  <hr class="endfloat">
+  <!--l. 196-->
+
+  <p class="indent">Hopefully you&rsquo;re starting to see how you
+  could easily automate this so that you don&rsquo;t have to do
+  this all the time. I&rsquo;m just showing you how to &rdquo;make
+  the sausage&rdquo; so that you know where everything goes. Future
+  versions of <span class="pplri7t-">m2sh</span> will most likely
+  create deployment directories like this automatically. 
+  <!--l. 201-->
+
+  <p class="indent">What we&rsquo;ve done here is the following:
+
+  <ol class="enumerate1">
+    <li class="enumerate" id="x1-41061x1">Setup a &nbsp;/deployment
+    directory we&rsquo;ll put everything inside.
+
+    <li class="enumerate" id="x1-41063x2">Created run, tmp, logs,
+    and profiles that Mongrel2 and procer need to run.
+
+    <li class="enumerate" id="x1-41065x3">In profiles we started
+    dirs for chat, mp3stream, handlertest, web, and mongrel2 that
+    procer will read files out of to get all our gear up and
+    running.
+
+    <li class="enumerate" id="x1-41067x4">Initialized the
+    config.sqlite file we&rsquo;ll be filling in with our modififed
+    config.py.
+
+    <li class="enumerate" id="x1-41069x5">Copied the
+    mongrel2_org.py example file over to our deployment so we can
+    modify it.
+  </ol>
 
   <h3 class="sectionHead"><span class="titlemark">4.4</span> <a id=
   "x1-420004.4" name="x1-420004.4"></a>Step 2: The mongrel2.org
-  Configuration</h3><!--l. 155-->
+  Configuration</h3><!--l. 215-->
 
-  <p class="noindent">The configuration we&rsquo;ll go over is the
-  one we use at <a href="http://mongrel2.org:6767/" class=
-  "url"><span class="pcrr7t-">http://mongrel2.org:6767/</span></a>
-  to run all the demos. This server is a test server that can go
-  down if we aren&rsquo;t careful so the main site doesn&rsquo;t
-  totally run on it yet. What we&rsquo;ll be configuring and
-  deploying is:
+  <p class="noindent">Now we&rsquo;re ready to get the
+  configuration working. Here&rsquo;s the thing though, you should
+  try to alter the configuration yourself. I&rsquo;ve already given
+  you the file and you are going to have to make the changes to
+  meet the requirements for this deployment directory. Here&rsquo;s
+  what yo have to change in <span class="pplb7t-">config.py</span>
+  to make everything work right: <!--l. 220-->
 
-  <dl class="description">
-    <dt class="description"><span class="pplb7t-">mongrel2 on port
-    6767</span>
+  <p class="indent">
 
-    <dd class="description">A mongrel2 server on port 6767.
+  <ol class="enumerate1">
+    <li class="enumerate" id="x1-42002x1">Get rid of the
+    <span class="pplri7t-">test</span><span class=
+    "pplri7t-">_directory</span> handler since we won&rsquo;t need
+    it and any routes that mention it.
 
-    <dt class="description"><span class="pplb7t-">deployment
-    chroot</span>
+    <li class="enumerate" id="x1-42004x2">Change the <span class=
+    "pplri7t-">base</span> of <span class=
+    "pplri7t-">chat</span><span class=
+    "pplri7t-">_demo</span><span class="pplri7t-">_dir</span> to
+    <span class="pplb7t-">&rsquo;static/chatdemo&rsquo;</span>
+    which we&rsquo;ll setup at the end.
 
-    <dd class="description">Where this mongrel2 will live.
+    <li class="enumerate" id="x1-42006x3">Modify the server
+    <span class="pplri7t-">chroot</span> so that it&rsquo;s
+    <span class="pplb7t-">/home/YOU/deployment/</span>.
 
-    <dt class="description"><span class="pplb7t-">chat demo</span>
+    <li class="enumerate" id="x1-42008x4">Use the <span class=
+    "pplri7t-">m2sh uuid</span> command to make some new UUIDs for
+    all the existing ones. This is optional but probably good idea
+    to get in the habit now.
 
-    <dd class="description">Starting the Python backend and the
-    configuring the directory with the frontend code in it.
+    <li class="enumerate" id="x1-42010x5">Finally, change any
+    mention of &rdquo;mongrel2.org&rdquo; into
+    &rdquo;localhost&rdquo; so that you can run it locally.
+  </ol><!--l. 232-->
 
-    <dt class="description"><span class=
-    "pplb7t-">handlertest</span>
+  <p class="indent">Once you have that all edited, you should be
+  able to run <span class="pplri7t-">m2sh load -db
+  config.sqlite</span> <span class="pplri7t-">-config
+  config.py</span> and it&rsquo;ll just load it up. Try using
+  <span class="pplri7t-">m2sh servers</span> and <span class=
+  "pplri7t-">m2sh hosts</span> to take a peek. <!--l. 237-->
 
-    <dd class="description">This will be a basic test that just
-    echos back HTTP requests.
+  <p class="indent">To test it out at this stage you can just run
+  the config.sqlite that you did with these commands: <!--l. 240-->
 
-    <dt class="description"><span class="pplb7t-">tests
-    directory</span>
+  <p class="indent"><a id="x1-42011r13" name="x1-42011r13"></a>
+  <hr class="float">
 
-    <dd class="description">A simple Dir target that serves files
-    out of tests.
+  <div class="float">
+    <div class="caption">
+      <span class="id">Source 13:</span> <span class=
+      "content"><span class="pplri7t-">Testing The Initial</span>
+      <span class="pplri7t-">Configuration</span></span>
+    </div><!--tex4ht:label?: x1-42011r13 -->
 
-    <dt class="description"><span class=
-    "pplb7t-">mp3streamer</span>
+    <div class="fancyvrb" id="fancyvrb13">
+      <a id="x1-42013r1" name="x1-42013r1"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;m2sh</span><span class=
+      "pcrr7t-x-x-90">&nbsp;start</span><span class=
+      "pcrr7t-x-x-90">&nbsp;-db</span><span class=
+      "pcrr7t-x-x-90">&nbsp;config.sqlite</span><span class=
+      "pcrr7t-x-x-90">&nbsp;-host</span><span class=
+      "pcrr7t-x-x-90">&nbsp;localhost</span><br class="fancyvrb">
+      <a id="x1-42015r2" name="x1-42015r2"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;^C</span><br class="fancyvrb">
+      <a id="x1-42017r3" name="x1-42017r3"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;m2sh</span><span class=
+      "pcrr7t-x-x-90">&nbsp;start</span><span class=
+      "pcrr7t-x-x-90">&nbsp;-db</span><span class=
+      "pcrr7t-x-x-90">&nbsp;config.sqlite</span><span class=
+      "pcrr7t-x-x-90">&nbsp;-host</span><span class=
+      "pcrr7t-x-x-90">&nbsp;localhost</span><span class=
+      "pcrr7t-x-x-90">&nbsp;-sudo</span><br class="fancyvrb">
+      <a id="x1-42019r4" name="x1-42019r4"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;less</span><span class=
+      "pcrr7t-x-x-90">&nbsp;run/mongrel2.logs</span><br class=
+      "fancyvrb">
+      <a id="x1-42021r5" name="x1-42021r5"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;m2sh</span><span class=
+      "pcrr7t-x-x-90">&nbsp;stop</span><span class=
+      "pcrr7t-x-x-90">&nbsp;-db</span><span class=
+      "pcrr7t-x-x-90">&nbsp;config.sqlite</span><span class=
+      "pcrr7t-x-x-90">&nbsp;-host</span><span class=
+      "pcrr7t-x-x-90">&nbsp;localhost</span><span class=
+      "pcrr7t-x-x-90">&nbsp;-murder</span>
+    </div>
+  </div>
+  <hr class="endfloat">
+  <!--l. 250-->
 
-    <dd class="description">An mp3streamer applicatio
-  </dl><!--l. 171-->
-
-  <p class="noindent">
+  <p class="indent">That&rsquo;s enough to make sure it runs, but
+  you&rsquo;ve got nothing running so it mostly won&rsquo;t work at
+  all. Just start up and then kill it right after.
 
   <h3 class="sectionHead"><span class="titlemark">4.5</span> <a id=
   "x1-430004.5" name="x1-430004.5"></a>Step 3: Setup procer</h3>
-  <!--l. 173-->
+  <!--l. 259-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">4.6</span> <a id=
   "x1-440004.6" name="x1-440004.6"></a>Step 4: Static Content</h3>
-  <!--l. 175-->
+  <!--l. 261-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">4.7</span> <a id=
   "x1-450004.7" name="x1-450004.7"></a>Step 5: Testing It</h3>
+  <!--l. 264-->
+
+  <p class="noindent">
+
+  <h3 class="sectionHead"><span class="titlemark">4.8</span> <a id=
+  "x1-460004.8" name="x1-460004.8"></a>Further Improvements</h3>
   <!--l. 1-->
 
   <p class="indent">
 
   <h2 class="chapterHead"><span class=
   "titlemark">Chapter&nbsp;5</span><br>
-  <a id="x1-460005" name="x1-460005"></a>Hacking</h2>
+  <a id="x1-470005" name="x1-470005"></a>Hacking</h2>
 
   <h3 class="sectionHead"><span class="titlemark">5.1</span> <a id=
-  "x1-470005.1" name="x1-470005.1"></a>Writing Your Own m2sh</h3>
+  "x1-480005.1" name="x1-480005.1"></a>Writing Your Own m2sh</h3>
   <!--l. 1-->
 
   <p class="indent">
 
   <h2 class="chapterHead"><span class=
   "titlemark">Chapter&nbsp;6</span><br>
-  <a id="x1-480006" name="x1-480006"></a>Contributing</h2>
+  <a id="x1-490006" name="x1-490006"></a>Contributing</h2>
   <!--l. 3-->
 
   <p class="noindent">Soon...

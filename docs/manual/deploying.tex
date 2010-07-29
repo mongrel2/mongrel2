@@ -52,7 +52,7 @@ or any of the other free books I mention
 But \emph{don't} read "Dive Into Python" as it is a horrible introduction.
 \end{aside}
 
-\subsection{Introduction procer}
+\subsection{Introducing procer}
 
 When I started working on this little manual I wanted to get you into setting up
 a well managed and automated deployment system.  The \shell{m2sh} program does 
@@ -76,7 +76,8 @@ and assumed it was going to be the one true init (not user space at all).  There
 \href{http://www.nico.schottelius.org/software/cinit/}{cinit} which got through a compile
 then barfed on its documentation, and the end result is some huge number of weird 
 shell scripts to make it work, and again it wants to be the one true init.  Finally 
-\href{http://smarden.org/runit/}{runit} is some of the worst C code I've seen in years.
+\href{http://smarden.org/runit/}{runit} is some of the worst C code I've seen in years and
+has the same weird design as daemontools.
 
 After trying every single one I just gave up.  Either they didn't build, were too complex,
 expected to be the one true init, poorly documented, not maintained, and definitely not
@@ -93,6 +94,9 @@ is much simpler with these differences:
     library from the Mongrel2 project.
 \item It doesn't want to be the one true init, or expect to be running constantly even.
     You can start it and stop it and it will only run what's not already running.
+\item It assumes that programs will always daemonize and create a PID file.  This turns
+    out to be way easier to manage than what daemontools does, so I'm sort of baffled why
+    daemontools is how it is.
 \item It has dependency management so that you can have processes start only after others
     have finished.
 \item It still uses simple files to configure itself that are in separate directories.
@@ -150,28 +154,114 @@ so you can go further than this then do it.
 
 \section{Step 1: The Deployment Area}
 
+We'll need a place to put all this stuff and run it so that Mongrel2 can chroot
+there, procer knows where its profiles are, and its all nice and clean.  For these
+instructions we're just going to make some directories in your home directory,
+but feel free to change this up later if you find a better way.
+
+\begin{code}{Make Deployment Directories}
+\begin{Verbatim}
+# go home first
+> cd ~/
+
+# create the deployment dir
+> mkdir deployment
+> cd deployment/
+
+# fill it with the directories we need
+deployment > mkdir run
+deployment > mkdir tmp
+deployment > mkdir logs
+deployment > mkdir profiles
+
+# create the procer profile dirs for each thing
+deployment > cd profiles/
+deployment/profiles > mkdir chat mp3stream handlertest web mongrel2
+
+deployment/profiles > cd ..
+
+# setup the mongrel2 database initially
+deployment > m2sh init -db config.sqlite
+
+# copy the mongrel2_conf.py sample from the source to here
+deployment > cp ~/projects/mongrel2/examples/python/tests/mongrel2_org.py config.py
+
+# see our end results
+deployment > ls
+config.py  config.sqlite  logs	profiles  run  tmp
+
+\end{Verbatim}
+\end{code}
+
+Hopefully you're starting to see how you could easily automate this so that you don't
+have to do this all the time.  I'm just showing you how to "make the sausage" so that
+you know where everything goes.  Future versions of \shell{m2sh} will most likely 
+create deployment directories like this automatically.
+
+What we've done here is the following:
+
+\begin{enumerate}
+\item Setup a ~/deployment directory we'll put everything inside.
+\item Created run, tmp, logs, and profiles that Mongrel2 and procer need to run.
+\item In profiles we started dirs for chat, mp3stream, handlertest, web, and mongrel2
+    that procer will read files out of to get all our gear up and running.
+\item Initialized the config.sqlite file we'll be filling in with our modififed config.py.
+\item Copied the mongrel2\_org.py example file over to our deployment so we can modify it.
+\end{enumerate}
+
+
 \section{Step 2: The mongrel2.org Configuration}
 
-The configuration we'll go over is the one we use at \url{http://mongrel2.org:6767/}
-to run all the demos.  This server is a test server that can go down if we aren't 
-careful so the main site doesn't totally run on it yet.  What we'll be configuring
-and deploying is:
+Now we're ready to get the configuration working.  Here's the thing though, you should 
+try to alter the configuration yourself.  I've already given you the file and you are
+going to have to make the changes to meet the requirements for this deployment directory.
+Here's what yo have to change in \file{config.py} to make everything work right:
 
-\begin{description}
-\item [mongrel2 on port 6767] A mongrel2 server on port 6767.
-\item [deployment chroot] Where this mongrel2 will live.
-\item [chat demo] Starting the Python backend and the configuring the directory with the
-    frontend code in it.
-\item [handlertest] This will be a basic test that just echos back HTTP requests.
-\item [tests directory] A simple Dir target that serves files out of tests.
-\item [mp3streamer] An mp3streamer applicatio
-\end{description}
+\begin{enumerate}
+\item Get rid of the \ident{test\_directory} handler since we won't need it and
+    any routes that mention it.
+\item Change the \ident{base} of \ident{chat\_demo\_dir} to \file{'static/chatdemo'} which we'll setup at the end.
+\item Modify the server \ident{chroot} so that it's \file{/home/YOU/deployment/}.
+\item Use the \shell{m2sh uuid} command to make some new UUIDs for all the 
+    existing ones.  This is optional but probably good idea to get in the 
+    habit now.
+\item Finally, change any mention of "mongrel2.org" into "localhost" so that you
+    can run it locally.
+\end{enumerate}
+
+Once you have that all edited, you should be able to run \shell{m2sh load -db
+config.sqlite -config config.py} and it'll just load it up.  Try using
+\shell{m2sh servers} and \shell{m2sh hosts} to take a peek.
+
+
+To test it out at this stage you can just run the config.sqlite that you
+did with these commands:
+
+\begin{code}{Testing The Initial Configuration}
+\begin{Verbatim}
+> m2sh start -db config.sqlite -host localhost
+^C
+> m2sh start -db config.sqlite -host localhost -sudo
+> less run/mongrel2.logs
+> m2sh stop -db config.sqlite -host localhost -murder
+\end{Verbatim}
+\end{code}
+
+That's enough to make sure it runs, but you've got nothing running
+so it mostly won't work at all.  Just start up and then kill it
+right after.
 
 
 \section{Step 3: Setup procer}
 
+
+
 \section{Step 4: Static Content}
 
 \section{Step 5: Testing It}
+
+
+\section{Further Improvements}
+
 
 
