@@ -234,6 +234,8 @@ def load_command(db=None, config=None, clear=True):
         commit_command(db=db, what="load_command", why=" ".join(sys.argv))
     except OperationalError, exc:
         print "SQLite error: %s" % exc
+    except SyntaxError,exc:
+        print "Syntax error: %s" % exc
 
 
 def config_command(db=None, config=None, clear=True):
