@@ -2885,25 +2885,19 @@
       suck for really learning if you know nothing. <!--l. 37-->
 
       <p class="noindent">This is why I started my own book
-      <span class="pplri7t-">Learn Python The Hard Way</span> for
-      people who know nothing about programming but need or want to
-      learn. It teaches Python but it mostly teaches all the things
-      programmers actually learn before they learn programming.
-      When you&rsquo;re done with my book you&rsquo;ll have you
-      &rdquo;programming brown belt&rdquo;. That means you can then
-      move onto one of many other free online books and really
-      learn programming, and have a higher chance of actually
-      learning it. <!--l. 45-->
+      <a href="http://learnpythonthehardway.org">Learn Python The
+      Hard Way</a> for people who know nothing about programming
+      but need or want to learn. It teaches Python but it mostly
+      teaches all the things programmers actually learn before they
+      learn programming. When you&rsquo;re done with my book
+      you&rsquo;ll have your &rdquo;programming brown belt&rdquo;.
+      That means you can then move onto one of many other free
+      online books and really learn programming, and have a higher
+      chance of actually learning it. <!--l. 45-->
 
       <p class="noindent">If you can&rsquo;t code Python then you
       can probably muddle through this and you may learn something,
-      but learning Python will be important later. If you
-      don&rsquo;t know Python and want a good introduction then I
-      will pimp my book <a href=
-      "http://learnpythonthehardway.org">Learn Python The Hard
-      Way</a> which is a totally free book that teaches Python as
-      if you know nothing. Give it a try, or any of the other free
-      books I mention <!--l. 52-->
+      but learning Python will be important later. <!--l. 48-->
 
       <p class="noindent">But <span class=
       "pplri7t-">don&rsquo;t</span> read &rdquo;Dive Into
@@ -2914,7 +2908,7 @@
 
   <h4 class="subsectionHead"><span class="titlemark">4.1.1</span>
   <a id="x1-380004.1.1" name="x1-380004.1.1"></a>Introducing
-  procer</h4><!--l. 57-->
+  procer</h4><!--l. 53-->
 
   <p class="noindent">When I started working on this little manual
   I wanted to get you into setting up a well managed and automated
@@ -2924,7 +2918,7 @@
   processes. Trying to juggle all these processes without a tool to
   help is a nightmare. You end up writing init scripts and merging
   them into your boot process and all sorts of crazy antics just so
-  you can run a stupid hello world demo. <!--l. 65-->
+  you can run a stupid hello world demo. <!--l. 61-->
 
   <p class="indent">What I needed was a &rdquo;user space process
   manager&rdquo;. These are programs that run other programs, but
@@ -2934,7 +2928,7 @@
   They usually read some startup profile describing what needs to
   start and what they depend on, and then it kicks everything into
   gear and watches them. If any of the processes crash they try to
-  restart them. Very simple. <!--l. 72-->
+  restart them. Very simple. <!--l. 68-->
 
   <p class="indent">There&rsquo;s just one catch, all of them suck.
   There&rsquo;s <a href=
@@ -2950,19 +2944,19 @@
   work, and again it wants to be the one true init. Finally
   <a href="http://smarden.org/runit/">runit</a> is some of the
   worst C code I&rsquo;ve seen in years and has the same weird
-  design as daemontools. <!--l. 82-->
+  design as daemontools. <!--l. 78-->
 
   <p class="indent">After trying every single one I just gave up.
   Either they didn&rsquo;t build, were too complex, expected to be
   the one true init, poorly documented, not maintained, and
   definitely not going to work for this manual. My only choice was
-  to shave a yak and write my own. <!--l. 86-->
+  to shave a yak and write my own. <!--l. 82-->
 
   <p class="indent">The end result is <span class=
   "pplri7t-">procer</span> which lives in <span class=
   "pplb7t-">examples/procer</span> and does most of what you need
   in a USPM. It works a lot like daemontools or minit but is much
-  simpler with these differences: <!--l. 90-->
+  simpler with these differences: <!--l. 86-->
 
   <p class="indent">
 
@@ -3005,26 +2999,26 @@
     <li class="enumerate" id="x1-38018x9">Best of all, I can use it
     in this book and you won&rsquo;t go insane trying to install it
     or use it like the others.
-  </ol><!--l. 112-->
+  </ol><!--l. 108-->
 
   <p class="indent">Of course, if you have something else you like
   then please use it. Anything that automates process management
   will be your friend. In this manual, to keep things simple and
   easily understood I&rsquo;ll be using <span class=
   "pplri7t-">procer</span> to tell you how to setup everything. 
-  <!--l. 116-->
+  <!--l. 112-->
 
   <p class="noindent">
 
   <h4 class="subsectionHead"><span class="titlemark">4.1.2</span>
   <a id="x1-390004.1.2" name="x1-390004.1.2"></a>Installing
-  procer</h4><!--l. 118-->
+  procer</h4><!--l. 114-->
 
   <p class="noindent">Installing procer is very easy. It&rsquo;s a
   single little binary and it lives in <span class=
   "pplb7t-">examples/procer</span> in the Mongrel2 source.
   Here&rsquo;s how you&rsquo;d install it totally from scratch as
-  if you hadn&rsquo;t even build Mongrel2 yet: <!--l. 122-->
+  if you hadn&rsquo;t even build Mongrel2 yet: <!--l. 118-->
 
   <p class="indent"><a id="x1-39001r11" name="x1-39001r11"></a>
   <hr class="float">
@@ -3066,7 +3060,7 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 131-->
+  <!--l. 127-->
 
   <p class="indent">That&rsquo;s the entire install process, and
   now procer is in <span class="pplb7t-">/usr/local/bin</span> so
@@ -3075,10 +3069,10 @@
   up the Mongrel2 demo completely and messing around with it.
 
   <h3 class="sectionHead"><span class="titlemark">4.2</span> <a id=
-  "x1-400004.2" name="x1-400004.2"></a>The Plan</h3><!--l. 138-->
+  "x1-400004.2" name="x1-400004.2"></a>The Plan</h3><!--l. 134-->
 
   <p class="noindent">We need to plan this deployment to make sure
-  we get the end result correct: <!--l. 140-->
+  we get the end result correct: <!--l. 136-->
 
   <p class="indent">
 
@@ -3102,27 +3096,27 @@
     keeping things running and play with taking things down and up
     and using <span class="pplri7t-">m2sh</span> to work with the
     deployment.
-  </ol><!--l. 150-->
+  </ol><!--l. 146-->
 
   <p class="indent">Once you have this setup working you can then
   start to make your own deployments and tweak things as you need
   for your own applications. Remember that the goal is to get you
   to <span class="pplri7t-">automate</span> everything as much as
   possible, so you can go further than this then do it. 
-  <!--l. 155-->
+  <!--l. 151-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">4.3</span> <a id=
   "x1-410004.3" name="x1-410004.3"></a>Step 1: The Deployment
-  Area</h3><!--l. 157-->
+  Area</h3><!--l. 153-->
 
   <p class="noindent">We&rsquo;ll need a place to put all this
   stuff and run it so that Mongrel2 can chroot there, procer knows
   where its profiles are, and its all nice and clean. For these
   instructions we&rsquo;re just going to make some directories in
   your home directory, but feel free to change this up later if you
-  find a better way. <!--l. 162-->
+  find a better way. <!--l. 158-->
 
   <p class="indent"><a id="x1-41001r12" name="x1-41001r12"></a>
   <hr class="float">
@@ -3321,7 +3315,7 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 197-->
+  <!--l. 193-->
 
   <p class="indent">Hopefully you&rsquo;re starting to see how you
   could easily automate this so that you don&rsquo;t have to do
@@ -3329,7 +3323,7 @@
   the sausage&rdquo; so that you know where everything goes. Future
   versions of <span class="pplri7t-">m2sh</span> will most likely
   create deployment directories like this automatically. 
-  <!--l. 202-->
+  <!--l. 198-->
 
   <p class="indent">What we&rsquo;ve done here is the following:
 
@@ -3356,7 +3350,7 @@
 
   <h3 class="sectionHead"><span class="titlemark">4.4</span> <a id=
   "x1-420004.4" name="x1-420004.4"></a>Step 2: The mongrel2.org
-  Configuration</h3><!--l. 216-->
+  Configuration</h3><!--l. 212-->
 
   <p class="noindent">Now we&rsquo;re ready to get the
   configuration working. Here&rsquo;s the thing though, you should
@@ -3364,7 +3358,7 @@
   you the file and you are going to have to make the changes to
   meet the requirements for this deployment directory. Here&rsquo;s
   what yo have to change in <span class="pplb7t-">config.py</span>
-  to make everything work right: <!--l. 221-->
+  to make everything work right: <!--l. 217-->
 
   <p class="indent">
 
@@ -3399,17 +3393,17 @@
     <li class="enumerate" id="x1-42012x6">Finally, change any
     mention of &rdquo;mongrel2.org&rdquo; into
     &rdquo;localhost&rdquo; so that you can run it locally.
-  </ol><!--l. 234-->
+  </ol><!--l. 230-->
 
   <p class="indent">Once you have that all edited, you should be
   able to run <span class="pplri7t-">m2sh load -db
   config.sqlite</span> <span class="pplri7t-">-config
   config.py</span> and it&rsquo;ll just load it up. Try using
   <span class="pplri7t-">m2sh servers</span> and <span class=
-  "pplri7t-">m2sh hosts</span> to take a peek. <!--l. 239-->
+  "pplri7t-">m2sh hosts</span> to take a peek. <!--l. 235-->
 
   <p class="indent">To test it out at this stage you can just run
-  the config.sqlite that you did with these commands: <!--l. 242-->
+  the config.sqlite that you did with these commands: <!--l. 238-->
 
   <p class="indent"><a id="x1-42013r13" name="x1-42013r13"></a>
   <hr class="float">
@@ -3463,7 +3457,7 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 252-->
+  <!--l. 248-->
 
   <p class="indent">That&rsquo;s enough to make sure it runs, but
   you&rsquo;ve got nothing running so it mostly won&rsquo;t work at
@@ -3471,7 +3465,7 @@
 
   <h3 class="sectionHead"><span class="titlemark">4.5</span> <a id=
   "x1-430004.5" name="x1-430004.5"></a>Step 3: Setup procer</h3>
-  <!--l. 259-->
+  <!--l. 255-->
 
   <p class="noindent">Now we want to make <span class=
   "pplri7t-">procer</span> start everything for us and keep it
@@ -3483,11 +3477,11 @@
   main <span class="pplb7t-">profiles</span> directory it tries to
   run it. It&rsquo;s dead simple, and very easy to automate so
   we&rsquo;ll do it by hand and then you can do some automation
-  later. <!--l. 267-->
+  later. <!--l. 263-->
 
   <p class="indent">Let&rsquo;s first setup a basic config that
   gets our skeleton profiles and make sure procer can run
-  everything. <!--l. 270-->
+  everything. <!--l. 266-->
 
   <p class="indent"><a id="x1-43001r14" name="x1-43001r14"></a>
   <hr class="float">
@@ -3605,7 +3599,7 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 295-->
+  <!--l. 291-->
 
   <p class="indent">With all of that you can then try to run
   <span class="pplri7t-">procer</span> to watch it fail but still
@@ -3625,7 +3619,7 @@
     "pcrr7t-">&nbsp;&gt;</span><span class=
     "pcrr7t-">&nbsp;less</span><span class=
     "pcrr7t-">&nbsp;error.log</span>
-  </div><!--l. 303-->
+  </div><!--l. 299-->
 
   <p class="indent">This is assuming that you are still in the
   <span class="pplb7t-">profiles</span> directory and what you
@@ -3633,13 +3627,13 @@
   and probably some messages printed to the screen. Just ignore any
   mention of Mongrel2 since that&rsquo;s probably just cruft from
   the <span class="pplb7t-">libm2.a</span> we haven&rsquo;t
-  removed. <!--l. 309-->
+  removed. <!--l. 305-->
 
   <p class="indent">Take a look in the <span class=
   "pplb7t-">error.log</span> and you&rsquo;ll see it&rsquo;s not
   necessarily errors but information on how things were run. What
   you should see is something like this for each profile: 
-  <!--l. 313-->
+  <!--l. 309-->
 
   <p class="indent"><a id="x1-43046r15" name="x1-43046r15"></a>
   <hr class="float">
@@ -3741,7 +3735,7 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 328-->
+  <!--l. 324-->
 
   <p class="indent">I&rsquo;ve cleaned this up a bit, and again
   ignore that it&rsquo;s saying &rdquo;Mongrel2&rdquo;,
@@ -3771,10 +3765,10 @@
     <li class="enumerate" id="x1-43078x6">It does this for all of
     them and since none of them run right <span class=
     "pplri7t-">procer</span> exits.
-  </ol><!--l. 342-->
+  </ol><!--l. 338-->
 
   <p class="indent">Next up lets get Mongrel2 running inside
-  <span class="pplri7t-">procer</span>: <!--l. 344-->
+  <span class="pplri7t-">procer</span>: <!--l. 340-->
 
   <p class="indent"><a id="x1-43079r16" name="x1-43079r16"></a>
   <hr class="float">
@@ -3910,16 +3904,16 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 366-->
+  <!--l. 362-->
 
   <p class="indent">Obviously you don&rsquo;t have to use a series
   of <span class="pplri7t-">echo</span> commands to make these
   scripts. You can edit them just fine, we&rsquo;re just doing it
-  this way so that you can follow along easier. <!--l. 370-->
+  this way so that you can follow along easier. <!--l. 366-->
 
   <p class="indent">Now, make sure you don&rsquo;t have any other
   Mongrel2 processes running and then start procer again to see if
-  it starts this configuration correctly. <!--l. 375-->
+  it starts this configuration correctly. <!--l. 371-->
 
   <p class="indent"><a id="x1-43114r17" name="x1-43114r17"></a>
   <hr class="float">
@@ -4071,7 +4065,7 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 396-->
+  <!--l. 392-->
 
   <p class="indent">To watch <span class="pplri7t-">procer</span>
   in action, try doing <span class="pplri7t-">m2sh stop -db
@@ -4082,7 +4076,7 @@
 
   <h4 class="subsectionHead"><span class="titlemark">4.5.1</span>
   <a id="x1-440004.5.1" name="x1-440004.5.1"></a>The Python
-  Examples</h4><!--l. 403-->
+  Examples</h4><!--l. 399-->
 
   <p class="noindent">We&rsquo;ve got a good setup of <span class=
   "pplri7t-">procer</span> going and it keeps Mongrel2 running so
@@ -4094,7 +4088,7 @@
   mongrel2 source is in <span class=
   "pplb7t-">&nbsp;/projects/mongrel2</span> you will change
   <span class="pplb7t-">profiles/chat/run</span> to be like this: 
-  <!--l. 411-->
+  <!--l. 407-->
 
   <p class="indent"><a id="x1-44001r18" name="x1-44001r18"></a>
   <hr class="float">
@@ -4149,7 +4143,7 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 425-->
+  <!--l. 421-->
 
   <p class="indent">This little script uses some funky features you
   might not be familiar with but which are nice to learn, so
@@ -4176,7 +4170,7 @@
     echo the magic variable <span class=
     "obeylines-h verb pcrr7t-">$!</span> to the <span class=
     "pplb7t-">chat.pid</span> file in the profile directory.
-  </ol><!--l. 443-->
+  </ol><!--l. 439-->
 
   <p class="indent">When you run this manually you should see
   something like this:
@@ -4229,11 +4223,11 @@
     "pcrr7t-">&nbsp;kill</span><span class=
     "pcrr7t-">&nbsp;-TERM</span><span class=
     "pcrr7t-">&nbsp;19305</span>
-  </div><!--l. 455-->
+  </div><!--l. 451-->
 
   <p class="indent">After all that you can then try out
   <span class="pplri7t-">procer</span> again to see if it properly
-  runs the chat demo as well as mongrel2: <!--l. 458-->
+  runs the chat demo as well as mongrel2: <!--l. 454-->
 
   <p class="indent"><a id="x1-44042r19" name="x1-44042r19"></a>
   <hr class="float">
@@ -4416,17 +4410,17 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 481-->
+  <!--l. 477-->
 
   <p class="indent">If you go look at <span class=
   "pplb7t-">profiles/error.log</span> you&rsquo;ll see that
   <span class="pplri7t-">procer</span> is also running each of them
   as the right user with chat being run as you, but Mongrel2 being
-  run as root so it can chroot/drop priv properly. <!--l. 485-->
+  run as root so it can chroot/drop priv properly. <!--l. 481-->
 
   <p class="indent">Rather than give you a walk through each of
   these setups, here&rsquo;s the run scripts for the remaining
-  files: <!--l. 488-->
+  files: <!--l. 484-->
 
   <p class="indent"><a id="x1-44079r20" name="x1-44079r20"></a>
   <hr class="float">
@@ -4586,12 +4580,12 @@
 
   <h4 class="subsectionHead"><span class="titlemark">4.5.2</span>
   <a id="x1-450004.5.2" name="x1-450004.5.2"></a>Testing The New
-  Setup</h4><!--l. 530-->
+  Setup</h4><!--l. 526-->
 
   <p class="noindent">Once everything is running and <span class=
   "pplri7t-">procer</span> is maintaining it you just need to see
   if things work. Here&rsquo;s some curl commands to try: 
-  <!--l. 533-->
+  <!--l. 529-->
 
   <p class="indent"><a id="x1-45001r21" name="x1-45001r21"></a>
   <hr class="float">
@@ -4628,7 +4622,7 @@
 
   <h4 class="subsectionHead"><span class="titlemark">4.5.3</span>
   <a id="x1-460004.5.3" name="x1-460004.5.3"></a>Nice Features of
-  Procer</h4><!--l. 545-->
+  Procer</h4><!--l. 541-->
 
   <p class="noindent">There&rsquo;s some nice subtle features you
   get from using <span class="pplri7t-">procer</span> to run your
@@ -4669,21 +4663,21 @@
     stuff it needs then goes back to supervising. This means you
     can change the configs for procer then just kick it over and
     it&rsquo;ll do the right thing.
-  </dl><!--l. 565-->
+  </dl><!--l. 561-->
 
   <p class="indent">The key thing though is that you now have the
   whole application for the mongrel2.org demo up and running,
   including automated process management, configuration, and
-  managing everything. <!--l. 569-->
+  managing everything. <!--l. 565-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">4.6</span> <a id=
   "x1-470004.6" name="x1-470004.6"></a>Step 4: Static Content</h3>
-  <!--l. 571-->
+  <!--l. 567-->
 
   <p class="noindent">The final thing we have to do is get the
-  static content we need to try out the chat demo: <!--l. 574-->
+  static content we need to try out the chat demo: <!--l. 570-->
 
   <p class="indent"><a id="x1-47001r22" name="x1-47001r22"></a>
   <hr class="float">
@@ -4721,7 +4715,7 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 582-->
+  <!--l. 578-->
 
   <p class="indent">If you get a good response then you should be
   able to go to <a href="http://localhost:6767/chatdemo/" class=
@@ -4734,11 +4728,11 @@
 
   <h3 class="sectionHead"><span class="titlemark">4.7</span> <a id=
   "x1-480004.7" name="x1-480004.7"></a>Step 5: Testing And
-  Troubleshooting</h3><!--l. 590-->
+  Troubleshooting</h3><!--l. 586-->
 
   <p class="noindent">You should have been testing the
   configuration as you went, but the main things to test are: 
-  <!--l. 593-->
+  <!--l. 589-->
 
   <p class="indent">
 
@@ -4769,32 +4763,32 @@
     <li class="enumerate" id="x1-48012x6">Stop <span class=
     "pplri7t-">procer</span> and then start it again to see if it
     properly doesn&rsquo;t step on things.
-  </ol><!--l. 608-->
+  </ol><!--l. 604-->
 
   <p class="indent">If you run into problems then just make sure
   that you can run each little piece and that you got the files you
   were supposed to make are correct. The best tool to use is
-  <span class="pplri7t-">diff</span>. <!--l. 612-->
+  <span class="pplri7t-">diff</span>. <!--l. 608-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">4.8</span> <a id=
   "x1-490004.8" name="x1-490004.8"></a>Further Improvements</h3>
-  <!--l. 615-->
+  <!--l. 611-->
 
   <p class="noindent">That ends this chapter, and at this point you
   should know how to setup nearly everything Mongrel2 has to offer
   right now. You should have a good idea of how <span class=
   "pplri7t-">procer</span> will work or not for your real
   deployments, and how it&rsquo;s used by me for my own
-  deployments. <!--l. 620-->
+  deployments. <!--l. 616-->
 
   <p class="indent">A <span class="pplri7t-">major</span>
   improvement that we may eventually make is automating setup of
   <span class="pplri7t-">procer</span> profiles, and just better
   overall management of the profiles with <span class=
   "pplri7t-">m2sh</span>. If you feel like hacking on that, just go
-  ahead and try and let us know. <!--l. 625-->
+  ahead and try and let us know. <!--l. 621-->
 
   <p class="indent">Other than that, automate, automate, automate. 
   <!--l. 1-->
