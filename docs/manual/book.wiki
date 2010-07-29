@@ -145,54 +145,57 @@
     "#x1-520005.1.1" id="QQ2-1-79" name=
     "QQ2-1-79">HTTP</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">5.1.2 <a href=
-    "#x1-530005.1.2" id="QQ2-1-80" name=
-    "QQ2-1-80">Proxying</a></span><br>
+    "#x1-530005.1.2" id="QQ2-1-81" name=
+    "QQ2-1-81">Proxying</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">5.1.3 <a href=
-    "#x1-540005.1.3" id="QQ2-1-81" name=
-    "QQ2-1-81">JSSocket</a></span><br>
+    "#x1-540005.1.3" id="QQ2-1-82" name=
+    "QQ2-1-82">WebSockets</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">5.1.4 <a href=
-    "#x1-550005.1.4" id="QQ2-1-82" name="QQ2-1-82">Long
-    Poll</a></span><br>
+    "#x1-550005.1.4" id="QQ2-1-84" name=
+    "QQ2-1-84">JSSocket</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">5.1.5 <a href=
-    "#x1-560005.1.5" id="QQ2-1-83" name=
-    "QQ2-1-83">Streaming</a></span><br>
+    "#x1-560005.1.5" id="QQ2-1-85" name="QQ2-1-85">Long
+    Poll</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">5.1.6 <a href=
-    "#x1-570005.1.6" id="QQ2-1-84" name="QQ2-1-84">N:M
+    "#x1-570005.1.6" id="QQ2-1-86" name=
+    "QQ2-1-86">Streaming</a></span><br>
+    &nbsp;&nbsp;<span class="subsectionToc">5.1.7 <a href=
+    "#x1-580005.1.7" id="QQ2-1-87" name="QQ2-1-87">N:M
     Responses</a></span><br>
-    &nbsp;<span class="sectionToc">5.2 <a href="#x1-580005.2" id=
-    "QQ2-1-85" name="QQ2-1-85">Introduction to 0MQ</a></span><br>
-    &nbsp;<span class="sectionToc">5.3 <a href="#x1-590005.3" id=
-    "QQ2-1-86" name="QQ2-1-86">Handlers And Formats</a></span><br>
-    &nbsp;<span class="sectionToc">5.4 <a href="#x1-600005.4" id=
-    "QQ2-1-87" name="QQ2-1-87">Python Handler API</a></span><br>
-    &nbsp;<span class="sectionToc">5.5 <a href="#x1-610005.5" id=
-    "QQ2-1-88" name="QQ2-1-88">Basic Handler Demo</a></span><br>
-    &nbsp;<span class="sectionToc">5.6 <a href="#x1-620005.6" id=
-    "QQ2-1-89" name="QQ2-1-89">Chat Demo</a></span><br>
-    &nbsp;<span class="sectionToc">5.7 <a href="#x1-630005.7" id=
-    "QQ2-1-90" name="QQ2-1-90">MP3 Streaming Demo</a></span><br>
-    &nbsp;<span class="sectionToc">5.8 <a href="#x1-640005.8" id=
-    "QQ2-1-91" name="QQ2-1-91">Other Language APIs</a></span><br>
+    &nbsp;<span class="sectionToc">5.2 <a href="#x1-590005.2" id=
+    "QQ2-1-88" name="QQ2-1-88">Introduction to 0MQ</a></span><br>
+    &nbsp;<span class="sectionToc">5.3 <a href="#x1-600005.3" id=
+    "QQ2-1-89" name="QQ2-1-89">Handlers And Formats</a></span><br>
+    &nbsp;<span class="sectionToc">5.4 <a href="#x1-610005.4" id=
+    "QQ2-1-90" name="QQ2-1-90">Python Handler API</a></span><br>
+    &nbsp;<span class="sectionToc">5.5 <a href="#x1-620005.5" id=
+    "QQ2-1-91" name="QQ2-1-91">Basic Handler Demo</a></span><br>
+    &nbsp;<span class="sectionToc">5.6 <a href="#x1-630005.6" id=
+    "QQ2-1-92" name="QQ2-1-92">Chat Demo</a></span><br>
+    &nbsp;<span class="sectionToc">5.7 <a href="#x1-640005.7" id=
+    "QQ2-1-93" name="QQ2-1-93">MP3 Streaming Demo</a></span><br>
+    &nbsp;<span class="sectionToc">5.8 <a href="#x1-650005.8" id=
+    "QQ2-1-94" name="QQ2-1-94">Other Language APIs</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">5.8.1 <a href=
-    "#x1-650005.8.1" id="QQ2-1-92" name="QQ2-1-92">Ruby Handler
+    "#x1-660005.8.1" id="QQ2-1-95" name="QQ2-1-95">Ruby Handler
     API</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">5.8.2 <a href=
-    "#x1-660005.8.2" id="QQ2-1-93" name="QQ2-1-93">C++ Handler
+    "#x1-670005.8.2" id="QQ2-1-96" name="QQ2-1-96">C++ Handler
     API</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">5.8.3 <a href=
-    "#x1-670005.8.3" id="QQ2-1-94" name="QQ2-1-94">PHP Handler
+    "#x1-680005.8.3" id="QQ2-1-97" name="QQ2-1-97">PHP Handler
     API</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">5.8.4 <a href=
-    "#x1-680005.8.4" id="QQ2-1-95" name="QQ2-1-95">Writing Your
+    "#x1-690005.8.4" id="QQ2-1-98" name="QQ2-1-98">Writing Your
     Own</a></span><br>
-    &nbsp;<span class="sectionToc">5.9 <a href="#x1-690005.9" id=
-    "QQ2-1-96" name="QQ2-1-96">Config Database
+    &nbsp;<span class="sectionToc">5.9 <a href="#x1-700005.9" id=
+    "QQ2-1-99" name="QQ2-1-99">Config Database
     Schema</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">5.9.1 <a href=
-    "#x1-700005.9.1" id="QQ2-1-97" name="QQ2-1-97">Writing Your Own
-    m2sh</a></span><br>
-    <span class="chapterToc">6 <a href="#x1-710006" id="QQ2-1-98"
-    name="QQ2-1-98">Contributing</a></span>
+    "#x1-710005.9.1" id="QQ2-1-100" name="QQ2-1-100">Writing Your
+    Own m2sh</a></span><br>
+    <span class="chapterToc">6 <a href="#x1-720006" id="QQ2-1-101"
+    name="QQ2-1-101">Contributing</a></span>
   </div><!--l. 1-->
 
   <p class="indent">
@@ -4938,124 +4941,317 @@
 
   <h3 class="sectionHead"><span class="titlemark">5.1</span> <a id=
   "x1-510005.1" name="x1-510005.1"></a>Front-end Goodies</h3>
-  <!--l. 52-->
+  <!--l. 51-->
+
+  <p class="noindent">Mongrel2 supports your standard web server
+  features like serving files, routing requests to another HTTP
+  server, multiple host matching, good 304 support, and just
+  generally being able to interact with a browser like normal.
+  You&rsquo;ve seen most of these features as you setup and
+  deployed a Mongrel2 configuration, but let&rsquo;s go through
+  some of them in more detail so you know what&rsquo;s possible. 
+  <!--l. 58-->
 
   <p class="noindent">
 
   <h4 class="subsectionHead"><span class="titlemark">5.1.1</span>
   <a id="x1-520005.1.1" name="x1-520005.1.1"></a>HTTP</h4>
-  <!--l. 55-->
+  <!--l. 60-->
 
-  <p class="noindent">
+  <p class="noindent">Mongrel2 uses the original Mongrel parser
+  that powers quite a few other web servers and large successful
+  websites. This parser is rock solid, dead accurate, and by design
+  blocks a lot of security attacks. For the most part you
+  don&rsquo;t have to worry about this and just need to know
+  Mongrel2 is using the same stable HTTP processing that has been
+  working great for many years. <!--l. 65-->
+
+  <p class="indent">Another way to put this is if Mongrel2 says
+  your request is invalid, it most definitely is. <!--l. 67-->
+
+  <p class="indent"><a id="x1-52001r6" name="x1-52001r6"></a>
+  <hr class="float">
+
+  <div class="float">
+    <div class="caption">
+      <span class="id">Note 6:</span> <span class=
+      "content"><span class="pplri7t-">Idiots And RFC</span>
+      <span class="pplri7t-">Implementers</span></span>
+    </div><!--tex4ht:label?: x1-52001r6 -->
+
+    <div class="quote">
+      <!--l. 68-->
+
+      <p class="noindent">I don&rsquo;t know why, but people who
+      implement RFCs pick up very weird cargo cult beliefs peddled
+      by the people who write the standards. In HTTP it was two
+      things which the creators of HTTP have actually pack-peddled
+      on: Accept everything, and keep-alives with pipe-lines. 
+      <!--l. 73-->
+
+      <p class="noindent">The truth is, if you want a secure server
+      of *any* kind blindly accepting every single thing any idiots
+      sends you is going to open your server up to a huge number of
+      attacks. If you look at every attack on existing HTTP servers
+      you&rsquo;ll find that about 80% of them are exploiting
+      ambiguous parts of the HTTP grammar to pass through malicious
+      content or overflow buffers. In Mongrel2 we use a parser that
+      rejects invalid requests from first basic principles using
+      technology that&rsquo;s 30 years old and backed by solid
+      mathematics. Not only does MOngrel2 reject bad requests, but
+      it can tell you <span class="pplri7t-">why</span> the request
+      was bad, just like a compiler. This doesn&rsquo;t mean
+      Mongrel2 is ruthless, but it definitely doesn&rsquo;t
+      tolerate ambiguity or stupidity. <!--l. 83-->
+
+      <p class="noindent">Mongrel2 completey supports keep-alives
+      because now, since it&rsquo;s not using Ruby <span class=
+      "pplri7t-">at all</span> it can scale up beyong 1024 file
+      descriptors. Ruby was limited in the number of open files a
+      process could have, so the original Mongrel had to break
+      keep-alive and kill connections in order to save itself from
+      greedy browsers that never close them. Mongrel2 doesn&rsquo;t
+      have this limitation so it uses full keep-alives and has a
+      dead accurate state machine to manage them correctly. 
+      <!--l. 90-->
+
+      <p class="noindent">Where problems come in is with pipe-lined
+      requests meaning a browser sends a bunch of requests in a big
+      blast, then hangs out for all the responses. This was such a
+      horrible stupid idea that pretty much everone gets it wrong
+      and doesn&rsquo;t support it fully, if at all. The reason is
+      its much too easy to blast a server with a ton of request,
+      wait a bit so they hit proxied backends, and then close the
+      socket. The web server and the backends are now screwed
+      having to handle these requests which will go nowhere. 
+      <!--l. 98-->
+
+      <p class="noindent">Mongrel2 does <span class=
+      "pplri7t-">not</span> support pipe-lined requests. It sends
+      one, and waits for the reponse, and if you want more then
+      tough. Screw you because it has <span class=
+      "pplri7t-">no</span> advantage for Mongrel2 and dubious
+      advantages to you. It is simply one more attack vector for
+      the server and is rejected outright. <!--l. 103-->
+
+      <p class="noindent">These two things are rejected outright by
+      Mongrel2 simply because they are stupid ideas and in 2010
+      nobody should be writing clients so badly that they need
+      these features.
+    </div>
+  </div>
+  <hr class="endfloat">
 
   <h4 class="subsectionHead"><span class="titlemark">5.1.2</span>
   <a id="x1-530005.1.2" name="x1-530005.1.2"></a>Proxying</h4>
-  <!--l. 58-->
+  <!--l. 109-->
+
+  <p class="noindent">You&rsquo;ve already seen configurations that
+  have the Proxy routes working, so it should be easy to understand
+  what&rsquo;s going on. You just create routes to backends that
+  are HTTP servers and Mongrel2 shuttles requests to them, then
+  proxies responses back. <!--l. 113-->
+
+  <p class="indent">The Proxying support in Mongrel2 is accurate,
+  but it&rsquo;s not very capable right now. For example
+  there&rsquo;s not round-robin backend selection, or page caching,
+  or other things you might need for more serious deployments.
+  Those features will come eventually though. <!--l. 117-->
+
+  <p class="indent">What you do get with Mongrel2&rsquo;s proxying
+  though is a dead accurate way of slicing up your application by
+  routes. Other web servers make you go through great pain in order
+  to have some URLs go to a proxy and others go to handlers or
+  directories. They make you use odd &rdquo;file syntax&rdquo;,
+  weird pseudo-turing logic if-statements, and other odd hacks to
+  get flexible route selection. They also tend to not maintain
+  keep-alives properly between proxy requests and other requests. 
+  <!--l. 124-->
+
+  <p class="indent">Mongrel2 uses the exact same routing syntax for
+  all backends and has no distinction between them. It also
+  properly does keep-alives for as long as it is efficient to do
+  so. <!--l. 128-->
 
   <p class="noindent">
 
   <h4 class="subsectionHead"><span class="titlemark">5.1.3</span>
-  <a id="x1-540005.1.3" name="x1-540005.1.3"></a>JSSocket</h4>
-  <!--l. 61-->
+  <a id="x1-540005.1.3" name="x1-540005.1.3"></a>WebSockets</h4>
+  <!--l. 130-->
 
-  <p class="noindent">
+  <p class="noindent">Mongrel2 supports WebSockets in that if
+  someone connects with a WebSocket then it will get sent to
+  handlers that use 0MQ and they can interact with it like every
+  other request. WebSockets are the least supported though since
+  they aren&rsquo;t fully baked and nobody&rsquo;s bothered to
+  write helper gear for handlers. They work in theory, but in
+  practice haven&rsquo;t really been tried. <!--l. 135-->
+
+  <p class="indent">If you try them out and find things that need
+  fixing let us know. <!--l. 137-->
+
+  <p class="indent"><a id="x1-54001r7" name="x1-54001r7"></a>
+  <hr class="float">
+
+  <div class="float">
+    <div class="caption">
+      <span class="id">Note 7:</span> <span class=
+      "content"><span class="pplri7t-">Death To</span> <span class=
+      "pplri7t-">WebSockets</span></span>
+    </div><!--tex4ht:label?: x1-54001r7 -->
+
+    <div class="quote">
+      <!--l. 138-->
+
+      <p class="noindent">I am getting sick of these
+      &rdquo;Backroom RFCs&rdquo; that are crafted around a bunch
+      of huge companies&rsquo; crap implementations found in their
+      existing products rather than things real programmers need.
+      WebSockets is yet another example of this, with so many odd
+      features and annoying agendas that I hope it fails miserably.
+      <!--l. 143-->
+
+      <p class="noindent">First, it actually specifies <span class=
+      "pplri7t-">unicode</span> for the wire protocol in the HTTP
+      headers. This is such a monumental bad idea and will break so
+      many web servers and browsers that I&rsquo;m baffled how it
+      got into the standard. The only thing I can think of is some
+      &rdquo;reverse colonialist&rdquo; who thinks the world should
+      a happy rainbow of Unicode demanded it be in there. Unicode
+      in the wire protocol adds no linguistic value (nobody reads
+      headers), complicates servers, adds security concerns because
+      Unicode is ambiguous, and also violates the existing HTTP
+      standard which specifies ASCII for the wire protocol. As
+      I&rsquo;ve said before in this manual, writing protocols is
+      hard enough without having to translate and deal with weird
+      UTF-8 Unicode bizarreness. <!--l. 152-->
+
+      <p class="noindent">Second, there is an idiotic
+      &rdquo;encryption&rdquo; mechanism for a key exchange that
+      can only be described as completely damaged and amateurish.
+      The scheme involves taking a regular number and then mixing
+      in non-number characters, so <span class=
+      "obeylines-h verb pcrr7t-">1234</span> becomes <span class=
+      "obeylines-h verb pcrr7t-">1@%^2&#8902;(34</span> and then is
+      &rdquo;decrypted&rdquo; by just reading only the digits. Yes,
+      this encryption is so advanced you can do it in your head
+      visually. I&rsquo;m sorry but any obfuscation that can be
+      done by an 11 year old on paper is not encryption and should
+      not be used at all. Again, this smacks of some
+      &rdquo;clever&rdquo; feature one of the many corporations out
+      there invented and not something any real programmer needs. 
+      <!--l. 160-->
+
+      <p class="noindent">There&rsquo;s more, but these two alone
+      are enough to decide to hold off on WebSockets until they get
+      their head straight and specify something that mere mortals
+      can hope to implement.
+    </div>
+  </div>
+  <hr class="endfloat">
 
   <h4 class="subsectionHead"><span class="titlemark">5.1.4</span>
-  <a id="x1-550005.1.4" name="x1-550005.1.4"></a>Long Poll</h4>
-  <!--l. 64-->
+  <a id="x1-550005.1.4" name="x1-550005.1.4"></a>JSSocket</h4>
+  <!--l. 167-->
 
   <p class="noindent">
 
   <h4 class="subsectionHead"><span class="titlemark">5.1.5</span>
-  <a id="x1-560005.1.5" name="x1-560005.1.5"></a>Streaming</h4>
-  <!--l. 67-->
+  <a id="x1-560005.1.5" name="x1-560005.1.5"></a>Long Poll</h4>
+  <!--l. 170-->
 
   <p class="noindent">
 
   <h4 class="subsectionHead"><span class="titlemark">5.1.6</span>
-  <a id="x1-570005.1.6" name="x1-570005.1.6"></a>N:M Responses</h4>
-  <!--l. 71-->
+  <a id="x1-570005.1.6" name="x1-570005.1.6"></a>Streaming</h4>
+  <!--l. 173-->
+
+  <p class="noindent">
+
+  <h4 class="subsectionHead"><span class="titlemark">5.1.7</span>
+  <a id="x1-580005.1.7" name="x1-580005.1.7"></a>N:M Responses</h4>
+  <!--l. 177-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">5.2</span> <a id=
-  "x1-580005.2" name="x1-580005.2"></a>Introduction to 0MQ</h3>
-  <!--l. 74-->
+  "x1-590005.2" name="x1-590005.2"></a>Introduction to 0MQ</h3>
+  <!--l. 180-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">5.3</span> <a id=
-  "x1-590005.3" name="x1-590005.3"></a>Handlers And Formats</h3>
-  <!--l. 77-->
+  "x1-600005.3" name="x1-600005.3"></a>Handlers And Formats</h3>
+  <!--l. 183-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">5.4</span> <a id=
-  "x1-600005.4" name="x1-600005.4"></a>Python Handler API</h3>
-  <!--l. 80-->
+  "x1-610005.4" name="x1-610005.4"></a>Python Handler API</h3>
+  <!--l. 186-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">5.5</span> <a id=
-  "x1-610005.5" name="x1-610005.5"></a>Basic Handler Demo</h3>
-  <!--l. 83-->
+  "x1-620005.5" name="x1-620005.5"></a>Basic Handler Demo</h3>
+  <!--l. 189-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">5.6</span> <a id=
-  "x1-620005.6" name="x1-620005.6"></a>Chat Demo</h3><!--l. 86-->
+  "x1-630005.6" name="x1-630005.6"></a>Chat Demo</h3><!--l. 192-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">5.7</span> <a id=
-  "x1-630005.7" name="x1-630005.7"></a>MP3 Streaming Demo</h3>
-  <!--l. 89-->
+  "x1-640005.7" name="x1-640005.7"></a>MP3 Streaming Demo</h3>
+  <!--l. 195-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">5.8</span> <a id=
-  "x1-640005.8" name="x1-640005.8"></a>Other Language APIs</h3>
-  <!--l. 92-->
+  "x1-650005.8" name="x1-650005.8"></a>Other Language APIs</h3>
+  <!--l. 198-->
 
   <p class="noindent">
 
   <h4 class="subsectionHead"><span class="titlemark">5.8.1</span>
-  <a id="x1-650005.8.1" name="x1-650005.8.1"></a>Ruby Handler
-  API</h4><!--l. 95-->
+  <a id="x1-660005.8.1" name="x1-660005.8.1"></a>Ruby Handler
+  API</h4><!--l. 201-->
 
   <p class="noindent">
 
   <h4 class="subsectionHead"><span class="titlemark">5.8.2</span>
-  <a id="x1-660005.8.2" name="x1-660005.8.2"></a>C++ Handler
-  API</h4><!--l. 98-->
+  <a id="x1-670005.8.2" name="x1-670005.8.2"></a>C++ Handler
+  API</h4><!--l. 204-->
 
   <p class="noindent">
 
   <h4 class="subsectionHead"><span class="titlemark">5.8.3</span>
-  <a id="x1-670005.8.3" name="x1-670005.8.3"></a>PHP Handler
-  API</h4><!--l. 101-->
+  <a id="x1-680005.8.3" name="x1-680005.8.3"></a>PHP Handler
+  API</h4><!--l. 207-->
 
   <p class="noindent">
 
   <h4 class="subsectionHead"><span class="titlemark">5.8.4</span>
-  <a id="x1-680005.8.4" name="x1-680005.8.4"></a>Writing Your
-  Own</h4><!--l. 104-->
+  <a id="x1-690005.8.4" name="x1-690005.8.4"></a>Writing Your
+  Own</h4><!--l. 210-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">5.9</span> <a id=
-  "x1-690005.9" name="x1-690005.9"></a>Config Database Schema</h3>
-  <!--l. 107-->
+  "x1-700005.9" name="x1-700005.9"></a>Config Database Schema</h3>
+  <!--l. 213-->
 
   <p class="noindent">
 
   <h4 class="subsectionHead"><span class="titlemark">5.9.1</span>
-  <a id="x1-700005.9.1" name="x1-700005.9.1"></a>Writing Your Own
+  <a id="x1-710005.9.1" name="x1-710005.9.1"></a>Writing Your Own
   m2sh</h4>
 
   <h2 class="chapterHead"><span class=
   "titlemark">Chapter&nbsp;6</span><br>
-  <a id="x1-710006" name="x1-710006"></a>Contributing</h2>
+  <a id="x1-720006" name="x1-720006"></a>Contributing</h2>
   <!--l. 3-->
 
   <p class="noindent">Soon...

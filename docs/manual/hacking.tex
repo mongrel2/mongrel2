@@ -48,12 +48,118 @@ out there, Mongrel2 just gives the tools to connect to it yourself.
 
 \section{Front-end Goodies}
 
+Mongrel2 supports your standard web server features like serving files, routing requests to 
+another HTTP server, multiple host matching, good 304 support, and just generally being able
+to interact with a browser like normal.  You've seen most of these features as you setup and
+deployed a Mongrel2 configuration, but let's go through some of them in more detail so you
+know what's possible.
+
 
 \subsection{HTTP}
 
+Mongrel2 uses the original Mongrel parser that powers quite a few other web servers and large
+successful websites.  This parser is rock solid, dead accurate, and by design blocks a lot of
+security attacks.  For the most part you don't have to worry about this and just need to know
+Mongrel2 is using the same stable HTTP processing that has been working great for many years.
+
+Another way to put this is if Mongrel2 says your request is invalid, it most definitely is.
+
+\begin{aside}{Idiots And RFC Implementers}
+I don't know why, but people who implement RFCs pick up very weird cargo cult
+beliefs peddled by the people who write the standards.  In HTTP it was two things
+which the creators of HTTP have actually pack-peddled on:  Accept everything, and 
+keep-alives with pipe-lines.
+
+The truth is, if you want a secure server of *any* kind blindly accepting every 
+single thing any idiots sends you is going to open your server up to a huge number
+of attacks.  If you look at every attack on existing HTTP servers you'll find that 
+about 80\% of them are exploiting ambiguous parts of the HTTP grammar to pass
+through malicious content or overflow buffers.  In Mongrel2 we use a parser that rejects
+invalid requests from first basic principles using technology that's 30 years old and
+backed by solid mathematics.  Not only does MOngrel2 reject bad requests, but it can
+tell you \emph{why} the request was bad, just like a compiler.  This doesn't mean
+Mongrel2 is ruthless, but it definitely doesn't tolerate ambiguity or stupidity.
+
+Mongrel2 completey supports keep-alives because now, since it's not using Ruby 
+\emph{at all} it can scale up beyong 1024 file descriptors.  Ruby was limited
+in the number of open files a process could have, so the original Mongrel had
+to break keep-alive and kill connections in order to save itself from greedy
+browsers that never close them.  Mongrel2 doesn't have this limitation so it
+uses full keep-alives and has a dead accurate state machine to manage them correctly.
+
+Where problems come in is with pipe-lined requests meaning a browser sends a bunch
+of requests in a big blast, then hangs out for all the responses.  This was such a
+horrible stupid idea that pretty much everone gets it wrong and doesn't support it
+fully, if at all.  The reason is its much too easy to blast a server with a ton
+of request, wait a bit so they hit proxied backends, and then close the socket.  The
+web server and the backends are now screwed having to handle these requests which will
+go nowhere.
+
+Mongrel2 does \emph{not} support pipe-lined requests.  It sends one, and waits for the
+reponse, and if you want more then tough.  Screw you because it has \emph{no} advantage
+for Mongrel2 and dubious advantages to you.  It is simply one more attack vector for
+the server and is rejected outright.
+
+These two things are rejected outright by Mongrel2 simply because they are stupid ideas
+and in 2010 nobody should be writing clients so badly that they need these features.
+\end{aside}
 
 \subsection{Proxying}
 
+You've already seen configurations that have the Proxy routes working, so it should
+be easy to understand what's going on.  You just create routes to backends that are
+HTTP servers and Mongrel2 shuttles requests to them, then proxies responses back.
+
+The Proxying support in Mongrel2 is accurate, but it's not very capable right now.  For
+example there's not round-robin backend selection, or page caching, or other things you
+might need for more serious deployments.  Those features will come eventually though.
+
+What you do get with Mongrel2's proxying though is a dead accurate way of slicing up
+your application by routes.  Other web servers make you go through great pain in order
+to have some URLs go to a proxy and others go to handlers or directories.  They make you
+use odd "file syntax", weird pseudo-turing logic if-statements, and other odd hacks
+to get flexible route selection.  They also tend to not maintain keep-alives properly
+between proxy requests and other requests.
+
+Mongrel2 uses the exact same routing syntax for all backends and has no distinction between
+them.  It also properly does keep-alives for as long as it is efficient to do so.
+
+
+\subsection{WebSockets}
+
+Mongrel2 supports WebSockets in that if someone connects with a WebSocket then it will get
+sent to handlers that use 0MQ and they can interact with it like every other request.  WebSockets
+are the least supported though since they aren't fully baked and nobody's bothered to write
+helper gear for handlers.  They work in theory, but in practice haven't really been tried.
+
+If you try them out and find things that need fixing let us know.
+
+\begin{aside}{Death To WebSockets}
+I am getting sick of these "Backroom RFCs" that are crafted around a bunch of huge
+companies' crap implementations found in their existing products rather than things
+real programmers need.  WebSockets is yet another example of this, with so many odd
+features and annoying agendas that I hope it fails miserably.
+
+First, it actually specifies \emph{unicode} for the wire protocol in the HTTP headers.
+This is such a monumental bad idea and will break so many web servers and browsers that
+I'm baffled how it got into the standard.  The only thing I can think of is some "reverse colonialist"
+who thinks the world should a happy rainbow of Unicode demanded it be in there.  Unicode in
+the wire protocol adds no linguistic value (nobody reads headers), complicates servers,
+adds security concerns because Unicode is ambiguous, and also violates the existing HTTP standard
+which specifies ASCII for the wire protocol.  As I've said before in this manual, writing
+protocols is hard enough without having to translate and deal with weird UTF-8 Unicode bizarreness.
+
+Second, there is an idiotic "encryption" mechanism for a key exchange that can only be
+described as completely damaged and amateurish.  The scheme involves taking a regular 
+number and then mixing in non-number characters, so \verb|1234| becomes \verb|1@%^2*(34| and then is
+"decrypted" by just reading only the digits.  Yes, this encryption is so advanced you can do it
+in your head visually.  I'm sorry but any obfuscation that can be done by an 11 year old on
+paper is not encryption and should not be used at all.  Again, this smacks of some "clever" feature
+one of the many corporations out there invented and not something any real programmer needs.
+
+There's more, but these two alone are enough to decide to hold off on WebSockets until
+they get their head straight and specify something that mere mortals can hope to implement.
+\end{aside}
 
 \subsection{JSSocket}
 
