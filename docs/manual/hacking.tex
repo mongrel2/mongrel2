@@ -387,14 +387,209 @@ really does true streaming.  They always end up having to bolt on some framing o
 \end{aside}
 
 
-\section{Handlers And Formats}
+\section{Handler ZeroMQ Format}
+
+You've had the world's fastest crash course in \href{http://zeromq.org}{ZeroMQ} and now you're 
+ready to see how Mongrel2 talks to your handlers with it.  I won't really call this a "protocol"
+since ZeroMQ is really doing the protocol, and we just pull fully baked messages out of it.  Instead
+this is just a format, as if you got strings out of a file or something similar.  This message
+format is designed to accomplish a few things in the simplest way possible:
+
+\begin{enumerate}
+\item Be usable from languages that are static compiled or scripting languages.
+\item Be safe from buffer overflows if done right, or easy to do right.
+\item Be easy to understand and require very little code.
+\item Be language agnostic and use a data format everyone can accept without complaining
+    that it should be done with their favorite \footnote{Except Erlang guys, 'cause they'll always
+    complain that everything's not in Erlang}.
+\item Be easy to parse and generate inside Mongrel2 \emph{without} have to parse the entire message 
+    to do routing or analysis.
+\item Be useful within ZeroMQ so that you can do subscriptions and routing.
+\end{enumerate}
+
+To satisfy these features there are two types of ZeroMQ sockets used (soon to be configurable) and
+then a request format that Mongrel2 sends, and a response format that the handlers send back.  Most
+importantly there is \emph{nothing about the request and response that must be connected}.  In most
+cases they will be connected, but you can receive a request from one browser and send a response
+to a totally different one.
+
+\subsection{Socket Types Used}
+
+First, the types of ZeroMQ sockets used are a \ident{ZMQ\_DOWNSTREAM} socket
+for messages from Mongrel2 to Handlers.  That means your Handler's receive
+socket should be a \ident{ZMQ\_UPSTREAM}.  Mongrel2 then uses a
+\ident{ZMQ\_SUB} socket for receiving responses, which means your Handlers
+should send on a \ident{ZMQ\_PUB} socket.  What this setup does is it
+allows multiple handlers to connect to a Mongrel2 server, but only
+one Handler will get a message in a round-robin style.  The PUB/SUB reply
+sockets though will let Handlers send back replies to a cluster of 
+Mongrel2 servers, but only the one with the right subscription will
+process the request\footnote{The types of sockets used will be configurable
+in later version}.
+
+In the various APIs we've implemented you don't need to care about this.
+They provide an abstraction on top of this, but it does help to know it
+so that you understand why the message format is the way it is.
+
+This leads to rule number 1:
+
+\begin{quote}
+\emph{Rule 1:} Handlers receive on with UPSTREAM and send with PUB sockets.
+\end{quote}
+
+\subsection{UUID Addressing}
+
+Do you remember all those UUIDs all over the place in the configuration
+files?  They may have seemed odd, but what they do is identify specific
+server deployments and processes in a cluster.  This will let you exactly
+identify which member of a cluster sent a message, so that you can return
+the right reply.  This is the first part of our protocol format and it
+results in the next rule 2:
+
+\begin{quote}
+\emph{Rule 2:} Every message to and from Mongrel2 has that Mongrel2 instance's
+UUID as the very first thing.
+\end{quote}
+
+\subsection{Numbers Identify Listeners}
+
+You then need a way to identify a particular listener (browser, client, etc.)
+that your message should target, \emph{and} Mongrel2 needs to tell you who 
+is sending your handler the request.  The only thing with this is what Mongrel2
+sends you is just one identifier, but you can send Mongrel2 a list of them.
+This leads to rule 3:
+
+\begin{quote}
+\emph{Rule 3:} Mongrel2 sends requests that with one number right after the
+server's UUID separated by a space.  Handlers return a \emph{netstring} with
+a list of numbers separated by spaces.  The numbers indicate the connected
+browser the message is to/from.
+\end{quote}
+
+In case you don't know what a netstring is, it is a very simple way to encode a
+block of data such that any language can read the block and know how big it is.
+A netstring is simply:  \verb|SIZE:DATA,| so to send "HI" you would do
+\verb|2:HI,| and it is \emph{incredibly} easy to parse in every language, even
+C.  It is also a fast format and you can read it even if you're a human.
 
 
-\section{Python Handler API}
+\subsection{Paths Identify Targets}
+
+In order to make it possible to route or analyze a request in your handlers
+without having to parse a full request, every request has the path that
+was matched in the server as the next piece.  That gives us:
+
+\begin{quote}
+\emph{Rule 4:} Requests have the path as a single string followed by a
+    space and \emph{no paths may have spaces in them}.
+\end{quote}
+
+
+\subsection{Request Headers And Body}
+
+We only have two more rules and then to complete the message format.
+
+
+\begin{quote}
+\emph{Rule 5:} Mongrel2 sends requests with a \ident{netstring} that contains a
+JSON hash (dict) of the request headers, and then another \ident{netstring}
+with the body of the request.
+\end{quote}
+
+Then there's a similar rule for responses:
+
+\begin{quote}
+\emph{Rule 6:} Handlers return just the body after a space character.  It can be \emph{any}
+    data that Mongel2 is supposed to send to the listeners. 
+\end{quote}
+    
+HTTP headers, image data, HTML pages, streaming video.  You can also send as
+many as you like to complete the request and any handler can send it.
+
+
+\subsection{Complete Message Examples}
+
+Now, even though we laid out all of this as a series of rules, the actual code to implement
+these is very simple.  First here's a simple "grammer" for how a request is formatted that
+gets sent to your handlers:
+
+\begin{Verbatim}
+UUID ID PATH SIZE:HEADERS,SIZE:BODY,
+\end{Verbatim}
+
+That's obviously a much simpler way to specify the request than all those
+rules, but it's also doesn't tell you why.  The above description, while
+boring as hell, tells you why each of these pieces exist.
+
+To parse this in Python we simply do this:
+
+\begin{code}{Parsing Mongrel2 Requests In Python}
+\begin{Verbatim}
+import json
+
+def parse_netstring(ns):
+    len, rest = ns.split(':', 1)
+    len = int(len)
+    assert rest[len] == ',', "Netstring did not end in ','"
+    return rest[:len], rest[len+1:]
+
+def parse(msg):
+    sender, conn_id, path, rest = msg.split(' ', 3)
+    headers, rest = parse_netstring(rest)
+    body, _ = parse_netstring(rest)
+
+    headers = json.loads(headers)
+
+    return uuid, id, path, headers, body
+\end{Verbatim}
+\end{code}
+
+This is actually all of the code needed to parse a request, and is
+fairly the same in many other languages.  If you look at the file
+\file{examples/python/mongrel2/request.py} you'll see a more complete
+example of making a full request object.
+
+A response is then just as simple and involves crafting a similar
+setup like this:
+
+\begin{Verbatim}
+UUID SIZE:ID ID ID, BODY
+\end{Verbatim}
+
+Notice I've got three IDs here but you can do 1 or up to 128.  Generating
+this is very easy in Python:
+
+\begin{code}{Generating Responses}
+\begin{Verbatim}
+
+def send(uuid, conn_id, msg):
+    header = "%s %d:%s," % (uuid, len(str(conn_id)), str(conn_id))
+    self.resp.send(header + ' ' + msg)
+
+
+def deliver(uuid, idents, data):
+    self.send(uuid, ' '.join(idents), data)
+
+\end{Verbatim}
+\end{code}
+
+That again is all there is to it.  The \ident{send} method is the
+one doing the real work of crafting the response, and the \ident{deliver}
+method is just using \ident{send} to do all the the target idents
+joined with a space.
+
+
+\subsection{Python Handler API}
+
+Instead of building all of this yourself, I've created a Python library
+that wraps all this up and makes it easy to use.  Each of the other
+libraries are designed around the same idea and should have a similar
+design.  To check out how to use the Python API we'll take a look at
+each of the demos that are available.  These are the same demos you
+ran in the previous section to create a sample deployment.
 
 
 \section{Basic Handler Demo}
-
 
 \section{Chat Demo}
 

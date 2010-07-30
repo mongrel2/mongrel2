@@ -169,37 +169,56 @@
     "#x1-600005.2.1" id="QQ2-1-89" name="QQ2-1-89">A Quick Python
     ZeroMQ Example</a></span><br>
     &nbsp;<span class="sectionToc">5.3 <a href="#x1-610005.3" id=
-    "QQ2-1-95" name="QQ2-1-95">Handlers And Formats</a></span><br>
-    &nbsp;<span class="sectionToc">5.4 <a href="#x1-620005.4" id=
-    "QQ2-1-96" name="QQ2-1-96">Python Handler API</a></span><br>
-    &nbsp;<span class="sectionToc">5.5 <a href="#x1-630005.5" id=
-    "QQ2-1-97" name="QQ2-1-97">Basic Handler Demo</a></span><br>
-    &nbsp;<span class="sectionToc">5.6 <a href="#x1-640005.6" id=
-    "QQ2-1-98" name="QQ2-1-98">Chat Demo</a></span><br>
-    &nbsp;<span class="sectionToc">5.7 <a href="#x1-650005.7" id=
-    "QQ2-1-99" name="QQ2-1-99">MP3 Streaming Demo</a></span><br>
-    &nbsp;<span class="sectionToc">5.8 <a href="#x1-660005.8" id=
-    "QQ2-1-100" name="QQ2-1-100">Other Language APIs</a></span><br>
-    &nbsp;&nbsp;<span class="subsectionToc">5.8.1 <a href=
-    "#x1-670005.8.1" id="QQ2-1-101" name="QQ2-1-101">Ruby Handler
+    "QQ2-1-95" name="QQ2-1-95">Handler ZeroMQ Format</a></span><br>
+    &nbsp;&nbsp;<span class="subsectionToc">5.3.1 <a href=
+    "#x1-620005.3.1" id="QQ2-1-96" name="QQ2-1-96">Socket Types
+    Used</a></span><br>
+    &nbsp;&nbsp;<span class="subsectionToc">5.3.2 <a href=
+    "#x1-630005.3.2" id="QQ2-1-97" name="QQ2-1-97">UUID
+    Addressing</a></span><br>
+    &nbsp;&nbsp;<span class="subsectionToc">5.3.3 <a href=
+    "#x1-640005.3.3" id="QQ2-1-98" name="QQ2-1-98">Numbers Identify
+    Listeners</a></span><br>
+    &nbsp;&nbsp;<span class="subsectionToc">5.3.4 <a href=
+    "#x1-650005.3.4" id="QQ2-1-99" name="QQ2-1-99">Paths Identify
+    Targets</a></span><br>
+    &nbsp;&nbsp;<span class="subsectionToc">5.3.5 <a href=
+    "#x1-660005.3.5" id="QQ2-1-100" name="QQ2-1-100">Request
+    Headers And Body</a></span><br>
+    &nbsp;&nbsp;<span class="subsectionToc">5.3.6 <a href=
+    "#x1-670005.3.6" id="QQ2-1-101" name="QQ2-1-101">Complete
+    Message Examples</a></span><br>
+    &nbsp;&nbsp;<span class="subsectionToc">5.3.7 <a href=
+    "#x1-680005.3.7" id="QQ2-1-104" name="QQ2-1-104">Python Handler
     API</a></span><br>
-    &nbsp;&nbsp;<span class="subsectionToc">5.8.2 <a href=
-    "#x1-680005.8.2" id="QQ2-1-102" name="QQ2-1-102">C++ Handler
+    &nbsp;<span class="sectionToc">5.4 <a href="#x1-690005.4" id=
+    "QQ2-1-105" name="QQ2-1-105">Basic Handler Demo</a></span><br>
+    &nbsp;<span class="sectionToc">5.5 <a href="#x1-700005.5" id=
+    "QQ2-1-106" name="QQ2-1-106">Chat Demo</a></span><br>
+    &nbsp;<span class="sectionToc">5.6 <a href="#x1-710005.6" id=
+    "QQ2-1-107" name="QQ2-1-107">MP3 Streaming Demo</a></span><br>
+    &nbsp;<span class="sectionToc">5.7 <a href="#x1-720005.7" id=
+    "QQ2-1-108" name="QQ2-1-108">Other Language APIs</a></span><br>
+    &nbsp;&nbsp;<span class="subsectionToc">5.7.1 <a href=
+    "#x1-730005.7.1" id="QQ2-1-109" name="QQ2-1-109">Ruby Handler
     API</a></span><br>
-    &nbsp;&nbsp;<span class="subsectionToc">5.8.3 <a href=
-    "#x1-690005.8.3" id="QQ2-1-103" name="QQ2-1-103">PHP Handler
+    &nbsp;&nbsp;<span class="subsectionToc">5.7.2 <a href=
+    "#x1-740005.7.2" id="QQ2-1-110" name="QQ2-1-110">C++ Handler
     API</a></span><br>
-    &nbsp;&nbsp;<span class="subsectionToc">5.8.4 <a href=
-    "#x1-700005.8.4" id="QQ2-1-104" name="QQ2-1-104">Writing Your
+    &nbsp;&nbsp;<span class="subsectionToc">5.7.3 <a href=
+    "#x1-750005.7.3" id="QQ2-1-111" name="QQ2-1-111">PHP Handler
+    API</a></span><br>
+    &nbsp;&nbsp;<span class="subsectionToc">5.7.4 <a href=
+    "#x1-760005.7.4" id="QQ2-1-112" name="QQ2-1-112">Writing Your
     Own</a></span><br>
-    &nbsp;<span class="sectionToc">5.9 <a href="#x1-710005.9" id=
-    "QQ2-1-105" name="QQ2-1-105">Config Database
+    &nbsp;<span class="sectionToc">5.8 <a href="#x1-770005.8" id=
+    "QQ2-1-113" name="QQ2-1-113">Config Database
     Schema</a></span><br>
-    &nbsp;&nbsp;<span class="subsectionToc">5.9.1 <a href=
-    "#x1-720005.9.1" id="QQ2-1-106" name="QQ2-1-106">Writing Your
+    &nbsp;&nbsp;<span class="subsectionToc">5.8.1 <a href=
+    "#x1-780005.8.1" id="QQ2-1-114" name="QQ2-1-114">Writing Your
     Own m2sh</a></span><br>
-    <span class="chapterToc">6 <a href="#x1-730006" id="QQ2-1-107"
-    name="QQ2-1-107">Contributing</a></span>
+    <span class="chapterToc">6 <a href="#x1-790006" id="QQ2-1-115"
+    name="QQ2-1-115">Contributing</a></span>
   </div><!--l. 1-->
 
   <p class="indent">
@@ -5691,77 +5710,570 @@
   <hr class="endfloat">
 
   <h3 class="sectionHead"><span class="titlemark">5.3</span> <a id=
-  "x1-610005.3" name="x1-610005.3"></a>Handlers And Formats</h3>
-  <!--l. 393-->
+  "x1-610005.3" name="x1-610005.3"></a>Handler ZeroMQ Format</h3>
+  <!--l. 392-->
+
+  <p class="noindent">You&rsquo;ve had the world&rsquo;s fastest
+  crash course in <a href="http://zeromq.org">ZeroMQ</a> and now
+  you&rsquo;re ready to see how Mongrel2 talks to your handlers
+  with it. I won&rsquo;t really call this a &rdquo;protocol&rdquo;
+  since ZeroMQ is really doing the protocol, and we just pull fully
+  baked messages out of it. Instead this is just a format, as if
+  you got strings out of a file or something similar. This message
+  format is designed to accomplish a few things in the simplest way
+  possible: <!--l. 398-->
+
+  <p class="indent">
+
+  <ol class="enumerate1">
+    <li class="enumerate" id="x1-61002x1">Be usable from languages
+    that are static compiled or scripting languages.
+
+    <li class="enumerate" id="x1-61004x2">Be safe from buffer
+    overflows if done right, or easy to do right.
+
+    <li class="enumerate" id="x1-61006x3">Be easy to understand and
+    require very little code.
+
+    <li class="enumerate" id="x1-61008x4">Be language agnostic and
+    use a data format everyone can accept without complaining that
+    it should be done with their favorite <span class=
+    "footnote-mark"><a href="book-final4.html#fn1x6"><sup class=
+    "textsuperscript">1</sup></a></span><a id="x1-61009f1" name=
+    "x1-61009f1"></a> .
+
+    <li class="enumerate" id="x1-61011x5">Be easy to parse and
+    generate inside Mongrel2 <span class="pplri7t-">without</span>
+    have to parse the entire message to do routing or analysis.
+
+    <li class="enumerate" id="x1-61013x6">Be useful within ZeroMQ
+    so that you can do subscriptions and routing.
+  </ol><!--l. 410-->
+
+  <p class="indent">To satisfy these features there are two types
+  of ZeroMQ sockets used (soon to be configurable) and then a
+  request format that Mongrel2 sends, and a response format that
+  the handlers send back. Most importantly there is <span class=
+  "pplri7t-">nothing about the request and</span> <span class=
+  "pplri7t-">response that must be connected</span>. In most cases
+  they will be connected, but you can receive a request from one
+  browser and send a response to a totally different one. 
+  <!--l. 416-->
+
+  <p class="noindent">
+
+  <h4 class="subsectionHead"><span class="titlemark">5.3.1</span>
+  <a id="x1-620005.3.1" name="x1-620005.3.1"></a>Socket Types
+  Used</h4><!--l. 418-->
+
+  <p class="noindent">First, the types of ZeroMQ sockets used are a
+  <span class="pplri7t-">ZMQ</span><span class=
+  "pplri7t-">_DOWNSTREAM</span> socket for messages from Mongrel2
+  to Handlers. That means your Handler&rsquo;s receive socket
+  should be a <span class="pplri7t-">ZMQ</span><span class=
+  "pplri7t-">_UPSTREAM</span>. Mongrel2 then uses a <span class=
+  "pplri7t-">ZMQ</span><span class="pplri7t-">_SUB</span> socket
+  for receiving responses, which means your Handlers should send on
+  a <span class="pplri7t-">ZMQ</span><span class=
+  "pplri7t-">_PUB</span> socket. What this setup does is it allows
+  multiple handlers to connect to a Mongrel2 server, but only one
+  Handler will get a message in a round-robin style. The PUB/SUB
+  reply sockets though will let Handlers send back replies to a
+  cluster of Mongrel2 servers, but only the one with the right
+  subscription will process the request<span class=
+  "footnote-mark"><a href="book-final5.html#fn2x6"><sup class=
+  "textsuperscript">2</sup></a></span><a id="x1-62001f2" name=
+  "x1-62001f2"></a> . <!--l. 430-->
+
+  <p class="indent">In the various APIs we&rsquo;ve implemented you
+  don&rsquo;t need to care about this. They provide an abstraction
+  on top of this, but it does help to know it so that you
+  understand why the message format is the way it is. <!--l. 434-->
+
+  <p class="indent">This leads to rule number 1:
+
+  <div class="quote">
+    <!--l. 437-->
+
+    <p class="noindent"><span class="pplri7t-">Rule 1:</span>
+    Handlers receive on with UPSTREAM and send with PUB sockets.
+  </div>
+
+  <h4 class="subsectionHead"><span class="titlemark">5.3.2</span>
+  <a id="x1-630005.3.2" name="x1-630005.3.2"></a>UUID
+  Addressing</h4><!--l. 442-->
+
+  <p class="noindent">Do you remember all those UUIDs all over the
+  place in the configuration files? They may have seemed odd, but
+  what they do is identify specific server deployments and
+  processes in a cluster. This will let you exactly identify which
+  member of a cluster sent a message, so that you can return the
+  right reply. This is the first part of our protocol format and it
+  results in the next rule 2: <!--l. 449-->
+
+  <p class="indent">
+
+  <div class="quote">
+    <!--l. 450-->
+
+    <p class="noindent"><span class="pplri7t-">Rule 2:</span> Every
+    message to and from Mongrel2 has that Mongrel2 instance&rsquo;s
+    UUID as the very first thing.
+  </div><!--l. 454-->
+
+  <p class="noindent">
+
+  <h4 class="subsectionHead"><span class="titlemark">5.3.3</span>
+  <a id="x1-640005.3.3" name="x1-640005.3.3"></a>Numbers Identify
+  Listeners</h4><!--l. 456-->
+
+  <p class="noindent">You then need a way to identify a particular
+  listener (browser, client, etc.) that your message should target,
+  <span class="pplri7t-">and</span> Mongrel2 needs to tell you who
+  is sending your handler the request. The only thing with this is
+  what Mongrel2 sends you is just one identifier, but you can send
+  Mongrel2 a list of them. This leads to rule 3: <!--l. 462-->
+
+  <p class="indent">
+
+  <div class="quote">
+    <!--l. 463-->
+
+    <p class="noindent"><span class="pplri7t-">Rule 3:</span>
+    Mongrel2 sends requests that with one number right after the
+    server&rsquo;s UUID separated by a space. Handlers return a
+    <span class="pplri7t-">netstring</span> with a list of numbers
+    separated by spaces. The numbers indicate the connected browser
+    the message is to/from.
+  </div><!--l. 469-->
+
+  <p class="indent">In case you don&rsquo;t know what a netstring
+  is, it is a very simple way to encode a block of data such that
+  any language can read the block and know how big it is. A
+  netstring is simply: <span class=
+  "obeylines-h verb pcrr7t-">SIZE:DATA,</span> so to send
+  &rdquo;HI&rdquo; you would do <span class=
+  "obeylines-h verb pcrr7t-">2:HI,</span> and it is <span class=
+  "pplri7t-">incredibly</span> easy to parse in every language,
+  even C. It is also a fast format and you can read it even if
+  you&rsquo;re a human. <!--l. 476-->
+
+  <p class="noindent">
+
+  <h4 class="subsectionHead"><span class="titlemark">5.3.4</span>
+  <a id="x1-650005.3.4" name="x1-650005.3.4"></a>Paths Identify
+  Targets</h4><!--l. 478-->
+
+  <p class="noindent">In order to make it possible to route or
+  analyze a request in your handlers without having to parse a full
+  request, every request has the path that was matched in the
+  server as the next piece. That gives us: <!--l. 482-->
+
+  <p class="indent">
+
+  <div class="quote">
+    <!--l. 483-->
+
+    <p class="noindent"><span class="pplri7t-">Rule 4:</span>
+    Requests have the path as a single string followed by a space
+    and <span class="pplri7t-">no paths may have spaces in
+    them</span>.
+  </div><!--l. 488-->
+
+  <p class="noindent">
+
+  <h4 class="subsectionHead"><span class="titlemark">5.3.5</span>
+  <a id="x1-660005.3.5" name="x1-660005.3.5"></a>Request Headers
+  And Body</h4><!--l. 490-->
+
+  <p class="noindent">We only have two more rules and then to
+  complete the message format. <!--l. 493-->
+
+  <p class="indent">
+
+  <div class="quote">
+    <!--l. 494-->
+
+    <p class="noindent"><span class="pplri7t-">Rule 5:</span>
+    Mongrel2 sends requests with a <span class=
+    "pplri7t-">netstring</span> that contains a JSON hash (dict) of
+    the request headers, and then another <span class=
+    "pplri7t-">netstring</span> with the body of the request.
+  </div><!--l. 499-->
+
+  <p class="indent">Then there&rsquo;s a similar rule for
+  responses: <!--l. 501-->
+
+  <p class="indent">
+
+  <div class="quote">
+    <!--l. 502-->
+
+    <p class="noindent"><span class="pplri7t-">Rule 6:</span>
+    Handlers return just the body after a space character. It can
+    be <span class="pplri7t-">any</span> data that Mongel2 is
+    supposed to send to the listeners.
+  </div><!--l. 506-->
+
+  <p class="indent">HTTP headers, image data, HTML pages, streaming
+  video. You can also send as many as you like to complete the
+  request and any handler can send it. <!--l. 510-->
+
+  <p class="noindent">
+
+  <h4 class="subsectionHead"><span class="titlemark">5.3.6</span>
+  <a id="x1-670005.3.6" name="x1-670005.3.6"></a>Complete Message
+  Examples</h4><!--l. 512-->
+
+  <p class="noindent">Now, even though we laid out all of this as a
+  series of rules, the actual code to implement these is very
+  simple. First here&rsquo;s a simple &rdquo;grammer&rdquo; for how
+  a request is formatted that gets sent to your handlers: 
+  <!--l. 516-->
+
+  <p class="indent">
+
+  <div class="fancyvrb" id="fancyvrb29">
+    <a id="x1-67002r1" name="x1-67002r1"></a><span class=
+    "pcrr7t-">&nbsp;</span><span class=
+    "pcrr7t-">&nbsp;UUID</span><span class=
+    "pcrr7t-">&nbsp;ID</span><span class=
+    "pcrr7t-">&nbsp;PATH</span><span class=
+    "pcrr7t-">&nbsp;SIZE:HEADERS,SIZE:BODY,</span>
+  </div><!--l. 520-->
+
+  <p class="indent">That&rsquo;s obviously a much simpler way to
+  specify the request than all those rules, but it&rsquo;s also
+  doesn&rsquo;t tell you why. The above description, while boring
+  as hell, tells you why each of these pieces exist. <!--l. 524-->
+
+  <p class="indent">To parse this in Python we simply do this: 
+  <!--l. 526-->
+
+  <p class="indent"><a id="x1-67003r27" name="x1-67003r27"></a>
+  <hr class="float">
+
+  <div class="float">
+    <div class="caption">
+      <span class="id">Source 27:</span> <span class=
+      "content"><span class="pplri7t-">Parsing Mongrel2 Requests
+      In</span> <span class="pplri7t-">Python</span></span>
+    </div><!--tex4ht:label?: x1-67003r27 -->
+
+    <div class="fancyvrb" id="fancyvrb30">
+      <a id="x1-67005r1" name="x1-67005r1"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;import</span><span class=
+      "pcrr7t-x-x-90">&nbsp;json</span><br class="fancyvrb">
+      <a id="x1-67007r2" name="x1-67007r2"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-67009r3" name="x1-67009r3"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;def</span><span class=
+      "pcrr7t-x-x-90">&nbsp;parse_netstring(ns):</span><br class=
+      "fancyvrb">
+      <a id="x1-67011r4" name="x1-67011r4"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;len,</span><span class=
+      "pcrr7t-x-x-90">&nbsp;rest</span><span class=
+      "pcrr7t-x-x-90">&nbsp;=</span><span class=
+      "pcrr7t-x-x-90">&nbsp;ns.split(':',</span><span class=
+      "pcrr7t-x-x-90">&nbsp;1)</span><br class="fancyvrb">
+      <a id="x1-67013r5" name="x1-67013r5"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;len</span><span class=
+      "pcrr7t-x-x-90">&nbsp;=</span><span class=
+      "pcrr7t-x-x-90">&nbsp;int(len)</span><br class="fancyvrb">
+      <a id="x1-67015r6" name="x1-67015r6"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;assert</span><span class=
+      "pcrr7t-x-x-90">&nbsp;rest&#91;len&#93;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;==</span><span class=
+      "pcrr7t-x-x-90">&nbsp;',',</span><span class=
+      "pcrr7t-x-x-90">&nbsp;"Netstring</span><span class=
+      "pcrr7t-x-x-90">&nbsp;did</span><span class=
+      "pcrr7t-x-x-90">&nbsp;not</span><span class=
+      "pcrr7t-x-x-90">&nbsp;end</span><span class=
+      "pcrr7t-x-x-90">&nbsp;in</span><span class=
+      "pcrr7t-x-x-90">&nbsp;','"</span><br class="fancyvrb">
+      <a id="x1-67017r7" name="x1-67017r7"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;return</span><span class=
+      "pcrr7t-x-x-90">&nbsp;rest&#91;:len&#93;,</span><span class=
+      "pcrr7t-x-x-90">&nbsp;rest&#91;len+1:&#93;</span><br class=
+      "fancyvrb">
+      <a id="x1-67019r8" name="x1-67019r8"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-67021r9" name="x1-67021r9"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;def</span><span class=
+      "pcrr7t-x-x-90">&nbsp;parse(msg):</span><br class="fancyvrb">
+      <a id="x1-67023r10" name="x1-67023r10"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;sender,</span><span class=
+      "pcrr7t-x-x-90">&nbsp;conn_id,</span><span class=
+      "pcrr7t-x-x-90">&nbsp;path,</span><span class=
+      "pcrr7t-x-x-90">&nbsp;rest</span><span class=
+      "pcrr7t-x-x-90">&nbsp;=</span><span class=
+      "pcrr7t-x-x-90">&nbsp;msg.split('</span><span class=
+      "pcrr7t-x-x-90">&nbsp;',</span><span class=
+      "pcrr7t-x-x-90">&nbsp;3)</span><br class="fancyvrb">
+      <a id="x1-67025r11" name="x1-67025r11"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;headers,</span><span class=
+      "pcrr7t-x-x-90">&nbsp;rest</span><span class=
+      "pcrr7t-x-x-90">&nbsp;=</span><span class=
+      "pcrr7t-x-x-90">&nbsp;parse_netstring(rest)</span><br class=
+      "fancyvrb">
+      <a id="x1-67027r12" name="x1-67027r12"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;body,</span><span class=
+      "pcrr7t-x-x-90">&nbsp;_</span><span class=
+      "pcrr7t-x-x-90">&nbsp;=</span><span class=
+      "pcrr7t-x-x-90">&nbsp;parse_netstring(rest)</span><br class=
+      "fancyvrb">
+      <a id="x1-67029r13" name="x1-67029r13"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-67031r14" name="x1-67031r14"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;headers</span><span class=
+      "pcrr7t-x-x-90">&nbsp;=</span><span class=
+      "pcrr7t-x-x-90">&nbsp;json.loads(headers)</span><br class=
+      "fancyvrb">
+      <a id="x1-67033r15" name="x1-67033r15"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-67035r16" name="x1-67035r16"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;return</span><span class=
+      "pcrr7t-x-x-90">&nbsp;uuid,</span><span class=
+      "pcrr7t-x-x-90">&nbsp;id,</span><span class=
+      "pcrr7t-x-x-90">&nbsp;path,</span><span class=
+      "pcrr7t-x-x-90">&nbsp;headers,</span><span class=
+      "pcrr7t-x-x-90">&nbsp;body</span>
+    </div>
+  </div>
+  <hr class="endfloat">
+  <!--l. 547-->
+
+  <p class="indent">This is actually all of the code needed to
+  parse a request, and is fairly the same in many other languages.
+  If you look at the file <span class=
+  "pplb7t-">examples/python/mongrel2/request.py</span> you&rsquo;ll
+  see a more complete example of making a full request object. 
+  <!--l. 552-->
+
+  <p class="indent">A response is then just as simple and involves
+  crafting a similar setup like this:
+
+  <div class="fancyvrb" id="fancyvrb31">
+    <a id="x1-67037r1" name="x1-67037r1"></a><span class=
+    "pcrr7t-">&nbsp;</span><span class=
+    "pcrr7t-">&nbsp;UUID</span><span class=
+    "pcrr7t-">&nbsp;SIZE:ID</span><span class=
+    "pcrr7t-">&nbsp;ID</span><span class=
+    "pcrr7t-">&nbsp;ID,</span><span class=
+    "pcrr7t-">&nbsp;BODY</span>
+  </div><!--l. 559-->
+
+  <p class="indent">Notice I&rsquo;ve got three IDs here but you
+  can do 1 or up to 128. Generating this is very easy in Python: 
+  <!--l. 562-->
+
+  <p class="indent"><a id="x1-67038r28" name="x1-67038r28"></a>
+  <hr class="float">
+
+  <div class="float">
+    <div class="caption">
+      <span class="id">Source 28:</span> <span class=
+      "content"><span class="pplri7t-">Generating</span>
+      <span class="pplri7t-">Responses</span></span>
+    </div><!--tex4ht:label?: x1-67038r28 -->
+
+    <div class="fancyvrb" id="fancyvrb32">
+      <a id="x1-67040r1" name="x1-67040r1"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-67042r2" name="x1-67042r2"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;def</span><span class=
+      "pcrr7t-x-x-90">&nbsp;send(uuid,</span><span class=
+      "pcrr7t-x-x-90">&nbsp;conn_id,</span><span class=
+      "pcrr7t-x-x-90">&nbsp;msg):</span><br class="fancyvrb">
+      <a id="x1-67044r3" name="x1-67044r3"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;header</span><span class=
+      "pcrr7t-x-x-90">&nbsp;=</span><span class=
+      "pcrr7t-x-x-90">&nbsp;"%s</span><span class=
+      "pcrr7t-x-x-90">&nbsp;%d:%s,"</span><span class=
+      "pcrr7t-x-x-90">&nbsp;%</span><span class=
+      "pcrr7t-x-x-90">&nbsp;(uuid,</span><span class=
+      "pcrr7t-x-x-90">&nbsp;len(str(conn_id)),</span><span class=
+      "pcrr7t-x-x-90">&nbsp;str(conn_id))</span><br class=
+      "fancyvrb">
+      <a id="x1-67046r4" name="x1-67046r4"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;self.resp.send(header</span><span class="pcrr7t-x-x-90">&nbsp;+</span><span class="pcrr7t-x-x-90">&nbsp;'</span><span class="pcrr7t-x-x-90">&nbsp;'</span><span class="pcrr7t-x-x-90">&nbsp;+</span><span class="pcrr7t-x-x-90">&nbsp;msg)</span><br class="fancyvrb">
+      <a id="x1-67048r5" name="x1-67048r5"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-67050r6" name="x1-67050r6"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-67052r7" name="x1-67052r7"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;def</span><span class=
+      "pcrr7t-x-x-90">&nbsp;deliver(uuid,</span><span class=
+      "pcrr7t-x-x-90">&nbsp;idents,</span><span class=
+      "pcrr7t-x-x-90">&nbsp;data):</span><br class="fancyvrb">
+      <a id="x1-67054r8" name="x1-67054r8"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;self.send(uuid,</span><span class=
+      "pcrr7t-x-x-90">&nbsp;'</span><span class=
+      "pcrr7t-x-x-90">&nbsp;'.join(idents),</span><span class=
+      "pcrr7t-x-x-90">&nbsp;data)</span><br class="fancyvrb">
+      <a id="x1-67056r9" name="x1-67056r9"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span>
+    </div>
+  </div>
+  <hr class="endfloat">
+  <!--l. 576-->
+
+  <p class="indent">That again is all there is to it. The
+  <span class="pplri7t-">send</span> method is the one doing the
+  real work of crafting the response, and the <span class=
+  "pplri7t-">deliver</span> method is just using <span class=
+  "pplri7t-">send</span> to do all the the target idents joined
+  with a space.
+
+  <h4 class="subsectionHead"><span class="titlemark">5.3.7</span>
+  <a id="x1-680005.3.7" name="x1-680005.3.7"></a>Python Handler
+  API</h4><!--l. 584-->
+
+  <p class="noindent">Instead of building all of this yourself,
+  I&rsquo;ve created a Python library that wraps all this up and
+  makes it easy to use. Each of the other libraries are designed
+  around the same idea and should have a similar design. To check
+  out how to use the Python API we&rsquo;ll take a look at each of
+  the demos that are available. These are the same demos you ran in
+  the previous section to create a sample deployment. <!--l. 592-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">5.4</span> <a id=
-  "x1-620005.4" name="x1-620005.4"></a>Python Handler API</h3>
-  <!--l. 396-->
+  "x1-690005.4" name="x1-690005.4"></a>Basic Handler Demo</h3>
+  <!--l. 594-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">5.5</span> <a id=
-  "x1-630005.5" name="x1-630005.5"></a>Basic Handler Demo</h3>
-  <!--l. 399-->
+  "x1-700005.5" name="x1-700005.5"></a>Chat Demo</h3><!--l. 597-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">5.6</span> <a id=
-  "x1-640005.6" name="x1-640005.6"></a>Chat Demo</h3><!--l. 402-->
+  "x1-710005.6" name="x1-710005.6"></a>MP3 Streaming Demo</h3>
+  <!--l. 600-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">5.7</span> <a id=
-  "x1-650005.7" name="x1-650005.7"></a>MP3 Streaming Demo</h3>
-  <!--l. 405-->
+  "x1-720005.7" name="x1-720005.7"></a>Other Language APIs</h3>
+  <!--l. 603-->
+
+  <p class="noindent">
+
+  <h4 class="subsectionHead"><span class="titlemark">5.7.1</span>
+  <a id="x1-730005.7.1" name="x1-730005.7.1"></a>Ruby Handler
+  API</h4><!--l. 606-->
+
+  <p class="noindent">
+
+  <h4 class="subsectionHead"><span class="titlemark">5.7.2</span>
+  <a id="x1-740005.7.2" name="x1-740005.7.2"></a>C++ Handler
+  API</h4><!--l. 609-->
+
+  <p class="noindent">
+
+  <h4 class="subsectionHead"><span class="titlemark">5.7.3</span>
+  <a id="x1-750005.7.3" name="x1-750005.7.3"></a>PHP Handler
+  API</h4><!--l. 612-->
+
+  <p class="noindent">
+
+  <h4 class="subsectionHead"><span class="titlemark">5.7.4</span>
+  <a id="x1-760005.7.4" name="x1-760005.7.4"></a>Writing Your
+  Own</h4><!--l. 615-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">5.8</span> <a id=
-  "x1-660005.8" name="x1-660005.8"></a>Other Language APIs</h3>
-  <!--l. 408-->
+  "x1-770005.8" name="x1-770005.8"></a>Config Database Schema</h3>
+  <!--l. 618-->
 
   <p class="noindent">
 
   <h4 class="subsectionHead"><span class="titlemark">5.8.1</span>
-  <a id="x1-670005.8.1" name="x1-670005.8.1"></a>Ruby Handler
-  API</h4><!--l. 411-->
+  <a id="x1-780005.8.1" name="x1-780005.8.1"></a>Writing Your Own
+  m2sh</h4><!--l. 1-->
 
-  <p class="noindent">
-
-  <h4 class="subsectionHead"><span class="titlemark">5.8.2</span>
-  <a id="x1-680005.8.2" name="x1-680005.8.2"></a>C++ Handler
-  API</h4><!--l. 414-->
-
-  <p class="noindent">
-
-  <h4 class="subsectionHead"><span class="titlemark">5.8.3</span>
-  <a id="x1-690005.8.3" name="x1-690005.8.3"></a>PHP Handler
-  API</h4><!--l. 417-->
-
-  <p class="noindent">
-
-  <h4 class="subsectionHead"><span class="titlemark">5.8.4</span>
-  <a id="x1-700005.8.4" name="x1-700005.8.4"></a>Writing Your
-  Own</h4><!--l. 420-->
-
-  <p class="noindent">
-
-  <h3 class="sectionHead"><span class="titlemark">5.9</span> <a id=
-  "x1-710005.9" name="x1-710005.9"></a>Config Database Schema</h3>
-  <!--l. 423-->
-
-  <p class="noindent">
-
-  <h4 class="subsectionHead"><span class="titlemark">5.9.1</span>
-  <a id="x1-720005.9.1" name="x1-720005.9.1"></a>Writing Your Own
-  m2sh</h4>
+  <p class="indent">
 
   <h2 class="chapterHead"><span class=
   "titlemark">Chapter&nbsp;6</span><br>
-  <a id="x1-730006" name="x1-730006"></a>Contributing</h2>
+  <a id="x1-790006" name="x1-790006"></a>Contributing</h2>
   <!--l. 3-->
 
   <p class="noindent">Soon...
