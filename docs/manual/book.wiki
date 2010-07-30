@@ -18,6 +18,10 @@
   "x1-1000"></a>Contents</h2>
 
   <div class="tableofcontents">
+    <span class="chapterToc"><a href="#x1-2000" id="QQ2-1-2" name=
+    "QQ2-1-2">Preface</a></span><br>
+    &nbsp;<span class="sectionToc">.1 <a href="#x1-3000.1" id=
+    "QQ2-1-3" name="QQ2-1-3">Typography</a></span><br>
     <span class="chapterToc">1 <a href="#x1-40001" id="QQ2-1-4"
     name="QQ2-1-4">Introduction</a></span><br>
     &nbsp;<span class="sectionToc">1.1 <a href="#x1-50001.1" id=
@@ -206,7 +210,7 @@
     name="QQ2-1-114">Contributing</a></span>
   </div>
 
-  <h2 class="likechapterHead"><a id="x1-2000" name=
+  <h2 class="chapterHead"><a id="x1-2000" name=
   "x1-2000"></a>Preface</h2><!--l. 3-->
 
   <p class="noindent">This manual will tell you about the most
@@ -225,8 +229,8 @@
   intended to insult you, but just to keep you interested so that
   you want to read it.
 
-  <h3 class="likesectionHead"><a id="x1-3000" name=
-  "x1-3000"></a>Typography</h3><!--l. 18-->
+  <h3 class="sectionHead"><span class="titlemark">.1</span> <a id=
+  "x1-3000.1" name="x1-3000.1"></a>Typography</h3><!--l. 18-->
 
   <p class="noindent">Usually the people running the web can be
   divided into three types of people: Steves, Edsgers, and Knuths. 
@@ -264,7 +268,9 @@
   forward type of people. <!--l. 47-->
 
   <p class="noindent">That is why this book is written in TeX and
-  why it uses whatever fonts TeX uses.
+  why it uses whatever fonts TeX uses. <!--l. 21-->
+
+  <p class="noindent">
 
   <h2 class="chapterHead"><span class=
   "titlemark">Chapter&nbsp;1</span><br>
@@ -283,7 +289,7 @@
   agnostic</span> and <span class="pplri7t-">asynchronous</span>
   way using a <span class="pplri7t-">simple messaging
   protocol</span> to talk to <span class=
-  "pplri7t-">applications</span> not just serve files. Mongrel2 is
+  "pplri7t-">applications</span>; not just serve files. Mongrel2 is
   also designed to be incredibly easy to <span class=
   "pplri7t-">automatically manage</span> it as part of your
   infrastructure. <!--l. 15-->
@@ -291,13 +297,13 @@
   <p class="noindent">Other web servers do some of these things,
   but they either do them in a bastardized way or not all of them
   at once. Plenty of language specific web servers like Node.js and
-  Jetty have asynchronous operation, but then they&rsquo;re not
-  language agnostic <span class="footnote-mark"><a href=
-  "book-final2.html#fn1x2"><sup class=
+  Jetty have asynchronous operation, but they&rsquo;re not language
+  agnostic <span class="footnote-mark"><a href=
+  "book-final2.html#fn1x3"><sup class=
   "textsuperscript">1</sup></a></span><a id="x1-4001f1" name=
   "x1-4001f1"></a>. Other web servers will let you talk to any
   language as a backend, but they insist on using HTTP proxying or
-  FastCGI which is <span class="pplri7t-">not</span> friendly to
+  FastCGI, which is <span class="pplri7t-">not</span> friendly to
   asynchronous operations. <!--l. 22-->
 
   <p class="noindent">Mongrel2 is the only web server I know of
@@ -309,21 +315,21 @@
   <!--l. 28-->
 
   <p class="noindent">The term &rdquo;language agnostic&rdquo; came
-  from people who read about Mongrel2 in the early days and it
+  from people who read about Mongrel2 in the early days, and it
   means that Mongrel2 does <span class="pplri7t-">not</span> try to
-  promote or any one language over any others. Mongrel2 does not
-  care if you run a &rdquo;Python shop&rdquo; or if you&rsquo;re a
-  die hard PHP fan or if you hate PHP and love only Ruby on Rails.
+  promote any one language over any others. Mongrel2 does not care
+  if you run a &rdquo;Python shop&rdquo; or if you&rsquo;re a die
+  hard PHP fan or if you hate PHP and love only Ruby on Rails.
   Mongrel2 only knows about HTTP requests, HTTP responses, async
   messages, and getting them to your gear to meet those
   requirements. <!--l. 35-->
 
   <p class="noindent">Language Agnosticism is the most important
-  feature of Mongrel2 and it&rsquo;s entire purpose stems from the
-  desire to reduce the amount of programming language religion in
-  the world. Real people want to get things done, not wanker on
-  which technology is the best or force other people to use their
-  favorite toys. Instead Mongrel2 works to just be great for every
+  feature of Mongrel2 and its entire purpose stems from the desire
+  to reduce the amount of programming language religion in the
+  world. Real people want to get things done, not wanker on which
+  technology is the best or force other people to use their
+  favorite toys. Instead, Mongrel2 works to just be great for every
   language and make it easy to use what works best for a given
   problem. <!--l. 43-->
 
@@ -333,13 +339,13 @@
   "x1-60001.2" name="x1-60001.2"></a>Asynchronous</h3><!--l. 45-->
 
   <p class="noindent">Many web servers are
-  &rdquo;asynchronous&rdquo; internally, and some others force you
-  to know way too much about how they work internally to get
-  anything done. What makes Mongrel2&rsquo;s version of
-  asynchronous messaging different is it extends to <span class=
-  "pplri7t-">outside</span> the Mongrel2 server. This is a powerful
-  concept that even your backends can operate asynchronously using
-  simple identification of connected clients. <!--l. 51-->
+  &rdquo;asynchronous&rdquo; internally, and some force you to know
+  way too much about how they work internally to get anything done.
+  What makes Mongrel2&rsquo;s version of asynchronous messaging
+  different is it extends to <span class="pplri7t-">outside</span>
+  the Mongrel2 server. This is a powerful concept that even your
+  backends can operate asynchronously using simple identification
+  of connected clients. <!--l. 51-->
 
   <p class="noindent">Other servers assume that every request is
   received by a browser, then sent to a backend, and then directly
@@ -366,10 +372,10 @@
   protocol that allowed for different messaging styles and worked
   with many different languages. HTTP proxying already does this,
   although it&rsquo;s not asynchronous at all. What gives Mongrel2
-  its special powers is ZeroMQ, a language and transport mechanism
-  agnostic messaging system that does <span class=
-  "pplri7t-">not</span> require a centralized messaging server to
-  operate. <!--l. 72-->
+  its special powers is ZeroMQ, a language- and
+  transport-mechanism-agnostic messaging system that does
+  <span class="pplri7t-">not</span> require a centralized messaging
+  server to operate. <!--l. 72-->
 
   <p class="noindent">Using ZeroMQ lets Mongrel2 talk to a huge
   number of languages, operate within any kind of network
@@ -385,22 +391,23 @@
   <p class="noindent">Web servers today are written as if it was
   still 1995 and all anyone needs to do is serve files, maybe some
   graphics. Today&rsquo;s web applications are not about serving
-  files, they&rsquo;re about serving application logic <span class=
+  files; they&rsquo;re about serving application logic <span class=
   "pplri7t-">and</span> doing it asynchronously. The advent of the
   bewildering numbers of ways to hack HTTP into an async messaging
   protocol<span class="footnote-mark"><a href=
-  "book-final3.html#fn2x2"><sup class=
+  "book-final3.html#fn2x3"><sup class=
   "textsuperscript">2</sup></a></span><a id="x1-8001f2" name=
   "x1-8001f2"></a> is proof enough that the pressure is on for web
-  server to be for applications with highly interactive interfaces.
-  <!--l. 87-->
+  servers to be for applications with highly interactive
+  interfaces. <!--l. 87-->
 
   <p class="noindent">Mongrel2 can still serve files just fine. In
-  fact, it&rsquo;s got very accurate and easy to understand file
+  fact, it&rsquo;s got very accurate and easy-to-understand file
   serving code. However, Mongrel2 will always be about
-  applications. Fast scalable awesome asynchronous or synchronous
-  applications that need to use languages that mere mortals can
-  work with like PHP. If there&rsquo;s ever a choice, apps win.
+  applications. Fast, scalable, awesome, asynchronous or
+  synchronous applications that need to use languages that mere
+  mortals can work with, like PHP. If there&rsquo;s ever a choice,
+  apps win.
 
   <h3 class="sectionHead"><span class="titlemark">1.5</span> <a id=
   "x1-90001.5" name="x1-90001.5"></a>Automated Management</h3>
@@ -415,11 +422,11 @@
   want. <!--l. 100-->
 
   <p class="noindent">This pattern is established with servers like
-  Postfix, Exim, Sendmail, qmail, and others that convert
+  Postfix, Exim, Sendmail, qmail, and others, that convert
   configuration files to half-assed SQL databases. Mongrel2
   effectively adopts a Model-View-Controller design for its
   configuration system, the same way every web application is
-  designed today. The Model is a SQlite3 database file, which any
+  designed today. The Model is a SQLite3 database file, which any
   programming language can access. The Controller is a Mongrel2
   process that reads this file and sets itself up accordingly. 
   <!--l. 108-->
@@ -427,16 +434,16 @@
   <p class="noindent">The View is a Python script called m2sh that
   gives you a command line &rdquo;UI&rdquo; to configure and setup
   the Mongrel2 sqlite model. It gives you commands for managing it,
-  crafting configurations, looking at them, the works. 
+  crafting configurations, looking at them; the works. 
   <!--l. 112-->
 
   <p class="noindent">But most importantly, <span class=
   "pplri7t-">you can write your own</span>. You don&rsquo;t have to
   wait for a Mongrel2 developer to craft a configuration file
   parser for your favorite language, or use some hack job Nagios
-  Perl junk to automate or scan it. It&rsquo;s SQlite3 with a solid
-  simple schema and well written Python code showing you how it
-  works. <!--l. 118-->
+  Perl junk to automate or scan it. It&rsquo;s SQLite3 with a
+  solid, simple schema and well written Python code showing you how
+  it works. <!--l. 118-->
 
   <p class="noindent">Nothing stops you from automating the hell
   out of Mongrel2 with that. <!--l. 121-->
@@ -451,9 +458,9 @@
   probably the best way to use it is to actually <span class=
   "pplri7t-">read it</span>. <!--l. 126-->
 
-  <p class="noindent">I know, revolutionary right. I mean, who has
+  <p class="noindent">I know! Revolutionary, right? I mean, who has
   time to read and learn about something these days. You just want
-  to get in there and get whatever problem you have done. Now! No
+  to get in there and get whatever problem you have done, now! No
   time for words. You just want a straight dump right into your
   brain so that you are able to solve all your problems instantly
   and screw all this talking. <!--l. 131-->
@@ -5754,7 +5761,7 @@
     <li class="enumerate" id="x1-61008x4">Be language agnostic and
     use a data format everyone can accept without complaining that
     it should be done with their favorite <span class=
-    "footnote-mark"><a href="book-final4.html#fn1x6"><sup class=
+    "footnote-mark"><a href="book-final4.html#fn1x7"><sup class=
     "textsuperscript">1</sup></a></span><a id="x1-61009f1" name=
     "x1-61009f1"></a> .
 
@@ -5797,7 +5804,7 @@
   reply sockets though will let Handlers send back replies to a
   cluster of Mongrel2 servers, but only the one with the right
   subscription will process the request<span class=
-  "footnote-mark"><a href="book-final5.html#fn2x6"><sup class=
+  "footnote-mark"><a href="book-final5.html#fn2x7"><sup class=
   "textsuperscript">2</sup></a></span><a id="x1-62001f2" name=
   "x1-62001f2"></a> . <!--l. 430-->
 
@@ -6244,7 +6251,7 @@
   the <span class="pplb7t-">examples/http</span><span class=
   "pplb7t-">_0mq/http.py</span> file and it just the simplest thing
   possible<span class="footnote-mark"><a href=
-  "book-final6.html#fn3x6"><sup class=
+  "book-final6.html#fn3x7"><sup class=
   "textsuperscript">3</sup></a></span><a id="x1-69001f3" name=
   "x1-69001f3"></a> : <!--l. 603-->
 
@@ -7066,7 +7073,7 @@
   "pplri7t-">m2sh</span> script in your favorite language.
   Obviously, if you&rsquo;re doing this you should probably have a
   good reason<span class="footnote-mark"><a href=
-  "book-final7.html#fn4x6"><sup class=
+  "book-final7.html#fn4x7"><sup class=
   "textsuperscript">4</sup></a></span><a id="x1-73001f4" name=
   "x1-73001f4"></a> What writing your own, or understanding what
   <span class="pplri7t-">m2sh</span> is doing will do for you
@@ -7108,7 +7115,7 @@
   "pplb7t-">src/config/mimetypes.sql</span> where the database
   schema is created and the large list of mimetypes that Mongrel2
   knows is stored.<span class="footnote-mark"><a href=
-  "book-final8.html#fn5x6"><sup class=
+  "book-final8.html#fn5x7"><sup class=
   "textsuperscript">5</sup></a></span><a id="x1-73002f5" name=
   "x1-73002f5"></a> Your tool should be able to use this SQL to
   make its database or at least know what it does. <!--l. 846-->
