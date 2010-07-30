@@ -147,7 +147,8 @@ int Dir_stream_file(FileRecord *file, int sock_fd)
         sent = Dir_send(sock_fd, file->fd, &offset, block_size);
         check_debug(sent > 0, "Failed to sendfile on socket: %d from file %d", sock_fd, file->fd);
     }
-
+    
+    check(total == file->sb.st_size, "Did not write enough!");
     check(total <= file->sb.st_size, "Wrote way too much, wrote %d but size was %d", (int)total, (int)file->sb.st_size);
 
     return sent;

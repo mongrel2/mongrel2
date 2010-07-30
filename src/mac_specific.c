@@ -39,13 +39,27 @@
 #include <sys/socket.h>
 #include <sys/uio.h>
 
-/* Wrapper function for sendfile that mac OS X uses */
+#include <dbg.h>
+
+// Wrapper function for sendfile that mac OS X uses
 int mac_sendfile(int out_fd, int in_fd, off_t *offset, size_t count) {
     off_t my_count = count;
-    if(sendfile(in_fd, out_fd, *offset, &my_count, NULL, 0))
-        return -1;
+    int rc;
+
+    // We have to do this loop nastiness, because mac os x fails with resource
+    // temporarily unavailable (per bug e8eddb51a8)
+    do {
+        fdwait(out_fd, 'w');
+        rc = sendfile(in_fd, out_fd, *offset, &my_count, NULL, 0);
+    } while(rc != 0 && errno == 35);
+
+    check(rc == 0, "OS X sendfile wrapper failed");
+
     *offset += my_count;
     return my_count;
+
+error:
+    return -1;
 }
 
 #endif
