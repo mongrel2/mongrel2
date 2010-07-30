@@ -3,13 +3,13 @@
 Mongrel2 is designed to build on most modern Unix systems, specifically Linux
 and Mac OSX.  It is written in C (\emph{not Ruby}) and uses fairly vanilla
 C and standard libraries, except for one piece that implements the internal
-coroutines.  Other than this you should be able to compile and install Mongrel2
+coroutines.  Other than this, you should be able to compile and install Mongrel2
 with nothing more than \shell{make all install} after you've installed
 all the dependencies.
 
 Now, if when I said dependencies you started to groan at having to install
 software to use my software, well my friend, welcome to the future.  You
-said you don't want people reinventing the wheel right?  Great, that means
+said you don't want people reinventing the wheel, right?  Great, that means
 you need to install software for my software to work.  It's either that or
 wait 10 years for me to build everything from scratch like some arrogant
 jackass.
@@ -31,10 +31,10 @@ To get everything working you will need the following dependencies:
 \end{itemize}
 
 If you install these things in this order, then everything should be good.
-Typically people run into problems if they do this out of order, for example
+Typically people run into problems if they do this out of order; for example,
 trying to install Mongrel2 before they have distribute and pip installed.
 
-Since every system is different it is difficult to tell you exactly how to
+Since every system is different, it is difficult to tell you exactly how to
 install required packages for your OS, but here's how I did it on my computer:
 
 
@@ -69,7 +69,7 @@ install required packages for your OS, but here's how I did it on my computer:
 \end{code}
 
 If you run into parts that your OS is missing, which is likely on
-Debian and SuSE systems, then you'll have to go and figure out 
+Debian and SuSE systems, then you'll have to go and figure out
 how to install it.
 
 
@@ -86,7 +86,7 @@ Mongrel2:
 
 \subsection{Using Fossil}
 
-Since it's early in Mongrel2 development we recommend you get fossil and install it
+Since it's early in Mongrel2 development, we recommend you get fossil and install it
 so you can track the latest fixes and development.  Here's the easiest way to
 do that:
 
@@ -101,7 +101,7 @@ do that:
 
 Once you have fossil you can then get the Mongrel2 source and open it up:
 
-\begin{code}{Cloning The Mongrel2 Source}
+\begin{code}{Cloning the Mongrel2 Source}
 \begin{Verbatim}
 > mkdir ~/fossils
 > fossil clone http://mongrel2.org ~/fossils/mongrel2.fossil
@@ -111,17 +111,17 @@ Once you have fossil you can then get the Mongrel2 source and open it up:
 \end{Verbatim}
 \end{code}
 
-Make sure you do this in order (just like with every set of instructions you should follow)
+Make sure you do this in order (just like with every set of instructions you follow)
 or else you'll get errors.  For example, if you don't make the \file{~/fossils} directory
 then you'll get an error saying fossil can't open your file to clone.  Well, that's because
 you \emph{didn't make the ~/fossils directory}.  Just pay attention and don't blame fossil
 if you can't.
 
 
-\subsection{Using The .zip File}
+\subsection{Using the .zip File}
 
 If you don't want to install fossil then you will need to get the .zip file
-from our site and install it that way.  Since the code is new you have \emph{no guarantees}
+from our site and install it that way.  Since the code is new, you have \emph{no guarantees}
 that this will work at all or that you will get a stable server.  We have not made an
 official release, so using the .zip file is effectively a lame way of avoiding using
 fossil.
@@ -146,10 +146,10 @@ The end result of this should be:
 
 \begin{enumerate}
 \item Mongrel2 builds and compiles without errors.
-\item All the unit tests run, please tell us about failures.
+\item All the unit tests run.\footnote{Please tell us about failures.}
 \item The Python libraries that m2sh needs get installed.
 \item The m2sh itself gets installed.
-\item Finally the mongrel2 binary gets installed.
+\item Finally, the mongrel2 binary gets installed.
 \end{enumerate}
 
 If any of these stages fail, then you can simply try to fix them and then
@@ -158,22 +158,22 @@ run:  \shell{make clean all install} which will do everything all over again.
 The most common error is if you didn't install pip or distribute and insist
 on using your own system's package management.  Do \emph{not} report bugs about
 your own flavor of Linux's stupidity about versions and how it installs Python.
-If you don't want to use the package system every other Python programmer uses
+If you don't want to use the package system every other Python programmer uses,
 then you're on your own.
 
 \begin{aside}{Use Virtualenv If You Fear Pip}
 For those who still want to use the package management but want to use pip and
-distribute I suggest you check out \href{http://pypi.python.org/pypi/virtualenv}{virtualenv}.
+distribute, I suggest you check out \href{http://pypi.python.org/pypi/virtualenv}{virtualenv}.
 What virtualenv does is create a little "chroot install" of just the packages
-you need using pip or distribute.  When you don't want them anymore you can just
+you need using pip or distribute.  When you don't want them anymore, you can just
 delete one directory and you're fine.
 \end{aside}
 
 
 \section{Testing The Installation}
 
-When you are done you probably want to make sure that it installed correctly.
-There's a test configuration file in \file{tests/config.sqlite} that you can 
+When you are done, you probably want to make sure that it installed correctly.
+There's a test configuration file in \file{tests/config.sqlite} that you can
 use to try it out:
 
 \begin{code}{First Test Run}
@@ -205,6 +205,6 @@ Don't forget \shell{make clean all install}.
 
 You now should have a working Mongrel2 system installed and the m2sh configuration
 interface ready to go.  In the rest of this manual we'll be simply learning how
-to do more with Mongrel2 like making our own configs, writing handlers, and other
+to do more with Mongrel2, like making our own configs, writing handlers, and other
 fun stuff.
 
