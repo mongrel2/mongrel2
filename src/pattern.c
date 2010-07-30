@@ -30,7 +30,7 @@ const char *classend (MatchState *ms, const char *p) {
   switch (*p++) {
     case L_ESC: {
       if (*p == '\0')
-        log_err("malformed pattern (ends with '%c')", *p);
+        log_err("malformed pattern (ends with '\\0')");
       return p+1;
     }
     case '[': {
