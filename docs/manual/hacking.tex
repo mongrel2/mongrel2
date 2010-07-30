@@ -588,32 +588,189 @@ design.  To check out how to use the Python API we'll take a look at
 each of the demos that are available.  These are the same demos you
 ran in the previous section to create a sample deployment.
 
+To look at the Python API take a look at
+\file{examples/python/mongrel2/request.py} and
+\file{examples/python/mongrel2/handler.py}.  They are very small files that you
+should be able to understand quickly.
+
 
 \section{Basic Handler Demo}
 
+The most basic handler you can write is in the \file{examples/http\_0mq/http.py} file
+and it just the simplest thing possible\footnote{This is the same code as the original
+file but with extraneous prints removed for simplicity.}:
+
+\begin{code}{http.py example}
+\begin{Verbatim}
+from mongrel2 import handler
+import json
+
+sender_id = "82209006-86FF-4982-B5EA-D1E29E55D481"
+
+conn = handler.Connection(sender_id, "tcp://127.0.0.1:9997",
+                          "tcp://127.0.0.1:9996")
+while True:
+    print "WAITING FOR REQUEST"
+
+    req = conn.recv()
+
+    if req.is_disconnect():
+        continue
+
+    response = "<pre>\nSENDER: %r\nIDENT:%r\nPATH: %r\nHEADERS:%r\nBODY:%r</pre>" % (
+        req.sender, req.conn_id, req.path, 
+        json.dumps(req.headers), req.body)
+
+    conn.reply_http(req, response)
+\end{Verbatim}
+\end{code}
+
+All this code does is print back a simple little dump of what it received, and
+it's not even a valid HTML document.  Let's walk through everything that's going on:
+
+\begin{enumerate}
+\item Import the \ident{handler} module from \ident{mongrel2} and \ident{json}.  The \ident{json} module is
+    really only used for logging.
+\item Establish the UUID for our handler, and create a connection.  It's not \emph{really} a connection
+    but more of a "virtual circuit" that you can just pretend is a connection.  It's using all ZeroMQ and 
+    the protocol we just described to then create a simple API to use.
+\item Go into a while loop forever and recv request objects off the connection.
+\item One type of special message we can get from Mongrel2 is a "disconnect" message, which tells you that
+    one of the listeners you tried to talk to was closed.  You should either ignore those and read
+    another, or update any internal state you may have.  They can come asynchronously, and for the most 
+    part you can ignore them unless you need to keep them open as in say a chat application or streaming.
+\item Craft the reply you're going to send back, which is just a dump of what you received.
+\item Send this reply back to Mongrel2.  Notice the subtle difference where you include the \emph{req} object
+    as part of how you reply?  This is the major difference between this API and more traditional 
+    request/response APIs in that you need the request you are responding to so that it know where to send
+    things.  In a normal socket based server this is just assumed to be the socket you're talking about.
+\end{enumerate}
+
+This is all that you need at first to do simple HTTP handlers.  In reality the \ident{reply\_http} method is
+just syntactic sugar on crafting a decent HTTP response.  Here's the actual method that is crafting these replies:
+
+\begin{code}{HTTP Response Python Code}
+\begin{Verbatim}
+def http_response(body, code, status, headers):
+    payload = {'code': code, 'status': status, 'body': body}
+    headers['Content-Length'] = len(body)
+    payload['headers'] = "\r\n".join('%s: %s' % (k,v) for k,v in
+                                     headers.items())
+
+    return HTTP_FORMAT % payload
+
+\end{Verbatim}
+\end{code}
+
+Which is then used by \ident{Connection.reply\_http} and 
+\ident{Connection.deliver\_http} to send an actual HTTP response.  That 
+means all this is doing is creating the raw bytes you want to go
+to the real browser, and how it's delivered is irrelevant.  For example,
+the \ident{deliver\_http} method means that, yes, you can have one
+handler send a single response to target \emph{multiple} browsers
+at once.
 
 
+\section{MP3 Streaming Demo}
+
+The next example is a very simple, and well kind of poorly implemented
+MP3 streaming demo that uses the ICY protocol.  ICY is a really lame
+protocol that was obviously designed before HTTP was totally baked
+and probably by people who don't really get HTTP.  It works in an odd
+way of having meta-data sent at specific sized intervals so the 
+client can display an update to the meta-data.
+
+What the mp3streamer demo does is create a streaming system by
+having a thread that receives requests for connections, and then
+another thread that sends the current data to all currently connected
+clients.  Rather than go through all the code you can take a look
+at the main file and see how simple it is once you get the 
+streaming thread right:
+
+\begin{code}{Base mp3stream Code}
+\begin{Verbatim}
+from mp3stream import ConnectState, Streamer 
+from mongrel2 import handler
+import glob
+
+
+sender_id = "9703b4dd-227a-45c4-b7a1-ef62d97962b2"
+
+CONN = handler.Connection(sender_id, "tcp://127.0.0.1:9995",
+                          "tcp://127.0.0.1:9994")
+
+MP3_FILES = glob.glob("*.mp3")
+
+print "PLAYING:", MP3_FILES
+
+CHUNK_SIZE = 5 * 1024
+
+STATE = ConnectState()
+
+STREAMER = Streamer(MP3_FILES, STATE, CONN, CHUNK_SIZE)
+STREAMER.start()
+
+
+while True:
+    req = CONN.recv()
+
+    if req.is_disconnect():
+        print "DISCONNECT", req.headers, req.body, req.conn_id
+        STATE.remove(req)
+    else:
+        print "REQUEST", req.headers, req.body
+
+        if STATE.count() > 20:
+            print "TOO MANY", STATE.count()
+            CONN.reply_http(req, "Too Many Connected.  Try Later.")
+        else:
+            STATE.add(req)
+            CONN.reply_http(req, "", headers={'icy-metaint': CHUNK_SIZE})
+\end{Verbatim}
+\end{code}
+
+Walking through this example is fairly easy, assuming you just trust
+that the streaming thread stuff works:
+
+\begin{enumerate}
+\item Starts off just like the handler test.
+\item We figure out what .mp3 files are in the current directory.
+\item Establish a data chunk size of 5k for the ICY protocol and 
+    make a ConnectState and Streamer from that.  These are the 
+    streaming thread things found in \file{mp3stream.py} in the same
+    directory.
+\item We then loop forever, accept requests.
+\item Unlike the handler, we want to remove disconnected clients
+    so we take them out of the STATE when we are notified.
+\item If we have too many connected clients we return a failure.
+\item Otherwise, we add them to the STATE and then send the initial
+    ICY protocol header to get things going.
+\end{enumerate}
+
+
+That is the base of it, and if you point mplayer at it (which is
+the only player that works really) you should hear it play:
+
+\begin{Verbatim}
+> mplayer http://localhost:6767/mp3stream
+\end{Verbatim}
+
+That is assuming you put some mp3 files into the directory and
+started the handler again.
+
+For more on how the actual state and the protocol works, go look
+at mp3stream.py.  Explaining it is far outside the scope of this manual
+but the key points to realize are that this is one thread that's
+targetting randomly connected clients with a single message to the 
+Mongrel2 server and streaming it.
 
 
 \section{Chat Demo}
 
 
-\section{MP3 Streaming Demo}
-
 
 \section{Other Language APIs}
 
-
-\subsection{Ruby Handler API}
-
-
-\subsection{C++ Handler API}
-
-
-\subsection{PHP Handler API}
-
-
-\subsection{Writing Your Own}
 
 
 \section{Config Database Schema}

@@ -194,31 +194,19 @@
     &nbsp;<span class="sectionToc">5.4 <a href="#x1-690005.4" id=
     "QQ2-1-106" name="QQ2-1-106">Basic Handler Demo</a></span><br>
     &nbsp;<span class="sectionToc">5.5 <a href="#x1-700005.5" id=
-    "QQ2-1-107" name="QQ2-1-107">Chat Demo</a></span><br>
+    "QQ2-1-109" name="QQ2-1-109">MP3 Streaming Demo</a></span><br>
     &nbsp;<span class="sectionToc">5.6 <a href="#x1-710005.6" id=
-    "QQ2-1-108" name="QQ2-1-108">MP3 Streaming Demo</a></span><br>
+    "QQ2-1-111" name="QQ2-1-111">Chat Demo</a></span><br>
     &nbsp;<span class="sectionToc">5.7 <a href="#x1-720005.7" id=
-    "QQ2-1-109" name="QQ2-1-109">Other Language APIs</a></span><br>
-    &nbsp;&nbsp;<span class="subsectionToc">5.7.1 <a href=
-    "#x1-730005.7.1" id="QQ2-1-110" name="QQ2-1-110">Ruby Handler
-    API</a></span><br>
-    &nbsp;&nbsp;<span class="subsectionToc">5.7.2 <a href=
-    "#x1-740005.7.2" id="QQ2-1-111" name="QQ2-1-111">C++ Handler
-    API</a></span><br>
-    &nbsp;&nbsp;<span class="subsectionToc">5.7.3 <a href=
-    "#x1-750005.7.3" id="QQ2-1-112" name="QQ2-1-112">PHP Handler
-    API</a></span><br>
-    &nbsp;&nbsp;<span class="subsectionToc">5.7.4 <a href=
-    "#x1-760005.7.4" id="QQ2-1-113" name="QQ2-1-113">Writing Your
-    Own</a></span><br>
-    &nbsp;<span class="sectionToc">5.8 <a href="#x1-770005.8" id=
-    "QQ2-1-114" name="QQ2-1-114">Config Database
+    "QQ2-1-112" name="QQ2-1-112">Other Language APIs</a></span><br>
+    &nbsp;<span class="sectionToc">5.8 <a href="#x1-730005.8" id=
+    "QQ2-1-113" name="QQ2-1-113">Config Database
     Schema</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">5.8.1 <a href=
-    "#x1-780005.8.1" id="QQ2-1-115" name="QQ2-1-115">Writing Your
+    "#x1-740005.8.1" id="QQ2-1-114" name="QQ2-1-114">Writing Your
     Own m2sh</a></span><br>
-    <span class="chapterToc">6 <a href="#x1-790006" id="QQ2-1-116"
-    name="QQ2-1-116">Contributing</a></span>
+    <span class="chapterToc">6 <a href="#x1-750006" id="QQ2-1-115"
+    name="QQ2-1-115">Contributing</a></span>
   </div><!--l. 1-->
 
   <p class="indent">
@@ -6240,72 +6228,784 @@
   around the same idea and should have a similar design. To check
   out how to use the Python API we&rsquo;ll take a look at each of
   the demos that are available. These are the same demos you ran in
-  the previous section to create a sample deployment. <!--l. 592-->
+  the previous section to create a sample deployment. <!--l. 591-->
+
+  <p class="indent">To look at the Python API take a look at
+  <span class="pplb7t-">examples/python/mongrel2/request.py</span>
+  and <span class=
+  "pplb7t-">examples/python/mongrel2/handler.py</span>. They are
+  very small files that you should be able to understand quickly. 
+  <!--l. 597-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">5.4</span> <a id=
   "x1-690005.4" name="x1-690005.4"></a>Basic Handler Demo</h3>
-  <!--l. 598-->
+  <!--l. 599-->
 
-  <p class="noindent">
+  <p class="noindent">The most basic handler you can write is in
+  the <span class="pplb7t-">examples/http</span><span class=
+  "pplb7t-">_0mq/http.py</span> file and it just the simplest thing
+  possible<span class="footnote-mark"><a href=
+  "book-final6.html#fn3x6"><sup class=
+  "textsuperscript">3</sup></a></span><a id="x1-69001f3" name=
+  "x1-69001f3"></a> : <!--l. 603-->
+
+  <p class="indent"><a id="x1-69002r29" name="x1-69002r29"></a>
+  <hr class="float">
+
+  <div class="float">
+    <div class="caption">
+      <span class="id">Source 29:</span> <span class=
+      "content"><span class="pplri7t-">http.py</span> <span class=
+      "pplri7t-">example</span></span>
+    </div><!--tex4ht:label?: x1-69002r29 -->
+
+    <div class="fancyvrb" id="fancyvrb33">
+      <a id="x1-69004r1" name="x1-69004r1"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;from</span><span class=
+      "pcrr7t-x-x-90">&nbsp;mongrel2</span><span class=
+      "pcrr7t-x-x-90">&nbsp;import</span><span class=
+      "pcrr7t-x-x-90">&nbsp;handler</span><br class="fancyvrb">
+      <a id="x1-69006r2" name="x1-69006r2"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;import</span><span class=
+      "pcrr7t-x-x-90">&nbsp;json</span><br class="fancyvrb">
+      <a id="x1-69008r3" name="x1-69008r3"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-69010r4" name="x1-69010r4"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;sender_id</span><span class=
+      "pcrr7t-x-x-90">&nbsp;=</span><span class=
+      "pcrr7t-x-x-90">&nbsp;"82209006-86FF-4982-B5EA-D1E29E55D481"</span><br class="fancyvrb">
+      <a id="x1-69012r5" name="x1-69012r5"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-69014r6" name="x1-69014r6"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;conn</span><span class=
+      "pcrr7t-x-x-90">&nbsp;=</span><span class=
+      "pcrr7t-x-x-90">&nbsp;handler.Connection(sender_id,</span><span class="pcrr7t-x-x-90">&nbsp;"tcp://127.0.0.1:9997",</span><br class="fancyvrb">
+      <a id="x1-69016r7" name="x1-69016r7"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;"tcp://127.0.0.1:9996")</span><br class="fancyvrb">
+      <a id="x1-69018r8" name="x1-69018r8"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;while</span><span class=
+      "pcrr7t-x-x-90">&nbsp;True:</span><br class="fancyvrb">
+      <a id="x1-69020r9" name="x1-69020r9"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;print</span><span class=
+      "pcrr7t-x-x-90">&nbsp;"WAITING</span><span class=
+      "pcrr7t-x-x-90">&nbsp;FOR</span><span class=
+      "pcrr7t-x-x-90">&nbsp;REQUEST"</span><br class="fancyvrb">
+      <a id="x1-69022r10" name="x1-69022r10"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-69024r11" name="x1-69024r11"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;req</span><span class=
+      "pcrr7t-x-x-90">&nbsp;=</span><span class=
+      "pcrr7t-x-x-90">&nbsp;conn.recv()</span><br class="fancyvrb">
+      <a id="x1-69026r12" name="x1-69026r12"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-69028r13" name="x1-69028r13"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;if</span><span class=
+      "pcrr7t-x-x-90">&nbsp;req.is_disconnect():</span><br class=
+      "fancyvrb">
+      <a id="x1-69030r14" name="x1-69030r14"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;continue</span><br class="fancyvrb">
+      <a id="x1-69032r15" name="x1-69032r15"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-69034r16" name="x1-69034r16"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;response</span><span class=
+      "pcrr7t-x-x-90">&nbsp;=</span><span class=
+      "pcrr7t-x-x-90">&nbsp;"&lt;pre&gt;\nSENDER:</span><span class="pcrr7t-x-x-90">&nbsp;%r\nIDENT:%r\nPATH:</span><span class="pcrr7t-x-x-90">&nbsp;%r\nHEADERS:%r\nBODY:%r&lt;/pre&gt;"</span><span class="pcrr7t-x-x-90">&nbsp;%</span><span class="pcrr7t-x-x-90">&nbsp;(</span><br class="fancyvrb">
+      <a id="x1-69036r17" name="x1-69036r17"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;req.sender,</span><span class=
+      "pcrr7t-x-x-90">&nbsp;req.conn_id,</span><span class=
+      "pcrr7t-x-x-90">&nbsp;req.path,</span><br class="fancyvrb">
+      <a id="x1-69038r18" name="x1-69038r18"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;json.dumps(req.headers),</span><span class="pcrr7t-x-x-90">&nbsp;req.body)</span><br class="fancyvrb">
+      <a id="x1-69040r19" name="x1-69040r19"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-69042r20" name="x1-69042r20"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;conn.reply_http(req,</span><span class=
+      "pcrr7t-x-x-90">&nbsp;response)</span>
+    </div>
+  </div>
+  <hr class="endfloat">
+  <!--l. 628-->
+
+  <p class="indent">All this code does is print back a simple
+  little dump of what it received, and it&rsquo;s not even a valid
+  HTML document. Let&rsquo;s walk through everything that&rsquo;s
+  going on:
+
+  <ol class="enumerate1">
+    <li class="enumerate" id="x1-69044x1">Import the <span class=
+    "pplri7t-">handler</span> module from <span class=
+    "pplri7t-">mongrel2</span> and <span class=
+    "pplri7t-">json</span>. The <span class="pplri7t-">json</span>
+    module is really only used for logging.
+
+    <li class="enumerate" id="x1-69046x2">Establish the UUID for
+    our handler, and create a connection. It&rsquo;s not
+    <span class="pplri7t-">really</span> a connection but more of a
+    &rdquo;virtual circuit&rdquo; that you can just pretend is a
+    connection. It&rsquo;s using all ZeroMQ and the protocol we
+    just described to then create a simple API to use.
+
+    <li class="enumerate" id="x1-69048x3">Go into a while loop
+    forever and recv request objects off the connection.
+
+    <li class="enumerate" id="x1-69050x4">One type of special
+    message we can get from Mongrel2 is a &rdquo;disconnect&rdquo;
+    message, which tells you that one of the listeners you tried to
+    talk to was closed. You should either ignore those and read
+    another, or update any internal state you may have. They can
+    come asynchronously, and for the most part you can ignore them
+    unless you need to keep them open as in say a chat application
+    or streaming.
+
+    <li class="enumerate" id="x1-69052x5">Craft the reply
+    you&rsquo;re going to send back, which is just a dump of what
+    you received.
+
+    <li class="enumerate" id="x1-69054x6">Send this reply back to
+    Mongrel2. Notice the subtle difference where you include the
+    <span class="pplri7t-">req</span> object as part of how you
+    reply? This is the major difference between this API and more
+    traditional request/response APIs in that you need the request
+    you are responding to so that it know where to send things. In
+    a normal socket based server this is just assumed to be the
+    socket you&rsquo;re talking about.
+  </ol><!--l. 649-->
+
+  <p class="indent">This is all that you need at first to do simple
+  HTTP handlers. In reality the <span class=
+  "pplri7t-">reply</span><span class="pplri7t-">_http</span> method
+  is just syntactic sugar on crafting a decent HTTP response.
+  Here&rsquo;s the actual method that is crafting these replies: 
+  <!--l. 652-->
+
+  <p class="indent"><a id="x1-69055r30" name="x1-69055r30"></a>
+  <hr class="float">
+
+  <div class="float">
+    <div class="caption">
+      <span class="id">Source 30:</span> <span class=
+      "content"><span class="pplri7t-">HTTP Response Python</span>
+      <span class="pplri7t-">Code</span></span>
+    </div><!--tex4ht:label?: x1-69055r30 -->
+
+    <div class="fancyvrb" id="fancyvrb34">
+      <a id="x1-69057r1" name="x1-69057r1"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;def</span><span class=
+      "pcrr7t-x-x-90">&nbsp;http_response(body,</span><span class=
+      "pcrr7t-x-x-90">&nbsp;code,</span><span class=
+      "pcrr7t-x-x-90">&nbsp;status,</span><span class=
+      "pcrr7t-x-x-90">&nbsp;headers):</span><br class="fancyvrb">
+      <a id="x1-69059r2" name="x1-69059r2"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;payload</span><span class=
+      "pcrr7t-x-x-90">&nbsp;=</span><span class=
+      "pcrr7t-x-x-90">&nbsp;{'code':</span><span class=
+      "pcrr7t-x-x-90">&nbsp;code,</span><span class=
+      "pcrr7t-x-x-90">&nbsp;'status':</span><span class=
+      "pcrr7t-x-x-90">&nbsp;status,</span><span class=
+      "pcrr7t-x-x-90">&nbsp;'body':</span><span class=
+      "pcrr7t-x-x-90">&nbsp;body}</span><br class="fancyvrb">
+      <a id="x1-69061r3" name="x1-69061r3"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;headers&#91;'Content-Length'&#93;</span><span class="pcrr7t-x-x-90">&nbsp;=</span><span class="pcrr7t-x-x-90">&nbsp;len(body)</span><br class="fancyvrb">
+      <a id="x1-69063r4" name="x1-69063r4"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;payload&#91;'headers'&#93;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;=</span><span class=
+      "pcrr7t-x-x-90">&nbsp;"\r\n".join('%s:</span><span class=
+      "pcrr7t-x-x-90">&nbsp;%s'</span><span class=
+      "pcrr7t-x-x-90">&nbsp;%</span><span class=
+      "pcrr7t-x-x-90">&nbsp;(k,v)</span><span class=
+      "pcrr7t-x-x-90">&nbsp;for</span><span class=
+      "pcrr7t-x-x-90">&nbsp;k,v</span><span class=
+      "pcrr7t-x-x-90">&nbsp;in</span><br class="fancyvrb">
+      <a id="x1-69065r5" name="x1-69065r5"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;headers.items())</span><br class=
+      "fancyvrb">
+      <a id="x1-69067r6" name="x1-69067r6"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-69069r7" name="x1-69069r7"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;return</span><span class=
+      "pcrr7t-x-x-90">&nbsp;HTTP_FORMAT</span><span class=
+      "pcrr7t-x-x-90">&nbsp;%</span><span class=
+      "pcrr7t-x-x-90">&nbsp;payload</span><br class="fancyvrb">
+      <a id="x1-69071r8" name="x1-69071r8"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span>
+    </div>
+  </div>
+  <hr class="endfloat">
+  <!--l. 665-->
+
+  <p class="indent">Which is then used by <span class=
+  "pplri7t-">Connection.reply</span><span class=
+  "pplri7t-">_http</span> and <span class=
+  "pplri7t-">Connection.deliver</span><span class=
+  "pplri7t-">_http</span> to send an actual HTTP response. That
+  means all this is doing is creating the raw bytes you want to go
+  to the real browser, and how it&rsquo;s delivered is irrelevant.
+  For example, the <span class=
+  "pplri7t-">deliver</span><span class="pplri7t-">_http</span>
+  method means that, yes, you can have one handler send a single
+  response to target <span class="pplri7t-">multiple</span>
+  browsers at once.
 
   <h3 class="sectionHead"><span class="titlemark">5.5</span> <a id=
-  "x1-700005.5" name="x1-700005.5"></a>Chat Demo</h3><!--l. 601-->
+  "x1-700005.5" name="x1-700005.5"></a>MP3 Streaming Demo</h3>
+  <!--l. 676-->
 
-  <p class="noindent">
+  <p class="noindent">The next example is a very simple, and well
+  kind of poorly implemented MP3 streaming demo that uses the ICY
+  protocol. ICY is a really lame protocol that was obviously
+  designed before HTTP was totally baked and probably by people who
+  don&rsquo;t really get HTTP. It works in an odd way of having
+  meta-data sent at specific sized intervals so the client can
+  display an update to the meta-data. <!--l. 683-->
+
+  <p class="indent">What the mp3streamer demo does is create a
+  streaming system by having a thread that receives requests for
+  connections, and then another thread that sends the current data
+  to all currently connected clients. Rather than go through all
+  the code you can take a look at the main file and see how simple
+  it is once you get the streaming thread right: <!--l. 690-->
+
+  <p class="indent"><a id="x1-70001r31" name="x1-70001r31"></a>
+  <hr class="float">
+
+  <div class="float">
+    <div class="caption">
+      <span class="id">Source 31:</span> <span class=
+      "content"><span class="pplri7t-">Base mp3stream</span>
+      <span class="pplri7t-">Code</span></span>
+    </div><!--tex4ht:label?: x1-70001r31 -->
+
+    <div class="fancyvrb" id="fancyvrb35">
+      <a id="x1-70003r1" name="x1-70003r1"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;from</span><span class=
+      "pcrr7t-x-x-90">&nbsp;mp3stream</span><span class=
+      "pcrr7t-x-x-90">&nbsp;import</span><span class=
+      "pcrr7t-x-x-90">&nbsp;ConnectState,</span><span class=
+      "pcrr7t-x-x-90">&nbsp;Streamer</span><br class="fancyvrb">
+      <a id="x1-70005r2" name="x1-70005r2"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;from</span><span class=
+      "pcrr7t-x-x-90">&nbsp;mongrel2</span><span class=
+      "pcrr7t-x-x-90">&nbsp;import</span><span class=
+      "pcrr7t-x-x-90">&nbsp;handler</span><br class="fancyvrb">
+      <a id="x1-70007r3" name="x1-70007r3"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;import</span><span class=
+      "pcrr7t-x-x-90">&nbsp;glob</span><br class="fancyvrb">
+      <a id="x1-70009r4" name="x1-70009r4"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-70011r5" name="x1-70011r5"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-70013r6" name="x1-70013r6"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;sender_id</span><span class=
+      "pcrr7t-x-x-90">&nbsp;=</span><span class=
+      "pcrr7t-x-x-90">&nbsp;"9703b4dd-227a-45c4-b7a1-ef62d97962b2"</span><br class="fancyvrb">
+      <a id="x1-70015r7" name="x1-70015r7"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-70017r8" name="x1-70017r8"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;CONN</span><span class=
+      "pcrr7t-x-x-90">&nbsp;=</span><span class=
+      "pcrr7t-x-x-90">&nbsp;handler.Connection(sender_id,</span><span class="pcrr7t-x-x-90">&nbsp;"tcp://127.0.0.1:9995",</span><br class="fancyvrb">
+      <a id="x1-70019r9" name="x1-70019r9"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;"tcp://127.0.0.1:9994")</span><br class="fancyvrb">
+      <a id="x1-70021r10" name="x1-70021r10"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-70023r11" name="x1-70023r11"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;MP3_FILES</span><span class=
+      "pcrr7t-x-x-90">&nbsp;=</span><span class=
+      "pcrr7t-x-x-90">&nbsp;glob.glob("&#8902;.mp3")</span><br class="fancyvrb">
+      <a id="x1-70025r12" name="x1-70025r12"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-70027r13" name="x1-70027r13"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;print</span><span class=
+      "pcrr7t-x-x-90">&nbsp;"PLAYING:",</span><span class=
+      "pcrr7t-x-x-90">&nbsp;MP3_FILES</span><br class="fancyvrb">
+      <a id="x1-70029r14" name="x1-70029r14"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-70031r15" name="x1-70031r15"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;CHUNK_SIZE</span><span class=
+      "pcrr7t-x-x-90">&nbsp;=</span><span class=
+      "pcrr7t-x-x-90">&nbsp;5</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&#8902;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;1024</span><br class="fancyvrb">
+      <a id="x1-70033r16" name="x1-70033r16"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-70035r17" name="x1-70035r17"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;STATE</span><span class=
+      "pcrr7t-x-x-90">&nbsp;=</span><span class=
+      "pcrr7t-x-x-90">&nbsp;ConnectState()</span><br class=
+      "fancyvrb">
+      <a id="x1-70037r18" name="x1-70037r18"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-70039r19" name="x1-70039r19"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;STREAMER</span><span class=
+      "pcrr7t-x-x-90">&nbsp;=</span><span class=
+      "pcrr7t-x-x-90">&nbsp;Streamer(MP3_FILES,</span><span class=
+      "pcrr7t-x-x-90">&nbsp;STATE,</span><span class=
+      "pcrr7t-x-x-90">&nbsp;CONN,</span><span class=
+      "pcrr7t-x-x-90">&nbsp;CHUNK_SIZE)</span><br class="fancyvrb">
+      <a id="x1-70041r20" name="x1-70041r20"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;STREAMER.start()</span><br class=
+      "fancyvrb">
+      <a id="x1-70043r21" name="x1-70043r21"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-70045r22" name="x1-70045r22"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-70047r23" name="x1-70047r23"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;while</span><span class=
+      "pcrr7t-x-x-90">&nbsp;True:</span><br class="fancyvrb">
+      <a id="x1-70049r24" name="x1-70049r24"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;req</span><span class=
+      "pcrr7t-x-x-90">&nbsp;=</span><span class=
+      "pcrr7t-x-x-90">&nbsp;CONN.recv()</span><br class="fancyvrb">
+      <a id="x1-70051r25" name="x1-70051r25"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-70053r26" name="x1-70053r26"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;if</span><span class=
+      "pcrr7t-x-x-90">&nbsp;req.is_disconnect():</span><br class=
+      "fancyvrb">
+      <a id="x1-70055r27" name="x1-70055r27"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;print</span><span class=
+      "pcrr7t-x-x-90">&nbsp;"DISCONNECT",</span><span class=
+      "pcrr7t-x-x-90">&nbsp;req.headers,</span><span class=
+      "pcrr7t-x-x-90">&nbsp;req.body,</span><span class=
+      "pcrr7t-x-x-90">&nbsp;req.conn_id</span><br class="fancyvrb">
+      <a id="x1-70057r28" name="x1-70057r28"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;STATE.remove(req)</span><br class=
+      "fancyvrb">
+      <a id="x1-70059r29" name="x1-70059r29"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;else:</span><br class="fancyvrb">
+      <a id="x1-70061r30" name="x1-70061r30"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;print</span><span class=
+      "pcrr7t-x-x-90">&nbsp;"REQUEST",</span><span class=
+      "pcrr7t-x-x-90">&nbsp;req.headers,</span><span class=
+      "pcrr7t-x-x-90">&nbsp;req.body</span><br class="fancyvrb">
+      <a id="x1-70063r31" name="x1-70063r31"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br class="fancyvrb">
+      <a id="x1-70065r32" name="x1-70065r32"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;if</span><span class=
+      "pcrr7t-x-x-90">&nbsp;STATE.count()</span><span class=
+      "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;20:</span><br class="fancyvrb">
+      <a id="x1-70067r33" name="x1-70067r33"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;print</span><span class=
+      "pcrr7t-x-x-90">&nbsp;"TOO</span><span class=
+      "pcrr7t-x-x-90">&nbsp;MANY",</span><span class=
+      "pcrr7t-x-x-90">&nbsp;STATE.count()</span><br class=
+      "fancyvrb">
+      <a id="x1-70069r34" name="x1-70069r34"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;CONN.reply_http(req,</span><span class=
+      "pcrr7t-x-x-90">&nbsp;"Too</span><span class=
+      "pcrr7t-x-x-90">&nbsp;Many</span><span class=
+      "pcrr7t-x-x-90">&nbsp;Connected.</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;Try</span><span class=
+      "pcrr7t-x-x-90">&nbsp;Later.")</span><br class="fancyvrb">
+      <a id="x1-70071r35" name="x1-70071r35"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;else:</span><br class="fancyvrb">
+      <a id="x1-70073r36" name="x1-70073r36"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;STATE.add(req)</span><br class=
+      "fancyvrb">
+      <a id="x1-70075r37" name="x1-70075r37"></a><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;CONN.reply_http(req,</span><span class=
+      "pcrr7t-x-x-90">&nbsp;"",</span><span class=
+      "pcrr7t-x-x-90">&nbsp;headers={'icy-metaint':</span><span class="pcrr7t-x-x-90">&nbsp;CHUNK_SIZE})</span>
+    </div>
+  </div>
+  <hr class="endfloat">
+  <!--l. 732-->
+
+  <p class="indent">Walking through this example is fairly easy,
+  assuming you just trust that the streaming thread stuff works:
+
+  <ol class="enumerate1">
+    <li class="enumerate" id="x1-70077x1">Starts off just like the
+    handler test.
+
+    <li class="enumerate" id="x1-70079x2">We figure out what .mp3
+    files are in the current directory.
+
+    <li class="enumerate" id="x1-70081x3">Establish a data chunk
+    size of 5k for the ICY protocol and make a ConnectState and
+    Streamer from that. These are the streaming thread things found
+    in <span class="pplb7t-">mp3stream.py</span> in the same
+    directory.
+
+    <li class="enumerate" id="x1-70083x4">We then loop forever,
+    accept requests.
+
+    <li class="enumerate" id="x1-70085x5">Unlike the handler, we
+    want to remove disconnected clients so we take them out of the
+    STATE when we are notified.
+
+    <li class="enumerate" id="x1-70087x6">If we have too many
+    connected clients we return a failure.
+
+    <li class="enumerate" id="x1-70089x7">Otherwise, we add them to
+    the STATE and then send the initial ICY protocol header to get
+    things going.
+  </ol><!--l. 751-->
+
+  <p class="indent">That is the base of it, and if you point
+  mplayer at it (which is the only player that works really) you
+  should hear it play:
+
+  <div class="fancyvrb" id="fancyvrb36">
+    <a id="x1-70091r1" name="x1-70091r1"></a><span class=
+    "pcrr7t-">&nbsp;</span><span class=
+    "pcrr7t-">&nbsp;&gt;</span><span class=
+    "pcrr7t-">&nbsp;mplayer</span><span class=
+    "pcrr7t-">&nbsp;http://localhost:6767/mp3stream</span>
+  </div><!--l. 758-->
+
+  <p class="indent">That is assuming you put some mp3 files into
+  the directory and started the handler again. <!--l. 761-->
+
+  <p class="indent">For more on how the actual state and the
+  protocol works, go look at mp3stream.py. Explaining it is far
+  outside the scope of this manual but the key points to realize
+  are that this is one thread that&rsquo;s targetting randomly
+  connected clients with a single message to the Mongrel2 server
+  and streaming it.
 
   <h3 class="sectionHead"><span class="titlemark">5.6</span> <a id=
-  "x1-710005.6" name="x1-710005.6"></a>MP3 Streaming Demo</h3>
-  <!--l. 604-->
+  "x1-710005.6" name="x1-710005.6"></a>Chat Demo</h3><!--l. 772-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">5.7</span> <a id=
   "x1-720005.7" name="x1-720005.7"></a>Other Language APIs</h3>
-  <!--l. 607-->
-
-  <p class="noindent">
-
-  <h4 class="subsectionHead"><span class="titlemark">5.7.1</span>
-  <a id="x1-730005.7.1" name="x1-730005.7.1"></a>Ruby Handler
-  API</h4><!--l. 610-->
-
-  <p class="noindent">
-
-  <h4 class="subsectionHead"><span class="titlemark">5.7.2</span>
-  <a id="x1-740005.7.2" name="x1-740005.7.2"></a>C++ Handler
-  API</h4><!--l. 613-->
-
-  <p class="noindent">
-
-  <h4 class="subsectionHead"><span class="titlemark">5.7.3</span>
-  <a id="x1-750005.7.3" name="x1-750005.7.3"></a>PHP Handler
-  API</h4><!--l. 616-->
-
-  <p class="noindent">
-
-  <h4 class="subsectionHead"><span class="titlemark">5.7.4</span>
-  <a id="x1-760005.7.4" name="x1-760005.7.4"></a>Writing Your
-  Own</h4><!--l. 619-->
+  <!--l. 776-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">5.8</span> <a id=
-  "x1-770005.8" name="x1-770005.8"></a>Config Database Schema</h3>
-  <!--l. 622-->
+  "x1-730005.8" name="x1-730005.8"></a>Config Database Schema</h3>
+  <!--l. 779-->
 
   <p class="noindent">
 
   <h4 class="subsectionHead"><span class="titlemark">5.8.1</span>
-  <a id="x1-780005.8.1" name="x1-780005.8.1"></a>Writing Your Own
-  m2sh</h4><!--l. 1-->
-
-  <p class="indent">
+  <a id="x1-740005.8.1" name="x1-740005.8.1"></a>Writing Your Own
+  m2sh</h4>
 
   <h2 class="chapterHead"><span class=
   "titlemark">Chapter&nbsp;6</span><br>
-  <a id="x1-790006" name="x1-790006"></a>Contributing</h2>
+  <a id="x1-750006" name="x1-750006"></a>Contributing</h2>
   <!--l. 3-->
 
   <p class="noindent">Soon...
