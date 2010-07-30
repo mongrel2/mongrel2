@@ -200,13 +200,10 @@
     &nbsp;<span class="sectionToc">5.7 <a href="#x1-720005.7" id=
     "QQ2-1-112" name="QQ2-1-112">Other Language APIs</a></span><br>
     &nbsp;<span class="sectionToc">5.8 <a href="#x1-730005.8" id=
-    "QQ2-1-113" name="QQ2-1-113">Config Database
-    Schema</a></span><br>
-    &nbsp;&nbsp;<span class="subsectionToc">5.8.1 <a href=
-    "#x1-740005.8.1" id="QQ2-1-114" name="QQ2-1-114">Writing Your
-    Own m2sh</a></span><br>
-    <span class="chapterToc">6 <a href="#x1-750006" id="QQ2-1-115"
-    name="QQ2-1-115">Contributing</a></span>
+    "QQ2-1-113" name="QQ2-1-113">Writing Your Own
+    m2sh</a></span><br>
+    <span class="chapterToc">6 <a href="#x1-740006" id="QQ2-1-114"
+    name="QQ2-1-114">Contributing</a></span>
   </div><!--l. 1-->
 
   <p class="indent">
@@ -6983,29 +6980,146 @@
   and streaming it.
 
   <h3 class="sectionHead"><span class="titlemark">5.6</span> <a id=
-  "x1-710005.6" name="x1-710005.6"></a>Chat Demo</h3><!--l. 772-->
+  "x1-710005.6" name="x1-710005.6"></a>Chat Demo</h3><!--l. 770-->
+
+  <p class="noindent">The chat demo is the most involved
+  demonstration, and I&rsquo;m kind of getting tired of leading you
+  by the hand so you go read the code. Here&rsquo;s where to look:
+
+  <dl class="description">
+    <dt class="description"><span class="pplb7t-">javascript</span>
+
+    <dd class="description">Look at <span class=
+    "pplb7t-">examples/chat/static/*.js</span> for the goodies. The
+    key is to see how <span class="pplb7t-">chat.js</span> works
+    with the JSSocket stuff, and then look at how I did
+    <span class="pplb7t-">app.js</span> using <span class=
+    "pplb7t-">fsm.js</span>.
+
+    <dt class="description"><span class="pplb7t-">python</span>
+
+    <dd class="description">Look at the <span class=
+    "pplb7t-">examples/chat/chat.py</span> file to see how the chat
+    states are maintained and how messages are sent around.
+
+    <dt class="description"><span class="pplb7t-">config</span>
+
+    <dd class="description">The configuration you created in the
+    last chapter actually works with the demo, and if you&rsquo;ve
+    been following along you should have tested it.
+  </dl><!--l. 785-->
+
+  <p class="indent">Hopefully you can figure it out from the code,
+  but if not let me know. <!--l. 788-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">5.7</span> <a id=
   "x1-720005.7" name="x1-720005.7"></a>Other Language APIs</h3>
-  <!--l. 776-->
+  <!--l. 790-->
+
+  <p class="noindent">As mentioned before there are currently APIs
+  for Ruby, C++, and PHP in addition to the Python code:
+
+  <dl class="description">
+    <dt class="description"><span class="pplb7t-">Python</span>
+
+    <dd class="description">When you installed the <span class=
+    "pplri7t-">m2sh</span> gear you also got a <span class=
+    "pplri7t-">mongrel2</span> Python library.
+
+    <dt class="description"><span class="pplb7t-">Ruby</span>
+
+    <dd class="description">Ruby support, and probably the most
+    extensive supported language, with good Rack support, by
+    <a href="http://github.com/perplexes/m2r">perplexes on
+    github</a>.
+
+    <dt class="description"><span class="pplb7t-">C++</span>
+
+    <dd class="description">C++ support by <a href=
+    "http://github.com/akrennmair/mongrel2-cpp">akrennmair on
+    github</a>
+
+    <dt class="description"><span class="pplb7t-">PHP</span>
+
+    <dd class="description">PHP support by <a href=
+    "http://github.com/winks/m2php">winks on github</a>.
+  </dl><!--l. 802-->
+
+  <p class="indent">If you want to implement another language, it
+  should be fairly trivial. Just base your design on the Python API
+  so that it is consistent, but please don&rsquo;t be a slave to
+  the Python if it doesn&rsquo;t fit the chosen language. Creating
+  a direct translation of the Python is fine at first, but try to
+  make it idiomatic after that so people who use that language feel
+  at home and it&rsquo;s easy for them. <!--l. 810-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">5.8</span> <a id=
-  "x1-730005.8" name="x1-730005.8"></a>Config Database Schema</h3>
-  <!--l. 779-->
+  "x1-730005.8" name="x1-730005.8"></a>Writing Your Own m2sh</h3>
+  <!--l. 812-->
 
-  <p class="noindent">
+  <p class="noindent">The very last thing I will cover in the
+  section on hacking Mongrel2 is how to write your own <span class=
+  "pplri7t-">m2sh</span> script in your favorite language.
+  Obviously, if you&rsquo;re doing this you should probably have a
+  good reason<span class="footnote-mark"><a href=
+  "book-final7.html#fn4x6"><sup class=
+  "textsuperscript">4</sup></a></span><a id="x1-73001f4" name=
+  "x1-73001f4"></a> What writing your own, or understanding what
+  <span class="pplri7t-">m2sh</span> is doing will do for you
+  though is help you when you start to think about automating
+  Mongrel2 for your deployments. <!--l. 819-->
 
-  <h4 class="subsectionHead"><span class="titlemark">5.8.1</span>
-  <a id="x1-740005.8.1" name="x1-740005.8.1"></a>Writing Your Own
-  m2sh</h4>
+  <p class="indent">Hopefully I may have motivated you to automate,
+  automate, automate. This is why we write software. If I wanted to
+  do stuff manually I&rsquo;d go play guitars or juggle. I write
+  software because I want a computer to do things for me, and
+  nothing needs this more than managing your systems. <!--l. 824-->
+
+  <p class="indent">This is why Mongrel2 is designed the way it is
+  using the MVC model. It lets <span class="pplri7t-">you</span>
+  create your own View like m2sh, web interfaces, automation
+  scripts, and anything else you need to make it easier to manage
+  more. <!--l. 828-->
+
+  <p class="indent">If you want to write your own <span class=
+  "pplri7t-">m2sh</span> then first go have a look at the Python
+  code in <span class="pplb7t-">examples/python/config</span>. This
+  is where each command lives, where the argument parsing is, and
+  most importantly the ORM model that works the raw SQLite
+  database. <!--l. 833-->
+
+  <p class="indent">The next thing to do is to make your tool craft
+  databases and compare the results to what m2sh does for a similar
+  configuration. I recommend you make a database that&rsquo;s
+  &rdquo;correct&rdquo; with m2sh, and then dump it via
+  <span class="pplri7t-">sqlite3</span>. After that use your tool
+  to make your own database, dump it, and then use <span class=
+  "pplri7t-">diff</span> to compare your results to mine. 
+  <!--l. 839-->
+
+  <p class="indent">Finally, the base schema files you&rsquo;ll
+  need to look at are in <span class=
+  "pplb7t-">src/config/config.sql</span> and <span class=
+  "pplb7t-">src/config/mimetypes.sql</span> where the database
+  schema is created and the large list of mimetypes that Mongrel2
+  knows is stored.<span class="footnote-mark"><a href=
+  "book-final8.html#fn5x6"><sup class=
+  "textsuperscript">5</sup></a></span><a id="x1-73002f5" name=
+  "x1-73002f5"></a> Your tool should be able to use this SQL to
+  make its database or at least know what it does. <!--l. 846-->
+
+  <p class="indent">If you do something cool with all of this, let
+  us know. <!--l. 1-->
+
+  <p class="indent">
 
   <h2 class="chapterHead"><span class=
   "titlemark">Chapter&nbsp;6</span><br>
-  <a id="x1-750006" name="x1-750006"></a>Contributing</h2>
+  <a id="x1-740006" name="x1-740006"></a>Contributing</h2>
   <!--l. 3-->
 
   <p class="noindent">Soon...

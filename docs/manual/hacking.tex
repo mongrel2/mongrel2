@@ -767,16 +767,80 @@ Mongrel2 server and streaming it.
 
 \section{Chat Demo}
 
+The chat demo is the most involved demonstration, and I'm kind of getting
+tired of leading you by the hand so you go read the code.  Here's where
+to look:
+
+\begin{description}
+\item [javascript] Look at \file{examples/chat/static/*.js} for the goodies.
+    The key is to see how \file{chat.js} works with the JSSocket stuff,
+    and then look at how I did \file{app.js} using \file{fsm.js}.
+\item [python] Look at the \file{examples/chat/chat.py} file to see how
+    the chat states are maintained and how messages are sent around.
+\item [config] The configuration you created in the last chapter
+    actually works with the demo, and if you've been following along
+    you should have tested it.
+\end{description}
+
+Hopefully you can figure it out from the code, but if not let me know.
 
 
 \section{Other Language APIs}
 
+As mentioned before there are currently APIs for Ruby, C++, and PHP in
+addition to the Python code:
 
 
-\section{Config Database Schema}
+\begin{description}
+\item [Python] When you installed the \shell{m2sh} gear you also got a \ident{mongrel2} Python library.
+\item [Ruby] Ruby support, and probably the most extensive supported language, with good Rack support, by \href{http://github.com/perplexes/m2r}{perplexes on github}.
+\item [C++] C++ support by \href{http://github.com/akrennmair/mongrel2-cpp}{akrennmair on github}
+\item [PHP] PHP support by \href{http://github.com/winks/m2php}{winks on github}.
+\end{description}
 
 
-\subsection{Writing Your Own m2sh}
+If you want to implement another language, it should be fairly trivial.
+Just base your design on the Python API so that it is consistent, but please
+don't be a slave to the Python if it doesn't fit the chosen language.
+Creating a direct translation of the Python is fine at first, but try
+to make it idiomatic after that so people who use that language feel at
+home and it's easy for them.
 
 
+\section{Writing Your Own m2sh}
 
+The very last thing I will cover in the section on hacking Mongrel2 
+is how to write your own \shell{m2sh} script in your favorite language.
+Obviously, if you're doing this you should probably have a good reason\footnote{Like you're a Ruby weenie and Python is banned at your company because they
+like dogma more than money.}  What writing your own, or understanding
+what \shell{m2sh} is doing will do for you though is help you when
+you start to think about automating Mongrel2 for your deployments.
+
+Hopefully I may have motivated you to automate, automate, automate. 
+This is why we write software.  If I wanted to do stuff manually I'd
+go play guitars or juggle.  I write software because I want a computer
+to do things for me, and nothing needs this more than managing your systems.
+
+This is why Mongrel2 is designed the way it is using the MVC model.  It
+lets \emph{you} create your own View like m2sh, web interfaces, automation
+scripts, and anything else you need to make it easier to manage more.
+
+If you want to write your own \shell{m2sh} then first go have a look at
+the Python code in \file{examples/python/config}.  This is where each
+command lives, where the argument parsing is, and most importantly the
+ORM model that works the raw SQLite database.
+
+The next thing to do is to make your tool craft databases and compare the
+results to what m2sh does for a similar configuration.  I recommend you make
+a database that's "correct" with m2sh, and then dump it via \shell{sqlite3}.
+After that use your tool to make your own database, dump it, and then use
+\shell{diff} to compare your results to mine.
+
+Finally, the base schema files you'll need to look at are in
+\file{src/config/config.sql} and \file{src/config/mimetypes.sql} where
+the database schema is created and the large list of mimetypes that 
+Mongrel2 knows is stored.\footnote{Incidentally, if you want to add one
+that's the table to put it in.}  Your tool should be able to use this
+SQL to make its database or at least know what it does.
+
+If you do something cool with all of this, let us know.
