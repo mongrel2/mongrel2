@@ -12,7 +12,7 @@
     </div>
   </div><!--l. 17-->
 
-  <p class="indent">
+  <p class="noindent">
 
   <h2 class="likechapterHead"><a id="x1-1000" name=
   "x1-1000"></a>Contents</h2>
@@ -204,9 +204,7 @@
     m2sh</a></span><br>
     <span class="chapterToc">6 <a href="#x1-740006" id="QQ2-1-114"
     name="QQ2-1-114">Contributing</a></span>
-  </div><!--l. 1-->
-
-  <p class="indent">
+  </div>
 
   <h2 class="likechapterHead"><a id="x1-2000" name=
   "x1-2000"></a>Preface</h2><!--l. 3-->
@@ -222,8 +220,8 @@
   code and save everyone a huge headache dealing with you. 
   <!--l. 11-->
 
-  <p class="indent">In case you haven&rsquo;t figured it out, this
-  book will be fun and slightly obnoxious. That&rsquo;s not
+  <p class="noindent">In case you haven&rsquo;t figured it out,
+  this book will be fun and slightly obnoxious. That&rsquo;s not
   intended to insult you, but just to keep you interested so that
   you want to read it.
 
@@ -234,7 +232,7 @@
   divided into three types of people: Steves, Edsgers, and Knuths. 
   <!--l. 21-->
 
-  <p class="indent">The Steves think that the entire internet
+  <p class="noindent">The Steves think that the entire internet
   should be a wonderful user experience where all pages are crafted
   with pixel perfect fonts with high gloss visuals and coated with
   the most happy happy joy joy of all possible experiences. To them
@@ -246,7 +244,7 @@
   would rather everything look fantastic and then use awesome
   marketing to cover up any technical flaws. <!--l. 31-->
 
-  <p class="indent">The Edsgers feel that the internet is
+  <p class="noindent">The Edsgers feel that the internet is
   completely unsafe and until it is a fully curate and crafted set
   of academic peer reviewed papers it will be a festering pile of
   dung. To the Edsgers the world is dangerous and only a truly
@@ -257,7 +255,7 @@
   painting the world with useless frivolous colors and words and
   things that lead to ambiguity and happiness. <!--l. 40-->
 
-  <p class="indent">The typography in this book, and the entire
+  <p class="noindent">The typography in this book, and the entire
   project, is for the Knuths of the world. I like to think of the
   Knuths as the practical yet professional types with a light sense
   of humor. They are the ones who are getting things done while
@@ -265,8 +263,8 @@
   functionality. They aren&rsquo;t zealots but practical straight
   forward type of people. <!--l. 47-->
 
-  <p class="indent">That is why this book is written in TeX and why
-  it uses whatever fonts TeX uses.
+  <p class="noindent">That is why this book is written in TeX and
+  why it uses whatever fonts TeX uses.
 
   <h2 class="chapterHead"><span class=
   "titlemark">Chapter&nbsp;1</span><br>
@@ -280,20 +278,19 @@
   that has WebSockets and Flash Sockets in it. That&rsquo;s it. 
   <!--l. 9-->
 
-  <p class="indent">What makes Mongrel2 special is how it satisfies
-  these requests in a <span class="pplri7t-">language</span>
-  <span class="pplri7t-">agnostic</span> and <span class=
-  "pplri7t-">asynchronous</span> way using a <span class=
-  "pplri7t-">simple messaging protocol</span> to talk to
-  <span class="pplri7t-">applications</span> not just serve files.
-  Mongrel2 is also designed to be incredibly easy to <span class=
-  "pplri7t-">automatically</span> <span class=
-  "pplri7t-">manage</span> it as part of your infrastructure. 
-  <!--l. 15-->
+  <p class="noindent">What makes Mongrel2 special is how it
+  satisfies these requests in a <span class="pplri7t-">language
+  agnostic</span> and <span class="pplri7t-">asynchronous</span>
+  way using a <span class="pplri7t-">simple messaging
+  protocol</span> to talk to <span class=
+  "pplri7t-">applications</span> not just serve files. Mongrel2 is
+  also designed to be incredibly easy to <span class=
+  "pplri7t-">automatically manage</span> it as part of your
+  infrastructure. <!--l. 15-->
 
-  <p class="indent">Other web servers do some of these things, but
-  they either do them in a bastardized way or not all of them at
-  once. Plenty of language specific web servers like Node.js and
+  <p class="noindent">Other web servers do some of these things,
+  but they either do them in a bastardized way or not all of them
+  at once. Plenty of language specific web servers like Node.js and
   Jetty have asynchronous operation, but then they&rsquo;re not
   language agnostic <span class="footnote-mark"><a href=
   "book-final2.html#fn1x2"><sup class=
@@ -303,8 +300,9 @@
   FastCGI which is <span class="pplri7t-">not</span> friendly to
   asynchronous operations. <!--l. 22-->
 
-  <p class="indent">Mongrel2 is the only web server I know of that
-  actively tries to focus on these features as a cohesive whole.
+  <p class="noindent">Mongrel2 is the only web server I know of
+  that actively tries to focus on these features as a cohesive
+  whole.
 
   <h3 class="sectionHead"><span class="titlemark">1.1</span> <a id=
   "x1-50001.1" name="x1-50001.1"></a>Language Agnostic</h3>
@@ -320,7 +318,7 @@
   messages, and getting them to your gear to meet those
   requirements. <!--l. 35-->
 
-  <p class="indent">Language Agnosticism is the most important
+  <p class="noindent">Language Agnosticism is the most important
   feature of Mongrel2 and it&rsquo;s entire purpose stems from the
   desire to reduce the amount of programming language religion in
   the world. Real people want to get things done, not wanker on
@@ -343,7 +341,7 @@
   concept that even your backends can operate asynchronously using
   simple identification of connected clients. <!--l. 51-->
 
-  <p class="indent">Other servers assume that every request is
+  <p class="noindent">Other servers assume that every request is
   received by a browser, then sent to a backend, and then directly
   sent out to the client and that&rsquo;s it. Mongrel2 assumes that
   there is a connected client, and it sends requests to backends,
@@ -352,7 +350,7 @@
   messages addressed to the client and it will write them on the
   socket. <!--l. 58-->
 
-  <p class="indent">Because of this design Mongrel2 can easily
+  <p class="noindent">Because of this design Mongrel2 can easily
   house both classic HTTP clients, keep-alive style HTTP client,
   chunked encoding responses, JSSockets, or WebSockets using the
   same code. <!--l. 63-->
@@ -373,7 +371,7 @@
   "pplri7t-">not</span> require a centralized messaging server to
   operate. <!--l. 72-->
 
-  <p class="indent">Using ZeroMQ lets Mongrel2 talk to a huge
+  <p class="noindent">Using ZeroMQ lets Mongrel2 talk to a huge
   number of languages, operate within any kind of network
   architecture, and do it with a very simple communication model
   and API that most programmers can understand. <!--l. 77-->
@@ -397,7 +395,7 @@
   server to be for applications with highly interactive interfaces.
   <!--l. 87-->
 
-  <p class="indent">Mongrel2 can still serve files just fine. In
+  <p class="noindent">Mongrel2 can still serve files just fine. In
   fact, it&rsquo;s got very accurate and easy to understand file
   serving code. However, Mongrel2 will always be about
   applications. Fast scalable awesome asynchronous or synchronous
@@ -416,7 +414,7 @@
   Python, but if you hate Python then you can write anything you
   want. <!--l. 100-->
 
-  <p class="indent">This pattern is established with servers like
+  <p class="noindent">This pattern is established with servers like
   Postfix, Exim, Sendmail, qmail, and others that convert
   configuration files to half-assed SQL databases. Mongrel2
   effectively adopts a Model-View-Controller design for its
@@ -426,13 +424,13 @@
   process that reads this file and sets itself up accordingly. 
   <!--l. 108-->
 
-  <p class="indent">The View is a Python script called m2sh that
+  <p class="noindent">The View is a Python script called m2sh that
   gives you a command line &rdquo;UI&rdquo; to configure and setup
   the Mongrel2 sqlite model. It gives you commands for managing it,
   crafting configurations, looking at them, the works. 
   <!--l. 112-->
 
-  <p class="indent">But most importantly, <span class=
+  <p class="noindent">But most importantly, <span class=
   "pplri7t-">you can write your own</span>. You don&rsquo;t have to
   wait for a Mongrel2 developer to craft a configuration file
   parser for your favorite language, or use some hack job Nagios
@@ -440,8 +438,8 @@
   simple schema and well written Python code showing you how it
   works. <!--l. 118-->
 
-  <p class="indent">Nothing stops you from automating the hell out
-  of Mongrel2 with that. <!--l. 121-->
+  <p class="noindent">Nothing stops you from automating the hell
+  out of Mongrel2 with that. <!--l. 121-->
 
   <p class="noindent">
 
@@ -453,23 +451,23 @@
   probably the best way to use it is to actually <span class=
   "pplri7t-">read it</span>. <!--l. 126-->
 
-  <p class="indent">I know, revolutionary right. I mean, who has
+  <p class="noindent">I know, revolutionary right. I mean, who has
   time to read and learn about something these days. You just want
   to get in there and get whatever problem you have done. Now! No
   time for words. You just want a straight dump right into your
   brain so that you are able to solve all your problems instantly
   and screw all this talking. <!--l. 131-->
 
-  <p class="indent">You ever ask yourself if this attitude about
+  <p class="noindent">You ever ask yourself if this attitude about
   not wanting to read and learn is possibly the reason you always
   get stuck in emergencies with no time to read and learn? 
   <!--l. 135-->
 
-  <p class="indent">Something to think about. <!--l. 137-->
+  <p class="noindent">Something to think about. <!--l. 137-->
 
-  <p class="indent">My recommendation is that you go through every
-  page of this manual and do the stuff in it. Even if you think you
-  won&rsquo;t need something, because you&rsquo;re not a
+  <p class="noindent">My recommendation is that you go through
+  every page of this manual and do the stuff in it. Even if you
+  think you won&rsquo;t need something, because you&rsquo;re not a
   programmer, or you&rsquo;re not in operations, you should learn
   it. Doing so will make the parts you do need clearer and give you
   better ideas for later.
@@ -487,15 +485,15 @@
   "pplri7t-">make all install</span> after you&rsquo;ve installed
   all the dependencies. <!--l. 10-->
 
-  <p class="indent">Now, if when I said dependencies you started to
-  groan at having to install software to use my software, well my
-  friend, welcome to the future. You said you don&rsquo;t want
+  <p class="noindent">Now, if when I said dependencies you started
+  to groan at having to install software to use my software, well
+  my friend, welcome to the future. You said you don&rsquo;t want
   people reinventing the wheel right? Great, that means you need to
   install software for my software to work. It&rsquo;s either that
   or wait 10 years for me to build everything from scratch like
   some arrogant jackass. <!--l. 17-->
 
-  <p class="indent">We good now? Great, let&rsquo;s get started.
+  <p class="noindent">We good now? Great, let&rsquo;s get started.
 
   <h3 class="sectionHead"><span class="titlemark">2.1</span> <a id=
   "x1-120002.1" name="x1-120002.1"></a>Install Dependencies</h3>
@@ -528,16 +526,18 @@
     the examples.
   </ul><!--l. 33-->
 
-  <p class="indent">If you install these things in this order, then
-  everything should be good. Typically people run into problems if
-  they do this out of order, for example trying to install Mongrel2
-  before they have distribute and pip installed. <!--l. 37-->
+  <p class="noindent">If you install these things in this order,
+  then everything should be good. Typically people run into
+  problems if they do this out of order, for example trying to
+  install Mongrel2 before they have distribute and pip installed. 
+  <!--l. 37-->
 
-  <p class="indent">Since every system is different it is difficult
-  to tell you exactly how to install required packages for your OS,
-  but here&rsquo;s how I did it on my computer: <!--l. 41-->
+  <p class="noindent">Since every system is different it is
+  difficult to tell you exactly how to install required packages
+  for your OS, but here&rsquo;s how I did it on my computer: 
+  <!--l. 41-->
 
-  <p class="indent"><a id="x1-12001r1" name="x1-12001r1"></a>
+  <p class="noindent"><a id="x1-12001r1" name="x1-12001r1"></a>
   <hr class="float">
 
   <div class="float">
@@ -688,9 +688,9 @@
   <hr class="endfloat">
   <!--l. 71-->
 
-  <p class="indent">If you run into parts that your OS is missing,
-  which is likely on Debian and SuSE systems, then you&rsquo;ll
-  have to go and figure out how to install it.
+  <p class="noindent">If you run into parts that your OS is
+  missing, which is likely on Debian and SuSE systems, then
+  you&rsquo;ll have to go and figure out how to install it.
 
   <h3 class="sectionHead"><span class="titlemark">2.2</span> <a id=
   "x1-130002.2" name="x1-130002.2"></a>Building Mongrel2</h3>
@@ -700,7 +700,7 @@
   grab the Mongrel2 source and try building it. There&rsquo;s two
   ways you can get the source code to Mongrel2: <!--l. 82-->
 
-  <p class="indent">
+  <p class="noindent">
 
   <ol class="enumerate1">
     <li class="enumerate" id="x1-13002x1">Install <a href=
@@ -722,7 +722,7 @@
   track the latest fixes and development. Here&rsquo;s the easiest
   way to do that: <!--l. 93-->
 
-  <p class="indent">
+  <p class="noindent">
 
   <ol class="enumerate1">
     <li class="enumerate" id="x1-14002x1">Go to <a href=
@@ -739,10 +739,10 @@
     us know since we might need to upgrade.
   </ol><!--l. 102-->
 
-  <p class="indent">Once you have fossil you can then get the
+  <p class="noindent">Once you have fossil you can then get the
   Mongrel2 source and open it up: <!--l. 104-->
 
-  <p class="indent"><a id="x1-14007r2" name="x1-14007r2"></a>
+  <p class="noindent"><a id="x1-14007r2" name="x1-14007r2"></a>
   <hr class="float">
 
   <div class="float">
@@ -786,15 +786,15 @@
   <hr class="endfloat">
   <!--l. 114-->
 
-  <p class="indent">Make sure you do this in order (just like with
-  every set of instructions you should follow) or else you&rsquo;ll
-  get errors. For example, if you don&rsquo;t make the <span class=
-  "pplb7t-">&nbsp;/fossils</span> directory then you&rsquo;ll get
-  an error saying fossil can&rsquo;t open your file to clone. Well,
-  that&rsquo;s because you <span class="pplri7t-">didn&rsquo;t make
-  the</span> <span class="pplri7t-">&nbsp;/fossils
-  directory</span>. Just pay attention and don&rsquo;t blame fossil
-  if you can&rsquo;t.
+  <p class="noindent">Make sure you do this in order (just like
+  with every set of instructions you should follow) or else
+  you&rsquo;ll get errors. For example, if you don&rsquo;t make the
+  <span class="pplb7t-">&nbsp;/fossils</span> directory then
+  you&rsquo;ll get an error saying fossil can&rsquo;t open your
+  file to clone. Well, that&rsquo;s because you <span class=
+  "pplri7t-">didn&rsquo;t make the</span> <span class=
+  "pplri7t-">&nbsp;/fossils directory</span>. Just pay attention
+  and don&rsquo;t blame fossil if you can&rsquo;t.
 
   <h4 class="subsectionHead"><span class="titlemark">2.2.2</span>
   <a id="x1-150002.2.2" name="x1-150002.2.2"></a>Using The .zip
@@ -808,7 +808,7 @@
   release, so using the .zip file is effectively a lame way of
   avoiding using fossil. <!--l. 129-->
 
-  <p class="indent">
+  <p class="noindent">
 
   <ol class="enumerate1">
     <li class="enumerate" id="x1-15002x1">Login as an anonymous
@@ -835,14 +835,15 @@
   build it and then install it with one command: <span class=
   "pplri7t-">make all install</span> <!--l. 142-->
 
-  <p class="indent">There is no <span class=
+  <p class="noindent">There is no <span class=
   "pplri7t-">./configure</span> for Mongrel2 since we avoid too
   many OS specific differences or shield those away with good
   feature checks in the code. <!--l. 145-->
 
-  <p class="indent">The end result of this should be: <!--l. 147-->
+  <p class="noindent">The end result of this should be: 
+  <!--l. 147-->
 
-  <p class="indent">
+  <p class="noindent">
 
   <ol class="enumerate1">
     <li class="enumerate" id="x1-16002x1">Mongrel2 builds and
@@ -861,13 +862,13 @@
     binary gets installed.
   </ol><!--l. 155-->
 
-  <p class="indent">If any of these stages fail, then you can
+  <p class="noindent">If any of these stages fail, then you can
   simply try to fix them and then run: <span class=
   "pplri7t-">make</span> <span class="pplri7t-">clean all
   install</span> which will do everything all over again. 
   <!--l. 158-->
 
-  <p class="indent">The most common error is if you didn&rsquo;t
+  <p class="noindent">The most common error is if you didn&rsquo;t
   install pip or distribute and insist on using your own
   system&rsquo;s package management. Do <span class=
   "pplri7t-">not</span> report bugs about your own flavor of
@@ -876,7 +877,7 @@
   other Python programmer uses then you&rsquo;re on your own. 
   <!--l. 164-->
 
-  <p class="indent"><a id="x1-16011r1" name="x1-16011r1"></a>
+  <p class="noindent"><a id="x1-16011r1" name="x1-16011r1"></a>
   <hr class="float">
 
   <div class="float">
@@ -889,9 +890,9 @@
     <div class="quote">
       <!--l. 165-->
 
-      <p class="noindent">For those who still want to use the
-      package management but want to use pip and distribute I
-      suggest you check out <a href=
+      <p class="indent">For those who still want to use the package
+      management but want to use pip and distribute I suggest you
+      check out <a href=
       "http://pypi.python.org/pypi/virtualenv">virtualenv</a>. What
       virtualenv does is create a little &rdquo;chroot
       install&rdquo; of just the packages you need using pip or
@@ -911,7 +912,7 @@
   "pplb7t-">tests/config.sqlite</span> that you can use to try it
   out: <!--l. 179-->
 
-  <p class="indent"><a id="x1-17001r3" name="x1-17001r3"></a>
+  <p class="noindent"><a id="x1-17001r3" name="x1-17001r3"></a>
   <hr class="float">
 
   <div class="float">
@@ -959,14 +960,14 @@
   <hr class="endfloat">
   <!--l. 189-->
 
-  <p class="indent">That&rsquo;s it. Just hit CTRL-c for now and
+  <p class="noindent">That&rsquo;s it. Just hit CTRL-c for now and
   we&rsquo;ll get into playing with this setup later.
 
   <h3 class="sectionHead"><span class="titlemark">2.5</span> <a id=
   "x1-180002.5" name="x1-180002.5"></a>Upgrading from trunk</h3>
   <!--l. 193-->
 
-  <p class="indent"><a id="x1-18001r4" name="x1-18001r4"></a>
+  <p class="noindent"><a id="x1-18001r4" name="x1-18001r4"></a>
   <hr class="float">
 
   <div class="float">
@@ -1009,9 +1010,7 @@
   installed and the m2sh configuration interface ready to go. In
   the rest of this manual we&rsquo;ll be simply learning how to do
   more with Mongrel2 like making our own configs, writing handlers,
-  and other fun stuff. <!--l. 1-->
-
-  <p class="indent">
+  and other fun stuff.
 
   <h2 class="chapterHead"><span class=
   "titlemark">Chapter&nbsp;3</span><br>
@@ -1025,13 +1024,13 @@
   access the configuration using any language that works for you,
   augment it, alter it, migrate it, and automate it. <!--l. 9-->
 
-  <p class="indent">In this chapter I&rsquo;m going to show you how
-  to make a basic configuration using m2sh and all the commands
+  <p class="noindent">In this chapter I&rsquo;m going to show you
+  how to make a basic configuration using m2sh and all the commands
   that are available. You&rsquo;ll learn how the configuration
   system is structured so that you know what goes where, but in the
   end it&rsquo;s just a simple storage mechanism. <!--l. 14-->
 
-  <p class="indent"><a id="x1-20001r2" name="x1-20001r2"></a>
+  <p class="noindent"><a id="x1-20001r2" name="x1-20001r2"></a>
   <hr class="float">
 
   <div class="float">
@@ -1044,30 +1043,30 @@
     <div class="quote">
       <!--l. 15-->
 
-      <p class="noindent">When I first started talking about
-      Mongrel2 I said I&rsquo;d store the configuration in SQLite
-      and do a Model-View-Controller kind of design. Immediately
-      people who can&rsquo;t read flipped out and though this meant
+      <p class="indent">When I first started talking about Mongrel2
+      I said I&rsquo;d store the configuration in SQLite and do a
+      Model-View-Controller kind of design. Immediately people who
+      can&rsquo;t read flipped out and though this meant
       they&rsquo;d be back in &rdquo;windows registry hell&rdquo;
       but with SQL as their only way to access it. They thought
       that they&rsquo;d be stuck writing configurations with SQL.
       That SQL couldn&rsquo;t possibly configure a web server. 
       <!--l. 21-->
 
-      <p class="noindent">They were wrong on many levels. Nobody
-      was <span class="pplri7t-">ever</span> going to make
-      <span class="pplri7t-">anyone</span> use SQL. That was
-      repeated over and over, but again, people don&rsquo;t read
-      and love spreading FUD. The SQLite config database is nothing
-      like the Windows Registry. No other web server really uses a
-      true hierarchy, they just cram a relational model into a
-      weirdo configuration format. The real goal was to make a web
-      server that was easy to manage from <span class=
-      "pplri7t-">any</span> language, and then give people a nice
-      tool to get their job done without having to ever touch SQL.
-      <span class="pplri7t-">EVER!</span> <!--l. 29-->
+      <p class="indent">They were wrong on many levels. Nobody was
+      <span class="pplri7t-">ever</span> going to make <span class=
+      "pplri7t-">anyone</span> use SQL. That was repeated over and
+      over, but again, people don&rsquo;t read and love spreading
+      FUD. The SQLite config database is nothing like the Windows
+      Registry. No other web server really uses a true hierarchy,
+      they just cram a relational model into a weirdo configuration
+      format. The real goal was to make a web server that was easy
+      to manage from <span class="pplri7t-">any</span> language,
+      and then give people a nice tool to get their job done
+      without having to ever touch SQL. <span class=
+      "pplri7t-">EVER!</span> <!--l. 29-->
 
-      <p class="noindent">In the end, what we got despite all this
+      <p class="indent">In the end, what we got despite all this
       fear mongering is a bad ass configuration tool and a design
       that is simple, elegant, and works fantastic. If you read
       that Mongrel2 uses SQLite and though this was weird, well
@@ -1091,7 +1090,7 @@
   the user (View) then it&rsquo;s easier to change the system and
   adapt it over time to new features. <!--l. 44-->
 
-  <p class="indent">The power of MVC is simply that these things
+  <p class="noindent">The power of MVC is simply that these things
   really are separate orthogonal pieces that get ugly if
   they&rsquo;re mixed together. There&rsquo;s not math or theory
   that says why, just lots of experience has told us it&rsquo;s
@@ -1102,7 +1101,7 @@
   stored procedures that assume the tables are a certain way. 
   <!--l. 51-->
 
-  <p class="indent">Mongrel2 needed a way to allow you to use
+  <p class="noindent">Mongrel2 needed a way to allow you to use
   various languages and tools to automate its configuration.
   Letting you automate your deployments is the entire point of the
   server. The idea was that if we gave you the Controller and the
@@ -1112,24 +1111,24 @@
   language, portable, small, fast enough, and full of all the
   features you need and then some. <!--l. 57-->
 
-  <p class="indent">What you are doing when you use m2sh to
+  <p class="noindent">What you are doing when you use m2sh to
   configure a configuration for Mongrel2 is working with a View
   we&rsquo;ve given you to create a Model for the Mongrel2 server
   to work with. That&rsquo;s it, and you can create your own View
   if you want. It could be automated deployment scripts, a web
   interface, monitoring scripts, anything you need. <!--l. 62-->
 
-  <p class="indent">The point is, if you just want to get Mongrel2
-  up and running, then use m2sh. If you want to do more advanced
-  stuff, then get into the configuration database schema and see
-  what you can do. The structure of the database very closely
-  matches Mongrel2&rsquo;s internal structure, so understanding
-  that means you understand how Mongrel2 works. This is a vast
-  improvement over other web servers like Apache where you&rsquo;ve
-  got no idea why one stanza has to go in a particular place, or
-  why information has to be duplicated. <!--l. 69-->
+  <p class="noindent">The point is, if you just want to get
+  Mongrel2 up and running, then use m2sh. If you want to do more
+  advanced stuff, then get into the configuration database schema
+  and see what you can do. The structure of the database very
+  closely matches Mongrel2&rsquo;s internal structure, so
+  understanding that means you understand how Mongrel2 works. This
+  is a vast improvement over other web servers like Apache where
+  you&rsquo;ve got no idea why one stanza has to go in a particular
+  place, or why information has to be duplicated. <!--l. 69-->
 
-  <p class="indent">With Mongrel2 it&rsquo;s all right there. 
+  <p class="noindent">With Mongrel2 it&rsquo;s all right there. 
   <!--l. 72-->
 
   <p class="noindent">
@@ -1142,7 +1141,7 @@
   Let&rsquo;s try doing a few of the most basic commands with this
   configuration: <!--l. 77-->
 
-  <p class="indent"><a id="x1-22001r5" name="x1-22001r5"></a>
+  <p class="noindent"><a id="x1-22001r5" name="x1-22001r5"></a>
   <hr class="float">
 
   <div class="float">
@@ -1201,19 +1200,18 @@
   <hr class="endfloat">
   <!--l. 87-->
 
-  <p class="indent">At this point you should have seen some raw
+  <p class="noindent">At this point you should have seen some raw
   dumps of the database, lists of servers and hosts, seen that
   mongrel2 is not running, and then started it. You can find out
   about all the commands and get help for them with <span class=
-  "pplri7t-">m2sh help</span> or <span class="pplri7t-">ms2h
-  help</span> <span class="pplri7t-">-for command</span>. 
-  <!--l. 91-->
+  "pplri7t-">m2sh help</span> or <span class="pplri7t-">ms2h help
+  -for</span> <span class="pplri7t-">command</span>. <!--l. 91-->
 
-  <p class="indent">You can now try doing some simple starting,
+  <p class="noindent">You can now try doing some simple starting,
   stopping and reloading using sudo (make sure you CTRL-c to exit
   from the previous start command): <!--l. 94-->
 
-  <p class="indent"><a id="x1-22012r6" name="x1-22012r6"></a>
+  <p class="noindent"><a id="x1-22012r6" name="x1-22012r6"></a>
   <hr class="float">
 
   <div class="float">
@@ -1290,7 +1288,7 @@
   <hr class="endfloat">
   <!--l. 107-->
 
-  <p class="indent">Awesome right? Using just this one little
+  <p class="noindent">Awesome right? Using just this one little
   Python management script you are able to completely manage a
   mongrel2 instance without having to hack on a config file at all.
   But you probably need to know how this is all working anyway.
@@ -1304,7 +1302,7 @@
   going on. Here&rsquo;s an explanation of what&rsquo;s going on
   behind the scenes: <!--l. 118-->
 
-  <p class="indent">
+  <p class="noindent">
 
   <ol class="enumerate1">
     <li class="enumerate" id="x1-23002x1">When you did <span class=
@@ -1348,7 +1346,7 @@
     by you, you can do that without having to use sudo.
   </ol><!--l. 137-->
 
-  <p class="indent">All of this is happening by reading the
+  <p class="noindent">All of this is happening by reading the
   <span class="pplb7t-">tests/config.sqlite</span> file and not
   reading any configuration files. You can now try building your
   own configuration that matches this one or some others. 
@@ -1371,15 +1369,16 @@
   configuration like it&rsquo;s code and you&rsquo;re set. 
   <!--l. 151-->
 
-  <p class="indent">The first thing you need to do is initialize a
-  fresh configuration database to get started by using <span class=
-  "pplri7t-">m2sh init</span> and then you load your configuration
-  using <span class="pplri7t-">m2sh load</span>. As an example,
-  we&rsquo;ll use the example configuration from <span class=
+  <p class="noindent">The first thing you need to do is initialize
+  a fresh configuration database to get started by using
+  <span class="pplri7t-">m2sh init</span> and then you load your
+  configuration using <span class="pplri7t-">m2sh load</span>. As
+  an example, we&rsquo;ll use the example configuration from
+  <span class=
   "pplb7t-">examples/python/tests/sample</span><span class=
   "pplb7t-">_conf.py</span> to make a simple one: <!--l. 156-->
 
-  <p class="indent"><a id="x1-24001r7" name="x1-24001r7"></a>
+  <p class="noindent"><a id="x1-24001r7" name="x1-24001r7"></a>
   <hr class="float">
 
   <div class="float">
@@ -1555,12 +1554,12 @@
   <hr class="endfloat">
   <!--l. 180-->
 
-  <p class="indent">If you aren&rsquo;t familiar with Python then
+  <p class="noindent">If you aren&rsquo;t familiar with Python then
   this code might look freaky, but it&rsquo;s really simple. Well
   get into how its structured in a second, but to load this file we
   would just do this: <!--l. 184-->
 
-  <p class="indent"><a id="x1-24040r8" name="x1-24040r8"></a>
+  <p class="noindent"><a id="x1-24040r8" name="x1-24040r8"></a>
   <hr class="float">
 
   <div class="float">
@@ -1619,7 +1618,7 @@
   <hr class="endfloat">
   <!--l. 194-->
 
-  <p class="indent">With this sequence of commands you:
+  <p class="noindent">With this sequence of commands you:
 
   <ol class="enumerate1">
     <li class="enumerate" id="x1-24052x1">Create a raw fresh config
@@ -1639,7 +1638,7 @@
     it out.
   </ol><!--l. 204-->
 
-  <p class="indent">By now you should be getting the hang of the
+  <p class="noindent">By now you should be getting the hang of the
   pattern here, which is to use m2sh and little Python
   configuration &rdquo;script&rdquo; to generate .sqlite files that
   Mongrel2 understands.
@@ -1693,9 +1692,9 @@
     processed ZeroMQ messages for your asynchronous handlers.
   </dl><!--l. 228-->
 
-  <p class="indent">Each of these nested &rdquo;objects&rdquo; then
-  has a set of attributes you can use to configure them, and most
-  of them have reasonable defaults. <!--l. 232-->
+  <p class="noindent">Each of these nested &rdquo;objects&rdquo;
+  then has a set of attributes you can use to configure them, and
+  most of them have reasonable defaults. <!--l. 232-->
 
   <p class="noindent">
 
@@ -1840,7 +1839,7 @@
     "pplri7t-">Proxy</span>.
   </dl><!--l. 283-->
 
-  <p class="indent">Later on you&rsquo;ll learn about the pattern
+  <p class="noindent">Later on you&rsquo;ll learn about the pattern
   matching that&rsquo;s used, but it&rsquo;s basically a stripped
   down version of your normal regular expressions, but with a few
   convenient syntaxes for doing simple string matching. When you
@@ -1889,9 +1888,9 @@
     matches the MIMEType table.
   </dl><!--l. 305-->
 
-  <p class="indent">Currently we don&rsquo;t offer more parameters
-  for configuration, but eventually you&rsquo;ll be able to tweak
-  more and more of the settings to control out Dirs work. 
+  <p class="noindent">Currently we don&rsquo;t offer more
+  parameters for configuration, but eventually you&rsquo;ll be able
+  to tweak more and more of the settings to control out Dirs work. 
   <!--l. 308-->
 
   <p class="noindent">
@@ -1919,7 +1918,7 @@
     <dd class="description">The port to connect to.
   </dl><!--l. 323-->
 
-  <p class="indent">Requests that match a Proxy route are still
+  <p class="noindent">Requests that match a Proxy route are still
   parsed by Mongrel2&rsquo;s incredibly accurate HTTP parser so
   that your backend servers should not be receiving badly formatted
   HTTP requests. Responses from a Proxy server however are sent
@@ -1975,7 +1974,7 @@
     to the same as send_ident.
   </dl><!--l. 350-->
 
-  <p class="indent">The interesting thing about the <span class=
+  <p class="noindent">The interesting thing about the <span class=
   "pplri7t-">Handler</span> configuration is you don&rsquo;t have
   to say where the actual backend handlers live. Notice you
   aren&rsquo;t declaring large clusters of proxies, proxy selection
@@ -2015,7 +2014,7 @@
   "pplb7t-">examples/python/tests/mongrel2</span><span class=
   "pplb7t-">_org.py</span>: <!--l. 372-->
 
-  <p class="indent"><a id="x1-33001r9" name="x1-33001r9"></a>
+  <p class="noindent"><a id="x1-33001r9" name="x1-33001r9"></a>
   <hr class="float">
 
   <div class="float">
@@ -2499,7 +2498,7 @@
   <hr class="endfloat">
   <!--l. 430-->
 
-  <p class="indent">If you haven&rsquo;t guessed yet, this
+  <p class="noindent">If you haven&rsquo;t guessed yet, this
   configuration is what&rsquo;s used on <a href=
   "http://mongrel2.org" class="url"><span class=
   "pcrr7t-">http://mongrel2.org</span></a> to configure the main
@@ -2566,7 +2565,7 @@
     and the settings to use.
   </ol><!--l. 456-->
 
-  <p class="indent">And that my friends is the most complex
+  <p class="noindent">And that my friends is the most complex
   configuration we have so far.
 
   <h3 class="sectionHead"><span class="titlemark">3.6</span> <a id=
@@ -2584,15 +2583,15 @@
   doesn&rsquo;t have a pattern then it&rsquo;s assumed to match and
   you&rsquo;re done. <!--l. 468-->
 
-  <p class="indent">The only caveat is you have to wrap your
+  <p class="noindent">The only caveat is you have to wrap your
   pattern parts in parenthesis, but these don&rsquo;t mean anything
   other than to delimit where a pattern starts. So instead of
   <span class="pplri7t-">/images/.*.jpg</span> write <span class=
   "pplri7t-">/images/(.*.jpg)</span> for it to work right. 
   <!--l. 472-->
 
-  <p class="indent">Here&rsquo;s the list of characters you can use
-  in your patterns:
+  <p class="noindent">Here&rsquo;s the list of characters you can
+  use in your patterns:
 
   <ul class="itemize1">
     <li class="itemize"><span class=
@@ -2641,7 +2640,7 @@
 
     <li class="itemize"><span class=
     "obeylines-h verb pcrr7t-">&#91;^set&#93;</span> Inverse character set,
-    so &#91;<img src="book-final0x.png" alt="^ 0 " class="circ">-9&#93; is
+    so &#91;<img src="book-final0x.png" alt="^0 " class="circ">-9&#93; is
     anything not digits.
 
     <li class="itemize"><span class=
@@ -2671,7 +2670,7 @@
     <li class="itemize">$ End of the string.
   </ul><!--l. 498-->
 
-  <p class="indent">Anything that&rsquo;s not listed here just
+  <p class="noindent">Anything that&rsquo;s not listed here just
   matches that character. Remember also that when you write the
   Python code for your scripts you can use the <span class=
   "obeylines-h verb pcrr7t-">r'blah'</span> string syntax to avoid
@@ -2679,7 +2678,7 @@
   "obeylines-h verb pcrr7t-">\</span> characters in the string. 
   <!--l. 502-->
 
-  <p class="indent"><a id="x1-34001r3" name="x1-34001r3"></a>
+  <p class="noindent"><a id="x1-34001r3" name="x1-34001r3"></a>
   <hr class="float">
 
   <div class="float">
@@ -2692,13 +2691,13 @@
     <div class="quote">
       <!--l. 503-->
 
-      <p class="noindent">Yep, I get it. You think that everyone
+      <p class="indent">Yep, I get it. You think that everyone
       should use UTF-8 or some Unicode encoding for everything. You
       despise the dominance of the &rsquo;A&rsquo; in ASCII and
       hate that you can&rsquo;t put your spoken language right in a
       URL. <!--l. 507-->
 
-      <p class="noindent">Well, I hate to say it, but tough.
+      <p class="indent">Well, I hate to say it, but tough.
       Protocols are hard enough without having to worry about the
       bewildering mess that is Unicode. When you sit down to write
       a network protocol, the last thing you need is a format
@@ -2708,7 +2707,7 @@
       ASCII every computer just knows what it is and it&rsquo;s the
       fastest for creating wire protocol formats. <!--l. 515-->
 
-      <p class="noindent">This is why, on the internet, you have to
+      <p class="indent">This is why, on the internet, you have to
       do things to URLs to make them ASCII like encoding them with
       % signs. It&rsquo;s in the standard and it&rsquo;s the smart
       thing to do. I don&rsquo;t want to have to know the
@@ -2719,7 +2718,7 @@
       standard is and the way to get a server that is stable and
       works. <!--l. 523-->
 
-      <p class="noindent">Protocols work better when there&rsquo;s
+      <p class="indent">Protocols work better when there&rsquo;s
       less politics in their design. This means you can&rsquo;t put
       Unicode into your URL patterns. I mean you can try but the
       behavior is completely undefined.
@@ -2728,8 +2727,8 @@
   <hr class="endfloat">
   <!--l. 530-->
 
-  <p class="indent">Here&rsquo;s some example routes you can try to
-  get a feel for the system:
+  <p class="noindent">Here&rsquo;s some example routes you can try
+  to get a feel for the system:
 
   <ul class="itemize1">
     <li class="itemize">r&rdquo;<span class=
@@ -2758,7 +2757,7 @@
     period.
   </ul><!--l. 541-->
 
-  <p class="indent">That should give the idea of how you can use
+  <p class="noindent">That should give the idea of how you can use
   them. Notice also that I&rsquo;m using the Python <span class=
   "obeylines-h verb pcrr7t-">r"blah"</span> string syntax which is
   interchangeable with the <span class=
@@ -2779,13 +2778,13 @@
   server they did it on, what time they did it, and what they did. 
   <!--l. 554-->
 
-  <p class="indent">To see the logs for your own tests just do
+  <p class="noindent">To see the logs for your own tests just do
   <span class="pplri7t-">m2sh log -db simple.sqlite</span> and then
   if you want to add a commit log message you use the <span class=
   "pplri7t-">m2sh commit</span> command. Here&rsquo;s an example
   from mongrel2.org: <!--l. 558-->
 
-  <p class="indent"><a id="x1-35001r10" name="x1-35001r10"></a>
+  <p class="noindent"><a id="x1-35001r10" name="x1-35001r10"></a>
   <hr class="float">
 
   <div class="float">
@@ -2846,7 +2845,7 @@
   <hr class="endfloat">
   <!--l. 573-->
 
-  <p class="indent">The motivation for this feature is the trend
+  <p class="noindent">The motivation for this feature is the trend
   that operations store server configurations in revision control
   systems like git or etckeeper. This works great for holding the
   configuration files, but it doesn&rsquo;t tell you what happened
@@ -2855,16 +2854,14 @@
   and commits system you can augment your revision control with
   deployment action tracking. <!--l. 579-->
 
-  <p class="indent">Later versions of Mongrel2 will keep small
+  <p class="noindent">Later versions of Mongrel2 will keep small
   amounts of statistics which will link these actions to changes in
   Mongrel2 behavior like frequent crashing, failures, slowness, or
   other problems. <!--l. 582-->
 
-  <p class="indent">Basically, there&rsquo;s nowhere to hide.
+  <p class="noindent">Basically, there&rsquo;s nowhere to hide.
   Mongrel2 will help operations figure out who needs to get fired
-  the next time Twitter goes down. <!--l. 1-->
-
-  <p class="indent">
+  the next time Twitter goes down.
 
   <h2 class="chapterHead"><span class=
   "titlemark">Chapter&nbsp;4</span><br>
@@ -2919,11 +2916,11 @@
     basic Python.
   </dl><!--l. 27-->
 
-  <p class="indent">That will get you going at first, and as we go
-  we&rsquo;ll do various other setups to get our application
+  <p class="noindent">That will get you going at first, and as we
+  go we&rsquo;ll do various other setups to get our application
   working. <!--l. 30-->
 
-  <p class="indent"><a id="x1-37001r4" name="x1-37001r4"></a>
+  <p class="noindent"><a id="x1-37001r4" name="x1-37001r4"></a>
   <hr class="float">
 
   <div class="float">
@@ -2936,19 +2933,19 @@
     <div class="quote">
       <!--l. 31-->
 
-      <p class="noindent">Why should you learn programming? The
-      trend is that if you are a system administrator who
-      can&rsquo;t code then you are on your way out. Eventually
-      you&rsquo;ll be in charge of automating systems not manually
-      managing them, and if you don&rsquo;t believe me then what do
-      you think all those managed service companies are doing?
-      Alright, so you need to learn to code, but most of the books
-      suck for really learning if you know nothing. <!--l. 37-->
+      <p class="indent">Why should you learn programming? The trend
+      is that if you are a system administrator who can&rsquo;t
+      code then you are on your way out. Eventually you&rsquo;ll be
+      in charge of automating systems not manually managing them,
+      and if you don&rsquo;t believe me then what do you think all
+      those managed service companies are doing? Alright, so you
+      need to learn to code, but most of the books suck for really
+      learning if you know nothing. <!--l. 37-->
 
-      <p class="noindent">This is why I started my own book
-      <a href="http://learnpythonthehardway.org">Learn Python The
-      Hard Way</a> for people who know nothing about programming
-      but need or want to learn. It teaches Python but it mostly
+      <p class="indent">This is why I started my own book <a href=
+      "http://learnpythonthehardway.org">Learn Python The Hard
+      Way</a> for people who know nothing about programming but
+      need or want to learn. It teaches Python but it mostly
       teaches all the things programmers actually learn before they
       learn programming. When you&rsquo;re done with my book
       you&rsquo;ll have your &rdquo;programming brown belt&rdquo;.
@@ -2956,11 +2953,11 @@
       online books and really learn programming, and have a higher
       chance of actually learning it. <!--l. 45-->
 
-      <p class="noindent">If you can&rsquo;t code Python then you
-      can probably muddle through this and you may learn something,
-      but learning Python will be important later. <!--l. 48-->
+      <p class="indent">If you can&rsquo;t code Python then you can
+      probably muddle through this and you may learn something, but
+      learning Python will be important later. <!--l. 48-->
 
-      <p class="noindent">But <span class=
+      <p class="indent">But <span class=
       "pplri7t-">don&rsquo;t</span> read &rdquo;Dive Into
       Python&rdquo; as it is a horrible introduction.
     </div>
@@ -2981,7 +2978,7 @@
   them into your boot process and all sorts of crazy antics just so
   you can run a stupid hello world demo. <!--l. 61-->
 
-  <p class="indent">What I needed was a &rdquo;user space process
+  <p class="noindent">What I needed was a &rdquo;user space process
   manager&rdquo;. These are programs that run other programs, but
   more importantly try to keep those other programs running without
   much human intervention. When you need to deploy a ton of
@@ -2991,8 +2988,8 @@
   gear and watches them. If any of the processes crash they try to
   restart them. Very simple. <!--l. 68-->
 
-  <p class="indent">There&rsquo;s just one catch, all of them suck.
-  There&rsquo;s <a href=
+  <p class="noindent">There&rsquo;s just one catch, all of them
+  suck. There&rsquo;s <a href=
   "http://cr.yp.to/daemontools.html">daemontools</a> which barely
   builds (if at all) and then assumes that daemons don&rsquo;t
   fork. Stupid. There&rsquo;s <a href=
@@ -3007,19 +3004,19 @@
   worst C code I&rsquo;ve seen in years and has the same weird
   design as daemontools. <!--l. 78-->
 
-  <p class="indent">After trying every single one I just gave up.
+  <p class="noindent">After trying every single one I just gave up.
   Either they didn&rsquo;t build, were too complex, expected to be
   the one true init, poorly documented, not maintained, and
   definitely not going to work for this manual. My only choice was
   to shave a yak and write my own. <!--l. 82-->
 
-  <p class="indent">The end result is <span class=
+  <p class="noindent">The end result is <span class=
   "pplri7t-">procer</span> which lives in <span class=
   "pplb7t-">examples/procer</span> and does most of what you need
   in a USPM. It works a lot like daemontools or minit but is much
   simpler with these differences: <!--l. 86-->
 
-  <p class="indent">
+  <p class="noindent">
 
   <ol class="enumerate1">
     <li class="enumerate" id="x1-38002x1">It is much simpler, with
@@ -3062,10 +3059,10 @@
     or use it like the others.
   </ol><!--l. 108-->
 
-  <p class="indent">Of course, if you have something else you like
-  then please use it. Anything that automates process management
-  will be your friend. In this manual, to keep things simple and
-  easily understood I&rsquo;ll be using <span class=
+  <p class="noindent">Of course, if you have something else you
+  like then please use it. Anything that automates process
+  management will be your friend. In this manual, to keep things
+  simple and easily understood I&rsquo;ll be using <span class=
   "pplri7t-">procer</span> to tell you how to setup everything. 
   <!--l. 112-->
 
@@ -3081,7 +3078,7 @@
   Here&rsquo;s how you&rsquo;d install it totally from scratch as
   if you hadn&rsquo;t even build Mongrel2 yet: <!--l. 118-->
 
-  <p class="indent"><a id="x1-39001r11" name="x1-39001r11"></a>
+  <p class="noindent"><a id="x1-39001r11" name="x1-39001r11"></a>
   <hr class="float">
 
   <div class="float">
@@ -3123,14 +3120,14 @@
   <hr class="endfloat">
   <!--l. 127-->
 
-  <p class="indent">That&rsquo;s the entire install process, and
+  <p class="noindent">That&rsquo;s the entire install process, and
   now procer is in <span class="pplb7t-">/usr/local/bin</span> so
   you can use it. In the rest of this chapter you&rsquo;ll learn
   how to use <span class="pplri7t-">procer</span> by just setting
   up the Mongrel2 demo completely and messing around with it. 
   <!--l. 132-->
 
-  <p class="indent"><a id="x1-39010r5" name="x1-39010r5"></a>
+  <p class="noindent"><a id="x1-39010r5" name="x1-39010r5"></a>
   <hr class="float">
 
   <div class="float">
@@ -3144,17 +3141,17 @@
     <div class="quote">
       <!--l. 133-->
 
-      <p class="noindent">I&rsquo;m sure there&rsquo;s some
-      neckbeard who&rsquo;s reading this and immediately starts
-      complaining that procer doesn&rsquo;t have all the features
-      of his favorite stupid tool. You&rsquo;re right, and
-      that&rsquo;s on purpose. Nobody reading this manual needs all
-      that crap or any of your dogma. They need, and I needed, a
-      little tool that does 1/2 of what everything else does and
-      was simple enough to understand. None of the existing tools
-      comes even close to meeting that goal. <!--l. 141-->
+      <p class="indent">I&rsquo;m sure there&rsquo;s some neckbeard
+      who&rsquo;s reading this and immediately starts complaining
+      that procer doesn&rsquo;t have all the features of his
+      favorite stupid tool. You&rsquo;re right, and that&rsquo;s on
+      purpose. Nobody reading this manual needs all that crap or
+      any of your dogma. They need, and I needed, a little tool
+      that does 1/2 of what everything else does and was simple
+      enough to understand. None of the existing tools comes even
+      close to meeting that goal. <!--l. 141-->
 
-      <p class="noindent">If you got a problem with procer, like
+      <p class="indent">If you got a problem with procer, like
       I&rsquo;m reinventing the wheel then fine, don&rsquo;t use
       it. Do your thing baby. But don&rsquo;t try to pretend like
       the other tools are buttered baby jesus crackers in a gold
@@ -3170,7 +3167,7 @@
   <p class="noindent">We need to plan this deployment to make sure
   we get the end result correct: <!--l. 153-->
 
-  <p class="indent">
+  <p class="noindent">
 
   <ol class="enumerate1">
     <li class="enumerate" id="x1-40002x1">Create a deployment area
@@ -3194,7 +3191,7 @@
     deployment.
   </ol><!--l. 163-->
 
-  <p class="indent">Once you have this setup working you can then
+  <p class="noindent">Once you have this setup working you can then
   start to make your own deployments and tweak things as you need
   for your own applications. Remember that the goal is to get you
   to <span class="pplri7t-">automate</span> everything as much as
@@ -3214,7 +3211,7 @@
   your home directory, but feel free to change this up later if you
   find a better way. <!--l. 175-->
 
-  <p class="indent"><a id="x1-41001r12" name="x1-41001r12"></a>
+  <p class="noindent"><a id="x1-41001r12" name="x1-41001r12"></a>
   <hr class="float">
 
   <div class="float">
@@ -3413,15 +3410,15 @@
   <hr class="endfloat">
   <!--l. 210-->
 
-  <p class="indent">Hopefully you&rsquo;re starting to see how you
-  could easily automate this so that you don&rsquo;t have to do
+  <p class="noindent">Hopefully you&rsquo;re starting to see how
+  you could easily automate this so that you don&rsquo;t have to do
   this all the time. I&rsquo;m just showing you how to &rdquo;make
   the sausage&rdquo; so that you know where everything goes. Future
   versions of <span class="pplri7t-">m2sh</span> will most likely
   create deployment directories like this automatically. 
   <!--l. 215-->
 
-  <p class="indent">What we&rsquo;ve done here is the following:
+  <p class="noindent">What we&rsquo;ve done here is the following:
 
   <ol class="enumerate1">
     <li class="enumerate" id="x1-41063x1">Setup a &nbsp;/deployment
@@ -3456,7 +3453,7 @@
   what you have to change in <span class="pplb7t-">config.py</span>
   to make everything work right: <!--l. 234-->
 
-  <p class="indent">
+  <p class="noindent">
 
   <ol class="enumerate1">
     <li class="enumerate" id="x1-42002x1">Get rid of the
@@ -3491,17 +3488,17 @@
     &rdquo;localhost&rdquo; so that you can run it locally.
   </ol><!--l. 247-->
 
-  <p class="indent">Once you have that all edited, you should be
+  <p class="noindent">Once you have that all edited, you should be
   able to run <span class="pplri7t-">m2sh load -db
   config.sqlite</span> <span class="pplri7t-">-config
   config.py</span> and it&rsquo;ll just load it up. Try using
   <span class="pplri7t-">m2sh servers</span> and <span class=
   "pplri7t-">m2sh hosts</span> to take a peek. <!--l. 252-->
 
-  <p class="indent">To test it out at this stage you can just run
+  <p class="noindent">To test it out at this stage you can just run
   the config.sqlite that you did with these commands: <!--l. 255-->
 
-  <p class="indent"><a id="x1-42013r13" name="x1-42013r13"></a>
+  <p class="noindent"><a id="x1-42013r13" name="x1-42013r13"></a>
   <hr class="float">
 
   <div class="float">
@@ -3555,7 +3552,7 @@
   <hr class="endfloat">
   <!--l. 265-->
 
-  <p class="indent">That&rsquo;s enough to make sure it runs, but
+  <p class="noindent">That&rsquo;s enough to make sure it runs, but
   you&rsquo;ve got nothing running so it mostly won&rsquo;t work at
   all. Just start up and then kill it right after.
 
@@ -3575,11 +3572,11 @@
   we&rsquo;ll do it by hand and then you can do some automation
   later. <!--l. 280-->
 
-  <p class="indent">Let&rsquo;s first setup a basic config that
+  <p class="noindent">Let&rsquo;s first setup a basic config that
   gets our skeleton profiles and make sure procer can run
   everything. <!--l. 283-->
 
-  <p class="indent"><a id="x1-43001r14" name="x1-43001r14"></a>
+  <p class="noindent"><a id="x1-43001r14" name="x1-43001r14"></a>
   <hr class="float">
 
   <div class="float">
@@ -3697,7 +3694,7 @@
   <hr class="endfloat">
   <!--l. 308-->
 
-  <p class="indent">With all of that you can then try to run
+  <p class="noindent">With all of that you can then try to run
   <span class="pplri7t-">procer</span> to watch it fail but still
   try to run everything:
 
@@ -3717,7 +3714,7 @@
     "pcrr7t-">&nbsp;error.log</span>
   </div><!--l. 316-->
 
-  <p class="indent">This is assuming that you are still in the
+  <p class="noindent">This is assuming that you are still in the
   <span class="pplb7t-">profiles</span> directory and what you
   should a file <span class="pplb7t-">error.log</span> get created
   and probably some messages printed to the screen. Just ignore any
@@ -3725,13 +3722,13 @@
   the <span class="pplb7t-">libm2.a</span> we haven&rsquo;t
   removed. <!--l. 322-->
 
-  <p class="indent">Take a look in the <span class=
+  <p class="noindent">Take a look in the <span class=
   "pplb7t-">error.log</span> and you&rsquo;ll see it&rsquo;s not
   necessarily errors but information on how things were run. What
   you should see is something like this for each profile: 
   <!--l. 326-->
 
-  <p class="indent"><a id="x1-43046r15" name="x1-43046r15"></a>
+  <p class="noindent"><a id="x1-43046r15" name="x1-43046r15"></a>
   <hr class="float">
 
   <div class="float">
@@ -3833,7 +3830,7 @@
   <hr class="endfloat">
   <!--l. 341-->
 
-  <p class="indent">I&rsquo;ve cleaned this up a bit, and again
+  <p class="noindent">I&rsquo;ve cleaned this up a bit, and again
   ignore that it&rsquo;s saying &rdquo;Mongrel2&rdquo;,
   that&rsquo;s just cruft from the library since it was originally
   designed for Mongrel2. What you can see here is the following:
@@ -3863,10 +3860,10 @@
     "pplri7t-">procer</span> exits.
   </ol><!--l. 355-->
 
-  <p class="indent">Next up lets get Mongrel2 running inside
+  <p class="noindent">Next up lets get Mongrel2 running inside
   <span class="pplri7t-">procer</span>: <!--l. 357-->
 
-  <p class="indent"><a id="x1-43079r16" name="x1-43079r16"></a>
+  <p class="noindent"><a id="x1-43079r16" name="x1-43079r16"></a>
   <hr class="float">
 
   <div class="float">
@@ -4002,16 +3999,17 @@
   <hr class="endfloat">
   <!--l. 379-->
 
-  <p class="indent">Obviously you don&rsquo;t have to use a series
-  of <span class="pplri7t-">echo</span> commands to make these
-  scripts. You can edit them just fine, we&rsquo;re just doing it
-  this way so that you can follow along easier. <!--l. 383-->
+  <p class="noindent">Obviously you don&rsquo;t have to use a
+  series of <span class="pplri7t-">echo</span> commands to make
+  these scripts. You can edit them just fine, we&rsquo;re just
+  doing it this way so that you can follow along easier. 
+  <!--l. 383-->
 
-  <p class="indent">Now, make sure you don&rsquo;t have any other
+  <p class="noindent">Now, make sure you don&rsquo;t have any other
   Mongrel2 processes running and then start procer again to see if
   it starts this configuration correctly. <!--l. 388-->
 
-  <p class="indent"><a id="x1-43114r17" name="x1-43114r17"></a>
+  <p class="noindent"><a id="x1-43114r17" name="x1-43114r17"></a>
   <hr class="float">
 
   <div class="float">
@@ -4143,7 +4141,7 @@
   <hr class="endfloat">
   <!--l. 408-->
 
-  <p class="indent">To watch <span class="pplri7t-">procer</span>
+  <p class="noindent">To watch <span class="pplri7t-">procer</span>
   in action, try doing <span class="pplri7t-">m2sh stop -db
   config.sqlite -host localhost</span> <span class=
   "pplri7t-">-murder</span> and then look at <span class=
@@ -4166,7 +4164,7 @@
   <span class="pplb7t-">profiles/chat/run</span> to be like this: 
   <!--l. 423-->
 
-  <p class="indent"><a id="x1-44001r18" name="x1-44001r18"></a>
+  <p class="noindent"><a id="x1-44001r18" name="x1-44001r18"></a>
   <hr class="float">
 
   <div class="float">
@@ -4221,8 +4219,8 @@
   <hr class="endfloat">
   <!--l. 437-->
 
-  <p class="indent">This little script uses some funky features you
-  might not be familiar with but which are nice to learn, so
+  <p class="noindent">This little script uses some funky features
+  you might not be familiar with but which are nice to learn, so
   let&rsquo;s take a look:
 
   <ol class="enumerate1">
@@ -4248,7 +4246,7 @@
     "pplb7t-">chat.pid</span> file in the profile directory.
   </ol><!--l. 455-->
 
-  <p class="indent">When you run this manually you should see
+  <p class="noindent">When you run this manually you should see
   something like this:
 
   <div class="fancyvrb" id="fancyvrb20">
@@ -4301,11 +4299,11 @@
     "pcrr7t-">&nbsp;19305</span>
   </div><!--l. 467-->
 
-  <p class="indent">After all that you can then try out
+  <p class="noindent">After all that you can then try out
   <span class="pplri7t-">procer</span> again to see if it properly
   runs the chat demo as well as mongrel2: <!--l. 470-->
 
-  <p class="indent"><a id="x1-44042r19" name="x1-44042r19"></a>
+  <p class="noindent"><a id="x1-44042r19" name="x1-44042r19"></a>
   <hr class="float">
 
   <div class="float">
@@ -4488,17 +4486,17 @@
   <hr class="endfloat">
   <!--l. 493-->
 
-  <p class="indent">If you go look at <span class=
+  <p class="noindent">If you go look at <span class=
   "pplb7t-">profiles/error.log</span> you&rsquo;ll see that
   <span class="pplri7t-">procer</span> is also running each of them
   as the right user with chat being run as you, but Mongrel2 being
   run as root so it can chroot/drop priv properly. <!--l. 497-->
 
-  <p class="indent">Rather than give you a walk through each of
+  <p class="noindent">Rather than give you a walk through each of
   these setups, here&rsquo;s the run scripts for the remaining
   files: <!--l. 500-->
 
-  <p class="indent"><a id="x1-44079r20" name="x1-44079r20"></a>
+  <p class="noindent"><a id="x1-44079r20" name="x1-44079r20"></a>
   <hr class="float">
 
   <div class="float">
@@ -4663,7 +4661,7 @@
   if things work. Here&rsquo;s some curl commands to try: 
   <!--l. 545-->
 
-  <p class="indent"><a id="x1-45001r21" name="x1-45001r21"></a>
+  <p class="noindent"><a id="x1-45001r21" name="x1-45001r21"></a>
   <hr class="float">
 
   <div class="float">
@@ -4741,7 +4739,7 @@
     it&rsquo;ll do the right thing.
   </dl><!--l. 577-->
 
-  <p class="indent">The key thing though is that you now have the
+  <p class="noindent">The key thing though is that you now have the
   whole application for the mongrel2.org demo up and running,
   including automated process management, configuration, and
   managing everything. <!--l. 581-->
@@ -4755,7 +4753,7 @@
   <p class="noindent">The final thing we have to do is get the
   static content we need to try out the chat demo: <!--l. 586-->
 
-  <p class="indent"><a id="x1-47001r22" name="x1-47001r22"></a>
+  <p class="noindent"><a id="x1-47001r22" name="x1-47001r22"></a>
   <hr class="float">
 
   <div class="float">
@@ -4793,7 +4791,7 @@
   <hr class="endfloat">
   <!--l. 594-->
 
-  <p class="indent">If you get a good response then you should be
+  <p class="noindent">If you get a good response then you should be
   able to go to <a href="http://localhost:6767/chatdemo/" class=
   "url"><span class=
   "pcrr7t-">http://localhost:6767/chatdemo/</span></a> and the chat
@@ -4810,7 +4808,7 @@
   configuration as you went, but the main things to test are: 
   <!--l. 605-->
 
-  <p class="indent">
+  <p class="noindent">
 
   <ol class="enumerate1">
     <li class="enumerate" id="x1-48002x1">The /chatdemo/ works and
@@ -4841,7 +4839,7 @@
     properly doesn&rsquo;t step on things.
   </ol><!--l. 620-->
 
-  <p class="indent">If you run into problems then just make sure
+  <p class="noindent">If you run into problems then just make sure
   that you can run each little piece and that you got the files you
   were supposed to make are correct. The best tool to use is
   <span class="pplri7t-">diff</span>. <!--l. 624-->
@@ -4859,14 +4857,15 @@
   deployments, and how it&rsquo;s used by me for my own
   deployments. <!--l. 632-->
 
-  <p class="indent">A <span class="pplri7t-">major</span>
+  <p class="noindent">A <span class="pplri7t-">major</span>
   improvement that we may eventually make is automating setup of
   <span class="pplri7t-">procer</span> profiles, and just better
   overall management of the profiles with <span class=
   "pplri7t-">m2sh</span>. If you feel like hacking on that, just go
   ahead and try and let us know. <!--l. 637-->
 
-  <p class="indent">Other than that, automate, automate, automate.
+  <p class="noindent">Other than that, automate, automate,
+  automate.
 
   <h2 class="chapterHead"><span class=
   "titlemark">Chapter&nbsp;5</span><br>
@@ -4882,16 +4881,16 @@
   servers. Finally I&rsquo;ll get into practical things when to do
   proxying and when to use a 0MQ handler. <!--l. 10-->
 
-  <p class="indent">For the majority of this chapter I&rsquo;ll be
-  using Python, but the demos should translate to the other
+  <p class="noindent">For the majority of this chapter I&rsquo;ll
+  be using Python, but the demos should translate to the other
   languages that are implemented. I&rsquo;ll periodically show how
   another language does one of the demos so you can get the idea
-  that Mongrel2 is <span class="pplri7t-">language agnostic</span>.
-  In no way should you take me using Python in this chapter to mean
-  you can&rsquo;t use something else for your handlers. 
-  <!--l. 16-->
+  that Mongrel2 is <span class="pplri7t-">language</span>
+  <span class="pplri7t-">agnostic</span>. In no way should you take
+  me using Python in this chapter to mean you can&rsquo;t use
+  something else for your handlers. <!--l. 16-->
 
-  <p class="indent">Currently supported languages are:
+  <p class="noindent">Currently supported languages are:
 
   <dl class="description">
     <dt class="description"><span class="pplb7t-">Python</span>
@@ -4933,17 +4932,17 @@
     any of those languages too.
   </dl><!--l. 27-->
 
-  <p class="indent">However, no matter how many languages Mongrel2
-  supports, you will still have applications that can&rsquo;t fit
-  into 0MQ handlers and just work better as classic web apps.
-  Either because you&rsquo;ve already written them and have
-  existing infrastructure, or because of some architectural issues
-  that require it to run traditionally. Because of that Mongrel2
-  supports <span class="pplri7t-">HTTP proxying</span> which allows
-  you to route requests to basic web server backends that
-  don&rsquo;t support 0MQ. <!--l. 33-->
+  <p class="noindent">However, no matter how many languages
+  Mongrel2 supports, you will still have applications that
+  can&rsquo;t fit into 0MQ handlers and just work better as classic
+  web apps. Either because you&rsquo;ve already written them and
+  have existing infrastructure, or because of some architectural
+  issues that require it to run traditionally. Because of that
+  Mongrel2 supports <span class="pplri7t-">HTTP proxying</span>
+  which allows you to route requests to basic web server backends
+  that don&rsquo;t support 0MQ. <!--l. 33-->
 
-  <p class="indent"><a id="x1-50001r6" name="x1-50001r6"></a>
+  <p class="noindent"><a id="x1-50001r6" name="x1-50001r6"></a>
   <hr class="float">
 
   <div class="float">
@@ -4957,17 +4956,17 @@
     <div class="quote">
       <!--l. 34-->
 
-      <p class="noindent">Nothing prevents you from writing your
-      own connector between Mongrel2 and your deployment protocol
-      of choice. If you need to run FastCGI or AJP in your
-      environment then your best bet is to just make a handler that
-      translates Mongrel2 requests to the protocol you need and
-      back. The Mongrel2 format is very easy to parse and translate
-      so you should be able to do it no problem. The Ruby library
-      already supports Rack as an example, and Python will support
-      WSGI soon. <!--l. 41-->
+      <p class="indent">Nothing prevents you from writing your own
+      connector between Mongrel2 and your deployment protocol of
+      choice. If you need to run FastCGI or AJP in your environment
+      then your best bet is to just make a handler that translates
+      Mongrel2 requests to the protocol you need and back. The
+      Mongrel2 format is very easy to parse and translate so you
+      should be able to do it no problem. The Ruby library already
+      supports Rack as an example, and Python will support WSGI
+      soon. <!--l. 41-->
 
-      <p class="noindent">However, Mongrel2 itself doesn&rsquo;t
+      <p class="indent">However, Mongrel2 itself doesn&rsquo;t
       support any of these directly. Doing so would bring back the
       language specific infections that cause other web servers to
       go south. The design of most of these protocols tend to be
@@ -5006,10 +5005,10 @@
   Mongrel2 is using the same stable HTTP processing that has been
   working great for many years. <!--l. 65-->
 
-  <p class="indent">Another way to put this is if Mongrel2 says
+  <p class="noindent">Another way to put this is if Mongrel2 says
   your request is invalid, it most definitely is. <!--l. 67-->
 
-  <p class="indent"><a id="x1-52001r7" name="x1-52001r7"></a>
+  <p class="noindent"><a id="x1-52001r7" name="x1-52001r7"></a>
   <hr class="float">
 
   <div class="float">
@@ -5022,14 +5021,14 @@
     <div class="quote">
       <!--l. 68-->
 
-      <p class="noindent">I don&rsquo;t know why, but people who
+      <p class="indent">I don&rsquo;t know why, but people who
       implement RFCs pick up very weird cargo cult beliefs peddled
       by the people who write the standards. In HTTP it was two
       things which the creators of HTTP have actually pack-peddled
       on: Accept everything, and keep-alives with pipe-lines. 
       <!--l. 73-->
 
-      <p class="noindent">The truth is, if you want a secure server
+      <p class="indent">The truth is, if you want a secure server
       of <span class="pplri7t-">any</span> kind blindly accepting
       every single thing any idiots sends you is going to open your
       server up to a huge number of attacks. If you look at every
@@ -5045,7 +5044,7 @@
       ruthless, but it definitely doesn&rsquo;t tolerate ambiguity
       or stupidity. <!--l. 83-->
 
-      <p class="noindent">Mongrel2 completey supports keep-alives
+      <p class="indent">Mongrel2 completey supports keep-alives
       because now, since it&rsquo;s not using Ruby <span class=
       "pplri7t-">at all</span> it can scale up beyond 1024 file
       descriptors. Ruby was limited in the number of open files a
@@ -5056,7 +5055,7 @@
       dead accurate state machine to manage them correctly. 
       <!--l. 90-->
 
-      <p class="noindent">Where problems come in is with pipe-lined
+      <p class="indent">Where problems come in is with pipe-lined
       requests meaning a browser sends a bunch of requests in a big
       blast, then hangs out for all the responses. This was such a
       horrible stupid idea that pretty much everone gets it wrong
@@ -5067,7 +5066,7 @@
       having to handle these requests which will go nowhere. 
       <!--l. 98-->
 
-      <p class="noindent">Mongrel2 does <span class=
+      <p class="indent">Mongrel2 does <span class=
       "pplri7t-">not</span> support pipe-lined requests. It sends
       one, and waits for the reponse, and if you want more then
       tough. Screw you because it has <span class=
@@ -5075,7 +5074,7 @@
       advantages to you. It is simply one more attack vector for
       the server and is rejected outright. <!--l. 103-->
 
-      <p class="noindent">These two things are rejected outright by
+      <p class="indent">These two things are rejected outright by
       Mongrel2 simply because they are stupid ideas and in 2010
       nobody should be writing clients so badly that they need
       these features.
@@ -5093,24 +5092,24 @@
   are HTTP servers and Mongrel2 shuttles requests to them, then
   proxies responses back. <!--l. 113-->
 
-  <p class="indent">The Proxying support in Mongrel2 is accurate,
+  <p class="noindent">The Proxying support in Mongrel2 is accurate,
   but it&rsquo;s not very capable right now. For example
   there&rsquo;s not round-robin backend selection, or page caching,
   or other things you might need for more serious deployments.
   Those features will come eventually though. <!--l. 117-->
 
-  <p class="indent">What you do get with Mongrel2&rsquo;s proxying
-  though is a dead accurate way of slicing up your application by
-  routes. Other web servers make you go through great pain in order
-  to have some URLs go to a proxy and others go to handlers or
-  directories. They make you use odd &rdquo;file syntax&rdquo;,
-  weird pseudo-turing logic if-statements, and other odd hacks to
-  get flexible route selection. They also tend to not maintain
-  keep-alives properly between proxy requests and other requests. 
-  <!--l. 124-->
+  <p class="noindent">What you do get with Mongrel2&rsquo;s
+  proxying though is a dead accurate way of slicing up your
+  application by routes. Other web servers make you go through
+  great pain in order to have some URLs go to a proxy and others go
+  to handlers or directories. They make you use odd &rdquo;file
+  syntax&rdquo;, weird pseudo-turing logic if-statements, and other
+  odd hacks to get flexible route selection. They also tend to not
+  maintain keep-alives properly between proxy requests and other
+  requests. <!--l. 124-->
 
-  <p class="indent">Mongrel2 uses the exact same routing syntax for
-  all backends and has no distinction between them. It also
+  <p class="noindent">Mongrel2 uses the exact same routing syntax
+  for all backends and has no distinction between them. It also
   properly does keep-alives for as long as it is efficient to do
   so. <!--l. 128-->
 
@@ -5128,10 +5127,10 @@
   write helper gear for handlers. They work in theory, but in
   practice haven&rsquo;t really been tried. <!--l. 135-->
 
-  <p class="indent">If you try them out and find things that need
+  <p class="noindent">If you try them out and find things that need
   fixing let us know. <!--l. 137-->
 
-  <p class="indent"><a id="x1-54001r8" name="x1-54001r8"></a>
+  <p class="noindent"><a id="x1-54001r8" name="x1-54001r8"></a>
   <hr class="float">
 
   <div class="float">
@@ -5144,15 +5143,15 @@
     <div class="quote">
       <!--l. 138-->
 
-      <p class="noindent">I am getting sick of these
-      &rdquo;Backroom RFCs&rdquo; that are crafted around a bunch
-      of huge companies&rsquo; crap implementations found in their
-      existing products rather than things real programmers need.
-      WebSockets is yet another example of this, with so many odd
-      features and annoying agendas that I hope it fails miserably.
+      <p class="indent">I am getting sick of these &rdquo;Backroom
+      RFCs&rdquo; that are crafted around a bunch of huge
+      companies&rsquo; crap implementations found in their existing
+      products rather than things real programmers need. WebSockets
+      is yet another example of this, with so many odd features and
+      annoying agendas that I hope it fails miserably. 
       <!--l. 143-->
 
-      <p class="noindent">First, it actually specifies <span class=
+      <p class="indent">First, it actually specifies <span class=
       "pplri7t-">unicode</span> for the wire protocol in the HTTP
       headers. This is such a monumental bad idea and will break so
       many web servers and browsers that I&rsquo;m baffled how it
@@ -5167,7 +5166,7 @@
       hard enough without having to translate and deal with weird
       UTF-8 Unicode bizarreness. <!--l. 152-->
 
-      <p class="noindent">Second, there is an idiotic
+      <p class="indent">Second, there is an idiotic
       &rdquo;encryption&rdquo; mechanism for a key exchange that
       can only be described as completely damaged and amateurish.
       The scheme involves taking a regular number and then mixing
@@ -5183,8 +5182,8 @@
       there invented and not something any real programmer needs. 
       <!--l. 160-->
 
-      <p class="noindent">There&rsquo;s more, but these two alone
-      are enough to decide to hold off on WebSockets until they get
+      <p class="indent">There&rsquo;s more, but these two alone are
+      enough to decide to hold off on WebSockets until they get
       their head straight and specify something that mere mortals
       can hope to implement.
     </div>
@@ -5250,18 +5249,18 @@
   many browsers requires less copying of the message and less
   transports. <!--l. 197-->
 
-  <p class="indent">In addition to this, you can setup Mongrel2
+  <p class="noindent">In addition to this, you can setup Mongrel2
   with the help of some 0MQ to send one request from a browser to
   as many target handlers as you like. You can even send them
   messages using <a href=
   "http://code.google.com/p/openpgm/">OpenPGM</a> for sending UDP
   messages reliably to clusters of computers. <!--l. 202-->
 
-  <p class="indent">This means that Mongrel2 is the only web server
-  capable of sending one request from a browser to N backends at
-  once, and then return the replies from these handlers to M
-  browsers. Not exactly sure what you could write with that but
-  it&rsquo;s probably something really damn cool. <!--l. 208-->
+  <p class="noindent">This means that Mongrel2 is the only web
+  server capable of sending one request from a browser to N
+  backends at once, and then return the replies from these handlers
+  to M browsers. Not exactly sure what you could write with that
+  but it&rsquo;s probably something really damn cool. <!--l. 208-->
 
   <p class="noindent">
 
@@ -5275,10 +5274,10 @@
   you can explore it further. It is a very simple system so
   hopefully you can figure it out from here. <!--l. 215-->
 
-  <p class="indent">What ZeroMQ ends up being is &rdquo;sockets the
-  way programmers think sockets work.&rdquo; Programmers usually
-  hear about TCP or UDP sockets and they think in a naive way that
-  they work like this:
+  <p class="noindent">What ZeroMQ ends up being is &rdquo;sockets
+  the way programmers think sockets work.&rdquo; Programmers
+  usually hear about TCP or UDP sockets and they think in a naive
+  way that they work like this:
 
   <dl class="description">
     <dt class="description"><span class="pplb7t-">TCP</span>
@@ -5304,10 +5303,10 @@
     weak.
   </dl><!--l. 234-->
 
-  <p class="indent">What ZeroMQ does is create an API that looks a
-  lot like sockets, and feels the same, but gives you the messaging
-  styles you actually want. By simply specifying the type of socket
-  when you call <a href=
+  <p class="noindent">What ZeroMQ does is create an API that looks
+  a lot like sockets, and feels the same, but gives you the
+  messaging styles you actually want. By simply specifying the type
+  of socket when you call <a href=
   "http://api.zeromq.org/zmq_socket.html">zmq_socket</a> you can
   have multicast, request/reply, and many other styles.
   Here&rsquo;s the list of ones currently implemented (as
@@ -5352,7 +5351,7 @@
     between two peers, basically like a better TCP connection.
   </dl><!--l. 257-->
 
-  <p class="indent">The next thing ZeroMQ does is it separates
+  <p class="noindent">The next thing ZeroMQ does is it separates
   these types of <span class="pplri7t-">messaging</span> from the
   underlying transport protocol and gives you a simple URL-like
   syntax for specifying that: <span class=
@@ -5384,7 +5383,7 @@
     that uses regular UDP to do reliable multicast messaging.
   </dl><!--l. 269-->
 
-  <p class="indent">Finally, ZeroMQ then divorces who binds and
+  <p class="noindent">Finally, ZeroMQ then divorces who binds and
   connects from the above two configurations. This means that
   unlike classic sockets who connects and who binds doesn&rsquo;t
   matter for the direction or kind of message. All that really
@@ -5395,8 +5394,8 @@
   Mongrel2 doesn&rsquo;t need to know about handlers, they just
   need to know about Mongrel2. <!--l. 278-->
 
-  <p class="indent">How this last part works, and why it works, is
-  that when clients or servers connect or disconnect, ZeroMQ
+  <p class="noindent">How this last part works, and why it works,
+  is that when clients or servers connect or disconnect, ZeroMQ
   <span class="pplri7t-">doesn&rsquo;t blow up</span>. In TCP, if I
   have a server, and then 10 clients connect, when one of them
   disconnects in the middle of a message I lose the message and get
@@ -5407,7 +5406,7 @@
   an addressing mechanism, not a <span class="pplri7t-">state
   management</span> mechanism. <!--l. 287-->
 
-  <p class="indent">Another way to put this feature is
+  <p class="noindent">Another way to put this feature is
   there&rsquo;s no <span class="pplri7t-">accept</span> in ZeroMQ.
   Clients connect and go at will and the server is just reading
   messages off when they&rsquo;re available or sending them out for
@@ -5425,7 +5424,7 @@
   Python will help you get a handle on it. First the client then
   the server: <!--l. 298-->
 
-  <p class="indent"><a id="x1-60001r23" name="x1-60001r23"></a>
+  <p class="noindent"><a id="x1-60001r23" name="x1-60001r23"></a>
   <hr class="float">
 
   <div class="float">
@@ -5480,7 +5479,7 @@
   <hr class="endfloat">
   <!--l. 313-->
 
-  <p class="indent"><a id="x1-60020r24" name="x1-60020r24"></a>
+  <p class="noindent"><a id="x1-60020r24" name="x1-60020r24"></a>
   <hr class="float">
 
   <div class="float">
@@ -5544,17 +5543,17 @@
   <hr class="endfloat">
   <!--l. 329-->
 
-  <p class="indent">You can then run these two in different windows
-  and they will talk to each other. Try playing around with
+  <p class="noindent">You can then run these two in different
+  windows and they will talk to each other. Try playing around with
   different socket types and transports to see what they do. Notice
   that for a PUB/SUB setup we have to use <span class=
   "pplri7t-">setsockopt</span> to subscribe the nothing (&rdquo;).
   This is the same no matter what language you use. <!--l. 335-->
 
-  <p class="indent">Here&rsquo;s an example that does the sme thing
-  but with REQ/REP style of messages. <!--l. 337-->
+  <p class="noindent">Here&rsquo;s an example that does the sme
+  thing but with REQ/REP style of messages. <!--l. 337-->
 
-  <p class="indent"><a id="x1-60041r25" name="x1-60041r25"></a>
+  <p class="noindent"><a id="x1-60041r25" name="x1-60041r25"></a>
   <hr class="float">
 
   <div class="float">
@@ -5614,7 +5613,7 @@
   <hr class="endfloat">
   <!--l. 353-->
 
-  <p class="indent"><a id="x1-60062r26" name="x1-60062r26"></a>
+  <p class="noindent"><a id="x1-60062r26" name="x1-60062r26"></a>
   <hr class="float">
 
   <div class="float">
@@ -5677,7 +5676,7 @@
   <hr class="endfloat">
   <!--l. 367-->
 
-  <p class="indent">As you can see when you run this it&rsquo;s
+  <p class="noindent">As you can see when you run this it&rsquo;s
   more like your classic web server style of messaging where a
   client requests something with an initial message, and the server
   replies. Try getting the order wrong and see how ZeroMQ aborts
@@ -5685,7 +5684,7 @@
   "pplri7t-">must</span> send first then recv, and REP sockets
   <span class="pplri7t-">must</span> recv then send. <!--l. 372-->
 
-  <p class="indent"><a id="x1-60081r9" name="x1-60081r9"></a>
+  <p class="noindent"><a id="x1-60081r9" name="x1-60081r9"></a>
   <hr class="float">
 
   <div class="float">
@@ -5698,8 +5697,8 @@
     <div class="quote">
       <!--l. 373-->
 
-      <p class="noindent">The lack of a reliable framing mechanism
-      in TCP was a crime against humanity. What I mean by a
+      <p class="indent">The lack of a reliable framing mechanism in
+      TCP was a crime against humanity. What I mean by a
       &rdquo;frame&rdquo; is a simple indicator that a message in a
       stream has a certain length. If you preface each message in
       TCP with the length of the data you&rsquo;re about to send
@@ -5709,15 +5708,15 @@
       the last byte would have saved the world much pain. 
       <!--l. 380-->
 
-      <p class="noindent">This is basically what ZeroMQ has done,
-      and so much more. ZeroMQ pulls out all the tricks to make
-      sure that the message you receive is totally cooked, fully
-      sized, and transports it faster than TCP can actually send
-      it. It does this by framing things intelligently, using
-      compression, reducing copying, and just generally being
-      awesome. <!--l. 385-->
+      <p class="indent">This is basically what ZeroMQ has done, and
+      so much more. ZeroMQ pulls out all the tricks to make sure
+      that the message you receive is totally cooked, fully sized,
+      and transports it faster than TCP can actually send it. It
+      does this by framing things intelligently, using compression,
+      reducing copying, and just generally being awesome. 
+      <!--l. 385-->
 
-      <p class="noindent">Of course, the only limitation is that it
+      <p class="indent">Of course, the only limitation is that it
       can&rsquo;t really <span class="pplri7t-">stream</span>
       things, but then again nobody really does true streaming.
       They always end up having to bolt on some framing of some
@@ -5740,7 +5739,7 @@
   format is designed to accomplish a few things in the simplest way
   possible: <!--l. 398-->
 
-  <p class="indent">
+  <p class="noindent">
 
   <ol class="enumerate1">
     <li class="enumerate" id="x1-61002x1">Be usable from languages
@@ -5767,7 +5766,7 @@
     so that you can do subscriptions and routing.
   </ol><!--l. 410-->
 
-  <p class="indent">To satisfy these features there are two types
+  <p class="noindent">To satisfy these features there are two types
   of ZeroMQ sockets used (soon to be configurable) and then a
   request format that Mongrel2 sends, and a response format that
   the handlers send back. Most importantly there is <span class=
@@ -5802,12 +5801,13 @@
   "textsuperscript">2</sup></a></span><a id="x1-62001f2" name=
   "x1-62001f2"></a> . <!--l. 430-->
 
-  <p class="indent">In the various APIs we&rsquo;ve implemented you
-  don&rsquo;t need to care about this. They provide an abstraction
-  on top of this, but it does help to know it so that you
-  understand why the message format is the way it is. <!--l. 434-->
+  <p class="noindent">In the various APIs we&rsquo;ve implemented
+  you don&rsquo;t need to care about this. They provide an
+  abstraction on top of this, but it does help to know it so that
+  you understand why the message format is the way it is. 
+  <!--l. 434-->
 
-  <p class="indent">This leads to rule number 1:
+  <p class="noindent">This leads to rule number 1:
 
   <div class="quote">
     <!--l. 437-->
@@ -5828,7 +5828,7 @@
   right reply. This is the first part of our protocol format and it
   results in the next rule 2: <!--l. 449-->
 
-  <p class="indent">
+  <p class="noindent">
 
   <div class="quote">
     <!--l. 450-->
@@ -5851,7 +5851,7 @@
   what Mongrel2 sends you is just one identifier, but you can send
   Mongrel2 a list of them. This leads to rule 3: <!--l. 462-->
 
-  <p class="indent">
+  <p class="noindent">
 
   <div class="quote">
     <!--l. 463-->
@@ -5864,7 +5864,7 @@
     the message is to/from.
   </div><!--l. 469-->
 
-  <p class="indent">In case you don&rsquo;t know what a netstring
+  <p class="noindent">In case you don&rsquo;t know what a netstring
   is, it is a very simple way to encode a block of data such that
   any language can read the block and know how big it is. A
   netstring is simply: <span class=
@@ -5886,7 +5886,7 @@
   request, every request has the path that was matched in the
   server as the next piece. That gives us: <!--l. 482-->
 
-  <p class="indent">
+  <p class="noindent">
 
   <div class="quote">
     <!--l. 483-->
@@ -5906,7 +5906,7 @@
   <p class="noindent">We only have two more rules and then to
   complete the message format. <!--l. 493-->
 
-  <p class="indent">
+  <p class="noindent">
 
   <div class="quote">
     <!--l. 494-->
@@ -5918,10 +5918,10 @@
     "pplri7t-">netstring</span> with the body of the request.
   </div><!--l. 499-->
 
-  <p class="indent">Then there&rsquo;s a similar rule for
+  <p class="noindent">Then there&rsquo;s a similar rule for
   responses: <!--l. 501-->
 
-  <p class="indent">
+  <p class="noindent">
 
   <div class="quote">
     <!--l. 502-->
@@ -5932,9 +5932,9 @@
     supposed to send to the listeners.
   </div><!--l. 506-->
 
-  <p class="indent">HTTP headers, image data, HTML pages, streaming
-  video. You can also send as many as you like to complete the
-  request and any handler can send it. <!--l. 510-->
+  <p class="noindent">HTTP headers, image data, HTML pages,
+  streaming video. You can also send as many as you like to
+  complete the request and any handler can send it. <!--l. 510-->
 
   <p class="noindent">
 
@@ -5948,7 +5948,7 @@
   a request is formatted that gets sent to your handlers: 
   <!--l. 516-->
 
-  <p class="indent">
+  <p class="noindent">
 
   <div class="fancyvrb" id="fancyvrb29">
     <a id="x1-67002r1" name="x1-67002r1"></a><span class=
@@ -5959,15 +5959,15 @@
     "pcrr7t-">&nbsp;SIZE:HEADERS,SIZE:BODY,</span>
   </div><!--l. 520-->
 
-  <p class="indent">That&rsquo;s obviously a much simpler way to
+  <p class="noindent">That&rsquo;s obviously a much simpler way to
   specify the request than all those rules, but it&rsquo;s also
   doesn&rsquo;t tell you why. The above description, while boring
   as hell, tells you why each of these pieces exist. <!--l. 524-->
 
-  <p class="indent">To parse this in Python we simply do this: 
+  <p class="noindent">To parse this in Python we simply do this: 
   <!--l. 526-->
 
-  <p class="indent"><a id="x1-67003r27" name="x1-67003r27"></a>
+  <p class="noindent"><a id="x1-67003r27" name="x1-67003r27"></a>
   <hr class="float">
 
   <div class="float">
@@ -6112,15 +6112,15 @@
   <hr class="endfloat">
   <!--l. 547-->
 
-  <p class="indent">This is actually all of the code needed to
+  <p class="noindent">This is actually all of the code needed to
   parse a request, and is fairly the same in many other languages.
   If you look at the file <span class=
   "pplb7t-">examples/python/mongrel2/request.py</span> you&rsquo;ll
   see a more complete example of making a full request object. 
   <!--l. 552-->
 
-  <p class="indent">A response is then just as simple and involves
-  crafting a similar setup like this:
+  <p class="noindent">A response is then just as simple and
+  involves crafting a similar setup like this:
 
   <div class="fancyvrb" id="fancyvrb31">
     <a id="x1-67037r1" name="x1-67037r1"></a><span class=
@@ -6132,11 +6132,11 @@
     "pcrr7t-">&nbsp;BODY</span>
   </div><!--l. 559-->
 
-  <p class="indent">Notice I&rsquo;ve got three IDs here but you
+  <p class="noindent">Notice I&rsquo;ve got three IDs here but you
   can do 1 or up to 128. Generating this is very easy in Python: 
   <!--l. 562-->
 
-  <p class="indent"><a id="x1-67038r28" name="x1-67038r28"></a>
+  <p class="noindent"><a id="x1-67038r28" name="x1-67038r28"></a>
   <hr class="float">
 
   <div class="float">
@@ -6208,7 +6208,7 @@
   <hr class="endfloat">
   <!--l. 576-->
 
-  <p class="indent">That again is all there is to it. The
+  <p class="noindent">That again is all there is to it. The
   <span class="pplri7t-">send</span> method is the one doing the
   real work of crafting the response, and the <span class=
   "pplri7t-">deliver</span> method is just using <span class=
@@ -6227,7 +6227,7 @@
   the demos that are available. These are the same demos you ran in
   the previous section to create a sample deployment. <!--l. 591-->
 
-  <p class="indent">To look at the Python API take a look at
+  <p class="noindent">To look at the Python API take a look at
   <span class="pplb7t-">examples/python/mongrel2/request.py</span>
   and <span class=
   "pplb7t-">examples/python/mongrel2/handler.py</span>. They are
@@ -6248,7 +6248,7 @@
   "textsuperscript">3</sup></a></span><a id="x1-69001f3" name=
   "x1-69001f3"></a> : <!--l. 603-->
 
-  <p class="indent"><a id="x1-69002r29" name="x1-69002r29"></a>
+  <p class="noindent"><a id="x1-69002r29" name="x1-69002r29"></a>
   <hr class="float">
 
   <div class="float">
@@ -6415,7 +6415,7 @@
   <hr class="endfloat">
   <!--l. 628-->
 
-  <p class="indent">All this code does is print back a simple
+  <p class="noindent">All this code does is print back a simple
   little dump of what it received, and it&rsquo;s not even a valid
   HTML document. Let&rsquo;s walk through everything that&rsquo;s
   going on:
@@ -6460,14 +6460,14 @@
     socket you&rsquo;re talking about.
   </ol><!--l. 649-->
 
-  <p class="indent">This is all that you need at first to do simple
-  HTTP handlers. In reality the <span class=
+  <p class="noindent">This is all that you need at first to do
+  simple HTTP handlers. In reality the <span class=
   "pplri7t-">reply</span><span class="pplri7t-">_http</span> method
   is just syntactic sugar on crafting a decent HTTP response.
   Here&rsquo;s the actual method that is crafting these replies: 
   <!--l. 652-->
 
-  <p class="indent"><a id="x1-69055r30" name="x1-69055r30"></a>
+  <p class="noindent"><a id="x1-69055r30" name="x1-69055r30"></a>
   <hr class="float">
 
   <div class="float">
@@ -6583,7 +6583,7 @@
   <hr class="endfloat">
   <!--l. 665-->
 
-  <p class="indent">Which is then used by <span class=
+  <p class="noindent">Which is then used by <span class=
   "pplri7t-">Connection.reply</span><span class=
   "pplri7t-">_http</span> and <span class=
   "pplri7t-">Connection.deliver</span><span class=
@@ -6608,14 +6608,14 @@
   meta-data sent at specific sized intervals so the client can
   display an update to the meta-data. <!--l. 683-->
 
-  <p class="indent">What the mp3streamer demo does is create a
+  <p class="noindent">What the mp3streamer demo does is create a
   streaming system by having a thread that receives requests for
   connections, and then another thread that sends the current data
   to all currently connected clients. Rather than go through all
   the code you can take a look at the main file and see how simple
   it is once you get the streaming thread right: <!--l. 690-->
 
-  <p class="indent"><a id="x1-70001r31" name="x1-70001r31"></a>
+  <p class="noindent"><a id="x1-70001r31" name="x1-70001r31"></a>
   <hr class="float">
 
   <div class="float">
@@ -6926,7 +6926,7 @@
   <hr class="endfloat">
   <!--l. 732-->
 
-  <p class="indent">Walking through this example is fairly easy,
+  <p class="noindent">Walking through this example is fairly easy,
   assuming you just trust that the streaming thread stuff works:
 
   <ol class="enumerate1">
@@ -6957,7 +6957,7 @@
     things going.
   </ol><!--l. 751-->
 
-  <p class="indent">That is the base of it, and if you point
+  <p class="noindent">That is the base of it, and if you point
   mplayer at it (which is the only player that works really) you
   should hear it play:
 
@@ -6969,10 +6969,10 @@
     "pcrr7t-">&nbsp;http://localhost:6767/mp3stream</span>
   </div><!--l. 758-->
 
-  <p class="indent">That is assuming you put some mp3 files into
+  <p class="noindent">That is assuming you put some mp3 files into
   the directory and started the handler again. <!--l. 761-->
 
-  <p class="indent">For more on how the actual state and the
+  <p class="noindent">For more on how the actual state and the
   protocol works, go look at mp3stream.py. Explaining it is far
   outside the scope of this manual but the key points to realize
   are that this is one thread that&rsquo;s targetting randomly
@@ -7009,8 +7009,8 @@
     been following along you should have tested it.
   </dl><!--l. 785-->
 
-  <p class="indent">Hopefully you can figure it out from the code,
-  but if not let me know. <!--l. 788-->
+  <p class="noindent">Hopefully you can figure it out from the
+  code, but if not let me know. <!--l. 788-->
 
   <p class="noindent">
 
@@ -7047,7 +7047,7 @@
     "http://github.com/winks/m2php">winks on github</a>.
   </dl><!--l. 802-->
 
-  <p class="indent">If you want to implement another language, it
+  <p class="noindent">If you want to implement another language, it
   should be fairly trivial. Just base your design on the Python API
   so that it is consistent, but please don&rsquo;t be a slave to
   the Python if it doesn&rsquo;t fit the chosen language. Creating
@@ -7073,35 +7073,36 @@
   though is help you when you start to think about automating
   Mongrel2 for your deployments. <!--l. 819-->
 
-  <p class="indent">Hopefully I may have motivated you to automate,
-  automate, automate. This is why we write software. If I wanted to
-  do stuff manually I&rsquo;d go play guitars or juggle. I write
-  software because I want a computer to do things for me, and
-  nothing needs this more than managing your systems. <!--l. 824-->
+  <p class="noindent">Hopefully I may have motivated you to
+  automate, automate, automate. This is why we write software. If I
+  wanted to do stuff manually I&rsquo;d go play guitars or juggle.
+  I write software because I want a computer to do things for me,
+  and nothing needs this more than managing your systems. 
+  <!--l. 824-->
 
-  <p class="indent">This is why Mongrel2 is designed the way it is
-  using the MVC model. It lets <span class="pplri7t-">you</span>
+  <p class="noindent">This is why Mongrel2 is designed the way it
+  is using the MVC model. It lets <span class="pplri7t-">you</span>
   create your own View like m2sh, web interfaces, automation
   scripts, and anything else you need to make it easier to manage
   more. <!--l. 828-->
 
-  <p class="indent">If you want to write your own <span class=
+  <p class="noindent">If you want to write your own <span class=
   "pplri7t-">m2sh</span> then first go have a look at the Python
   code in <span class="pplb7t-">examples/python/config</span>. This
   is where each command lives, where the argument parsing is, and
   most importantly the ORM model that works the raw SQLite
   database. <!--l. 833-->
 
-  <p class="indent">The next thing to do is to make your tool craft
-  databases and compare the results to what m2sh does for a similar
-  configuration. I recommend you make a database that&rsquo;s
-  &rdquo;correct&rdquo; with m2sh, and then dump it via
-  <span class="pplri7t-">sqlite3</span>. After that use your tool
-  to make your own database, dump it, and then use <span class=
-  "pplri7t-">diff</span> to compare your results to mine. 
-  <!--l. 839-->
+  <p class="noindent">The next thing to do is to make your tool
+  craft databases and compare the results to what m2sh does for a
+  similar configuration. I recommend you make a database
+  that&rsquo;s &rdquo;correct&rdquo; with m2sh, and then dump it
+  via <span class="pplri7t-">sqlite3</span>. After that use your
+  tool to make your own database, dump it, and then use
+  <span class="pplri7t-">diff</span> to compare your results to
+  mine. <!--l. 839-->
 
-  <p class="indent">Finally, the base schema files you&rsquo;ll
+  <p class="noindent">Finally, the base schema files you&rsquo;ll
   need to look at are in <span class=
   "pplb7t-">src/config/config.sql</span> and <span class=
   "pplb7t-">src/config/mimetypes.sql</span> where the database
@@ -7112,15 +7113,66 @@
   "x1-73002f5"></a> Your tool should be able to use this SQL to
   make its database or at least know what it does. <!--l. 846-->
 
-  <p class="indent">If you do something cool with all of this, let
-  us know. <!--l. 1-->
+  <p class="noindent">If you do something cool with all of this,
+  let us know. <!--l. 1-->
 
-  <p class="indent">
+  <p class="noindent">
 
   <h2 class="chapterHead"><span class=
   "titlemark">Chapter&nbsp;6</span><br>
   <a id="x1-740006" name="x1-740006"></a>Contributing</h2>
   <!--l. 3-->
 
-  <p class="noindent">Soon...
+  <p class="noindent">You have gone through a complete description
+  of all the features that Mongrel2 has right now, but <span class=
+  "pplri7t-">not</span> all the features it will have. I tend to
+  write small software that does exactly what it needs to do, and
+  Mongrel2 is no different. What you see here are the majority of
+  the things you need to do right now, and we&rsquo;ll be slowly
+  adding things people run into. <!--l. 9-->
+
+  <p class="noindent">Right now, what you have in your hands is
+  something you can use, but it needs help. There is not SSL
+  support yet. We&rsquo;re just using plain old poll to get things
+  working. There&rsquo;s no dynamic modules or filters yet (if we
+  ever have them), and we haven&rsquo;t really deployed it in
+  anything important. <!--l. 14-->
+
+  <p class="noindent">That means you can contribute. If you want to
+  help with Mongrel2, just go to the <a href=
+  "http://mongrel2.org">Mongrel2</a> site and do whatever you can.
+  Submit bug reports, help with docs, offer patches, join the
+  mailing list, whatever. <!--l. 18-->
+
+  <p class="noindent">The reason I mostly begging people who are
+  interested in Mongrel2 for help is that I&rsquo;m on a mission.
+  I&rsquo;ve been through 3 or 4 major technology cycles that got
+  the us nowhere but forced me and many other programmers to learn
+  whole new languages with dubious benefits. I remember C++ wiping
+  out C with no real benefit. I remember Java wiping out C++ again
+  with no real benefit. I remember Ruby wiping out Java and again
+  with no real benefit. In the end, the only thing we got from each
+  &rdquo;language revolution&rdquo; was yet another Ponzi Scheme we
+  all had to pretend to believe in if we wanted to get a job. 
+  <!--l. 27-->
+
+  <p class="noindent">My goal with Mongrel2 is to lessen this
+  suffering. A professional engineer should not have to follow fads
+  like a fashion designer. You should be able to use the tool that
+  works best for the environment, and all languages should be
+  treated equally in the eyes of core technologies like web servers
+  and email servers. Businesses should also be able to hire
+  programmers not by what language they know, but by how good they
+  are and how well they fit. Companies should be able to pivot off
+  dead or poorly suited technologies and onto better ones without
+  major upheaval. <!--l. 35-->
+
+  <p class="noindent">I don&rsquo;t know if Mongrel2 will do this,
+  but I do know it has a chance to at least start the trend of
+  language agnosticism in our industry. If you want to help, then
+  please come contribute. <!--l. 39-->
+
+  <p class="noindent">Thanks, <!--l. 41-->
+
+  <p class="noindent">Zed
 

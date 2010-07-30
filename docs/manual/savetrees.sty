@@ -1,0 +1,195 @@
+%%
+%% This is file `savetrees.sty',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% savetrees.dtx  (with options: `package')
+%% 
+%% This is a generated file.
+%% 
+%% Copyright (C) 2010 by Scott Pakin <scott+st@pakin.org>
+%% 
+%% This file may be distributed and/or modified under the conditions of
+%% the LaTeX Project Public License, either version 1.3c of this license
+%% or (at your option) any later version.  The latest version of this
+%% license is in:
+%% 
+%%    http://www.latex-project.org/lppl.txt
+%% 
+%% and version 1.3c or later is part of all distributions of LaTeX version
+%% 2006/05/20 or later.
+%% 
+\NeedsTeXFormat{LaTeX2e}[1999/12/01]
+\ProvidesPackage{savetrees}
+    [2010/06/03 v1.3 Pack as much text as possible onto each page]
+\newif\if@st@normal@sections
+\DeclareOption{normalsections}{\@st@normal@sectionstrue}
+\newif\if@st@normal@margins
+\DeclareOption{normalmargins}{\@st@normal@marginstrue}
+\newif\if@st@normal@lists
+\DeclareOption{normallists}{\@st@normal@liststrue}
+\newif\if@st@normal@floats
+\DeclareOption{normalfloats}{\@st@normal@floatstrue}
+\newif\if@st@normal@indent
+\DeclareOption{normalindent}{\@st@normal@indenttrue}
+\newif\if@st@normal@title
+\DeclareOption{normaltitle}{\@st@normal@titletrue}
+\newif\if@st@normal@leading
+\DeclareOption{normalleading}{\@st@normal@leadingtrue}
+\newif\if@st@normal@looseness
+\DeclareOption{normallooseness}{\@st@normal@loosenesstrue}
+\newif\if@st@normal@char@widths
+\DeclareOption{normalcharwidths}{\@st@normal@char@widthstrue}
+\newif\if@st@normal@bib
+\DeclareOption{normalbib}{\@st@normal@bibtrue}
+\newif\if@st@normal@bibnotes
+\DeclareOption{normalbibnotes}{\@st@normal@bibnotestrue}
+\ProcessOptions\relax
+\if@st@normal@sections
+\else
+  \RequirePackage[tiny,compact]{titlesec}
+\fi
+\newlength{\@st@marginsize}
+\setlength{\@st@marginsize}{1.5cm}
+\if@st@normal@margins
+\else
+  \RequirePackage[lmargin=\@st@marginsize,
+                  rmargin=\@st@marginsize,
+                  tmargin=\@st@marginsize,
+                  bmargin=\@st@marginsize,
+                  includefoot,
+                  footskip=2ex]{geometry}
+\fi
+\if@st@normal@lists
+\else
+  \RequirePackage{calc}
+  \def\itemize{%
+    \ifnum \@itemdepth >\thr@@\@toodeep\else
+      \advance\@itemdepth\@ne
+      \edef\@itemitem{labelitem\romannumeral\the\@itemdepth}%
+      \expandafter
+      \list
+        \csname\@itemitem\endcsname
+        {\def\makelabel##1{\hss\llap{##1}}%
+         \settowidth{\leftmargin}{\csname\@itemitem\endcsname}%
+         \addtolength{\leftmargin}{\labelsep * \@itemdepth}%
+         \setlength{\topsep}{4pt plus 1pt minus 2pt}%
+         \setlength{\itemsep}{0pt}%
+         \setlength{\parsep}{0pt}%
+        }%
+    \fi}
+  \def\enumerate{%
+    \ifnum \@enumdepth >\thr@@\@toodeep\else
+      \advance\@enumdepth\@ne
+      \edef\@enumctr{enum\romannumeral\the\@enumdepth}%
+        \expandafter
+        \list
+          \csname label\@enumctr\endcsname
+          {\usecounter\@enumctr\def\makelabel##1{\hss\llap{##1}}%
+           \settowidth{\leftmargin}{\csname label\@enumctr\endcsname}%
+           \addtolength{\leftmargin}{\labelsep * \@enumdepth}%
+           \setlength{\topsep}{4pt plus 1pt minus 2pt}%
+           \setlength{\itemsep}{0pt}%
+           \setlength{\parsep}{0pt}%
+          }
+    \fi}
+  \renewenvironment{description}{%
+    \begin{list}{}{\setlength{\leftmargin}{1em}%
+                   \labelwidth\z@ \itemindent-\leftmargin
+                   \let\makelabel\descriptionlabel}%
+  }{%
+    \end{list}
+  }
+\fi
+\if@st@normal@floats
+\else
+  \renewcommand{\topfraction}{0.85}
+  \renewcommand{\bottomfraction}{0.85}
+  \renewcommand{\textfraction}{0.1}
+  \renewcommand{\floatpagefraction}{0.85}
+  \renewcommand{\dbltopfraction}{0.85}
+  \renewcommand{\dblfloatpagefraction}{.85}
+  \setcounter{topnumber}{25}
+  \setcounter{bottomnumber}{25}
+  \setcounter{totalnumber}{25}
+  \setcounter{dbltopnumber}{25}
+\fi
+\if@st@normal@indent
+\else
+  \setlength{\parindent}{1em}
+\fi
+\if@st@normal@title
+\else
+  \def\@maketitle{%
+    \newpage
+    \null
+    \begin{center}%
+      \let \footnote \thanks
+      {\large \textbf{\@title}\par}
+      \vskip 0.5\baselineskip
+      \begin{tabular}[t]{c}%
+        \@author
+      \end{tabular}\par
+      \vskip 0.5\baselineskip
+      \@date
+    \end{center}%
+    \par
+    \vskip \baselineskip
+  }
+\fi
+\if@st@normal@leading
+\else
+  \renewcommand{\baselinestretch}{0.9}
+\fi
+\if@st@normal@looseness
+\else
+  \let\markeverypar\everypar
+  \newtoks\everypar
+  \everypar\markeverypar
+  \markeverypar{\the\everypar\looseness=-1\relax}
+\fi
+\if@st@normal@char@widths
+\else
+  \RequirePackage[stretch=0,shrink=50]{microtype}
+\fi
+\if@st@normal@bib
+\else
+  \renewenvironment{thebibliography}[1]{%
+    \@ifundefined{chapter}{%
+      \section*{\refname
+        \@mkboth{\MakeUppercase\refname}{\MakeUppercase\refname}}%
+    }{%
+      \chapter*{\bibname
+        \@mkboth{\MakeUppercase\bibname}{\MakeUppercase\bibname}}%
+    }%
+    \list{\@biblabel{\@arabic\c@enumiv}}%
+         {\settowidth\labelwidth{\@biblabel{#1}}%
+          \leftmargin\labelwidth
+          \advance\leftmargin\labelsep
+          \setlength{\parsep}{0pt}%
+          \setlength{\itemsep}{1pt}%
+          \@openbib@code
+          \usecounter{enumiv}%
+          \let\p@enumiv\@empty
+          \renewcommand\theenumiv{\@arabic\c@enumiv}}%
+      \small
+      \sloppy
+      \clubpenalty4000
+      \@clubpenalty \clubpenalty
+      \widowpenalty4000%
+      \sfcode`\.\@m
+  }{%
+    \def\@noitemerr
+         {\@latex@warning{Empty `thebibliography' environment}}%
+    \endlist
+  }
+\fi
+\if@st@normal@bibnotes
+  \newcommand{\savetreesbibnote}[1]{#1}
+\else
+  \newcommand{\savetreesbibnote}[1]{\@gobble}
+\fi
+\endinput
+%%
+%% End of file `savetrees.sty'.
