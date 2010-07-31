@@ -1,6 +1,7 @@
 import re
 import sys
 import inspect
+from mongrel2.config import rc
 
 
 S_IP_ADDRESS = lambda x, token: ['ip_address', token]
@@ -251,9 +252,20 @@ def parse_and_run_command(argv, mod, default_command=None, exit_on_error=True):
 
         command_module(mod, command, options)
     except ArgumentError, exc:
-        print "ERROR: ", exc
-        if exit_on_error:
-            sys.exit(1)
+        rcf = rc.read_rc()
+
+        try:
+            function = mod.__dict__[command+"_command"]
+            needed = determine_kwargs(function)
+            new = {}
+            for k in needed.keys():
+                if k in rcf:
+                    new[k] = rcf[k]
+            command_module(mod, command, new)
+        except ArgumentError, exc:
+            print "ERROR: ", exc
+            if exit_on_error:
+                sys.exit(1)
 
     return True
 
