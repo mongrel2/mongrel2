@@ -1030,12 +1030,12 @@
   <p class="noindent">Mongrel2 is designed to be easy to deploy and
   <span class="pplri7t-">automate</span> the deployment. This is
   why it uses <a href="http://www.sqlite.org/">SQLite</a> to store
-  the configuration, but <span class="pplri7t-">m2sh</span> as an
-  interface to creating the configuration. Doing this lets you
-  access the configuration using any language that works for you,
-  augment it, alter it, migrate it, and automate it. <!--l. 9-->
+  the configuration, but m2sh as an interface to creating the
+  configuration. Doing this lets you access the configuration using
+  any language that works for you, augment it, alter it, migrate it
+  and automate it. <!--l. 9-->
 
-  <p class="noindent">In this chapter I&rsquo;m going to show you
+  <p class="noindent">In this chapter, I&rsquo;m going to show you
   how to make a basic configuration using m2sh and all the commands
   that are available. You&rsquo;ll learn how the configuration
   system is structured so that you know what goes where, but in the
@@ -1054,22 +1054,22 @@
     <div class="quote">
       <!--l. 15-->
 
-      <p class="indent">When I first started talking about Mongrel2
-      I said I&rsquo;d store the configuration in SQLite and do a
-      Model-View-Controller kind of design. Immediately people who
-      can&rsquo;t read flipped out and though this meant
-      they&rsquo;d be back in &rdquo;windows registry hell&rdquo;
+      <p class="indent">When I first started talking about
+      Mongrel2, I said I&rsquo;d store the configuration in SQLite
+      and do a Model-View-Controller kind of design. Immediately
+      people who can&rsquo;t read flipped out and though this meant
+      they&rsquo;d be back in &rdquo;windows registry hell&rdquo;,
       but with SQL as their only way to access it. They thought
-      that they&rsquo;d be stuck writing configurations with SQL.
-      That SQL couldn&rsquo;t possibly configure a web server. 
+      that they&rsquo;d be stuck writing configurations with SQL;
+      that SQL couldn&rsquo;t possibly configure a web server. 
       <!--l. 21-->
 
       <p class="indent">They were wrong on many levels. Nobody was
       <span class="pplri7t-">ever</span> going to make <span class=
       "pplri7t-">anyone</span> use SQL. That was repeated over and
-      over, but again, people don&rsquo;t read and love spreading
+      over but, again, people don&rsquo;t read and love spreading
       FUD. The SQLite config database is nothing like the Windows
-      Registry. No other web server really uses a true hierarchy,
+      Registry. No other web server really uses a true hierarchy;
       they just cram a relational model into a weirdo configuration
       format. The real goal was to make a web server that was easy
       to manage from <span class="pplri7t-">any</span> language,
@@ -1080,9 +1080,9 @@
       <p class="indent">In the end, what we got despite all this
       fear mongering is a bad ass configuration tool and a design
       that is simple, elegant, and works fantastic. If you read
-      that Mongrel2 uses SQLite and though this was weird, well
+      that Mongrel2 uses SQLite and though this was weird, well,
       welcome to the future. Sometimes it&rsquo;s weird out here
-      (even though, Postfix has been doing this for a decade or
+      (even though Postfix has been doing this for a decade or
       more).
     </div>
   </div>
@@ -1092,21 +1092,21 @@
   "x1-210003.1" name="x1-210003.1"></a>Model-View-Controller</h3>
   <!--l. 38-->
 
-  <p class="noindent">When you hear Model-View-Controller you think
-  about web applications. This is a design pattern where you place
-  different concerns into different parts of your system and try
-  not to mix them too much. For an interactive application, if you
-  keep the part that stores data (Model) separated from the logic
-  (Controller) and use another piece to display and interact with
-  the user (View) then it&rsquo;s easier to change the system and
-  adapt it over time to new features. <!--l. 44-->
+  <p class="noindent">When you hear Model-View-Controller, you
+  think about web applications. This is a design pattern where you
+  place different concerns into different parts of your system and
+  try not to mix them too much. For an interactive application, if
+  you keep the part that stores data (Model) separated from the
+  logic (Controller) and use another piece to display and interact
+  with the user (View), then it&rsquo;s easier to change the system
+  and adapt it over time to new features. <!--l. 44-->
 
   <p class="noindent">The power of MVC is simply that these things
   really are separate orthogonal pieces that get ugly if
-  they&rsquo;re mixed together. There&rsquo;s not math or theory
-  that says why, just lots of experience has told us it&rsquo;s
-  usually a bad idea. When you start mixing them you find out that
-  it&rsquo;s hard to change for new requirements later because
+  they&rsquo;re mixed together. There&rsquo;s no math or theory
+  that says why; just lots of experience has told us it&rsquo;s
+  usually a bad idea. When you start mixing them, you find out that
+  it&rsquo;s hard to change for new requirements later, because
   you&rsquo;ve sprinkled logic all over your web pages. Or you
   can&rsquo;t update your database because there&rsquo;s all these
   stored procedures that assume the tables are a certain way. 
@@ -1118,12 +1118,12 @@
   server. The idea was that if we gave you the Controller and the
   Model, then you can craft any <span class="pplri7t-">View</span>
   you wanted, and there&rsquo;s no better Model than a SQL database
-  like SQLite. It&rsquo;s embeddable, easily accessed from C or any
-  language, portable, small, fast enough, and full of all the
+  like SQLite: it&rsquo;s embeddable, easily accessed from C or any
+  language, portable, small, fast enough and full of all the
   features you need and then some. <!--l. 57-->
 
   <p class="noindent">What you are doing when you use m2sh to
-  configure a configuration for Mongrel2 is working with a View
+  configure a configuration for Mongrel2, is working with a View
   we&rsquo;ve given you to create a Model for the Mongrel2 server
   to work with. That&rsquo;s it, and you can create your own View
   if you want. It could be automated deployment scripts, a web
@@ -1139,7 +1139,7 @@
   you&rsquo;ve got no idea why one stanza has to go in a particular
   place, or why information has to be duplicated. <!--l. 69-->
 
-  <p class="noindent">With Mongrel2 it&rsquo;s all right there. 
+  <p class="noindent">With Mongrel2, it&rsquo;s all right there. 
   <!--l. 72-->
 
   <p class="noindent">
@@ -1268,7 +1268,7 @@
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
       "pcrr7t-x-x-90">&nbsp;curl</span><span class=
-      "pcrr7t-x-x-90">&nbsp;http://localhost:8080/</span><br class=
+      "pcrr7t-x-x-90">&nbsp;http://localhost:6767/</span><br class=
       "fancyvrb">
       <a id="x1-22024r6" name="x1-22024r6"></a><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
@@ -1299,9 +1299,9 @@
   <hr class="endfloat">
   <!--l. 107-->
 
-  <p class="noindent">Awesome right? Using just this one little
-  Python management script you are able to completely manage a
-  mongrel2 instance without having to hack on a config file at all.
+  <p class="noindent">Awesome, right? Using just this one little
+  Python management script, you are able to completely manage a
+  Mongrel2 instance without having to hack on a config file at all.
   But you probably need to know how this is all working anyway.
 
   <h4 class="subsectionHead"><span class="titlemark">3.2.1</span>
@@ -1318,20 +1318,20 @@
   <ol class="enumerate1">
     <li class="enumerate" id="x1-23002x1">When you did <span class=
     "pplri7t-">m2sh start</span> with the <span class=
-    "pplri7t-">-sudo</span> option it actually runs <span class=
+    "pplri7t-">-sudo</span> option, it actually runs <span class=
     "pplri7t-">sudo</span> <span class="pplri7t-">mongrel2
     tests/config.sqlite localhost</span> to start the server.
 
     <li class="enumerate" id="x1-23004x2">Mongrel2 is now running
     in the background as a daemon process, just like a regular
-    server however what it did was chroot to the current directory
-    and then drop privileges so that they match the owner of that
-    directory (you). Use <span class="pplri7t-">ps aux</span> to
-    take a look.
+    server. However, what it did was chroot to the current
+    directory and then drop privileges so that they match the owner
+    of that directory (you). Use <span class="pplri7t-">ps
+    aux</span> to take a look.
 
-    <li class="enumerate" id="x1-23006x3">With Mongrel2 running you
-    can look in the logs/error.log file to see what it said. It
-    should be a bunch of debug logging but check out the messages,
+    <li class="enumerate" id="x1-23006x3">With Mongrel2 running,
+    you can look in the logs/error.log file to see what it said. It
+    should be a bunch of debug logging, but check out the messages:
     nice and detailed.
 
     <li class="enumerate" id="x1-23008x4">Next you did a soft
@@ -1341,16 +1341,16 @@
 
     <li class="enumerate" id="x1-23010x5">However, there&rsquo;s a
     slight bug that doesn&rsquo;t do the reload until the next
-    request is served, that&rsquo;s what the <span class=
+    request is served. That&rsquo;s what the <span class=
     "pplri7t-">curl http://localhost:8080/</span> was for.
 
     <li class="enumerate" id="x1-23012x6">Now that you can see this
-    reload work in the <span class="pplb7t-">logs/error.log</span>
-    you used <span class="pplri7t-">m2sh running</span> to see if
-    it&rsquo;s running. This command is just reading the config
-    database to find out where the PID file is (<span class=
-    "pplb7t-">run/mongrel2.pid</span>) and then checking if that
-    process is running.
+    reload work in <span class="pplb7t-">logs/error.log</span>, you
+    used <span class="pplri7t-">m2sh</span> <span class=
+    "pplri7t-">running</span> to see if it&rsquo;s running. This
+    command is just reading the config database to find out where
+    the PID file is (<span class="pplb7t-">run/mongrel2.pid</span>)
+    and then checking if that process is running.
 
     <li class="enumerate" id="x1-23014x7">Finally, you tell
     mongrel2 to stop, and since it dropped privileges to be owned
@@ -1566,9 +1566,9 @@
   <!--l. 180-->
 
   <p class="noindent">If you aren&rsquo;t familiar with Python then
-  this code might look freaky, but it&rsquo;s really simple. Well
-  get into how its structured in a second, but to load this file we
-  would just do this: <!--l. 184-->
+  this code might look freaky, but it&rsquo;s really simple.
+  We&rsquo;ll get into how its structured in a second, but to load
+  this file we would just do this: <!--l. 184-->
 
   <p class="noindent"><a id="x1-24040r8" name="x1-24040r8"></a>
   <hr class="float">
@@ -1664,54 +1664,70 @@
   <dl class="description">
     <dt class="description"><span class="pplb7t-">Server</span>
 
-    <dd class="description">This is the root of a config, and you
-    can have multiples of these in one database, even though each
-    start command only runs one at a time.
+    <dd class="description">
+      This is the root of a config, and you can have multiples of
+      these in one database, even though each start command only
+      runs one at a time.
 
-    <dt class="description"><span class="pplb7t-">Host</span>
+      <dl class="description">
+        <dt class="description"><span class="pplb7t-">Host</span>
 
-    <dd class="description">Servers then have Hosts inside them
-    which say what DNS hostname Mongrel2 should answer for, and you
-    can have multiples of these in each Server.
+        <dd class="description">
+          Servers have Hosts inside them, which say what DNS
+          hostname Mongrel2 should answer for. You can have
+          multiples of these in each Server.
 
-    <dt class="description"><span class="pplb7t-">Route</span>
+          <dl class="description">
+            <dt class="description"><span class=
+            "pplb7t-">Route</span>
 
-    <dd class="description">Hosts have Routes in them which tells
-    Mongrel2 what to do with URL paths and patterns that match
-    them. Routes then have <span class="pplri7t-">Dir</span>,
-    <span class="pplri7t-">Handler</span>, and <span class=
-    "pplri7t-">Proxy</span> items in them.
+            <dd class="description">
+              Hosts have Routes in them, which tells Mongrel2 what
+              to do with URL paths and patterns that match them.
+              Routes then have <span class="pplri7t-">Dir</span>,
+              <span class="pplri7t-">Handler</span> or <span class=
+              "pplri7t-">Proxy</span> items in them.
 
-    <dt class="description"><span class="pplb7t-">Dir</span>
+              <dl class="description">
+                <dt class="description"><span class=
+                "pplb7t-">Dir</span>
 
-    <dd class="description">A Dir serves files out of a directory,
-    full with 304 and ETag support, default content types, and most
-    of the things you need to serve them.
+                <dd class="description">A Dir serves files out of a
+                directory, full with 304 and ETag support, default
+                content types, and most of the things you need to
+                serve them.
 
-    <dt class="description"><span class="pplb7t-">Proxy</span>
+                <dt class="description"><span class=
+                "pplb7t-">Proxy</span>
 
-    <dd class="description">A Proxy takes requests matching the
-    Route they&rsquo;re attached to and sends them to another HTTP
-    server somewhere else. Mongrel2 will then act as a full proxy
-    and also try to keep connections open in keep-alive mode if the
-    browser supports it.
+                <dd class="description">A Proxy takes requests
+                matching the Route they&rsquo;re attached to and
+                sends them to another HTTP server somewhere else.
+                Mongrel2 will then act as a full proxy and also try
+                to keep connections open in keep-alive mode if the
+                browser supports it.
 
-    <dt class="description"><span class="pplb7t-">Handler</span>
+                <dt class="description"><span class=
+                "pplb7t-">Handler</span>
 
-    <dd class="description">A Handler is the best part of Mongrel2.
-    It takes HTTP requests, and turns them into nicely packed and
-    processed ZeroMQ messages for your asynchronous handlers.
-  </dl><!--l. 228-->
+                <dd class="description">A Handler is the best part
+                of Mongrel2. It takes HTTP requests, and turns them
+                into nicely packed and processed ZeroMQ messages
+                for your asynchronous handlers.
+              </dl>
+            </dl>
+        </dl>
+    </dl><!--l. 234-->
 
   <p class="noindent">Each of these nested &rdquo;objects&rdquo;
   then has a set of attributes you can use to configure them, and
-  most of them have reasonable defaults. <!--l. 232-->
+  most of them have reasonable defaults. <!--l. 238-->
 
   <p class="noindent">
 
   <h4 class="subsectionHead"><span class="titlemark">3.4.1</span>
   <a id="x1-260003.4.1" name="x1-260003.4.1"></a>Server</h4>
-  <!--l. 234-->
+  <!--l. 240-->
 
   <p class="noindent">The server is all about telling Mongrel2
   where to listen on its port, where to chroot, and general server
@@ -1762,13 +1778,13 @@
 
     <dd class="description">The port the server should listen on
     for new connections.
-  </dl><!--l. 251-->
+  </dl><!--l. 257-->
 
   <p class="noindent">
 
   <h4 class="subsectionHead"><span class="titlemark">3.4.2</span>
   <a id="x1-270003.4.2" name="x1-270003.4.2"></a>Host</h4>
-  <!--l. 253-->
+  <!--l. 259-->
 
   <p class="noindent">A host is matched using a kind of
   <span class="pplri7t-">inverse route</span> that matches the
@@ -1806,13 +1822,13 @@
 
     <dd class="description">This is a dict (hashmap) of the URL
     patterns mapped to the targets that should be run.
-  </dl><!--l. 268-->
+  </dl><!--l. 274-->
 
   <p class="noindent">
 
   <h4 class="subsectionHead"><span class="titlemark">3.4.3</span>
   <a id="x1-280003.4.3" name="x1-280003.4.3"></a>Route</h4>
-  <!--l. 270-->
+  <!--l. 276-->
 
   <p class="noindent">The <span class="pplri7t-">Route</span> is
   the workhorse of the whole system. It uses some very fancy but
@@ -1839,42 +1855,41 @@
 
     <dt class="description"><span class="pplb7t-">host</span>
 
-    <dd class="description">If you want to set the host manually
-    then you can use this attribute.
+    <dd class="description">You can use this attribute to set the
+    host manually.
 
     <dt class="description"><span class="pplb7t-">target</span>
 
     <dd class="description">This is the target that should handle
     the request, either a <span class="pplri7t-">Dir</span>,
-    <span class="pplri7t-">Handler</span>, <span class=
+    <span class="pplri7t-">Handler</span> or <span class=
     "pplri7t-">Proxy</span>.
-  </dl><!--l. 283-->
+  </dl><!--l. 289-->
 
-  <p class="noindent">Later on you&rsquo;ll learn about the pattern
-  matching that&rsquo;s used, but it&rsquo;s basically a stripped
-  down version of your normal regular expressions, but with a few
-  convenient syntaxes for doing simple string matching. When you
-  configure a route you write something like <span class=
+  <p class="noindent">Later on, you&rsquo;ll learn about the
+  pattern matching that&rsquo;s used, but it&rsquo;s basically a
+  stripped down version of your normal regular expressions, but
+  with a few convenient syntaxes for doing simple string matching.
+  When you configure a route, you write something like <span class=
   "pplb7t-">/images/(.*.jpg)</span> and the part before the
-  &rsquo;(&rsquo; is used as a fast matched prefix while the part
-  after is considered a pattern to match. When a request comes in,
-  Mongrel2 quickly finds the longest prefix that matches the URL,
-  and then tests its pattern if there is one. If the pattern is
-  valid then the request goes through. If not then 404. 
-  <!--l. 291-->
+  &rsquo;(&rsquo; is used as a fast matched prefix, while the part
+  after it is considered a pattern to match. When a request comes
+  in, Mongrel2 quickly finds the longest prefix that matches the
+  URL, and then tests its pattern if there is one. If the pattern
+  is valid, the request goes through. If not, 404. <!--l. 297-->
 
   <p class="noindent">
 
   <h4 class="subsectionHead"><span class="titlemark">3.4.4</span>
   <a id="x1-290003.4.4" name="x1-290003.4.4"></a>Dir</h4>
-  <!--l. 293-->
+  <!--l. 299-->
 
   <p class="noindent">A <span class="pplri7t-">Dir</span> is a
-  simple directory serving route target that serves files out of a
+  simple directory-serving route target that serves files out of a
   directory. It has caching built-in, handles if-modified-since,
-  etags, and all the various bizarre HTTP caching mechanisms as RFC
-  accurate as possible. It also has default content types and index
-  files.
+  ETags, and all the various bizarre HTTP caching mechanisms as
+  RFC-accurate as possible. It also has default content-types and
+  index files.
 
   <dl class="description">
     <dt class="description"><span class="pplb7t-">base</span>
@@ -1897,24 +1912,24 @@
 
     <dd class="description">The default Content-Type to use if none
     matches the MIMEType table.
-  </dl><!--l. 305-->
+  </dl><!--l. 311-->
 
-  <p class="noindent">Currently we don&rsquo;t offer more
+  <p class="noindent">Currently, we don&rsquo;t offer more
   parameters for configuration, but eventually you&rsquo;ll be able
-  to tweak more and more of the settings to control out Dirs work. 
-  <!--l. 308-->
+  to tweak more and more of the settings to control how Dirs work. 
+  <!--l. 314-->
 
   <p class="noindent">
 
   <h4 class="subsectionHead"><span class="titlemark">3.4.5</span>
   <a id="x1-300003.4.5" name="x1-300003.4.5"></a>Proxy</h4>
-  <!--l. 310-->
+  <!--l. 316-->
 
   <p class="noindent">A Proxy is a Ghetto. It is used so that you
   can use Mongrel2 but not have to throw out your existing
   infrastructure. Mongrel2 goes to great pains to make sure that it
   implements a fast and dead accurate proxy system internally, but
-  no matter how good it is it can&rsquo;t compete with ZeroMQ
+  no matter how good it is it, can&rsquo;t compete with ZeroMQ
   handlers. The idea with giving Proxy functionality is you can
   point Mongrel2 at existing servers, and then slowly carve out
   pieces that will work as handlers.
@@ -1927,51 +1942,51 @@
     <dt class="description"><span class="pplb7t-">port</span>
 
     <dd class="description">The port to connect to.
-  </dl><!--l. 323-->
+  </dl><!--l. 329-->
 
   <p class="noindent">Requests that match a Proxy route are still
-  parsed by Mongrel2&rsquo;s incredibly accurate HTTP parser so
+  parsed by Mongrel2&rsquo;s incredibly accurate HTTP parser, so
   that your backend servers should not be receiving badly formatted
-  HTTP requests. Responses from a Proxy server however are sent
-  unaltered to the browser directly. <!--l. 329-->
+  HTTP requests. Responses from a Proxy server, however, are sent
+  unaltered to the browser directly. <!--l. 335-->
 
   <p class="noindent">
 
   <h4 class="subsectionHead"><span class="titlemark">3.4.6</span>
   <a id="x1-310003.4.6" name="x1-310003.4.6"></a>Handler</h4>
-  <!--l. 331-->
+  <!--l. 337-->
 
-  <p class="noindent">Now we get to the best part, the ZeroMQ
+  <p class="noindent">Now we get to the best part: the ZeroMQ
   <span class="pplri7t-">Handlers</span> that will receive
   asynchronous requests from Mongrel2. You need to use the ZeroMQ
   syntax for configuring them, but this means with one
-  configuration format you can use handlers that are using udp,
-  tcp, unix, or pgm transports. Most testing has been done with tcp
-  transports the most.
+  configuration format you can use handlers that are using UDP,
+  TCP, Unix, or PGM transports. Most testing has been done with TCP
+  transports.
 
   <dl class="description">
     <dt class="description"><span class=
     "pplb7t-">send</span><span class="pplb7t-">_spec</span>
 
     <dd class="description">This is the 0MQ sender specification,
-    something like &rdquo;tcp://127.0.0.1:9999&rdquo; will use tcp
+    something like &rdquo;tcp://127.0.0.1:9999&rdquo; will use TCP
     to connect to a server on 127.0.0.1 at port 9999. The type of
-    socket used is a DOWNSTREAM socket so that handlers receive
+    socket used is a DOWNSTREAM socket, so that handlers receive
     messages in round-robin style.
 
     <dt class="description"><span class=
     "pplb7t-">send</span><span class="pplb7t-">_ident</span>
 
     <dd class="description">This is an identifier (usually a UUID)
-    that will be used to register the send socket. Doing this makes
-    it so that messages are persisted between crashes.
+    that will be used to register the send socket. This makes it so
+    that messages are persisted between crashes.
 
     <dt class="description"><span class=
     "pplb7t-">recv</span><span class="pplb7t-">_spec</span>
 
     <dd class="description">Same as the send spec, but it&rsquo;s
     for receiving responses from Handlers. The type of socket used
-    is a SUB socket so that a cluster of Mongrel2 servers will
+    is a SUB socket, so that a cluster of Mongrel2 servers will
     receive handler responses but only the one with the right
     recv_ident will process it.
 
@@ -1983,47 +1998,47 @@
     mention the send_ident on all returned messages, so you should
     either set this to nothing and don&rsquo;t subscribe, or set it
     to the same as send_ident.
-  </dl><!--l. 350-->
+  </dl><!--l. 356-->
 
   <p class="noindent">The interesting thing about the <span class=
   "pplri7t-">Handler</span> configuration is you don&rsquo;t have
-  to say where the actual backend handlers live. Notice you
+  to say where the actual backend handlers live. Did you notice you
   aren&rsquo;t declaring large clusters of proxies, proxy selection
-  methods, or anything else other than two 0MQ endpoints and some
+  methods, or anything else, other than two 0MQ endpoints and some
   identifiers? This is because Mongrel2 is <span class=
   "pplri7t-">binding</span> these sockets and listening. Mongrel2
-  doesn&rsquo;t actively connect to backends, they connect to
-  Mongrel2. This means if you want to fire up 10 more handlers, you
-  just start them. No need to restart or reconfigure Mongrel2 to
-  make them active. <!--l. 358-->
+  doesn&rsquo;t actively connect to backends; they connect to
+  Mongrel2. This means, if you want to fire up 10 more handlers,
+  you just start them; no need to restart or reconfigure Mongrel2
+  to make them active. <!--l. 364-->
 
   <p class="noindent">
 
   <h4 class="subsectionHead"><span class="titlemark">3.4.7</span>
   <a id="x1-320003.4.7" name="x1-320003.4.7"></a>Others</h4>
-  <!--l. 360-->
+  <!--l. 366-->
 
   <p class="noindent">There&rsquo;s also <span class=
   "pplri7t-">Log</span>, <span class="pplri7t-">MIMEType</span>,
   and <span class="pplri7t-">Setting</span> objects/tables you can
   work with, but we&rsquo;ll get into those later since you
   don&rsquo;t need to know about them to understand the Mongrel2
-  structure. <!--l. 366-->
+  structure. <!--l. 372-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">3.5</span> <a id=
   "x1-330003.5" name="x1-330003.5"></a>A More Complex Example</h3>
-  <!--l. 368-->
+  <!--l. 374-->
 
   <p class="noindent">All of this knowledge about the Mongrel2
   configuration structure can now be used to take a look at a more
-  complex example. What we&rsquo;ll do is take a look at this
-  example and I&rsquo;ll just say what&rsquo;s going on, and you
-  try to match what I&rsquo;m saying to the code. Here&rsquo;s the
-  file <span class=
+  complex example. We&rsquo;ll take a look at this example and
+  I&rsquo;ll just say what&rsquo;s going on, and you try to match
+  what I&rsquo;m saying to the code. Here&rsquo;s the file
+  <span class=
   "pplb7t-">examples/python/tests/mongrel2</span><span class=
-  "pplb7t-">_org.py</span>: <!--l. 372-->
+  "pplb7t-">_org.py</span>: <!--l. 378-->
 
   <p class="noindent"><a id="x1-33001r9" name="x1-33001r9"></a>
   <hr class="float">
@@ -2507,7 +2522,7 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 430-->
+  <!--l. 436-->
 
   <p class="noindent">If you haven&rsquo;t guessed yet, this
   configuration is what&rsquo;s used on <a href=
@@ -2517,7 +2532,7 @@
   out:
 
   <ol class="enumerate1">
-    <li class="enumerate" id="x1-33109x1">Our basic server with a
+    <li class="enumerate" id="x1-33109x1">Our basic server, with a
     default host of mongrel2.org.
 
     <li class="enumerate" id="x1-33111x2">The route targets are
@@ -2553,60 +2568,60 @@
     than by configurations.
 
     <li class="enumerate" id="x1-33123x8">With all those handler
-    targets we can now make the <span class="pplri7t-">mongrel2
-    Host</span> with all the routes assigned once and nice and
-    clean. However look how I was lazy and just tossed the
-    mp3stream demo right into the routes dict? You can totally do
-    this and m2sh will figure it out. Remember also that you can
-    use the <span class="obeylines-h verb pcrr7t-">r'blah'</span>
-    string format to not have to double up on your <span class=
+    targets, we can now make the <span class="pplri7t-">mongrel2
+    Host</span> with all the routes assigned once, nice and clean.
+    However, look how I was lazy and just tossed the mp3stream demo
+    right into the routes dict? You can totally do this and m2sh
+    will figure it out. Remember also that you can use the
+    <span class="obeylines-h verb pcrr7t-">r'blah'</span> string
+    format to not have to double up on your <span class=
     "obeylines-h verb pcrr7t-">\</span> chars in the patterns.
 
     <li class="enumerate" id="x1-33125x9">We then assign this
     <span class="pplri7t-">mongrel2</span> variable as the hosts
     for the <span class="pplri7t-">main</span> server.
 
-    <li class="enumerate" id="x1-33127x10">There is also a settings
-    feature which is just a dict of global settings you can tweak.
-    In this case we&rsquo;re upping the number of threads that 0MQ
-    is using for doing it&rsquo;s operations.
+    <li class="enumerate" id="x1-33127x10">There is also a
+    <span class="pplri7t-">settings</span> feature, which is just a
+    dict of global settings you can tweak. In this case,
+    we&rsquo;re upping the number of threads that 0MQ is using for
+    its operations.
 
     <li class="enumerate" id="x1-33129x11">Finally, we commit the
     whole thing to the database by passing in the servers to save
     and the settings to use.
-  </ol><!--l. 456-->
+  </ol><!--l. 462-->
 
-  <p class="noindent">And that my friends is the most complex
+  <p class="noindent">And that, my friends, is the most complex
   configuration we have so far.
 
   <h3 class="sectionHead"><span class="titlemark">3.6</span> <a id=
   "x1-340003.6" name="x1-340003.6"></a>Routing And Host
-  Patterns</h3><!--l. 461-->
+  Patterns</h3><!--l. 467-->
 
   <p class="noindent">The pattern code was taken from <a href=
   "http://www.lua.org/">Lua</a> and is some of the simplest code
   for doing fast pattern matches. It is very much like regular
-  expressions except it removes a lot of features you don&rsquo;t
-  need for routes. How Mongrel2 to uses them is it takes routes and
-  breaks them into a prefix and pattern part. It then uses routes
-  to find the longest matching prefix and then tests the pattern.
-  If the pattern matches then the route works. If the route
-  doesn&rsquo;t have a pattern then it&rsquo;s assumed to match and
-  you&rsquo;re done. <!--l. 468-->
+  expressions, except it removes a lot of features you don&rsquo;t
+  need for routes. Mongrel2 uses them by breaking routes up into a
+  prefix and pattern part. It then uses routes to find the longest
+  matching prefix and then tests the pattern. If the pattern
+  matches, then the route works. If the route doesn&rsquo;t have a
+  pattern, then it&rsquo;s assumed to match, and you&rsquo;re done.
+  <!--l. 474-->
 
   <p class="noindent">The only caveat is you have to wrap your
   pattern parts in parenthesis, but these don&rsquo;t mean anything
   other than to delimit where a pattern starts. So instead of
-  <span class="pplri7t-">/images/.*.jpg</span> write <span class=
-  "pplri7t-">/images/(.*.jpg)</span> for it to work right. 
-  <!--l. 472-->
+  <span class="pplri7t-">/images/.*.jpg</span>, write <span class=
+  "pplri7t-">/images/(.*.jpg)</span> for it to work. <!--l. 478-->
 
   <p class="noindent">Here&rsquo;s the list of characters you can
   use in your patterns:
 
   <ul class="itemize1">
     <li class="itemize"><span class=
-    "obeylines-h verb pcrr7t-">.</span> (period) all characters.
+    "obeylines-h verb pcrr7t-">.</span> (period) All characters.
 
     <li class="itemize"><span class=
     "obeylines-h verb pcrr7t-">\a</span> Letters.
@@ -2640,54 +2655,61 @@
     terminator).
 
     <li class="itemize"><span class=
-    "obeylines-h verb pcrr7t-">\x</span> Escapes x, so <span class=
-    "obeylines-h verb pcrr7t-">\</span> escapes <span class=
-    "obeylines-h verb pcrr7t-">\</span>, <span class=
-    "obeylines-h verb pcrr7t-">\</span>* escapes *.
-
-    <li class="itemize"><span class=
     "obeylines-h verb pcrr7t-">&#91;set&#93;</span> Just like a regex &#91;&#93;
-    where it is a class of chars, like &#91;0-9&#93; for all digits.
+    where is a set of chars, like &#91;0-9&#93; for all digits.
 
     <li class="itemize"><span class=
     "obeylines-h verb pcrr7t-">&#91;^set&#93;</span> Inverse character set,
     so &#91;<img src="book-final0x.png" alt="^0 " class="circ">-9&#93; is
-    anything not digits.
+    anything but digits.
 
     <li class="itemize"><span class=
-    "obeylines-h verb pcrr7t-">x&#8902;</span> Longest match of 0
-    or more x chars.
+    "obeylines-h verb pcrr7t-">&#8902;</span> Longest match of 0 or
+    more of the preceding character.
 
     <li class="itemize"><span class=
-    "obeylines-h verb pcrr7t-">x+</span> Longest match of 1 or more
-    x chars.
+    "obeylines-h verb pcrr7t-">+</span> Longest match of 1 or more
+    of the preceding character.
 
     <li class="itemize"><span class=
-    "obeylines-h verb pcrr7t-">x-</span> Shortest match of 0 or
-    more x chars.
+    "obeylines-h verb pcrr7t-">-</span> Shortest match of 0 or more
+    of the preceding character.
 
     <li class="itemize"><span class=
-    "obeylines-h verb pcrr7t-">x?</span> 0 or 1 match of x char.
+    "obeylines-h verb pcrr7t-">?</span> 0 or 1 match of of the
+    preceding character
 
     <li class="itemize"><span class=
-    "obeylines-h verb pcrr7t-">\bxy</span> Balanced match a
-    substring starting with x and ending in y. So <span class=
-    "obeylines-h verb pcrr7t-">\</span>b() will match balanced
-    parenthesis.
+    "obeylines-h verb pcrr7t-">\b</span><span class=
+    "pplri7t-">xy</span> Balanced match a substring starting with
+    <span class="pplri7t-">x</span> and ending in <span class=
+    "pplri7t-">y</span>. So <span class=
+    "obeylines-h verb pcrr7t-">\b()</span> will match balanced
+    parentheses.
 
     <li class="itemize"><span class=
     "obeylines-h verb pcrr7t-">^</span> The beginning of a string.
 
-    <li class="itemize">$ End of the string.
-  </ul><!--l. 498-->
+    <li class="itemize"><span class=
+    "obeylines-h verb pcrr7t-">\$</span> End of the string.
+  </ul><!--l. 504-->
 
-  <p class="noindent">Anything that&rsquo;s not listed here just
-  matches that character. Remember also that when you write the
-  Python code for your scripts you can use the <span class=
+  <p class="noindent">Using the uppercase version of an escaped
+  character makes it work the opposite way (i.e., <span class=
+  "obeylines-h verb pcrr7t-">\A</span> matches any character that
+  <span class="pplri7t-">isn&rsquo;t</span> a letter). The
+  backslash can be used to escape the following character,
+  disabling its special abilities (i.e., <span class=
+  "obeylines-h verb pcrr7t-">\\</span> will match a backslash). 
+  <!--l. 509-->
+
+  <p class="noindent">Anything that&rsquo;s not listed here is
+  matched literally. Remember also that when you write the Python
+  code for your scripts you can use the <span class=
   "obeylines-h verb pcrr7t-">r'blah'</span> string syntax to avoid
   having to double up on your <span class=
   "obeylines-h verb pcrr7t-">\</span> characters in the string. 
-  <!--l. 502-->
+  <!--l. 513-->
 
   <p class="noindent"><a id="x1-34001r3" name="x1-34001r3"></a>
   <hr class="float">
@@ -2695,18 +2717,19 @@
   <div class="float">
     <div class="caption">
       <span class="id">Note 3:</span> <span class=
-      "content"><span class="pplri7t-">Sorry Unicodians, It&rsquo;s
-      All</span> <span class="pplri7t-">ASCII</span></span>
+      "content"><span class="pplri7t-">Sorry, Unicodians,
+      It&rsquo;s All</span> <span class=
+      "pplri7t-">ASCII</span></span>
     </div><!--tex4ht:label?: x1-34001r3 -->
 
     <div class="quote">
-      <!--l. 503-->
+      <!--l. 514-->
 
       <p class="indent">Yep, I get it. You think that everyone
       should use UTF-8 or some Unicode encoding for everything. You
       despise the dominance of the &rsquo;A&rsquo; in ASCII and
       hate that you can&rsquo;t put your spoken language right in a
-      URL. <!--l. 507-->
+      URL. <!--l. 518-->
 
       <p class="indent">Well, I hate to say it, but tough.
       Protocols are hard enough without having to worry about the
@@ -2715,58 +2738,57 @@
       that&rsquo;s inconsistent, has multiple interpretations,
       can&rsquo;t be properly capitalized or lowercased, and
       requires extra translations steps for every operation. With
-      ASCII every computer just knows what it is and it&rsquo;s the
-      fastest for creating wire protocol formats. <!--l. 515-->
+      ASCII, every computer just knows what it is, and it&rsquo;s
+      the fastest for creating wire protocol formats. <!--l. 526-->
 
-      <p class="indent">This is why, on the internet, you have to
-      do things to URLs to make them ASCII like encoding them with
-      % signs. It&rsquo;s in the standard and it&rsquo;s the smart
+      <p class="indent">This is why, on the Internet, you have to
+      do things to URLs to make them ASCII, like encoding them with
+      % signs. It&rsquo;s in the standard, and it&rsquo;s the smart
       thing to do. I don&rsquo;t want to have to know the
       difference between the various accents in your spoken
       language to route a URL around. I just want to deal with a
       fixed set of characters and be done with it. Don&rsquo;t
       blame me or Mongrel2 for this, it&rsquo;s just the way the
       standard is and the way to get a server that is stable and
-      works. <!--l. 523-->
+      works. <!--l. 534-->
 
       <p class="indent">Protocols work better when there&rsquo;s
       less politics in their design. This means you can&rsquo;t put
-      Unicode into your URL patterns. I mean you can try but the
+      Unicode into your URL patterns. I mean, you can try; but the
       behavior is completely undefined.
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 530-->
+  <!--l. 541-->
 
-  <p class="noindent">Here&rsquo;s some example routes you can try
-  to get a feel for the system:
+  <p class="noindent">Here are some example routes you can try to
+  get a feel for the system:
 
   <ul class="itemize1">
-    <li class="itemize">r&rdquo;<span class=
-    "obeylines-h verb pcrr7t-">/images/</span>&rdquo; This will
-    just match any path that has /images/ in it without any
-    patterns.
+    <li class="itemize"><span class=
+    "obeylines-h verb pcrr7t-">r"/images/"</span> This will just
+    match any path that has /images/ in it without any patterns.
 
-    <li class="itemize">r&rdquo;<span class=
-    "obeylines-h verb pcrr7t-">/</span>&rdquo; The fastest possible
+    <li class="itemize"><span class=
+    "obeylines-h verb pcrr7t-">r"/"</span> The fastest possible
     route you can have.
 
-    <li class="itemize">r&rdquo;<span class=
-    "obeylines-h verb pcrr7t-">/images/(.&#8902;.jpg)</span>&rdquo;
+    <li class="itemize"><span class=
+    "obeylines-h verb pcrr7t-">r"/images/(.&#8902;.jpg)"</span>
     Match only requests for jpg images in the images directory.
     Keep in mind that this isn&rsquo;t actually looking in the
     directory, it&rsquo;s just matching the <span class=
     "pplri7t-">(.*.jpg)</span> pattern.
 
-    <li class="itemize">r&rdquo;<span class=
-    "obeylines-h verb pcrr7t-">/images/(\a-\-\d+\.jpg)</span>&rdquo;
-    A more complex example that matches a short sequence of 0 or
-    more letters (remember -), then a dash (<span class=
+    <li class="itemize"><span class=
+    "obeylines-h verb pcrr7t-">r"/images/(\a-\-\d+\.jpg)"</span> A
+    more complex example that matches a short sequence of 0 or more
+    letters (remember -), then a dash (<span class=
     "obeylines-h verb pcrr7t-">\-</span> escapes the -), then 1 or
     long sequence of digits and finally a .jpg) with the
     <span class="obeylines-h verb pcrr7t-">\</span>. escaping the
     period.
-  </ul><!--l. 541-->
+  </ul><!--l. 552-->
 
   <p class="noindent">That should give the idea of how you can use
   them. Notice also that I&rsquo;m using the Python <span class=
@@ -2777,7 +2799,7 @@
 
   <h3 class="sectionHead"><span class="titlemark">3.7</span> <a id=
   "x1-350003.7" name="x1-350003.7"></a>Deployment Logs And
-  Commits</h3><!--l. 547-->
+  Commits</h3><!--l. 558-->
 
   <p class="noindent">A very nice feature for people doing
   operations work is that m2sh keeps track of all the commands you
@@ -2786,14 +2808,14 @@
   maintained even across <span class="pplri7t-">m2sh init</span>
   and <span class="pplri7t-">m2sh load</span> commands so you can
   see what&rsquo;s going on. They track who did something, what
-  server they did it on, what time they did it, and what they did. 
-  <!--l. 554-->
+  server they did it on, what time they did it and what they did. 
+  <!--l. 565-->
 
-  <p class="noindent">To see the logs for your own tests just do
-  <span class="pplri7t-">m2sh log -db simple.sqlite</span> and then
-  if you want to add a commit log message you use the <span class=
-  "pplri7t-">m2sh commit</span> command. Here&rsquo;s an example
-  from mongrel2.org: <!--l. 558-->
+  <p class="noindent">To see the logs for your own tests, just do
+  <span class="pplri7t-">m2sh log -db simple.sqlite</span> and
+  then, if you want to add a commit log message, you use the
+  <span class="pplri7t-">m2sh commit</span> command. Here&rsquo;s
+  an example from mongrel2.org: <!--l. 569-->
 
   <p class="noindent"><a id="x1-35001r10" name="x1-35001r10"></a>
   <hr class="float">
@@ -2854,21 +2876,21 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 573-->
+  <!--l. 584-->
 
   <p class="noindent">The motivation for this feature is the trend
   that operations store server configurations in revision control
   systems like git or etckeeper. This works great for holding the
   configuration files, but it doesn&rsquo;t tell you what happened
-  on each server. In many cases the configuration files also need
+  on each server. In many cases, the configuration files also need
   to be reworked or altered for each deployment. With the m2sh log
   and commits system you can augment your revision control with
-  deployment action tracking. <!--l. 579-->
+  deployment action tracking. <!--l. 590-->
 
   <p class="noindent">Later versions of Mongrel2 will keep small
   amounts of statistics which will link these actions to changes in
   Mongrel2 behavior like frequent crashing, failures, slowness, or
-  other problems. <!--l. 582-->
+  other problems. <!--l. 593-->
 
   <p class="noindent">Basically, there&rsquo;s nowhere to hide.
   Mongrel2 will help operations figure out who needs to get fired
