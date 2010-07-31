@@ -46,7 +46,7 @@
     "#x1-140002.2.1" id="QQ2-1-15" name="QQ2-1-15">Using
     Fossil</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">2.2.2 <a href=
-    "#x1-150002.2.2" id="QQ2-1-17" name="QQ2-1-17">Using The .zip
+    "#x1-150002.2.2" id="QQ2-1-17" name="QQ2-1-17">Using the .zip
     File</a></span><br>
     &nbsp;<span class="sectionToc">2.3 <a href="#x1-160002.3" id=
     "QQ2-1-18" name="QQ2-1-18">Building And
@@ -216,12 +216,12 @@
   <p class="noindent">This manual will tell you about the most
   awesome webserver on the planet: Mongrel2. It is written for
   people with a sense of humor who want to get things done with
-  Mongrel2. That means if you&rsquo;re an operations professional,
-  software developer, hacker, or just curious it&rsquo;s for you.
+  Mongrel2. That means, if you&rsquo;re an operations professional,
+  software developer, hacker or just curious, it&rsquo;s for you.
   However, if you&rsquo;re too serious and think &rdquo;flowery
-  language&rdquo; (aka good entertaining writing) does not belong
-  in your software manuals then you should just go read the source
-  code and save everyone a huge headache dealing with you. 
+  language&rdquo; (A.K.A. good entertaining writing) does not
+  belong in your software manuals, then you should just go read the
+  source code and save everyone a huge headache dealing with you. 
   <!--l. 11-->
 
   <p class="noindent">In case you haven&rsquo;t figured it out,
@@ -238,22 +238,23 @@
 
   <p class="noindent">The Steves think that the entire internet
   should be a wonderful user experience where all pages are crafted
-  with pixel perfect fonts with high gloss visuals and coated with
-  the most happy happy joy joy of all possible experiences. To them
-  design is paramount and actual stability isn&rsquo;t important
-  unless it interferes with design. The Steves of the internet
-  think the Edsgers of internet are destroying the universe with
-  things like &rdquo;functionality&rdquo;, &rdquo;security&rdquo;,
-  and &rdquo;stability&rdquo;. Just like the real Steve Jobs, they
-  would rather everything look fantastic and then use awesome
-  marketing to cover up any technical flaws. <!--l. 31-->
+  with pixel-perfect fonts with high gloss visuals and coated with
+  the most happy happy joy joy of all possible experiences. To
+  them, design is paramount and actual stability isn&rsquo;t
+  important unless it interferes with design. The Steves of the
+  internet think the Edsgers of internet are destroying the
+  universe with things like &rdquo;functionality&rdquo;,
+  &rdquo;security&rdquo;, and &rdquo;stability&rdquo;. Just like
+  the real Steve Jobs, they would rather everything look fantastic
+  and then use awesome marketing to cover up any technical flaws. 
+  <!--l. 31-->
 
   <p class="noindent">The Edsgers feel that the internet is
-  completely unsafe and until it is a fully curate and crafted set
-  of academic peer reviewed papers it will be a festering pile of
-  dung. To the Edsgers the world is dangerous and only a truly
-  paranoid attitude toward security and stability will ensure that
-  it becomes safe. They want every single piece of software to
+  completely unsafe, and until it is a fully curated and crafted
+  set of academic, peer reviewed papers, it will be a festering
+  pile of dung. To the Edsgers, the world is dangerous and only a
+  truly paranoid attitude toward security and stability will ensure
+  that it becomes safe. They want every single piece of software to
   reject all reality and be crafted from nothing but pure
   mathematics, and hate the fact that the Steves want to run around
   painting the world with useless frivolous colors and words and
@@ -263,12 +264,14 @@
   project, is for the Knuths of the world. I like to think of the
   Knuths as the practical yet professional types with a light sense
   of humor. They are the ones who are getting things done while
-  still balancing between great typography and solid bug free
-  functionality. They aren&rsquo;t zealots but practical straight
-  forward type of people. <!--l. 47-->
+  still balancing between great typography and solid bug-free
+  functionality. They aren&rsquo;t zealots, but practical,
+  straight-forward type of people. <!--l. 47-->
 
-  <p class="noindent">That is why this book is written in TeX and
-  why it uses whatever fonts TeX uses. <!--l. 21-->
+  <p class="noindent">That is why this book is written in
+  <span class="TEX">T<span class="E">E</span>X</span>, and why it
+  uses whatever fonts <span class="TEX">T<span class=
+  "E">E</span>X</span>uses. <!--l. 21-->
 
   <p class="noindent">
 
@@ -487,7 +490,7 @@
   Unix systems, specifically Linux and Mac OSX. It is written in C
   (<span class="pplri7t-">not Ruby</span>) and uses fairly vanilla
   C and standard libraries, except for one piece that implements
-  the internal coroutines. Other than this you should be able to
+  the internal coroutines. Other than this, you should be able to
   compile and install Mongrel2 with nothing more than <span class=
   "pplri7t-">make all install</span> after you&rsquo;ve installed
   all the dependencies. <!--l. 10-->
@@ -495,10 +498,10 @@
   <p class="noindent">Now, if when I said dependencies you started
   to groan at having to install software to use my software, well
   my friend, welcome to the future. You said you don&rsquo;t want
-  people reinventing the wheel right? Great, that means you need to
-  install software for my software to work. It&rsquo;s either that
-  or wait 10 years for me to build everything from scratch like
-  some arrogant jackass. <!--l. 17-->
+  people reinventing the wheel, right? Great, that means you need
+  to install software for my software to work. It&rsquo;s either
+  that or wait 10 years for me to build everything from scratch
+  like some arrogant jackass. <!--l. 17-->
 
   <p class="noindent">We good now? Great, let&rsquo;s get started.
 
@@ -535,11 +538,11 @@
 
   <p class="noindent">If you install these things in this order,
   then everything should be good. Typically people run into
-  problems if they do this out of order, for example trying to
+  problems if they do this out of order; for example, trying to
   install Mongrel2 before they have distribute and pip installed. 
   <!--l. 37-->
 
-  <p class="noindent">Since every system is different it is
+  <p class="noindent">Since every system is different, it is
   difficult to tell you exactly how to install required packages
   for your OS, but here&rsquo;s how I did it on my computer: 
   <!--l. 41-->
@@ -725,9 +728,9 @@
   <!--l. 89-->
 
   <p class="noindent">Since it&rsquo;s early in Mongrel2
-  development we recommend you get fossil and install it so you can
-  track the latest fixes and development. Here&rsquo;s the easiest
-  way to do that: <!--l. 93-->
+  development, we recommend you get fossil and install it so you
+  can track the latest fixes and development. Here&rsquo;s the
+  easiest way to do that: <!--l. 93-->
 
   <p class="noindent">
 
@@ -755,7 +758,7 @@
   <div class="float">
     <div class="caption">
       <span class="id">Source 2:</span> <span class=
-      "content"><span class="pplri7t-">Cloning The Mongrel2</span>
+      "content"><span class="pplri7t-">Cloning the Mongrel2</span>
       <span class="pplri7t-">Source</span></span>
     </div><!--tex4ht:label?: x1-14007r2 -->
 
@@ -794,22 +797,22 @@
   <!--l. 114-->
 
   <p class="noindent">Make sure you do this in order (just like
-  with every set of instructions you should follow) or else
-  you&rsquo;ll get errors. For example, if you don&rsquo;t make the
-  <span class="pplb7t-">&nbsp;/fossils</span> directory then
-  you&rsquo;ll get an error saying fossil can&rsquo;t open your
-  file to clone. Well, that&rsquo;s because you <span class=
-  "pplri7t-">didn&rsquo;t make the</span> <span class=
-  "pplri7t-">&nbsp;/fossils directory</span>. Just pay attention
-  and don&rsquo;t blame fossil if you can&rsquo;t.
+  with every set of instructions you follow) or else you&rsquo;ll
+  get errors. For example, if you don&rsquo;t make the <span class=
+  "pplb7t-">&nbsp;/fossils</span> directory then you&rsquo;ll get
+  an error saying fossil can&rsquo;t open your file to clone. Well,
+  that&rsquo;s because you <span class="pplri7t-">didn&rsquo;t make
+  the</span> <span class="pplri7t-">&nbsp;/fossils
+  directory</span>. Just pay attention and don&rsquo;t blame fossil
+  if you can&rsquo;t.
 
   <h4 class="subsectionHead"><span class="titlemark">2.2.2</span>
-  <a id="x1-150002.2.2" name="x1-150002.2.2"></a>Using The .zip
+  <a id="x1-150002.2.2" name="x1-150002.2.2"></a>Using the .zip
   File</h4><!--l. 123-->
 
   <p class="noindent">If you don&rsquo;t want to install fossil
   then you will need to get the .zip file from our site and install
-  it that way. Since the code is new you have <span class=
+  it that way. Since the code is new, you have <span class=
   "pplri7t-">no guarantees</span> that this will work at all or
   that you will get a stable server. We have not made an official
   release, so using the .zip file is effectively a lame way of
@@ -856,16 +859,19 @@
     <li class="enumerate" id="x1-16002x1">Mongrel2 builds and
     compiles without errors.
 
-    <li class="enumerate" id="x1-16004x2">All the unit tests run,
-    please tell us about failures.
+    <li class="enumerate" id="x1-16004x2">All the unit tests
+    run.<span class="footnote-mark"><a href=
+    "book-final4.html#fn1x4"><sup class=
+    "textsuperscript">1</sup></a></span><a id="x1-16005f1" name=
+    "x1-16005f1"></a>
 
-    <li class="enumerate" id="x1-16006x3">The Python libraries that
+    <li class="enumerate" id="x1-16007x3">The Python libraries that
     m2sh needs get installed.
 
-    <li class="enumerate" id="x1-16008x4">The m2sh itself gets
+    <li class="enumerate" id="x1-16009x4">The m2sh itself gets
     installed.
 
-    <li class="enumerate" id="x1-16010x5">Finally the mongrel2
+    <li class="enumerate" id="x1-16011x5">Finally, the mongrel2
     binary gets installed.
   </ol><!--l. 155-->
 
@@ -881,10 +887,10 @@
   "pplri7t-">not</span> report bugs about your own flavor of
   Linux&rsquo;s stupidity about versions and how it installs
   Python. If you don&rsquo;t want to use the package system every
-  other Python programmer uses then you&rsquo;re on your own. 
+  other Python programmer uses, then you&rsquo;re on your own. 
   <!--l. 164-->
 
-  <p class="noindent"><a id="x1-16011r1" name="x1-16011r1"></a>
+  <p class="noindent"><a id="x1-16012r1" name="x1-16012r1"></a>
   <hr class="float">
 
   <div class="float">
@@ -892,18 +898,18 @@
       <span class="id">Note 1:</span> <span class=
       "content"><span class="pplri7t-">Use Virtualenv If You
       Fear</span> <span class="pplri7t-">Pip</span></span>
-    </div><!--tex4ht:label?: x1-16011r1 -->
+    </div><!--tex4ht:label?: x1-16012r1 -->
 
     <div class="quote">
       <!--l. 165-->
 
       <p class="indent">For those who still want to use the package
-      management but want to use pip and distribute I suggest you
+      management but want to use pip and distribute, I suggest you
       check out <a href=
       "http://pypi.python.org/pypi/virtualenv">virtualenv</a>. What
       virtualenv does is create a little &rdquo;chroot
       install&rdquo; of just the packages you need using pip or
-      distribute. When you don&rsquo;t want them anymore you can
+      distribute. When you don&rsquo;t want them anymore, you can
       just delete one directory and you&rsquo;re fine.
     </div>
   </div>
@@ -913,7 +919,7 @@
   "x1-170002.4" name="x1-170002.4"></a>Testing The
   Installation</h3><!--l. 175-->
 
-  <p class="noindent">When you are done you probably want to make
+  <p class="noindent">When you are done, you probably want to make
   sure that it installed correctly. There&rsquo;s a test
   configuration file in <span class=
   "pplb7t-">tests/config.sqlite</span> that you can use to try it
@@ -1016,8 +1022,8 @@
   <p class="noindent">You now should have a working Mongrel2 system
   installed and the m2sh configuration interface ready to go. In
   the rest of this manual we&rsquo;ll be simply learning how to do
-  more with Mongrel2 like making our own configs, writing handlers,
-  and other fun stuff.
+  more with Mongrel2, like making our own configs, writing
+  handlers, and other fun stuff.
 
   <h2 class="chapterHead"><span class=
   "titlemark">Chapter&nbsp;3</span><br>
@@ -5761,7 +5767,7 @@
     <li class="enumerate" id="x1-61008x4">Be language agnostic and
     use a data format everyone can accept without complaining that
     it should be done with their favorite <span class=
-    "footnote-mark"><a href="book-final4.html#fn1x7"><sup class=
+    "footnote-mark"><a href="book-final5.html#fn1x7"><sup class=
     "textsuperscript">1</sup></a></span><a id="x1-61009f1" name=
     "x1-61009f1"></a> .
 
@@ -5804,7 +5810,7 @@
   reply sockets though will let Handlers send back replies to a
   cluster of Mongrel2 servers, but only the one with the right
   subscription will process the request<span class=
-  "footnote-mark"><a href="book-final5.html#fn2x7"><sup class=
+  "footnote-mark"><a href="book-final6.html#fn2x7"><sup class=
   "textsuperscript">2</sup></a></span><a id="x1-62001f2" name=
   "x1-62001f2"></a> . <!--l. 430-->
 
@@ -6251,7 +6257,7 @@
   the <span class="pplb7t-">examples/http</span><span class=
   "pplb7t-">_0mq/http.py</span> file and it just the simplest thing
   possible<span class="footnote-mark"><a href=
-  "book-final6.html#fn3x7"><sup class=
+  "book-final7.html#fn3x7"><sup class=
   "textsuperscript">3</sup></a></span><a id="x1-69001f3" name=
   "x1-69001f3"></a> : <!--l. 603-->
 
@@ -7073,7 +7079,7 @@
   "pplri7t-">m2sh</span> script in your favorite language.
   Obviously, if you&rsquo;re doing this you should probably have a
   good reason<span class="footnote-mark"><a href=
-  "book-final7.html#fn4x7"><sup class=
+  "book-final8.html#fn4x7"><sup class=
   "textsuperscript">4</sup></a></span><a id="x1-73001f4" name=
   "x1-73001f4"></a> What writing your own, or understanding what
   <span class="pplri7t-">m2sh</span> is doing will do for you
@@ -7115,7 +7121,7 @@
   "pplb7t-">src/config/mimetypes.sql</span> where the database
   schema is created and the large list of mimetypes that Mongrel2
   knows is stored.<span class="footnote-mark"><a href=
-  "book-final8.html#fn5x7"><sup class=
+  "book-final9.html#fn5x7"><sup class=
   "textsuperscript">5</sup></a></span><a id="x1-73002f5" name=
   "x1-73002f5"></a> Your tool should be able to use this SQL to
   make its database or at least know what it does. <!--l. 846-->
