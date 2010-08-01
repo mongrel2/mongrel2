@@ -14,7 +14,7 @@ a simple storage mechanism.
 \begin{aside}{Apparently SQL Inspires FUD}
 When I first started talking about Mongrel2, I said I'd store the configuration
 in SQLite and do a Model-View-Controller kind of design.  Immediately people who
-can't read flipped out and though this meant they'd be back in "windows registry hell",
+can't read flipped out and though this meant they'd be back in ``windows registry hell'',
 but with SQL as their only way to access it.  They thought that they'd be stuck writing
 configurations with SQL; that SQL couldn't possibly configure a web server.
 
@@ -149,8 +149,8 @@ control system.  With Python you just write your configuration like it's code an
 you're set.
 
 The first thing you need to do is initialize a fresh configuration database to get
-started by using \shell{m2sh init} and then you load your configuration using
-\shell{m2sh load}.  As an example, we'll use the example configuration
+started by using \shell{m2sh init} and then you load your configuration into it using
+\shell{m2sh load}.  For our example, we'll use the example configuration
 from \file{examples/python/tests/sample\_conf.py} to make a simple one:
 
 \begin{code}{Simple Little Config Example}
@@ -202,7 +202,7 @@ With this sequence of commands you:
 \end{enumerate}
 
 By now you should be getting the hang of the pattern here, which is to use
-m2sh and little Python configuration "script" to generate .sqlite files
+m2sh and little Python configuration ``script'' to generate .sqlite files
 that Mongrel2 understands.
 
 \section{How A Config Is Structured}
@@ -231,7 +231,7 @@ The base structure of a Mongrel2 configuration is:
   \end{description}
 \end{description}
 
-Each of these nested "objects" then has a set of attributes you can use to configure them, and
+Each of these nested ``objects'' then has a set of attributes you can use to configure them, and
 most of them have reasonable defaults.
 
 
@@ -244,7 +244,7 @@ and general server specific deployment gear.
 \item[uuid] A UUID is used to make sure that each deployed server is unique in your infrastructure.
     You could easily use any string that's letters, numbers, or - characters.
 \item[chroot] This is the directory that Mongrel2 should chroot to and drop privileges.
-\item[access\_log] The access log file \emph{relative to the chroot}.  Usually starts with a '/'.  Make sure
+\item[access\_log] The access log file \emph{relative to the chroot}.  Usually starts with a `/'.  Make sure
     you don't configure your server so that this and other files are accessible, or make this owned by root.
 \item[error\_log] The error log file just like access\_log.
 \item[pid\_file] Like the access log, where within the chroot directory is the pid file stored.
@@ -288,7 +288,7 @@ code in Mongrel2 to translate \ident{Host:} headers to \ident{Hosts} and URL pat
 
 Later on, you'll learn about the pattern matching that's used, but it's basically a stripped down version of your
 normal regular expressions, but with a few convenient syntaxes for doing simple string matching.  When you configure
-a route, you write something like \file{/images/(.*.jpg)} and the part before the '(' is used as a fast matched
+a route, you write something like \file{/images/(.*.jpg)} and the part before the `(' is used as a fast matched
 prefix, while the part after it is considered a pattern to match.  When a request comes in, Mongrel2 quickly finds the
 longest prefix that matches the URL, and then tests its pattern if there is one.  If the pattern is valid, the
 request goes through.  If not, 404.
@@ -340,7 +340,7 @@ configuration format you can use handlers that are using UDP, TCP, Unix, or PGM 
 testing has been done with TCP transports.
 
 \begin{description}
-\item[send\_spec]  This is the 0MQ sender specification, something like "tcp://127.0.0.1:9999" will
+\item[send\_spec]  This is the 0MQ sender specification, something like ``tcp://127.0.0.1:9999'' will
     use TCP to connect to a server on 127.0.0.1 at port 9999.  The type of socket used is a DOWNSTREAM
     socket, so that handlers receive messages in round-robin style.
 \item[send\_ident] This is an identifier (usually a UUID) that will be used to register the send
@@ -512,7 +512,7 @@ code for your scripts you can use the \verb|r'blah'| string syntax to avoid havi
 
 \begin{aside}{Sorry, Unicodians, It's All ASCII}
 Yep, I get it.  You think that everyone should use UTF-8 or some Unicode encoding for everything.
-You despise the dominance of the 'A' in ASCII and hate that you can't put your spoken language
+You despise the dominance of the `A' in ASCII and hate that you can't put your spoken language
 right in a URL.
 
 Well, I hate to say it, but tough.  Protocols are hard enough without having to

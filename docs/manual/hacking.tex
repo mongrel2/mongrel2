@@ -117,7 +117,7 @@ might need for more serious deployments.  Those features will come eventually, t
 What you do get with Mongrel2's proxying, though, is a dead accurate way of slicing up
 your application by routes.  Other web servers make you go through great pain in order
 to have some URLs go to a proxy and others go to handlers or directories.  They make you
-use odd "file syntax", weird pseudo-turing logic if-statements, and other odd hacks
+use odd ``file syntax'', weird pseudo-turing logic if-statements, and other odd hacks
 to get flexible route selection.  They also tend to not maintain keep-alives properly
 between proxy requests and other requests.
 
@@ -135,26 +135,26 @@ helper gear for handlers.  They work, in theory, but haven't really been tried i
 If you try them out and find things that need fixing, let us know.
 
 \begin{aside}{Death To WebSockets}
-I am getting sick of these "Backroom RFCs" that are crafted around a bunch of huge
+I am getting sick of these ``Backroom RFCs'' that are crafted around a bunch of huge
 companies' crap implementations found in their existing products rather than things
 real programmers need.  WebSockets is yet another example of this, with so many odd
 features and annoying agendas that I hope it fails miserably.
 
 First, it actually specifies \emph{Unicode} for the wire protocol in the HTTP headers.
 This is such a monumental bad idea and will break so many web servers and browsers that
-I'm baffled how it got into the standard.  The only thing I can think of is some "reverse colonialist"
+I'm baffled how it got into the standard.  The only thing I can think of is some ``reverse colonialist''
 who thinks the world should a happy rainbow of Unicode demanded it be in there.  Unicode in
 the wire protocol adds no linguistic value (nobody reads headers), complicates servers,
 adds security concerns because Unicode is ambiguous, and also violates the existing HTTP standard
 which specifies ASCII for the wire protocol.  As I've said before in this manual, writing
 protocols is hard enough without having to translate and deal with weird UTF-8 Unicode bizarreness.
 
-Second, there is an idiotic "encryption" mechanism for a key exchange that can only be
+Second, there is an idiotic ``encryption'' mechanism for a key exchange that can only be
 described as completely damaged and amateurish.  The scheme involves taking a regular
 number and then mixing in non-number characters, so \verb|1234| becomes \verb|1@%^2*(34| and then is
-"decrypted" by just reading only the digits.  Yes, this encryption is so advanced you can do it
+``decrypted'' by just reading only the digits.  Yes, this encryption is so advanced you can do it
 in your head visually.  I'm sorry, but any obfuscation that can be done by an 11 year old on
-paper is not encryption and should not be used at all.  Again, this smacks of some "clever" feature
+paper is not encryption and should not be used at all.  Again, this smacks of some ``clever'' feature
 one of the many corporations out there invented and not something any real programmer needs.
 
 There's more, but these two alone are enough to decide to hold off on WebSockets until
@@ -211,13 +211,13 @@ Learning to use \href{http://zeromq.org}{ZeroMQ} is a bit outside the scope of t
 a quick introduction to it so that you can explore it further.  It is a very simple
 system, so hopefully you can figure it out from here.
 
-What ZeroMQ ends up being is "sockets the way programmers think sockets work."  Programmers
+What ZeroMQ ends up being is ``sockets the way programmers think sockets work''.  Programmers
 usually hear about TCP or UDP sockets and they think in a naive way that they work like
 this:
 
 \begin{description}
 \item [TCP] Programmers think these are streamed sequential messages, so if
-   they send a "message" that's 10k long then when the receiver gets it and read
+   they send a ``message'' that's 10k long then when the receiver gets it and read
    from the TCP socket they get a single 10k message in reply.  This only works in
    small messages and not on the Internet, so it's easy to see how it would seem
    to work that way.  The reality is that you can get messages of any size, and without
@@ -262,7 +262,7 @@ and \href{http://api.zeromq.org/zmq\_connect.html}{zmq\_connect} are:
 \item [tcp://] This is a plain old TCP socket with a host and portnumber.
 \item [ipc://] This uses Unix inter-process communication like domain sockets, mq, or whatever is available.
 \item [pgm://] Reliable multicast messaging that uses raw IP layering and requires special privileges.
-\item [epgm://] The "encapsulated" version that uses regular UDP to do reliable multicast messaging.
+\item [epgm://] The ``encapsulated'' version that uses regular UDP to do reliable multicast messaging.
 \end{description}
 
 Finally, ZeroMQ divorces who binds and connects from the above two
@@ -270,7 +270,7 @@ configurations.  This means that, unlike classic sockets, who connects and who
 binds doesn't matter for the direction or kind of message.  All that really
 matters is whether the connection makes sense for your application.  For
 example, in Mongrel2 the server does a bind on the handler ports so that
-handlers can connect at will, which gives your handlers a nice "zero config"
+handlers can connect at will, which gives your handlers a nice ``zero config''
 setup.  Mongrel2 doesn't need to know about handlers; they just need to know
 about Mongrel2.
 
@@ -328,7 +328,7 @@ while True:
 You can then run these two in different windows and they will talk to each
 other.  Try playing around with different socket types and transports to see
 what they do.  Notice that for a PUB/SUB setup we have to use \ident{setsockopt}
-to subscribe the nothing ('').  This is the same no matter what language you
+to subscribe the nothing (\verb|''|).  This is the same no matter what language you
 use.
 
 Here's an example that does the same thing but with REQ/REP style of messages.
@@ -370,7 +370,7 @@ first then recv, and REP sockets \emph{must} recv then send.
 
 \begin{aside}{There's Always a Size in ZeroMQ Land}
 The lack of a reliable framing mechanism in TCP was a crime against humanity.  What I mean by a
-"frame" is a simple indicator that a message in a stream has a certain length.  If you preface
+``frame'' is a simple indicator that a message in a stream has a certain length.  If you preface
 each message in TCP with the length of the data you're about to send then you avoid all manner
 of annoyance, attacks, and bugs.  Something as simple as a single byte that says you're sending up
 to 128 more bytes, with an extra bit to indicate the last byte would have saved the world much
@@ -389,7 +389,7 @@ really does true streaming.  They always end up having to bolt on some framing o
 \section{Handler ZeroMQ Format}
 
 You've had the world's fastest crash course in \href{http://zeromq.org}{ZeroMQ} and now you're
-ready to see how Mongrel2 talks to your handlers with it.  I won't really call this a "protocol",
+ready to see how Mongrel2 talks to your handlers with it.  I won't really call this a ``protocol'',
 since ZeroMQ is really doing the protocol, and we just pull fully baked messages out of it.  Instead,
 this is just a format, as if you got strings out of a file or something similar.  This message
 format is designed to accomplish a few things in the simplest way possible:
@@ -465,7 +465,7 @@ message is to/from.
 
 In case you don't know what a netstring is, it is a very simple way to encode a
 block of data such that any language can read the block and know how big it is.
-A netstring is, simply, \verb|SIZE:DATA,|. So, to send "HI", you would do
+A netstring is, simply, \verb|SIZE:DATA,|. So, to send ``HI'', you would do
 \verb|2:HI,|, and it is \emph{incredibly} easy to parse in every language, even
 C.  It is also a fast format and you can read it even if you're a human.
 
@@ -506,7 +506,7 @@ many as you like to complete the request and any handler can send it.
 \subsection{Complete Message Examples}
 
 Now, even though we laid out all of this as a series of rules, the actual code to implement
-these is very simple.  First here's a simple "grammar" for how a request that
+these is very simple.  First here's a simple ``grammar'' for how a request that
 gets sent to your handlers is formatted:
 
 \begin{Verbatim}
@@ -584,10 +584,9 @@ design.  To check out how to use the Python API, we'll take a look at
 each of the demos that are available.  These are the same demos you
 ran in the previous section to create a sample deployment.
 
-To look at the Python API, take a look at
+For the Python API, you may want to start by looking at two very small files that should be able to understand quickly:
 \file{examples/python/mongrel2/request.py} and
-\file{examples/python/mongrel2/handler.py}.  They are very small files that you
-should be able to understand quickly.
+\file{examples/python/mongrel2/handler.py}.
 
 
 \section{Basic Handler Demo}
@@ -628,10 +627,10 @@ it's not even a valid HTML document.  Let's walk through everything that's going
 \item Import the \ident{handler} module from \ident{mongrel2} and \ident{json}.  The \ident{json} module is
     really only used for logging.
 \item Establish the UUID for our handler, and create a connection.  It's not \emph{really} a connection
-    but more of a "virtual circuit" that you can just pretend is a connection.  It's using all ZeroMQ and
+    but more of a ``virtual circuit'' that you can just pretend is a connection.  It's using all ZeroMQ and
     the protocol we just described to create a simple API to use.
 \item Go into a while loop forever and recv request objects off the connection.
-\item One type of special message we can get from Mongrel2 is a "disconnect" message, which tells you that
+\item One type of special message we can get from Mongrel2 is a ``disconnect'' message, which tells you that
     one of the listeners you tried to talk to was closed.  You should either ignore those and read
     another, or update any internal state you may have.  They can come asynchronously, and for the most
     part you can ignore them unless you need to keep them open as in, say, a chat application or streaming.
@@ -829,11 +828,11 @@ ORM model that works the raw SQLite database.
 
 The next thing to do is to make your tool craft databases and compare the
 results to what m2sh does for a similar configuration.  I recommend you make
-a database that's "correct" with m2sh, and then dump it via \shell{sqlite3}.
+a database that's ``correct'' with m2sh, and then dump it via \shell{sqlite3}.
 After that, use your tool to make your own database, dump it, and then use
 \shell{diff} to compare your results to mine.
 
-Finally, the base schema files you'll need to look at are in
+Finally, you'll need to look at two base schema files:
 \file{src/config/config.sql} and \file{src/config/mimetypes.sql}, where
 the database schema is created and the large list of mimetypes that
 Mongrel2 knows is stored.\footnote{Incidentally, if you want to add one,

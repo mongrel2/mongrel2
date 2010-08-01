@@ -1,7 +1,7 @@
 \chapter{Deploying}
 
 I am now going to try to get you to setup a small tiny little version of a good
-deployment that matches the \url{http://mongrel2.org} site's configuration with
+deployment that matches the configuration of the site at \url{http://mongrel2.org}, with
 all the examples running.  This configuration will give you all the tools you
 need to make automated and managed deployments, but it is using small scale tools.
 The idea is that you learn what is involved in a nice easy to manage setup using simple
@@ -38,14 +38,14 @@ This is why I started my own book: \href{http://learnpythonthehardway.org}{Learn
 Python The Hard Way}, for people who know nothing about programming but need or
 want to learn.  It teaches Python, but it mostly teaches all the things
 programmers actually learn before they learn programming.  When you're done
-with my book, you'll have your "programming brown belt".  That means you can
+with my book, you'll have your ``programming brown belt".  That means you can
 then move onto one of many other free online books and \emph{really} learn
 programming, and have a higher chance of actually learning it.
 
 If you can't code Python then you can probably muddle through this and you may
 learn something, but learning Python will be important later.
 
-But \emph{don't} read "Dive Into Python". It is a horrible introduction.
+But \emph{don't} read ``Dive Into Python". It is a horrible introduction.
 \end{aside}
 
 \subsection{Introducing procer}
@@ -58,7 +58,7 @@ processes without a tool to help is a nightmare.  You end up writing init script
 and merging them into your boot process and all sorts of crazy antics just so you
 can run a stupid hello world demo.
 
-What I needed was a "user space process manager".  These are programs that run other
+What I needed was a ``user space process manager".  These are programs that run other
 programs, but, more importantly, try to keep those other programs running without much
 human intervention.  When you need to deploy a ton of processes that all have to
 be running, these USPMs are fantastic.  They usually read some startup profile describing
@@ -208,7 +208,7 @@ config.py  config.sqlite  logs	profiles  run  tmp
 \end{code}
 
 Hopefully, you're starting to see how you could easily automate this so that you don't
-have to do this all the time.  I'm just showing you how to "make the sausage" so that
+have to do this all the time.  I'm just showing you how to ``make the sausage'' so that
 you know where everything goes.  Future versions of \shell{m2sh} will most likely
 create deployment directories like this automatically.
 
@@ -240,7 +240,7 @@ Here's what you have to change in \file{config.py} to make everything work right
     existing ones.  This is optional, but probably a good idea to get in the
     habit now.
 \item Change the \ident{port} for \ident{web\_app\_proxy} so it points to 8080 instead of 80.
-\item Finally, change any mention of "mongrel2.org" into "localhost" so that you
+\item Finally, change any mention of ``mongrel2.org'' into ``localhost'' so that you
     can run it locally.
 \end{enumerate}
 
@@ -338,7 +338,7 @@ ERROR chat didn't make pidfile /home/zedshaw/deployment/profiles/chat/chat.pid.
 \end{Verbatim}
 \end{code}
 
-I've cleaned this up a bit and, again, ignore that it's saying "Mongrel2";
+I've cleaned this up a bit and, again, ignore that it's saying ``Mongrel2";
 that's just cruft from the library since it was originally designed
 for Mongrel2.  What you can see here is the following:
 
@@ -415,7 +415,7 @@ Mongrel2 come right back.
 We've got a good setup of \shell{procer} going and it keeps Mongrel2
 running, so let's setup a similar thing for each of our little
 Python demos that we'll need.  In order to do this, though, we sort
-of have to "hack in" making them daemonize and create PID files with
+of have to ``hack in'' making them daemonize and create PID files with
 a little shell script help.  Let's start with the \ident{chat} demo
 and, assuming your mongrel2 source is in \file{~/projects/mongrel2},
 you will change \file{profiles/chat/run} to be like this:
