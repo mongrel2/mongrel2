@@ -61,6 +61,22 @@ char *test_pattern_match()
     
     mu_assert(m != NULL, "Should match.");
 
+    // escaped, non-class characters map to themselves
+
+    m = pattern_match("ZED", strlen("ZED"), "Z\\ED");
+
+    mu_assert(m != NULL, "Should match.");
+
+    // escaped special characters are depowered
+
+    m = pattern_match("*Z*E+D.", strlen("*Z*E+D."), "\\*Z\\*E\\+D\\.");
+
+    mu_assert(m != NULL, "Should match.");
+
+    m = pattern_match("ZED!", strlen("ZED!"), "ZED\\.");
+
+    mu_assert(m == NULL, "Should not match.");
+
     return NULL;
 }
 
