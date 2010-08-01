@@ -126,7 +126,7 @@ what's going on.  Here's an explanation of what's going on behind the scenes:
 \item Next you did a soft reload with \shell{m2sh reload} and you should notice that your mongrel2
     process was able to load the new config \emph{without restarting}.
 \item However, there's a slight bug that doesn't do the reload until the next request is served. That's
-    what the \shell{curl http://localhost:8080/} was for.
+    what the \shell{curl http://localhost:6767/} was for.
 \item Now that you can see this reload work in \file{logs/error.log}, you used \shell{m2sh running} to
     see if it's running.  This command is just reading the config database to find out where the PID file
     is (\file{run/mongrel2.pid}) and then checking if that process is running.
@@ -167,7 +167,7 @@ main = Server(
     port=6767,
     hosts = [
         Host(name="localhost", routes={
-            '/tests/': Dir(base='tests/', index_file='index.html',
+            r'/tests/': Dir(base='tests/', index_file='index.html',
                              default_ctype='text/plain')
         })
     ]
