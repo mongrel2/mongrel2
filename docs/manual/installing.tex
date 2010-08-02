@@ -39,7 +39,7 @@ install required packages for your OS, but here's how I did it on my computer:
 
 
 \begin{code}{Installing Dependencies on ArchLinux}
-\begin{Verbatim}
+\begin{lstlisting}
 # install ZeroMQ
 > wget http://www.zeromq.org/local--files/area:download/zeromq-2.0.7.tar.gz
 > tar -xzvf zeromq-2.0.7.tar.gz
@@ -65,7 +65,7 @@ install required packages for your OS, but here's how I did it on my computer:
 
 # web.py
 > sudo pip install web.py
-\end{Verbatim}
+\end{lstlisting}
 \end{code}
 
 If you run into parts that your OS is missing, which is likely on
@@ -102,13 +102,13 @@ do that:
 Once you have fossil you can then get the Mongrel2 source and open it up:
 
 \begin{code}{Cloning the Mongrel2 Source}
-\begin{Verbatim}
+\begin{lstlisting}
 > mkdir ~/fossils
 > fossil clone http://mongrel2.org ~/fossils/mongrel2.fossil
 > mkdir mongrel2
 > cd mongrel2
 > fossil open ~/fossils/mongrel2.fossil
-\end{Verbatim}
+\end{lstlisting}
 \end{code}
 
 Make sure you do this in order (just like with every set of instructions you follow)
@@ -177,13 +177,13 @@ There's a test configuration file in \file{tests/config.sqlite} that you can
 use to try it out:
 
 \begin{code}{First Test Run}
-\begin{Verbatim}
+\begin{lstlisting}
 > mkdir run
 > mkdir logs
 > mkdir tmp
 > m2sh dump -db tests/config.sqlite
 > m2sh start -db tests/config.sqlite -host localhost
-\end{Verbatim}
+\end{lstlisting}
 \end{code}
 
 That's it.  Just hit CTRL-c for now and we'll get into playing with this
@@ -191,11 +191,11 @@ setup later.
 
 \section{Upgrading from trunk}
 \begin{code}{Update your checkout}
-\begin{Verbatim}
+\begin{lstlisting}
 > cd mongrel2
 > fossil pull http://mongrel2.org
 > fossil update
-\end{Verbatim}
+\end{lstlisting}
 \end{code}
 
 Don't forget \shell{make clean all install}.

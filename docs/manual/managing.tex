@@ -75,13 +75,13 @@ To give this configuration system a try you just need to run the test configurat
 in the unit tests.  Let's try doing a few of the most basic commands with this configuration:
 
 \begin{code}{Sample m2sh Commands}
-\begin{Verbatim}
+\begin{lstlisting}
 > m2sh dump -db tests/config.sqlite
 > m2sh servers -db tests/config.sqlite
 > m2sh hosts -db tests/config.sqlite -host localhost
 > m2sh running -db tests/config.sqlite -host localhost
 > m2sh start -db tests/config.sqlite -host localhost
-\end{Verbatim}
+\end{lstlisting}
 \end{code}
 
 At this point you should have seen some raw dumps of the database, lists of servers and hosts,
@@ -92,7 +92,7 @@ You can now try doing some simple starting, stopping and reloading using sudo (m
 to exit from the previous start command):
 
 \begin{code}{Starting, Stopping, Reloading}
-\begin{Verbatim}
+\begin{lstlisting}
 > m2sh start -db tests/config.sqlite -host localhost -sudo
 > tail logs/error.log
 > m2sh reload -db tests/config.sqlite -host localhost
@@ -101,7 +101,7 @@ to exit from the previous start command):
 > tail logs/error.log
 > m2sh running -db tests/config.sqlite -host localhost
 > m2sh stop -db tests/config.sqlite -host localhost
-\end{Verbatim}
+\end{lstlisting}
 \end{code}
 
 Awesome, right?  Using just this one little Python management script, you
@@ -154,27 +154,7 @@ started by using \shell{m2sh init} and then you load your configuration into it 
 from \file{examples/python/tests/sample\_conf.py} to make a simple one:
 
 \begin{code}{Simple Little Config Example}
-\begin{Verbatim}
-from mongrel2.config import *
-
-main = Server(
-    uuid="f400bf85-4538-4f7a-8908-67e313d515c2",
-    access_log="/logs/access.log",
-    error_log="/logs/error.log",
-    chroot="./",
-    default_host="localhost",
-    pid_file="/run/mongrel2.pid",
-    port=6767,
-    hosts = [
-        Host(name="localhost", routes={
-            r'/tests/': Dir(base='tests/', index_file='index.html',
-                             default_ctype='text/plain')
-        })
-    ]
-)
-
-commit([main])
-\end{Verbatim}
+  \lstinputlisting[language=Python]{../../examples/python/tests/sample_conf.py}
 \end{code}
 
 If you aren't familiar with Python then this code might look freaky, but it's really
@@ -182,13 +162,13 @@ simple.  We'll get into how its structured in a second, but to load this file
 we would just do this:
 
 \begin{code}{Loading The Simple Config}
-\begin{Verbatim}
+\begin{lstlisting}
 > m2sh init -db simple.sqlite
 > m2sh load -db simple.sqlite -config examples/python/tests/sample_conf.py
 > m2sh servers -db simple.sqlite
 > m2sh hosts -db simple.sqlite -host localhost
 > m2sh start -db simple.sqlite -host localhost
-\end{Verbatim}
+\end{lstlisting}
 \end{code}
 
 With this sequence of commands you:
@@ -376,61 +356,7 @@ a more complex example.  We'll take a look at this example and I'll just say wha
 going on, and you try to match what I'm saying to the code.  Here's the file \file{examples/python/tests/mongrel2\_org.py}:
 
 \begin{code}{Mongrel2.org Config Script}
-\begin{Verbatim}
-from mongrel2.config import *
-
-main = Server(
-    uuid="2f62bd5-9e59-49cd-993c-3b6013c28f05",
-    access_log="/logs/access.log",
-    error_log="/logs/error.log",
-    chroot="./",
-    pid_file="/run/mongrel2.pid",
-    default_host="mongrel2.org",
-    port=6767
-)
-
-
-test_directory = Dir(base='tests/',
-                     index_file='index.html',
-                     default_ctype='text/plain')
-
-web_app_proxy = Proxy(addr='127.0.0.1', port=80)
-
-chat_demo_dir = Dir(base='examples/chat/static/',
-                    index_file='index.html',
-                    default_ctype='text/plain')
-
-chat_demo = Handler(send_spec='tcp://127.0.0.1:9999',
-                    send_ident='54c6755b-9628-40a4-9a2d-cc82a816345e',
-                    recv_spec='tcp://127.0.0.1:9998', recv_ident='')
-
-handler_test = Handler(send_spec='tcp://127.0.0.1:9997',
-                       send_ident='34f9ceee-cd52-4b7f-b197-88bf2f0ec378',
-                       recv_spec='tcp://127.0.0.1:9996', recv_ident='')
-
-# the r'' string syntax means to not interpret any \ chars, for regexes
-mongrel2 = Host(name="mongrel2.org", routes={
-    r'@chat': chat_demo,
-    r'/handlertest': handler_test,
-    r'/chat/': web_app_proxy,
-    r'/': web_app_proxy,
-    r'/tests/': test_directory,
-    r'/testsmulti/(.*.json)': test_directory,
-    r'/chatdemo/': chat_demo_dir,
-    r'/static/': chat_demo_dir,
-    r'/mp3stream': Handler(
-        send_spec='tcp://127.0.0.1:9995',
-        send_ident='53f9f1d1-1116-4751-b6ff-4fbe3e43d142',
-        recv_spec='tcp://127.0.0.1:9994', recv_ident='')
-})
-
-main.hosts = [mongrel2]
-
-settings = {"zeromq.threads": 4}
-
-commit([main], settings=settings)
-
-\end{Verbatim}
+  \lstinputlisting[language=Python]{../../examples/python/tests/mongrel2_org.py}
 \end{code}
 
 If you haven't guessed yet, this configuration is what's used on \url{http://mongrel2.org}
@@ -567,7 +493,7 @@ if you want to add a commit log message, you use the \shell{m2sh commit} command
 Here's an example from mongrel2.org:
 
 \begin{code}{Example Commit Log}
-\begin{Verbatim}
+\begin{lstlisting}
 > m2sh log -db config.sqlite 
 [2010-07-18T04:14:53, mongrel2@zedshaw, init_command] /usr/bin/m2sh init -db config.sqlite
 [2010-07-18T04:15:06, mongrel2@zedshaw, load_command] /usr/bin/m2sh load -db config.sqlite -config examples/python/tests/mongrel2_org.py
@@ -578,7 +504,7 @@ Here's an example from mongrel2.org:
 [2010-07-18T20:09:01, mongrel2@zedshaw, init_command] /usr/bin/m2sh config -db config.sqlite -config examples/python/tests/mongrel2_org.py
 [2010-07-18T20:09:02, mongrel2@zedshaw, load_command] /usr/bin/m2sh config -db config.sqlite -config examples/python/tests/mongrel2_org.py
 > m2sh commit -db config.sqlite -what mongrel2.org -why "Testing things out."
-\end{Verbatim}
+\end{lstlisting}
 \end{code}
 
 The motivation for this feature is the trend that operations store server configurations

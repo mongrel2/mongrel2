@@ -17,7 +17,14 @@
 \usepackage{fancyvrb}
 \usepackage{color}
 \usepackage{parskip}
+\usepackage{listings}
 \parskip 7.2pt
+
+\lstset{basicstyle=\ttfamily,
+breaklines=true,
+postbreak=\raisebox{0ex}[0ex][0ex]{\ensuremath{\hookrightarrow}},
+breakatwhitespace=true
+}
 
 % taken from http://mintaka.sdsu.edu/GF/bibliog/latex/floats.html
 % Alter some LaTeX defaults for better treatment of figures:

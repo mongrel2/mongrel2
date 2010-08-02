@@ -116,12 +116,12 @@ Installing procer is very easy.  It's a single little binary and it lives in
 totally from scratch as if you hadn't even build Mongrel2 yet:
 
 \begin{code}{Install procer}
-\begin{Verbatim}
+\begin{lstlisting}
 > cd projects/mongrel2
 > make clean all install
 > cd examples/procer
 > make clean all install
-\end{Verbatim}
+\end{lstlisting}
 \end{code}
 
 That's the entire install process, and now procer is in \file{/usr/local/bin}
@@ -173,7 +173,7 @@ instructions, we're just going to make some directories in your home directory,
 but feel free to change this up later if you find a better way.
 
 \begin{code}{Make Deployment Directories}
-\begin{Verbatim}
+\begin{lstlisting}
 # go home first
 > cd ~/
 
@@ -199,7 +199,7 @@ deployment > cp ~/mongrel2/examples/python/tests/mongrel2_org.py config.py
 deployment > ls
 config.py  config.sqlite  logs  profiles  run  static tmp
 
-\end{Verbatim}
+\end{lstlisting}
 \end{code}
 
 Hopefully, you're starting to see how you could easily automate this so that you don't
@@ -248,13 +248,13 @@ To test it out at this stage you can just run the config.sqlite that you
 did with these commands:
 
 \begin{code}{Testing The Initial Configuration}
-\begin{Verbatim}
+\begin{lstlisting}
 > m2sh start -db config.sqlite -host localhost
 ^C
 > m2sh start -db config.sqlite -host localhost -sudo
 > less logs/error.log
 > m2sh stop -db config.sqlite -host localhost -murder
-\end{Verbatim}
+\end{lstlisting}
 \end{code}
 
 That's enough to make sure it runs, but you've got nothing running,
@@ -276,7 +276,7 @@ Let's first setup a basic config that gets our skeleton profiles
 and make sure procer can run everything:
 
 \begin{code}{Skeleton procer Setup}
-\begin{Verbatim}
+\begin{lstlisting}
 deployment > cd profiles/
 deployment/profiles > ls
 chat  handlertest  mongrel2  mp3stream  web
@@ -297,16 +297,16 @@ deployment/profiles > for i in *; do chmod u+x $i/run; done
 
 # check out what we did
 deployment/profiles > ls -lR
-\end{Verbatim}
+\end{lstlisting}
 \end{code}
 
 With all of that, you can then try to run \shell{procer} to watch
 it fail but still try to run everything:
 
-\begin{Verbatim}
+\begin{lstlisting}
 > sudo procer $PWD $PWD/../run/procer.pid
 > less error.log
-\end{Verbatim}
+\end{lstlisting}
 
 This is assuming that you are still in the \file{profiles} directory.
 You should see the file \file{error.log} get created and
@@ -319,7 +319,7 @@ errors but information on how things were run.  You should
 see something like this for each profile:
 
 \begin{code}{First Dummy Run Of procer}
-\begin{Verbatim}
+\begin{lstlisting}
 DEBUG procer.c:232: Loading 5 actions.
 DEBUG procer.c:83: STARTED chat
 ERROR Failed to open PID file /home/zedshaw/deployment/profiles/chat/chat.pid for reading.
@@ -330,7 +330,7 @@ DEBUG procer.c:56: WAITING FOR CHILD.
 INFO  Now running as UID:1000, GID:1000
 DEBUG procer.c:60: Command ran and exited successfully, now looking for the PID file.
 ERROR chat didn't make pidfile /home/zedshaw/deployment/profiles/chat/chat.pid.
-\end{Verbatim}
+\end{lstlisting}
 \end{code}
 
 I've cleaned this up a bit and, again, ignore that it's saying ``Mongrel2";
@@ -350,7 +350,7 @@ for Mongrel2.  What you can see here is the following:
 Next up, let's get Mongrel2 running inside \shell{procer}:
 
 \begin{code}{procer Config For Mongrel2}
-\begin{Verbatim}
+\begin{lstlisting}
 > cd ~/deployment
 # make mongrel2 run as root
 deployment > sudo chown root.root profiles/mongrel2
@@ -368,7 +368,7 @@ deployment > cat profiles/mongrel2/run
 #!/bin/sh
 cd /home/YOU/deployment
 m2sh start -db config.sqlite -host localhost
-\end{Verbatim}
+\end{lstlisting}
 \end{code}
 
 Obviously, you don't have to use a series of \shell{echo} commands to
@@ -381,7 +381,7 @@ correctly.
 
 
 \begin{code}{Using procer To Run Mongrel2}
-\begin{Verbatim}
+\begin{lstlisting}
 > cd ~/deployment
 # clear out the error.log for testing
 deployment > rm profiles/error.log
@@ -397,7 +397,7 @@ deployment > ps ax | grep procer
 deployment > ps ax | grep mongrel2
 17944 ?        Ssl    0:00 mongrel2 config.sqlite localhost
 
-\end{Verbatim}
+\end{lstlisting}
 \end{code}
 
 To watch \shell{procer} in action, try doing \shell{m2sh stop -db config.sqlite
@@ -416,7 +416,7 @@ and, assuming your mongrel2 source is in \file{\~{}/projects/mongrel2},
 you will change \file{profiles/chat/run} to be like this:
 
 \begin{code}{Run Script For Chat Demo}
-\begin{Verbatim}
+\begin{lstlisting}[language=sh]
 #!/bin/sh
 set -e
 
@@ -426,7 +426,7 @@ SOURCE=/home/YOU/projects/mongrel2
 cd $SOURCE/examples/chat
 nohup python chat.py 2>&1 > chat.log &
 echo $! > $DEPLOY/profiles/chat/chat.pid
-\end{Verbatim}
+\end{lstlisting}
 \end{code}
 
 This little script uses some funky features you might not be familiar
@@ -449,7 +449,7 @@ with, but which are nice to learn, so let's take a look:
 
 When you run this manually, you should see something like this:
 
-\begin{Verbatim}
+\begin{lstlisting}
 deployment > ./profiles/chat/run
 nohup: redirecting stderr to stdout
 
@@ -457,13 +457,13 @@ deployment > ps ax | grep chat
 19305 pts/1    Sl     0:00 python chat.py
 
 deployment > kill -TERM 19305
-\end{Verbatim}
+\end{lstlisting}
 
 After all that, you can then try out \shell{procer} again to see if it
 properly runs the chat demo as well as mongrel2:
 
 \begin{code}{Running procer With Chat Demo}
-\begin{Verbatim}
+\begin{lstlisting}
 # run procer to get stuff started
 deployment > sudo procer $PWD/profiles $PWD/run/procer.pid
 
@@ -482,7 +482,7 @@ deployment > kill -TERM `cat profiles/chat/chat.pid`
 
 deployment > ps ax | grep chat
 19669 ?        Sl     0:00 python chat.py
-\end{Verbatim}
+\end{lstlisting}
 \end{code}
 
 If you go look at \file{profiles/error.log}, you'll see that \shell{procer}
@@ -493,8 +493,10 @@ Rather than give you a walk through each of these setups, here's the
 run scripts for the remaining files:
 
 \begin{code}{Remaining Run Scripts}
-\begin{Verbatim}
---- profiles/handlertest/run
+  \file{profiles/handlertest/run}
+\hrule
+
+\begin{lstlisting}[language=sh]
 #!/bin/sh
 set -e
 
@@ -504,9 +506,12 @@ SOURCE=/home/YOU/projects/mongrel2
 cd $SOURCE/examples/http_0mq
 nohup python http.py 2>&1 > http.log &
 echo $! > $DEPLOY/profiles/handlertest/handlertest.pid
+\end{lstlisting}
 
+\file{profiles/mp3stream/run}
+\hrule
 
---- profiles/mp3stream/run
+\begin{lstlisting}[language=sh]
 #!/bin/sh
 set -e
 
@@ -516,8 +521,12 @@ SOURCE=/home/YOU/projects/mongrel2
 cd $SOURCE/examples/mp3stream
 nohup python handler.py 2>&1 > mp3stream.log &
 echo $! > $DEPLOY/profiles/mp3stream/mp3stream.pid
+\end{lstlisting}
 
---- profiles/web/run
+
+\file{profiles/web/run}
+\hrule
+\begin{lstlisting}[language=sh]
 #!/bin/sh
 set -e
 
@@ -528,7 +537,7 @@ cd $SOURCE/examples/chat
 nohup python www.py 2>&1 > www.log &
 echo $! > $DEPLOY/profiles/web/web.pid
 
-\end{Verbatim}
+\end{lstlisting}
 \end{code}
 
 
@@ -538,12 +547,12 @@ Once everything is running and \shell{procer} is maintaining it, you
 just need to see if things work.  Here's some curl commands to try:
 
 \begin{code}{Testing With Curl}
-\begin{Verbatim}
+\begin{lstlisting}
 > curl http://localhost:6767/
 Hello, World!
 > curl http://localhost:6767/handlertest
 ...
-\end{Verbatim}
+\end{lstlisting}
 \end{code}
 
 
@@ -579,11 +588,11 @@ The final thing we have to do is get the static content we need to try
 out the chat demo:
 
 \begin{code}{Setting Up Static Content}
-\begin{Verbatim}
+\begin{lstlisting}
 > cp -r ~/projects/mongrel2/examples/chat/static static/chatdemo
 > m2sh stop -db config.sqlite -host localhost -murder
 > curl -I http://localhost:6767/chatdemo/
-\end{Verbatim}
+\end{lstlisting}
 \end{code}
 
 If you get a good response then you should be able to go to

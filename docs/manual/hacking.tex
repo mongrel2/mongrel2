@@ -295,7 +295,7 @@ I think learning how you'd write your own ZeroMQ simple echo server in Python wi
 help you get a handle on it.  First the client then the server:
 
 \begin{code}{Simple Python ZeroMQ Client}
-\begin{Verbatim}
+\begin{lstlisting}
 import zmq
 
 ctx = zmq.Context()
@@ -305,12 +305,12 @@ s.setsockopt(zmq.SUBSCRIBE, '')
 
 msg = s.recv()
 print "MSG: ", repr(msg)
-\end{Verbatim}
+\end{lstlisting}
 \end{code}
 
 
 \begin{code}{Simple Python ZeroMQ Server}
-\begin{Verbatim}
+\begin{lstlisting}
 import zmq
 import time
 
@@ -321,7 +321,7 @@ s.bind("tcp://127.0.0.1:5566")
 while True:
     s.send("HELLO")
     time.sleep(1)
-\end{Verbatim}
+\end{lstlisting}
 \end{code}
 
 
@@ -334,7 +334,7 @@ use.
 Here's an example that does the same thing but with REQ/REP style of messages.
 
 \begin{code}{ZeroMQ REQ/REP Client}
-\begin{Verbatim}
+\begin{lstlisting}
 import zmq
 
 ctx = zmq.Context()
@@ -345,12 +345,12 @@ s.send('HI FROM CLIENT')
 
 msg = s.recv()
 print "MSG: ", repr(msg)
-\end{Verbatim}
+\end{lstlisting}
 \end{code}
 
 
 \begin{code}{ZeroMQ REQ/REP Server}
-\begin{Verbatim}
+\begin{lstlisting}
 import zmq
 
 ctx = zmq.Context()
@@ -360,7 +360,7 @@ s.bind("tcp://127.0.0.1:5566")
 while True:
     print "GOT BACK", repr(s.recv())
     s.send("HELLO")
-\end{Verbatim}
+\end{lstlisting}
 \end{code}
 
 As you can see when you run this, it's more like your classic web server style of messaging,
@@ -509,9 +509,9 @@ Now, even though we laid out all of this as a series of rules, the actual code t
 these is very simple.  First here's a simple ``grammar'' for how a request that
 gets sent to your handlers is formatted:
 
-\begin{Verbatim}
+\begin{lstlisting}
 UUID ID PATH SIZE:HEADERS,SIZE:BODY,
-\end{Verbatim}
+\end{lstlisting}
 
 That's obviously a much simpler way to specify the request than all those
 rules, but it also doesn't tell you why.  The above description, while
@@ -520,7 +520,7 @@ boring as hell, tells you why each of these pieces exist.
 To parse this in Python we simply do this:
 
 \begin{code}{Parsing Mongrel2 Requests In Python}
-\begin{Verbatim}
+\begin{lstlisting}
 import json
 
 def parse_netstring(ns):
@@ -537,7 +537,7 @@ def parse(msg):
     headers = json.loads(headers)
 
     return uuid, id, path, headers, body
-\end{Verbatim}
+\end{lstlisting}
 \end{code}
 
 This is actually all of the code needed to parse a request, and is
@@ -548,15 +548,15 @@ example of making a full request object.
 A response is then just as simple and involves crafting a similar
 setup like this:
 
-\begin{Verbatim}
+\begin{lstlisting}
 UUID SIZE:ID ID ID, BODY
-\end{Verbatim}
+\end{lstlisting}
 
 Notice I've got three IDs here, but you can do anywhere from 1 up to 128.  Generating
 this is very easy in Python:
 
 \begin{code}{Generating Responses}
-\begin{Verbatim}
+\begin{lstlisting}
 
 def send(uuid, conn_id, msg):
     header = "%s %d:%s," % (uuid, len(str(conn_id)), str(conn_id))
@@ -566,7 +566,7 @@ def send(uuid, conn_id, msg):
 def deliver(uuid, idents, data):
     self.send(uuid, ' '.join(idents), data)
 
-\end{Verbatim}
+\end{lstlisting}
 \end{code}
 
 That, again, is all there is to it.  The \ident{send} method is the
@@ -596,28 +596,7 @@ and it just the simplest thing possible:\footnote{This is the same code as the o
 file, but with extraneous prints removed for simplicity.}
 
 \begin{code}{http.py example}
-\begin{Verbatim}
-from mongrel2 import handler
-import json
-
-sender_id = "82209006-86FF-4982-B5EA-D1E29E55D481"
-
-conn = handler.Connection(sender_id, "tcp://127.0.0.1:9997",
-                          "tcp://127.0.0.1:9996")
-while True:
-    print "WAITING FOR REQUEST"
-
-    req = conn.recv()
-
-    if req.is_disconnect():
-        continue
-
-    response = "<pre>\nSENDER: %r\nIDENT:%r\nPATH: %r\nHEADERS:%r\nBODY:%r</pre>" % (
-        req.sender, req.conn_id, req.path,
-        json.dumps(req.headers), req.body)
-
-    conn.reply_http(req, response)
-\end{Verbatim}
+  \lstinputlisting[language=Python]{../../examples/http_0mq/http.py}
 \end{code}
 
 All this code does is print back a simple little dump of what it received, and
@@ -645,7 +624,7 @@ This is all you need at first to do simple HTTP handlers.  In reality, the \iden
 just syntactic sugar on crafting a decent HTTP response.  Here's the actual method that is crafting these replies:
 
 \begin{code}{HTTP Response Python Code}
-\begin{Verbatim}
+\begin{lstlisting}
 def http_response(body, code, status, headers):
     payload = {'code': code, 'status': status, 'body': body}
     headers['Content-Length'] = len(body)
@@ -654,7 +633,7 @@ def http_response(body, code, status, headers):
 
     return HTTP_FORMAT % payload
 
-\end{Verbatim}
+\end{lstlisting}
 \end{code}
 
 Which is then used by \ident{Connection.reply\_http} and
@@ -683,45 +662,7 @@ at the main file and see how simple it is once you get the
 streaming thread right:
 
 \begin{code}{Base mp3stream Code}
-\begin{Verbatim}
-from mp3stream import ConnectState, Streamer
-from mongrel2 import handler
-import glob
-
-
-sender_id = "9703b4dd-227a-45c4-b7a1-ef62d97962b2"
-
-CONN = handler.Connection(sender_id, "tcp://127.0.0.1:9995",
-                          "tcp://127.0.0.1:9994")
-
-MP3_FILES = glob.glob("*.mp3")
-
-print "PLAYING:", MP3_FILES
-
-CHUNK_SIZE = 5 * 1024
-
-STATE = ConnectState()
-
-STREAMER = Streamer(MP3_FILES, STATE, CONN, CHUNK_SIZE)
-STREAMER.start()
-
-
-while True:
-    req = CONN.recv()
-
-    if req.is_disconnect():
-        print "DISCONNECT", req.headers, req.body, req.conn_id
-        STATE.remove(req)
-    else:
-        print "REQUEST", req.headers, req.body
-
-        if STATE.count() > 20:
-            print "TOO MANY", STATE.count()
-            CONN.reply_http(req, "Too Many Connected.  Try Later.")
-        else:
-            STATE.add(req)
-            CONN.reply_http(req, "", headers={'icy-metaint': CHUNK_SIZE})
-\end{Verbatim}
+  \lstinputlisting[language=Python]{../../examples/mp3stream/handler.py}
 \end{code}
 
 Walking through this example is fairly easy, assuming you just trust
@@ -746,9 +687,9 @@ that the streaming thread stuff works:
 That is the base of it, and if you point mplayer at it (which is
 the only player that works, really) you should hear it play:
 
-\begin{Verbatim}
+\begin{lstlisting}
 > mplayer http://localhost:6767/mp3stream
-\end{Verbatim}
+\end{lstlisting}
 
 That is, assuming you put some mp3 files into the directory and
 started the handler again.
