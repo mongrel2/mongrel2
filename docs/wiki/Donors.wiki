@@ -6,7 +6,7 @@
 
 <li><a href="http://envato.com/">Envato</a></li>
 <li><a href="http://highgroove.com/">Highgroove Studios</a></li>
-<li><a href="http://infinitelybeta.com">Baishampayan Ghose from Infinitely       
+<li><a href="http://infinitelybeta.com">Baishampayan Ghose from Infinitely Beta</a></li>
 <li><a href="http://pragmaticbadger.com/">Daniel, Matt &amp; Xian @ Pragmatic Badger</a></li>
 <li><a href="http://www.onepageperday.com">Matt Murphy</a></li>
 <li><font size="1%">Paul T ($1 so funny)</font></li>
@@ -15,7 +15,6 @@
 <li>Shane Emmons</li>
 <li>Silas Sewell</li>
 <li>Íslenska lýðnetsfélagið ehf.</li>
-Beta</a></li>
 <li>And many more who wanted to remain silent.</li>
 
 </ul>
