@@ -3,17 +3,19 @@
 
 #include "kegogi_parser.h"
 
-#include <bstr/bstrlib.h>
+#include <bstring.h>
 #include "kegogi.h"
 #include "httpclient.h"
 #include "util.h"
 
 %%{
     machine kegogi;
-    action handle_command {
+    action command {
         if(idx < max_commands && uri != NULL && method != NULL) {
             host = host ? host : bstrcpy(default_host);
-	    Request *req = Request_create(host, port, method, uri);
+	    int numPort = port ? atoi(bdata(port)) : default_port;
+	    if(port) bdestroy(port);
+	    Request *req = Request_create(host, numPort, method, uri);
 	    commands[idx++].request = req;
         }
 	else
@@ -22,7 +24,7 @@
 
     action clear {
         method = NULL;
- 	port = default_port;
+ 	port = NULL;
 	host = NULL;
 	uri = NULL;
     }
@@ -32,29 +34,37 @@
     }
 
     action method {
-    	if(idx < max_commands) {
-	    method = blk2bstr(mark, fpc - mark);
-  	    bconchar(method, '\0');
-        }
+        method = blk2bstr(mark, fpc - mark);
     }
 
     action host {
-    	if(idx < max_commands) {
-            host = blk2bstr(mark, fpc - mark);
-            bconchar(host, '\0');
-        }
+        host = blk2bstr(mark, fpc - mark);
     }
 
     action port {
-        port = atoin(mark, fpc - mark);
+        port = blk2bstr(mark, fpc - mark);
     }
 
     action uri {
-    	if(idx < max_commands) {
-            uri = blk2bstr(mark, fpc - mark);
-	    bconchar(uri, '\0');
-        }
+        uri = blk2bstr(mark, fpc - mark);
     }
+
+    action status_code {
+        status_code = atoin(mark, fpc - mark);
+    }        
+
+    action param_name {
+        param_name = blk2bstr(mark, fpc - mark);
+    }        
+
+    action dictionary {
+
+    }
+
+    action pattern {
+        pattern = blk2bstr(mark, fpc - mark);
+    }
+
 
     ws = (space - '\n')+;
 
@@ -68,7 +78,8 @@
     url = ((protocol? host port?)? uri);
     
     comment = '#' [^\n]*;
-    command = (ws? method ws url ws? '\n') >clear @handle_command;
+
+    command = (ws? method ws url ws? comment? '\n') >clear @command;
     empty_line = ws? comment? '\n';
   
     main := (command | empty_line)*;
@@ -90,8 +101,7 @@ int parse_kegogi_file(const char *path, Command commands[], int max_commands) {
     bstring default_host = bfromcstr("localhost");
     int default_port = 80;
 
-    bstring host, uri, method;
-    int port;
+    bstring host, port, uri, method;
     char *mark, *p = buffer, *pe = buffer + size, *eof = pe;
     int cs;
 

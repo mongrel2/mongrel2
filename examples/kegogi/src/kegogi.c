@@ -11,32 +11,39 @@
 FILE *LOG_FILE = NULL;
 #define MAX_COMMANDS 1024
 
-void taskmain(int argc, char *argv[])
+void runkegogi(void *arg)
 {
-    LOG_FILE = stderr;
-    check(argc > 1, "Expected kegogi file");
-
+    bstring path = (bstring) arg;
     Command commands[MAX_COMMANDS];
-    int nCommands = parse_kegogi_file(argv[1], commands, MAX_COMMANDS);
+    int nCommands = parse_kegogi_file(bdata(path), commands, MAX_COMMANDS);
 
     int i;
     for(i = 0; i < nCommands; i++) {
         Request *req = commands[i].request;
         Response *rsp = Response_fetch(req);
-
+        
         if(rsp == NULL)
             debug("Failure to fetch %s:%d%s", bdata(req->host), req->port,
                   bdata(req->uri));
         else
-            debug("Fetched %s:%d%s with status code %d", bdata(req->host), 
-                   req->port, bdata(req->uri), rsp->status_code);
+            debug("Fetched %s:%d%s with status code %s", bdata(req->host), 
+                  req->port, bdata(req->uri), bdata(rsp->status_code));
         Request_destroy(req);
         Response_destroy(rsp);
                         
     }
 
-    taskexit(0);
-error:
+}
 
+void taskmain(int argc, char *argv[])
+{
+    LOG_FILE = stderr;
+    check(argc > 1, "Expected kegogi file");
+
+    taskcreate(runkegogi, bfromcstr(argv[1]), 64 * 1024);
+
+    taskexit(0);
+
+error:
     taskexitall(1);
 }

@@ -3,12 +3,11 @@
 #include <stdlib.h>
 
 #include <task/task.h>
-#include <bstr/bstrlib.h>
+#include <bstring.h>
 #include <dbg.h>
 
 #include "kegogi.h"
 #include "httpclient_parser.h"
-#include "util.h"
 
 #define FETCH_BUFFER_SIZE 10 * 1024
 
@@ -57,13 +56,12 @@ static void http_field(void *data, const char *field, size_t flen,
                        const char *val, size_t vlen)
 {
     Response *rsp = (Response *) data;
-    if(!strnicmp("content-length", field, flen))
-        rsp->content_len = atoin(val, vlen);
     
     bstring bField = blk2bstr(field, flen);
-    bconchar(bField, '\0');
     bstring bVal = blk2bstr(val, vlen);
-    bconchar(bVal, '\0');
+
+    if(biseqcstrcaseless(bField, "content-length"))
+        rsp->content_len = atoi(bdata(bVal));
 
     check(!Headers_add(&rsp->headers, bField, bVal), "Failed to add headers");
 
@@ -76,7 +74,8 @@ error:
 static void status_code(void *data, const char *at, size_t len)
 {
     Response *rsp = (Response *) data;
-    rsp->status_code = atoin(at, len);
+    rsp->status_code = blk2bstr(at, len);
+    bconchar(rsp->status_code, '\0');
 }
 
 static void header_done(void *data, const char *at, size_t len)
@@ -105,7 +104,6 @@ static void dump_remaining_from_fd(int fd, ssize_t remaining)
             continue;
     }
     return;
-
 error:
     return;
 }
@@ -122,7 +120,7 @@ Response *Response_fetch(Request *req) {
     rsp->content_len = -1;
     rsp->body_so_far = 0;
     rsp->body = NULL;
-    rsp->status_code = -1;
+    rsp->status_code = NULL;
 
     httpclient_parser parser;
     rc = httpclient_parser_init(&parser);
@@ -142,7 +140,6 @@ Response *Response_fetch(Request *req) {
 
     bstring request =  bformat(REQUEST_FORMAT, bdata(req->method),
                                bdata(req->uri), bdata(req->host));
-
     int totalsent = fdsend(fd, bdata(request), blength(request));
     check(totalsent == blength(request), "Didn't send all of the request.");
     
@@ -179,6 +176,7 @@ void Request_destroy(Request *req) {
 void Response_destroy(Response *rsp) {
     if(rsp) {
         if(rsp->body) bdestroy(rsp->body);
+        if(rsp->status_code) bdestroy(rsp->status_code);
         Headers_cleanup(&rsp->headers);
         free(rsp);
     }

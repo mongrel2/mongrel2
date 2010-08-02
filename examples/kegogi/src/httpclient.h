@@ -24,7 +24,7 @@ typedef struct Request {
 } Request;
 
 typedef struct Response {
-    int status_code;
+    bstring status_code;
     bstring body;
     Headers headers;
     int content_len;
