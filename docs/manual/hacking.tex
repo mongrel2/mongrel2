@@ -241,11 +241,11 @@ currently implemented (as documented in \shell{man zmq\_socket}):
   \item [\texttt{ZMQ\_REQ}/\texttt{ZMQ\_REP}]  Your classic, strict, REQuest/REPly sockets, that work much like
     HTTP request/response semantics.  These are more strict and lock-step, but are slower
     because of the extra overhead in keeping the state organized.
-  \item [\texttt{ZMQ\_PUB} \texttt{ZMQ\_SUB}]  These are PUBlish/SUBscribe sockets and work as a decentralized
+  \item [\texttt{ZMQ\_PUB}/\texttt{ZMQ\_SUB}]  These are PUBlish/SUBscribe sockets and work as a decentralized
     asynchronous messaging.  PUB sockets just send out messages to multiple subscribers, without
     expecting a reply.  SUB sockets just read messages that are sent to them, and can subscribe
     to prefixes on the messages.
-  \item [\texttt{ZMQ\_DOWNSTREAM} \texttt{ZMQ\_UPSTREAM}] DOWN/UP sockets are more like asynchronous round-robin
+  \item [\texttt{ZMQ\_DOWNSTREAM}/\texttt{ZMQ\_UPSTREAM}] DOWN/UP sockets are more like asynchronous round-robin
     sockets.  They work like PUB/SUB, but instead of the message going to all subscribers that
     are subscribed or not, a DOWN/UP socket will have a message go to just one of the receivers
     in a cluster.  This is a lot like having a round-robin proxy configuration in your web server.
