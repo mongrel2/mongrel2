@@ -515,19 +515,25 @@
   <ul class="itemize1">
     <li class="itemize">GNU make (gmake).
 
-    <li class="itemize">ZeroMQ for the messaging.
+    <li class="itemize"><a href="http://zeromq.org">ZeroMQ</a> for
+    the messaging.
 
-    <li class="itemize">Python 2.6 for the m2sh management and
-    examples.
+    <li class="itemize"><a href="http://python.org">Python 2.6</a>
+    for the m2sh management and examples.
 
-    <li class="itemize">SQLite3 and make sure <span class=
+    <li class="itemize"><a href=
+    "http://www.sqlite.org/">SQLite3</a> and make sure <span class=
     "pplri7t-">Python</span> has the ability to access SQLite3.
 
-    <li class="itemize">distribute and pip.
+    <li class="itemize"><a href=
+    "http://pypi.python.org/pypi/distribute">distribute</a> and
+    <a href="http://pypi.python.org/pypi/pip/0.7.2">pip</a>.
 
-    <li class="itemize">PyZMQ for the examples.
+    <li class="itemize"><a href=
+    "http://github.com/zeromq/pyzmq">PyZMQ</a> for the examples.
 
-    <li class="itemize">web.py for the examples.
+    <li class="itemize"><a href="http://webpy.org/">web.py</a> for
+    the examples.
   </ul><!--l. 33-->
 
   <p class="noindent">If you install these things in this order,
@@ -707,8 +713,9 @@
   <p class="noindent">
 
   <ol class="enumerate1">
-    <li class="enumerate" id="x1-13002x1">Install Fossil SCM and
-    check out the source.
+    <li class="enumerate" id="x1-13002x1">Install <a href=
+    "http://fossil-scm.org">Fossil SCM</a> and check out the
+    source.
 
     <li class="enumerate" id="x1-13004x2">Grab the source .zip
     release and install it from there.
@@ -728,12 +735,14 @@
   <p class="noindent">
 
   <ol class="enumerate1">
-    <li class="enumerate" id="x1-14002x1">Go to the fossil download
-    page and grab the binary that fits your system, or the source
-    tar.gz.
+    <li class="enumerate" id="x1-14002x1">Go to <a href=
+    "http://www.fossil-scm.org/download.html">the fossil download
+    page</a> and grab the binary that fits your system, or the
+    source tar.gz.
 
-    <li class="enumerate" id="x1-14004x2">Follow their install
-    instructions to get it on your system.
+    <li class="enumerate" id="x1-14004x2">Follow their <a href=
+    "http://fossil-scm.org/index.html/doc/tip/www/build.wiki">install
+    instructions</a> to get it on your system.
 
     <li class="enumerate" id="x1-14006x3">If you find that your
     version of fossil ends up having problems with mongrel2.org let
@@ -812,10 +821,10 @@
 
   <ol class="enumerate1">
     <li class="enumerate" id="x1-15002x1">Login as an anonymous
-    user at mongrel2.org.
+    user <a href="http://mongrel2.org/login">at mongrel2.org</a>.
 
-    <li class="enumerate" id="x1-15004x2">Go to the latest source
-    tip.
+    <li class="enumerate" id="x1-15004x2">Go to the <a href=
+    "http://mongrel2.org/info/tip">latest source tip</a>.
 
     <li class="enumerate" id="x1-15006x3">Click on the &ldquo;ZIP
     archive&rdquo; link to download the latest zip file of the
@@ -895,11 +904,12 @@
 
       <p class="indent">For those who still want to use the package
       management but want to use pip and distribute, I suggest you
-      check out virtualenv. What virtualenv does is create a little
-      &ldquo;chroot install&rdquo; of just the packages you need
-      using pip or distribute. When you don&rsquo;t want them
-      anymore, you can just delete one directory and you&rsquo;re
-      fine.
+      check out <a href=
+      "http://pypi.python.org/pypi/virtualenv">virtualenv</a>. What
+      virtualenv does is create a little &ldquo;chroot
+      install&rdquo; of just the packages you need using pip or
+      distribute. When you don&rsquo;t want them anymore, you can
+      just delete one directory and you&rsquo;re fine.
     </div>
   </div>
   <hr class="endfloat">
@@ -1020,10 +1030,11 @@
 
   <p class="noindent">Mongrel2 is designed to be easy to deploy and
   <span class="pplri7t-">automate</span> the deployment. This is
-  why it uses SQLite to store the configuration, but m2sh as an
-  interface to creating the configuration. Doing this lets you
-  access the configuration using any language that works for you,
-  augment it, alter it, migrate it and automate it. <!--l. 9-->
+  why it uses <a href="http://www.sqlite.org/">SQLite</a> to store
+  the configuration, but m2sh as an interface to creating the
+  configuration. Doing this lets you access the configuration using
+  any language that works for you, augment it, alter it, migrate it
+  and automate it. <!--l. 9-->
 
   <p class="noindent">In this chapter, I&rsquo;m going to show you
   how to make a basic configuration using m2sh and all the commands
@@ -2591,15 +2602,16 @@
   "x1-340003.6" name="x1-340003.6"></a>Routing And Host
   Patterns</h3><!--l. 467-->
 
-  <p class="noindent">The pattern code was taken from Lua and is
-  some of the simplest code for doing fast pattern matches. It is
-  very much like regular expressions, except it removes a lot of
-  features you don&rsquo;t need for routes. Mongrel2 uses them by
-  breaking routes up into a prefix and pattern part. It then uses
-  routes to find the longest matching prefix and then tests the
-  pattern. If the pattern matches, then the route works. If the
-  route doesn&rsquo;t have a pattern, then it&rsquo;s assumed to
-  match, and you&rsquo;re done. <!--l. 474-->
+  <p class="noindent">The pattern code was taken from <a href=
+  "http://www.lua.org/">Lua</a> and is some of the simplest code
+  for doing fast pattern matches. It is very much like regular
+  expressions, except it removes a lot of features you don&rsquo;t
+  need for routes. Mongrel2 uses them by breaking routes up into a
+  prefix and pattern part. It then uses routes to find the longest
+  matching prefix and then tests the pattern. If the pattern
+  matches, then the route works. If the route doesn&rsquo;t have a
+  pattern, then it&rsquo;s assumed to match, and you&rsquo;re done.
+  <!--l. 474-->
 
   <p class="noindent">The only caveat is you have to wrap your
   pattern parts in parenthesis, but these don&rsquo;t mean anything
@@ -2968,16 +2980,17 @@
       need to learn to code, but most of the books suck for really
       learning if you know nothing. <!--l. 37-->
 
-      <p class="indent">This is why I started my own book: Learn
-      Python The Hard Way, for people who know nothing about
-      programming but need or want to learn. It teaches Python, but
-      it mostly teaches all the things programmers actually learn
-      before they learn programming. When you&rsquo;re done with my
-      book, you&rsquo;ll have your &ldquo;programming brown
-      belt&rdquo;. That means you can then move onto one of many
-      other free online books and <span class=
-      "pplri7t-">really</span> learn programming, and have a higher
-      chance of actually learning it. <!--l. 45-->
+      <p class="indent">This is why I started my own book: <a href=
+      "http://learnpythonthehardway.org">Learn Python The Hard
+      Way</a>, for people who know nothing about programming but
+      need or want to learn. It teaches Python, but it mostly
+      teaches all the things programmers actually learn before they
+      learn programming. When you&rsquo;re done with my book,
+      you&rsquo;ll have your &ldquo;programming brown belt&rdquo;.
+      That means you can then move onto one of many other free
+      online books and <span class="pplri7t-">really</span> learn
+      programming, and have a higher chance of actually learning
+      it. <!--l. 45-->
 
       <p class="indent">If you can&rsquo;t code Python then you can
       probably muddle through this and you may learn something, but
@@ -3015,14 +3028,18 @@
   restart them. Very simple. <!--l. 68-->
 
   <p class="noindent">There&rsquo;s just one catch: all of them
-  suck. There&rsquo;s daemontools which barely builds (if at all)
-  and then assumes that daemons don&rsquo;t fork. Stupid.
-  There&rsquo;s minit, which bafflingly required dietlibc to even
-  compile and assumed it was going to be the one true init (not
-  user space at all). There&rsquo;s cinit, which got through a
-  compile, then barfed on its documentation, and the end result is
-  some huge number of weird shell scripts to make it work, and,
-  again, it wants to be the one true init. Finally , runit is some
+  suck. There&rsquo;s <a href=
+  "http://cr.yp.to/daemontools.html">daemontools</a> which barely
+  builds (if at all) and then assumes that daemons don&rsquo;t
+  fork. Stupid. There&rsquo;s <a href=
+  "http://www.fefe.de/minit/">minit</a>, which bafflingly required
+  dietlibc to even compile and assumed it was going to be the one
+  true init (not user space at all). There&rsquo;s <a href=
+  "http://www.nico.schottelius.org/software/cinit/">cinit</a>,
+  which got through a compile, then barfed on its documentation,
+  and the end result is some huge number of weird shell scripts to
+  make it work, and, again, it wants to be the one true init.
+  Finally , <a href="http://smarden.org/runit/">runit</a> is some
   of the worst C code I&rsquo;ve seen in years and has the same
   weird design as daemontools. <!--l. 78-->
 
@@ -3542,8 +3559,8 @@
       <a id="x1-42021r4" name="x1-42021r4"></a><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;&gt;</span><span class=
-      "pcrr7t-x-x-90">&nbsp;cat</span><span class=
-      "pcrr7t-x-x-90">&nbsp;run/mongrel2.pid</span><br class=
+      "pcrr7t-x-x-90">&nbsp;less</span><span class=
+      "pcrr7t-x-x-90">&nbsp;logs/error.log</span><br class=
       "fancyvrb">
       <a id="x1-42023r5" name="x1-42023r5"></a><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
@@ -4991,15 +5008,19 @@
     <dt class="description"><span class="pplb7t-">Ruby</span>
 
     <dd class="description">Probably the most extensively supported
-    language, with good Rack support, by perplexes on github.
+    language, with good Rack support, by <a href=
+    "http://github.com/perplexes/m2r">perplexes on github</a>.
 
     <dt class="description"><span class="pplb7t-">C++</span>
 
-    <dd class="description">C++ support by akrennmair on github.
+    <dd class="description">C++ support by <a href=
+    "http://github.com/akrennmair/mongrel2-cpp">akrennmair on
+    github</a>.
 
     <dt class="description"><span class="pplb7t-">PHP</span>
 
-    <dd class="description">PHP support by winks on github.
+    <dd class="description">PHP support by <a href=
+    "http://github.com/winks/m2php">winks on github</a>.
 
     <dt class="description"><span class="pplb7t-">C</span>
 
@@ -5009,10 +5030,11 @@
 
     <dt class="description"><span class="pplb7t-">Others?</span>
 
-    <dd class="description">ZeroMQ supports Ada, Basic, C, C++,
-    Common Lisp, Erlang, Go, Haskell, Java, Lua, .NET, Objective-C,
-    ooc, Perl, PHP, Python, and Ruby, so after reading this chapter
-    you can easily write handlers in any of those languages too.
+    <dd class="description"><a href="http://zeromq.org">ZeroMQ</a>
+    supports Ada, Basic, C, C++, Common Lisp, Erlang, Go, Haskell,
+    Java, Lua, .NET, Objective-C, ooc, Perl, PHP, Python, and Ruby,
+    so after reading this chapter you can easily write handlers in
+    any of those languages too.
   </dl><!--l. 27-->
 
   <p class="noindent">However, no matter how many languages
@@ -5335,8 +5357,9 @@
   <p class="noindent">In addition to this, you can setup Mongrel2
   with the help of some 0MQ to send one request from a browser to
   as many target handlers as you like. You can even send them
-  messages using OpenPGM for sending UDP messages reliably to
-  clusters of computers. <!--l. 202-->
+  messages using <a href=
+  "http://code.google.com/p/openpgm/">OpenPGM</a> for sending UDP
+  messages reliably to clusters of computers. <!--l. 202-->
 
   <p class="noindent">This means that Mongrel2 is the only web
   server capable of sending one request from a browser to N
@@ -5350,11 +5373,11 @@
   "x1-590005.2" name="x1-590005.2"></a>Introduction to ZeroMQ</h3>
   <!--l. 210-->
 
-  <p class="noindent">Learning to use ZeroMQ is a bit outside the
-  scope of this book, but I&rsquo;ll give you a quick introduction
-  to it so that you can explore it further. It is a very simple
-  system, so hopefully you can figure it out from here. 
-  <!--l. 214-->
+  <p class="noindent">Learning to use <a href=
+  "http://zeromq.org">ZeroMQ</a> is a bit outside the scope of this
+  book, but I&rsquo;ll give you a quick introduction to it so that
+  you can explore it further. It is a very simple system, so
+  hopefully you can figure it out from here. <!--l. 214-->
 
   <p class="noindent">What ZeroMQ ends up being is &ldquo;sockets
   the way programmers think sockets work&rdquo;. Programmers
@@ -5388,10 +5411,12 @@
   <p class="noindent">What ZeroMQ does is create an API that looks
   a lot like sockets, and feels the same, but gives you the
   messaging styles you actually want. By simply specifying the type
-  of socket when you call zmq_socket you can have multicast,
-  request/reply, and many other styles. Here&rsquo;s the list of
-  ones currently implemented (as documented in <span class=
-  "pcrro7t-">man zmq</span><span class="pcrro7t-">_socket</span>):
+  of socket when you call <a href=
+  "http://api.zeromq.org/zmq_socket.html">zmq_socket</a> you can
+  have multicast, request/reply, and many other styles.
+  Here&rsquo;s the list of ones currently implemented (as
+  documented in <span class="pcrro7t-">man zmq</span><span class=
+  "pcrro7t-">_socket</span>):
 
   <dl class="description">
     <dt class="description"><span class=
@@ -5406,7 +5431,8 @@
 
     <dt class="description"><span class=
     "pcrb7t-">ZMQ</span><span class=
-    "pcrb7t-">_PUBZMQ</span><span class="pcrb7t-">_SUB</span>
+    "pcrb7t-">_PUB</span><span class="pplb7t-">/</span><span class=
+    "pcrb7t-">ZMQ</span><span class="pcrb7t-">_SUB</span>
 
     <dd class="description">These are PUBlish/SUBscribe sockets and
     work as a decentralized asynchronous messaging. PUB sockets
@@ -5416,7 +5442,8 @@
 
     <dt class="description"><span class=
     "pcrb7t-">ZMQ</span><span class=
-    "pcrb7t-">_DOWNSTREAMZMQ</span><span class=
+    "pcrb7t-">_DOWNSTREAM</span><span class=
+    "pplb7t-">/</span><span class="pcrb7t-">ZMQ</span><span class=
     "pcrb7t-">_UPSTREAM</span>
 
     <dd class="description">DOWN/UP sockets are more like
@@ -5438,8 +5465,9 @@
   underlying transport protocol and gives you a simple URL-like
   syntax for specifying that: <span class=
   "pcrro7t-">tcp://127.0.0.1:9999/</span> for example. The types of
-  transports that you can use when you call zmq_bind and
-  zmq_connect are:
+  transports that you can use when you call <a href=
+  "http://api.zeromq.org/zmq_bind.html">zmq_bind</a> and <a href=
+  "http://api.zeromq.org/zmq_connect.html">zmq_connect</a> are:
 
   <dl class="description">
     <dt class="description"><span class="pcrb7t-">tcp://</span>
@@ -5812,14 +5840,14 @@
   <!--l. 391-->
 
   <p class="noindent">You&rsquo;ve had the world&rsquo;s fastest
-  crash course in ZeroMQ and now you&rsquo;re ready to see how
-  Mongrel2 talks to your handlers with it. I won&rsquo;t really
-  call this a &ldquo;protocol&rdquo;, since ZeroMQ is really doing
-  the protocol, and we just pull fully baked messages out of it.
-  Instead, this is just a format, as if you got strings out of a
-  file or something similar. This message format is designed to
-  accomplish a few things in the simplest way possible: 
-  <!--l. 397-->
+  crash course in <a href="http://zeromq.org">ZeroMQ</a> and now
+  you&rsquo;re ready to see how Mongrel2 talks to your handlers
+  with it. I won&rsquo;t really call this a &ldquo;protocol&rdquo;,
+  since ZeroMQ is really doing the protocol, and we just pull fully
+  baked messages out of it. Instead, this is just a format, as if
+  you got strings out of a file or something similar. This message
+  format is designed to accomplish a few things in the simplest way
+  possible: <!--l. 397-->
 
   <p class="noindent">
 
@@ -7112,15 +7140,19 @@
     <dt class="description"><span class="pplb7t-">Ruby</span>
 
     <dd class="description">Probably the most extensively supported
-    language, with good Rack support, by perplexes on github.
+    language, with good Rack support, by <a href=
+    "http://github.com/perplexes/m2r">perplexes on github</a>.
 
     <dt class="description"><span class="pplb7t-">C++</span>
 
-    <dd class="description">C++ support by akrennmair on github.
+    <dd class="description">C++ support by <a href=
+    "http://github.com/akrennmair/mongrel2-cpp">akrennmair on
+    github</a>.
 
     <dt class="description"><span class="pplb7t-">PHP</span>
 
-    <dd class="description">PHP support by winks on github.
+    <dd class="description">PHP support by <a href=
+    "http://github.com/winks/m2php">winks on github</a>.
   </dl><!--l. 797-->
 
   <p class="noindent">If you want to implement another language, it
@@ -7216,9 +7248,10 @@
   anything important. <!--l. 14-->
 
   <p class="noindent">That means you can contribute. If you want to
-  help with Mongrel2, just go to the Mongrel2 site and do whatever
-  you can. Submit bug reports, help with docs, offer patches, join
-  the mailing list, whatever. <!--l. 18-->
+  help with Mongrel2, just go to the <a href=
+  "http://mongrel2.org">Mongrel2</a> site and do whatever you can.
+  Submit bug reports, help with docs, offer patches, join the
+  mailing list, whatever. <!--l. 18-->
 
   <p class="noindent">The reason I am mostly begging people who are
   interested in Mongrel2 for help is that I&rsquo;m on a mission.
