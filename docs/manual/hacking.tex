@@ -212,7 +212,7 @@ a quick introduction to it so that you can explore it further.  It is a very sim
 system, so hopefully you can figure it out from here.
 
 What ZeroMQ ends up being is ``sockets the way programmers think sockets work''.  Programmers
-usually hear about TCP or UDP sockets and they think in a naive way that they work like
+usually hear about TCP or UDP sockets and they think in a na{\"\i}ve way that they work like
 this:
 
 \begin{description}
@@ -238,18 +238,18 @@ multicast, request/reply, and many other styles.  Here's the list of ones
 currently implemented (as documented in \shell{man zmq\_socket}):
 
 \begin{description}
-\item [ZMQ\_REQ ZMQ\_REP]  Your classic, strict, REQuest/REPly sockets, that work much like
+  \item [\texttt{ZMQ\_REQ}/\texttt{ZMQ\_REP}]  Your classic, strict, REQuest/REPly sockets, that work much like
     HTTP request/response semantics.  These are more strict and lock-step, but are slower
     because of the extra overhead in keeping the state organized.
-\item [ZMQ\_PUB ZMQ\_SUB]  These are PUBlish/SUBscribe sockets and work as a decentralized
+  \item [\texttt{ZMQ\_PUB} \texttt{ZMQ\_SUB}]  These are PUBlish/SUBscribe sockets and work as a decentralized
     asynchronous messaging.  PUB sockets just send out messages to multiple subscribers, without
     expecting a reply.  SUB sockets just read messages that are sent to them, and can subscribe
     to prefixes on the messages.
-\item [ZMQ\_DOWNSTREAM ZMQ\_UPSTREAM] DOWN/UP sockets are more like asynchronous round-robin
+  \item [\texttt{ZMQ\_DOWNSTREAM} \texttt{ZMQ\_UPSTREAM}] DOWN/UP sockets are more like asynchronous round-robin
     sockets.  They work like PUB/SUB, but instead of the message going to all subscribers that
     are subscribed or not, a DOWN/UP socket will have a message go to just one of the receivers
     in a cluster.  This is a lot like having a round-robin proxy configuration in your web server.
-\item [ZMQ\_PAIR] A PAIR is just a direct connection between two peers, basically like a better
+  \item [\texttt{ZMQ\_PAIR}] A PAIR is just a direct connection between two peers, basically like a better
     TCP connection.
 \end{description}
 
@@ -259,10 +259,10 @@ for example.  The types of transports that you can use when you call \href{http:
 and \href{http://api.zeromq.org/zmq\_connect.html}{zmq\_connect} are:
 
 \begin{description}
-\item [tcp://] This is a plain old TCP socket with a host and portnumber.
-\item [ipc://] This uses Unix inter-process communication like domain sockets, mq, or whatever is available.
-\item [pgm://] Reliable multicast messaging that uses raw IP layering and requires special privileges.
-\item [epgm://] The ``encapsulated'' version that uses regular UDP to do reliable multicast messaging.
+\item [\texttt{tcp://}] This is a plain old TCP socket with a host and portnumber.
+\item [\texttt{ipc://}] This uses Unix inter-process communication like domain sockets, mq, or whatever is available.
+\item [\texttt{pgm://}] Reliable multicast messaging that uses raw IP layering and requires special privileges.
+\item [\texttt{epgm://}] The ``encapsulated'' version that uses regular UDP to do reliable multicast messaging.
 \end{description}
 
 Finally, ZeroMQ divorces who binds and connects from the above two

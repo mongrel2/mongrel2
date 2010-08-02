@@ -182,27 +182,22 @@ but feel free to change this up later if you find a better way.
 > cd deployment/
 
 # fill it with the directories we need
-deployment > mkdir run
-deployment > mkdir tmp
-deployment > mkdir logs
-deployment > mkdir static
-deployment > mkdir profiles
+deployment > mkdir run tmp logs static profiles
 
 # create the procer profile dirs for each thing
 deployment > cd profiles/
 deployment/profiles > mkdir chat mp3stream handlertest web mongrel2
-
 deployment/profiles > cd ..
 
 # setup the mongrel2 database initially
 deployment > m2sh init -db config.sqlite
 
 # copy the mongrel2_conf.py sample from the source to here
-deployment > cp ~/projects/mongrel2/examples/python/tests/mongrel2_org.py config.py
+deployment > cp ~/mongrel2/examples/python/tests/mongrel2_org.py config.py
 
 # see our end results
 deployment > ls
-config.py  config.sqlite  logs	profiles  run  tmp
+config.py  config.sqlite  logs  profiles  run  static tmp
 
 \end{Verbatim}
 \end{code}
@@ -215,18 +210,18 @@ create deployment directories like this automatically.
 What we've done here is the following:
 
 \begin{enumerate}
-\item Setup a ~/deployment directory we'll put everything in.
-\item Created run, tmp, logs, and profiles that Mongrel2 and procer need to run.
-\item In profiles we started dirs for chat, mp3stream, handlertest, web and mongrel2,
+  \item Setup a \file{\~{}/deployment} directory we'll put everything in.
+  \item Created \file{run}, \file{tmp}, \file{logs}, and \file{profiles} that Mongrel2 and procer need to run.
+  \item In profiles we started dirs for \file{chat}, \file{mp3stream}, \file{handlertest}, \file{web} and \file{mongrel2},
     that procer will read files out of to get all our gear up and running.
-\item Initialized the config.sqlite file we'll be filling in with our modififed config.py.
-\item Copied the mongrel2\_org.py example file over to our deployment so we can modify it.
+  \item Initialized the \file{config.sqlite} file we'll be filling in with our modififed config.py.
+  \item Copied the \file{mongrel2\_org.py} example file over to our deployment so we can modify it.
 \end{enumerate}
 
 
 \section{Step 2: The mongrel2.org Configuration}
 
-Now we're ready to get the configuration working.  Here's the thing though: you should
+Now we're ready to get the configuration working.  Here's the thing, though: you should
 try to alter the configuration yourself.  I've already given you the file and you are
 going to have to make the changes to meet the requirements for this deployment directory.
 Here's what you have to change in \file{config.py} to make everything work right:
@@ -257,7 +252,7 @@ did with these commands:
 > m2sh start -db config.sqlite -host localhost
 ^C
 > m2sh start -db config.sqlite -host localhost -sudo
-> less run/mongrel2.logs
+> cat run/mongrel2.pid
 > m2sh stop -db config.sqlite -host localhost -murder
 \end{Verbatim}
 \end{code}
@@ -344,7 +339,7 @@ for Mongrel2.  What you can see here is the following:
 
 \begin{enumerate}
 \item It starts up and says it found 5 profiles.
-\item It starts chat, and says there's no PID file so good to continue.
+\item It starts chat, and says there's no PID file so it's good to continue.
 \item It reports what ACTION it's running, so you can see the config.
 \item It spawns off your \file{run} script, \emph{drops privilege}
      and says it's WAITING for your script to exit.
@@ -371,7 +366,7 @@ deployment > echo "m2sh start -db config.sqlite -host localhost" >> profiles/mon
 # check out the results
 deployment > cat profiles/mongrel2/run
 #!/bin/sh
-cd /home/zedshaw/deployment
+cd /home/YOU/deployment
 m2sh start -db config.sqlite -host localhost
 \end{Verbatim}
 \end{code}
@@ -417,7 +412,7 @@ running, so let's setup a similar thing for each of our little
 Python demos that we'll need.  In order to do this, though, we sort
 of have to ``hack in'' making them daemonize and create PID files with
 a little shell script help.  Let's start with the \ident{chat} demo
-and, assuming your mongrel2 source is in \file{~/projects/mongrel2},
+and, assuming your mongrel2 source is in \file{\~{}/projects/mongrel2},
 you will change \file{profiles/chat/run} to be like this:
 
 \begin{code}{Run Script For Chat Demo}
@@ -464,7 +459,7 @@ deployment > ps ax | grep chat
 deployment > kill -TERM 19305
 \end{Verbatim}
 
-After all that you can then try out \shell{procer} again to see if it
+After all that, you can then try out \shell{procer} again to see if it
 properly runs the chat demo as well as mongrel2:
 
 \begin{code}{Running procer With Chat Demo}
@@ -503,8 +498,8 @@ run scripts for the remaining files:
 #!/bin/sh
 set -e
 
-DEPLOY=/home/zedshaw/deployment
-SOURCE=/home/zedshaw/projects/mongrel2
+DEPLOY=/home/YOU/deployment
+SOURCE=/home/YOU/projects/mongrel2
 
 cd $SOURCE/examples/http_0mq
 nohup python http.py 2>&1 > http.log &
@@ -515,8 +510,8 @@ echo $! > $DEPLOY/profiles/handlertest/handlertest.pid
 #!/bin/sh
 set -e
 
-DEPLOY=/home/zedshaw/deployment
-SOURCE=/home/zedshaw/projects/mongrel2
+DEPLOY=/home/YOU/deployment
+SOURCE=/home/YOU/projects/mongrel2
 
 cd $SOURCE/examples/mp3stream
 nohup python handler.py 2>&1 > mp3stream.log &
@@ -526,8 +521,8 @@ echo $! > $DEPLOY/profiles/mp3stream/mp3stream.pid
 #!/bin/sh
 set -e
 
-DEPLOY=/home/zedshaw/deployment
-SOURCE=/home/zedshaw/projects/mongrel2
+DEPLOY=/home/YOU/deployment
+SOURCE=/home/YOU/projects/mongrel2
 
 cd $SOURCE/examples/chat
 nohup python www.py 2>&1 > www.log &
@@ -565,7 +560,7 @@ to run your stuff:
     procer will kick it back over automatically.
 \item [Easy Automation]  You should start to see how you could automate creating
     profiles for new processes since the setup is consistent.
-\item [profiles/run.log]  All your commands will have their output sent to
+  \item [\file{profiles/run.log}]  All your commands will have their output sent to
     this file so you can see how they might be blowing up in your scripts.
 \item [Restart State Maintained]  Since procer is just tracking PID files and
     processes, if you shut it down, it won't kill the world.  When you start
@@ -585,7 +580,7 @@ out the chat demo:
 
 \begin{code}{Setting Up Static Content}
 \begin{Verbatim}
-> cp -r mongrel2/examples/chat/static static/chatdemo
+> cp -r ~/projects/mongrel2/examples/chat/static static/chatdemo
 > m2sh stop -db config.sqlite -host localhost -murder
 > curl -I http://localhost:6767/chatdemo/
 \end{Verbatim}

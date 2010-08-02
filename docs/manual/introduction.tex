@@ -14,8 +14,8 @@ infrastructure.
 
 Other web servers do some of these things, but they either do them in a bastardized
 way or not all of them at once.  Plenty of language specific web servers like Node.js
-and Jetty have asynchronous operation, but they're not language agnostic
-\footnote{Who the hell wants to code Javascript all day?  Yuck.}.  Other web servers
+and Jetty have asynchronous operation, but they're not language
+agnostic\footnote{Who the hell wants to code Javascript all day?  Yuck.}.  Other web servers
 will let you talk to any language as a backend, but they insist on using HTTP
 proxying or FastCGI, which is \emph{not} friendly to asynchronous operations.
 
@@ -27,12 +27,12 @@ features as a cohesive whole.
 
 The term ``language agnostic'' came from people who read about Mongrel2 in the
 early days, and it means that Mongrel2 does \emph{not} try to promote any one
-language over any others.  Mongrel2 does not care if you run a ``Python shop'' or
-if you're a die hard PHP fan or if you hate PHP and love only Ruby on Rails.
+language over any others.  Mongrel2 does not care if you run a ``Python shop'', or
+if you're a die hard PHP fan, or if you hate PHP and love only Ruby on Rails.
 Mongrel2 only knows about HTTP requests, HTTP responses, async messages, and
 getting them to your gear to meet those requirements.
 
-Language Agnosticism is the most important feature of Mongrel2 and its entire
+Language Agnosticism is the most important feature of Mongrel2, and its entire
 purpose stems from the desire to reduce the amount of programming language
 religion in the world.  Real people want to get things done, not wanker on
 which technology is the best or force other people to use their favorite toys.
@@ -44,7 +44,7 @@ to use what works best for a given problem.
 
 Many web servers are ``asynchronous'' internally, and some force you to
 know way too much about how they work internally to get anything done.  What makes
-Mongrel2's version of asynchronous messaging different is it extends to
+Mongrel2's version of asynchronous messaging different is that it extends to
 \emph{outside} the Mongrel2 server.  This is a powerful concept that even your backends
 can operate asynchronously using simple identification of connected clients.
 
@@ -55,7 +55,7 @@ about how those backends respond to the clients.  All it requires is that the ba
 application send messages addressed to the client and it will write them on the
 socket.
 
-Because of this design Mongrel2 can easily house both classic HTTP clients, keep-alive
+Because of this design, Mongrel2 can easily house both classic HTTP clients, keep-alive
 style HTTP client, chunked encoding responses, JSSockets, or WebSockets using the same
 code.
 
@@ -109,7 +109,7 @@ The View is a Python script called m2sh that gives you a command line ``UI'' to
 configure and setup the Mongrel2 sqlite model.  It gives you commands for
 managing it, crafting configurations, looking at them; the works.
 
-But most importantly, \emph{you can write your own}.  You don't have to wait
+But, most importantly, \emph{you can write your own}.  You don't have to wait
 for a Mongrel2 developer to craft a configuration file parser for your favorite
 language, or use some hack job Nagios Perl junk to automate or scan it.  It's
 SQLite3 with a solid, simple schema and well written Python code showing you how
