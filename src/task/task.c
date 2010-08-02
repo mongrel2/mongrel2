@@ -315,7 +315,7 @@ taskinfo(int s)
 
 static int taskargc;
 static char **taskargv;
-int MAINSTACKSIZE = 64 * 1024;
+int MAINSTACKSIZE = 32 * 1024;
 
 static void
 taskmainstart(void *v)
