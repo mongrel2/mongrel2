@@ -6,7 +6,6 @@
 #include <bstring.h>
 #include "kegogi.h"
 #include "httpclient.h"
-#include "util.h"
 
 %%{
     machine kegogi;
@@ -79,7 +78,7 @@
     
     comment = '#' [^\n]*;
 
-    command = (ws? method ws url ws? comment? '\n') >clear @command;
+    command = (ws? "send" ws+ method ws+ url ws? comment? '\n') >clear @command;
     empty_line = ws? comment? '\n';
   
     main := (command | empty_line)*;
