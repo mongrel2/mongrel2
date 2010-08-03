@@ -48,7 +48,7 @@
 #include <sys/socket.h>
 #include <response.h>
 
-struct tagbstring PING_PATTERN = bsStatic("@[a-z/]- {\"type\":%s*\"ping\"}");
+struct tagbstring PING_PATTERN = bsStatic("@[a-z/]- {\"type\":\\s*\"ping\"}");
 
 #ifdef NDEBUG
 #define TRACE(C)
