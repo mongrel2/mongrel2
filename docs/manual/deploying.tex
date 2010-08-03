@@ -424,7 +424,7 @@ DEPLOY=/home/YOU/deployment
 SOURCE=/home/YOU/projects/mongrel2
 
 cd $SOURCE/examples/chat
-nohup python chat.py 2>&1 > chat.log &
+nohup python -u chat.py 2>&1 > chat.log &
 echo $! > $DEPLOY/profiles/chat/chat.pid
 \end{lstlisting}
 \end{code}
@@ -504,7 +504,7 @@ DEPLOY=/home/YOU/deployment
 SOURCE=/home/YOU/projects/mongrel2
 
 cd $SOURCE/examples/http_0mq
-nohup python http.py 2>&1 > http.log &
+nohup python -u http.py 2>&1 > http.log &
 echo $! > $DEPLOY/profiles/handlertest/handlertest.pid
 \end{lstlisting}
 
@@ -519,7 +519,7 @@ DEPLOY=/home/YOU/deployment
 SOURCE=/home/YOU/projects/mongrel2
 
 cd $SOURCE/examples/mp3stream
-nohup python handler.py 2>&1 > mp3stream.log &
+nohup python -u handler.py 2>&1 > mp3stream.log &
 echo $! > $DEPLOY/profiles/mp3stream/mp3stream.pid
 \end{lstlisting}
 
@@ -534,7 +534,7 @@ DEPLOY=/home/YOU/deployment
 SOURCE=/home/YOU/projects/mongrel2
 
 cd $SOURCE/examples/chat
-nohup python www.py 2>&1 > www.log &
+nohup python -u www.py 2>&1 > www.log &
 echo $! > $DEPLOY/profiles/web/web.pid
 
 \end{lstlisting}
