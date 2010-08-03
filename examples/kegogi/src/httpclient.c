@@ -75,7 +75,6 @@ static void status_code(void *data, const char *at, size_t len)
 {
     Response *rsp = (Response *) data;
     rsp->status_code = blk2bstr(at, len);
-    bconchar(rsp->status_code, '\0');
 }
 
 static void header_done(void *data, const char *at, size_t len)
@@ -106,6 +105,17 @@ static void dump_remaining_from_fd(int fd, ssize_t remaining)
     return;
 error:
     return;
+}
+
+Response *Response_create(bstring status_code) {
+    Response *rsp = malloc(sizeof(*rsp));
+    check(rsp, "Unable to allocate response\n");
+    rsp->status_code = status_code;
+
+    return rsp;
+
+error:
+    return NULL;
 }
 
 Response *Response_fetch(Request *req) {

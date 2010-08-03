@@ -10,12 +10,15 @@
 %%{
     machine kegogi;
     action command {
-        if(idx < max_commands && uri != NULL && method != NULL) {
+        if(idx < max_commands && uri && method && status_code) {
             host = host ? host : bstrcpy(default_host);
 	    int numPort = port ? atoi(bdata(port)) : default_port;
-	    if(port) bdestroy(port);
 	    Request *req = Request_create(host, numPort, method, uri);
-	    commands[idx++].request = req;
+	    Response *expected = Response_create(status_code);
+	    commands[idx].request = req;
+	    commands[idx].expected = expected;
+	    idx++;
+	    if(port) bdestroy(port);
         }
 	else
 	    printf("error\n");
@@ -26,6 +29,7 @@
  	port = NULL;
 	host = NULL;
 	uri = NULL;
+	status_code = NULL;
     }
 
     action mark {
@@ -49,7 +53,7 @@
     }
 
     action status_code {
-        status_code = atoin(mark, fpc - mark);
+        status_code = blk2bstr(mark, fpc - mark);
     }        
 
     action param_name {
@@ -66,20 +70,23 @@
 
 
     ws = (space - '\n')+;
+    comment = '#' [^\n]*;
 
     method = (upper | digit){1,20} >mark %method;
-
     protocol = alpha+ '://';
     host = ([^:/]+) >mark %host;
     port = ':' (digit+) >mark %port;
     uri = ('/' (^space)*) >mark %uri;
-
     url = ((protocol? host port?)? uri);
-    
-    comment = '#' [^\n]*;
 
-    command = (ws? "send" ws+ method ws+ url ws? comment? '\n') >clear @command;
+    send_command = ws* "send" ws+ method ws+ url ws? comment? '\n';
+
+    status_code = (digit+) >mark %status_code;
+    expect_command = ws* "expect" ws+ status_code ws? comment? '\n';
+
     empty_line = ws? comment? '\n';
+    command = (send_command empty_line* expect_command) >clear @command;
+
   
     main := (command | empty_line)*;
 }%%
@@ -100,7 +107,7 @@ int parse_kegogi_file(const char *path, Command commands[], int max_commands) {
     bstring default_host = bfromcstr("localhost");
     int default_port = 80;
 
-    bstring host, port, uri, method;
+    bstring host, port, uri, method, status_code;
     char *mark, *p = buffer, *pe = buffer + size, *eof = pe;
     int cs;
 
