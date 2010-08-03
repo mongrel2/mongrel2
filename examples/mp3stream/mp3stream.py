@@ -46,12 +46,13 @@ class ConnectState(object):
 
 class Streamer(Thread):
 
-    def __init__(self, mp3_files, state, conn, chunk_size):
+    def __init__(self, mp3_files, state, conn, chunk_size, sender_id):
         super(Streamer, self).__init__()
         self.mp3_files = mp3_files
         self.state = state
         self.conn = conn
         self.chunk_size = chunk_size
+        self.sender_id = sender_id
 
 
     def make_icy_info(self, data):
@@ -71,7 +72,7 @@ class Streamer(Thread):
 
         # the first one has our little header for the song
         chunk = result.read(self.chunk_size) + icy_info
-        self.conn.deliver(self.state.connected(), chunk)
+        self.conn.deliver(self.sender_id, self.state.connected(), chunk)
 
         # all of them after that are empty
         while chunk and self.state.connected():
@@ -82,7 +83,7 @@ class Streamer(Thread):
             elif len(chunk) < self.chunk_size:
                 chunk += empty_md * (self.chunk_size - len(chunk))
 
-            self.conn.deliver(self.state.connected(), chunk + empty_md)
+            self.conn.deliver(self.sender_id, self.state.connected(), chunk + empty_md)
             time.sleep(0.2)
 
 

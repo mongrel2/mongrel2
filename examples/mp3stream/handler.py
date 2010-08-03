@@ -16,7 +16,7 @@ CHUNK_SIZE = 5 * 1024
 
 STATE = ConnectState()
 
-STREAMER = Streamer(MP3_FILES, STATE, CONN, CHUNK_SIZE)
+STREAMER = Streamer(MP3_FILES, STATE, CONN, CHUNK_SIZE, sender_id)
 STREAMER.start()
 
 
