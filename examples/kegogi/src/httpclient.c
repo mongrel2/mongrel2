@@ -61,7 +61,7 @@ static void http_field(void *data, const char *field, size_t flen,
     bstring bVal = blk2bstr(val, vlen);
 
     if(biseqcstrcaseless(bField, "content-length"))
-        rsp->content_len = atoi((char *)bVal);
+        rsp->content_len = atoi((char *)bVal->data);
     else if (biseqcstrcaseless(bField, "transfer-encoding"))
         rsp->chunked_body = biseqcstrcaseless(bVal, "chunked");
 
@@ -77,7 +77,7 @@ static void status_code(void *data, const char *at, size_t len)
 {
     Response *rsp = (Response *) data;
     bstring bs = blk2bstr(at, len);
-    rsp->status_code = atoi((char *)bs);
+    rsp->status_code = atoi((char *)bs->data);
     bdestroy(bs);
 }
 
