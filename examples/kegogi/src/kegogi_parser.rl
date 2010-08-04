@@ -11,14 +11,17 @@
     machine kegogi;
     action command {
         if(idx < max_commands && uri && method && status_code) {
-            host = host ? host : bstrcpy(default_host);
-	    int numPort = port ? atoi(bdata(port)) : default_port;
-	    Request *req = Request_create(host, numPort, method, uri);
-	    Response *expected = Response_create(status_code);
-	    commands[idx].request = req;
-	    commands[idx].expected = expected;
+	    host = host ? host : bstrcpy(default_host);
+	    port = port ? port : bstrcpy(default_port);	    
+
+	    commands[idx].send.method = method;
+	    commands[idx].send.host = host;
+	    commands[idx].send.port = port;
+	    commands[idx].send.uri = uri;
+	    
+	    commands[idx].expect.status_code = status_code;
+
 	    idx++;
-	    if(port) bdestroy(port);
         }
 	else
 	    printf("error\n");
@@ -68,7 +71,6 @@
         pattern = blk2bstr(mark, fpc - mark);
     }
 
-
     ws = (space - '\n')+;
     comment = '#' [^\n]*;
 
@@ -105,7 +107,7 @@ int parse_kegogi_file(const char *path, Command commands[], int max_commands) {
     int idx = 0;
 
     bstring default_host = bfromcstr("localhost");
-    int default_port = 80;
+    bstring default_port = bfromcstr("80");
 
     bstring host, port, uri, method, status_code;
     char *mark, *p = buffer, *pe = buffer + size, *eof = pe;
@@ -113,6 +115,9 @@ int parse_kegogi_file(const char *path, Command commands[], int max_commands) {
 
     %% write init;
     %% write exec;
+
+    bdestroy(default_host);
+    bdestroy(default_port);
 
     return idx;
 }

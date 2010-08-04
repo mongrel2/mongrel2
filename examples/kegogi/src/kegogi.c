@@ -11,7 +11,7 @@
 FILE *LOG_FILE = NULL;
 #define MAX_COMMANDS 1024
 
-static int verify_response(Response *expected, Response *actual);
+static int verify_response(Expect *expected, Response *actual);
 
 void runkegogi(void *arg)
 {
@@ -21,31 +21,40 @@ void runkegogi(void *arg)
 
     int i;
     for(i = 0; i < nCommands; i++) {
-        Request *req = commands[i].request;
-        Response *expected = commands[i].expected;
+        Request *req = Request_create(bstrcpy(commands[i].send.host),
+                                      atoi(bdata(commands[i].send.port)),
+                                      bstrcpy(commands[i].send.method),
+                                      bstrcpy(commands[i].send.uri));
         Response *actual = Response_fetch(req);
         
-        debug("sending %s to %s:%d%s", bdata(req->method), bdata(req->host), 
-              req->port, bdata(req->uri));
-        debug("expecting %s", bdata(expected->status_code));
+        debug("send %s %s:%s%s",
+              bdata(commands[i].send.method), 
+              bdata(commands[i].send.host),
+              bdata(commands[i].send.port),
+              bdata(commands[i].send.uri));
+        debug("expect %s",
+              bdata(commands[i].expect.status_code));
+
         if(actual != NULL)
-            debug("actual %s", bdata(actual->status_code));
+            debug("actual %d", actual->status_code);
         else
             debug("Response failed");
 
-        debug("Verified = %s", verify_response(expected, actual) ? "SUCCESS" : "FAILURE");
+        if(verify_response(&commands[i].expect, actual))
+            debug("Verified = SUCCESS");
+        else
+            debug("Verified = FAILURE");
         
         Request_destroy(req);
         Response_destroy(actual);
-        Response_destroy(expected);
     }
 
 }
 
-static int verify_response(Response *expected, Response *actual) {
+static int verify_response(Expect *expected, Response *actual) {
     if(!(expected && actual)) return 0;
     
-    return biseq(expected->status_code, actual->status_code);
+    return atoi(bdata(expected->status_code)) == actual->status_code;
 }
 
 void taskmain(int argc, char *argv[])
