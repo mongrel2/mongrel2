@@ -261,6 +261,8 @@ Response *Response_fetch(Request *req)
 
 error:
     bdestroy(request);
+    Response_destroy(rsp);
+    if(buffer) free(buffer);
     return NULL;
 }
 
