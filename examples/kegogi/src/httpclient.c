@@ -61,7 +61,7 @@ static void http_field(void *data, const char *field, size_t flen,
     bstring bVal = blk2bstr(val, vlen);
 
     if(biseqcstrcaseless(bField, "content-length"))
-        rsp->content_len = atoi(bdata(bVal));
+        rsp->content_len = atoi((char *)bVal);
     else if (biseqcstrcaseless(bField, "transfer-encoding"))
         rsp->chunked_body = biseqcstrcaseless(bVal, "chunked");
 
@@ -77,7 +77,7 @@ static void status_code(void *data, const char *at, size_t len)
 {
     Response *rsp = (Response *) data;
     bstring bs = blk2bstr(at, len);
-    rsp->status_code = atoi(bdata(bs));
+    rsp->status_code = atoi((char *)bs);
     bdestroy(bs);
 }
 
@@ -129,13 +129,14 @@ Response *Response_fetch(Request *req) {
     check(totalsent == blength(request), "Didn't send all of the request.");
     
 
-    ssize_t nread;
+    ssize_t nread = 0;
 
     while(!httpclient_parser_finish(&parser)) {
         nread = fdrecv(fd, buffer, FETCH_BUFFER_SIZE - 1);
         check(nread > 0, "Failed to get all of headers");
         buffer[nread] = '\0';
         size_t nparsed = httpclient_parser_execute(&parser, buffer, nread, 0);
+        check(nparsed == nread, "Error parsing, didn't parse all of the buffer.");
     }
     check(httpclient_parser_finish(&parser) == 1, "Didn't parse.");
 
@@ -200,7 +201,7 @@ Response *Response_fetch(Request *req) {
                 ssize_t toread = FETCH_BUFFER_SIZE;
                 if(toread > remaining) toread = remaining;
                 nread = fdrecv(fd, buffer, toread);
-                check(nread > 0, "fdrecv failed with %d remaining", remaining);
+                check(nread > 0, "fdrecv failed with %d remaining", (int)remaining);
                 bcatblk(rsp->body, buffer, nread);
                 remaining -= nread;
             }

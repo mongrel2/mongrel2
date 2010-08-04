@@ -6,6 +6,7 @@
 #include <bstring.h>
 #include "kegogi.h"
 #include "httpclient.h"
+#include <dbg.h>
 
 %%{
     machine kegogi;
@@ -96,28 +97,42 @@
 
 %% write data;
 
-int parse_kegogi_file(const char *path, Command commands[], int max_commands) {
-    FILE *f = fopen(path, "r");
-    fseek(f, 0L, SEEK_END);
-    int size = ftell(f);
-    fseek(f, 0L, SEEK_SET);
-    char *buffer = malloc(size);
-    fread(buffer, 1, size, f);
+int parse_kegogi_file(const char *path, Command commands[], int max_commands) 
+{
+    FILE *script = NULL;
+    bstring buffer = NULL;
+    int idx = -1;
+    bstring host = NULL;
+    bstring port = NULL;
+    bstring uri = NULL;
+    bstring method = NULL;
+    bstring status_code = NULL;
+    char *mark = NULL;
+    int cs = 0;
+    char *p = NULL;
+    char *pe = NULL;
 
-    int idx = 0;
+    script = fopen(path, "r");
+    check(script, "Failed to open file: %s", path);
+
+    buffer = bread((bNread)fread, script);
+    check_mem(buffer);
 
     bstring default_host = bfromcstr("localhost");
     bstring default_port = bfromcstr("80");
 
-    bstring host, port, uri, method, status_code;
-    char *mark, *p = buffer, *pe = buffer + size, *eof = pe;
-    int cs;
+    p = bdata(buffer);
+    pe = p + blength(buffer);
 
     %% write init;
     %% write exec;
 
+error:
+    //fallthrough on purpose
     bdestroy(default_host);
     bdestroy(default_port);
+    bdestroy(buffer);
+    if(script) fclose(script);
 
     return idx;
 }

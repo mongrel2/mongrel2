@@ -22,7 +22,7 @@ void runkegogi(void *arg)
     int i;
     for(i = 0; i < nCommands; i++) {
         Request *req = Request_create(bstrcpy(commands[i].send.host),
-                                      atoi(bdata(commands[i].send.port)),
+                                      atoi((const char *)commands[i].send.port->data),
                                       bstrcpy(commands[i].send.method),
                                       bstrcpy(commands[i].send.uri));
         Response *actual = Response_fetch(req);
@@ -54,7 +54,7 @@ void runkegogi(void *arg)
 static int verify_response(Expect *expected, Response *actual) {
     if(!(expected && actual)) return 0;
     
-    return atoi(bdata(expected->status_code)) == actual->status_code;
+    return atoi((const char *)expected->status_code) == actual->status_code;
 }
 
 void taskmain(int argc, char *argv[])

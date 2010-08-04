@@ -144,7 +144,8 @@ int httpclient_parser_init(httpclient_parser *parser)  {
 
 
 /** exec **/
-size_t httpclient_parser_execute(httpclient_parser *parser, const char *buffer, size_t len, size_t off)  {
+size_t httpclient_parser_execute(httpclient_parser *parser, const char *buffer, size_t len, size_t off)  
+{
   const char *p, *pe;
   int cs = parser->cs;
 

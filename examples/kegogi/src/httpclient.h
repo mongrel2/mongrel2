@@ -28,7 +28,7 @@ typedef struct Response {
     bstring body;
     Headers headers;
     int content_len;
-    char *body_start;
+    const char *body_start;
     int body_so_far;
     int chunked_body;
 } Response;
