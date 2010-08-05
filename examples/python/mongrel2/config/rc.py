@@ -7,7 +7,7 @@ def read_rc():
     rcfile = homedir + os.sep + rcbasename
 
     if not (os.path.isfile(rcfile) and os.access(rcfile, os.R_OK)):
-        return
+        return {}
 
     config = ConfigParser.SafeConfigParser()
     config.read(rcfile)
@@ -16,4 +16,5 @@ def read_rc():
     dict = {}
     for k,v in args:
         dict[k] = v
+
     return dict

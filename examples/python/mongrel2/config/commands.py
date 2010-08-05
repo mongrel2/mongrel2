@@ -10,6 +10,17 @@ import signal
 from sqlite3 import OperationalError
 
 
+def try_reading(reader):
+    try:
+        cmd = reader.readline()
+        return cmd.split(' ')
+
+    except UnicodeDecodeError:
+        print "\nERROR: Sorry, PyRepl and Python hate printing to your screen: UnicodeDecodeError."
+
+    return []
+
+
 def shell_command():
     """
     Starts an interactive shell with readline style input so you can
@@ -28,22 +39,19 @@ def shell_command():
     reader.ps4 = "....> "
 
     try:
-
         while True:
-            try:
-                cmd = reader.readline()
-                if cmd:
-                    args.parse_and_run_command(
-                        cmd.split(' '), mongrel2.config.commands,
-                           default_command=None, exit_on_error=False)
-            except UnicodeDecodeError:
-                print "\nERROR: Sorry, PyRepl and Python hate printing to your screen: UnicodeDecodeError."
+
+            cmd = try_reading(reader)
+            if cmd:
+                try:
+                    args.parse_and_run_command(cmd, mongrel2.config.commands)
+                except Exception, e:
+                    print "ERROR:", e
 
     except EOFError:
         print "Bye."
     except KeyboardInterrupt:
         print "BYE!"
-
 
 
 def help_command(**options):
@@ -58,15 +66,15 @@ def help_command(**options):
     """
     if "for" in options:
         help_text = args.help_for_command(config.commands, options['for'])
+
         if help_text:
             print help_text
         else:
-            args.invalid_command_message(config.commands, exit_on_error=True)
+            args.invalid_command_message(config.commands)
     else:
         print "Available commands:\n"
-        print ", ".join(args.available_commands(config.commands))
+        print "\n".join(args.available_commands(config.commands))
         print "\nUse config help -for <command> to find out more."
-
 
 
 def dump_command(db=None):

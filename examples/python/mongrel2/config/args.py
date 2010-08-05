@@ -217,55 +217,34 @@ def available_commands(mod, ending="_command"):
     return commands
 
 
-def invalid_command_message(mod, exit_on_error):
+def invalid_command_message(mod):
     """Called when you give an invalid command to print what you can use."""
     print "You must specify a valid command.  Try these: "
-    print ", ".join(available_commands(mod))
-
-    if exit_on_error: 
-        sys.exit(1)
-    else:
-        return False
+    print "\n".join(available_commands(mod))
 
 
-def parse_and_run_command(argv, mod, default_command=None, exit_on_error=True):
+def parse_and_run_command(argv, mod, default_command=None):
     """
     A one-shot function that parses the args, and then runs the command
     that the user specifies.  If you set a default_command, and they don't
     give one then it runs that command.  If you don't specify a command,
     and they fail to give one then it prints an error.
-
-    On this error (failure to give a command) it will call sys.exit(1).
-    Set exit_on_error=False if you don't want this behavior, like if
-    you're doing a unit test.
     """
     try:
         command, options = parse(argv)
+    except ArgumentError, e:
+        print "Parsing Error:", e
+        return
 
-        if not command and default_command:
-            command = default_command
-        elif not command and not default_command:
-            return invalid_command_message(mod, exit_on_error)
+    if not command and default_command:
+        command = default_command
+    elif not command and not default_command:
+        return invalid_command_message(mod)
 
-        if command not in available_commands(mod):
-            return invalid_command_message(mod, exit_on_error)
+    if command not in available_commands(mod):
+        return invalid_command_message(mod)
 
-        command_module(mod, command, options)
-    except ArgumentError, exc:
-        rcf = rc.read_rc()
-
-        try:
-            function = mod.__dict__[command+"_command"]
-            needed = determine_kwargs(function)
-            new = {}
-            for k in needed.keys():
-                if k in rcf:
-                    new[k] = rcf[k]
-            command_module(mod, command, new)
-        except ArgumentError, exc:
-            print "ERROR: ", exc
-            if exit_on_error:
-                sys.exit(1)
+    command_module(mod, command, options)
 
     return True
 
