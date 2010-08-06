@@ -87,7 +87,7 @@
     status_code = (digit+) >mark %status_code;
     expect_command = ws* "expect" ws+ status_code ws? comment? '\n';
 
-    empty_line = ws? comment? '\n';
+    empty_line = ws* comment? '\n';
     command = (send_command empty_line* expect_command) >clear @command;
 
   
@@ -101,7 +101,7 @@ int parse_kegogi_file(const char *path, Command commands[], int max_commands)
 {
     FILE *script = NULL;
     bstring buffer = NULL;
-    int idx = -1;
+    int idx = 0;
     bstring host = NULL;
     bstring port = NULL;
     bstring uri = NULL;

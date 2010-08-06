@@ -244,7 +244,6 @@ Response *Response_fetch(Request *req)
         check(nread > 0, "Failed to get all of headers");
         buffer[nread] = '\0';
         size_t nparsed = httpclient_parser_execute(&parser, buffer, nread, 0);
-        check(nparsed == nread, "Error parsing, didn't parse all of the buffer.");
     }
     check(httpclient_parser_finish(&parser) == 1, "Didn't parse.");
 
@@ -254,8 +253,6 @@ Response *Response_fetch(Request *req)
     else {
         check(Response_read_body(rsp, nread, buffer, fd) == 0, "Failed to read full body.");
     }
-
-    debug("body length = %d", blength(rsp->body));
 
     return rsp;
 

@@ -54,7 +54,7 @@ void runkegogi(void *arg)
 static int verify_response(Expect *expected, Response *actual) {
     if(!(expected && actual)) return 0;
     
-    return atoi((const char *)expected->status_code) == actual->status_code;
+    return atoi(expected->status_code->data) == actual->status_code;
 }
 
 void taskmain(int argc, char *argv[])
