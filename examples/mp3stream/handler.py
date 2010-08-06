@@ -8,16 +8,22 @@ sender_id = "9703b4dd-227a-45c4-b7a1-ef62d97962b2"
 CONN = handler.Connection(sender_id, "tcp://127.0.0.1:9995",
                           "tcp://127.0.0.1:9994")
 
+
+STREAM_NAME = "Mongrel2 Radio"
+
 MP3_FILES = glob.glob("*.mp3")
 
 print "PLAYING:", MP3_FILES
 
-CHUNK_SIZE = 5 * 1024
+CHUNK_SIZE = 8 * 1024
 
 STATE = ConnectState()
 
 STREAMER = Streamer(MP3_FILES, STATE, CONN, CHUNK_SIZE, sender_id)
 STREAMER.start()
+
+HEADERS = { 'icy-metaint': CHUNK_SIZE,
+            'icy-name': STREAM_NAME}
 
 
 while True:
@@ -34,6 +40,6 @@ while True:
             CONN.reply_http(req, "Too Many Connected.  Try Later.")
         else:
             STATE.add(req)
-            CONN.reply_http(req, "", headers={'icy-metaint': CHUNK_SIZE})
+            CONN.reply_http(req, "", headers=HEADERS)
 
 

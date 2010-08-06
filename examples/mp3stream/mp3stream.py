@@ -57,25 +57,26 @@ class Streamer(Thread):
 
     def make_icy_info(self, data):
         icy_info_len = len(data)
-        assert icy_info_len % 16 == 0, "Must be multiple of 16."
-        return struct.pack('B', icy_info_len / 16) + data
+        pad_len = (16 - (icy_info_len % 16)) % 16
+        padding = struct.pack('B', 0) * pad_len
+        return struct.pack('B', (icy_info_len + pad_len) / 16) + data + padding
 
 
     def stream_mp3(self, mp3_name):
-        result = open(mp3_name, 'r')
-
-        chunk = result.read(self.chunk_size)
-        icy_info = self.make_icy_info("StreamTitle='Just A Funky Test';")
+        icy_info = self.make_icy_info("StreamTitle='%s';" % mp3_name)
         empty_md = self.make_icy_info("")
 
         print self.state.connected(), "Listeners connected."
 
+        result = open(mp3_name, 'r')
+
+        chunk = result.read(self.chunk_size)
+
         # the first one has our little header for the song
-        chunk = result.read(self.chunk_size) + icy_info
-        self.conn.deliver(self.sender_id, self.state.connected(), chunk)
+        self.conn.deliver(self.sender_id, self.state.connected(), chunk + icy_info)
 
         # all of them after that are empty
-        while chunk and self.state.connected():
+        while self.state.connected():
             chunk = result.read(self.chunk_size)
 
             if not chunk:
@@ -84,7 +85,10 @@ class Streamer(Thread):
                 chunk += empty_md * (self.chunk_size - len(chunk))
 
             self.conn.deliver(self.sender_id, self.state.connected(), chunk + empty_md)
+
             time.sleep(0.2)
+
+        result.close()
 
 
     def run(self):
