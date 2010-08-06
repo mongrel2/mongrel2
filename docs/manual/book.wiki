@@ -1259,12 +1259,12 @@
       <p class="indent">When I first started talking about
       Mongrel2, I said I&rsquo;d store the configuration in SQLite
       and do a Model-View-Controller kind of design. Immediately
-      people who can&rsquo;t read flipped out and though this meant
-      they&rsquo;d be back in &ldquo;windows registry hell&rdquo;,
-      but with SQL as their only way to access it. They thought
-      that they&rsquo;d be stuck writing configurations with SQL;
-      that SQL couldn&rsquo;t possibly configure a web server. 
-      <!--l. 21-->
+      people who can&rsquo;t read flipped out and thought this
+      meant they&rsquo;d be back in &ldquo;Windows registry
+      hell&rdquo;, but with SQL as their only way to access it.
+      They thought that they&rsquo;d be stuck writing
+      configurations with SQL; that SQL couldn&rsquo;t possibly
+      configure a web server. <!--l. 21-->
 
       <p class="indent">They were wrong on many levels. Nobody was
       <span class="pplri7t-">ever</span> going to make <span class=
@@ -9797,6 +9797,24 @@
       "pcrr7t-x-x-90">&nbsp;</span><br>
       <span class="label"><a id="x1-70013r11" name=
       "x1-70013r11"></a></span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br>
+      <span class="label"><a id="x1-70014r12" name=
+      "x1-70014r12"></a></span><span class=
+      "pcrr7t-x-x-90">STREAM_NAME</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">=</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">"</span><span class=
+      "pcrr7t-x-x-90">Mongrel2</span><span class=
+      "pcrr7t-x-x-90">&#9251;</span><span class=
+      "pcrr7t-x-x-90">Radio</span><span class=
+      "pcrr7t-x-x-90">"</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br>
+      <span class="label"><a id="x1-70015r13" name=
+      "x1-70015r13"></a></span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br>
+      <span class="label"><a id="x1-70016r14" name=
+      "x1-70016r14"></a></span><span class=
       "pcrr7t-x-x-90">MP3_FILES</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">=</span><span class=
@@ -9811,11 +9829,11 @@
       "pcrr7t-x-x-90">"</span><span class=
       "pcrr7t-x-x-90">)</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-70014r12" name=
-      "x1-70014r12"></a></span><span class=
+      <span class="label"><a id="x1-70017r15" name=
+      "x1-70017r15"></a></span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-70015r13" name=
-      "x1-70015r13"></a></span><span class=
+      <span class="label"><a id="x1-70018r16" name=
+      "x1-70018r16"></a></span><span class=
       "pcrb7t-x-x-90">print</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">"</span><span class=
@@ -9826,26 +9844,26 @@
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">MP3_FILES</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-70016r14" name=
-      "x1-70016r14"></a></span><span class=
+      <span class="label"><a id="x1-70019r17" name=
+      "x1-70019r17"></a></span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-70017r15" name=
-      "x1-70017r15"></a></span><span class=
+      <span class="label"><a id="x1-70020r18" name=
+      "x1-70020r18"></a></span><span class=
       "pcrr7t-x-x-90">CHUNK_SIZE</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">=</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
-      "pcrr7t-x-x-90">5</span><span class=
+      "pcrr7t-x-x-90">8</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&#8902;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">1024</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-70018r16" name=
-      "x1-70018r16"></a></span><span class=
+      <span class="label"><a id="x1-70021r19" name=
+      "x1-70021r19"></a></span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-70019r17" name=
-      "x1-70019r17"></a></span><span class=
+      <span class="label"><a id="x1-70022r20" name=
+      "x1-70022r20"></a></span><span class=
       "pcrr7t-x-x-90">STATE</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">=</span><span class=
@@ -9853,11 +9871,11 @@
       "pcrr7t-x-x-90">ConnectState</span><span class=
       "pcrr7t-x-x-90">()</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-70020r18" name=
-      "x1-70020r18"></a></span><span class=
+      <span class="label"><a id="x1-70023r21" name=
+      "x1-70023r21"></a></span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-70021r19" name=
-      "x1-70021r19"></a></span><span class=
+      <span class="label"><a id="x1-70024r22" name=
+      "x1-70024r22"></a></span><span class=
       "pcrr7t-x-x-90">STREAMER</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">=</span><span class=
@@ -9879,28 +9897,73 @@
       "pcrr7t-x-x-90">sender_id</span><span class=
       "pcrr7t-x-x-90">)</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-70022r20" name=
-      "x1-70022r20"></a></span><span class=
+      <span class="label"><a id="x1-70025r23" name=
+      "x1-70025r23"></a></span><span class=
       "pcrr7t-x-x-90">STREAMER</span><span class=
       "pcrr7t-x-x-90">.</span><span class=
       "pcrr7t-x-x-90">start</span><span class=
       "pcrr7t-x-x-90">()</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-70023r21" name=
-      "x1-70023r21"></a></span><span class=
+      <span class="label"><a id="x1-70026r24" name=
+      "x1-70026r24"></a></span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-70024r22" name=
-      "x1-70024r22"></a></span><span class=
+      <span class="label"><a id="x1-70027r25" name=
+      "x1-70027r25"></a></span><span class=
+      "pcrr7t-x-x-90">HEADERS</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">=</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">{</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">'</span><span class=
+      "pcrr7t-x-x-90">icy</span><span class=
+      "pcrr7t-x-x-90">-</span><span class=
+      "pcrr7t-x-x-90">metaint</span><span class=
+      "pcrr7t-x-x-90">'</span><span class=
+      "pcrr7t-x-x-90">:</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">CHUNK_SIZE</span><span class=
+      "pcrr7t-x-x-90">,</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-70025r23" name=
-      "x1-70025r23"></a></span><span class=
+      <span class="label"><a id="x1-70028r26" name=
+      "x1-70028r26"></a></span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">'</span><span class=
+      "pcrr7t-x-x-90">icy</span><span class=
+      "pcrr7t-x-x-90">-</span><span class=
+      "pcrr7t-x-x-90">name</span><span class=
+      "pcrr7t-x-x-90">'</span><span class=
+      "pcrr7t-x-x-90">:</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">STREAM_NAME</span><span class=
+      "pcrr7t-x-x-90">}</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br>
+      <span class="label"><a id="x1-70029r27" name=
+      "x1-70029r27"></a></span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br>
+      <span class="label"><a id="x1-70030r28" name=
+      "x1-70030r28"></a></span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br>
+      <span class="label"><a id="x1-70031r29" name=
+      "x1-70031r29"></a></span><span class=
       "pcrb7t-x-x-90">while</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">True</span><span class=
       "pcrr7t-x-x-90">:</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-70026r24" name=
-      "x1-70026r24"></a></span><span class=
+      <span class="label"><a id="x1-70032r30" name=
+      "x1-70032r30"></a></span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
@@ -9914,11 +9977,11 @@
       "pcrr7t-x-x-90">recv</span><span class=
       "pcrr7t-x-x-90">()</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-70027r25" name=
-      "x1-70027r25"></a></span><span class=
+      <span class="label"><a id="x1-70033r31" name=
+      "x1-70033r31"></a></span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-70028r26" name=
-      "x1-70028r26"></a></span><span class=
+      <span class="label"><a id="x1-70034r32" name=
+      "x1-70034r32"></a></span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
@@ -9931,8 +9994,8 @@
       "pcrr7t-x-x-90">()</span><span class=
       "pcrr7t-x-x-90">:</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-70029r27" name=
-      "x1-70029r27"></a></span><span class=
+      <span class="label"><a id="x1-70035r33" name=
+      "x1-70035r33"></a></span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
@@ -9962,8 +10025,8 @@
       "pcrr7t-x-x-90">.</span><span class=
       "pcrr7t-x-x-90">conn_id</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-70030r28" name=
-      "x1-70030r28"></a></span><span class=
+      <span class="label"><a id="x1-70036r34" name=
+      "x1-70036r34"></a></span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
@@ -9979,8 +10042,8 @@
       "pcrr7t-x-x-90">req</span><span class=
       "pcrr7t-x-x-90">)</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-70031r29" name=
-      "x1-70031r29"></a></span><span class=
+      <span class="label"><a id="x1-70037r35" name=
+      "x1-70037r35"></a></span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
@@ -9988,8 +10051,8 @@
       "pcrb7t-x-x-90">else</span><span class=
       "pcrr7t-x-x-90">:</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-70032r30" name=
-      "x1-70032r30"></a></span><span class=
+      <span class="label"><a id="x1-70038r36" name=
+      "x1-70038r36"></a></span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
@@ -10014,11 +10077,11 @@
       "pcrr7t-x-x-90">.</span><span class=
       "pcrr7t-x-x-90">body</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-70033r31" name=
-      "x1-70033r31"></a></span><span class=
+      <span class="label"><a id="x1-70039r37" name=
+      "x1-70039r37"></a></span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-70034r32" name=
-      "x1-70034r32"></a></span><span class=
+      <span class="label"><a id="x1-70040r38" name=
+      "x1-70040r38"></a></span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
@@ -10038,8 +10101,8 @@
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">20:</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-70035r33" name=
-      "x1-70035r33"></a></span><span class=
+      <span class="label"><a id="x1-70041r39" name=
+      "x1-70041r39"></a></span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
@@ -10066,8 +10129,8 @@
       "pcrr7t-x-x-90">count</span><span class=
       "pcrr7t-x-x-90">()</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-70036r34" name=
-      "x1-70036r34"></a></span><span class=
+      <span class="label"><a id="x1-70042r40" name=
+      "x1-70042r40"></a></span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
@@ -10103,8 +10166,8 @@
       "pcrr7t-x-x-90">"</span><span class=
       "pcrr7t-x-x-90">)</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-70037r35" name=
-      "x1-70037r35"></a></span><span class=
+      <span class="label"><a id="x1-70043r41" name=
+      "x1-70043r41"></a></span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
@@ -10116,8 +10179,8 @@
       "pcrb7t-x-x-90">else</span><span class=
       "pcrr7t-x-x-90">:</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-70038r36" name=
-      "x1-70038r36"></a></span><span class=
+      <span class="label"><a id="x1-70044r42" name=
+      "x1-70044r42"></a></span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
@@ -10137,8 +10200,8 @@
       "pcrr7t-x-x-90">req</span><span class=
       "pcrr7t-x-x-90">)</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-70039r37" name=
-      "x1-70039r37"></a></span><span class=
+      <span class="label"><a id="x1-70045r43" name=
+      "x1-70045r43"></a></span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
@@ -10163,16 +10226,9 @@
       "pcrr7t-x-x-90">,</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">headers</span><span class=
-      "pcrr7t-x-x-90">={</span><span class=
-      "pcrr7t-x-x-90">'</span><span class=
-      "pcrr7t-x-x-90">icy</span><span class=
-      "pcrr7t-x-x-90">-</span><span class=
-      "pcrr7t-x-x-90">metaint</span><span class=
-      "pcrr7t-x-x-90">'</span><span class=
-      "pcrr7t-x-x-90">:</span><span class=
-      "pcrr7t-x-x-90">&nbsp;</span><span class=
-      "pcrr7t-x-x-90">CHUNK_SIZE</span><span class=
-      "pcrr7t-x-x-90">})</span>
+      "pcrr7t-x-x-90">=</span><span class=
+      "pcrr7t-x-x-90">HEADERS</span><span class=
+      "pcrr7t-x-x-90">)</span>
     </div>
   </div>
   <hr class="endfloat">
@@ -10182,29 +10238,29 @@
   assuming you just trust that the streaming thread stuff works:
 
   <ol class="enumerate1">
-    <li class="enumerate" id="x1-70044x1">Starts off just like the
+    <li class="enumerate" id="x1-70050x1">Starts off just like the
     handler test.
 
-    <li class="enumerate" id="x1-70046x2">We figure out what .mp3
+    <li class="enumerate" id="x1-70052x2">We figure out what .mp3
     files are in the current directory.
 
-    <li class="enumerate" id="x1-70048x3">Establish a data chunk
+    <li class="enumerate" id="x1-70054x3">Establish a data chunk
     size of 5k for the ICY protocol and make a ConnectState and
     Streamer from that. These are the streaming thread things found
     in <span class="pcrb7t-">mp3stream.py</span> in the same
     directory.
 
-    <li class="enumerate" id="x1-70050x4">We then loop forever,
+    <li class="enumerate" id="x1-70056x4">We then loop forever,
     accepting requests.
 
-    <li class="enumerate" id="x1-70052x5">Unlike the handler, we
+    <li class="enumerate" id="x1-70058x5">Unlike the handler, we
     want to remove disconnected clients, so we take them out of the
     STATE when we are notified.
 
-    <li class="enumerate" id="x1-70054x6">If we have too many
+    <li class="enumerate" id="x1-70060x6">If we have too many
     connected clients, we reply with a failure.
 
-    <li class="enumerate" id="x1-70056x7">Otherwise, we add them to
+    <li class="enumerate" id="x1-70062x7">Otherwise, we add them to
     the STATE and then send the initial ICY protocol header to get
     things going.
   </ol><!--l. 687-->
@@ -10214,8 +10270,8 @@
   should hear it play: <!--l. 690-->
 
   <div class="lstlisting" id="listing-34">
-    <span class="label"><a id="x1-70057r1" name=
-    "x1-70057r1"></a></span><span class=
+    <span class="label"><a id="x1-70063r1" name=
+    "x1-70063r1"></a></span><span class=
     "pcrr7t-">&gt;</span><span class=
     "pcrr7t-">&nbsp;</span><span class=
     "pcrr7t-">mplayer</span><span class=
