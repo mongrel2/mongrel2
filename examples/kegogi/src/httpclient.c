@@ -130,15 +130,11 @@ inline int Response_read_chunks(Response *rsp, int nread, char *buffer, int fd)
             }
         }
         else if(chunk_size <= nread - i) {
-            int j;
-            for(j = i; j < chunk_size + i; j++) printf("%c", buffer[j]);
             bcatblk(rsp->body, buffer + i, chunk_size);
             i += chunk_size;
             chunk_size = -1;
         }
         else { // chunk_size > nread - i
-            int j;
-            for(j = i; j < nread; j++) printf("%c", buffer[j]);
             bcatblk(rsp->body, buffer + i, nread - i);
             chunk_size -= (nread - i);
             i = nread;

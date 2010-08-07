@@ -5,15 +5,19 @@
 
 #include <bstring.h>
 
+#include "param.h"
+
 typedef struct Send {
     bstring method;
     bstring host;
     bstring port;
     bstring uri;
+    ParamDict *params;
 } Send;
 
 typedef struct Expect {
     bstring status_code;
+    ParamDict *params;
 } Expect;
 
 typedef struct Command {

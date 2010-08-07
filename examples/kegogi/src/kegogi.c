@@ -35,6 +35,16 @@ void runkegogi(void *arg)
         debug("expect %s",
               bdata(commands[i].expect.status_code));
 
+        dnode_t *d;
+        Param *p;
+        printf("send args\n");
+        ParamDict_foreach(commands[i].send.params, p, d)
+            printf("\t%s = %s\n", bdata(p->name), bdata(p->data.string));
+        printf("expect args\n");
+        ParamDict_foreach(commands[i].expect.params, p, d)
+            printf("\t%s = %s\n", bdata(p->name), bdata(p->data.string));
+
+
         if(actual != NULL)
             debug("actual %d", actual->status_code);
         else
@@ -54,7 +64,7 @@ void runkegogi(void *arg)
 static int verify_response(Expect *expected, Response *actual) {
     if(!(expected && actual)) return 0;
     
-    return atoi(expected->status_code->data) == actual->status_code;
+    return atoi(bdata(expected->status_code)) == actual->status_code;
 }
 
 void taskmain(int argc, char *argv[])
@@ -62,7 +72,7 @@ void taskmain(int argc, char *argv[])
     LOG_FILE = stderr;
     check(argc > 1, "Expected kegogi file");
 
-    taskcreate(runkegogi, bfromcstr(argv[1]), 64 * 1024);
+    taskcreate(runkegogi, bfromcstr(argv[1]), 128 * 1024);
 
     taskexit(0);
 
