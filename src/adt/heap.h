@@ -24,7 +24,7 @@ typedef struct Heap {
 
 void Heap_destroy(Heap *h);
 
-Heap *Heap_init(size_t dim);
+Heap *Heap_create(size_t dim);
 
 void Heap_add(Heap *h, int key);
 

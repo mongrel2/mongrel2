@@ -5,43 +5,27 @@
 #include <stdio.h>
 #include <signal.h>
 #include <sys/socket.h>
-#include <sys/resource.h>
-
+#include <superpoll.h>
 #include <dbg.h>
 
-enum
-{
-    // TODO: base how many we can handle on the rlimit possible
-    MAXFD = 1024 * 10, FDSTACK= 100 * 1024
-};
 
-
-static zmq_pollitem_t pollfd[MAXFD];
-static Task *polltask[MAXFD];
-static int npollfd;
 static int startedfdtask;
 static Tasklist sleeping;
 static int sleepingcounted;
 static uvlong nsec(void);
+SuperPoll *POLL = NULL;
 
 void *ZMQ_CTX = NULL;
 
+enum
+{
+    FDSTACK= 100 * 1024 
+};
 
 #ifndef MSG_NOSIGNAL
 #define MSG_NOSIGNAL 0
 #endif
 
-inline rlim_t get_max_fd() {
-    static rlim_t maxfd = 0;
-    struct rlimit rl;
-
-    if(maxfd == 0 && getrlimit(RLIMIT_NOFILE, &rl) == 0) {
-        maxfd = rl.rlim_cur > MAXFD ? MAXFD : rl.rlim_cur;
-        log_info("maximum number of file descriptors is %u\n", (unsigned int)maxfd);
-    }
-
-    return maxfd;
-}
 
 void mqinit(int threads)
 {
@@ -55,12 +39,52 @@ void mqinit(int threads)
     }
 }
 
+inline int next_task_sleeptime(int min)
+{
+    Task *t;
+    uvlong now = 0;
+    int ms = 0;
+
+    if((t=sleeping.head) == nil)
+        ms = -1;
+    else{
+        /* sleep at most 5s */
+        now = nsec();
+        if(now >= t->alarmtime) {
+            ms = 0;
+        } else if(now+5*1000*1000*1000LL >= t->alarmtime) {
+            ms = (t->alarmtime - now)/1000000 + min;
+        } else {
+            ms = 5000;
+        }
+    }
+
+    return ms;
+}
+
+inline void wake_sleepers()
+{
+    Task *t;
+    uvlong now = nsec();
+
+    while((t =sleeping.head) && now >= t->alarmtime){
+        deltask(&sleeping, t);
+
+        if(!t->system && --sleepingcounted == 0) taskcount--;
+
+        taskready(t);
+    }
+}
+
 void
 fdtask(void *v)
 {
     int i, ms;
-    Task *t;
-    uvlong now;
+    PollResult result;
+    int rc = 0;
+
+    result.hits = calloc(sizeof(PollEvent), SuperPoll_max(POLL));
+    check_mem(result.hits);
 
     tasksystem();
     taskname("fdtask");
@@ -72,59 +96,34 @@ fdtask(void *v)
         /* we're the only one runnable - poll for i/o */
         errno = 0;
         taskstate("poll");
-        if((t=sleeping.head) == nil)
-            ms = -1;
-        else{
-            /* sleep at most 5s */
-            now = nsec();
-            if(now >= t->alarmtime)
-                ms = 0;
-            else if(now+5*1000*1000*1000LL >= t->alarmtime)
-                ms = (t->alarmtime - now)/1000000;
-            else
-                ms = 5000;
+
+        ms = next_task_sleeptime(500);
+
+        rc = SuperPoll_poll(POLL, &result, ms);
+        check(rc != -1, "SuperPoll failure, aborting.");
+
+        for(i = 0; i < rc; i++) {
+            taskready(result.hits[i].data); 
         }
 
-        if(zmq_poll(pollfd, npollfd, ms) < 0){
-            if(errno == EINTR) {
-                continue;
-            }
-
-            fprint(2, "poll: %d:%s\n", errno, strerror(errno));
-            taskexitall(0);
-        }
-
-        /* wake up the guys who deserve it */
-        for(i=0; i<npollfd; i++){
-            while(i < npollfd && pollfd[i].revents){
-                taskready(polltask[i]);
-                --npollfd;
-                pollfd[i] = pollfd[npollfd];
-                polltask[i] = polltask[npollfd];
-            }
-        }
-        
-        now = nsec();
-        while((t=sleeping.head) && now >= t->alarmtime){
-            deltask(&sleeping, t);
-            if(!t->system && --sleepingcounted == 0)
-                taskcount--;
-            taskready(t);
-        }
+        wake_sleepers();
     }
+
+error:
+    taskexitall(1);
 }
+
 
 int tasknuke(int id)
 {
     int i = 0;
-    // TODO: this should shuffle ram around if possible or something
-    for(i = 0; i < npollfd; i++) {
-        if(polltask[i] && polltask[i]->id == id) {
-            pollfd[i].fd = -1;
-            pollfd[i].socket = NULL;
-            pollfd[i].events = 0;
-            pollfd[i].revents = 0;
-            polltask[i] = NULL;
+    Task *target = NULL;
+
+    for(i = 0; i < SuperPoll_active_count(POLL); i++) {
+        target = (Task *)SuperPoll_data(POLL, i);
+
+        if(target && target->id == id) {
+            SuperPoll_compact_down(POLL, i);
             return 0;
         }
     }
@@ -134,19 +133,9 @@ int tasknuke(int id)
 
 int taskwaiting()
 {
-    // TODO: until we do the cleanup of pollfd better we have
-    // to count them this way
-    int count = 0;
-    int i = 0;
-
-    for(i = 0; i < npollfd; i++) {
-        if(polltask[i] && pollfd[i].events) {
-            count++;
-        }
-    }
-
-    return count;
+    return SuperPoll_active_count(POLL);
 }
+
 
 uint
 taskdelay(uint ms)
@@ -154,7 +143,8 @@ taskdelay(uint ms)
     uvlong when, now;
     Task *t;
     
-    if(!startedfdtask){
+    if(!startedfdtask) {
+        POLL = SuperPoll_create();
         startedfdtask = 1;
         taskcreate(fdtask, 0, FDSTACK);
     }
@@ -193,41 +183,24 @@ taskdelay(uint ms)
 int
 _wait(void *socket, int fd, int rw)
 {
-    int bits;
-
     if(!startedfdtask) {
+        POLL = SuperPoll_create();
         startedfdtask = 1;
         taskcreate(fdtask, 0, FDSTACK);
-    }
-
-    if(npollfd >= get_max_fd()){
-        errno = EBUSY;
-        return -1;
     }
     
     taskstate("wait %d:%s", socket ? (int)(intptr_t)socket : fd, 
             rw=='r' ? "read" : rw=='w' ? "write" : "error");
 
-    bits = 0;
-    switch(rw){
-    case 'r':
-        bits |= ZMQ_POLLIN;
-        break;
-    case 'w':
-        bits |= ZMQ_POLLOUT;
-        break;
-    }
-
-    polltask[npollfd] = taskrunning;
-    pollfd[npollfd].fd = fd;
-    pollfd[npollfd].socket = socket;
-    pollfd[npollfd].events = bits;
-    pollfd[npollfd].revents = 0;
-    npollfd++;
+    int max = SuperPoll_add(POLL, (void *)taskrunning, socket, fd, rw, 1);
+    check(max != -1, "Too many IO events requested.");
 
     taskswitch();
 
     return 0;
+
+error:
+    return -1;
 }
 
 int fdwait(int fd, int rw)

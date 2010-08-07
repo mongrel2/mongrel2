@@ -137,6 +137,7 @@ void Server_start(Server *srv)
 
     tst_traverse(srv->default_host->routes->routes, handlers_receive_start, srv);
 
+
     while(RUNNING && (cfd = netaccept(srv->listen_fd, remote, &rport)) >= 0) {
         debug("Connection from %s:%d to %s:%d", remote, rport, 
                 bdata(srv->default_host->name), srv->port);

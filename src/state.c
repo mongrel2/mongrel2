@@ -48,7 +48,7 @@
 
 
 
-#line 2 "src/state.c"
+#line 52 "src/state.c"
 static const int StateActions_start = 14;
 static const int StateActions_first_final = 14;
 static const int StateActions_error = 0;
@@ -66,7 +66,7 @@ int State_init(State *state, StateActions *actions)
     state->actions = actions;
 
     
-#line 2 "src/state.c"
+#line 70 "src/state.c"
 	{
 	 state->cs = StateActions_start;
 	}
@@ -78,7 +78,7 @@ int State_init(State *state, StateActions *actions)
 inline int State_invariant(State *state, int event)
 {
     if ( state->cs == 
-#line 2 "src/state.c"
+#line 82 "src/state.c"
 0
 #line 100 "src/state.rl"
  ) {
@@ -86,7 +86,7 @@ inline int State_invariant(State *state, int event)
     }
 
     if ( state->cs >= 
-#line 2 "src/state.c"
+#line 90 "src/state.c"
 14
 #line 104 "src/state.rl"
  ) {
@@ -107,7 +107,7 @@ int State_exec(State *state, int event, void *data)
     const int *eof = event == CLOSE ? pe : NULL;
 
     
-#line 2 "src/state.c"
+#line 111 "src/state.c"
 	{
 	if ( p == pe )
 		goto _test_eof;
@@ -121,7 +121,7 @@ tr0:
 #line 52 "src/state.rl"
 	{ CALL(error, (*p)); }
 	goto st0;
-#line 2 "src/state.c"
+#line 125 "src/state.c"
 st0:
  state->cs = 0;
 	goto _out;
@@ -133,7 +133,7 @@ st1:
 	if ( ++p == pe )
 		goto _test_eof1;
 case 1:
-#line 2 "src/state.c"
+#line 137 "src/state.c"
 	if ( (*p) == 101 )
 		goto tr1;
 	goto tr0;
@@ -145,7 +145,7 @@ st2:
 	if ( ++p == pe )
 		goto _test_eof2;
 case 2:
-#line 2 "src/state.c"
+#line 149 "src/state.c"
 	switch( (*p) ) {
 		case 102: goto tr2;
 		case 112: goto tr3;
@@ -159,7 +159,7 @@ st15:
 	if ( ++p == pe )
 		goto _test_eof15;
 case 15:
-#line 2 "src/state.c"
+#line 163 "src/state.c"
 	if ( (*p) == 109 )
 		goto tr18;
 	goto tr0;
@@ -171,7 +171,7 @@ st3:
 	if ( ++p == pe )
 		goto _test_eof3;
 case 3:
-#line 2 "src/state.c"
+#line 175 "src/state.c"
 	switch( (*p) ) {
 		case 107: goto tr4;
 		case 108: goto tr5;
@@ -186,7 +186,7 @@ st4:
 	if ( ++p == pe )
 		goto _test_eof4;
 case 4:
-#line 2 "src/state.c"
+#line 190 "src/state.c"
 	switch( (*p) ) {
 		case 102: goto tr2;
 		case 104: goto tr7;
@@ -206,7 +206,7 @@ st5:
 	if ( ++p == pe )
 		goto _test_eof5;
 case 5:
-#line 2 "src/state.c"
+#line 210 "src/state.c"
 	switch( (*p) ) {
 		case 102: goto tr2;
 		case 114: goto tr1;
@@ -224,7 +224,7 @@ st6:
 	if ( ++p == pe )
 		goto _test_eof6;
 case 6:
-#line 2 "src/state.c"
+#line 228 "src/state.c"
 	if ( (*p) == 113 )
 		goto tr1;
 	goto tr0;
@@ -236,7 +236,7 @@ st7:
 	if ( ++p == pe )
 		goto _test_eof7;
 case 7:
-#line 2 "src/state.c"
+#line 240 "src/state.c"
 	goto tr0;
 tr5:
 #line 58 "src/state.rl"
@@ -246,7 +246,7 @@ st8:
 	if ( ++p == pe )
 		goto _test_eof8;
 case 8:
-#line 2 "src/state.c"
+#line 250 "src/state.c"
 	if ( (*p) == 106 )
 		goto tr10;
 	goto tr0;
@@ -267,7 +267,7 @@ st10:
 	if ( ++p == pe )
 		goto _test_eof10;
 case 10:
-#line 2 "src/state.c"
+#line 271 "src/state.c"
 	switch( (*p) ) {
 		case 111: goto tr14;
 		case 113: goto tr15;
@@ -285,7 +285,7 @@ st11:
 	if ( ++p == pe )
 		goto _test_eof11;
 case 11:
-#line 2 "src/state.c"
+#line 289 "src/state.c"
 	if ( (*p) == 102 )
 		goto tr16;
 	goto tr0;
@@ -308,7 +308,7 @@ st12:
 	if ( ++p == pe )
 		goto _test_eof12;
 case 12:
-#line 2 "src/state.c"
+#line 312 "src/state.c"
 	goto tr0;
 tr15:
 #line 70 "src/state.rl"
@@ -318,7 +318,7 @@ st13:
 	if ( ++p == pe )
 		goto _test_eof13;
 case 13:
-#line 2 "src/state.c"
+#line 322 "src/state.c"
 	switch( (*p) ) {
 		case 104: goto tr17;
 		case 106: goto tr17;
@@ -366,7 +366,7 @@ case 13:
 #line 53 "src/state.rl"
 	{ CALL(finish, (*p)); }
 	break;
-#line 2 "src/state.c"
+#line 370 "src/state.c"
 	}
 	}
 

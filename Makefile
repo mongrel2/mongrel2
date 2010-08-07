@@ -1,6 +1,6 @@
 
-# CFLAGS=-g -Wall -Isrc -DNDEBUG
-CFLAGS=-g -Wall -Isrc
+CFLAGS=-g -Wall -Isrc -DNDEBUG
+# CFLAGS=-g -Wall -Isrc
 LIBS=-lzmq -lsqlite3
 
 ASM=$(wildcard src/**/*.S src/*.S)
@@ -27,6 +27,15 @@ build:
 
 clean:
 	rm -rf build bin lib ${OBJECTS} ${TESTS} tests/config.sqlite
+
+pristine: clean
+	sudo rm -rf examples/python/build examples/python/dist examples/python/m2py.egg-info
+	sudo find . -name "*.pyc" -exec rm {} \;
+	cd docs/manual && make clean
+	cd docs/ && make clean
+	cd examples/kegogi && make clean
+	rm -f logs/*
+	rm -f run/*
 
 tests: build/libm2.a tests/config.sqlite ${TESTS}
 	sh ./tests/runtests.sh

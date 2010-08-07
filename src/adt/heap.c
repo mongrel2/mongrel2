@@ -121,7 +121,7 @@ int Heap_search(Heap *h, int key)
 
 
 
-Heap *Heap_init(size_t capacity)
+Heap *Heap_create(size_t capacity)
 {
     Heap *h = (Heap *)h_calloc(sizeof(Heap), 1);
     check_mem(h);

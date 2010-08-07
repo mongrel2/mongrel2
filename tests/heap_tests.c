@@ -3,9 +3,9 @@
 
 FILE *LOG_FILE = NULL;
 
-char *test_Heap_init_destroy()
+char *test_Heap_create_destroy()
 {
-    Heap *h = Heap_init(100);
+    Heap *h = Heap_create(100);
     mu_assert(h != NULL, "Failed to make Heap.");
     mu_assert(h->keys != NULL, "Failed to make internals.");
     mu_assert(Heap_capacity(h) == 100, "Wrong dimensions.");
@@ -22,7 +22,7 @@ char *test_Heap_init_destroy()
 
 char *test_Heap_add()
 {
-    Heap *h = Heap_init(100);
+    Heap *h = Heap_create(100);
     int i = 0;
 
     Heap_add(h, 1);
@@ -56,7 +56,7 @@ char *test_Heap_add()
 
 char *test_Heap_delete()
 {
-    Heap *h = Heap_init(100);
+    Heap *h = Heap_create(100);
     int i = 0;
 
     for(i = 0; i < 10; i++) {
@@ -87,7 +87,7 @@ char *test_Heap_delete()
 
 char *test_Heap_search()
 {
-    Heap *h = Heap_init(100);
+    Heap *h = Heap_create(100);
     int i = 0;
 
     for(i = 0; i < 10; i++) {
@@ -109,7 +109,7 @@ char *test_Heap_search()
 char * all_tests() {
     mu_suite_start();
 
-    mu_run_test(test_Heap_init_destroy);
+    mu_run_test(test_Heap_create_destroy);
     mu_run_test(test_Heap_add);
     mu_run_test(test_Heap_delete);
     mu_run_test(test_Heap_search);
