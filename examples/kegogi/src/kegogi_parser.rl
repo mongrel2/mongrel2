@@ -1,139 +1,134 @@
-#include <stdio.h>
-#include <stdlib.h>
-
 #include "kegogi_parser.h"
 
 #include <bstring.h>
-#include "kegogi.h"
-#include "httpclient.h"
 #include <dbg.h>
 
+#include "param.h"
+
 %%{
-    machine kegogi;
-    action command {
+    machine foo;
 
-        if(idx < max_commands && uri && method && status_code) {
-            host = host ? host : bstrcpy(default_host);
-            port = port ? port : bstrcpy(default_port);	    
+    action mark { m = fpc; }
 
-            commands[idx].send.method = method;
-            commands[idx].send.host = host;
-            commands[idx].send.port = port;
-            commands[idx].send.uri = uri;
-            commands[idx].send.params = sendParams;
+    action name { s = blk2bstr(m, fpc-m); type = STRING; }
+    action string { s = blk2bstr(m, fpc-m); type = STRING; }
+    action pattern { s = blk2bstr(m, fpc-m); type = PATTERN; }
 
-            commands[idx].expect.status_code = status_code;
-            commands[idx].expect.params = params;
+    action start_dict { dict = ParamDict_create(); }
+    action end_dict { type=DICT; }
 
-            idx++;
-        }
-        else
-            printf("error\n");
+    action param_name { param_name = s; s = NULL; }
+    action param_value {
+        param_type = type;
+        param_value = param_type == DICT ? (void*) dict : (void*) s;
+        dict = NULL;
+        s = NULL;
+    }
+    action param {
+        Param *param = Param_create(param_name, param_type, param_value);
+        check_mem(param);
+        ParamDict_set(params, param);
+        param_value = NULL;
+        param_name = NULL;
+    }
 
-        method = NULL;
-        port = NULL;
-        host = NULL;
-        uri = NULL;
-        status_code = NULL;
+    action dict_key { dict_key = s; }
+    action dict_value { dict_value = s; dict_type = type; }
+    action dict_pair { 
+        Param *dict_pair = Param_create(dict_key, dict_type, dict_value);
+        ParamDict_set(dict, dict_pair);
+    }
+
+    action method { method = blk2bstr(m, fpc-m); }
+
+    action host { host = blk2bstr(m, fpc-m); }
+    action port { port = blk2bstr(m, fpc-m); }
+    action uri { uri = blk2bstr(m, fpc-m); }
+    action status_code { status_code = blk2bstr(m, fpc-m); }
+
+    action start_command {
+        check(idx < max_commands, "Too many commands");
         params = ParamDict_create();
     }
 
     action send_command {
-        sendParams = params;
-        params = ParamDict_create();        
+        commands[idx].send.method = method;
+        commands[idx].send.host = host;
+        commands[idx].send.port = port;
+        commands[idx].send.uri = uri;
+        commands[idx].send.params = params;
+        method = host = port = uri = NULL;
+        params = NULL;
     }
 
-    action clear {
+    action expect_command {
+        commands[idx].expect.status_code = status_code;
+        commands[idx].expect.params = params;
+        status_code = NULL;
+        params = NULL;
     }
 
-    action mark {
-        mark = fpc;
-    }
+    action command_pair { idx++; }
 
-    action method {
-        method = blk2bstr(mark, fpc - mark);
-    }
+    ws = space - '\n';
 
-    action host {
-        host = blk2bstr(mark, fpc - mark);
-    }
-
-    action port {
-        port = blk2bstr(mark, fpc - mark);
-    }
-
-    action uri {
-        uri = blk2bstr(mark, fpc - mark);
-    }
-
-    action status_code {
-        status_code = blk2bstr(mark, fpc - mark);
-    }        
-
-    action name { s = blk2bstr(mark, fpc - mark); }
-    action pattern { s = blk2bstr(mark, fpc - mark); }
-    action string { s = blk2bstr(mark, fpc - mark); }
-    action key { key = s; }
-    action value { value = s; }
-    action param {
-        Param *param = Param_create(key, STRING, value);
-        ParamDict_set(params, param);
-    }
-            
-    ws = (space - '\n')+;
-    comment = '#' [^\n]*;
-
-    string = '\"' (([^\"\\] | ('\\' any))*) >mark %string '\"';
-    pattern = '(' (([^(\\] | ('\\' any))*) >mark %pattern ')';
     name = (alpha (alnum | '-')*) >mark %name;
-    key = (name | string) %key;
-    value = string %value;
-    param = (key '=' value ws*) %param;
-    method = (upper | digit){1,20} >mark %method;
+    pattern = '(' (([^(\\] | ('\\' any))*) >mark %pattern ')';
+    string = '\"' (([^\"\\] | ('\\' any))*) >mark %string '\"';
+    pair = (ws* (name | string) %dict_key ws* ':' ws* (string | pattern) %dict_value ws*) %dict_pair;
+    dict = ('{' (pair ',')* pair? '}') >start_dict %end_dict;
+
     protocol = alpha+ '://';
-    host = ([^:/]+) >mark %host;
-    port = ':' (digit+) >mark %port;
-    uri = ('/' (^space)*) >mark %uri;
-    url = ((protocol? host port?)? uri);
+    host = [^:/]+ >mark %host;
+    port = digit+ >mark %port;
+    uri  = ('/' (^ws)*) >mark %uri;
+    url  = (protocol? host (':' port)?)? uri;
 
-    send_command = (ws* "send" ws+ method ws+ url (ws+ param*)? comment? '\n') %send_command;
+    method = alpha+ >mark %method;
 
-    status_code = (digit+) >mark %status_code;
-    expect_command = ws* "expect" ws+ status_code (ws+ param*)? comment? '\n';
+    status_code = digit+ >mark %status_code;
 
-    empty_line = ws* comment? '\n';
-    command = (send_command empty_line* expect_command) >clear @command;
 
-  
-    main := (command | empty_line)*;
+    param = ((name | string) %param_name ws* '=' ws* (string | pattern | dict) %param_value) %param;
+
+    send_command = ('send' ws+ method ws+ url (ws+ param)*) >start_command %send_command '\n';
+    expect_command = ('expect' ws+ status_code (ws+ param)*) >start_command %expect_command '\n';
+    command_pair = (send_command expect_command) %command_pair;
+
+    main := command_pair*;
 }%%
-
 
 %% write data;
 
-int parse_kegogi_file(const char *path, Command commands[], int max_commands) 
-{
+#include <stdio.h>
+#include <string.h>
+
+int parse_kegogi_file(const char *path, Command commands[], int max_commands) {
     FILE *script = NULL;
     bstring buffer = NULL;
     int idx = 0;
+    bstring s = NULL;
+    ParamType type;
     bstring host = NULL;
     bstring port = NULL;
     bstring uri = NULL;
     bstring method = NULL;
     bstring status_code = NULL;
-    bstring s = NULL;
-    bstring key = NULL;
-    bstring value = NULL;
+    bstring param_name = NULL;
+    ParamType param_type;
+    void* param_value = NULL;
+    bstring dict_key = NULL;
+    ParamType dict_type;
+    void *dict_value = NULL;
+    ParamDict *dict = NULL;
 
-    char *mark = NULL;
+    char *m = NULL;
     int cs = 0;
     char *p = NULL;
     char *pe = NULL;
     char *eof = NULL;
 
-    ParamDict *sendParams = NULL;
-    ParamDict *expectParams = NULL;
-    ParamDict *params = ParamDict_create();
+    ParamDict *params = NULL;
 
     script = fopen(path, "r");
     check(script, "Failed to open file: %s", path);
@@ -155,8 +150,8 @@ error:
     bdestroy(default_host);
     bdestroy(default_port);
     bdestroy(buffer);
-    ParamDict_destroy(params);
     if(script) fclose(script);
 
-    return idx;
+    return idx + 1;
 }
+

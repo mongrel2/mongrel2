@@ -7,6 +7,7 @@
 #include <dbg.h>
 
 Param *Param_create(bstring name, ParamType type, void *val) {
+    check(name != NULL && val != NULL, "Null name or val passed to Param_create");
     Param *p = calloc(sizeof(*p), 1);
     check_mem(p);
     p->name = name;
@@ -137,16 +138,12 @@ void ParamDict_destroy(ParamDict *pd) {
 
 void ParamDict_set(ParamDict *pd, Param *p) {
     if(!pd || !p) return;
-    debug("inserting %s -> %s", bdata(p->name), bdata(p->data.string));
-    check(dict_verify(pd->dict), "verify");
+
     dnode_t *node = dict_lookup(pd->dict, p->name);
-    check(dict_verify(pd->dict), "verify");
     if(node) dict_delete_free(pd->dict, node);
-    check(dict_verify(pd->dict), "verify");
-    debug("foo");
-    check(dict_verify(pd->dict), "verify");
+
     dict_alloc_insert(pd->dict, p->name, p);
-    check(dict_verify(pd->dict), "verify");
+
 error:
     return;
 }

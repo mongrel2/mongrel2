@@ -13,12 +13,39 @@ FILE *LOG_FILE = NULL;
 
 static int verify_response(Expect *expected, Response *actual);
 
+void print_param(Param *p) {
+    Param *p2;
+    dnode_t *d;
+    
+    if(p->type == DICT) {
+        printf("    %s = {\n", bdata(p->name));
+        ParamDict_foreach(p->data.dict, p2, d) {
+            switch(p2->type) {
+            case PATTERN:
+                printf("        %s: (%s)\n", bdata(p2->name), bdata(p2->data.pattern));
+                break;
+            case STRING:
+                printf("        %s: \"%s\"\n", bdata(p2->name), bdata(p2->data.string));
+                break;
+            case DICT:
+                printf("        %s: {...}\n", bdata(p2->name));
+                break;
+            }
+        }
+        printf("    }\n");
+    }
+    else if(p->type == PATTERN)
+        printf("    %s = (%s)\n", bdata(p->name), bdata(p->data.pattern));
+    else
+        printf("    %s = \"%s\"\n", bdata(p->name), bdata(p->data.string));
+}
+
 void runkegogi(void *arg)
 {
     bstring path = (bstring) arg;
     Command commands[MAX_COMMANDS];
     int nCommands = parse_kegogi_file(bdata(path), commands, MAX_COMMANDS);
-
+    debug("nCommands = %d", nCommands);
     int i;
     for(i = 0; i < nCommands; i++) {
         Request *req = Request_create(bstrcpy(commands[i].send.host),
@@ -39,10 +66,10 @@ void runkegogi(void *arg)
         Param *p;
         printf("send args\n");
         ParamDict_foreach(commands[i].send.params, p, d)
-            printf("\t%s = %s\n", bdata(p->name), bdata(p->data.string));
+            print_param(p);
         printf("expect args\n");
         ParamDict_foreach(commands[i].expect.params, p, d)
-            printf("\t%s = %s\n", bdata(p->name), bdata(p->data.string));
+            print_param(p);
 
 
         if(actual != NULL)
