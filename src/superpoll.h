@@ -16,7 +16,7 @@ typedef struct SuperPoll {
 
 
 typedef struct PollEvent {
-    zmq_pollitem_t poll;
+    zmq_pollitem_t ev;
     void *data;
 } PollEvent;
 
@@ -44,5 +44,9 @@ int SuperPoll_get_max_fd(int requested_max);
 #define SuperPoll_max(S) ((S)->max_hot)
 
 #define SuperPoll_data(S, I) ((S)->data[(I)])
+
+int PollResult_init(SuperPoll *p, PollResult *result);
+
+void PollResult_clean(PollResult *result);
 
 #endif

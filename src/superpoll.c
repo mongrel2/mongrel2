@@ -81,7 +81,7 @@ void SuperPoll_compact_down(SuperPoll *sp, int i)
 inline void SuperPoll_add_hit(PollResult *result, int i, zmq_pollitem_t *p, void *data)
 {
     assert(i < result->hot_fds && "Error, added more hits than possible, tell Zed.");
-    result->hits[i].poll = *p;
+    result->hits[i].ev = *p;
     result->hits[i].data = data;
 }
 
@@ -149,4 +149,24 @@ error:
 
     MAXFD = 256;
     return MAXFD;
+}
+
+
+int PollResult_init(SuperPoll *p, PollResult *result)
+{
+    memset(result, 0, sizeof(PollResult));
+    result->hits = calloc(sizeof(PollEvent), SuperPoll_max(p));
+    check_mem(result->hits);
+
+    return 0;
+
+error:
+    return -1;
+}
+
+void PollResult_clean(PollResult *result)
+{
+    if(result) {
+        if(result->hits) free(result->hits);
+    }
 }

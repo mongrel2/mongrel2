@@ -82,9 +82,9 @@ fdtask(void *v)
     int i, ms;
     PollResult result;
     int rc = 0;
-
-    result.hits = calloc(sizeof(PollEvent), SuperPoll_max(POLL));
-    check_mem(result.hits);
+    
+    rc = PollResult_init(POLL, &result);
+    check(rc == 0, "Failed to initialize the poll result.");
 
     tasksystem();
     taskname("fdtask");
@@ -108,6 +108,9 @@ fdtask(void *v)
 
         wake_sleepers();
     }
+
+    PollResult_clean(&result);
+    taskexit(0);
 
 error:
     taskexitall(1);
