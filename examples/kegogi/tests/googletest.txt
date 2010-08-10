@@ -3,12 +3,13 @@
 # uri.  It then checks the status code against the one specified in the expect
 # portion of the command.
 
-send GET http://www.google.com/
+send GET http://www.google.com:80/
 expect 200
 
 # 411 means length required
-send POST http://www.google.com/
+send POST http://www.google.com:80/
 expect 411
 
-send GET http://www.google.com/this/is/not/real/asdfkljasdfklj
+send GET http://www.google.com:80/this/is/not/real/asdfkljasdfklj
 expect 404
+

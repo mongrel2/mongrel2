@@ -93,8 +93,8 @@ ParamDict *ParamDict_create() {
     ParamDict *pd = calloc(sizeof(*pd), 1);
     check_mem(pd);
     pd->dict = dict_create(MAX_PARAM_COUNT, (dict_comp_t) bstricmp);
-    debug("pd->dict = %p", pd->dict);
     check_mem(pd->dict);
+
     dict_set_allocator(pd->dict, pd_alloc_dict, pd_free_dict, NULL);
     // Do not allow dupes
 
@@ -138,7 +138,11 @@ void ParamDict_destroy(ParamDict *pd) {
 
 void ParamDict_set(ParamDict *pd, Param *p) {
     if(!pd || !p) return;
-
+    if(p->type != DICT)
+        printf("--- %s = %s\n", p->name->data, p->data.string->data);
+    else
+        printf("--- %s = {...}\n", p->name->data);
+               
     dnode_t *node = dict_lookup(pd->dict, p->name);
     if(node) dict_delete_free(pd->dict, node);
 

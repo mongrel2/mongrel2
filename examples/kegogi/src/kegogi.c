@@ -7,37 +7,36 @@
 
 #include "httpclient.h"
 #include "kegogi_parser.h"
+#include "kegogi_tokens.h"
 
 FILE *LOG_FILE = NULL;
 #define MAX_COMMANDS 1024
 
 static int verify_response(Expect *expected, Response *actual);
 
-void print_param(Param *p) {
-    Param *p2;
-    dnode_t *d;
-    
-    if(p->type == DICT) {
-        printf("    %s = {\n", bdata(p->name));
-        ParamDict_foreach(p->data.dict, p2, d) {
-            switch(p2->type) {
-            case PATTERN:
-                printf("        %s: (%s)\n", bdata(p2->name), bdata(p2->data.pattern));
-                break;
-            case STRING:
-                printf("        %s: \"%s\"\n", bdata(p2->name), bdata(p2->data.string));
-                break;
-            case DICT:
-                printf("        %s: {...}\n", bdata(p2->name));
-                break;
-            }
-        }
-        printf("    }\n");
-    }
+void print_indent(int indent_level) {
+    int i = 0;
+    for(i = 0; i < indent_level; i++) printf("  ");
+}
+
+void print_param(int indent_level, Param *p) {
+    print_indent(indent_level);
+    printf("%s = ", p->name->data);
+    if(p->type == STRING)
+        printf("\"%s\"", p->data.string->data);
     else if(p->type == PATTERN)
-        printf("    %s = (%s)\n", bdata(p->name), bdata(p->data.pattern));
-    else
-        printf("    %s = \"%s\"\n", bdata(p->name), bdata(p->data.string));
+        printf("(%s)", p->data.pattern->data);
+    else if(p->type == DICT) {
+        printf("{\n");
+        Param *p2;
+        dnode_t *d;
+        ParamDict_foreach(p->data.dict, p2, d) {
+            print_param(indent_level + 1, p2);
+        }
+        print_indent(indent_level);
+        printf("}");
+    }
+    printf("\n");
 }
 
 void runkegogi(void *arg)
@@ -46,10 +45,11 @@ void runkegogi(void *arg)
     Command commands[MAX_COMMANDS];
     int nCommands = parse_kegogi_file(bdata(path), commands, MAX_COMMANDS);
     debug("nCommands = %d", nCommands);
+
     int i;
     for(i = 0; i < nCommands; i++) {
         Request *req = Request_create(bstrcpy(commands[i].send.host),
-                                      atoi((const char *)commands[i].send.port->data),
+                                      atoi(bdata(commands[i].send.port)),
                                       bstrcpy(commands[i].send.method),
                                       bstrcpy(commands[i].send.uri));
         Response *actual = Response_fetch(req);
@@ -59,18 +59,17 @@ void runkegogi(void *arg)
               bdata(commands[i].send.host),
               bdata(commands[i].send.port),
               bdata(commands[i].send.uri));
+        Param *p;
+        dnode_t *d;
+        ParamDict_foreach(commands[i].send.params, p, d) {
+            print_param(1, p);
+        }
+
         debug("expect %s",
               bdata(commands[i].expect.status_code));
-
-        dnode_t *d;
-        Param *p;
-        printf("send args\n");
-        ParamDict_foreach(commands[i].send.params, p, d)
-            print_param(p);
-        printf("expect args\n");
-        ParamDict_foreach(commands[i].expect.params, p, d)
-            print_param(p);
-
+        ParamDict_foreach(commands[i].expect.params, p, d) {
+            print_param(1, p);
+        }
 
         if(actual != NULL)
             debug("actual %d", actual->status_code);
