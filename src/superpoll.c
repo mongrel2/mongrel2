@@ -97,7 +97,7 @@ int SuperPoll_poll(SuperPoll *sp, PollResult *result, int ms)
 
     result->hot_fds = nfound; 
 
-    if(sp->npollfd - 2) {
+    if(sp->npollfd > 0) {
         result->hot_atr = 1000 * nfound / sp->npollfd;
     }
 
