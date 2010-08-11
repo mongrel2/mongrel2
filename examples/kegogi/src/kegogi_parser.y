@@ -11,6 +11,8 @@
 
 }
 
+%token_prefix TK
+
 %extra_argument {CommandList *commandList}
 
 %type params {ParamDict*}
@@ -40,19 +42,19 @@ command_list ::= .
 params(A) ::= params(B) param(C) . { A = B; ParamDict_set(A, C); }
 params(A) ::= . { A = ParamDict_create(); }
 
-param(A) ::= TKSTRING(B) TKEQUALS TKPATTERN(C) . {
+param(A) ::= STRING(B) EQUALS PATTERN(C) . {
     A = Param_create(bstrcpy(B->s1), PATTERN, bstrcpy(C->s1));
 }    
 
-param(A) ::= TKSTRING(B) TKEQUALS TKSTRING(C) . {
+param(A) ::= STRING(B) EQUALS STRING(C) . {
     A = Param_create(bstrcpy(B->s1), STRING, bstrcpy(C->s1));
 }
 
-param(A) ::= TKSTRING(B) TKEQUALS TKDICT_START params(C) TKDICT_END . {
+param(A) ::= STRING(B) EQUALS DICT_START params(C) DICT_END . {
     A = Param_create(bstrcpy(B->s1), DICT, C);
 }
-command(A) ::= TKSEND TKSTRING(B) TKURL(C) params(D) newlines
-               TKEXPECT TKNUMBER(E) params(F) newlines . {
+command(A) ::= SEND STRING(B) URL(C) params(D) newlines
+               EXPECT NUMBER(E) params(F) newlines . {
            A = calloc(sizeof(Command), 1);
            A->send.method = bstrcpy(B->s1);
            A->send.uri = bstrcpy(C->s1);
@@ -63,5 +65,5 @@ command(A) ::= TKSEND TKSTRING(B) TKURL(C) params(D) newlines
            A->expect.params = F;
 }
 
-newlines ::= newlines TKNEWLINE .
-newlines ::= TKNEWLINE .
+newlines ::= newlines NEWLINE .
+newlines ::= NEWLINE .
