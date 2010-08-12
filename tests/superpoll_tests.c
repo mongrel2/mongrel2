@@ -1,4 +1,5 @@
 #include <assert.h>
+
 #define NDEBUG 1
 
 #include "minunit.h"
@@ -13,8 +14,8 @@ SuperPoll *TEST_POLL = NULL;
 
 /* Code for this unit test taken from:  pipetest.c
  *	Scalability test of async poll functionality on pipes.
- *	Copyright 2002, 2006 Red Hat, Inc.
- *	Portions Copyright 2001 Davide Libenzi <davidel@xmailserver.org>.
+ *	Copyright 502, 506 Red Hat, Inc.
+ *	Portions Copyright 501 Davide Libenzi <davidel@xmailserver.org>.
  */
 #include <stdlib.h>
 #include <stdio.h>
@@ -77,12 +78,6 @@ struct fdinfo {
 
 struct token pending_tokens[MAX_FDS];
 int nr_pending_tokens;
-
-void pexit(char *msg)
-{
-	perror(msg);
-	exit(1);
-}
 
 void really_send_toke(struct token *toke)
 {
@@ -157,8 +152,7 @@ void read_and_process_token(int fd)
 	char *buf = inf->buf;
 	int nr;
 	nr = read(fd, buf, BUFSIZE);
-	if (-1 == nr)
-		pexit("read");
+    check(nr != -1, "Failed to read from fd that was supposedly ready: %d", fd);
 
 	toke = (struct token *)buf;
 
@@ -167,19 +161,24 @@ void read_and_process_token(int fd)
 		toke++;
 		nr -= BUFSIZE;
 	}
-	assert(nr == 0);
+
+	check(nr == 0, "Didn't write everythig to pipe.");
+
+    return;
+
+error:
+    return;
 }
 
 
-void makeapipe(int idx)
+void makeapipe(int idx, int hot)
 {
 	int *fds = pipefds[idx].fds;
 	struct fdinfo *inf;
 	int i;
     int rc = 0;
 
-	if (pipe(fds))
-		pexit("pipe");
+	check(pipe(fds) == 0, "Failed to make pipe #%d", idx);
 
 	for (i=0; i<2; i++) {
 		int fl = fcntl(fds[i], F_GETFL);
@@ -196,7 +195,7 @@ void makeapipe(int idx)
 	inf->fd = fds[READ];
 	inf->pipe_idx = idx;
 
-    rc = SuperPoll_add(TEST_POLL, NULL, NULL, fds[READ], 'r', 1);
+    rc = SuperPoll_add(TEST_POLL, NULL, NULL, fds[READ], 'r', hot);
     check(rc != -1, "Failed to add read side to superpoll.");
 
 	inf = &fdinfo[fds[WRITE]];
@@ -212,46 +211,61 @@ error:
     return;
 }
 
-void makepipes(int nr)
+void makepipes(int nr, int hot)
 {
 	int i;
 	for (i=0; i<nr; i++)
-		makeapipe(i);
+		makeapipe(i, hot);
 	nr_pipes = nr;
 }
 
 
-int run_main_loop(void)
+void closepipes(int nr)
 {
     int i = 0;
-	int res = 0;
+    for(i = 0; i < nr; i++) {
+        free(fdinfo[pipefds[i].fds[READ]].buf);
+        close(pipefds[i].fds[READ]);
+
+        free(fdinfo[pipefds[i].fds[WRITE]].buf);
+        close(pipefds[i].fds[WRITE]);
+    }
+
+    memset(fdinfo, 0, sizeof(fdinfo));
+    memset(pipefds, 0, sizeof(pipefds));
+
+    done = 0;
+    nr_token_passes = 0;
+}
+
+int run_main_loop(int hot)
+{
+    int i = 0;
+	int nfds = 0;
+    int rc = 0;
     PollResult result;
     
-    res = PollResult_init(TEST_POLL, &result);
-    check(res == 0, "Failed to initialize the poll result.");
+    rc = PollResult_init(TEST_POLL, &result);
+    check(rc == 0, "Failed to initialize the poll result.");
 
 	while (!done) {
 		send_pending_tokes();
 
-		res = SuperPoll_poll(TEST_POLL, &result, -1);
+		nfds = SuperPoll_poll(TEST_POLL, &result, -1);
+        check(nfds >= 0, "superpoll failed.");
 
-		if (res <= 0)
-			pexit("poll");
-
-		for (i = 0; i < res; i++) {
+		for (i = 0; i < nfds; i++) {
 			if (result.hits[i].ev.revents & ZMQ_POLLIN) {
 				read_and_process_token(result.hits[i].ev.fd);
-
+                rc = SuperPoll_add(TEST_POLL, NULL, NULL, result.hits[i].ev.fd, 'r', hot);
+                check(rc != -1, "Failed to add read side to superpoll: hot=%d", hot);
 			}
 		}
-
-        for(i = 0; i < nr_pipes; i++) {
-            res = SuperPoll_add(TEST_POLL, NULL, NULL, pipefds[i].fds[READ], 'r', 1);
-            check(res != -1, "Failed to add read side to superpoll.");
-        }
 	}
 
     PollResult_clean(&result);
+
+    debug("NPOLL after run: %d", TEST_POLL->npollfd);
     return 0;
 
 error:
@@ -272,23 +286,29 @@ void seedthreads(int nr)
 	}
 }
 
-char *run_test(int nr, int threads, int gens, char *fail_msg)
+char *run_test(int nr, int threads, int gens, int hot, char *fail_msg)
 {
+
 	struct timeval stv, etv;
 	long long usecs, passes_per_sec;
     int rc = 0;
+    FILE *perf = NULL;
 
     check(nr >= threads, "You can't have the nr less than threads.");
 
 	max_threads = threads;
 	max_generation = gens;
 
-    printf("using %d pipe pairs, %d message threads, %ld generations, %d bufsize\n",
-           nr, max_threads, max_generation, BUFSIZE);
+    perf = fopen("tests/perf.log", "a+");
+    check(perf, "Failed to open tests/perf.log");
+    pid_t mypid = getpid();
 
-    TEST_POLL = SuperPoll_create();
 
-	makepipes(nr);
+    fprintf(perf, "%s %d %d %d %ld %d ", hot ? "poll" : "epoll",
+            mypid, nr, max_threads, max_generation, BUFSIZE);
+
+
+	makepipes(nr, hot);
 
 	send_pending_tokes();
 
@@ -296,7 +316,7 @@ char *run_test(int nr, int threads, int gens, char *fail_msg)
 
 	seedthreads(max_threads);
 
-    rc = run_main_loop();
+    rc = run_main_loop(hot);
     mu_assert(rc == 0, "Main loop failed.");
 
 	gettimeofday(&etv, NULL);
@@ -309,49 +329,71 @@ char *run_test(int nr, int threads, int gens, char *fail_msg)
 		etv.tv_sec -= 1;
 	}
 
-    printf("%ld passes in %ld.%06ld seconds\n", nr_token_passes,
-           etv.tv_sec, etv.tv_usec);
+    fprintf(perf, "%ld %ld.%06ld ", nr_token_passes, etv.tv_sec, etv.tv_usec);
 
 	usecs = etv.tv_usec + etv.tv_sec * 1000000LL;
 	passes_per_sec = nr_token_passes * 1000000LL * 100;
 	passes_per_sec /= usecs;
 
-    printf("passes_per_sec: %Ld.%02Ld\n",
-           passes_per_sec / 100,
-           passes_per_sec % 100);
+    fprintf(perf, "%Ld.%02Ld\n", passes_per_sec / 100, passes_per_sec % 100);
 
-    SuperPoll_destroy(TEST_POLL);
-
+    closepipes(nr);
+    fclose(perf);
 
 	return NULL;
 
 error:
+    closepipes(nr);
+    if(perf) fclose(perf);
     return fail_msg;
 }
 
-char *test_maxed_pipes()
+char *test_maxed_pipes_hot()
 {
-    return run_test(50, 50, 5, "max pipes 1 failed");
-    return run_test(1, 1, 5, "max pipes 2 failed");
+    return run_test(100, 100, 100, 1, "max pipes 1 failed");
 }
 
 
-char *test_sparse_pipes()
+char *test_sparse_pipes_hot()
 {
-    return run_test(10, 1, 5, "sparse pipes 1 failed");
-    return run_test(50, 5, 5, "sparse pipes 2 failed");
+    return run_test(100, 1, 100, 1, "sparse pipes 1 failed");
 }
 
-char *test_midlevel_pipes()
+char *test_midlevel_pipes_hot()
 {
-    return run_test(10, 6, 5, "midlevel pipes failed.");
+    return run_test(100, 100, 100, 1, "midlevel pipes failed.");
+}
+
+char *test_maxed_pipes_idle()
+{
+    return run_test(100, 100, 100, 0, "max idle pipes 1 failed");
+}
+
+
+char *test_sparse_pipes_idle()
+{
+    return run_test(100, 1, 100, 0, "sparse pipes 1 failed");
+}
+
+char *test_midlevel_pipes_idle()
+{
+    return run_test(100, 100, 100, 0, "midlevel pipes failed.");
 }
 
 char *all_tests() {
     mu_suite_start();
-    mu_run_test(test_maxed_pipes);
-    mu_run_test(test_sparse_pipes);
-    mu_run_test(test_midlevel_pipes);
+
+    SuperPoll_get_max_fd(MAX_FDS);
+    TEST_POLL = SuperPoll_create();
+
+    mu_run_test(test_sparse_pipes_idle);
+    mu_run_test(test_maxed_pipes_idle);
+    mu_run_test(test_midlevel_pipes_idle);
+    mu_run_test(test_sparse_pipes_hot);
+    mu_run_test(test_maxed_pipes_hot);
+    mu_run_test(test_midlevel_pipes_hot);
+
+    SuperPoll_destroy(TEST_POLL);
     return NULL;
 }
 

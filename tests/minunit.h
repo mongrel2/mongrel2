@@ -13,6 +13,7 @@
 
 #define RUN_TESTS(name) void taskmain(int argc, char *argv[]) {\
      LOG_FILE = fopen("tests/tests.log", "a+");\
+     if(!LOG_FILE) { printf("CAN'T OPEN TEST LOG\n"); exit(1); } \
      setbuf(LOG_FILE, NULL);\
      debug("----- RUNNING: %s", argv[0]);\
      printf("----\nRUNNING: %s\n", argv[0]);\

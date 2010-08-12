@@ -136,7 +136,8 @@ int tasknuke(int id)
 
 int taskwaiting()
 {
-    return SuperPoll_active_count(POLL);
+    // TODO: do this right, for now just -1 for the epoll
+    return SuperPoll_active_count(POLL) - 1;
 }
 
 
@@ -195,14 +196,19 @@ _wait(void *socket, int fd, int rw)
     taskstate("wait %d:%s", socket ? (int)(intptr_t)socket : fd, 
             rw=='r' ? "read" : rw=='w' ? "write" : "error");
 
-    int max = SuperPoll_add(POLL, (void *)taskrunning, socket, fd, rw, 1);
-    check(max != -1, "Too many IO events requested.");
+    if(socket) {
+        int max = SuperPoll_add(POLL, (void *)taskrunning, socket, fd, rw, 1);
+        check(max != -1, "Error adding fd %d to task wait list.", fd);
+    } else {
+        int max = SuperPoll_add(POLL, (void *)taskrunning, socket, fd, rw, 1);
+        check(max != -1, "Error adding fd %d to task list.", fd);
+    }
 
     taskswitch();
-
     return 0;
 
 error:
+    taskswitch();
     return -1;
 }
 

@@ -63,10 +63,10 @@ void terminate(int s)
     RELOAD = s == SIGHUP;
     MURDER = s == SIGTERM;
     if(!RELOAD) {
-        debug("SHUTDOWN REQUESTED: %s", MURDER ? "MURDER" : "GRACEFUL");
+        log_info("SHUTDOWN REQUESTED: %s", MURDER ? "MURDER" : "GRACEFUL");
         fdclose(SERVER->listen_fd);
     } else {
-        debug("RELOAD RECEIVED, I'll do it on the next request.");
+        log_info("RELOAD RECEIVED, I'll do it on the next request.");
     }
 }
 
@@ -243,16 +243,16 @@ void complete_shutdown(Server *srv)
 
     int left = taskwaiting();
 
-    debug("Waiting for connections to die: %d", left);
+    log_info("Waiting for connections to die: %d", left);
     while((left = taskwaiting()) > 0 && !MURDER) {
         // TODO: after a certain time close all of the connection sockets forcefully
-        taskdelay(1000);
-        debug("Waiting for connections to die: %d", left);
+        taskdelay(3000);
+        log_info("Waiting for connections to die: %d", left);
     }
 
     MIME_destroy();
 
-    debug("Removing pid file %s", bdata(srv->pid_file));
+    log_info("Removing pid file %s", bdata(srv->pid_file));
     unlink((const char *)srv->pid_file->data);
 
     Server_destroy(srv);
