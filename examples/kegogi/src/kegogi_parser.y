@@ -7,7 +7,12 @@
 #include "kegogi_tokens.h"
 #include "kegogi.h"
 
-#define assert(S) do { if(!(S)) { debug(#S); taskexitall(-1);} } while(0)
+#define assert(S) {                                     \
+        if(!(S)) {                                      \
+            debug(#S);                                  \
+            taskexitall(-1);                            \
+        }                                               \
+    }
 
 }
 
@@ -15,8 +20,8 @@
 
 %extra_argument {CommandList *commandList}
 
+%type param {Param*}
 %type params {ParamDict*}
-
 %type dict {ParamDict*}
 
 %type command {Command*}
@@ -24,16 +29,19 @@
 %token_type {Token*}
 
 %syntax_error {
-    debug("Oh snap!");
+    debug("There was a syntax error");
  }
 
+%stack_overflow {
+    debug("There was a stack overflow");
+ }
 script ::= command_list.
 
 command_list ::= command_list command(A) . {
     int idx = commandList->count;
     assert(idx < commandList->size);
     commandList->count++;
-    memcpy(commandList->commands + idx, A, sizeof(Command));
+    commandList->commands[idx] = *A;
     free(A);
 }
 command_list ::= .
