@@ -6,19 +6,20 @@
 #include <signal.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <sys/wait.h>
 
 FILE *LOG_FILE = NULL;
 
 extern char **environ;
 
-inline void hardsleep(int sec)
+static inline void hardsleep(int sec)
 {
     taskyield();
     sleep(sec);
 }
 
 
-inline void redirect_output(const char *run_log)
+static inline void redirect_output(const char *run_log)
 {
     freopen(run_log, "a+", stdout);
     setbuf(stdout, NULL);
@@ -108,7 +109,7 @@ void Action_task(void *v)
         hardsleep(1);
     }
 
-    debug("ACTION %s exited.", action->name);
+    debug("ACTION %s exited.", bdata(action->name));
 
 error:
     Rampart_failed(&action->after);
@@ -207,7 +208,7 @@ void taskmain(int argc, char *argv[])
     pid_file = bfromcstr(argv[2]);
 
     rc = Unixy_remove_dead_pidfile(pid_file);
-    check(rc == 0, "Failed to remove %s, procer is probably already running.");
+    check(rc == 0, "Failed to remove %s, procer is probably already running.", bdata(pid_file));
 
     rc = Unixy_daemonize();
     check(rc == 0, "Couldn't daemonize, that's not good.");
@@ -229,7 +230,7 @@ void taskmain(int argc, char *argv[])
     rc = glob(bdata(dir_glob), GLOB_ERR | GLOB_ONLYDIR, NULL, &profile_glob);
     check(rc == 0, "Failed to find directories in the profiles.");
 
-    debug("Loading %d actions.", profile_glob.gl_pathc);
+    debug("Loading %zu actions.", profile_glob.gl_pathc);
     for(i = 0; i < profile_glob.gl_pathc; i++) {
         action = Action_create(profile_glob.gl_pathv[i]);
         targets = tst_insert(targets, bdata(action->name), blength(action->name), action);
