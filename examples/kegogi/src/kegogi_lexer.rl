@@ -27,7 +27,7 @@
     dict_end = '}';
     equals = [:=];
 
-    host = [^/: ]+ >mark %s2;
+    host = ([^/:] - space)+ >mark %s2;
     uri = ('/' (any - space)*) >mark %s1;
     port = digit+ >mark %s3;
     url = ((alpha+ '://')? host (':' port)?)? uri;
