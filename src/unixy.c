@@ -97,7 +97,7 @@ pid_t Unixy_pid_read(bstring pid_path)
     pid_file = fopen(bdata(pid_path), "r");
     check(pid_file, "Failed to open PID file %s for reading.", bdata(pid_path));
 
-    fscanf(pid_file, "%d", &pid);
+    check(fscanf(pid_file, "%d", &pid) != -1, "Failed to read an integer from PID file: %s", bdata(pid_path));
 
     fclose(pid_file);
     return pid;

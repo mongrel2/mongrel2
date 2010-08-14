@@ -350,38 +350,39 @@ error:
 
 char *test_maxed_pipes_hot()
 {
-    return run_test(100, 100, 100, 1, "max pipes 1 failed");
+    return run_test(50, 50, 50, 1, "max pipes 1 failed");
 }
 
 
 char *test_sparse_pipes_hot()
 {
-    return run_test(100, 1, 100, 1, "sparse pipes 1 failed");
+    return run_test(50, 10, 50, 1, "sparse pipes 1 failed");
 }
 
 char *test_midlevel_pipes_hot()
 {
-    return run_test(100, 100, 100, 1, "midlevel pipes failed.");
+    return run_test(50, 25, 50, 1, "midlevel pipes failed.");
 }
 
 char *test_maxed_pipes_idle()
 {
-    return run_test(100, 100, 100, 0, "max idle pipes 1 failed");
+    return run_test(50, 50, 50, 0, "max idle pipes 1 failed");
 }
 
 
 char *test_sparse_pipes_idle()
 {
-    return run_test(100, 1, 100, 0, "sparse pipes 1 failed");
+    return run_test(50, 10, 50, 0, "sparse pipes 1 failed");
 }
 
 char *test_midlevel_pipes_idle()
 {
-    return run_test(100, 100, 100, 0, "midlevel pipes failed.");
+    return run_test(50, 25, 50, 0, "midlevel pipes failed.");
 }
 
 char *all_tests() {
     mu_suite_start();
+    int i = 0;
 
     SuperPoll_get_max_fd(MAX_FDS);
     TEST_POLL = SuperPoll_create();
@@ -394,6 +395,7 @@ char *all_tests() {
     mu_run_test(test_midlevel_pipes_hot);
 
     SuperPoll_destroy(TEST_POLL);
+
     return NULL;
 }
 

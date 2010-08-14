@@ -1,26 +1,31 @@
 #ifndef _superpoll_h
 #define _superpoll_h
 
-#include <adt/heap.h>
+#include <adt/list.h>
 #include <zmq.h>
 
+typedef struct IdleData {
+    int fd;
+    void *data;
+} IdleData;
+
 typedef struct SuperPoll {
-    int max_idle;
-    int max_hot;
 
     // poll information
     zmq_pollitem_t *pollfd;
+    // caller's data
+    void **hot_data;
+    int nfd_hot;
+    int max_hot;
 
     // epoll information
     struct epoll_event *events;
     int epoll_fd;
 
-    // caller's data
-    void **hot_data;
-    void **idle_data;
-
-    int nfd_hot;
-    int nfd_idle;
+    int max_idle;
+    IdleData *idle_data;
+    list_t *idle_active;
+    list_t *idle_free;
 } SuperPoll;
 
 
@@ -53,7 +58,7 @@ int SuperPoll_poll(SuperPoll *sp, PollResult *result, int ms);
 
 int SuperPoll_get_max_fd(int requested_max);
 
-#define SuperPoll_active_count(S) ((S)->nfd_hot + (S)->nfd_idle)
+#define SuperPoll_active_count(S) ((S)->nfd_hot + list_count((S)->idle_active))
 
 #define SuperPoll_max_hot(S) ((S)->max_hot)
 #define SuperPoll_max_idle(S) ((S)->max_idle)

@@ -102,12 +102,12 @@ error:
 
 int Config_route_load_cb(void *param, int cols, char **data, char **names)
 {
+    char *query = NULL;
     arity(4);
     
     Host *host = (Host *)param;
     check(host, "Should get a host on callback for routes.");
 
-    char *query = NULL;
     int rc = 0;
     void *target = NULL;
     BackendType type = 0;
@@ -224,12 +224,12 @@ error:
 
 int Config_server_load_cb(void *param, int cols, char **data, char **names)
 {
+    char *query = NULL;
     arity(8);
 
     list_t *servers = (list_t *)param;
     Server *srv = NULL;
     const char *HOST_QUERY = "SELECT id, name, matching FROM host where server_id = %s";
-    char *query = NULL;
  
     log_info("Configuring server ID: %s, default host: %s, port: %s", 
             data[1], data[2], data[3]);

@@ -1,4 +1,4 @@
-# CFLAGS=-g -Wall -Isrc -DNDEBUG
+# CFLAGS=-g -O2 -Wall -Isrc -DNDEBUG
 CFLAGS=-g -Wall -Isrc
 LIBS=-lzmq -lsqlite3
 
