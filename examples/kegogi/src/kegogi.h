@@ -28,9 +28,10 @@ typedef struct CommandList {
     int size;
     int count;
     Command *commands;
+    ParamDict *defaults;
 } CommandList;
 
+int parse_kegogi_file(const char *path, CommandList *commandList);
 TokenList *get_kegogi_tokens(bstring content);
-
 
 #endif

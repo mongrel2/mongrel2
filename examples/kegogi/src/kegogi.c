@@ -43,7 +43,14 @@ void runkegogi(void *arg)
 {
     bstring path = (bstring) arg;
     Command commands[MAX_COMMANDS];
-    int nCommands = parse_kegogi_file(bdata(path), commands, MAX_COMMANDS);
+    CommandList commandList = {
+        .size = MAX_COMMANDS,
+        .count = 0,
+        .defaults = NULL,
+        .commands = commands
+    };
+        
+    int nCommands = parse_kegogi_file(bdata(path), &commandList);
     debug("nCommands = %d", nCommands);
 
     int i;
