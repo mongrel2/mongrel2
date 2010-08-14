@@ -3,7 +3,6 @@
 #define NDEBUG 1
 
 #include "minunit.h"
-#include <adt/heap.h>
 #include <mem/halloc.h>
 
 #include <superpoll.h>
