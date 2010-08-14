@@ -79,8 +79,8 @@ command(A) ::= SEND STRING(B) URL(C) params(D) NEWLINE
            A = calloc(sizeof(Command), 1);
            A->send.method = bstrcpy(B->s1);
            A->send.uri = bstrcpy(C->s1);
-           A->send.host = bstrcpy(C->s2);
-           A->send.port = bstrcpy(C->s3);
+           A->send.host = (C->s2 == NULL) ? NULL : bstrcpy(C->s2);
+           A->send.port = (C->s3 == NULL) ? NULL : bstrcpy(C->s3);
            A->send.params = D;
            A->expect.status_code = bstrcpy(E->s1);
            A->expect.params = F;

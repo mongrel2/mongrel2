@@ -12,6 +12,9 @@
 FILE *LOG_FILE = NULL;
 #define MAX_COMMANDS 1024
 
+struct tagbstring default_host_key = bsStatic("host");
+struct tagbstring default_port_key = bsStatic("port");
+
 static int verify_response(Expect *expected, Response *actual);
 
 void print_indent(int indent_level) {
@@ -53,21 +56,48 @@ void runkegogi(void *arg)
     int nCommands = parse_kegogi_file(bdata(path), &commandList);
     debug("nCommands = %d", nCommands);
 
+    Param *p;
+    dnode_t *d;
+
+    if(commandList.defaults != NULL) {
+        printf("Defaults:\n");
+        ParamDict_foreach(commandList.defaults, p, d) {
+            print_param(1, p);
+        }
+    }
+
+    bstring default_host = NULL;
+    int default_port = 80;
+
+    if(commandList.defaults != NULL) {
+        p = ParamDict_get(commandList.defaults, &default_host_key);
+        if(p && p->type == STRING)
+            default_host = p->data.string;
+        p = ParamDict_get(commandList.defaults, &default_port_key);
+        if(p && p->type == STRING)
+            default_port = atoi(bdata(p->data.string));
+    }
+
     int i;
     for(i = 0; i < nCommands; i++) {
-        Request *req = Request_create(bstrcpy(commands[i].send.host),
-                                      atoi(bdata(commands[i].send.port)),
+        bstring host = commands[i].send.host;
+        if(!host) host = default_host;
+        check(host != NULL, "No host or default host specified");
+        
+        int port = default_port;
+        if(commands[i].send.port)
+            port = atoi(bdata(commands[i].send.port));
+
+        Request *req = Request_create(bstrcpy(host), port,
                                       bstrcpy(commands[i].send.method),
                                       bstrcpy(commands[i].send.uri));
         Response *actual = Response_fetch(req);
         
-        debug("send %s %s:%s%s",
+        debug("send %s %s:%d%s",
               bdata(commands[i].send.method), 
-              bdata(commands[i].send.host),
-              bdata(commands[i].send.port),
+              bdata(host),
+              port,
               bdata(commands[i].send.uri));
-        Param *p;
-        dnode_t *d;
         ParamDict_foreach(commands[i].send.params, p, d) {
             print_param(1, p);
         }
@@ -92,6 +122,11 @@ void runkegogi(void *arg)
         Response_destroy(actual);
     }
 
+    return;
+
+error:
+    debug("Errored out in runkegogi, quitting");
+    taskexitall(-1);
 }
 
 static int verify_response(Expect *expected, Response *actual) {
