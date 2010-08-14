@@ -30,7 +30,6 @@ SuperPoll *TEST_POLL = NULL;
 #include <sys/ioctl.h>
 #include <sys/time.h>
 #include <sys/mman.h>
-#include <sys/epoll.h>
 #include <sys/time.h>
 #include <sys/resource.h>
 
@@ -328,7 +327,7 @@ char *run_test(int nr, int threads, int gens, int hot, char *fail_msg)
 		etv.tv_sec -= 1;
 	}
 
-    fprintf(perf, "%ld %ld.%06ld ", nr_token_passes, etv.tv_sec, etv.tv_usec);
+    fprintf(perf, "%ld %ld.%06ld ", nr_token_passes, etv.tv_sec, (long int)etv.tv_usec);
 
 	usecs = etv.tv_usec + etv.tv_sec * 1000000LL;
 	passes_per_sec = nr_token_passes * 1000000LL * 100;

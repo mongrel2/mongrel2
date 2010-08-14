@@ -32,10 +32,10 @@ void SuperPoll_destroy(SuperPoll *sp)
 }
 
 
-int SuperPoll_arm_idle_fd(SuperPoll *sp);
-int SuperPoll_setup_idle(SuperPoll *sp, int total_open_fd);
-int SuperPoll_add_idle(SuperPoll *sp, void *data, int fd, int rw);
-int SuperPoll_add_idle_hits(SuperPoll *sp, PollResult *result);
+inline int SuperPoll_arm_idle_fd(SuperPoll *sp);
+inline int SuperPoll_setup_idle(SuperPoll *sp, int total_open_fd);
+inline int SuperPoll_add_idle(SuperPoll *sp, void *data, int fd, int rw);
+inline int SuperPoll_add_idle_hits(SuperPoll *sp, PollResult *result);
 
 
 SuperPoll *SuperPoll_create()
