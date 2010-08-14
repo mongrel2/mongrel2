@@ -12,35 +12,10 @@
 FILE *LOG_FILE = NULL;
 #define MAX_COMMANDS 1024
 
-struct tagbstring default_host_key = bsStatic("host");
-struct tagbstring default_port_key = bsStatic("port");
+struct tagbstring DEFAULT_HOST_KEY = bsStatic("host");
+struct tagbstring DEFAULT_PORT_KEY = bsStatic("port");
 
-static int verify_response(Expect *expected, Response *actual);
-
-void print_indent(int indent_level) {
-    int i = 0;
-    for(i = 0; i < indent_level; i++) printf("  ");
-}
-
-void print_param(int indent_level, Param *p) {
-    print_indent(indent_level);
-    printf("%s = ", p->name->data);
-    if(p->type == STRING)
-        printf("\"%s\"", p->data.string->data);
-    else if(p->type == PATTERN)
-        printf("(%s)", p->data.pattern->data);
-    else if(p->type == DICT) {
-        printf("{\n");
-        Param *p2;
-        dnode_t *d;
-        ParamDict_foreach(p->data.dict, p2, d) {
-            print_param(indent_level + 1, p2);
-        }
-        print_indent(indent_level);
-        printf("}");
-    }
-    printf("\n");
-}
+static int verify_response(Command *command, Request *req, Response *actual);
 
 void runkegogi(void *arg)
 {
@@ -52,34 +27,26 @@ void runkegogi(void *arg)
         .defaults = NULL,
         .commands = commands
     };
-        
-    int nCommands = parse_kegogi_file(bdata(path), &commandList);
-    debug("nCommands = %d", nCommands);
-
-    Param *p;
-    dnode_t *d;
-
-    if(commandList.defaults != NULL) {
-        printf("Defaults:\n");
-        ParamDict_foreach(commandList.defaults, p, d) {
-            print_param(1, p);
-        }
-    }
+    int passed = 0;
+    int failed = 0;
+    int num_commands = 0;
 
     bstring default_host = NULL;
     int default_port = 80;
 
+    num_commands = parse_kegogi_file(bdata(path), &commandList);
     if(commandList.defaults != NULL) {
-        p = ParamDict_get(commandList.defaults, &default_host_key);
+        Param *p;
+        p = ParamDict_get(commandList.defaults, &DEFAULT_HOST_KEY);
         if(p && p->type == STRING)
             default_host = p->data.string;
-        p = ParamDict_get(commandList.defaults, &default_port_key);
+        p = ParamDict_get(commandList.defaults, &DEFAULT_PORT_KEY);
         if(p && p->type == STRING)
             default_port = atoi(bdata(p->data.string));
     }
 
     int i;
-    for(i = 0; i < nCommands; i++) {
+    for(i = 0; i < num_commands; i++) {
         bstring host = commands[i].send.host;
         if(!host) host = default_host;
         check(host != NULL, "No host or default host specified");
@@ -93,46 +60,46 @@ void runkegogi(void *arg)
                                       bstrcpy(commands[i].send.uri));
         Response *actual = Response_fetch(req);
         
-        debug("send %s %s:%d%s",
-              bdata(commands[i].send.method), 
-              bdata(host),
-              port,
-              bdata(commands[i].send.uri));
-        ParamDict_foreach(commands[i].send.params, p, d) {
-            print_param(1, p);
-        }
-
-        debug("expect %s",
-              bdata(commands[i].expect.status_code));
-        ParamDict_foreach(commands[i].expect.params, p, d) {
-            print_param(1, p);
-        }
-
-        if(actual != NULL)
-            debug("actual %d", actual->status_code);
+        if(verify_response(&commands[i], req, actual))
+            passed++;
         else
-            debug("Response failed");
-
-        if(verify_response(&commands[i].expect, actual))
-            debug("Verified = SUCCESS");
-        else
-            debug("Verified = FAILURE");
-        
+            failed++;
         Request_destroy(req);
         Response_destroy(actual);
     }
+    
+    printf("Passed: %d / %d\n", passed, num_commands);
 
-    return;
+    taskexitall(failed == 0 ? 0 : 1);
 
 error:
     debug("Errored out in runkegogi, quitting");
     taskexitall(-1);
 }
 
-static int verify_response(Expect *expected, Response *actual) {
-    if(!(expected && actual)) return 0;
-    
-    return atoi(bdata(expected->status_code)) == actual->status_code;
+static int verify_response(Command *command, Request *req, Response *actual) {
+    check(command != NULL && req != NULL, "command and req must not be NULL");
+
+    if(actual == NULL) {
+        printf("Failure when fetching %s:%d%s\n", bdata(req->host), req->port,
+               bdata(req->uri));
+        printf("  Failed to retrieve response from server, actual is NULL\n");
+        return 0;
+    }
+
+    int expected_status_code = atoi(bdata(command->expect.status_code));
+    if(expected_status_code != actual->status_code) {
+        printf("Failure when fetching %s:%d%s\n", bdata(req->host), req->port,
+               bdata(req->uri));
+        printf("  Status code was %d, expected %d\n", actual->status_code,
+               expected_status_code);
+        return 0;
+    }
+
+    return 1;
+
+error:
+    return 0;
 }
 
 void taskmain(int argc, char *argv[])

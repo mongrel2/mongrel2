@@ -173,7 +173,7 @@ error:
 
 Response *Response_create()
 {
-    Response *rsp = malloc(sizeof(*rsp));
+    Response *rsp = calloc(sizeof(*rsp), 1);
     check_mem(rsp);
 
     Headers_init(&rsp->headers);
@@ -214,21 +214,25 @@ error:
 Response *Response_fetch(Request *req) 
 {
     int fd = 0;
-    char *buffer = malloc(FETCH_BUFFER_SIZE);
+    char *buffer = NULL;
+    bstring request = NULL;
+    httpclient_parser parser;
+    Response *rsp = NULL;
+
+    buffer = malloc(FETCH_BUFFER_SIZE);
     check_mem(buffer);
 
-    Response *rsp = Response_create();
+    rsp = Response_create();
     check(rsp, "Failed to create Response.");
 
-    httpclient_parser parser;
     check(Response_setup_parser(rsp, &parser) == 0, "Failed to setup parser.");
 
     fd = netdial(TCP, bdata(req->host), req->port);
     check(fd > 0, "Failed to connect to %s on port %d.", bdata(req->host),
           req->port);
 
-    bstring request =  bformat(REQUEST_FORMAT, bdata(req->method),
-                               bdata(req->uri), bdata(req->host));
+    request =  bformat(REQUEST_FORMAT, bdata(req->method),
+                       bdata(req->uri), bdata(req->host));
     int totalsent = fdsend(fd, bdata(request), blength(request));
     check(totalsent == blength(request), "Didn't send all of the request.");
     
@@ -253,9 +257,10 @@ Response *Response_fetch(Request *req)
     return rsp;
 
 error:
-    bdestroy(request);
     Response_destroy(rsp);
+    if(request) bdestroy(request);
     if(buffer) free(buffer);
+
     return NULL;
 }
 

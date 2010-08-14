@@ -30,6 +30,7 @@ int parse_kegogi_file(const char *path, CommandList *commandList) {
         Parse(parser, tokens->tokens[i].type, &tokens->tokens[i],
               commandList);
     }
+    Parse(parser, TKNEWLINE, 0, commandList);
     Parse(parser, 0, 0, commandList);
     TokenList_destroy(tokens);
     tokens = NULL;

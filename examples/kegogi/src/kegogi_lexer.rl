@@ -12,7 +12,7 @@
     send = 'send';
     expect = 'expect';
 
-    comment = '#' [^\n]*;
+    comment = '#' [^\n]* '\n';
 
     action mark { m = fpc; }
     action s1 { s1 = blk2bstr(m, fpc-m); }
@@ -63,7 +63,7 @@
              TokenList_append3(&token_list, TKURL, s1, s2, s3);
              s1 = s2 = s3 = NULL;
          };
-         newline => {
+         (newline|comment) => {
              TokenList_append0(&token_list, TKNEWLINE);
              s1 = s2 = s3 = NULL;
          };
@@ -81,7 +81,6 @@
          };
          space => { };
          ',' => { };
-         comment => { };
     *|;
 }%%
 
