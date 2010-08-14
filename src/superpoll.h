@@ -18,9 +18,9 @@ typedef struct SuperPoll {
     int nfd_hot;
     int max_hot;
 
-    // epoll information
-    struct epoll_event *events;
-    int epoll_fd;
+    // idle information
+    void *events;
+    int idle_fd;
 
     int max_idle;
     IdleData *idle_data;

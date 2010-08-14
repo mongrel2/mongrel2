@@ -381,14 +381,16 @@ char *test_midlevel_pipes_idle()
 
 char *all_tests() {
     mu_suite_start();
-    int i = 0;
 
     SuperPoll_get_max_fd(MAX_FDS);
     TEST_POLL = SuperPoll_create();
 
+#ifndef NO_EPOLL
     mu_run_test(test_sparse_pipes_idle);
     mu_run_test(test_maxed_pipes_idle);
     mu_run_test(test_midlevel_pipes_idle);
+#endif
+
     mu_run_test(test_sparse_pipes_hot);
     mu_run_test(test_maxed_pipes_hot);
     mu_run_test(test_midlevel_pipes_hot);

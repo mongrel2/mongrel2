@@ -3,9 +3,9 @@
 #include <dbg.h>
 #include <assert.h>
 #include <sys/resource.h>
-#include <sys/epoll.h>
 #include <unistd.h>
 #include <assert.h>
+
 
 static int MAXFD = 0;
 
@@ -16,7 +16,7 @@ enum {
 void SuperPoll_destroy(SuperPoll *sp)
 {
     if(sp) {
-        close(sp->epoll_fd);
+        if(sp->idle_fd > 0) close(sp->idle_fd);
         if(sp->idle_active) {
             list_destroy_nodes(sp->idle_active);
             list_destroy(sp->idle_active);
@@ -32,10 +32,10 @@ void SuperPoll_destroy(SuperPoll *sp)
 }
 
 
-int SuperPoll_arm_epoll_fd(SuperPoll *sp);
-int SuperPoll_setup_epoll(SuperPoll *sp, int total_open_fd);
-int SuperPoll_add_epoll(SuperPoll *sp, void *data, int fd, int rw);
-int SuperPoll_add_epoll_hits(SuperPoll *sp, PollResult *result);
+int SuperPoll_arm_idle_fd(SuperPoll *sp);
+int SuperPoll_setup_idle(SuperPoll *sp, int total_open_fd);
+int SuperPoll_add_idle(SuperPoll *sp, void *data, int fd, int rw);
+int SuperPoll_add_idle_hits(SuperPoll *sp, PollResult *result);
 
 
 SuperPoll *SuperPoll_create()
@@ -55,7 +55,7 @@ SuperPoll *SuperPoll_create()
     check_mem(sp->hot_data);
     hattach(sp->hot_data, sp);
 
-    check(SuperPoll_setup_epoll(sp, total_open_fd) == 0, "Failed to configure epoll. Disabling.");
+    check(SuperPoll_setup_idle(sp, total_open_fd) == 0, "Failed to configure epoll. Disabling.");
 
     log_info("Allowing for %d hot and %d idle file descriptors.", sp->max_hot, sp->max_idle);
 
@@ -105,7 +105,7 @@ int SuperPoll_add(SuperPoll *sp, void *data, void *socket, int fd, int rw, int h
         return SuperPoll_add_poll(sp, data, socket, fd, rw);
     } else {
         assert(!socket && "Cannot add a 0MQ socket to the idle (!hot) set.");
-        return SuperPoll_add_epoll(sp, data, fd, rw);
+        return SuperPoll_add_idle(sp, data, fd, rw);
     }
 }
 
@@ -131,11 +131,11 @@ int SuperPoll_poll(SuperPoll *sp, PollResult *result, int ms)
     int nfound = 0;
     int cur_i = 0;
     int rc = 0;
-    int hit_epoll = 0;
+    int hit_idle = 0;
 
     result->nhits = 0;
 
-    // do the regular poll, with epollfd inside
+    // do the regular poll, with idlefd inside
     nfound = zmq_poll(sp->pollfd, sp->nfd_hot, ms);
     check(nfound >= 0 || errno == EINTR, "zmq_poll failed.");
 
@@ -147,10 +147,10 @@ int SuperPoll_poll(SuperPoll *sp, PollResult *result, int ms)
             cur_i++;
         }
 
-        if(sp->pollfd[cur_i].fd == sp->epoll_fd) {
-            hit_epoll = 1;
-            rc = SuperPoll_add_epoll_hits(sp, result);
-            check(rc != -1, "Failed to add epoll hits.");
+        if(sp->pollfd[cur_i].fd == sp->idle_fd) {
+            hit_idle = 1;
+            rc = SuperPoll_add_idle_hits(sp, result);
+            check(rc != -1, "Failed to add idle hits.");
         } else {
             SuperPoll_add_hit(result, &sp->pollfd[cur_i], sp->hot_data[cur_i]);
         }
@@ -158,8 +158,8 @@ int SuperPoll_poll(SuperPoll *sp, PollResult *result, int ms)
         SuperPoll_compact_down(sp, cur_i);
     }
 
-    if(hit_epoll) {
-        SuperPoll_arm_epoll_fd(sp);
+    if(hit_idle) {
+        SuperPoll_arm_idle_fd(sp);
     }
 
     result->hot_atr = sp->nfd_hot ? result->hot_fds / sp->nfd_hot * 100 : 0;
@@ -230,14 +230,46 @@ void PollResult_clean(PollResult *result)
 }
 
 
+#ifdef NO_EPOLL
 
-
-inline int SuperPoll_arm_epoll_fd(SuperPoll *sp)
+inline int SuperPoll_arm_idle_fd(SuperPoll *sp)
 {
-    return SuperPoll_add(sp, NULL, NULL, sp->epoll_fd, 'r', 1);
+    assert(0 && "Should not get called.");
 }
 
-inline int SuperPoll_setup_epoll(SuperPoll *sp, int total_open_fd) 
+inline int SuperPoll_setup_idle(SuperPoll *sp, int total_open_fd)
+{
+    sp->max_idle = 0;
+    sp->events = NULL;
+    sp->idle_fd = -1;
+    sp->idle_data = NULL;
+    sp->idle_free = NULL;
+    sp->idle_active = NULL;
+    return 0;
+}
+
+inline int SuperPoll_add_idle(SuperPoll *sp, void *data, int fd, int rw)
+{
+    return SuperPoll_add_poll(sp, data, NULL, fd, rw);
+}
+
+inline int SuperPoll_add_idle_hits(SuperPoll *sp, PollResult *result)
+{
+    return 0;
+}
+
+#else
+
+#include <sys/epoll.h>
+
+#define SuperPoll_epoll_events(S) ((struct epoll_event *)(S))
+
+inline int SuperPoll_arm_idle_fd(SuperPoll *sp)
+{
+    return SuperPoll_add(sp, NULL, NULL, sp->idle_fd, 'r', 1);
+}
+
+inline int SuperPoll_setup_idle(SuperPoll *sp, int total_open_fd) 
 {
     int i = 0;
 
@@ -249,8 +281,8 @@ inline int SuperPoll_setup_epoll(SuperPoll *sp, int total_open_fd)
     check_mem(sp->events);
     hattach(sp->events, sp);
 
-	sp->epoll_fd = epoll_create(sp->max_idle);
-    check(sp->epoll_fd != -1, "Failed to create the epoll structure.");
+	sp->idle_fd = epoll_create(sp->max_idle);
+    check(sp->idle_fd != -1, "Failed to create the epoll structure.");
 
     sp->idle_data = h_calloc(sizeof(IdleData), sp->max_idle);
     check_mem(sp->idle_data);
@@ -269,7 +301,7 @@ inline int SuperPoll_setup_epoll(SuperPoll *sp, int total_open_fd)
     sp->idle_active = list_create(sp->max_idle);
     check_mem(sp->idle_active);
 
-    int rc = SuperPoll_arm_epoll_fd(sp);
+    int rc = SuperPoll_arm_idle_fd(sp);
     check(rc != -1, "Failed to add the epoll socket to the poll list.");
 
     return 0;
@@ -278,7 +310,7 @@ error:
 }
 
 
-inline int SuperPoll_add_epoll(SuperPoll *sp, void *data, int fd, int rw)
+inline int SuperPoll_add_idle(SuperPoll *sp, void *data, int fd, int rw)
 {
     // take one off the free list, set it up, push onto the actives
     lnode_t *next = list_del_last(sp->idle_free);
@@ -306,11 +338,11 @@ inline int SuperPoll_add_epoll(SuperPoll *sp, void *data, int fd, int rw)
     }
 
     // do the actual epoll call, but if we get that it's in there then mod it
-    int rc = epoll_ctl(sp->epoll_fd, EPOLL_CTL_ADD, fd, &event);
+    int rc = epoll_ctl(sp->idle_fd, EPOLL_CTL_ADD, fd, &event);
 
     if(rc == -1 && errno == EEXIST) {
         // that's already in there so do a mod instead
-        rc = epoll_ctl(sp->epoll_fd, EPOLL_CTL_MOD, fd, &event);
+        rc = epoll_ctl(sp->idle_fd, EPOLL_CTL_MOD, fd, &event);
         check(rc != -1, "Could not MOD fd that's already in epoll.");
     } else if(rc == -1) {
         sentinel("Failed to add FD to epoll.");
@@ -323,26 +355,27 @@ error:
 }
 
 
-inline int SuperPoll_add_epoll_hits(SuperPoll *sp, PollResult *result)
+inline int SuperPoll_add_idle_hits(SuperPoll *sp, PollResult *result)
 {
     int nfds = 0;
     int i = 0;
     int rc = 0;
     zmq_pollitem_t ev = {.socket = NULL};
 
-    nfds = epoll_wait(sp->epoll_fd, sp->events, sp->max_idle, 0);
+    nfds = epoll_wait(sp->idle_fd, SuperPoll_epoll_events(sp), sp->max_idle, 0);
     check(nfds >= 0, "Error doing epoll.");
+    struct epoll_event *events = SuperPoll_epoll_events(sp);
 
     for(i = 0; i < nfds; i++) {
-        lnode_t *node = (lnode_t *)sp->events[i].data.ptr;
+        lnode_t *node = (lnode_t *)events[i].data.ptr;
         IdleData *data = lnode_get(node);
         ev.fd = data->fd;
 
-        if(sp->events[i].events & EPOLLIN) {
+        if(events[i].events & EPOLLIN) {
             ev.revents = ZMQ_POLLIN;
         }
 
-        if(sp->events[i].events & EPOLLOUT) {
+        if(events[i].events & EPOLLOUT) {
             ev.revents = ZMQ_POLLOUT;
         }
 
@@ -351,7 +384,7 @@ inline int SuperPoll_add_epoll_hits(SuperPoll *sp, PollResult *result)
         }
 
         // no matter what remove it
-        rc = epoll_ctl(sp->epoll_fd, EPOLL_CTL_DEL, ev.fd, NULL);
+        rc = epoll_ctl(sp->idle_fd, EPOLL_CTL_DEL, ev.fd, NULL);
         check(rc != -1, "Failed to remove fd %d from epoll.", ev.fd);
 
         // take it out of active and put into free list
@@ -367,3 +400,5 @@ inline int SuperPoll_add_epoll_hits(SuperPoll *sp, PollResult *result)
 error:
     return -1;
 }
+
+#endif  // NO_EPOLL
