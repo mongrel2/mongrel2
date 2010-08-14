@@ -8,6 +8,7 @@
 
 %%{
     machine kegogi_lexer;
+    defaults = 'defaults';
     send = 'send';
     expect = 'expect';
 
@@ -34,6 +35,10 @@
     newline = '\n';
 
     main := |*
+         defaults => {
+             TokenList_append0(&token_list, TKDEFAULTS);
+             s1 = s2 = s3 = NULL;
+         };
          send => {
              TokenList_append0(&token_list, TKSEND);
              s1 = s2 = s3 = NULL;

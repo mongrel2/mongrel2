@@ -138,11 +138,7 @@ void ParamDict_destroy(ParamDict *pd) {
 
 void ParamDict_set(ParamDict *pd, Param *p) {
     if(!pd || !p) return;
-    if(p->type != DICT)
-        printf("--- %s = %s\n", p->name->data, p->data.string->data);
-    else
-        printf("--- %s = {...}\n", p->name->data);
-               
+
     dnode_t *node = dict_lookup(pd->dict, p->name);
     if(node) dict_delete_free(pd->dict, node);
 

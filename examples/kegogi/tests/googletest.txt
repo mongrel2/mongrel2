@@ -3,6 +3,8 @@
 # uri.  It then checks the status code against the one specified in the expect
 # portion of the command.
 
+defaults host=foo
+
 send GET http://www.google.com:80/
 expect 200
 
