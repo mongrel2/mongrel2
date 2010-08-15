@@ -40,8 +40,6 @@ def commit(servers, settings=None):
             host.server = server
             store.add(host)
 
-            host.routes = [Route(path=p, target=t) for p,t in
-                           host.routes.items()]
 
             for route in host.routes:
                 route.host = host
@@ -81,7 +79,9 @@ class Server(object):
         self.default_host = unicode(default_host)
         self.pid_file = unicode(pid_file)
         self.port = port
-        self.hosts = hosts or []
+
+        for h in hosts or []:
+            self.hosts.add(h)
 
     def __repr__(self):
         return "Server(uuid=%r, access_log=%r, error_log=%r, chroot=%r, default_host=%r, port=%d)" % (
@@ -105,7 +105,10 @@ class Host(object):
         self.name = unicode(name)
         self.matching = matching or self.name
         self.maintenance = maintenance
-        self.routes = routes or []
+
+        if routes:
+            for p,t in routes.items():
+                self.routes.add(Route(path=p, target=t))
 
 
     def __repr__(self):

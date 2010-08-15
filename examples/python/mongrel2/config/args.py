@@ -175,10 +175,7 @@ def command_module(mod, command, options, ending="_command"):
     function = mod.__dict__[command+ending]
     kwargs = determine_kwargs(function)
     ensure_defaults(options, kwargs)
-    try:
-        return function(**options)
-    except TypeError, exc:
-        print "ERROR: ", exc
+    return function(**options)
 
 
 def available_help(mod, ending="_command"):

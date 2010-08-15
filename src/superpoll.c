@@ -181,7 +181,7 @@ int SuperPoll_poll(SuperPoll *sp, PollResult *result, int ms)
 
     result->nhits = 0;
 
-    // do the regular poll, with idlefd inside
+    // do the regular poll, with idlefd inside if available
     nfound = zmq_poll(sp->pollfd, sp->nfd_hot, ms);
     check(nfound >= 0 || errno == EINTR, "zmq_poll failed.");
 

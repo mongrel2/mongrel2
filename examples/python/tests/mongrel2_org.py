@@ -45,7 +45,7 @@ mongrel2 = Host(name="mongrel2.org", routes={
         recv_spec='tcp://127.0.0.1:9994', recv_ident='')
 })
 
-main.hosts = [mongrel2]
+main.hosts.add(mongrel2)
 
 settings = {"zeromq.threads": 4}
 
