@@ -3374,12 +3374,11 @@
       "pcrr7t-x-x-90">main</span><span class=
       "pcrr7t-x-x-90">.</span><span class=
       "pcrr7t-x-x-90">hosts</span><span class=
-      "pcrr7t-x-x-90">&nbsp;</span><span class=
-      "pcrr7t-x-x-90">=</span><span class=
-      "pcrr7t-x-x-90">&nbsp;</span><span class=
-      "pcrr7t-x-x-90">&#91;</span><span class=
+      "pcrr7t-x-x-90">.</span><span class=
+      "pcrr7t-x-x-90">add</span><span class=
+      "pcrr7t-x-x-90">(</span><span class=
       "pcrr7t-x-x-90">mongrel2</span><span class=
-      "pcrr7t-x-x-90">&#93;</span><span class=
+      "pcrr7t-x-x-90">)</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
       <span class="label"><a id="x1-33051r49" name=
       "x1-33051r49"></a></span><span class=
@@ -3556,7 +3555,7 @@
 
     <li class="itemize"><span class=
     "obeylines-h verb pcrr7t-">&#91;^set&#93;</span> Inverse character set,
-    so &#91;<img src="book-final239x.png" alt="^0 " class="circ">-9&#93; is
+    so &#91;<img src="book-final237x.png" alt="^0 " class="circ">-9&#93; is
     anything but digits.
 
     <li class="itemize"><span class=
