@@ -85,10 +85,26 @@ SuperPoll *SuperPoll_create()
 {
     SuperPoll *sp = h_calloc(sizeof(SuperPoll), 1);
     check_mem(sp);
+    int rc = 0;
 
-    int total_open_fd = SuperPoll_get_max_fd(MAX_NOFILE);
-    sp->max_hot = HAS_EPOLL == 1 ? total_open_fd / 4 : total_open_fd;
+    int total_open_fd = SuperPoll_get_max_fd();
     sp->nfd_hot = 0;
+
+    if(HAS_EPOLL) {
+        int hot_dividend = Setting_get_int("superpoll.hot_dividend", 4);
+
+        sp->max_hot = total_open_fd / hot_dividend;
+
+        rc = SuperPoll_setup_idle(sp, total_open_fd);
+        check(rc == 0, "Failed to configure epoll. Disabling.");
+
+        log_info("Allowing for %d hot and %d idle file descriptors (dividend was %d)",
+                sp->max_hot, sp->max_idle, hot_dividend);
+    } else {
+        sp->max_hot = total_open_fd;
+
+        log_info("You do not have epoll support. Allowing for %d file descriptors through poll.", sp->max_hot);
+    }
 
     sp->pollfd = h_calloc(sizeof(zmq_pollitem_t), sp->max_hot);
     check_mem(sp->pollfd);
@@ -99,10 +115,8 @@ SuperPoll *SuperPoll_create()
     hattach(sp->hot_data, sp);
 
     if(HAS_EPOLL) {
-        check(SuperPoll_setup_idle(sp, total_open_fd) == 0, "Failed to configure epoll. Disabling.");
-        log_info("Allowing for %d hot and %d idle file descriptors.", sp->max_hot, sp->max_idle);
-    } else {
-        log_info("You do not have epoll support. Allowing for %d file descriptors through poll.", sp->max_hot);
+        int rc = SuperPoll_arm_idle_fd(sp);
+        check(rc != -1, "Failed to add the epoll socket to the poll list.");
     }
 
     return sp;
@@ -147,7 +161,7 @@ error:
 
 int SuperPoll_add(SuperPoll *sp, void *data, void *socket, int fd, int rw, int hot)
 {
-    if(hot || !HAS_EPOLL) {
+    if(socket || hot || !HAS_EPOLL) {
         return SuperPoll_add_poll(sp, data, socket, fd, rw);
     } else {
         assert(!socket && "Cannot add a 0MQ socket to the idle (!hot) set.");
@@ -214,14 +228,14 @@ error:
 
 }
 
-int SuperPoll_get_max_fd(int requested_max)
+int SuperPoll_get_max_fd()
 {
     int rc = 0;
     struct rlimit rl;
 
-    if(!requested_max) requested_max = MAX_NOFILE;
-
     if(MAXFD) return MAXFD;
+
+    int requested_max = Setting_get_int("superpoll.max_fd", MAX_NOFILE);
 
     debug("Attempting to force NOFILE limit to %d", requested_max);
     rl.rlim_cur = requested_max;
@@ -344,9 +358,6 @@ inline int SuperPoll_setup_idle(SuperPoll *sp, int total_open_fd)
     sp->idle_active = list_create(sp->max_idle);
     check_mem(sp->idle_active);
 
-    int rc = SuperPoll_arm_idle_fd(sp);
-    check(rc != -1, "Failed to add the epoll socket to the poll list.");
-
     return 0;
 error:
     return -1;
@@ -356,9 +367,10 @@ error:
 inline int SuperPoll_add_idle(SuperPoll *sp, void *data, int fd, int rw)
 {
     // take one off the free list, set it up, push onto the actives
+    check(!list_isempty(sp->idle_free), "Too many open files, no free idle slots.");
+
     lnode_t *next = list_del_last(sp->idle_free);
 
-    check(next, "Too many open files, no free idle slots.");
     IdleData *id = (IdleData *)lnode_get(next);
     assert(id && "Got an id NULL ptr from the free list.");
 

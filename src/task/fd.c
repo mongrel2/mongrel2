@@ -9,7 +9,7 @@
 #include <dbg.h>
 
 
-static int startedfdtask;
+static int STARTED_FDTASK = 0;
 static Tasklist sleeping;
 static int sleepingcounted;
 static uvlong nsec(void);
@@ -140,18 +140,22 @@ int taskwaiting()
     return SuperPoll_active_count(POLL) - 1;
 }
 
+inline void startfdtask()
+{
+    if(!STARTED_FDTASK) {
+        POLL = SuperPoll_create();
+        STARTED_FDTASK = 1;
+        taskcreate(fdtask, 0, FDSTACK);
+    }
+}
 
 uint
 taskdelay(uint ms)
 {
     uvlong when, now;
     Task *t;
-    
-    if(!startedfdtask) {
-        POLL = SuperPoll_create();
-        startedfdtask = 1;
-        taskcreate(fdtask, 0, FDSTACK);
-    }
+   
+    startfdtask();
 
     now = nsec();
     when = now+(uvlong)ms*1000000;
@@ -187,22 +191,15 @@ taskdelay(uint ms)
 int
 _wait(void *socket, int fd, int rw)
 {
-    if(!startedfdtask) {
-        POLL = SuperPoll_create();
-        startedfdtask = 1;
-        taskcreate(fdtask, 0, FDSTACK);
-    }
+    startfdtask();
+    int max = 0;
+    int hot_add = SuperPoll_active_hot(POLL) < SuperPoll_max_hot(POLL);
     
     taskstate("wait %d:%s", socket ? (int)(intptr_t)socket : fd, 
             rw=='r' ? "read" : rw=='w' ? "write" : "error");
 
-    if(socket) {
-        int max = SuperPoll_add(POLL, (void *)taskrunning, socket, fd, rw, 1);
-        check(max != -1, "Error adding fd %d to task wait list.", fd);
-    } else {
-        int max = SuperPoll_add(POLL, (void *)taskrunning, socket, fd, rw, 1);
-        check(max != -1, "Error adding fd %d to task list.", fd);
-    }
+    max = SuperPoll_add(POLL, (void *)taskrunning, socket, fd, rw, hot_add);
+    check(max != -1, "Error adding fd %d to task wait list.", fd);
 
     taskswitch();
     return 0;

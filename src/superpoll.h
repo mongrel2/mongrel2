@@ -90,9 +90,11 @@ void SuperPoll_compact_down(SuperPoll *sp, int i);
 
 int SuperPoll_poll(SuperPoll *sp, PollResult *result, int ms);
 
-int SuperPoll_get_max_fd(int requested_max);
+int SuperPoll_get_max_fd();
 
-#define SuperPoll_active_count(S) ((S)->nfd_hot + list_count((S)->idle_active))
+#define SuperPoll_active_hot(S) ((S)->nfd_hot)
+#define SuperPoll_active_idle(S) (list_count((S)->idle_active))
+#define SuperPoll_active_count(S) (SuperPoll_active_hot(S) + SuperPoll_active_idle(S))
 
 #define SuperPoll_max_hot(S) ((S)->max_hot)
 #define SuperPoll_max_idle(S) ((S)->max_idle)

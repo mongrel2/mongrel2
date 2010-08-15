@@ -380,10 +380,15 @@ char *test_midlevel_pipes_idle()
     return run_test(50, 25, 50, 0, "midlevel pipes failed.");
 }
 
+char *test_totally_maxed()
+{
+    return run_test(400, 350, 10, 0, "midlevel pipes failed.");
+}
+
 char *all_tests() {
     mu_suite_start();
 
-    SuperPoll_get_max_fd(10 * 1024);
+    SuperPoll_get_max_fd();
     TEST_POLL = SuperPoll_create();
 
     mu_run_test(test_sparse_pipes_hot);
@@ -394,6 +399,7 @@ char *all_tests() {
     mu_run_test(test_sparse_pipes_idle);
     mu_run_test(test_maxed_pipes_idle);
     mu_run_test(test_midlevel_pipes_idle);
+    mu_run_test(test_totally_maxed);
 #endif
 
     SuperPoll_destroy(TEST_POLL);

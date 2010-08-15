@@ -274,7 +274,7 @@ void taskmain(int argc, char **argv)
     SERVER = load_server(argv[1], argv[2]);
     check(SERVER, "Aborting since can't load server.");
 
-    SuperPoll_get_max_fd(0);
+    SuperPoll_get_max_fd();
 
     rc = clear_pid_file(SERVER);
     check(rc == 0, "PID file failure, aborting rather than trying to start.");
