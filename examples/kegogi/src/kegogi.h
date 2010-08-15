@@ -6,6 +6,8 @@
 #include "param.h"
 #include "kegogi_tokens.h"
 
+#define DEFAULT_PORT 80
+
 typedef struct Send {
     bstring method;
     bstring host;
@@ -30,8 +32,8 @@ typedef struct CommandList {
     Command *commands;
     ParamDict *defaults;
 } CommandList;
-
-int parse_kegogi_file(const char *path, CommandList *commandList);
+int parse_kegogi_file(const char *path, Command commands[],
+                      int max_num_commands, ParamDict **defaults);
 TokenList *get_kegogi_tokens(bstring content);
 
 #endif

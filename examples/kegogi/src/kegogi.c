@@ -16,48 +16,24 @@ struct tagbstring DEFAULT_HOST_KEY = bsStatic("host");
 struct tagbstring DEFAULT_PORT_KEY = bsStatic("port");
 
 static int verify_response(Command *command, Request *req, Response *actual);
+static Request *create_request(Send *send, ParamDict *defaults);
 
 void runkegogi(void *arg)
 {
     bstring path = (bstring) arg;
     Command commands[MAX_COMMANDS];
-    CommandList commandList = {
-        .size = MAX_COMMANDS,
-        .count = 0,
-        .defaults = NULL,
-        .commands = commands
-    };
+    ParamDict *defaults;
     int passed = 0;
     int failed = 0;
     int num_commands = 0;
 
-    bstring default_host = NULL;
-    int default_port = 80;
-
-    num_commands = parse_kegogi_file(bdata(path), &commandList);
-    if(commandList.defaults != NULL) {
-        Param *p;
-        p = ParamDict_get(commandList.defaults, &DEFAULT_HOST_KEY);
-        if(p && p->type == STRING)
-            default_host = p->data.string;
-        p = ParamDict_get(commandList.defaults, &DEFAULT_PORT_KEY);
-        if(p && p->type == STRING)
-            default_port = atoi(bdata(p->data.string));
-    }
+    num_commands = parse_kegogi_file(bdata(path), commands, MAX_COMMANDS,
+                                     &defaults);
 
     int i;
     for(i = 0; i < num_commands; i++) {
-        bstring host = commands[i].send.host;
-        if(!host) host = default_host;
-        check(host != NULL, "No host or default host specified");
-        
-        int port = default_port;
-        if(commands[i].send.port)
-            port = atoi(bdata(commands[i].send.port));
+        Request *req = create_request(&commands[i].send, defaults);
 
-        Request *req = Request_create(bstrcpy(host), port,
-                                      bstrcpy(commands[i].send.method),
-                                      bstrcpy(commands[i].send.uri));
         Response *actual = Response_fetch(req);
         
         if(verify_response(&commands[i], req, actual))
@@ -71,10 +47,44 @@ void runkegogi(void *arg)
     printf("Passed: %d / %d\n", passed, num_commands);
 
     taskexitall(failed == 0 ? 0 : 1);
+}
+
+static Request *create_request(Send *send, ParamDict *defaults)
+{
+    check(send != NULL, "create_request cannot accept NULL send arg");
+    struct tagbstring default_host_key = bsStatic("host");
+    struct tagbstring default_port_key = bsStatic("port");
+    Param *p;
+
+    bstring method = send->method;
+    check(method != NULL, "Command must specify method");
+
+    bstring uri = send->uri;
+    check(uri != NULL, "Command must specify uri");
+
+    bstring host = send->host;
+    if(host == NULL) {
+        p = ParamDict_get(defaults, &default_host_key);
+        if(p && p->type == STRING)
+            host = p->data.string;
+    }
+    check(host != NULL, "Command is missing host and there is no default");
+
+    bstring port = send->port;
+    if(port == NULL) {
+        p = ParamDict_get(defaults, &default_port_key);
+        if(p && p->type == STRING)
+            port = p->data.string;
+    }
+    // No check, if it's NULL, we'll use 80
+
+    return Request_create(bstrcpy(host),
+                          (port != NULL) ? atoi(bdata(port)) : DEFAULT_PORT,
+                          bstrcpy(method),
+                          bstrcpy(uri));
 
 error:
-    debug("Errored out in runkegogi, quitting");
-    taskexitall(-1);
+    return NULL;
 }
 
 static int verify_response(Command *command, Request *req, Response *actual) {
