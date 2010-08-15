@@ -1,3 +1,38 @@
+/**
+ *
+ * Copyright (c) 2010, Zed A. Shaw and Mongrel2 Project Contributors.
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are
+ * met:
+ * 
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ * 
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ * 
+ *     * Neither the name of the Mongrel2 Project, Zed A. Shaw, nor the names
+ *       of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written
+ *       permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+ * IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+
 #include <superpoll.h>
 #include <mem/halloc.h>
 #include <dbg.h>
@@ -230,7 +265,7 @@ void PollResult_clean(PollResult *result)
 }
 
 
-#ifdef NO_EPOLL
+#ifndef __linux__
 
 inline int SuperPoll_arm_idle_fd(SuperPoll *sp)
 {
@@ -262,7 +297,7 @@ inline int SuperPoll_add_idle_hits(SuperPoll *sp, PollResult *result)
 
 #include <sys/epoll.h>
 
-#define SuperPoll_epoll_events(S) ((struct epoll_event *)(S))
+#define SuperPoll_epoll_events(S) ((struct epoll_event *)(S->events))
 
 inline int SuperPoll_arm_idle_fd(SuperPoll *sp)
 {
@@ -292,6 +327,8 @@ inline int SuperPoll_setup_idle(SuperPoll *sp, int total_open_fd)
     check_mem(sp->idle_free);
 
     // load the free list to prime the pump for later usage
+    // TODO: do this either a lot faster or just do it lazy instead
+    debug("Building up slots for %d sockets in idle. Could take a minute.", sp->max_idle);
     for(i = 0; i < sp->max_idle; i++) {
         lnode_t *n = lnode_create(&sp->idle_data[i]);
         check_mem(n);
@@ -401,4 +438,4 @@ error:
     return -1;
 }
 
-#endif  // NO_EPOLL
+#endif  // LINUX

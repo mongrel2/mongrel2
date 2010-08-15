@@ -143,7 +143,7 @@ void process_token(int fd, struct token *toke, int nr)
 	}
 }
 
-void read_and_process_token(int fd)
+int read_and_process_token(int fd)
 {
 	struct token *toke;
 	struct fdinfo *inf = &fdinfo[fd];
@@ -162,10 +162,10 @@ void read_and_process_token(int fd)
 
 	check(nr == 0, "Didn't write everythig to pipe.");
 
-    return;
+    return 0;
 
 error:
-    return;
+    return -1;
 }
 
 
@@ -254,9 +254,10 @@ int run_main_loop(int hot)
 
 		for (i = 0; i < nfds; i++) {
 			if (result.hits[i].ev.revents & ZMQ_POLLIN) {
-				read_and_process_token(result.hits[i].ev.fd);
-                rc = SuperPoll_add(TEST_POLL, NULL, NULL, result.hits[i].ev.fd, 'r', hot);
-                check(rc != -1, "Failed to add read side to superpoll: hot=%d", hot);
+                // don't add it back in if there was an error along the way
+				if(read_and_process_token(result.hits[i].ev.fd) == 0) {
+                    rc = SuperPoll_add(TEST_POLL, NULL, NULL, result.hits[i].ev.fd, 'r', hot);
+                }
 			}
 		}
 	}
@@ -286,6 +287,7 @@ void seedthreads(int nr)
 
 char *run_test(int nr, int threads, int gens, int hot, char *fail_msg)
 {
+    debug("TEST IS: %s", fail_msg);
 
 	struct timeval stv, etv;
 	long long usecs, passes_per_sec;
@@ -315,7 +317,7 @@ char *run_test(int nr, int threads, int gens, int hot, char *fail_msg)
 	seedthreads(max_threads);
 
     rc = run_main_loop(hot);
-    mu_assert(rc == 0, "Main loop failed.");
+    check(rc == 0, "Looks like the main loop failed for '%s'", fail_msg);
 
 	gettimeofday(&etv, NULL);
 
@@ -354,7 +356,7 @@ char *test_maxed_pipes_hot()
 
 char *test_sparse_pipes_hot()
 {
-    return run_test(50, 10, 50, 1, "sparse pipes 1 failed");
+    return run_test(50, 5, 50, 1, "sparse pipes 1 failed");
 }
 
 char *test_midlevel_pipes_hot()
@@ -370,7 +372,7 @@ char *test_maxed_pipes_idle()
 
 char *test_sparse_pipes_idle()
 {
-    return run_test(50, 10, 50, 0, "sparse pipes 1 failed");
+    return run_test(50, 5, 50, 0, "sparse pipes 1 failed");
 }
 
 char *test_midlevel_pipes_idle()
@@ -381,18 +383,18 @@ char *test_midlevel_pipes_idle()
 char *all_tests() {
     mu_suite_start();
 
-    SuperPoll_get_max_fd(MAX_FDS);
+    SuperPoll_get_max_fd(10 * 1024);
     TEST_POLL = SuperPoll_create();
-
-#ifndef NO_EPOLL
-    mu_run_test(test_sparse_pipes_idle);
-    mu_run_test(test_maxed_pipes_idle);
-    mu_run_test(test_midlevel_pipes_idle);
-#endif
 
     mu_run_test(test_sparse_pipes_hot);
     mu_run_test(test_maxed_pipes_hot);
     mu_run_test(test_midlevel_pipes_hot);
+
+#ifdef __linux__
+    mu_run_test(test_sparse_pipes_idle);
+    mu_run_test(test_maxed_pipes_idle);
+    mu_run_test(test_midlevel_pipes_idle);
+#endif
 
     SuperPoll_destroy(TEST_POLL);
 
