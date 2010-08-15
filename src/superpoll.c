@@ -40,7 +40,13 @@
 #include <sys/resource.h>
 #include <unistd.h>
 #include <assert.h>
+#include <setting.h>
 
+#ifdef __linux__
+#define HAS_EPOLL 1
+#else
+#define HAS_EPOLL 0
+#endif
 
 static int MAXFD = 0;
 
@@ -51,15 +57,17 @@ enum {
 void SuperPoll_destroy(SuperPoll *sp)
 {
     if(sp) {
-        if(sp->idle_fd > 0) close(sp->idle_fd);
-        if(sp->idle_active) {
-            list_destroy_nodes(sp->idle_active);
-            list_destroy(sp->idle_active);
-        }
+        if(HAS_EPOLL) {
+            if(sp->idle_fd > 0) close(sp->idle_fd);
+            if(sp->idle_active) {
+                list_destroy_nodes(sp->idle_active);
+                list_destroy(sp->idle_active);
+            }
 
-        if(sp->idle_free) {
-            list_destroy_nodes(sp->idle_free);
-            list_destroy(sp->idle_free);
+            if(sp->idle_free) {
+                list_destroy_nodes(sp->idle_free);
+                list_destroy(sp->idle_free);
+            }
         }
 
         h_free(sp);
@@ -77,9 +85,9 @@ SuperPoll *SuperPoll_create()
 {
     SuperPoll *sp = h_calloc(sizeof(SuperPoll), 1);
     check_mem(sp);
-   
+
     int total_open_fd = SuperPoll_get_max_fd(MAX_NOFILE);
-    sp->max_hot = total_open_fd / 4;
+    sp->max_hot = HAS_EPOLL == 1 ? total_open_fd / 4 : total_open_fd;
     sp->nfd_hot = 0;
 
     sp->pollfd = h_calloc(sizeof(zmq_pollitem_t), sp->max_hot);
@@ -90,9 +98,12 @@ SuperPoll *SuperPoll_create()
     check_mem(sp->hot_data);
     hattach(sp->hot_data, sp);
 
-    check(SuperPoll_setup_idle(sp, total_open_fd) == 0, "Failed to configure epoll. Disabling.");
-
-    log_info("Allowing for %d hot and %d idle file descriptors.", sp->max_hot, sp->max_idle);
+    if(HAS_EPOLL) {
+        check(SuperPoll_setup_idle(sp, total_open_fd) == 0, "Failed to configure epoll. Disabling.");
+        log_info("Allowing for %d hot and %d idle file descriptors.", sp->max_hot, sp->max_idle);
+    } else {
+        log_info("You do not have epoll support. Allowing for %d file descriptors through poll.", sp->max_hot);
+    }
 
     return sp;
 
@@ -136,7 +147,7 @@ error:
 
 int SuperPoll_add(SuperPoll *sp, void *data, void *socket, int fd, int rw, int hot)
 {
-    if(hot) {
+    if(hot || !HAS_EPOLL) {
         return SuperPoll_add_poll(sp, data, socket, fd, rw);
     } else {
         assert(!socket && "Cannot add a 0MQ socket to the idle (!hot) set.");
@@ -177,12 +188,11 @@ int SuperPoll_poll(SuperPoll *sp, PollResult *result, int ms)
     result->hot_fds = nfound;
 
     for(i = 0; i < nfound; i++) {
-        // TODO: change this to only scan then assert < nfd_hot
         while(cur_i < sp->nfd_hot && !sp->pollfd[cur_i].revents) {
             cur_i++;
         }
 
-        if(sp->pollfd[cur_i].fd == sp->idle_fd) {
+        if(HAS_EPOLL && sp->pollfd[cur_i].fd == sp->idle_fd) {
             hit_idle = 1;
             rc = SuperPoll_add_idle_hits(sp, result);
             check(rc != -1, "Failed to add idle hits.");
@@ -197,11 +207,6 @@ int SuperPoll_poll(SuperPoll *sp, PollResult *result, int ms)
         SuperPoll_arm_idle_fd(sp);
     }
 
-    result->hot_atr = sp->nfd_hot ? result->hot_fds / sp->nfd_hot * 100 : 0;
-
-    if(result->idle_atr < 100 && result->idle_atr > 1) {
-        debug("HOT ATR: %d IDLE ATR: %d", result->hot_atr, result->idle_atr);
-    }
     return result->nhits;
 
 error:
@@ -265,7 +270,7 @@ void PollResult_clean(PollResult *result)
 }
 
 
-#ifndef __linux__
+#if defined HAS_EPOLL && HAS_EPOLL == 0
 
 inline int SuperPoll_arm_idle_fd(SuperPoll *sp)
 {
@@ -306,6 +311,8 @@ inline int SuperPoll_arm_idle_fd(SuperPoll *sp)
 
 inline int SuperPoll_setup_idle(SuperPoll *sp, int total_open_fd) 
 {
+    assert(HAS_EPOLL == 1 && "This function should not run unless HAS_EPOLL is 1.");
+
     int i = 0;
 
     sp->max_idle = total_open_fd - sp->max_hot;
@@ -327,7 +334,6 @@ inline int SuperPoll_setup_idle(SuperPoll *sp, int total_open_fd)
     check_mem(sp->idle_free);
 
     // load the free list to prime the pump for later usage
-    // TODO: do this either a lot faster or just do it lazy instead
     debug("Building up slots for %d sockets in idle. Could take a minute.", sp->max_idle);
     for(i = 0; i < sp->max_idle; i++) {
         lnode_t *n = lnode_create(&sp->idle_data[i]);
@@ -438,4 +444,4 @@ error:
     return -1;
 }
 
-#endif  // LINUX
+#endif  // HAS_EPOLL
