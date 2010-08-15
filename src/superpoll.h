@@ -93,7 +93,9 @@ int SuperPoll_poll(SuperPoll *sp, PollResult *result, int ms);
 int SuperPoll_get_max_fd();
 
 #define SuperPoll_active_hot(S) ((S)->nfd_hot)
-#define SuperPoll_active_idle(S) (list_count((S)->idle_active))
+
+#define SuperPoll_active_idle(S) ((S)->idle_active ? list_count((S)->idle_active)  :0)
+
 #define SuperPoll_active_count(S) (SuperPoll_active_hot(S) + SuperPoll_active_idle(S))
 
 #define SuperPoll_max_hot(S) ((S)->max_hot)

@@ -122,7 +122,7 @@ int tasknuke(int id)
     int i = 0;
     Task *target = NULL;
 
-    for(i = 0; i < SuperPoll_active_count(POLL); i++) {
+    for(i = 0; i < SuperPoll_active_hot(POLL); i++) {
         target = (Task *)SuperPoll_data(POLL, i);
 
         if(target && target->id == id) {
@@ -134,12 +134,6 @@ int tasknuke(int id)
     return -1;
 }
 
-int taskwaiting()
-{
-    // TODO: do this right, for now just -1 for the epoll
-    return SuperPoll_active_count(POLL) - 1;
-}
-
 inline void startfdtask()
 {
     if(!STARTED_FDTASK) {
@@ -148,6 +142,15 @@ inline void startfdtask()
         taskcreate(fdtask, 0, FDSTACK);
     }
 }
+
+int taskwaiting()
+{
+    startfdtask();
+
+    // TODO: do this right, for now just -1 for the epoll
+    return SuperPoll_active_count(POLL) - 1;
+}
+
 
 uint
 taskdelay(uint ms)
