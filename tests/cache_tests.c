@@ -4,7 +4,7 @@
 
 FILE *LOG_FILE = NULL;
 
-static long last_evicted = -1;
+static long last_evicted;
 void test_evict(void *data) {
     last_evicted = (long) data;
 }
@@ -15,6 +15,8 @@ int test_lookup(void *data, void *key) {
 
 char *test_cache_evict()
 {
+    last_evicted = -1;
+
     Cache *cache = Cache_create(MIN_CACHE_SIZE, test_lookup, test_evict);
     mu_assert(cache != NULL, "Failed to create cache");
     
@@ -29,6 +31,35 @@ char *test_cache_evict()
         mu_assert(last_evicted == i, "Evicted something out of order");
     }
     
+    Cache_destroy(cache);
+    return NULL;
+}
+
+char *test_cache_manual_evict()
+{
+    last_evicted = -1;
+
+    Cache *cache = Cache_create(MIN_CACHE_SIZE, test_lookup, test_evict);
+    mu_assert(cache != NULL, "Failed to create cache");
+    
+    long i;
+    for(i = 1; i <= MIN_CACHE_SIZE; i++) {
+        Cache_add(cache, (void *) i);
+        mu_assert(last_evicted == -1, "Evicted something too early");
+    }
+
+
+    for(i = 1; i <= MIN_CACHE_SIZE; i++) {
+        Cache_evict_object(cache, (void *) i);
+        mu_assert(last_evicted == i, "Evicted something out of order");
+    }
+
+    last_evicted = -1;
+    for(i = 1; i <= MIN_CACHE_SIZE; i++) {
+        Cache_add(cache, (void *) i);
+        mu_assert(last_evicted == -1, "The cache wasn't empty'");
+    }
+
     Cache_destroy(cache);
     return NULL;
 }
@@ -72,6 +103,7 @@ char *all_tests() {
     mu_suite_start();
     
     mu_run_test(test_cache_evict);
+    mu_run_test(test_cache_manual_evict);
     mu_run_test(test_cache_lookup);
 
     return NULL;
