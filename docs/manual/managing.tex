@@ -390,12 +390,14 @@ And that, my friends, is the most complex configuration we have so far.
 
 \section{Routing And Host Patterns}
 
-The pattern code was taken from \href{http://www.lua.org/}{Lua} and is some of the simplest
-code for doing fast pattern matches.  It is very much like regular expressions, except it removes
-a lot of features you don't need for routes.  Mongrel2 uses them by breaking routes up into
-a prefix and pattern part.  It then uses routes to find the longest matching prefix and then
-tests the pattern.  If the pattern matches, then the route works.  If the route doesn't have a pattern,
-then it's assumed to match, and you're done.
+The pattern code was taken from \href{http://www.lua.org/}{Lua} and is some of
+the simplest code for doing fast pattern matches.  It is very much like regular
+expressions, except it removes a lot of features you don't need for routes.
+Also, unlike regular expressions, URL patterns always match from the start.
+Mongrel2 uses them by breaking routes up into a prefix and pattern part.  It
+then uses routes to find the longest matching prefix and then tests the
+pattern.  If the pattern matches, then the route works.  If the route doesn't
+have a pattern, then it's assumed to match, and you're done.
 
 The only caveat is you have to wrap your pattern parts in parenthesis, but these don't mean anything
 other than to delimit where a pattern starts.  So instead of \shell{/images/.*.jpg}, write \shell{/images/(.*.jpg)}
@@ -423,7 +425,6 @@ Here's the list of characters you can use in your patterns:
 \item \verb|?| 0 or 1 match of of the preceding character
 \item \verb|\b|\emph{xy} Balanced match a substring starting with \emph{x}
   and ending in \emph{y}.  So \verb|\b()| will match balanced parentheses.
-\item \verb|^| The beginning of a string.
 \item \verb|$| End of the string.
 \end{itemize}
 

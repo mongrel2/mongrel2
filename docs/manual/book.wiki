@@ -3497,19 +3497,20 @@
   "http://www.lua.org/">Lua</a> and is some of the simplest code
   for doing fast pattern matches. It is very much like regular
   expressions, except it removes a lot of features you don&rsquo;t
-  need for routes. Mongrel2 uses them by breaking routes up into a
-  prefix and pattern part. It then uses routes to find the longest
-  matching prefix and then tests the pattern. If the pattern
-  matches, then the route works. If the route doesn&rsquo;t have a
-  pattern, then it&rsquo;s assumed to match, and you&rsquo;re done.
-  <!--l. 400-->
+  need for routes. Also, unlike regular expressions, URL patterns
+  always match from the start. Mongrel2 uses them by breaking
+  routes up into a prefix and pattern part. It then uses routes to
+  find the longest matching prefix and then tests the pattern. If
+  the pattern matches, then the route works. If the route
+  doesn&rsquo;t have a pattern, then it&rsquo;s assumed to match,
+  and you&rsquo;re done. <!--l. 402-->
 
   <p class="noindent">The only caveat is you have to wrap your
   pattern parts in parenthesis, but these don&rsquo;t mean anything
   other than to delimit where a pattern starts. So instead of
   <span class="pcrro7t-">/images/.&#8902;.jpg</span>, write
   <span class="pcrro7t-">/images/(.&#8902;.jpg)</span> for it to
-  work. <!--l. 404-->
+  work. <!--l. 406-->
 
   <p class="noindent">Here&rsquo;s the list of characters you can
   use in your patterns:
@@ -3583,11 +3584,8 @@
     parentheses.
 
     <li class="itemize"><span class=
-    "obeylines-h verb pcrr7t-">^</span> The beginning of a string.
-
-    <li class="itemize"><span class=
     "obeylines-h verb pcrr7t-">$</span> End of the string.
-  </ul><!--l. 430-->
+  </ul><!--l. 431-->
 
   <p class="noindent">Using the uppercase version of an escaped
   character makes it work the opposite way (i.e., <span class=
@@ -3596,7 +3594,7 @@
   backslash can be used to escape the following character,
   disabling its special abilities (i.e., <span class=
   "obeylines-h verb pcrr7t-">\\</span> will match a backslash). 
-  <!--l. 435-->
+  <!--l. 436-->
 
   <p class="noindent">Anything that&rsquo;s not listed here is
   matched literally. Remember also that when you write the Python
@@ -3604,7 +3602,7 @@
   "obeylines-h verb pcrr7t-">r'blah'</span> string syntax to avoid
   having to double up on your <span class=
   "obeylines-h verb pcrr7t-">\</span> characters in the string. 
-  <!--l. 439-->
+  <!--l. 440-->
 
   <p class="noindent"><a id="x1-34001r3" name="x1-34001r3"></a>
   <hr class="float">
@@ -3618,13 +3616,13 @@
     </div><!--tex4ht:label?: x1-34001r3 -->
 
     <div class="quote">
-      <!--l. 440-->
+      <!--l. 441-->
 
       <p class="indent">Yep, I get it. You think that everyone
       should use UTF-8 or some Unicode encoding for everything. You
       despise the dominance of the &lsquo;A&rsquo; in ASCII and
       hate that you can&rsquo;t put your spoken language right in a
-      URL. <!--l. 444-->
+      URL. <!--l. 445-->
 
       <p class="indent">Well, I hate to say it, but tough.
       Protocols are hard enough without having to worry about the
@@ -3634,7 +3632,7 @@
       can&rsquo;t be properly capitalized or lowercased, and
       requires extra translations steps for every operation. With
       ASCII, every computer just knows what it is, and it&rsquo;s
-      the fastest for creating wire protocol formats. <!--l. 452-->
+      the fastest for creating wire protocol formats. <!--l. 453-->
 
       <p class="indent">This is why, on the Internet, you have to
       do things to URLs to make them ASCII, like encoding them with
@@ -3645,7 +3643,7 @@
       fixed set of characters and be done with it. Don&rsquo;t
       blame me or Mongrel2 for this, it&rsquo;s just the way the
       standard is and the way to get a server that is stable and
-      works. <!--l. 460-->
+      works. <!--l. 461-->
 
       <p class="indent">Protocols work better when there&rsquo;s
       less politics in their design. This means you can&rsquo;t put
@@ -3654,7 +3652,7 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 467-->
+  <!--l. 468-->
 
   <p class="noindent">Here are some example routes you can try to
   get a feel for the system:
@@ -3683,7 +3681,7 @@
     long sequence of digits and finally a .jpg) with the
     <span class="obeylines-h verb pcrr7t-">\</span>. escaping the
     period.
-  </ul><!--l. 478-->
+  </ul><!--l. 479-->
 
   <p class="noindent">That should give the idea of how you can use
   them. Notice also that I&rsquo;m using the Python <span class=
@@ -3694,7 +3692,7 @@
 
   <h3 class="sectionHead"><span class="titlemark">3.7</span> <a id=
   "x1-350003.7" name="x1-350003.7"></a>Deployment Logs And
-  Commits</h3><!--l. 484-->
+  Commits</h3><!--l. 485-->
 
   <p class="noindent">A very nice feature for people doing
   operations work is that m2sh keeps track of all the commands you
@@ -3704,13 +3702,13 @@
   and <span class="pcrro7t-">m2sh load</span> commands so you can
   see what&rsquo;s going on. They track who did something, what
   server they did it on, what time they did it and what they did. 
-  <!--l. 491-->
+  <!--l. 492-->
 
   <p class="noindent">To see the logs for your own tests, just do
   <span class="pcrro7t-">m2sh log -db simple.sqlite</span> and
   then, if you want to add a commit log message, you use the
   <span class="pcrro7t-">m2sh commit</span> command. Here&rsquo;s
-  an example from mongrel2.org: <!--l. 495-->
+  an example from mongrel2.org: <!--l. 496-->
 
   <p class="noindent"><a id="x1-35001r10" name="x1-35001r10"></a>
   <hr class="float">
@@ -3721,7 +3719,7 @@
       "content"><span class="pplri7t-">Example Commit</span>
       <span class="pplri7t-">Log</span></span>
     </div><!--tex4ht:label?: x1-35001r10 -->
-    <!--l. 496-->
+    <!--l. 497-->
 
     <div class="lstlisting" id="listing-8">
       <span class="label"><a id="x1-35002r1" name=
@@ -4069,7 +4067,7 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 510-->
+  <!--l. 511-->
 
   <p class="noindent">The motivation for this feature is the trend
   that operations store server configurations in revision control
@@ -4078,12 +4076,12 @@
   on each server. In many cases, the configuration files also need
   to be reworked or altered for each deployment. With the m2sh log
   and commits system you can augment your revision control with
-  deployment action tracking. <!--l. 516-->
+  deployment action tracking. <!--l. 517-->
 
   <p class="noindent">Later versions of Mongrel2 will keep small
   amounts of statistics which will link these actions to changes in
   Mongrel2 behavior like frequent crashing, failures, slowness, or
-  other problems. <!--l. 519-->
+  other problems. <!--l. 520-->
 
   <p class="noindent">Basically, there&rsquo;s nowhere to hide.
   Mongrel2 will help operations figure out who needs to get fired
