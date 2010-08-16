@@ -154,7 +154,7 @@ error:
     return NULL;
 }
 
-inline void Request_nuke_parts(Request *req)
+static inline void Request_nuke_parts(Request *req)
 {
     bdestroy(req->request_method); req->request_method = NULL;
     bdestroy(req->version); req->version = NULL;

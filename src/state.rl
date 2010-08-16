@@ -95,7 +95,7 @@ int State_init(State *state, StateActions *actions)
     return 1;
 }
 
-inline int State_invariant(State *state, int event)
+static inline int State_invariant(State *state, int event)
 {
     if ( state->cs == %%{ write error; }%% ) {
         return -1;

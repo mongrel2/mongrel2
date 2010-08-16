@@ -91,7 +91,7 @@ error:
 
 }
 
-inline void handler_cap_payload(bstring payload)
+static inline void handler_cap_payload(bstring payload)
 {
     if(payload->data[payload->slen - 1] == '\0') {
         btrunc(payload, blength(payload)-1);
@@ -100,7 +100,7 @@ inline void handler_cap_payload(bstring payload)
     }
 }
 
-inline void handler_process_request(Handler *handler, int fd, int conn_type,
+static inline void handler_process_request(Handler *handler, int fd, int conn_type,
         const char *body_start, size_t body_length)
 {
     bstring payload = NULL;
@@ -138,7 +138,7 @@ error:
 }
 
 
-inline int handler_recv_parse(Handler *handler, HandlerParser *parser)
+static inline int handler_recv_parse(Handler *handler, HandlerParser *parser)
 {
     check(handler->running, "Called while handler wasn't running, that's not good.");
 

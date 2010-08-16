@@ -75,10 +75,10 @@ void SuperPoll_destroy(SuperPoll *sp)
 }
 
 
-inline int SuperPoll_arm_idle_fd(SuperPoll *sp);
-inline int SuperPoll_setup_idle(SuperPoll *sp, int total_open_fd);
-inline int SuperPoll_add_idle(SuperPoll *sp, void *data, int fd, int rw);
-inline int SuperPoll_add_idle_hits(SuperPoll *sp, PollResult *result);
+static inline int SuperPoll_arm_idle_fd(SuperPoll *sp);
+static inline int SuperPoll_setup_idle(SuperPoll *sp, int total_open_fd);
+static inline int SuperPoll_add_idle(SuperPoll *sp, void *data, int fd, int rw);
+static inline int SuperPoll_add_idle_hits(SuperPoll *sp, PollResult *result);
 
 
 SuperPoll *SuperPoll_create()
@@ -129,7 +129,7 @@ error:
 
 
 
-inline int SuperPoll_add_poll(SuperPoll *sp, void *data, void *socket, int fd, int rw)
+static inline int SuperPoll_add_poll(SuperPoll *sp, void *data, void *socket, int fd, int rw)
 {
     int cur_fd = sp->nfd_hot;
     int bits = 0;
@@ -177,7 +177,7 @@ void SuperPoll_compact_down(SuperPoll *sp, int i)
     sp->hot_data[i] = sp->hot_data[sp->nfd_hot];
 }
 
-inline void SuperPoll_add_hit(PollResult *result, zmq_pollitem_t *p, void *data)
+static inline void SuperPoll_add_hit(PollResult *result, zmq_pollitem_t *p, void *data)
 {
     result->hits[result->nhits].ev = *p;
     result->hits[result->nhits].data = data;
@@ -286,12 +286,12 @@ void PollResult_clean(PollResult *result)
 
 #if defined HAS_EPOLL && HAS_EPOLL == 0
 
-inline int SuperPoll_arm_idle_fd(SuperPoll *sp)
+static inline int SuperPoll_arm_idle_fd(SuperPoll *sp)
 {
     assert(0 && "Should not get called.");
 }
 
-inline int SuperPoll_setup_idle(SuperPoll *sp, int total_open_fd)
+static inline int SuperPoll_setup_idle(SuperPoll *sp, int total_open_fd)
 {
     sp->max_idle = 0;
     sp->events = NULL;
@@ -302,12 +302,12 @@ inline int SuperPoll_setup_idle(SuperPoll *sp, int total_open_fd)
     return 0;
 }
 
-inline int SuperPoll_add_idle(SuperPoll *sp, void *data, int fd, int rw)
+static inline int SuperPoll_add_idle(SuperPoll *sp, void *data, int fd, int rw)
 {
     return SuperPoll_add_poll(sp, data, NULL, fd, rw);
 }
 
-inline int SuperPoll_add_idle_hits(SuperPoll *sp, PollResult *result)
+static inline int SuperPoll_add_idle_hits(SuperPoll *sp, PollResult *result)
 {
     return 0;
 }
@@ -318,12 +318,12 @@ inline int SuperPoll_add_idle_hits(SuperPoll *sp, PollResult *result)
 
 #define SuperPoll_epoll_events(S) ((struct epoll_event *)(S->events))
 
-inline int SuperPoll_arm_idle_fd(SuperPoll *sp)
+static inline int SuperPoll_arm_idle_fd(SuperPoll *sp)
 {
     return SuperPoll_add(sp, NULL, NULL, sp->idle_fd, 'r', 1);
 }
 
-inline int SuperPoll_setup_idle(SuperPoll *sp, int total_open_fd) 
+static inline int SuperPoll_setup_idle(SuperPoll *sp, int total_open_fd) 
 {
     assert(HAS_EPOLL == 1 && "This function should not run unless HAS_EPOLL is 1.");
 
@@ -364,7 +364,7 @@ error:
 }
 
 
-inline int SuperPoll_add_idle(SuperPoll *sp, void *data, int fd, int rw)
+static inline int SuperPoll_add_idle(SuperPoll *sp, void *data, int fd, int rw)
 {
     // take one off the free list, set it up, push onto the actives
     check(!list_isempty(sp->idle_free), "Too many open files, no free idle slots.");
@@ -410,7 +410,7 @@ error:
 }
 
 
-inline int SuperPoll_add_idle_hits(SuperPoll *sp, PollResult *result)
+static inline int SuperPoll_add_idle_hits(SuperPoll *sp, PollResult *result)
 {
     int nfds = 0;
     int i = 0;

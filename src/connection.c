@@ -64,7 +64,7 @@ enum {
     MAX_CONTENT_LENGTH = 20 * 1024
 };
 
-inline int Connection_backend_event(Backend *found, int fd)
+static inline int Connection_backend_event(Backend *found, int fd)
 {
     switch(found->type) {
         case BACKEND_HANDLER:

@@ -128,7 +128,7 @@ error:
     return NULL;
 }
 
-inline int Dir_send_header(FileRecord *file, int sock_fd)
+static inline int Dir_send_header(FileRecord *file, int sock_fd)
 {
     return fdsend(sock_fd, bdata(file->header), blength(file->header)) == blength(file->header);
 }
@@ -236,7 +236,7 @@ void FileRecord_destroy(FileRecord *file)
 }
 
 
-inline int normalize_path(bstring target)
+static inline int normalize_path(bstring target)
 {
     ballocmin(target, PATH_MAX);
     char *path_buf = calloc(PATH_MAX+1, 1);
@@ -254,7 +254,7 @@ error:
     return 1;
 }
 
-inline int Dir_lazy_normalize_base(Dir *dir)
+static inline int Dir_lazy_normalize_base(Dir *dir)
 {
     if(dir->normalized_base == NULL) {
         dir->normalized_base = bstrcpy(dir->base);
@@ -355,7 +355,7 @@ error:
 }
 
 
-inline bstring Dir_if_modified_since(Request *req, FileRecord *file, int if_modified_since)
+static inline bstring Dir_if_modified_since(Request *req, FileRecord *file, int if_modified_since)
 {
     if(if_modified_since <= (int)time(NULL) && file->sb.st_mtime <= if_modified_since) {
         return &HTTP_304;
@@ -366,7 +366,7 @@ inline bstring Dir_if_modified_since(Request *req, FileRecord *file, int if_modi
     return &HTTP_500;
 }
 
-inline bstring Dir_none_match(Request *req, FileRecord *file, int if_modified_since, bstring if_none_match)
+static inline bstring Dir_none_match(Request *req, FileRecord *file, int if_modified_since, bstring if_none_match)
 {
     if(biseqcstr(if_none_match, "*") || biseq(if_none_match, file->etag)) {
         return &HTTP_304;
@@ -384,7 +384,7 @@ inline bstring Dir_none_match(Request *req, FileRecord *file, int if_modified_si
 
 
 
-inline bstring Dir_calculate_response(Request *req, FileRecord *file)
+static inline bstring Dir_calculate_response(Request *req, FileRecord *file)
 {
     int if_unmodified_since = 0;
     int if_modified_since = 0;

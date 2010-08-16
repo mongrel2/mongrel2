@@ -39,7 +39,7 @@ void mqinit(int threads)
     }
 }
 
-inline int next_task_sleeptime(int min)
+static inline int next_task_sleeptime(int min)
 {
     Task *t;
     uvlong now = 0;
@@ -62,7 +62,7 @@ inline int next_task_sleeptime(int min)
     return ms;
 }
 
-inline void wake_sleepers()
+static inline void wake_sleepers()
 {
     Task *t;
     uvlong now = nsec();
@@ -134,7 +134,7 @@ int tasknuke(int id)
     return -1;
 }
 
-inline void startfdtask()
+static inline void startfdtask()
 {
     if(!STARTED_FDTASK) {
         POLL = SuperPoll_create();
