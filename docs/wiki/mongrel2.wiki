@@ -1,27 +1,33 @@
-<img src="/logo" align="right"><p></p>
+<img src="/static/logo.png" align="right"><p></p>
 
 <h1>About Mongrel2</h1>
 
-<p>Mongrel2 is an <em>application</em>, <em>language</em>, and <em>network architecture</em> <b>agnostic</b> web server.  The goal is to create a web server specifically designed for web <b>applications</b> over serving files.</p>
+<p style="font-size: 1.2em;">Mongrel2 is an <em>application</em>, <em>language</em>, and <em>network architecture</em> <b>agnostic</b> web server that focuses on web <b>applications</b> over serving files using
+modern browser technologies.
+</p>
 
 <h2>Features</h2>
 
 <ul>
-    <li><b>Programming language agnostic design<b> that lets you use whatever language you want, even to configure and manage it.
-    </b></b>
-    </li>
-    <li><b>Designed to handle HTTP, Flash XMLSockets, or WebSockets, or Long Polling</b> on the same socket transparently, and then route messages from those <b>to <a href="http://zeromq.org">ZeroMQ</a>, HTTP, or raw socket</b> backends.
-    </li>
-    <li><b>Break the strict request/response mapping and let you translate one request or message into multiple backends</b> to produce a more complex response. This will let you create scalable architectures using any backend language you want.
-    </li>
-    <li><b>Uses a MVC style configuration design, with sqlite3 as the "Model" and Python scripts as the "View".</b>  There's a m2sh program that lets you manage the server, it's configuration, and logs about configuration activity.
-    </li>
-    <li><b>Use the proven and rock solid Mongrel HTTP Parser</b> that many other web application servers use.  There have been very few security flaws in this parser, and it actively blocks many attacks due to its design.
-    </li>
-    <li><b>Use the latest event systems (poll, epoll, kqueue)</b> but rather than force you to understand async events, it will use a <b>fast context switching coroutine system</b> based on ucontext or assembler.
-    </li>
-    <li><b>Support all of the usual web server features,</b> but it will defer to being designed specifically for applications over high-speed file serving.  Since Mongrel2 will be written in C it should do files pretty well too, but easy application architectures and operations support will come first.</li>
+    <li><b>Language Agnostic</b> with a simple backend protocol supporting <a href="http://github.com/perplexes/m2r">Ruby</a>,
+    <a href="http://github.com/berry/Mongrel2-WSGI-Handler">Python</a>,
+    <a href="http://github.com/akrennmair/mongrel2-cpp">C++</a>,
+    <a href="http://github.com/winks/m2php">PHP</a>,
+    <a href="http://github.com/cmoore/web-mongrel2">Haskell</a>,
+    <a href="http://github.com/vseloved/cl-mongrel2">Common Lisp</a>,
+    and <a href="http://github.com/jsimmons/mongrel2-lua/">Lua</a> all written by Mongrel2 fans.</li>
+    <li><b>Modern Browser Friendly</b> designed to handle HTTP, Flash XMLSockets, or WebSockets, Long Polling on the same socket transparently.</li>
+    <li><b><a href="http://zeromq.org">ZeroMQ</a> Enabled</b> as well as HTTP proxy support so it works with what you have already while giving you new super powers.</li>
+    <li><b>Network Architecture Agnostic</b> so you can carve your operations up anyway that reduces costs.</li>
+    <li><b>N:M Messaging Patterns</b> means you can have any N handlers answer to any M browsers arbitrarily, but still easy to do plain request/response.</li>
+    <li><b>Automation Loving Configs</b> that are easily accessible via any programming language with an Model-View-Controller design.</li>
+    <li><b>Modern Internal Design</b> using the Mongrel 1 HTTP parser powering many big companies with a proven security track record, event based I/O, fast coroutines
+    to handle that I/O, and smart reasonable defaults with zero configuration needed usually.</li>
+    <li><b>Documented, Documented, Documented</b> We <a href="/doc/tip/docs/manual/book.wiki">document everything</a> in a well written manual that
+    shows you how to use every feature.</li>
+    <li><b>BSD Licensed</b> and all with a <a href="/wiki?name=License">BSD 3-clause license</a>.
 </ul>
+
 
 
 <h2>Download</h2>
@@ -54,6 +60,25 @@ Currently we have:<p>
     <li><a href="/wiki?name=DesignCriticisms">DesignCriticisms</a></li>
 </ul>
 
+
+<h2>Languages</h2>
+
+<p>Mongrel2 fans have written quite a few handlers already:</p>
+
+<ul>
+    <li><a href="http://github.com/perplexes/m2r">Ruby (with Rack support)</a></li>
+    <li><a href="http://github.com/berry/Mongrel2-WSGI-Handler">Python (with WSGI)</a></li>
+    <li><a href="http://github.com/akrennmair/mongrel2-cpp">C++</a></li>
+    <li><a href="http://github.com/winks/m2php">PHP</a></li>
+    <li><a href="http://github.com/cmoore/web-mongrel2">Haskell</a></li>
+    <li><a href="http://github.com/vseloved/cl-mongrel2">Common Lisp</a></li>
+    <li><a href="http://github.com/jsimmons/mongrel2-lua/">Lua</a></li>
+</ul>
+
+<p>It is very easy to create a handler, you should read the <a href="http://mongrel2.org/doc/tip/docs/manual/book.wiki#x1-590005.2">manual about handlers</a> for 
+information on writing one for your language.</p>
+
+
 <h2>IRC and Mailing Lists</h2>
 
 <ul>
@@ -63,13 +88,5 @@ Currently we have:<p>
 
 <p>I reserve the right to boot anyone I want off these for being obnoxious, and I arbitrarily define "obnoxious" however I want.</p>
 
-
-<h2>License</h2>
-
-<p>Mongrel2 is BSD Licensed using the 3 clause BSD license, which basically means you can use it how you want but you can't promote your business activities using the names Mongrel2 Project, or its contributors.</p>
-
-<p>You of course can tell anyone you want that that you're using Mongrel2, that your services or your company are based on Mongrel2.  You just can't say that our <b>project</b> endorses your business without explicit permission.</p>
-
-<p>You can read the full <a href="/wiki?name=License">License</a> here.</p>
 
 
