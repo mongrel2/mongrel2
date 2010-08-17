@@ -145,10 +145,7 @@ body {
     background-color: #e1e1e1;
     color: #333;
     font-family: Verdana, sans-serif;
-    background: -webkit-gradient(linear, left top, left bottom, from(#fff), 
-to(#cbccc8));
-    background: -moz-linear-gradient(top,  #fff,  #cbccc8);
-    background: -linear-gradient(top,  #fff,  #cbccc8);
+    background: #cbcccc8;
     font-size: 0.8em;
 }
 
@@ -189,7 +186,7 @@ div.logo {
 
 /* Widths */
 div.header, div.mainmenu, div.submenu, div.content, div.footer {
-    max-width: 900px;
+    max-width: 800px;
     margin: auto;
     padding: 3px 20px 3px 20px;
     clear: both;
@@ -391,6 +388,16 @@ table.report tr td {
 textarea {
     font-size: 1em;
 }
+
+div.sidefloat {
+    left:50%;
+    margin-left:-555px;
+    position:fixed;
+    text-align:right;
+    top:180px;
+    width:102px;
+}
+
 ');
 REPLACE INTO config VALUES('header','<html>
 <head>
@@ -438,7 +445,17 @@ if {[info exists login]} {
 } else {
   html "<a href=''$baseurl/login''>Login</a>"
 }
-</th1><a href="/wiki?name=Donate"><b>Donate!</b></a></div>
+</th1></div>
+<div class="sidefloat">
+<form action="https://www.paypal.com/cgi-bin/webscr" method="post">
+<input type="hidden" name="cmd" value="_s-xclick">
+<input type="hidden" name="encrypted" value="-----BEGIN PKCS7-----MIIHRwYJKoZIhvcNAQcEoIIHODCCBzQCAQExggEwMIIBLAIBADCBlDCBjjELMAkGA1UEBhMCVVMxCzAJBgNVBAgTAkNBMRYwFAYDVQQHEw1Nb3VudGFpbiBWaWV3MRQwEgYDVQQKEwtQYXlQYWwgSW5jLjETMBEGA1UECxQKbGl2ZV9jZXJ0czERMA8GA1UEAxQIbGl2ZV9hcGkxHDAaBgkqhkiG9w0BCQEWDXJlQHBheXBhbC5jb20CAQAwDQYJKoZIhvcNAQEBBQAEgYCRpfRF6XMAXMREFkqlf7ESYJSoWXkZR6Sq/aamttWQV1N40ZdZq7IZuzHoOcbPDRDgy3vKqizZVso+fLE2uUX7FQ5f2kGh1CB8ToFBDFkp70W+XHwtaA3t/121qaOhx81RiU5uhmdzJotuxbjHiJhqgTYAW06de2lXcIEUj/r+4DELMAkGBSsOAwIaBQAwgcQGCSqGSIb3DQEHATAUBggqhkiG9w0DBwQIq85LMDZBLteAgaBYbNSEekyV5cNv7mrfZONLR06Pc/MAh+fy/pXLI6PtR/ulhPqcehmLPSCkjBl1Q8q0UwKF9Hp7G4jqqYUYOVAaoU33mmzbc40N736vUN68+5akWU8vQMUs+yzdK8yoEzAgTrSsNrBD7p42RE5Rkgtd6jGRvDlyABhF6XZb26vaIly3sH8z631BcOcCjh1Mn5+YSdwQjQAfigyI+blFtH5qoIIDhzCCA4MwggLsoAMCAQICAQAwDQYJKoZIhvcNAQEFBQAwgY4xCzAJBgNVBAYTAlVTMQswCQYDVQQIEwJDQTEWMBQGA1UEBxMNTW91bnRhaW4gVmlldzEUMBIGA1UEChMLUGF5UGFsIEluYy4xEzARBgNVBAsUCmxpdmVfY2VydHMxETAPBgNVBAMUCGxpdmVfYXBpMRwwGgYJKoZIhvcNAQkBFg1yZUBwYXlwYWwuY29tMB4XDTA0MDIxMzEwMTMxNVoXDTM1MDIxMzEwMTMxNVowgY4xCzAJBgNVBAYTAlVTMQswCQYDVQQIEwJDQTEWMBQGA1UEBxMNTW91bnRhaW4gVmlldzEUMBIGA1UEChMLUGF5UGFsIEluYy4xEzARBgNVBAsUCmxpdmVfY2VydHMxETAPBgNVBAMUCGxpdmVfYXBpMRwwGgYJKoZIhvcNAQkBFg1yZUBwYXlwYWwuY29tMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDBR07d/ETMS1ycjtkpkvjXZe9k+6CieLuLsPumsJ7QC1odNz3sJiCbs2wC0nLE0uLGaEtXynIgRqIddYCHx88pb5HTXv4SZeuv0Rqq4+axW9PLAAATU8w04qqjaSXgbGLP3NmohqM6bV9kZZwZLR/klDaQGo1u9uDb9lr4Yn+rBQIDAQABo4HuMIHrMB0GA1UdDgQWBBSWn3y7xm8XvVk/UtcKG+wQ1mSUazCBuwYDVR0jBIGzMIGwgBSWn3y7xm8XvVk/UtcKG+wQ1mSUa6GBlKSBkTCBjjELMAkGA1UEBhMCVVMxCzAJBgNVBAgTAkNBMRYwFAYDVQQHEw1Nb3VudGFpbiBWaWV3MRQwEgYDVQQKEwtQYXlQYWwgSW5jLjETMBEGA1UECxQKbGl2ZV9jZXJ0czERMA8GA1UEAxQIbGl2ZV9hcGkxHDAaBgkqhkiG9w0BCQEWDXJlQHBheXBhbC5jb22CAQAwDAYDVR0TBAUwAwEB/zANBgkqhkiG9w0BAQUFAAOBgQCBXzpWmoBa5e9fo6ujionW1hUhPkOBakTr3YCDjbYfvJEiv/2P+IobhOGJr85+XHhN0v4gUkEDI8r2/rNk1m0GA8HKddvTjyGw/XqXa+LSTlDYkqI8OwR8GEYj4efEtcRpRYBxV8KxAW93YDWzFGvruKnnLbDAF6VR5w/cCMn5hzGCAZowggGWAgEBMIGUMIGOMQswCQYDVQQGEwJVUzELMAkGA1UECBMCQ0ExFjAUBgNVBAcTDU1vdW50YWluIFZpZXcxFDASBgNVBAoTC1BheVBhbCBJbmMuMRMwEQYDVQQLFApsaXZlX2NlcnRzMREwDwYDVQQDFAhsaXZlX2FwaTEcMBoGCSqGSIb3DQEJARYNcmVAcGF5cGFsLmNvbQIBADAJBgUrDgMCGgUAoF0wGAYJKoZIhvcNAQkDMQsGCSqGSIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTAwNzI1MDY0ODQyWjAjBgkqhkiG9w0BCQQxFgQU3awW6IrkBXUtQrw87rtO7ePMHwYwDQYJKoZIhvcNAQEBBQAEgYCwDp5AAamD+K40L2NRDHW/OWOuns0Fjn19Go3YQnhr/uUIGA/GoM1/ISId0f1xjj44u8QNbxJ4PmiYbBV3/ieFtpqZV5MHkMlSz35DR3Agm8Hlj+LwpkrUfcG2HDnG14Z1AICzACREg3bJWQ/5UAERFD2CeJIqQ/R9Rmy6iQufYQ==-----END PKCS7-----
+">
+<input type="image" src="https://www.paypal.com/en_US/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+<img alt="" border="0" src="https://www.paypal.com/en_US/i/scr/pixel.gif" width="1" height="1">
+</form>
+<a href="http://mongrel2.org/wiki?name=Donate">Why donate?</a>
+</div>
 ');
 REPLACE INTO config VALUES('footer','<div class="footer">
 Copyright 2010 Zed A. Shaw.  All rights reserved.  <a href="http://mongrel2.org/wiki?name=License">BSD Licensed.</a> Mongrel2 is Trademark by Zed A. Shaw.

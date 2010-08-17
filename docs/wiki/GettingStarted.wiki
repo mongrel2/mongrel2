@@ -1,279 +1,109 @@
 <h1>Getting Started With Mongrel2</h1>
 
-<p>This document is designed for early adopters who want to get into hacking on Mongrel2 and seeing where it's going.  It gets you working with the source so that you can track changes immediately and potentially contribute.  The instructions are not designed for someone who will eventually use it.  There will be better instructions when there's official releases that are much more succinct.</p>
+<p>This is the fastest way to get started with Mongrel2.  Nothing is really
+explained, just all the stuff you need is setup and you get to run a few commands.
+If you want very good explanations for all of this, go read 
+<a href="/doc/tip/docs/manual/book.wiki">The Mongrel2 Manual (HTML)</a> a complete manual covering everything from getting started, to writing your first handlers.</p>
 
-<h2>Building Externals</h2>
+<p>This getting started assumes you know what you're doing and can run commands in Unix.</p>
 
-<ul><li>Go get <a href="http://www.fossil-scm.org/download.html">Fossil (latest)</a> and <a href="http://zeromq.org">ZeroMQ (2.0.7)</a> and install them on your system.  <b>Do not use your package manager, they will get it wrong.</b>
-</li><li>Python 2.6 (2.5 might work too).
-</li><li>PyZMQ from <a href="http://github.com/ellisonbg/pyzmq">PyZMQ</a> with git and install that using "sudo python setup.py install".
-</li><li><a href="http://webpy.org/">web.py</a> for some of the samples later.
-</li><li>Finally, you will need a recent version of gmake to make the build work, but that is all.  <b>Premake4 is no longer used.</b>
-</li><li>For the m2sh config system (which uses Python) install nose, simplejson, storm, and pyrepl using <a href="http://pypi.python.org/pypi/distribute">distribute</a> or <a href="http://pypi.python.org/pypi/pip/0.7.2">pip</a>.</li></ul>
 
-<p><b>WARNING:</b> Sometimes, you feel like you need absolute control, so you go crazy and install everything by hand.  Well, good luck to you, because the dependency chains on modern software are massive.  Should you run into any other packages missing that are dependent below these mentioned ones, then you are on your own.  Modern systems managers use automated software installers and packagers that properly get dependencies right, and things like sqlite3 are a <b>standard</b> part of Python now.  Short version:  If you run into packages that are missing, it's on you to figure out how to get them installed, not me to write docs for every bizarro distro that packages stuff weird.</p>
+<h1>Building The Dependencies</h1>
 
-<p>Once you have all the requirements installed you can then build Mongrel2 and install it.</p>
+<p>Here's how I might do it on ArchLinux:</p>
 
-<h2>Getting The Source</h2>
-
-<p>Using fossil, check out the source code:</p>
-
-<pre class="verbatim">
-mkdir ~/fossils
-fossil clone http://mongrel2.org ~/fossils/mongrel2.fossil
-mkdir mongrel2
-cd mongrel2
-fossil open ~/fossils/mongrel2.fossil
+<pre>
+# install ZeroMQ 
+wget http://www.zeromq.org/local--files/area:download/zeromq-2.0.7.tar.gz 
+tar -xzvf zeromq-2.0.7.tar.gz 
+cd zeromq-2.0.7/ 
+./configure 
+make 
+sudo make install 
+ 
+# install python 
+sudo pacman -S python 
+ 
+# install sqlite3 
+sudo pacman -S sqlite3 
+ 
+# install distribute and pip 
+sudo pacman -S python-pip 
+sudo pip install distribute 
+ 
+# install PyZMQ from github 
+sudo pacman -S git 
+git clone http://github.com/zeromq/pyzmq.git 
+sudo python setup.py install 
+ 
+# web.py 
+sudo pip install web.py
 </pre>
 
-<p><b>WARNING</b>: Make sure you follow these exactly.  If you get an error "unable to open database file", it's probably because you tried to clone fossils/mongrel2.fossil <em>before</em> you created the ~/fossils/ directory.  Don't blame fossil because you can't read instructions, and don't think git will help you with that.  You seen those flow charts?  Git is like a Ph.D. in DVCS.</p>
 
-<h2>Learn About Fossil</h2>
+<h1>Getting The Source</h1>
 
-<p>Read the <a href="http://www.fossil-scm.org/fossil/doc/tip/www/quickstart.wiki">Fossil Quick Start</a> so you know what you're doing a bit.  Remember that the source you checked out is like a branch, and that the <b>real</b> repository for you is the ~/fossils/mongrel2.fossil file.  You can copy this to any platform, rsync it somewhere, do anything you want.  This file and your source are what get synced against the <a href="http://mongrel2.org">mongrel2.org</a> web site.</p>
+<p>Quickest way to do that is to grab the tar.bz2 file:</p>
 
-<h2>Building Mongrel2</h2>
-
-<p><b>WARNING:</b>Python's package management is a total disaster, so if you had a previous version of the Mongrel2 Python code you'll have to uninstall it.  For this I recommend you install <b>pip</b> and do <b>sudo pip uninstall mongrel2-python</b> then if you get any errors about the <b>config module</b> then you'll have to go on an expedition to find any mongrel2-python packages and remove them.  How in the world the m2py package can <b>possibly</b> load another package's files is beyong me, but I'm sure someone who knows how Python packaging actually works has some incredibly complex and idiotic reason for it.</p>
-
-<p>Now you can try to build it:</p>
-
-<pre class="verbatim">
-make clean
-make
-make install
+<pre>
+wget http://mongrel2.org/static/mongrel2-1.0beta.tar.bz2
 </pre>
 
-<p>Remember, you <b>must have</b> gmake or this will fail.  BSD make won't work for this, but most everyone can get gmake.  When you do the <b>make install</b> it will need sudo to do the actual install, but it will minimize the sudo use.</p>
 
-<p>If you have unit test failures then <a href="http://mongrel2.org/reportlist">submit a ticket</a> with your output in a &lt;verbatim&gt; tag or as an attachment.  If you have a segfault then run that one test under gdb and do a backtrace, like this:</p>
+<h1>Building Mongrel2</h1>
 
-<pre class="verbatim">
-~/projects/mongrel2 $ gdb tests/listener_tests
-... GDB's stupid license spam ...
-Reading symbols from /home/zedshaw/projects/mongrel2/tests/listener_tests...done.
-(gdb) run
-Starting program: /home/zedshaw/projects/mongrel2/tests/listener_tests
-&#91;Thread debugging using libthread_db enabled&#93;
-----  
-RUNNING: /home/zedshaw/projects/mongrel2/tests/listener_tests
-&#91;New Thread 0xb7c2ab70 (LWP 2641)&#93;
-&#91;New Thread 0xb7429b70 (LWP 2642)&#93;
-VEVTVA==
-Program received signal SIGSEGV, Segmentation fault.
-0xb7e1dac0 in strnlen () from /lib/libc.so.6
-(gdb) backtrace
-#0  0xb7e1dac0 in strnlen () from /lib/libc.so.6
-#1  0xb7de720b in vfprintf () from /lib/libc.so.6
-#2  0xb7deb5d2 in buffered_vfprintf () from /lib/libc.so.6
-#3  0xb7de64b3 in vfprintf () from /lib/libc.so.6
-#4  0xb7df0d0f in fprintf () from /lib/libc.so.6
-... lots of output we need...
-#10 0x08056822 in test_Listener_task () at tests/listener_tests.c:76
-#11 0x08056b48 in all_tests () at tests/listener_tests.c:119
-#12 0x08056bbb in taskmain (argc=1, argv=0xbffff874)
-    at tests/listener_tests.c:124
-#13 0x0804f8e6 in taskmainstart (v=0x0) at task.c:349
-(gdb) 
+<p>Now you need to build mongrel2:</p>
+
+<pre>
+tar -xjvf mongrel2-1.0beta.tar.bz2
+cd mongrel2_2010-08-17_011326_58fb817f8e/
+make clean all install
 </pre>
 
-<p>This is an actual backtrace I did, with sections cut out for this document.  Please give us the full backtrace so we can track it down, and all the usual information about your platform.</p>
+<p>The version number for your directory might be different since we 
+update it frequently.</p>
 
-<h2>A First Test Run</h2>
 
-<p>You can now try to run the test instance of Mongrel2 by doing this:</p>
+<h1>Configuring The First Time</h1>
 
-<pre class="verbatim">
-mongrel2 tests/config.sqlite localhost
+<p>Now you can try out the simplest config example and get it running:</p>
+
+<pre>
+cp examples/python/tests/sample_conf.py myconfig.py
+m2sh init -db myconfig.sqlite
+m2sh load -db myconfig.sqlite  -config myconfig.py
 </pre>
 
-<p>This will start the Mongrel2 server listening on port 6767 and proxying HTTP requests to another web server on port 8080 on localhost.  Start another web server and see if it works.</p>
+<p><b>NOTE:</b>There's also examples/python/tests/mongrel2_org.py which is a more complete example.</p>
 
-<h2>Running A Daemon</h2>
 
-<p>Now if you want to run it for real, you need to make a couple of directories and start it as root:</p>
+<h1>Running Mongrel2</h1>
 
-<pre class="verbatim">
-mkdir logs
-mkdir run
-mkdir tmp
-sudo mongrel2 tests/config.sqlite localhost
+<p>Now you can run this and try it.  Make sure you're still in the mongrel2 source directory:</p>
+
+<pre>
+mkdir run logs tmp
+m2sh start -db myconfig.sqlite -host localhost
 </pre>
 
-<p><b>WARNING</b> Some operating systems live in the 90's and don't include /usr/local/bin in your default PATH.  Add it if you can't find mongrel2.</p>
+<p>From another window do:</p>
 
-<p>These directories will then get files:</p>
-
-<ul><li>logs/error.log
-</li><li>run/mongrel2.pid</li></ul>
-
-<p>After you run Mongrel2, it will look at whoever owns the directory it is in (you) and it will drop privileges to the owner.  This makes sure that Mongrel2 properly drops privileges without having to get you to configure it right. </p>
-
-<p>At this point Mongrel2 is now chroot to the current working directory, created pid file and log file, dropped privileges to a safer user who owns that directory, and then fired up your configuration.</p>
-
-<h2>Testing The Features</h2>
-
-<p>Once you do that you can try a few tests using <a href="http://curl.haxx.se/">cUrl</a> to make sure certain things work.  First, you'll want to run a few things in other windows using Python and ZeroMQ.  Run each of these in a separate window so you can watch them:</p>
-
-<pre class="verbatim">
---- window 1 ----
-cd examples/chat
-python www.py
-
---- window 2 ----
-cd examples/chat
-python chat.py
-
---- window 3 ----
-cd example/http_0mq
-python http.py
-</pre>
-
-<p>With all of this running and Mongrel2 you can now try some demos out using curl:</p>
-
-<pre class="verbatim">
-curl http://localhost:6767/
-curl http://localhost:6767/Zed
+<pre>
 curl http://localhost:6767/tests/sample.html
-curl http://localhost:6767/tests/sample.json
-curl http://localhost:6767/handlertest
-curl http://localhost:6767/chatdemo/
-</pre>
-
-<p>Next, try out the chat demo with your browser by going to http://localhost:6767/chatdemo/ yourself.  Probably pretty lonely but there you go, you have chat.  Check out the chat window to watch your message travel around.</p>
-
-<h2>Writing Handlers</h2>
-
-<p>The examples used above are in Python, and you can take a look at the simple Python library those examples use in the <b>examples/python</b> library.
-There are also libraries for the following languages:</p>
-
-<ul><li><a href="http://github.com/winks/m2php">PHP</a>
-</li><li><a href="http://github.com/akrennmair/mongrel2-cpp">C++</a>
-</li><li><a href="http://github.com/perplexes/m2r">Ruby</a></li></ul>
-
-<p>Each of these are written by different authors and they usually hang out in #mongrel2 on irc.freenode.org.</p>
-
-<h1>m2sh</h1>
-
-<p>Mongrel2 uses a "Model-View-Controller" design for its configuration system.  You notice that you're starting Mongrel2 with a sqlite3 database and this database actually configures a mongrel2 server.  This database is the Model of the MVC system, with Mongrel2 servers as the "Controller".</p>
-
-<p>The "View" is the <b>m2sh</b> program that gives you a way to manage, configure, and interact with Mongrel2.  It is literally the "user interface" to the Mongrel2 server for shell users.  You could write a similar program in any other language, a web application, a desktop app, and everything would work just fine.  This is the advantage of m2sh and the MVC design of Mongrel2:  You can easily automate it yourself.</p>
-
-<p>To try out m2sh just do this:</p>
-
-<pre class="verbatim">
-m2sh help
-m2sh servers -db tests/config.sqlite
-m2sh hosts -db tests/config.sqlite -host localhost
-</pre>
-
-<p>That does a basic dump of your configuration, but you can also use it as a shell with history (thanks to PyRepl):</p>
-
-<pre class="verbatim">
-m2sh
-m2> help
-m2> help -for servers
-m2> servers -db tests/config.sqlite
-m2> hosts -db tests/config.sqlite -host localhost
-m2> ^d
-Bye.
-</pre>
-
-<h2>Configuring Mongrel2</h2>
-
-<p>We'll now try to configure mongrel using m2sh.  There is a sample configuration we'll play with in 
-<a href="/artifact?name=32fb2bbf3829cf0ed93efd00817cdc8da1c6f6c8">examples/python/tests/sample_conf.py that looks like this.</a></p>
-
-
-<p>This is actually Python code that sets up a configuration script.  For now we just use Python since it has some advantages, but later there may be another format.</p>
-
-<p>How this works is m2sh will "load" this and it will create your configuration database for you, and it will
-log what you did.  Here's how you do it:</p>
-
-<pre class="verbatim">
-m2sh
-m2> init -db test.sqlite
-m2> load -db test.sqlite -config examples/python/tests/sample_conf.py
-m2> servers -db test.sqlite
--------
-localhost f400bf85-4538-4f7a-8908-67e313d515c2
-	1 : localhost
-m2> hosts -db test.sqlite -host localhost
---------
-Host(maintenance=0, name=u'localhost', matching=u'localhost') :
-	/tests/ : Dir(base=u'tests/', index_file=u'index.html', default_ctype=u'text/plain')
-m2> 
-</pre>
-
-<h2>Managing Mongrel2</h2>
-
-<p>You can now try starting this server, and we'll use m2sh to make sure that it starts and your old one stops:</p>
-
-<pre class="verbatim">
-m2> running -db tests/config.sqlite -host localhost
-NO: Mongrel2 server localhost NOT at PID 19299
-</pre>
-
-<p>If your server is running then do:</p>
-
-<pre class="verbatim">
-m2> stop -db tests/config.sqlite -host localhost
-</pre>
-
-<p>Now you can start it up and try it out:</p>
-
-<pre class="verbatim">
-m2> start -db test.sqlite -host localhost -sudo
-m2> running -db test.sqlite -host localhost
-YES: Mongrel2 server localhost running at PID 27812
-m2> ^d
-Bye.
-</pre>
-
-<p>Finally you can try a few curl commands to play with your server and then stop it:</p>
-
-<pre class="verbatim">
-~/projects/mongrel2 $ curl http://localhost:6767/tests/
 hi there
-~/projects/mongrel2 $ curl -i http://localhost:6767/tests/
-HTTP/1.1 200 OK
-Date: Sun, 18 Jul 10 03:46:51 +0000
-Content-Type: text/plain
-Content-Length: 9
-Last-Modified: Wed, 14 Jul 10 19:20:10 +0000
-ETag: 4c3e0dea-9
-Connection: keep-alive
-
-hi there
-~/projects/mongrel2 $ m2sh stop -db test.sqlite -host localhost
-~/projects/mongrel2 $ m2sh running -db test.sqlite -host localhost
-NO: Mongrel2 server localhost NOT at PID 27812
 </pre>
 
-<h2>A More Complex Configuration</h2>
 
-<p>There is also a config in <a href="/artifact?name=92e4e01c649d0ceef7d1b3afca715198c05b6723">examples/python/tests/mongrel2_org.py</a> that is the same the one that runs mongrel2.org.</p>
+<h1>Shutting Down</h1>
+
+<p>Just do CTRL-C and it'll exit.  <b>m2sh</b> has many other commands and some of them
+shut things down or restart.  Run <b>m2sh help</b> to find out more.
+</p>
 
 
-<p>This one is longer because it sets up a few examples and does a more real server configuration, but just like the previous one it's also
-in Python.</p>
+<h1>Learn More From The Manual</h1>
 
-<h2>Mongrel2 Config Action Log</h2>
-
-<p>When you manage any system you want to have a log of who did what to it, so you can find out why something may be broken.
-One of the best practices is to use a revision control tool to manage your configurations, but those have problems when the
-config needs to change for each box.</p>
-
-<p>While a revision control tool is useful, Mongrel2 also keeps track of who did what to a config database using the log and commit
-commands of m2sh.</p>
-
-<p>Fairly simple, but it is maintained even if you reload the configuration and do an init.</p>
-
-<h2>Getting Help</h2>
-
-<p>If you run into problems then you can hop onto the #mongrel2 IRC channel at irc.freenode.org and we'll help out.</p>
-
-<h2>Contributing To Mongrel2</h2>
-
-<p>Feel free to join the <a href="mailto:mongrel2@librelist.com">mongrel2@librelist.com mailing list</a> and start talking about what you want it to do, filling out tickets, or hacking on tooling you think it might need.</p>
+<p>That is the fastest crash course you can get in running Mongrel2.  You
+should now go read <a href="/doc/tip/docs/manual/book.wiki">The Mongrel2 Manual
+ (HTML)</a> which we took much more time writing and making very nice for
+you.</p>

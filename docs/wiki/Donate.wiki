@@ -1,6 +1,11 @@
 <h1>Donating To Mongrel2</h1>
 
-<p>The Mongrel2 Project is volunteer run and mostly written by me, <a href="http://zedshaw.com">Zed A. Shaw</a>.  If you believe in the project's goal of a truly programming language agnostic practical bad ass web server, then please donate.  You can also see a list of <a href="/wiki?name=Donors">Donors</a> so far. <b>Donations go to feeding me and paying my rent so that I don't have to get a day job and can work on Mongrel2 full time and make it awesome.</b></p>
+<p>The Mongrel2 Project is volunteer run and mostly written by me, <a
+href="http://zedshaw.com">Zed A. Shaw</a>.  If you believe in the project's
+goal of a truly programming language agnostic practical bad ass web server,
+then please donate.  You can also see a list of <a
+href="/wiki?name=Donors">Donors</a> so far.  Donations
+go to me as a way to fund my work on Mongrel2.</p>
 
 <h2>Donate With Paypal</h2>
 
@@ -18,9 +23,9 @@
 <h2>Donate With Amazon (US Only)</h2>
 
 <p>
-<b>Amazon is currently reviewing the Mongrel2.org donations</b> and may return the money that has been donated so far.  Once they've made a decision
-I will notify everyone who donated personally and make sure you get every penny.  I'm also not going to use Amazon for donations anymore because of
-how irritating this is and their fairly lax policy of allowing donations then denying them after a sum has been submitted.
+I used to accept donations from Amazon, but they decided to hold money early on pending a review.  I now don't use them, and don't recommend
+them to anyone else.  If you want to use Amazon, then you can give me a gift certificate if you like.  Send it to <a href="mailto:zedshaw@zedshaw.com">zedshaw@zedshaw.com</a>
+and I'll be happy to use it.  I buy stuff from Amazon all the time.
 </p>
 
 
