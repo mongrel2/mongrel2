@@ -10,8 +10,9 @@ import subprocess
 import sys
 
 from zcov import GCovGroup
-from GCovParser import GCovFileData
+from zcov.GCovParser import GCovFileData
 import Image
+from pkg_resources import resource_stream
 
 ###
 
@@ -257,15 +258,16 @@ def writeResources(directory):
     a = a.transpose(Image.ROTATE_270)
     a.save(os.path.join(directory,'round-corner-tr-%d.png'%(kRoundRectSize,)))
 
-    base = os.path.dirname(os.path.realpath(__file__))
     f = open(os.path.join(directory,'sorttable.js'),'w')
-    f.write(open(os.path.join(base, 'js/sorttable.js')).read())
+    f.write(resource_stream('zcov', 'data/js/sorttable.js').read())
     f.close()
+
     f = open(os.path.join(directory,'sourceview.js'),'w')
-    f.write(open(os.path.join(base, 'js/sourceview.js')).read())
+    f.write(resource_stream('zcov', 'data/js/sourceview.js').read())
     f.close()
+
     f = open(os.path.join(directory,'style.css'),'w')
-    f.write(open(os.path.join(base, 'style.css')).read())
+    f.write(resource_stream('zcov', 'data/style.css').read())
     f.close()
 
 class GcovSummary:

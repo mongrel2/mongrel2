@@ -1,6 +1,8 @@
 # CFLAGS=-g -O2 -Wall -Isrc -DNDEBUG
-CFLAGS=-g -Wall -Isrc -fprofile-arcs -ftest-coverage
+CFLAGS=-g -Wall -Isrc 
 LIBS=-lzmq -lsqlite3
+
+# CFLAGS := $(CFLAGS) -fprofile-arcs -ftest-coverage
 
 ASM=$(wildcard src/**/*.S src/*.S)
 RAGEL_TARGETS=src/state.c src/http11/http11_parser.c
@@ -76,3 +78,8 @@ valgrind:
 %.o: %.S
 	$(CC) $(CFLAGS) -c $< -o $@
 
+coverage: clean all
+	rm -rf tests/m2.zcov tests/coverage
+	zcov-scan tests/m2.zcov
+	zcov-genhtml tests/m2.zcov tests/coverage
+	zcov-summarize tests/m2.zcov
