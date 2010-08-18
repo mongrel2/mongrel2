@@ -1,8 +1,6 @@
-# CFLAGS=-g -O2 -Wall -Isrc -DNDEBUG
 CFLAGS=-g -Wall -Isrc 
 LIBS=-lzmq -lsqlite3
 
-# CFLAGS := $(CFLAGS) -fprofile-arcs -ftest-coverage
 
 ASM=$(wildcard src/**/*.S src/*.S)
 RAGEL_TARGETS=src/state.c src/http11/http11_parser.c
@@ -14,6 +12,9 @@ TEST_SRC=$(wildcard tests/*.c)
 TESTS=$(patsubst %.c,%,${TEST_SRC})
 
 all: bin/mongrel2 tests
+
+release: CFLAGS=-g -O2 -Wall -Isrc -DNDEBUG
+release: all
 
 bin/mongrel2: build/libm2.a src/mongrel2.o
 	$(CC) $(CFLAGS) $(LIBS) src/mongrel2.o -o $@ $<
@@ -78,6 +79,7 @@ valgrind:
 %.o: %.S
 	$(CC) $(CFLAGS) -c $< -o $@
 
+coverage: CFLAGS += -fprofile-arcs -ftest-coverage
 coverage: clean all
 	rm -rf tests/m2.zcov tests/coverage
 	zcov-scan tests/m2.zcov
