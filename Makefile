@@ -48,7 +48,7 @@ tests/config.sqlite: src/config/config.sql src/config/example.sql src/config/mim
 	sqlite3 $@ < src/config/example.sql
 	sqlite3 $@ < src/config/mimetypes.sql
 
-$(TESTS): %: %.c
+$(TESTS): %: %.c build/libm2.a
 	$(CC) $(CFLAGS) $(LIBS) -o $@ $< build/libm2.a
 
 src/state.c: src/state.rl src/state_machine.rl
