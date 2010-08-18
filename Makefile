@@ -1,6 +1,6 @@
 CFLAGS=-g -Wall -Isrc 
 LIBS=-lzmq -lsqlite3
-
+PREFIX=/usr/local
 
 ASM=$(wildcard src/**/*.S src/*.S)
 RAGEL_TARGETS=src/state.c src/http11/http11_parser.c
@@ -59,10 +59,12 @@ check:
 	@echo Files with potentially dangerous functions.
 	@egrep '[^_.>a-zA-Z0-9](str(n?cpy|n?cat|xfrm|n?dup|str|pbrk|tok|_)|stpn?cpy|a?sn?printf|byte_)' $(filter-out src/bstr/bsafe.c,${SOURCES})
 
-install: python all
-	sudo install bin/mongrel2 /usr/local/bin/
+install: all install-bin install-py 
 
-python: examples/python/mongrel2/sql/config.sql
+install-bin:
+	sudo install bin/mongrel2 $(PREFIX)/bin/
+
+install-py: examples/python/mongrel2/sql/config.sql
 	cd examples/python && sudo python setup.py install
 
 examples/python/mongrel2/sql/config.sql: src/config/config.sql src/config/mimetypes.sql

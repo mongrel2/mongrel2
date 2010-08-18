@@ -1,6 +1,6 @@
 CFLAGS=-I../../src -g
 LIBS=../../build/libm2.a -lzmq -lsqlite3
-
+PREFIX=/usr/local
 
 all: procer
 
@@ -12,4 +12,4 @@ clean:
 	rm -f *.o procer
 
 install:
-	sudo install procer /usr/local/bin/
+	sudo install procer $(PREFIX)/bin/
