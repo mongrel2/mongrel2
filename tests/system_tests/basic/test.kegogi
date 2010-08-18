@@ -1,0 +1,10 @@
+defaults host="localhost" port="6767"
+
+send GET /
+expect 200
+
+send GET /foo
+expect 404
+
+send GET /foobar
+expect 200
