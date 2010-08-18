@@ -1,0 +1,28 @@
+/* Source code view: line number format */
+span.lineNum {
+  background-color: #EFE383;
+}
+
+/* Source code view: format for lines which were executed */
+span.lineCov {
+  background-color: #CAD7FE;
+}
+
+/* Source code view: format for lines which were not executed */
+span.lineNoCov {
+  background-color: #FF6230;
+}
+
+/* Source code view: span to bracket branches, so they can be toggled */
+span.branchGroup {
+}
+
+/* Source code view: format for branches which were executed */
+span.branchTaken {
+  background-color: #CAD7FE;
+}
+
+/* Source code view: format for branches which were not executed */
+span.branchNotTaken {
+  background-color: #FF6230;
+}

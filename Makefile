@@ -1,5 +1,5 @@
 # CFLAGS=-g -O2 -Wall -Isrc -DNDEBUG
-CFLAGS=-g -Wall -Isrc
+CFLAGS=-g -Wall -Isrc -fprofile-arcs -ftest-coverage
 LIBS=-lzmq -lsqlite3
 
 ASM=$(wildcard src/**/*.S src/*.S)
@@ -26,6 +26,7 @@ build:
 
 clean:
 	rm -rf build bin lib ${OBJECTS} ${TESTS} tests/config.sqlite
+	find . -name "*.gc*" -exec rm {} \;
 
 pristine: clean
 	sudo rm -rf examples/python/build examples/python/dist examples/python/m2py.egg-info
