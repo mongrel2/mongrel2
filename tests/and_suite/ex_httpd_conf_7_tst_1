@@ -1,0 +1,23 @@
+GET / HTTP/1.1
+Host: foo.EXAMPLE.Com
+
+GET /conf1-index.html HTTP/1.1
+Host: foo.EXAMPLE.com
+
+GET /conf2/ HTTP/1.1
+Host: foo.EXAMPLE.com
+
+GET /conf3/ HTTP/1.1
+Host: foo.example.COM
+
+GET /conf4/ HTTP/1.1
+Host: foo.example.com
+
+GET /conf4 HTTP/1.1
+Host: foo.example.com
+
+GET /conf4/non-exist HTTP/1.1
+Host: foo.EXAMPLE.com
+
+GET /conf4/non-exist HTTP/1.0
+

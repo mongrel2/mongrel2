@@ -1,0 +1,7 @@
+HEAD http://default/README HTTP/1.1
+Host:
+
+GET http://default/README HTTP/1.1
+Host:
+COnnection: close
+

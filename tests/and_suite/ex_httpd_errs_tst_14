@@ -1,0 +1,4 @@
+BLAH / HTTP/1.1
+Host: abcd
+
+GET / HTTP/1.0

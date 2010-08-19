@@ -1,0 +1,9 @@
+GET / HTTP/1.1
+Host: default
+If-Unmodified-Since: Tue, 12 Oct 2004 07:02:24 GMT
+
+GET / HTTP/1.1
+Host: default
+If-Match: blah
+Connection: close
+

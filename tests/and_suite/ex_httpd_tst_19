@@ -1,0 +1,11 @@
+HEAD                  HTTP://foo.example.com HTTP/1.1
+Host:
+If-Match: 
+ *
+
+HEAD           HTTP://foo.example.com HTTP/1.1
+Host:                       
+If-Match: 
+ *
+Connection: close
+

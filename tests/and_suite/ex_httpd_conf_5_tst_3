@@ -1,0 +1,31 @@
+HEAD / HTTP/1.1
+Host: foo.example.com
+Range: bytes = 0-1 , 2-4 ,
+               4 - 8
+
+HEAD /nothere/5.1-switch-5.3 HTTP/1.1
+Host: foo.example.com
+
+HEAD /there/5.2-neg-CT.html HTTP/1.1
+Host: foo.example.com
+Range: bytes = 0-1 , 2-4 ,
+               4 - 8 ,,,
+
+GET /there/5.2-neg-CT.html HTTP/1.1
+Host: foo.example.com
+Range: bytes = 0-1 , 2-4 ,
+               4 - 8 ,,,
+
+GET /there/5.2-neg-CT.html HTTP/1.1
+Host: foo.example.com
+Range: bytes = ,,0-1,,0-1,,0-1,,0-1,,
+
+GET /there/5.2-neg-CT.txt HTTP/1.1
+Host: foo.example.com
+Range: bytes = ,,0-1,,0-1,,0-1,,0-1,,
+
+HEAD /there/5.2-neg-CT.txt HTTP/1.1
+Host: foo.example.com
+Connection: close
+Range: bytes = 0-1 , 2-4 ,1-,-2,4-
+

@@ -1,0 +1,10 @@
+GET /corner/ HTTP/1.1
+Host: foo.example.com
+
+GET /corner HTTP/1.1
+Host: foo.example.com
+
+GET /corner/index.html/ HTTP/1.1
+Host: foo.example.com
+Connection: close
+

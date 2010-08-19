@@ -1,0 +1,52 @@
+HEAD / HTTP / 1 . 1
+Host:
+ blah            
+
+TRACE / HTTP / 1 . 1
+Host:
+ blah            
+
+GET / HTTP/1.1
+Host:
+             foo.example.com
+             
+
+GET /foo.example.com:1234/ HTTP/1.1
+Host: foo.example.com:1234
+If-Modified-Since:   Sun, 10 Oct 2004 07:02:24 GMT
+
+GET /foo.example.com:1234/ HTTP/1.1
+Host:       X
+If-Range:   Sun, 10 Oct 2004 07:02:24 GMT
+Range:      bytes = 2-9
+
+HEAD http://X/foo.example.com HTTP/1.1
+Host:
+
+GET http://X/foo.example.com HTTP/1.1
+Host:
+
+GET http://X/foo.example.com/ HTTP/1.1
+Host:
+Range:      bytes = 2-9
+
+GET http://X/foo.example.com/.%2F/ HTTP/1.1
+Host:
+Connection: Keep-Alive
+Range:      bytes = 2-9
+
+GET http://X/foo.example.com/index.html HTTP/1.1
+Host:
+Range: bytes = ,,  ,-8,   ,,
+
+GET http://X/foo.example.com/nxt HTTP/1.1
+Host:
+
+GET /foo.example.com/nxt HTTP/1.1
+Host: 
+
+HEAD http://X/foo.example.com/index.html HTTP/1.1
+Range:      bytes = 2-9
+Connection: close
+Host:
+

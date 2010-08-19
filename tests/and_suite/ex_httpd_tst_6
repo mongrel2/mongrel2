@@ -1,0 +1,13 @@
+
+
+GET http://defaulT/bin#one HTTP/1.1
+Host:
+
+
+GET http://defaulT/bin#two HTTP/1.1
+Host:
+
+GET http://defaulT/bin#foo HTTP/1.1
+Host:
+Connection: close
+

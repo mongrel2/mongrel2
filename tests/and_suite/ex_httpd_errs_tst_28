@@ -1,0 +1,69 @@
+HEAD http://default/ HTTP/1.1
+HOST:
+Accept-Encoding: blah
+
+HEAD http://default/ HTTP/1.1
+HOST:
+Accept-Encoding: 
+
+HEAD http://default/ HTTP/1.1
+HOST:
+Accept-Encoding: gzip X
+
+HEAD http://default/ HTTP/1.1
+HOST:
+Accept-Encoding: gzip , foo 
+
+HEAD http://default/ HTTP/1.1
+HOST:
+Accept-Encoding: gzip ; foo 
+
+HEAD http://default/ HTTP/1.1
+HOST:
+Accept-Encoding: gzip ; q foo 
+
+HEAD http://default/ HTTP/1.1
+HOST:
+Accept-Encoding: gzip ; q = foo 
+
+HEAD http://default/ HTTP/1.1
+HOST:
+Accept-Encoding: gzip ; q = 0 
+
+HEAD http://default/ HTTP/1.1
+HOST:
+Accept-Encoding: gzip ; q = 0 , foo
+
+HEAD http://default/ HTTP/1.1
+HOST:
+Accept-Encoding: gzip ; q = 0 foo 
+
+HEAD http://default/ HTTP/1.1
+HOST:
+Accept-Encoding: gzip ; q = 0 . x 
+
+HEAD http://default/ HTTP/1.1
+HOST:
+Accept-Encoding: gzip ; q = 0 . 6666 
+
+HEAD http://default/ HTTP/1.1
+HOST:
+Accept-Encoding: ,,identity ; q = 2 . 001 ,,
+
+HEAD http://default/ HTTP/1.1
+HOST:
+Accept-Encoding: ,,gzip;q=0, identity ; q = 0 ,,*
+
+HEAD http://default/ HTTP/1.1
+HOST:
+Accept-Encoding: * ; q = 1 . 010 
+
+HEAD http://default/ HTTP/1.1
+HOST:
+Accept-Encoding: ,,* ; q = 0 . 001 ,,
+
+HEAD http://default/ HTTP/1.1
+HOST:
+Accept-Encoding: ,,blah;q=1,,
+Connection: close
+

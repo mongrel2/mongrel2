@@ -1,0 +1,25 @@
+HEAD / HTTP/1.1
+Host: default
+Accept: a/b ; blah="\
+
+HEAD / HTTP/1.1
+Host: default
+Accept: a/b ; blah="x
+
+HEAD / HTTP/1.1
+Host: default
+Accept: */* ; q = 1.
+
+HEAD / HTTP/1.1
+Host: default
+Accept: text/* ; q = 
+
+HEAD / HTTP/1.1
+Host: default
+Accept: text/plain  X
+
+HEAD / HTTP/1.1
+Host: default
+Accept: text/plain ; X =
+Connection: close
+

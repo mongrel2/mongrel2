@@ -1,0 +1,46 @@
+GET / HTTP/1.1
+Host: default
+Range: 1-2
+
+GET / HTTP/1.1
+Host: default
+Range: bytes 1-2
+
+GET / HTTP/1.1
+Host: default
+Range: bytes = -x
+
+GET / HTTP/1.1
+Host: default
+Range: bytes = -2000000
+
+GET / HTTP/1.1
+Host: default
+Range: bytes = 2000000
+
+GET / HTTP/1.1
+Host: default
+range: bytes = 2000000-x
+
+GET / HTTP/1.1
+Host: default
+Range: bytes = 2000000-1
+
+GET / HTTP/1.1
+Host: default
+If-Range: foo
+range: bytes = 2000000-1
+
+GET / HTTP/1.1
+Host: default
+Range: bytes = 1 - 2000000x
+
+GET / HTTP/1.1
+Host: default
+Range: bytes =  - 000000
+
+GET / HTTP/1.1
+Host: default
+Range: bytes = 1 - 2000000
+connection: close
+

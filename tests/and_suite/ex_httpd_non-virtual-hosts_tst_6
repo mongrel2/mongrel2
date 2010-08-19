@@ -1,0 +1,10 @@
+GET //// HTTP/1.1
+Host: none
+
+GET / HTTP/1.1
+Host: none
+
+GET /%2f. HTTP/1.1
+Host: none
+Connection: close
+

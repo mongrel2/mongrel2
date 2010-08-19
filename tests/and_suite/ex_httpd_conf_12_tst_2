@@ -1,0 +1,124 @@
+HEAD /403/1 HTTP/1.1
+Host:
+Accept-Encoding: foo
+
+HEAD /403/1 HTTP/1.1
+Host:
+
+
+HEAD /403/2 HTTP/1.1
+Host:
+If-Modified-Since: foo
+
+HEAD /403/2 HTTP/1.1
+Host:
+If-Modified-Since: x
+
+HEAD /403/2 HTTP/1.1
+Host:
+
+
+HEAD /403/3 HTTP/1.1
+Host:
+If-UNModified-Since: foo
+
+HEAD /403/3 HTTP/1.1
+Host:
+If-Unmodified-Since: x
+
+HEAD /403/3 HTTP/1.1
+Host:
+
+
+HEAD /403/4 HTTP/1.1
+Host:
+If-RANGE: foo
+
+HEAD /403/4 HTTP/1.1
+Host:
+If-Range: x
+
+HEAD /403/4 HTTP/1.1
+Host:
+
+
+HEAD /403/5 HTTP/1.1
+Host:
+If-Match: foo
+
+HEAD /403/5 HTTP/1.1
+Host:
+If-Match: x
+
+HEAD /403/5 HTTP/1.1
+Host:
+
+
+HEAD /403/6 HTTP/1.1
+Host:
+If-NONE-match: foo
+
+HEAD /403/6 HTTP/1.1
+Host:
+If-None-MATCH: x
+
+HEAD /403/6 HTTP/1.1
+Host:
+
+
+HEAD /403/7 HTTP/1.1
+Host:
+X-Moz: foo
+
+HEAD /403/7 HTTP/1.1
+Host:
+
+
+HEAD /403/8 HTTP/1.1
+Host:
+User-Agent: blah_foo_
+
+HEAD /403/8 HTTP/1.1
+Host:
+User-Agent: _foo_
+
+HEAD /403/8 HTTP/1.1
+Host:
+User-AGENT: x
+
+HEAD /403/8 HTTP/1.1
+Host:
+
+
+HEAD /403/9 HTTP/1.1
+Host:
+Referer: news:_x1234
+
+GET /403/9 HTTP/1.1
+Host:
+Referer: news:_x1234
+
+HEAD /403/9 HTTP/1.1
+Host:
+Referer: news:x1234
+
+HEAD /403/9 HTTP/1.1
+Host:
+Referer: news:_foo_
+
+HEAD /403/9 HTTP/1.1
+Host:
+REFERER: x
+
+HEAD /403/9 HTTP/1.1
+Host:
+
+
+GET / HTTP/1.1
+User-AGENT: a
+USER-agent: b
+Host:
+
+HEAD / HTTP/1.1
+Host:
+Comment: above should be an error, but displayed as 404...

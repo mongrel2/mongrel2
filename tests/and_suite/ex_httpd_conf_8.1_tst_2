@@ -1,0 +1,41 @@
+HEAD / HTTP/1.1
+If-None-Match: "f.e.c/1"
+If-None-Match: "f.e.c/2"
+If-None-Match: "f.e.c/3"
+If-None-Match: "f.e.c/4"
+Host: foo.exAMPLE.COM
+
+HEAD / HTTP/1.1
+If-Match: "f.e.c/1"
+If-Match: "f.e.c/2"
+If-Match: "f.e.c/3"
+If-Match: "f.e.c/4"
+Host: foo.exAMPLE.COM
+
+HEAD / HTTP/1.1
+If-None-Match: W/"f.e.c/1", W/"f.e.c/2", W/"f.e.c/3", W/"f.e.c/4"
+Host: foo.exAMPLE.COM
+
+HEAD / HTTP/1.1
+If-None-Match: W/"f.e.c/1"
+Host: foo.exAMPLE.COM
+
+HEAD / HTTP/1.1
+If-None-Match: W/"f.e.c/2"
+Host: foo.exAMPLE.COM
+
+HEAD / HTTP/1.1
+If-None-Match: W/"f.e.c/4"
+Host: foo.exAMPLE.COM
+
+HEAD / HTTP/1.1
+If-Match: *
+Host: foo.exAMPLE.COM
+
+HEAD / HTTP/1.1
+If-None-Match: *
+Host: foo.exAMPLE.COM
+
+HEAD /index.html HTTP/1.0
+Connection: close
+

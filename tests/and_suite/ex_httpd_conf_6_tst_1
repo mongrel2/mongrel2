@@ -1,0 +1,6 @@
+HEAD /index.html/foo HTTP/1.0
+Connection: keep-alive
+
+HEAD /index.html/ HTTP/1.0
+
+HEAD /index.html/ HTTP/1.0

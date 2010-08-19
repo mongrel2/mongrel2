@@ -1,0 +1,34 @@
+GET / HTTP/1.1
+Host: default
+Accept-Encoding: foo
+
+GET / HTTP/1.1
+Host: default
+Accept-Encoding: xgzip
+
+GET / HTTP/1.1
+Host: default
+Accept-Encoding: foo
+
+GET / HTTP/1.1
+Host: default
+Accept-Encoding: foo
+
+
+HEAD / HTTP/1.1
+Host: default
+Accept-Encoding: bzip2
+
+HEAD / HTTP/1.1
+Host: default
+Accept-Encoding: bzip2x
+
+HEAD / HTTP/1.1
+Host: default
+Accept-Encoding: gzip
+
+HEAD / HTTP/1.1
+Accept-Encoding: foo
+Host: default
+Connection: close
+

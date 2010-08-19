@@ -1,0 +1,6 @@
+GET /index.html HTTP/1.1
+Host: www.foo.example.com..:1234
+
+GET /index.html HTTP/1.1
+Host: www.foo.example.com..:1234
+

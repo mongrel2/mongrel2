@@ -1,0 +1,88 @@
+GET / HTTP/1.1
+Host: foo.EXAMPLE.Com
+Accept: text/*, text/html;q=0
+
+GET / HTTP/1.1
+Host: foo.EXAMPLE.Com
+Accept: text/*;q=0
+
+GET /index.html.gz HTTP/1.1
+Host: foo.EXAMPLE.Com
+Accept: text/html
+
+GET / HTTP/1.1
+Host: foo.EXAMPLE.Com
+Accept: */*;q=0
+Accept-Language: en;q=0.1,fr
+
+GET /index.html.gz HTTP/1.1
+Host: foo.EXAMPLE.Com
+Accept: text/*
+Accept-Language: en-gb;q=0,fr
+
+GET /index.html.gz HTTP/1.1
+Host: foo.EXAMPLE.Com
+Accept: text/*
+Accept-Language: *;q=0
+
+HEAD / HTTP/1.1
+Host: foo.EXAMPLE.Com
+Accept: text/*, text/html;q=0
+Accept-Encoding: gzip
+
+HEAD / HTTP/1.1
+Host: foo.EXAMPLE.Com
+Accept: text/*;q=0
+Accept-Encoding: gzip
+
+HEAD /index.html.gz HTTP/1.1
+Host: foo.EXAMPLE.Com
+Accept-Encoding: gzip
+Accept: text/*
+
+HEAD / HTTP/1.1
+Host: foo.EXAMPLE.Com
+Accept: */*;q=0
+Accept-Encoding: gzip
+
+HEAD /index.html.gz HTTP/1.1
+Host: foo.EXAMPLE.Com
+Accept: text/html
+Accept-Language: en-gb;q=0,fr
+Accept-Encoding: gzip
+
+HEAD / HTTP/1.1
+Host: foo.EXAMPLE.Com
+Accept: text/*;q=0
+Accept-Language: *;q=0
+Accept-Encoding: gzip
+
+HEAD /index.html.gz HTTP/1.1
+Host: foo.EXAMPLE.Com
+Accept: text/html
+Accept-Language: en-gb;q=1.0,fr
+Accept-Encoding: gzip
+
+GET /index.html.gz HTTP/1.1
+Host: foo.EXAMPLE.Com
+Accept: application/x-gzip;q=0, */*
+Accept-Language: en-gb;q=1.0,fr
+Accept-Encoding: gzip
+
+HEAD /index.html.gz HTTP/1.1
+Host: foo.EXAMPLE.Com
+Accept: application/x-gzip;q=0, */*;q=0.9, text/html;q=1
+Accept-Language: fr-abcd-foo-bar;q=1.0,it
+Accept-Encoding: gzip
+
+GET / HTTP/1.1
+Host: foo.EXAMPLE.Com
+Accept: */*;q=0
+Accept-Language: en;q=0.1,jp;q=1.0,it
+
+GET / HTTP/1.1
+Host: foo.EXAMPLE.Com
+Accept: text/html;q=0
+Accept-Language: en;q=0.1,it;q=1.0,jp
+Connection: close
+

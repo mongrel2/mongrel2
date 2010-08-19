@@ -1,0 +1,22 @@
+HEAD / HTTP/1.1
+Host: foo.example.com
+Range: bytes = 0-1 , 2-4 ,
+               4 - 8
+
+HEAD /nothere/5.1-switch-5.2 HTTP/1.1
+Host: foo.example.com
+
+HEAD / HTTP/1.1
+Host: foo.example.com
+Range: bytes = 0-1 , 2-4 ,
+               4 - 8
+
+HEAD / HTTP/1.1
+Host: foo.example.com
+Range: bytes = 0-1 , 2-4
+
+GET / HTTP/1.1
+Connection: close
+Host: foo.example.com
+Range: bytes = 0-1 , 2-4
+

@@ -1,0 +1,6 @@
+GET http://default/ HTTP/1.1
+Transfer-Encoding: identity
+
+GET http://default/ HTTP/1.1
+Transfer-Encoding: identity
+

@@ -1,0 +1,25 @@
+GET /neg HTTP/1.1
+host:
+
+GET /neg HTTP/1.1
+HOST:
+Accept: text/html
+
+GET /neg HTTP/1.1
+HOST:
+Accept: text/html
+Accept-Language: fr
+
+GET /neg HTTP/1.1
+Accept-Language: es
+Host:
+
+GET /neg HTTP/1.1
+Accept-Language: es
+Accept: foo/bar
+Host:
+
+GET /neg HTTP/1.1
+Accept-Language: it
+HOST
+

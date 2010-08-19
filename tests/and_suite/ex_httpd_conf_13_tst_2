@@ -1,0 +1,118 @@
+GET /conf-tst13/hex HTTP/1.1
+Host:
+
+GET /conf-tst13/string HTTP/1.1
+Host:
+
+GET /conf-tst13/byte HTTP/1.1
+Host:
+
+
+GET /conf-tst13/hex HTTP/1.1
+Accept-Encoding: gzip
+Host:
+
+GET /conf-tst13/string HTTP/1.1
+Accept-Encoding: gzip
+Host:
+
+GET /conf-tst13/byte HTTP/1.1
+Accept-Encoding: gzip
+Host:
+
+
+GET /conf-tst13/hex HTTP/1.1
+Accept-Encoding: bzip2
+Host:
+
+GET /conf-tst13/string HTTP/1.1
+Accept-Encoding: bzip2
+Host:
+
+GET /conf-tst13/byte HTTP/1.1
+Accept-Encoding: bzip2
+Host:
+
+
+GET /conf-tst13/hex HTTP/1.1
+If-Match: "foo"
+Host:
+
+GET /conf-tst13/hex HTTP/1.1
+If-None-Match: "foo"
+Host:
+
+GET /conf-tst13/string HTTP/1.1
+Accept-Encoding: gzip
+If-Match: "foo"
+Host:
+
+GET /conf-tst13/byte HTTP/1.1
+Accept-Encoding: bzip2
+If-None-Match: "foo"
+Host:
+
+
+GET /conf-tst13/hex HTTP/1.1
+Accept-Encoding: gzip
+If-None-Match: "79-416b8180"
+Host:
+
+GET /conf-tst13/string HTTP/1.1
+If-None-Match: "79-416b8180"
+Host:
+
+GET /conf-tst13/byte HTTP/1.1
+Accept-Encoding: bzip2
+If-None-Match: "79-416b8180"
+Host:
+
+
+GET /conf-tst13/hex HTTP/1.1
+Accept-Encoding: bzip2
+If-Match: "bar", "79-416b8180"
+Host:
+
+GET /conf-tst13/string HTTP/1.1
+Accept-Encoding: gzip
+If-Match: "bar", "79-416b8180"
+Host:
+
+GET /conf-tst13/byte HTTP/1.1
+If-Match: "bar", "79-416b8180"
+Host:
+
+
+GET /conf-tst13/hex HTTP/1.1
+Accept-Encoding: bzip2
+If-None-Match: "bar", "79-416b8180"
+Host:
+
+GET /conf-tst13/string HTTP/1.1
+If-None-Match: "bar", "79-416b8180"
+Host:
+
+GET /conf-tst13/byte HTTP/1.1
+If-None-Match: "bar", "79-416b8180"
+Accept-Encoding: gzip
+Host:
+
+
+GET /conf-tst13/hex HTTP/1.1
+If-Range: "79-416b8180"
+Accept-Encoding: gzip
+Range: bytes=1-1
+Host:
+
+GET /conf-tst13/string HTTP/1.1
+If-Range: "79-416b8180"
+Accept-Encoding: bzip2
+Range: bytes=1-1
+Host:
+
+GET /conf-tst13/byte HTTP/1.1
+If-Range: "79-416b8180"
+Range: bytes=1-1
+Host:
+Connection: close
+

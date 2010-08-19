@@ -1,0 +1,34 @@
+GET / HTTP/1.1
+Host: 
+Accept:
+
+GET / HTTP/1.1
+Host: 
+Range: bytes = 0-
+Accept: */*
+
+GET / HTTP/1.1
+Host: 
+Accept: text/html
+
+GET / HTTP/1.1
+Host: 
+Accept: text/*
+
+GET / HTTP/1.1
+Host: 
+Accept: text/*;q=1.000; */*;q=0; text/plain
+
+GET / HTTP/1.1
+Host: 
+Accept: text/*;q=0.000; */*;q=1; text/htmler
+
+GET / HTTP/1.1
+Host: 
+Accept: */*;q=0.00, text/*;q=0.1;level=2;blah="\",", */*;q=1, text/html;q=0
+
+GET / HTTP/1.1
+Host: 
+Accept: */*;q=0.0, text/*;q=0.000, */*;q=1 ; blah=foo, text/html
+Connection: close
+

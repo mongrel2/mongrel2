@@ -1,0 +1,17 @@
+GET /conf-tst13/cond HTTP/1.1
+Host:
+
+GET /conf-tst13/cond HTTP/1.1
+Host:
+Referer: www.example.com
+
+GET /conf-tst13/cond HTTP/1.1
+Host:
+Referer: http://www.example.com/index.html
+Accept-Encoding: gzip
+
+GET /conf-tst13/cond HTTP/1.1
+Host:
+Referer: example.com
+Connection: close
+

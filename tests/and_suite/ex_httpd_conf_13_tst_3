@@ -1,0 +1,274 @@
+GET /A2/neg HTTP/1.1
+X-comment: Doing with no auth
+host:
+
+GET /A2/neg HTTP/1.1
+HOST:
+Accept: text/html
+
+GET /A2/neg HTTP/1.1
+HOST:
+Accept: text/html
+Accept-Language: fr
+
+GET /A2/neg HTTP/1.1
+Accept-Language: es
+Host:
+
+GET /A2/neg HTTP/1.1
+Accept-Language: es
+Accept: foo/bar
+Host:
+
+
+
+GET /A2/neg HTTP/1.1
+X-comment: Doing with bad auth
+AUTHorization:
+host:
+
+GET /A2/neg HTTP/1.1
+AUTHorization: ==
+HOST:
+Accept: text/html
+
+GET /A2/neg HTTP/1.1
+HOST:
+Accept: text/html
+AUTHorization: Basic eAo=
+Accept-Language: fr
+
+GET /A2/neg HTTP/1.1
+Accept-Language: es
+AUTHorization: Basicalfkjal
+Host:
+
+GET /A2/neg HTTP/1.1
+Accept-Language: es
+Accept: foo/bar
+AUTHorization: Basic alfkjal
+Host:
+
+
+
+
+GET /A2/neg HTTP/1.1
+X-comment: Doing with good auth
+AUTHorization: Basic Zm9vOmJhcg==
+host:
+
+GET /A2/neg HTTP/1.1
+AUTHorization: Basic Zm9vOmJhcg==
+HOST:
+Accept: text/html
+
+GET /A2/neg HTTP/1.1
+HOST:
+AUTHorization: Basic Zm9vOmJhcg==
+Accept: text/html
+Accept-Language: fr
+
+GET /A2/neg HTTP/1.1
+AUTHorization: Basic Zm9vOmJhcg==
+Accept-Language: es
+Host:
+
+GET /A2/neg HTTP/1.1
+Accept-Language: es
+AUTHorization: Basic Zm9vOmJhcg==
+Accept: foo/bar
+Host:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+GET /D2/neg HTTP/1.1
+X-comment2: Again with /D2/
+X-comment: Doing with no auth
+host:
+
+GET /D2/neg HTTP/1.1
+HOST:
+Accept: text/html
+
+GET /D2/neg HTTP/1.1
+HOST:
+Accept: text/html
+Accept-Language: fr
+
+GET /D2/neg HTTP/1.1
+Accept-Language: es
+Host:
+
+GET /D2/neg HTTP/1.1
+Accept-Language: es
+Accept: foo/bar
+Host:
+
+
+
+GET /D2/neg HTTP/1.1
+X-comment: Doing with bad auth
+AUTHorization:
+host:
+
+GET /D2/neg HTTP/1.1
+AUTHorization: Basic ==
+HOST:
+Accept: text/html
+
+GET /D2/neg HTTP/1.1
+HOST:
+Accept: text/html
+AUTHorization: Basic
+Accept-Language: fr
+
+GET /D2/neg HTTP/1.1
+Accept-Language: es
+AUTHorization: Basic alfkjal
+Host:
+
+GET /D2/neg HTTP/1.1
+Accept-Language: es
+Accept: foo/bar
+AUTHorization: alfkjal
+Host:
+
+
+
+
+GET /D2/neg HTTP/1.1
+X-comment: Doing with good auth
+AUTHorization: Basic Zm9vOmJhcg==
+host:
+
+GET /D2/neg HTTP/1.1
+AUTHorization: Basic Zm9vOmJhcg==
+HOST:
+Accept: text/html
+
+GET /D2/neg HTTP/1.1
+HOST:
+AUTHorization: Basic Zm9vOmJhcg==
+Accept: text/html
+Accept-Language: fr
+
+GET /D2/neg HTTP/1.1
+AUTHorization: Basic Zm9vOmJhcg==
+Accept-Language: es
+Host:
+
+GET /D2/neg HTTP/1.1
+Accept-Language: es
+AUTHorization: Basic Zm9vOmJhcg==
+Accept: foo/bar
+Host:
+
+
+
+
+
+
+
+
+GET /A3/neg HTTP/1.1
+X-comment2: Again with /A3/
+X-comment: Doing with no auth
+host:
+
+GET /A3/neg HTTP/1.1
+HOST:
+Accept: text/html
+
+GET /A3/neg HTTP/1.1
+HOST:
+Accept: text/html
+Accept-Language: fr
+
+GET /A3/neg HTTP/1.1
+Accept-Language: es
+Host:
+
+GET /A3/neg HTTP/1.1
+Accept-Language: es
+Accept: foo/bar
+Host:
+
+
+
+GET /A3/neg HTTP/1.1
+X-comment: Doing with bad auth
+AUTHorization:Basic
+host:
+
+GET /A3/neg HTTP/1.1
+AUTHorization: Basic ==
+HOST:
+Accept: text/html
+
+GET /A3/neg HTTP/1.1
+HOST:
+Accept: text/html
+AUTHorization: Basic eAo=
+Accept-Language: fr
+
+GET /A3/neg HTTP/1.1
+Accept-Language: es
+AUTHorization: Basic alfkjal
+Host:
+
+GET /A3/neg HTTP/1.1
+Accept-Language: es
+Accept: foo/bar
+AUTHorization: alfkjal
+Host:
+
+
+
+
+GET /A3/neg HTTP/1.1
+X-comment: Doing with good auth
+AUTHorization: Basic Zm9vOmJhcg==
+host:
+
+GET /A3/neg HTTP/1.1
+AUTHorization: Basic Zm9vOmJhcg==
+HOST:
+Accept: text/html
+
+GET /A3/neg HTTP/1.1
+HOST:
+AUTHorization: Basic Zm9vOmJhcg==
+Accept: text/html
+Accept-Language: fr
+
+GET /A3/neg HTTP/1.1
+AUTHorization: Basic Zm9vOmJhcg==
+Accept-Language: es
+Host:
+
+GET /A3/neg HTTP/1.1
+Accept-Language: es
+AUTHorization: Basic Zm9vOmJhcg==
+Accept: foo/bar
+Host:
+
+
+
+
+
+GET /neg HTTP/1.1
+Accept-Language: it
+HOST
+

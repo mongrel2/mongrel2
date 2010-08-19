@@ -1,0 +1,52 @@
+HEAD /nothere/5.1-switch-5.2 HTTP/1.0
+Connection: keep-alive
+
+GET /nothere/5.2-neg-AL HTTP/1.0
+Connection: keep-alive
+
+GET /nothere/5.2-neg-AL HTTP/1.0
+Connection: keep-alive
+Accept-Language: en
+
+GET /nothere/5.2-neg-AL HTTP/1.1
+Host: foo.example.com
+Accept-Language: en ; q=0.  01, fr;q=0.  02, jp;q=0.4, jp-foo;q=0.8,* ; q = 1
+
+GET /nothere/5.2-neg-AL HTTP/1.1
+Host: foo.example.com
+Accept-Language: ,  
+                 * ; q = 1, jp-foo;q=0.8,jp;q=0.4,fr;q=0.  02,en ; q=0.  01, 
+
+GET /nothere/5.2-neg-AL HTTP/1.1
+Host: foo.example.com
+Accept-Language: en ; q=0.  03, fr;q=0.  8, jp;q=0.2, jp-foo;q=0.1,* ; q = 1
+
+GET /nothere/5.2-neg-AL HTTP/1.1
+Host: foo.example.com
+Accept-Language: en ; q=0.  03, fr;q=0.  04, jp;q=0.8, jp-foo;q=0.1,* ; q = 1
+
+GET /nothere/5.2-neg-AL HTTP/1.1
+Host: foo.example.com
+Accept-Language: en ; q=0.  03, jp;q=0.2, jp-foo;q=0.1,* ; q = 1
+
+GET /nothere/5.2-neg-AL HTTP/1.1
+Host: foo.example.com
+Accept-Language: en ; q=0.  03, fr;q=0.  8, * ; q = 1
+
+GET /nothere/5.2-neg-AL HTTP/1.1
+Host: foo.example.com
+Accept-Language: en-gb ; q=0.  003, fr;q=0.  004,* ; q = 0
+
+GET /nothere/5.2-neg-AL HTTP/1.1
+Host: foo.example.com
+Accept-Language: en-gb ; q=0.  03, fr;q=0.  004,* ; q = 0
+
+GET /nothere/5.2-neg-AL HTTP/1.1
+Host: foo.example.com
+Accept-Language: ,* ; q = 0 ,
+                 en-GB ; q=0.  003, en-US ; q=0.  03, fr;q=0.  004
+Accept-Encoding: gzip
+
+GET /nothere/5.2-neg-AL HTTP/1.0
+Accept-Language: * ; q = 0
+

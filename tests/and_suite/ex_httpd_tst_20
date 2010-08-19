@@ -1,0 +1,6 @@
+GET / HTTP/1.0
+Accept: text/*;q=1.0
+
+GET / HTTP/1.0
+Accept: text/*;q=1.0
+

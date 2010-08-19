@@ -1,0 +1,15 @@
+GET http://default/ HTTP/1.1
+HOST:
+Transfer-Encoding: identity
+Content-Length: 0
+
+GET http://default/ HTTP/1.1
+HOST:
+Transfer-Encoding: identity
+Transfer-Encoding: identity
+Content-Length: 0
+
+GET http://default/ HTTP/1.1
+HOST:
+Transfer-Encoding: identity
+

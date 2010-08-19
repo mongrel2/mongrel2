@@ -1,0 +1,122 @@
+HEAD / HTTP/1.1
+Host: default
+
+HEAD /,validate HTTP/1.1
+Host: default
+
+HEAD /,cssvalidate HTTP/1.1
+Host: default
+
+HEAD /,spell HTTP/1.1
+Host: default
+
+HEAD /,checklink HTTP/1.1
+Host: default
+
+HEAD /,rchecklink HTTP/1.1
+Host: default
+
+HEAD /,text HTTP/1.1
+Host: default
+
+HEAD /,links HTTP/1.1
+Host: default
+
+HEAD /,bloglinks HTTP/1.1
+Host: default
+
+HEAD /,cacheability HTTP/1.1
+Host: default
+
+
+HEAD /x,validate HTTP/1.1
+Host: default
+
+HEAD /x,cssvalidate HTTP/1.1
+Host: default
+
+HEAD /x,spell HTTP/1.1
+Host: default
+
+HEAD /x,checklink HTTP/1.1
+Host: default
+
+HEAD /x,rchecklink HTTP/1.1
+Host: default
+
+HEAD /x,text HTTP/1.1
+Host: default
+
+HEAD /x,links HTTP/1.1
+Host: default
+
+HEAD /x,bloglinks HTTP/1.1
+Host: default
+
+HEAD /x,cacheability HTTP/1.1
+Host: default
+
+
+HEAD /abcd/x,validate HTTP/1.1
+Host: default
+
+HEAD /abcd/x,cssvalidate HTTP/1.1
+Host: default
+
+HEAD /abcd/x,spell HTTP/1.1
+Host: default
+
+HEAD /abcd/x,checklink HTTP/1.1
+Host: default
+
+HEAD /abcd/x,rchecklink HTTP/1.1
+Host: default
+
+HEAD /abcd/x,text HTTP/1.1
+Host: default
+
+HEAD /abcd/x,links HTTP/1.1
+Host: default
+
+HEAD /abcd/x,bloglinks HTTP/1.1
+Host: default
+
+HEAD /abcd/x,cacheability HTTP/1.1
+Host: default
+
+
+HEAD /%61%62%63%64/x,validate HTTP/1.1
+Host: default
+
+HEAD /%61%62%63%64/x,cssvalidate HTTP/1.1
+Host: default
+
+HEAD /%61%62%63%64/x,spell HTTP/1.1
+Host: default
+
+HEAD /%61%62%63%64/x,checklink HTTP/1.1
+Host: default
+
+HEAD /%61%62%63%64/x,rchecklink HTTP/1.1
+Host: default
+
+HEAD /%61%62%63%64/x,text HTTP/1.1
+Host: default
+
+HEAD /%61%62%63%64/x,links HTTP/1.1
+Host: default
+
+HEAD /%61%62%63%64/x,bloglinks HTTP/1.1
+Host: default
+
+HEAD /%61%62%63%64/x,cacheability HTTP/1.1
+Host: default
+
+
+HEAD /Z/x,validate HTTP/1.1
+Host: x
+
+HEAD /Z/x,validate HTTP/1.1
+Host: x
+Connection: close
+

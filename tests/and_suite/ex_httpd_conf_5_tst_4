@@ -1,0 +1,29 @@
+HEAD /nothere/5.1-switch-5.2 HTTP/1.0
+Connection: keep-alive
+
+GET /nothere/5.2-neg-CT HTTP/1.0
+Connection: keep-alive
+
+GET /nothere/5.2-neg-CT HTTP/1.0
+Connection: keep-alive
+Accept: text/plain, text/html, image/png, */*
+
+GET /nothere/5.2-neg-CT HTTP/1.1
+Host: foo.example.com
+Accept: text/plain;q=0.  01, text/html;q=0.  02, image/png;q=0.  001,*/* ; q = 0
+
+GET /nothere/5.2-neg-CT HTTP/1.1
+Host: foo.example.com
+Accept: text/plain;q=0.  02, text/html;q=0.  01, image/png;q=0.  001,*/* ; q = 0
+
+GET /nothere/5.2-neg-CT HTTP/1.1
+Host: foo.example.com
+Accept: text/html;q=0.  01, image/png;q=0.  001,*/* ; q = 0
+
+GET /nothere/5.2-neg-CT HTTP/1.1
+Host: foo.example.com
+Accept: text/plain;q=0.  02, image/png;q=0.  001,*/* ; q = 0
+
+GET /nothere/5.2-neg-CT HTTP/1.0
+Accept: text/* ; q = 0, image/png;q=0.  001,*/* ; q = 1 . 000
+

@@ -1,0 +1,4 @@
+GET /fifo HTTP/1.1
+Host: default
+Connection: close
+

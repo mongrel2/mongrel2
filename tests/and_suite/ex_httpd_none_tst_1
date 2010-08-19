@@ -1,0 +1,7 @@
+GET / HTTP/1.1
+Host: default
+Range: bytes=1-2
+
+GET / HTTP/1.1
+Host: default
+

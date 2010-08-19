@@ -1,0 +1,36 @@
+HEAD / HTTP/1.0
+Connection: keep-alive
+
+HEAD / HTTP/1.1
+Host: foo.exAMPLE.com
+
+HEAD / HTTP/1.1
+Host: foo.exAMPLE.COM
+
+HEAD / HTTP/1.1
+If-Match: "f.e.c/1"
+Host: foo.exAMPLE.COM
+
+HEAD / HTTP/1.1
+If-None-Match: "f.e.c/1"
+Host: foo.exAMPLE.COM
+
+HEAD / HTTP/1.1
+If-Match: "f.e.c/2"
+Host: foo.example.COM
+
+HEAD / HTTP/1.1
+If-None-Match: "f.e.c/2"
+Host: foo.example.COM
+
+HEAD / HTTP/1.1
+If-Match: "f.e.c/4"
+Host: foo.example.com
+
+HEAD / HTTP/1.1
+If-None-Match: "f.e.c/4"
+Host: foo.example.com
+
+HEAD /index.html HTTP/1.0
+Connection: close
+

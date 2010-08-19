@@ -1,0 +1,67 @@
+HEAD / HTTP / 1 . 1
+Host:
+ blah            
+
+TRACE / HTTP / 1 . 1
+Host:
+ blah            
+
+GET / HTTP/1.1
+Host:
+             foo.example.com
+             
+
+GET / HTTP/1.1
+Host: foo.example.com:1234
+If-Modified-Since:   Sun, 10 Oct 2004 07:02:24 GMT
+
+GET / HTTP/1.1
+Host:       FOO.example.com:1234
+If-Range:   Sun, 10 Oct 2004 07:02:24 GMT
+Range:      bytes = 2-9
+
+HEAD http://foo.example.COM HTTP/1.1
+HOST:
+
+GET http://foo.EXAMPLE.com/ HTTP/1.1
+HOST:
+Range:      bytes = 2-9
+
+GET http://foo.example.com/%2F. HTTP/1.1
+HOST:
+Range:      bytes = 2-9
+
+GET http://foo.example.com/%2f./ HTTP/1.1
+HOST:
+Connection: Keep-Alive
+Range:      bytes = 2-9
+
+GET http://FOO.example.com/index.html HTTP/1.1
+HOST:
+Range: bytes = ,,  ,-8,   ,,
+
+GET http://FOO.example.com/index.html HTTP/1.1
+HOST:
+Range: bytes = ,
+	    ,
+  ,
+ -8
+ ,
+	   ,,
+
+GET http://FOO.example.com/index.html HTTP/1.1
+Range: bytes = 151 -  ,
+HOST:
+
+GET http://FOO.example.com/index.html HTTP/1.1
+Range: bytes = 151 -   
+HOST:
+
+GET http://FOO.example.com/index.html#blah HTTP/1.1
+HOST:
+If-None-Match: *
+
+HEAD http://FOO.example.com/index.html HTTP/1.1
+Range:      bytes = 2-9
+HOST:
+

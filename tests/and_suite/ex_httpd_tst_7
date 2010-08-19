@@ -1,0 +1,58 @@
+HEAD http://default/ HTTP/1.1
+Host:
+Accept-Encoding: gzip
+
+HEAD http://default/index.html HTTP/1.1
+Host:
+Accept-Encoding: gzip
+
+HEAD http://default/index.html.gz HTTP/1.1
+Host:
+
+HEAD http://default/ HTTP/1.1
+Host:
+
+HEAD http://default/ HTTP/1.1
+Host:
+Accept-Encoding: gzip
+Range: bytes = 1-
+
+HEAD http://default/ HTTP/1.1
+Host:
+Accept-Encoding: gzip; q = 0 . 1, identity; q = 1.000
+
+HEAD http://default/ HTTP/1.1
+Host:
+Accept-Encoding: gzip; q = 0 . 02, identity; q = 0.1
+
+HEAD http://default/ HTTP/1.1
+Host:
+Accept-Encoding: gzip; q = 0 . 0
+
+HEAD http://default/ HTTP/1.1
+Host:
+Accept-Encoding: gzipper, bzip
+
+HEAD http://foo.example.com/ HTTP/1.1
+Host:
+Accept-Encoding: gzip, bzip2
+
+HEAD http://default/index-big.html HTTP/1.1
+Host:
+Accept-Encoding: gzipper, bzip2;q=0. 8, gzi, gzip;q = 0.01
+
+HEAD http://default/index-big.html HTTP/1.1
+Host:
+Accept-Encoding: bzip2er, bzip2;q=0. 01, bzi, gzip;q = 0.8
+
+HEAD http://default/ HTTP/1.1
+Host:
+Range: bytes = 0-4
+Accept-Encoding: foo, bar;q= 0 . 02 , *;q = 1 . 000 , gzipper;q=0, end
+
+HEAD http://default/ HTTP/1.1
+Host:
+Accept-Encoding: x-gzip
+Range: bytes = -16
+Connection: close
+

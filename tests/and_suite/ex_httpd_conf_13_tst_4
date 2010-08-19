@@ -1,0 +1,63 @@
+GET /A2/conf-tst13/hex HTTP/1.1
+AUTHorization: Basic Zm9vOmJhcg==
+Host:
+
+GET /A3/conf-tst13/string HTTP/1.1
+AUTHorization: Basic Zm9vOmJhcg==
+Host:
+
+GET /D2/conf-tst13/byte HTTP/1.1
+Host:
+
+
+GET /D2/conf-tst13/hex HTTP/1.1
+Accept-Encoding: gzip
+Host:
+
+GET /A2/conf-tst13/string HTTP/1.1
+AUTHorization: Basic Zm9vOmJhcg==
+Accept-Encoding: gzip
+Host:
+
+GET /A3/conf-tst13/byte HTTP/1.1
+AUTHorization: Basic Zm9vOmJhcg==
+Accept-Encoding: gzip
+Host:
+
+
+GET /A3/conf-tst13/hex HTTP/1.1
+Accept-Encoding: bzip2
+AUTHorization: Basic Zm9vOmJhcg==
+Host:
+
+GET /D2/conf-tst13/string HTTP/1.1
+Accept-Encoding: bzip2
+Host:
+
+GET /A1/conf-tst13/byte HTTP/1.1
+AUTHorization: Basic Zm9vOmJhcg==
+Accept-Encoding: bzip2
+Host:
+
+
+GET /A2/conf-tst13/hex HTTP/1.1
+If-Range: "79-416b8180"
+AUTHorization: Basic Zm9vOmJhcg==
+Accept-Encoding: gzip
+Range: bytes=1-1
+Host:
+
+GET /A3/conf-tst13/string HTTP/1.1
+If-Range: "79-416b8180"
+Accept-Encoding: bzip2
+Range: bytes=1-1
+Host:
+AUTHorization: Basic Zm9vOmJhcg==
+
+GET /D2/conf-tst13/byte HTTP/1.1
+If-Range: "79-416b8180"
+Range: bytes=1-1
+Host:
+AUTHorization: Basic Zm9vOmJhcg==
+Connection: close
+

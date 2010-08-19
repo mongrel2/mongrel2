@@ -1,0 +1,40 @@
+HEAD /nothere/5.1-switch-5.2 HTTP/1.0
+Connection: keep-alive
+
+GET /nothere/5.2-neg HTTP/1.0
+Connection: keep-alive
+
+GET /nothere/5.2-neg HTTP/1.0
+Connection: keep-alive
+Accept-Language: en
+Accept: text/*, */*;q=0
+
+GET /nothere/5.2-neg HTTP/1.1
+Host: foo.example.com
+Accept-Language: en ; q=0.  01, fr;q=0.  02, JP;q=0.4, JP-foo;q=0.8,* ; q = 1
+Accept: text/html, */*;q=0
+
+GET /nothere/5.2-neg HTTP/1.1
+Host: foo.example.com
+Accept-Language: en ; q=0.  01, JP;q=0.4, JP-foo;q=0.8,* ; q = 1
+Accept: text/html;q=0.9, */*
+
+GET /nothere/5.2-neg HTTP/1.1
+Host: foo.example.com
+Accept-Language: ,*,en ; q=0.  01, fr;q=0.  02, JP;q=0.4, JP-foo;q=0.8,
+Accept: ,*/*,text/html;q=0.9,
+
+GET /nothere/5.2-neg HTTP/1.0
+Accept-Language: * ; q = 0
+Connection: keep-alive
+Accept: bing/bong;level=1;foo="bar",*/*;q=0
+
+GET /nothere/5.2-neg HTTP/1.0
+Accept-Language: * ; q = 0 , fr
+Accept: text/html;level=1;foo="zoomer\\\"abcd",*/*;q=0
+Connection: keep-alive
+
+GET /nothere/5.2-neg HTTP/1.0
+Accept-Language: * ; q = 0
+Accept: ,*/*;q=0
+

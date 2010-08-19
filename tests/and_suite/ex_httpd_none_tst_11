@@ -1,0 +1,8 @@
+GET / HTTP/1.1
+Host: x
+Accept-Encoding: gzip;q=0, identity;q=0
+
+GET / HTTP/1.1
+Host: x
+Accept-Encoding: gzip;q=0, identity;q=0
+

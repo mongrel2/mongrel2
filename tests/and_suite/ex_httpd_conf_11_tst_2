@@ -1,0 +1,23 @@
+HEAD /virt/tst_11/r503 HTTP/1.1
+Host:
+Accept-Encoding: foo
+
+HEAD /virt/tst_11/c503 HTTP/1.1
+Host:
+Accept-Encoding: foo
+
+GET /virt/tst_11/vary%20static%20all HTTP/1.1
+Host:
+Accept-Encoding: foo
+Connection: Accept-encoding
+
+GET /virt/tst_11/vary%20static%20all HTTP/1.0
+Host:
+Accept-Encoding: foo
+Connection: keep-alive,Accept-encoding
+
+GET /virt/tst_11/vary%20static%20all HTTP/1.1
+Host:
+Accept-Encoding: foo
+Connection: close, Accept-encoding
+

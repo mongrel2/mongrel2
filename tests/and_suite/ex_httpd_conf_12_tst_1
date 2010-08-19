@@ -1,0 +1,40 @@
+GET /01_. HTTP/1.1
+Host:
+
+GET /02_ HTTP/1.1
+Host:
+
+HEAD /03%27 HTTP/1.1
+Host:
+
+HEAD /04, HTTP/1.1
+Host:
+
+HEAD /05! HTTP/1.1
+Host:
+
+HEAD /06> HTTP/1.1
+Host:
+
+HEAD /07) HTTP/1.1
+Host:
+
+HEAD /08] HTTP/1.1
+Host:
+
+HEAD /09" HTTP/1.1
+Host:
+
+HEAD /10' HTTP/1.1
+Host:
+
+HEAD /11%27 HTTP/1.1
+Host:
+
+HEAD /12%20 HTTP/1.1
+Host:
+
+GET /13">_ HTTP/1.1
+Host:
+Connection: close
+

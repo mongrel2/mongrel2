@@ -1,0 +1,6 @@
+HEAD / HTTP/1.0
+foo bar
+
+HEAD / HTTP/1.0
+foo bar
+

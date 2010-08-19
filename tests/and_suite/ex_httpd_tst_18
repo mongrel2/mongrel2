@@ -1,0 +1,16 @@
+HEAD                  HTTP://default.example.com HTTP/1.0
+Connection:
+                Keep-Alive         
+
+HEAD          http://foo.example.com HTTP/1.0
+Connection:   Keep-Alive    
+
+HEAD          http:// HTTP/1.0
+Connection:   Keep-Alive    
+
+HEAD HTTP://foo.example.com/../ HTTP/1.0
+Connection:
+                Keep-Alive         
+
+GET  /  HTTP / 1 . 0
+

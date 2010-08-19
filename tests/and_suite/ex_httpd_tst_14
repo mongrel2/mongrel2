@@ -1,0 +1,7 @@
+GET / HTTP/1.0
+Connection: ranGe, AccEpt, keep-aLive, accept-language
+Range: bytes = -2
+accept: foo/bar
+
+GET / HTTP/1.0
+

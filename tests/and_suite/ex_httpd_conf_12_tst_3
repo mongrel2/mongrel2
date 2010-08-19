@@ -1,0 +1,16 @@
+HEAD /bp.x.y HTTP/1.1
+Host: foo.example.com
+
+HEAD /bp.x%2E%79 HTTP/1.1
+Host: foo.example.com
+
+HEAD /bp%2ex.y HTTP/1.1
+Host: foo.example.com
+
+HEAD /bp.x.%79 HTTP/1.1
+Host: foo.example.com
+
+GET /%62%70%2e%78%2E%79?foo=bar HTTP/1.1
+Connection: close
+Host: foo.example.com
+

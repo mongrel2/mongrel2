@@ -53,7 +53,7 @@ $(TESTS): %: %.c build/libm2.a
 
 src/state.c: src/state.rl src/state_machine.rl
 
-src/http11/http11_parser.c: src/http11/http11_parser.rl src/http11/http11_parser_common.rl
+src/http11/http11_parser.c: src/http11/http11_parser.rl
 
 check:
 	@echo Files with potentially dangerous functions.
