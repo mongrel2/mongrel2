@@ -65,9 +65,9 @@ static void dump_status()
     bstring status = taskgetinfo();
     bstring status_file = Setting_get_str("status_file", &DEFAULT_STATUS_FILE);
 
-    unlink(bdata(status_file));
+    unlink((char *)status_file->data);
 
-    int fd = open(bdata(status_file), O_WRONLY | O_CREAT, 0600);
+    int fd = open((char *)status_file->data, O_WRONLY | O_CREAT, 0600);
     check(fd >= 0, "Failed to open status file: %s", bdata(status_file));
 
     int rc = write(fd, bdata(status), blength(status));
