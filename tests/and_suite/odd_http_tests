@@ -1,9 +1,6 @@
 GET http://localhost:8080/iesucks HTTP/1.1
 Host: localhost
 
-GET +-.123://localhost:8080/iesucks HTTP/1.1
-Host: localhost
-
 PUT * HTTP/1.1
 Host: localhost
 
@@ -15,10 +12,6 @@ Host: localhost
 
 GET /test;param=value;param=value?stuff=values HTTP/1.1
 Host: testing
-
-GET /stuff HTTP/3.4
-Host: testing
-Connection: close
 
 GET /esape%20that HTTP/1.1
 Host: testing

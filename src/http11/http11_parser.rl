@@ -134,7 +134,7 @@
   token = (ascii -- (CTL | tspecials));
 
 # URI schemes and absolute paths
-  scheme = ( alpha | digit | "+" | "-" | "." )* ;
+  scheme = "http";
   absolute_uri = (scheme ":" (uchar | reserved )*);
 
   path = ( pchar+ ( "/" pchar* )* ) ;
@@ -148,7 +148,7 @@
   Fragment = ( uchar | reserved )* >mark %fragment;
   Method = ( upper | digit | safe ){1,20} >mark %request_method;
 
-  http_number = ( digit+ "." digit+ ) ;
+  http_number = ( "1." ("0" | "1") ) ;
   HTTP_Version = ( "HTTP/" http_number ) >mark %http_version ;
   Request_Line = ( Method " " Request_URI ("#" Fragment){0,1} " " HTTP_Version CRLF ) ;
 
