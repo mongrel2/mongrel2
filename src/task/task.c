@@ -22,9 +22,6 @@ int        nalltask;
 static char *argv0;
 static    void        contextswitch(Context *from, Context *to);
 
-// TODO: make this configurable for the status
-const char *STATUS_FILE="/tmp/mongrel2_status.txt";
-
 
 static void
 taskstart(uint y, uint x)
@@ -315,26 +312,6 @@ taskgetinfo(void)
     return data;
 }
 
-static void
-taskinfo(int s)
-{
-    int fd = 0;
-
-    unlink(STATUS_FILE);
-
-    fd = open(STATUS_FILE, O_WRONLY | O_CREAT, 0600);
-    if(fd < 0) {
-        fprint(2, "Error, could not open status file.");
-        fd = 2;
-    }
-
-    bstring status = taskgetinfo();
-    write(fd, bdata(status), blength(status));
-    bdestroy(status);
-
-    close(fd);
-}
-
 /*
  * startup
  */
@@ -353,17 +330,6 @@ taskmainstart(void *v)
 int
 main(int argc, char **argv)
 {
-    struct sigaction sa, osa;
-
-    memset(&sa, 0, sizeof sa);
-    sa.sa_handler = taskinfo;
-    sa.sa_flags = SA_RESTART;
-    sigaction(SIGQUIT, &sa, &osa);
-
-#ifdef SIGINFO
-    sigaction(SIGINFO, &sa, &osa);
-#endif
-
     argv0 = argv[0];
     taskargc = argc;
     taskargv = argv;

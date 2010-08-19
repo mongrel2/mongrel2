@@ -32,20 +32,22 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <server.h>
-#include <dbg.h>
-#include <task/task.h>
+#include <fcntl.h>
 #include <string.h>
-#include <config/config.h>
-#include <adt/list.h>
-#include <config/db.h>
-#include <unixy.h>
-#include <time.h>
-#include <dir.h>
 #include <signal.h>
-#include <mime.h>
-#include <superpoll.h>
+#include <time.h>
 
+#include "server.h"
+#include "dbg.h"
+#include "dir.h"
+#include "task/task.h"
+#include "config/config.h"
+#include "config/db.h"
+#include "adt/list.h"
+#include "unixy.h"
+#include "mime.h"
+#include "superpoll.h"
+#include "setting.h"
 
 FILE *LOG_FILE = NULL;
 
@@ -53,20 +55,51 @@ extern int RUNNING;
 int RELOAD;
 int MURDER;
 
+struct tagbstring DEFAULT_STATUS_FILE = bsStatic("/tmp/mongrel2_status.txt");
 struct tagbstring PRIV_DIR = bsStatic("/");
 
 Server *SERVER = NULL;
 
+static void dump_status()
+{
+    bstring status = taskgetinfo();
+    bstring status_file = Setting_get_str("status_file", &DEFAULT_STATUS_FILE);
+
+    unlink(bdata(status_file));
+
+    int fd = open(bdata(status_file), O_WRONLY | O_CREAT, 0600);
+    check(fd >= 0, "Failed to open status file: %s", bdata(status_file));
+
+    int rc = write(fd, bdata(status), blength(status));
+    check(rc > 0, "Failed to write to status file: %s", bdata(status_file));
+
+    log_info("Wrote status to file: %s", bdata(status_file));
+
+    error:  // Fallthrough on purpose.
+        close(fd);
+        bdestroy(status);
+}
+
 void terminate(int s)
 {
-    RUNNING=0;
-    RELOAD = s == SIGHUP;
     MURDER = s == SIGTERM;
-    if(!RELOAD) {
-        log_info("SHUTDOWN REQUESTED: %s", MURDER ? "MURDER" : "GRACEFUL");
-        fdclose(SERVER->listen_fd);
-    } else {
-        log_info("RELOAD RECEIVED, I'll do it on the next request.");
+    switch(s)
+    {
+        case(SIGHUP):
+            RELOAD = 1;
+            RUNNING = 0;
+            log_info("RELOAD REQUESTED, I'll do it on the next request.");
+            break;
+        case(SIGQUIT): // Fallthrough on purpose.
+#ifdef SIGINFO
+        case(SIGINFO):
+#endif
+            dump_status();
+            break;
+        default:
+            RUNNING = 0;
+            log_info("SHUTDOWN REQUESTED: %s", MURDER ? "MURDER" : "GRACEFUL");
+            break;
     }
 }
 
@@ -79,6 +112,10 @@ void start_terminator()
     sigaction(SIGINT, &sa, &osa);
     sigaction(SIGTERM, &sa, &osa);
     sigaction(SIGHUP, &sa, &osa);
+    sigaction(SIGQUIT, &sa, &osa);
+#ifdef SIGINFO
+    sigaction(SIGINFO, &sa, &osa);
+#endif
 }
 
 
