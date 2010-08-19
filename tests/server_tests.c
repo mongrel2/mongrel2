@@ -38,6 +38,11 @@ char *test_Server_adds()
     rc = Server_add_host(srv, bstrcpy(host->name), host);
     mu_assert(rc == 0, "Failed to add host to server.");
 
+    Host *zedshaw = Server_match_backend(srv, host->name);
+    mu_assert(zedshaw == host, "Didn't get the right one back.");
+
+    mu_assert(Server_match_backend(srv, bfromcstr("NOWAY")) == NULL, "Should not find this one.");
+
     Server_destroy(srv);
 
     return NULL;

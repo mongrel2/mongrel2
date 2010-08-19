@@ -1,6 +1,9 @@
 
 for i in tests/*_tests
 do
-    ./$i
+    if test -f $i
+    then
+        ./$i
+    fi
 done
 
