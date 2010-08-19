@@ -1,38 +1,37 @@
-GET / HTTP/1.1
+GET /test?howdy=yes HTTP/1.1
 COMMENT-TST: Test different date formats...
-HOST : 
-	foo.example.com:1234
-Comment-date-rfc1123 : Sun, 10 Oct 2004 07:02:24 GMT
-If-Modified-since    : Sunday, 10-Oct-04 07:02:24 GMT
+HOST: foo.example.com:1234
+Comment-date-rfc1123: Sun, 10 Oct 2004 07:02:24 GMT
+If-Modified-since: Tue, 17 Aug 10 03:21:45 +0000
+If-UNModified-since: Sunday, 10-Oct-04 07:02:24 GMT
 
 HEAD / HTTP/1.1
-HOST : foo.example.com:1234
-Comment-date-rfc1123 : Sun, 10 Oct 2004 07:02:24 GMT
-If-UNModified-since  : Sunday, 10-Oct-04 07:02:24 GMT
+HOST: foo.example.com:1234
+Comment-date-rfc1123: Sun, 10 Oct 2004 07:02:24 GMT
+If-UNModified-since: Sunday, 10-Oct-04 07:02:24 GMT
 
 GET / HTTP/1.1
 HOST : foo.example.com:1234
-Comment-date-rfc1123 : Sun, 10 Oct 2004 07:02:24 GMT
-If-Range             : Sunday, 10-Oct-04 07:02:24 GMT
-Range : bytes = -1
+Comment-date-rfc1123: Sun, 10 Oct 2004 07:02:24 GMT
+If-Range: Sunday, 10-Oct-04 07:02:24 GMT
+Range: bytes = -1
                                                                                 
 
 GET / HTTP/1.1
-HOST : 
-	foo.example.com:1234
-Comment-date-rfc1123 : Sun, 10 Oct 2004 07:02:24 GMT
-If-Modified-since    : Sun Oct 10 07:02:24 2004
+HOST: foo.example.com:1234
+Comment-date-rfc1123: Sun, 10 Oct 2004 07:02:24 GMT
+If-Modified-since: Sun Oct 10 07:02:24 2004
 
 HEAD / HTTP/1.1
-HOST : foo.example.com:1234
-Comment-date-rfc1123 : Sun, 10 Oct 2004 07:02:24 GMT
-If-UNModified-since  : Sun Oct 10 07:02:24 2004
+HOST: foo.example.com:1234
+Comment-date-rfc1123: Sun, 10 Oct 2004 07:02:24 GMT
+If-UNModified-since: Sun Oct 10 07:02:24 2004
 
 GET / HTTP/1.1
-HOST : foo.example.com:1234
-Comment-date-rfc1123 : Sun, 10 Oct 2004 07:02:24 GMT
-If-Range             : Sun Oct 10 07:02:24 2004
-Range : bytes = -1
+HOST: foo.example.com:1234
+Comment-date-rfc1123: Sun, 10 Oct 2004 07:02:24 GMT
+If-Range: Sun Oct 10 07:02:24 2004
+Range: bytes = -1
 connection: close
 
 
