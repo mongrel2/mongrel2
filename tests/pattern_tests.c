@@ -78,6 +78,12 @@ char *test_blocks()
     m = pattern_match("ZED", strlen("ZEED"), "Z(ED)");
     mu_assert(m != NULL, "Should match.");
 
+    bstring s = bfromcstr("ZED");
+    bstring p = bfromcstr("Z(ED)");
+    m = bstring_match(s, p);
+    mu_assert(m != NULL, "Should match.");
+
+    bdestroy(s); bdestroy(p);
     return NULL;
 }
 
