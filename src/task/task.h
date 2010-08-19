@@ -12,6 +12,8 @@ extern "C" {
 #include <inttypes.h>
 #include <zmq.h>
 
+#include "bstring.h"
+
 /*
  * basic procs and threads
  */
@@ -31,6 +33,7 @@ void    taskname(char*, ...);
 void    taskstate(char*, ...);
 char*    taskgetname(void);
 char*    taskgetstate(void);
+bstring taskgetinfo(void);
 void    tasksystem(void);
 unsigned int  taskdelay(unsigned int);
 unsigned int  taskid(void);

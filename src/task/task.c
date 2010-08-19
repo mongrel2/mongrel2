@@ -276,12 +276,48 @@ needstack(int n)
     }
 }
 
-static void
-taskinfo(int s)
+bstring
+taskgetinfo(void)
 {
     int i;
     Task *t;
-    char *extra;
+
+    bstring data;
+    char* extra;
+    bstring taskline;
+
+    data = bfromcstr("{\"task_list\":[");
+
+    for(i = 0; i < nalltask; i++)
+    {
+        t = alltask[i];
+
+        if(t == taskrunning)
+            extra = "running";
+        else if(t->ready)
+            extra = "ready";
+        else
+            extra = "";
+
+        taskline = bformat("{\"id\": %d, \"system\": %d, \"name\": \"%s\", \"state\": \"%s\", \"extra\": \"%s\"}", t->id, t->system ? 1 : 0, t->name, t->state, extra);
+
+        if(i < nalltask - 1)
+        {
+            bcatcstr(taskline, ",\n");
+        }
+
+        bconcat(data, taskline);
+        bdestroy(taskline);
+    }
+
+    bcatcstr(data, "]}\n");
+
+    return data;
+}
+
+static void
+taskinfo(int s)
+{
     int fd = 0;
 
     unlink(STATUS_FILE);
@@ -292,21 +328,11 @@ taskinfo(int s)
         fd = 2;
     }
 
-    fprint(fd, "{\"task_list\":[");
-    for(i=0; i<nalltask; i++){
-        t = alltask[i];
-        if(t == taskrunning)
-            extra = " (running)";
-        else if(t->ready)
-            extra = " (ready)";
-        else
-            extra = "";
+    bstring status = taskgetinfo();
+    write(fd, bdata(status), blength(status));
+    bdestroy(status);
 
-        fprint(fd, "{\"id\": %d, \"system\": %d, \"name\": \"%s\", \"state\": \"%s\", \"extra\": \"%s\"}", t->id, t->system ? 1 : 0, t->name, t->state, extra);
-
-        if(i<nalltask-1) fprint(fd, ",\n");
-    }
-    fprint(fd, "]}");
+    close(fd);
 }
 
 /*
