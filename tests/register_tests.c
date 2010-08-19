@@ -7,6 +7,10 @@ char *test_Register_init()
 {
     Register_init();
 
+    // make sure we can call it twice
+    
+    Register_init();
+
     return NULL;
 }
 
@@ -18,6 +22,8 @@ char *test_Register_connect_disconnect()
     Register_disconnect(12);
     mu_assert(Register_exists(12) == 0, "Didn't disconnect.");
 
+    // do it again to make sure we log invalid unregisters
+    Register_disconnect(12);
     return NULL;
 }
 
@@ -27,6 +33,10 @@ char *test_Register_ping()
     mu_assert(Register_exists(12232) == CONN_TYPE_HTTP, "Didn't register.");
 
     mu_assert(Register_ping(12232), "Ping didn't work.");
+
+    // attempt a double registration which should work
+    Register_connect(12232, CONN_TYPE_MSG);
+    mu_assert(Register_exists(12232) == CONN_TYPE_MSG, "Didn't register.");
 
     Register_disconnect(12232);
     mu_assert(Register_exists(12) == 0, "Didn't disconnect.");
