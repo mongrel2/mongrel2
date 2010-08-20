@@ -85,20 +85,18 @@ void terminate(int s)
     MURDER = s == SIGTERM;
     switch(s)
     {
-        case(SIGHUP):
+        case SIGHUP:
             RELOAD = 1;
             RUNNING = 0;
             log_info("RELOAD REQUESTED, I'll do it on the next request.");
             break;
-        case(SIGQUIT): // Fallthrough on purpose.
-#ifdef SIGINFO
-        case(SIGINFO):
-#endif
+        case SIGQUIT: // Fallthrough on purpose.
             dump_status();
             break;
         default:
             RUNNING = 0;
             log_info("SHUTDOWN REQUESTED: %s", MURDER ? "MURDER" : "GRACEFUL");
+            fdclose(SERVER->listen_fd);
             break;
     }
 }
@@ -113,9 +111,6 @@ void start_terminator()
     sigaction(SIGTERM, &sa, &osa);
     sigaction(SIGHUP, &sa, &osa);
     sigaction(SIGQUIT, &sa, &osa);
-#ifdef SIGINFO
-    sigaction(SIGINFO, &sa, &osa);
-#endif
 }
 
 
