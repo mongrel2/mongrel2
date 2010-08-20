@@ -90,7 +90,7 @@ void terminate(int s)
             RUNNING = 0;
             log_info("RELOAD REQUESTED, I'll do it on the next request.");
             break;
-        case SIGQUIT: // Fallthrough on purpose.
+        case SIGQUIT:
             dump_status();
             break;
         default:
