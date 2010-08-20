@@ -1,0 +1,12 @@
+#!/bin/bash
+
+curl http://localhost:6767/
+
+curl http://localhost:6767/handlertest
+
+curl http://localhost:6767/chatdemo/
+
+curl http://localhost:6767/tests/sample.json
+
+curl http://localhost:6767/tests/crap
+

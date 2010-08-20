@@ -82,8 +82,14 @@ valgrind:
 	$(CC) $(CFLAGS) -c $< -o $@
 
 coverage: CFLAGS += -fprofile-arcs -ftest-coverage
-coverage: clean all
+coverage: clean all coverage_report
+
+coverage_report:
 	rm -rf tests/m2.zcov tests/coverage
 	zcov-scan tests/m2.zcov
 	zcov-genhtml tests/m2.zcov tests/coverage
 	zcov-summarize tests/m2.zcov
+
+system_tests:
+	./tests/system_tests/curl_tests
+	./tests/system_tests/chat_tests
