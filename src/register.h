@@ -35,11 +35,19 @@
 #ifndef _register_h
 #define _register_h
 
+#include <time.h>
+#include <stdint.h>
+
 enum {
     CONN_TYPE_HTTP=1,
     CONN_TYPE_MSG,
     CONN_TYPE_SOCKET
 };
+
+typedef struct Registration {
+    uint32_t last_ping;
+    uint8_t conn_type;
+} Registration;
 
 void Register_connect(int fd, int conn_type);
 
