@@ -22,17 +22,28 @@ char *test_Dir_find_file()
 
 char *test_Dir_resolve_file()
 {
-    Dir *test = Dir_create("tests/", "/", "index.html", "test/plain");
+    Dir *test = Dir_create("tests/", "/", "sample.html", "test/plain");
     mu_assert(test != NULL, "Failed to make test dir.");
 
-    FileRecord *rec = Dir_resolve_file(test, "/sample.json");
+    FileRecord *rec = Dir_resolve_file(test, bfromcstr("/sample.json"));
     mu_assert(rec != NULL, "Failed to resolve file that should be there.");
 
-    FileRecord_destroy(rec);
-    Dir_destroy(test);
+    rec = Dir_resolve_file(test, bfromcstr("/"));
+    mu_assert(rec != NULL, "Failed to find default file.");
+
+    rec = Dir_resolve_file(test, bfromcstr("/../../../../../etc/passwd"));
+    mu_assert(rec == NULL, "HACK! should not find this.");
     
+    test = Dir_create("foobar/", "/", "sample.html", "test/plan");
+    mu_assert(test != NULL, "Failed to make the failed dir.");
+
+    rec = Dir_resolve_file(test, bfromcstr("/sample.json"));
+    mu_assert(test == NULL, "Should not get something from a bad base directory.");
+
     return NULL;
 }
+
+
 
 char * all_tests() {
     mu_suite_start();
