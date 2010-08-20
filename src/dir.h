@@ -89,6 +89,8 @@ int Dir_stream_file(FileRecord *file, int sock_fd);
 
 int Dir_serve_file(Request *req, Dir *dir, bstring path, int fd);
 
+FileRecord *Dir_resolve_file(Dir *dir, bstring path);
+
 void FileRecord_release(FileRecord *file);
 void FileRecord_destroy(FileRecord *file);
 

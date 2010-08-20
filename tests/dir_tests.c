@@ -20,6 +20,20 @@ char *test_Dir_find_file()
 }
 
 
+char *test_Dir_resolve_file()
+{
+    Dir *test = Dir_create("tests/", "/", "index.html", "test/plain");
+    mu_assert(test != NULL, "Failed to make test dir.");
+
+    FileRecord *rec = Dir_resolve_file(test, "/sample.json");
+    mu_assert(rec != NULL, "Failed to resolve file that should be there.");
+
+    FileRecord_destroy(rec);
+    Dir_destroy(test);
+    
+    return NULL;
+}
+
 char * all_tests() {
     mu_suite_start();
 

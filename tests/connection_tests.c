@@ -42,7 +42,7 @@ int test_task_with_sample(const char *sample_file)
     check(conn, "Failed to create the conn.");
 
     conn->fd = open(sample_file, O_RDONLY);
-    check(!conn->fd >= 0, "Failed to open the sample file: %s.", sample_file);
+    check(conn->fd == 0, "Failed to open the sample file: %s.", sample_file);
 
     Connection_task(conn);
 
