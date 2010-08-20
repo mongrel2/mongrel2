@@ -87,7 +87,7 @@ FileRecord *Dir_find_file(bstring path, bstring default_type);
 
 int Dir_stream_file(FileRecord *file, int sock_fd);
 
-int Dir_serve_file(Request *req, Dir *dir, bstring path, int fd);
+int Dir_serve_file(Dir *dir, Request *req, int fd);
 
 FileRecord *Dir_resolve_file(Dir *dir, bstring path);
 

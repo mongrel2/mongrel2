@@ -433,13 +433,16 @@ static inline bstring Dir_calculate_response(Request *req, FileRecord *file)
 }
 
 
-int Dir_serve_file(Request *req, Dir *dir, bstring path, int fd)
+int Dir_serve_file(Dir *dir, Request *req, int fd)
 {
     FileRecord *file = NULL;
     bstring resp = NULL;
+    bstring path = Request_path(req);
     int rc = 0;
     int is_get = biseq(req->request_method, &HTTP_GET);
     int is_head = is_get ? 0 : biseq(req->request_method, &HTTP_HEAD);
+
+    check(path, "Request had not path. That's weird.");
 
     if(!(is_get || is_head)) {
         rc = Response_send_status(fd, &HTTP_405);

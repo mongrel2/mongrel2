@@ -241,12 +241,11 @@ int connection_http_to_directory(int event, void *data)
 {
     TRACE(http_to_directory);
     Connection *conn = (Connection *)data;
-    bstring path = Request_path(conn->req);
 
     Dir *dir = Request_get_action(conn->req, dir);
 
-    int rc = Dir_serve_file(conn->req, dir, path, conn->fd);
-    check_debug(rc == 0, "Failed to serve file: %s", bdata(path));
+    int rc = Dir_serve_file(dir, conn->req, conn->fd);
+    check_debug(rc == 0, "Failed to serve file: %s", bdata(Request_path(conn->req)));
 
     return RESP_SENT;
 
