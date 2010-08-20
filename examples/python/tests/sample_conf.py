@@ -7,6 +7,7 @@ main = Server(
     error_log="/logs/error.log",
     chroot="./",
     default_host="localhost",
+    name="test",
     pid_file="/run/mongrel2.pid",
     port=6767,
     hosts = [

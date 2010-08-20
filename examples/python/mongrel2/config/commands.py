@@ -138,7 +138,7 @@ def servers_command(db=None):
         servers = store.find(model.Server)
         for server in servers:
             print "-------"
-            print server.default_host, server.uuid
+            print server.name, server.default_host, server.uuid
 
             for host in server.hosts:
                 print "\t", host.id, ':', host.name
@@ -147,12 +147,13 @@ def servers_command(db=None):
         print "SQLite error: %s" % exc
 
 
-def hosts_command(db=None, uuid="", host=""):
+def hosts_command(db=None, uuid="", host="", name=""):
     """
     List all the hosts in the given server identified by UUID or host.
 
         m2sh hosts -db config.sqlite -uuid f400bf85-4538-4f7a-8908-67e313d515c2
         m2sh hosts -db config.sqlite -host localhost
+        m2sh hosts -db config.sqlite -name test
 
     The -host parameter is the default_host for the server.
     """
@@ -170,8 +171,10 @@ def hosts_command(db=None, uuid="", host=""):
             results = store.find(model.Server, model.Server.uuid == unicode(uuid))
         elif host:
             results = store.find(model.Server, model.Server.default_host == unicode(host))
+        elif name:
+            results = store.find(model.Server, model.Server.name == unicode(name))
         else:
-            print "ERROR: Must give a -host or -uuid."
+            print "ERROR: Must give a -host or -uuid or -name."
             return
 
         if results.count():
@@ -312,29 +315,32 @@ def log_command(db=None, count=20):
         print log
 
 
-def start_command(db=None, host=None, sudo=False):
+def start_command(db=None, host="", name="", sudo=False):
     """
     Does a simple start of the given server identified by the host
-    (default_host) parameter:
+    (default_host) parameter or the name:
 
 
         m2sh start -db config.sqlite -host localhost
+        m2sh start -db config.sqlite -name test
 
-    Give the -sudo options if you want it to start mongrel2 as
-    root for you (must have sudo installed).
+    Give the -sudo options if you want it to start mongrel2 as root for you
+    (must have sudo installed).  It'll actually find your servers whether you
+    give host or name even by the host.  Basically it'll get it right.
     """
     root_enabler = 'sudo' if sudo else ''
 
-    os.system('%s mongrel2 %s %s' % (root_enabler, db, host))
+    os.system('%s mongrel2 %s %s' % (root_enabler, db, host or name))
 
 
-def stop_command(db=None, host=None, murder=False):
+def stop_command(db=None, host="", name="", murder=False):
     """
     Stops a running mongrel2 process according to the host, either
     gracefully (INT) or murderous (TERM):
 
         m2sh stop -db config.sqlite -host localhost
         m2sh stop -db config.sqlite -host localhost -murder
+        m2sh stop -db config.sqlite -name test -murder
 
     You shouldn't need sudo to stop a running mongrel if you
     are also the user that owns the chroot directory or root.
@@ -344,7 +350,7 @@ def stop_command(db=None, host=None, murder=False):
     semi-gracefully.  You can also do it again with -murder if it's waiting
     for some dead connections and you want it to just quit.
     """
-    pid = get_server_pid(db, host)
+    pid = get_server_pid(db, host=host, name=name)
     if not pid: return
 
     sig = signal.SIGTERM if murder else signal.SIGINT
@@ -352,33 +358,35 @@ def stop_command(db=None, host=None, murder=False):
     os.kill(pid, sig)
 
 
-def reload_command(db=None, host=None):
+def reload_command(db=None, host="", name=""):
     """
     Causes Mongrel2 to do a soft-reload which will re-read the config
     database and then attempt to load a whole new configuration without
     losing connections on the previous one:
 
         m2sh reload -db config.sqlite -host localhost
+        m2sh reload -db config.sqlite -name test
 
     This reload will need access to the config database from within the 
     chroot for it to work, and it's not totally guaranteed to be 100%
     reliable, but if you are doing development and need to do quick changes
     then this is what you do.
     """
-    pid = get_server_pid(db, host)
+    pid = get_server_pid(db, host=host, name=name)
     if not pid: return
 
     os.kill(pid, signal.SIGHUP)
 
 
-def running_command(db=None, host=None):
+def running_command(db=None, host="", name=""):
     """
     Tells you if the given server is still running:
 
         m2sh running -db config.sqlite -host localhost
+        m2sh running -db config.sqlite -name test
     """
 
-    pid = get_server_pid(db, host)
+    pid = get_server_pid(db, host=host, name=name)
     if not pid: return
 
     try:
@@ -388,12 +396,17 @@ def running_command(db=None, host=None):
         print "NO: Mongrel2 server %s NOT at PID %d" % (host, pid)
 
 
-def get_server_pid(db, host):
+def get_server_pid(db, host = None, name = None):
     store = model.load_db("sqlite:" + db)
-    results = store.find(model.Server, model.Server.default_host == unicode(host))
+    results = []
+
+    if host:
+        results = store.find(model.Server, model.Server.default_host == unicode(host))
+    else:
+        results = store.find(model.Server, model.Server.name == unicode(name))
 
     if results.count() == 0:
-        print "No servers found."
+        print "No servers found for %s."
         return None
 
     server = results[0]

@@ -7,6 +7,7 @@ main = Server(
     chroot="./",
     pid_file="/run/mongrel2.pid",
     default_host="mongrel2.org",
+    name="main",
     port=6767
 )
 

@@ -258,7 +258,7 @@ error:
 list_t *Config_load_servers(const char *path, const char *name)
 {
     list_t *servers = list_create(LISTCOUNT_T_MAX);
-    const char *SERVER_QUERY = "SELECT id, uuid, default_host, port, chroot, access_log, error_log, pid_file FROM server WHERE default_host=%Q";
+    const char *SERVER_QUERY = "SELECT id, uuid, default_host, port, chroot, access_log, error_log, pid_file FROM server WHERE default_host=%Q OR name=%Q";
     char *query = NULL;
 
     int rc = DB_init(path);
