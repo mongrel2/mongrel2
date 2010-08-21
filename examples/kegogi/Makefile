@@ -6,9 +6,9 @@ all: kegogi
 install: all
 	sudo install build/kegogi /usr/local/bin/
 
-kegogi: src/kegogi.o src/fuzzrnd.o src/httpclient_parser.o src/kegogi_parser.o src/httpclient.o src/param.o src/kegogi_lexer.o src/kegogi_tokens.o
+kegogi: src/kegogi.o src/fuzzrnd.o src/kegogi_parser.o src/httpclient.o src/param.o src/kegogi_lexer.o src/kegogi_tokens.o
 	mkdir -p build
-	gcc ${CFLAGS} -o build/kegogi src/kegogi.o src/kegogi_parser.o src/kegogi_lexer.o src/fuzzrnd.o src/httpclient_parser.o src/httpclient.o src/param.o src/kegogi_tokens.o ${LIBS} ../../build/libm2.a
+	gcc ${CFLAGS} -o build/kegogi src/kegogi.o src/kegogi_parser.o src/kegogi_lexer.o src/fuzzrnd.o src/httpclient.o src/param.o src/kegogi_tokens.o ${LIBS} ../../build/libm2.a
 
 src/kegogi_lexer.o: src/kegogi_lexer.c
 	gcc $(CFLAGS) -c src/kegogi_lexer.c -o src/kegogi_lexer.o

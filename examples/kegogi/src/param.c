@@ -144,7 +144,6 @@ void ParamDict_set(ParamDict *pd, Param *p) {
 
     dict_alloc_insert(pd->dict, p->name, p);
 
-error:
     return;
 }
 
