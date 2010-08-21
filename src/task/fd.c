@@ -48,16 +48,17 @@ static inline int next_task_sleeptime(int min)
     if((t=sleeping.head) == nil)
         ms = -1;
     else{
-        /* sleep at most 5s */
         now = nsec();
         if(now >= t->alarmtime) {
             ms = 0;
-        } else if(now+5*1000*1000*1000LL >= t->alarmtime) {
-            ms = (t->alarmtime - now)/1000000 + min;
         } else {
-            ms = 5000;
+            ms = (t->alarmtime - now) / 1000000;
         }
+
+        if(ms % min != 0) ms = ms - (ms % min);
     }
+
+    if(ms == 0) ms = min;
 
     return ms;
 }
