@@ -54,18 +54,18 @@ void bstring_free(void *data, void *hint)
 }
 
 
-void Handler_notify_leave(Handler *handler, int fd)
+void Handler_notify_leave(Handler *handler, int id)
 {
     void *socket = handler->send_socket;
     assert(socket && "Socket can't be NULL");
 
     bstring payload = bformat("%s %d @* %d:%s,%d:%s,",
-            bdata(handler->send_ident), fd,
+            bdata(handler->send_ident), id,
             blength(&LEAVE_HEADER), bdata(&LEAVE_HEADER),
             blength(&LEAVE_MSG), bdata(&LEAVE_MSG));
 
     if(Handler_deliver(socket, bdata(payload), blength(payload)) == -1) {
-        log_err("Can't tell handler %d died.", fd);
+        log_err("Can't tell handler %d died.", id);
     }
 
     bdestroy(payload);
@@ -100,7 +100,8 @@ static inline void handler_cap_payload(bstring payload)
     }
 }
 
-static inline void handler_process_request(Handler *handler, int fd, int conn_type,
+static inline void handler_process_request(Handler *handler, int id,
+        int fd, int conn_type,
         const char *body_start, size_t body_length)
 {
     bstring payload = NULL;
@@ -108,8 +109,8 @@ static inline void handler_process_request(Handler *handler, int fd, int conn_ty
 
     // TODO: 0 length message will mean close connection
     if(!conn_type) {
-        log_err("Ident %d is no longer connected.", fd);
-        Handler_notify_leave(handler, fd);
+        log_err("Ident %d (fd %d) is no longer connected.", id, fd);
+        Handler_notify_leave(handler, id);
     } else {
         payload = blk2bstr(body_start, body_length);
         
@@ -188,10 +189,12 @@ void Handler_task(void *v)
         }
 
         for(i = 0; i < parser.target_count; i++) {
-            int fd = (int)parser.targets[i];
-            int conn_type = Register_exists(fd);
+            int id = (int)parser.targets[i];
+            int fd = Register_fd_for_id(id);
+            int conn_type = Register_fd_exists(fd);
 
-            handler_process_request(handler, fd, conn_type, parser.body_start, parser.body_length);
+            handler_process_request(handler, id, fd,
+                    conn_type, parser.body_start, parser.body_length);
         }
 
         bdestroy(parser.uuid);

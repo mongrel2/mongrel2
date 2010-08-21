@@ -43,53 +43,89 @@
 #define MAX_REGISTERED_FDS  64 * 1024
 
 static Registration REGISTRATIONS[MAX_REGISTERED_FDS];
-static int REG_COUNT = 0;
+// this has to stay uint16_t so we wrap around
+static uint16_t REG_COUNT = 0;
+static uint16_t REG_ID_TO_FD[MAX_REGISTERED_FDS];
 
 void Register_init()
 {
     memset(REGISTRATIONS, 0, sizeof(REGISTRATIONS));
+    memset(REG_ID_TO_FD, 0, sizeof(REG_ID_TO_FD));
 }
 
-void Register_connect(int fd, int conn_type)
+int Register_connect(int fd, int conn_type)
 {
-    assert(fd < MAX_REGISTERED_FDS && "Attempt to register FD that's greater than 64k possible.");
+    assert(fd < MAX_REGISTERED_FDS && "FD given to register is greater than max.");
     assert(conn_type != 0 && "conn_type can't be 0");
 
     Registration *reg = &REGISTRATIONS[fd];
+
+    check(reg->conn_type == 0, "Attempt to connect fd %d to slot already owned by someone else.", fd);
+
     reg->conn_type = conn_type;
     reg->last_ping = time(NULL);
-    REG_COUNT++;
+    
+    // purposefully want overflow on these
+    reg->id = REG_COUNT++;
+    REG_ID_TO_FD[reg->id] = fd;
+
+    return reg->id;
+
+error:
+    return -1;
 }
 
 
-void Register_disconnect(int fd)
+int Register_disconnect(int fd)
 {
-    assert(fd < MAX_REGISTERED_FDS && "Attempt to register FD that's greater than 64k possible.");
+    assert(fd < MAX_REGISTERED_FDS && "FD given to register is greater than max.");
 
     Registration *reg = &REGISTRATIONS[fd];
+    check(reg->conn_type != 0, "Attempt to unregister FD %d which is already gone.", fd);
+
     reg->conn_type = 0;
     reg->last_ping = 0;
     fdclose(fd);
-    REG_COUNT--;
+
+    REG_ID_TO_FD[reg->id] = 0;
+    return reg->id;
+
+error:
+    return -1;
 }
 
 int Register_ping(int fd)
 {
-    assert(fd < MAX_REGISTERED_FDS && "Attempt to register FD that's greater than 64k possible.");
+    assert(fd < MAX_REGISTERED_FDS && "FD given to register is greater than max.");
     Registration *reg = &REGISTRATIONS[fd];
 
-    if(reg->conn_type == 0) {
-        return 0;
-    } else {
-        reg->last_ping = time(NULL);
-        return reg->last_ping;
-    }
+    check(reg->conn_type != 0, "Attemp to ping an FD that isn't registered: %d", fd);
+
+    reg->last_ping = time(NULL);
+    return reg->last_ping;
+
+error:
+    return -1;
 }
 
 
-int Register_exists(int fd)
+int Register_fd_exists(int fd)
 {
-    assert(fd < MAX_REGISTERED_FDS && "Attempt to register FD that's greater than 64k possible.");
+    assert(fd < MAX_REGISTERED_FDS && "FD given to register is greater than max.");
+
     return REGISTRATIONS[fd].conn_type;
+}
+
+
+int Register_fd_for_id(int id)
+{
+    assert(id < MAX_REGISTERED_FDS && "Ident (id) given to register is greater than max.");
+    return REG_ID_TO_FD[id];
+}
+
+int Register_id_for_fd(int fd)
+{
+    assert(fd < MAX_REGISTERED_FDS && "FD given to register is greater than max.");
+    return REGISTRATIONS[fd].id;
 }
 

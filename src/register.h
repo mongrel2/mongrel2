@@ -45,18 +45,23 @@ enum {
 };
 
 typedef struct Registration {
-    uint32_t last_ping;
     uint8_t conn_type;
+    uint16_t id;
+    uint32_t last_ping;
 } Registration;
 
-void Register_connect(int fd, int conn_type);
+int Register_connect(int fd, int conn_type);
 
-void Register_disconnect(int fd);
+int Register_disconnect(int fd);
 
 int Register_ping(int fd);
 
 void Register_init();
 
-int Register_exists(int fd);
+int Register_fd_exists(int fd);
+
+int Register_id_for_fd(int fd);
+
+int Register_fd_for_id(int id);
 
 #endif

@@ -41,6 +41,7 @@
 #include <adt/dict.h>
 #include <string.h>
 #include <headers.h>
+#include <register.h>
 
 #include <time.h>
 
@@ -234,6 +235,9 @@ bstring Request_to_payload(Request *req, bstring uuid, int fd, const char *buf, 
     bstring headers = bformat("{\"%s\":\"%s\"", bdata(&HTTP_PATH), bdata(req->path));
     bstring result = NULL;
     dnode_t *i = NULL;
+    int id = Register_id_for_fd(fd);
+
+    check(id != -1, "Asked to generate a paylod for an fd that doesn't exist: %d", fd);
 
     if(Request_is_json(req)) {
         B(&HTTP_METHOD, &JSON_METHOD);
@@ -254,7 +258,7 @@ bstring Request_to_payload(Request *req, bstring uuid, int fd, const char *buf, 
 
     bconchar(headers, '}');
 
-    result = bformat("%s %d %s %d:%s,%d:", bdata(uuid), fd, 
+    result = bformat("%s %d %s %d:%s,%d:", bdata(uuid), id, 
             bdata(Request_path(req)),
             blength(headers), bdata(headers), len);
 
