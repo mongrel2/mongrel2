@@ -111,6 +111,9 @@ void start_terminator()
     sigaction(SIGTERM, &sa, &osa);
     sigaction(SIGHUP, &sa, &osa);
     sigaction(SIGQUIT, &sa, &osa);
+
+    sa.sa_handler = SIG_IGN;
+    sigaction(SIGPIPE, &sa, &osa);
 }
 
 
@@ -159,6 +162,13 @@ error:
     return -1;
 }
 
+void tickertask(void *v)
+{
+    // this will be used later for timeouts
+    while(1) {
+        taskdelay(10000);
+    }
+}
 
 int attempt_chroot_drop(Server *srv)
 {
@@ -315,6 +325,8 @@ void taskmain(int argc, char **argv)
     check(rc == 0, "Major failure in chroot/droppriv, aborting."); 
 
     final_setup();
+
+    taskcreate(tickertask, NULL, 16 * 1024);
 
     while(1) {
         Server_start(SERVER);

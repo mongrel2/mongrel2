@@ -28,6 +28,7 @@ def read_msg():
 
 def join_feed(user):
     CONN.send('@chat {"type": "join", "user": "%s"}\x00' % user)
+    time.sleep(1)
 
 def post_msg(user, data):
     msg = '@chat {"type": "msg", "user": "%s", "msg": "%s"}\x00' % (user, data)
