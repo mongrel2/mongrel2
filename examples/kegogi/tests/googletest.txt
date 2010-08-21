@@ -7,11 +7,11 @@
 defaults host="www.google.com"
 
 send GET /
-expect 200
+expect 200 body=(.*google.*)
 
 # 411 means length required
 send POST http://www.google.com/
-expect 411
+expect 411 
 
 send GET http://www.google.com:80/this/is/not/real/asdfkljasdfk
 expect 404

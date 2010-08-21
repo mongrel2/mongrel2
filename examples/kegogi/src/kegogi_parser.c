@@ -160,30 +160,32 @@ static const YYMINORTYPE yyzerominor = { 0 };
 **  yy_default[]       Default action for each state.
 */
 static const YYACTIONTYPE yy_action[] = {
- /*     0 */    25,   18,   19,   21,    2,   20,    7,    6,   12,   38,
- /*    10 */     1,   17,   16,   23,   11,   11,   14,   11,    3,   22,
- /*    20 */     4,   24,   11,    5,   10,   13,    8,    9,   15,
+ /*     0 */    25,   18,    8,   24,   20,   17,    7,    9,   12,   16,
+ /*    10 */    15,   19,   15,   38,    1,   13,   15,   15,   21,   22,
+ /*    20 */    11,   23,   14,   10,    6,    5,   39,   39,   39,   39,
+ /*    30 */     2,    4,   39,    3,
 };
 static const YYCODETYPE yy_lookahead[] = {
- /*     0 */     0,    1,   13,    2,   14,    4,    5,    7,    8,   18,
- /*    10 */    19,   16,   17,    1,    2,    2,    1,    2,   14,    6,
- /*    20 */    14,    1,    2,   14,    3,    2,    9,   11,   10,
+ /*     0 */     0,    1,    9,    2,   13,    4,    5,    7,    8,    1,
+ /*    10 */     2,    1,    2,   18,   19,    1,    2,    2,   16,   17,
+ /*    20 */     2,    6,   10,    3,   11,   14,   20,   20,   20,   20,
+ /*    30 */    14,   14,   20,   14,
 };
-#define YY_SHIFT_USE_DFLT (-1)
+#define YY_SHIFT_USE_DFLT (-8)
 #define YY_SHIFT_MAX 15
 static const signed char yy_shift_ofst[] = {
- /*     0 */    -1,    0,   12,   13,   15,   20,   -1,   -1,   -1,   -1,
- /*    10 */     1,   21,   23,   17,   18,   16,
+ /*     0 */    -8,    0,   15,    8,   14,   10,   -8,   -8,   -8,   -8,
+ /*    10 */     1,   -7,   18,   12,   13,   20,
 };
-#define YY_REDUCE_USE_DFLT (-12)
+#define YY_REDUCE_USE_DFLT (-10)
 #define YY_REDUCE_MAX 9
 static const signed char yy_reduce_ofst[] = {
- /*     0 */    -9,   -5,  -11,  -11,  -11,  -11,  -10,    4,    6,    9,
+ /*     0 */    -5,    2,   -9,   -9,   -9,   -9,   11,   16,   17,   19,
 };
 static const YYACTIONTYPE yy_default[] = {
  /*     0 */    29,   37,   37,   37,   37,   37,   31,   31,   31,   31,
- /*    10 */    37,   37,   37,   37,   37,   37,   26,   27,   28,   30,
- /*    20 */    32,   33,   34,   35,   36,
+ /*    10 */    37,   37,   37,   37,   37,   37,   35,   32,   28,   36,
+ /*    20 */    30,   27,   26,   34,   33,
 };
 #define YY_SZ_ACTTAB (int)(sizeof(yy_action)/sizeof(yy_action[0]))
 
@@ -383,7 +385,7 @@ static void yy_destructor(
 {
 #line 29 "src/kegogi_parser.y"
  free((yypminor->yy30)); 
-#line 387 "src/kegogi_parser.c"
+#line 389 "src/kegogi_parser.c"
 }
       break;
     default:  break;   /* If no destructor action specified: do nothing */
@@ -560,7 +562,7 @@ static void yyStackOverflow(yyParser *yypParser, YYMINORTYPE *yypMinor){
 
     debug("There was a stack overflow");
  
-#line 564 "src/kegogi_parser.c"
+#line 566 "src/kegogi_parser.c"
    ParseARG_STORE; /* Suppress warning about unused %extra_argument var */
 }
 
@@ -692,7 +694,7 @@ static void yy_reduce(
     commandList->commands[idx] = *yymsp[0].minor.yy30;
     free(yymsp[0].minor.yy30);
 }
-#line 696 "src/kegogi_parser.c"
+#line 698 "src/kegogi_parser.c"
         break;
       case 2: /* command_list ::= command_list defaults */
 #line 49 "src/kegogi_parser.y"
@@ -702,43 +704,43 @@ static void yy_reduce(
     else
         commandList->defaults = yymsp[0].minor.yy24;
 }
-#line 706 "src/kegogi_parser.c"
+#line 708 "src/kegogi_parser.c"
         break;
       case 5: /* params ::= params param */
 #line 60 "src/kegogi_parser.y"
 { yygotominor.yy24 = yymsp[-1].minor.yy24; ParamDict_set(yygotominor.yy24, yymsp[0].minor.yy8); }
-#line 711 "src/kegogi_parser.c"
+#line 713 "src/kegogi_parser.c"
         break;
       case 6: /* params ::= */
 #line 61 "src/kegogi_parser.y"
 { yygotominor.yy24 = ParamDict_create(); }
-#line 716 "src/kegogi_parser.c"
+#line 718 "src/kegogi_parser.c"
         break;
       case 7: /* param ::= STRING EQUALS PATTERN */
 #line 63 "src/kegogi_parser.y"
 {
     yygotominor.yy8 = Param_create(bstrcpy(yymsp[-2].minor.yy0->s1), PATTERN, bstrcpy(yymsp[0].minor.yy0->s1));
 }
-#line 723 "src/kegogi_parser.c"
+#line 725 "src/kegogi_parser.c"
         break;
       case 8: /* param ::= STRING EQUALS STRING */
 #line 67 "src/kegogi_parser.y"
 {
     yygotominor.yy8 = Param_create(bstrcpy(yymsp[-2].minor.yy0->s1), STRING, bstrcpy(yymsp[0].minor.yy0->s1));
 }
-#line 730 "src/kegogi_parser.c"
+#line 732 "src/kegogi_parser.c"
         break;
       case 9: /* param ::= STRING EQUALS DICT_START params DICT_END */
 #line 71 "src/kegogi_parser.y"
 {
     yygotominor.yy8 = Param_create(bstrcpy(yymsp[-4].minor.yy0->s1), DICT, yymsp[-1].minor.yy24);
 }
-#line 737 "src/kegogi_parser.c"
+#line 739 "src/kegogi_parser.c"
         break;
       case 10: /* defaults ::= DEFAULTS params NEWLINE */
 #line 75 "src/kegogi_parser.y"
 { yygotominor.yy24 = yymsp[-1].minor.yy24; }
-#line 742 "src/kegogi_parser.c"
+#line 744 "src/kegogi_parser.c"
         break;
       case 11: /* command ::= SEND STRING URL params NEWLINE EXPECT NUMBER params NEWLINE */
 #line 78 "src/kegogi_parser.y"
@@ -752,7 +754,7 @@ static void yy_reduce(
            yygotominor.yy30->expect.status_code = bstrcpy(yymsp[-2].minor.yy0->s1);
            yygotominor.yy30->expect.params = yymsp[-1].minor.yy24;
 }
-#line 756 "src/kegogi_parser.c"
+#line 758 "src/kegogi_parser.c"
         break;
       default:
       /* (0) script ::= command_list */ yytestcase(yyruleno==0);
@@ -821,7 +823,7 @@ static void yy_syntax_error(
 
     debug("There was a syntax error");
  
-#line 825 "src/kegogi_parser.c"
+#line 827 "src/kegogi_parser.c"
   ParseARG_STORE; /* Suppress warning about unused %extra_argument variable */
 }
 

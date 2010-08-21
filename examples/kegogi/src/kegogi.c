@@ -4,6 +4,7 @@
 #include <dbg.h>
 #include <task/task.h>
 #include <bstr/bstrlib.h>
+#include <pattern.h>
 
 #include "httpclient.h"
 #include "kegogi_parser.h"
@@ -15,7 +16,7 @@ FILE *LOG_FILE = NULL;
 struct tagbstring DEFAULT_HOST_KEY = bsStatic("host");
 struct tagbstring DEFAULT_PORT_KEY = bsStatic("port");
 
-static int verify_response(Command *command, Request *req, Response *actual);
+static int verify_response(Expect *expect, Request *req, Response *actual);
 static Request *create_request(Send *send, ParamDict *defaults);
 
 void runkegogi(void *arg)
@@ -36,7 +37,7 @@ void runkegogi(void *arg)
 
         Response *actual = Response_fetch(req);
         
-        if(verify_response(&commands[i], req, actual))
+        if(verify_response(&commands[i].expect, req, actual))
             passed++;
         else
             failed++;
@@ -87,8 +88,9 @@ error:
     return NULL;
 }
 
-static int verify_response(Command *command, Request *req, Response *actual) {
-    check(command != NULL && req != NULL, "command and req must not be NULL");
+static int verify_response(Expect *expect, Request *req, Response *actual) {
+    check(expect != NULL && req != NULL, "command and req must not be NULL");
+    struct tagbstring body_key = bsStatic("body");
 
     if(actual == NULL) {
         printf("Failure when fetching %s:%d%s\n", bdata(req->host), req->port,
@@ -97,13 +99,37 @@ static int verify_response(Command *command, Request *req, Response *actual) {
         return 0;
     }
 
-    int expected_status_code = atoi(bdata(command->expect.status_code));
+    int expected_status_code = atoi(bdata(expect->status_code));
     if(expected_status_code != actual->status_code) {
         printf("Failure when fetching %s:%d%s\n", bdata(req->host), req->port,
                bdata(req->uri));
         printf("  Status code was %d, expected %d\n", actual->status_code,
                expected_status_code);
         return 0;
+    }
+
+    
+    Param *p = ParamDict_get(expect->params, &body_key);
+    if(p != NULL) {
+        int pass = 0;
+        if(p->type == PATTERN)
+            pass = (bstring_match(actual->body, p->data.pattern) != NULL);
+        else if(p->type == STRING)
+            pass = (bstrcmp(actual->body, p->data.string) == 0);
+
+        if(!pass) {
+            printf("Failure when fetching %s:%d%s\n", bdata(req->host),
+                   req->port, bdata(req->uri));
+            printf("  Actual: \"%s\"\n", bdata(actual->body));
+            if(p->type == PATTERN)
+                printf("  Expected: (%s)\n", bdata(p->data.pattern));
+            else if (p->type == STRING)
+                printf("  Expected: \"%s\"\n", bdata(p->data.string));
+            else
+                printf("  Expected dict?\n");
+
+            return 0;
+        }
     }
 
     return 1;
