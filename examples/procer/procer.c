@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <sys/stat.h>
 
 FILE *LOG_FILE = NULL;
 
@@ -227,13 +228,19 @@ void taskmain(int argc, char *argv[])
     bstring dir_glob = bformat("%s/[A-Za-z0-9]*", argv[1]);
     check(dir_glob, "Couldn't make the directory glob.");
 
-    rc = glob(bdata(dir_glob), GLOB_ERR | GLOB_ONLYDIR, NULL, &profile_glob);
+    rc = glob(bdata(dir_glob), GLOB_ERR, NULL, &profile_glob);
     check(rc == 0, "Failed to find directories in the profiles.");
 
+    struct stat sb;
     debug("Loading %zu actions.", profile_glob.gl_pathc);
     for(i = 0; i < profile_glob.gl_pathc; i++) {
-        action = Action_create(profile_glob.gl_pathv[i]);
-        targets = tst_insert(targets, bdata(action->name), blength(action->name), action);
+        rc = lstat(profile_glob.gl_pathv[i], &sb);
+        check(rc == 0, "Failed to stat file or directory: %s", profile_glob.gl_pathv[i]);
+
+        if (sb.st_mode & S_IFDIR) {
+            action = Action_create(profile_glob.gl_pathv[i]);
+            targets = tst_insert(targets, bdata(action->name), blength(action->name), action);
+        }
     }
 
     // now we setup the dependencies from the settings they've got
