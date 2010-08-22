@@ -35,15 +35,14 @@
 #ifndef httpclient_parser_h
 #define httpclient_parser_h
 
-#include <sys/types.h>
-
-typedef void (*element_cb)(void *data, const char *at, size_t length);
-typedef void (*field_cb)(void *data, const char *field, size_t flen, const char *value, size_t vlen);
+#include <http11/http11_common.h>
 
 typedef struct httpclient_parser { 
   int cs;
   size_t body_start;
   int content_len;
+  int chunked;
+  int chunks_done;
   size_t nread;
   size_t mark;
   size_t field_start;

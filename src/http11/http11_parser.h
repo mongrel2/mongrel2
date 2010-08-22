@@ -2,10 +2,7 @@
 #ifndef http11_parser_h
 #define http11_parser_h
 
-#include <sys/types.h>
-
-typedef void (*element_cb)(void *data, const char *at, size_t length);
-typedef void (*field_cb)(void *data, const char *field, size_t flen, const char *value, size_t vlen);
+#include <http11/http11_common.h>
 
 typedef struct http_parser { 
   int cs;

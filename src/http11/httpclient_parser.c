@@ -49,7 +49,7 @@
 
 /** machine **/
 
-#line 124 "src/http11/httpclient_parser.rl"
+#line 135 "src/http11/httpclient_parser.rl"
 
 
 /** Data **/
@@ -62,48 +62,50 @@ static const int httpclient_parser_error = 0;
 static const int httpclient_parser_en_main = 1;
 
 
-#line 128 "src/http11/httpclient_parser.rl"
+#line 139 "src/http11/httpclient_parser.rl"
 
 int httpclient_parser_init(httpclient_parser *parser)  {
-  int cs = 0;
+    int cs = 0;
 
-  
+    
 #line 72 "src/http11/httpclient_parser.c"
 	{
 	cs = httpclient_parser_start;
 	}
 
-#line 133 "src/http11/httpclient_parser.rl"
+#line 144 "src/http11/httpclient_parser.rl"
 
-  parser->cs = cs;
-  parser->body_start = 0;
-  parser->content_len = 0;
-  parser->mark = 0;
-  parser->nread = 0;
-  parser->field_len = 0;
-  parser->field_start = 0;    
+    parser->cs = cs;
+    parser->body_start = 0;
+    parser->content_len = 0;
+    parser->chunked = 0;
+    parser->chunks_done = 0;
+    parser->mark = 0;
+    parser->nread = 0;
+    parser->field_len = 0;
+    parser->field_start = 0;    
 
-  return(1);
+    return(1);
 }
 
 
 /** exec **/
 size_t httpclient_parser_execute(httpclient_parser *parser, const char *buffer, size_t len, size_t off)  
 {
-  const char *p, *pe;
-  int cs = parser->cs;
+    const char *p, *pe;
+    int cs = parser->cs;
 
-  assert(off <= len && "offset past end of buffer");
+    assert(off <= len && "offset past end of buffer");
 
-  p = buffer+off;
-  pe = buffer+len;
+    p = buffer+off;
+    pe = buffer+len;
 
-  assert(*pe == '\0' && "pointer does not end on NUL");
-  assert(pe - p == len - off && "pointers aren't same distance");
+    assert(*pe == '\0' && "pointer does not end on NUL");
+    assert(pe - p == len - off && "pointers aren't same distance");
 
 
-  
-#line 107 "src/http11/httpclient_parser.c"
+    
+#line 109 "src/http11/httpclient_parser.c"
 	{
 	if ( p == pe )
 		goto _test_eof;
@@ -111,91 +113,271 @@ size_t httpclient_parser_execute(httpclient_parser *parser, const char *buffer, 
 	{
 case 1:
 	switch( (*p) ) {
+		case 10: goto tr0;
 		case 13: goto st2;
-		case 48: goto tr2;
+		case 48: goto tr3;
 		case 59: goto st15;
-		case 72: goto tr5;
+		case 72: goto tr6;
 	}
 	if ( (*p) < 65 ) {
 		if ( 49 <= (*p) && (*p) <= 57 )
-			goto tr3;
+			goto tr4;
 	} else if ( (*p) > 70 ) {
 		if ( 97 <= (*p) && (*p) <= 102 )
-			goto tr3;
+			goto tr4;
 	} else
-		goto tr3;
+		goto tr4;
 	goto st0;
 st0:
 cs = 0;
 	goto _out;
-tr33:
+tr0:
+#line 90 "src/http11/httpclient_parser.rl"
+	{
+        parser->chunked = 1;
+        parser->content_len = 0;
+        parser->chunks_done = 1;
+        parser->last_chunk(parser->data, NULL, 0);
+    }
+#line 97 "src/http11/httpclient_parser.rl"
+	{ 
+        parser->body_start = p - buffer + 1; 
+        if(parser->header_done != NULL)
+            parser->header_done(parser->data, p + 1, pe - p - 1);
+        {p++; cs = 36; goto _out;}
+    }
+	goto st36;
+tr7:
+#line 82 "src/http11/httpclient_parser.rl"
+	{
+        parser->chunked = 1;
+        parser->content_len = strtol(PTR_TO(mark), NULL, 16);
+        parser->chunks_done = parser->content_len <= 0;
+        if(parser->chunk_size != NULL)
+            parser->chunk_size(parser->data, PTR_TO(mark), LEN(mark, p));
+    }
+#line 97 "src/http11/httpclient_parser.rl"
+	{ 
+        parser->body_start = p - buffer + 1; 
+        if(parser->header_done != NULL)
+            parser->header_done(parser->data, p + 1, pe - p - 1);
+        {p++; cs = 36; goto _out;}
+    }
+#line 90 "src/http11/httpclient_parser.rl"
+	{
+        parser->chunked = 1;
+        parser->content_len = 0;
+        parser->chunks_done = 1;
+        parser->last_chunk(parser->data, NULL, 0);
+    }
+	goto st36;
+tr11:
+#line 97 "src/http11/httpclient_parser.rl"
+	{ 
+        parser->body_start = p - buffer + 1; 
+        if(parser->header_done != NULL)
+            parser->header_done(parser->data, p + 1, pe - p - 1);
+        {p++; cs = 36; goto _out;}
+    }
+#line 90 "src/http11/httpclient_parser.rl"
+	{
+        parser->chunked = 1;
+        parser->content_len = 0;
+        parser->chunks_done = 1;
+        parser->last_chunk(parser->data, NULL, 0);
+    }
+	goto st36;
+tr12:
+#line 82 "src/http11/httpclient_parser.rl"
+	{
+        parser->chunked = 1;
+        parser->content_len = strtol(PTR_TO(mark), NULL, 16);
+        parser->chunks_done = parser->content_len <= 0;
+        if(parser->chunk_size != NULL)
+            parser->chunk_size(parser->data, PTR_TO(mark), LEN(mark, p));
+    }
+#line 97 "src/http11/httpclient_parser.rl"
+	{ 
+        parser->body_start = p - buffer + 1; 
+        if(parser->header_done != NULL)
+            parser->header_done(parser->data, p + 1, pe - p - 1);
+        {p++; cs = 36; goto _out;}
+    }
+	goto st36;
+tr15:
+#line 97 "src/http11/httpclient_parser.rl"
+	{ 
+        parser->body_start = p - buffer + 1; 
+        if(parser->header_done != NULL)
+            parser->header_done(parser->data, p + 1, pe - p - 1);
+        {p++; cs = 36; goto _out;}
+    }
+	goto st36;
+tr17:
 #line 56 "src/http11/httpclient_parser.rl"
 	{ 
-    parser->field_len = LEN(field_start, p);
-  }
+        parser->field_len = LEN(field_start, p);
+    }
 #line 60 "src/http11/httpclient_parser.rl"
 	{ MARK(mark, p); }
 #line 62 "src/http11/httpclient_parser.rl"
 	{ 
-    parser->http_field(parser->data, PTR_TO(field_start), parser->field_len, PTR_TO(mark), LEN(mark, p));
-  }
-	goto st2;
-tr38:
+        if(parser->http_field != NULL)
+            parser->http_field(parser->data, PTR_TO(field_start), parser->field_len, PTR_TO(mark), LEN(mark, p));
+    }
+#line 97 "src/http11/httpclient_parser.rl"
+	{ 
+        parser->body_start = p - buffer + 1; 
+        if(parser->header_done != NULL)
+            parser->header_done(parser->data, p + 1, pe - p - 1);
+        {p++; cs = 36; goto _out;}
+    }
+	goto st36;
+tr23:
 #line 62 "src/http11/httpclient_parser.rl"
 	{ 
-    parser->http_field(parser->data, PTR_TO(field_start), parser->field_len, PTR_TO(mark), LEN(mark, p));
-  }
-	goto st2;
-st2:
-	if ( ++p == pe )
-		goto _test_eof2;
-case 2:
-#line 154 "src/http11/httpclient_parser.c"
-	if ( (*p) == 10 )
-		goto tr6;
-	goto st0;
-tr6:
-#line 82 "src/http11/httpclient_parser.rl"
-	{
-    parser->last_chunk(parser->data, NULL, 0);
-  }
-#line 86 "src/http11/httpclient_parser.rl"
+        if(parser->http_field != NULL)
+            parser->http_field(parser->data, PTR_TO(field_start), parser->field_len, PTR_TO(mark), LEN(mark, p));
+    }
+#line 97 "src/http11/httpclient_parser.rl"
 	{ 
-    parser->body_start = p - buffer + 1; 
-    if(parser->header_done != NULL)
-      parser->header_done(parser->data, p + 1, pe - p - 1);
-    {p++; cs = 36; goto _out;}
-  }
+        parser->body_start = p - buffer + 1; 
+        if(parser->header_done != NULL)
+            parser->header_done(parser->data, p + 1, pe - p - 1);
+        {p++; cs = 36; goto _out;}
+    }
 	goto st36;
-tr10:
-#line 86 "src/http11/httpclient_parser.rl"
+tr28:
+#line 56 "src/http11/httpclient_parser.rl"
 	{ 
-    parser->body_start = p - buffer + 1; 
-    if(parser->header_done != NULL)
-      parser->header_done(parser->data, p + 1, pe - p - 1);
-    {p++; cs = 36; goto _out;}
-  }
-#line 82 "src/http11/httpclient_parser.rl"
+        parser->field_len = LEN(field_start, p);
+    }
+#line 60 "src/http11/httpclient_parser.rl"
+	{ MARK(mark, p); }
+#line 62 "src/http11/httpclient_parser.rl"
+	{ 
+        if(parser->http_field != NULL)
+            parser->http_field(parser->data, PTR_TO(field_start), parser->field_len, PTR_TO(mark), LEN(mark, p));
+    }
+#line 97 "src/http11/httpclient_parser.rl"
+	{ 
+        parser->body_start = p - buffer + 1; 
+        if(parser->header_done != NULL)
+            parser->header_done(parser->data, p + 1, pe - p - 1);
+        {p++; cs = 36; goto _out;}
+    }
+#line 90 "src/http11/httpclient_parser.rl"
 	{
-    parser->last_chunk(parser->data, NULL, 0);
-  }
+        parser->chunked = 1;
+        parser->content_len = 0;
+        parser->chunks_done = 1;
+        parser->last_chunk(parser->data, NULL, 0);
+    }
 	goto st36;
-tr13:
-#line 86 "src/http11/httpclient_parser.rl"
+tr34:
+#line 62 "src/http11/httpclient_parser.rl"
 	{ 
-    parser->body_start = p - buffer + 1; 
-    if(parser->header_done != NULL)
-      parser->header_done(parser->data, p + 1, pe - p - 1);
-    {p++; cs = 36; goto _out;}
-  }
+        if(parser->http_field != NULL)
+            parser->http_field(parser->data, PTR_TO(field_start), parser->field_len, PTR_TO(mark), LEN(mark, p));
+    }
+#line 97 "src/http11/httpclient_parser.rl"
+	{ 
+        parser->body_start = p - buffer + 1; 
+        if(parser->header_done != NULL)
+            parser->header_done(parser->data, p + 1, pe - p - 1);
+        {p++; cs = 36; goto _out;}
+    }
+#line 90 "src/http11/httpclient_parser.rl"
+	{
+        parser->chunked = 1;
+        parser->content_len = 0;
+        parser->chunks_done = 1;
+        parser->last_chunk(parser->data, NULL, 0);
+    }
+	goto st36;
+tr39:
+#line 56 "src/http11/httpclient_parser.rl"
+	{ 
+        parser->field_len = LEN(field_start, p);
+    }
+#line 60 "src/http11/httpclient_parser.rl"
+	{ MARK(mark, p); }
+#line 62 "src/http11/httpclient_parser.rl"
+	{ 
+        if(parser->http_field != NULL)
+            parser->http_field(parser->data, PTR_TO(field_start), parser->field_len, PTR_TO(mark), LEN(mark, p));
+    }
+#line 90 "src/http11/httpclient_parser.rl"
+	{
+        parser->chunked = 1;
+        parser->content_len = 0;
+        parser->chunks_done = 1;
+        parser->last_chunk(parser->data, NULL, 0);
+    }
+#line 97 "src/http11/httpclient_parser.rl"
+	{ 
+        parser->body_start = p - buffer + 1; 
+        if(parser->header_done != NULL)
+            parser->header_done(parser->data, p + 1, pe - p - 1);
+        {p++; cs = 36; goto _out;}
+    }
+	goto st36;
+tr45:
+#line 62 "src/http11/httpclient_parser.rl"
+	{ 
+        if(parser->http_field != NULL)
+            parser->http_field(parser->data, PTR_TO(field_start), parser->field_len, PTR_TO(mark), LEN(mark, p));
+    }
+#line 90 "src/http11/httpclient_parser.rl"
+	{
+        parser->chunked = 1;
+        parser->content_len = 0;
+        parser->chunks_done = 1;
+        parser->last_chunk(parser->data, NULL, 0);
+    }
+#line 97 "src/http11/httpclient_parser.rl"
+	{ 
+        parser->body_start = p - buffer + 1; 
+        if(parser->header_done != NULL)
+            parser->header_done(parser->data, p + 1, pe - p - 1);
+        {p++; cs = 36; goto _out;}
+    }
 	goto st36;
 st36:
 	if ( ++p == pe )
 		goto _test_eof36;
 case 36:
-#line 197 "src/http11/httpclient_parser.c"
+#line 351 "src/http11/httpclient_parser.c"
 	goto st0;
-tr2:
+tr40:
+#line 56 "src/http11/httpclient_parser.rl"
+	{ 
+        parser->field_len = LEN(field_start, p);
+    }
+#line 60 "src/http11/httpclient_parser.rl"
+	{ MARK(mark, p); }
+#line 62 "src/http11/httpclient_parser.rl"
+	{ 
+        if(parser->http_field != NULL)
+            parser->http_field(parser->data, PTR_TO(field_start), parser->field_len, PTR_TO(mark), LEN(mark, p));
+    }
+	goto st2;
+tr46:
+#line 62 "src/http11/httpclient_parser.rl"
+	{ 
+        if(parser->http_field != NULL)
+            parser->http_field(parser->data, PTR_TO(field_start), parser->field_len, PTR_TO(mark), LEN(mark, p));
+    }
+	goto st2;
+st2:
+	if ( ++p == pe )
+		goto _test_eof2;
+case 2:
+#line 377 "src/http11/httpclient_parser.c"
+	if ( (*p) == 10 )
+		goto tr0;
+	goto st0;
+tr3:
 #line 52 "src/http11/httpclient_parser.rl"
 	{MARK(mark, p); }
 	goto st3;
@@ -203,10 +385,11 @@ st3:
 	if ( ++p == pe )
 		goto _test_eof3;
 case 3:
-#line 207 "src/http11/httpclient_parser.c"
+#line 389 "src/http11/httpclient_parser.c"
 	switch( (*p) ) {
-		case 13: goto tr7;
-		case 59: goto tr9;
+		case 10: goto tr7;
+		case 13: goto tr8;
+		case 59: goto tr10;
 	}
 	if ( (*p) < 65 ) {
 		if ( 48 <= (*p) && (*p) <= 57 )
@@ -217,39 +400,45 @@ case 3:
 	} else
 		goto st5;
 	goto st0;
-tr7:
-#line 78 "src/http11/httpclient_parser.rl"
+tr8:
+#line 82 "src/http11/httpclient_parser.rl"
 	{
-    parser->chunk_size(parser->data, PTR_TO(mark), LEN(mark, p));
-  }
+        parser->chunked = 1;
+        parser->content_len = strtol(PTR_TO(mark), NULL, 16);
+        parser->chunks_done = parser->content_len <= 0;
+        if(parser->chunk_size != NULL)
+            parser->chunk_size(parser->data, PTR_TO(mark), LEN(mark, p));
+    }
 	goto st4;
-tr24:
+tr29:
 #line 56 "src/http11/httpclient_parser.rl"
 	{ 
-    parser->field_len = LEN(field_start, p);
-  }
+        parser->field_len = LEN(field_start, p);
+    }
 #line 60 "src/http11/httpclient_parser.rl"
 	{ MARK(mark, p); }
 #line 62 "src/http11/httpclient_parser.rl"
 	{ 
-    parser->http_field(parser->data, PTR_TO(field_start), parser->field_len, PTR_TO(mark), LEN(mark, p));
-  }
+        if(parser->http_field != NULL)
+            parser->http_field(parser->data, PTR_TO(field_start), parser->field_len, PTR_TO(mark), LEN(mark, p));
+    }
 	goto st4;
-tr29:
+tr35:
 #line 62 "src/http11/httpclient_parser.rl"
 	{ 
-    parser->http_field(parser->data, PTR_TO(field_start), parser->field_len, PTR_TO(mark), LEN(mark, p));
-  }
+        if(parser->http_field != NULL)
+            parser->http_field(parser->data, PTR_TO(field_start), parser->field_len, PTR_TO(mark), LEN(mark, p));
+    }
 	goto st4;
 st4:
 	if ( ++p == pe )
 		goto _test_eof4;
 case 4:
-#line 249 "src/http11/httpclient_parser.c"
+#line 438 "src/http11/httpclient_parser.c"
 	if ( (*p) == 10 )
-		goto tr10;
+		goto tr11;
 	goto st0;
-tr3:
+tr4:
 #line 52 "src/http11/httpclient_parser.rl"
 	{MARK(mark, p); }
 	goto st5;
@@ -257,10 +446,11 @@ st5:
 	if ( ++p == pe )
 		goto _test_eof5;
 case 5:
-#line 261 "src/http11/httpclient_parser.c"
+#line 450 "src/http11/httpclient_parser.c"
 	switch( (*p) ) {
-		case 13: goto tr11;
-		case 59: goto tr12;
+		case 10: goto tr12;
+		case 13: goto tr13;
+		case 59: goto tr14;
 	}
 	if ( (*p) < 65 ) {
 		if ( 48 <= (*p) && (*p) <= 57 )
@@ -271,91 +461,103 @@ case 5:
 	} else
 		goto st5;
 	goto st0;
-tr11:
-#line 78 "src/http11/httpclient_parser.rl"
+tr13:
+#line 82 "src/http11/httpclient_parser.rl"
 	{
-    parser->chunk_size(parser->data, PTR_TO(mark), LEN(mark, p));
-  }
+        parser->chunked = 1;
+        parser->content_len = strtol(PTR_TO(mark), NULL, 16);
+        parser->chunks_done = parser->content_len <= 0;
+        if(parser->chunk_size != NULL)
+            parser->chunk_size(parser->data, PTR_TO(mark), LEN(mark, p));
+    }
 	goto st6;
-tr15:
+tr18:
 #line 56 "src/http11/httpclient_parser.rl"
 	{ 
-    parser->field_len = LEN(field_start, p);
-  }
+        parser->field_len = LEN(field_start, p);
+    }
 #line 60 "src/http11/httpclient_parser.rl"
 	{ MARK(mark, p); }
 #line 62 "src/http11/httpclient_parser.rl"
 	{ 
-    parser->http_field(parser->data, PTR_TO(field_start), parser->field_len, PTR_TO(mark), LEN(mark, p));
-  }
+        if(parser->http_field != NULL)
+            parser->http_field(parser->data, PTR_TO(field_start), parser->field_len, PTR_TO(mark), LEN(mark, p));
+    }
 	goto st6;
-tr20:
+tr24:
 #line 62 "src/http11/httpclient_parser.rl"
 	{ 
-    parser->http_field(parser->data, PTR_TO(field_start), parser->field_len, PTR_TO(mark), LEN(mark, p));
-  }
+        if(parser->http_field != NULL)
+            parser->http_field(parser->data, PTR_TO(field_start), parser->field_len, PTR_TO(mark), LEN(mark, p));
+    }
 	goto st6;
 st6:
 	if ( ++p == pe )
 		goto _test_eof6;
 case 6:
-#line 303 "src/http11/httpclient_parser.c"
+#line 499 "src/http11/httpclient_parser.c"
 	if ( (*p) == 10 )
-		goto tr13;
+		goto tr15;
 	goto st0;
-tr12:
-#line 78 "src/http11/httpclient_parser.rl"
+tr14:
+#line 82 "src/http11/httpclient_parser.rl"
 	{
-    parser->chunk_size(parser->data, PTR_TO(mark), LEN(mark, p));
-  }
+        parser->chunked = 1;
+        parser->content_len = strtol(PTR_TO(mark), NULL, 16);
+        parser->chunks_done = parser->content_len <= 0;
+        if(parser->chunk_size != NULL)
+            parser->chunk_size(parser->data, PTR_TO(mark), LEN(mark, p));
+    }
 	goto st7;
-tr17:
+tr20:
 #line 56 "src/http11/httpclient_parser.rl"
 	{ 
-    parser->field_len = LEN(field_start, p);
-  }
+        parser->field_len = LEN(field_start, p);
+    }
 #line 60 "src/http11/httpclient_parser.rl"
 	{ MARK(mark, p); }
 #line 62 "src/http11/httpclient_parser.rl"
 	{ 
-    parser->http_field(parser->data, PTR_TO(field_start), parser->field_len, PTR_TO(mark), LEN(mark, p));
-  }
+        if(parser->http_field != NULL)
+            parser->http_field(parser->data, PTR_TO(field_start), parser->field_len, PTR_TO(mark), LEN(mark, p));
+    }
 	goto st7;
-tr22:
+tr26:
 #line 62 "src/http11/httpclient_parser.rl"
 	{ 
-    parser->http_field(parser->data, PTR_TO(field_start), parser->field_len, PTR_TO(mark), LEN(mark, p));
-  }
+        if(parser->http_field != NULL)
+            parser->http_field(parser->data, PTR_TO(field_start), parser->field_len, PTR_TO(mark), LEN(mark, p));
+    }
 	goto st7;
 st7:
 	if ( ++p == pe )
 		goto _test_eof7;
 case 7:
-#line 335 "src/http11/httpclient_parser.c"
+#line 537 "src/http11/httpclient_parser.c"
 	switch( (*p) ) {
-		case 33: goto tr14;
-		case 124: goto tr14;
-		case 126: goto tr14;
+		case 33: goto tr16;
+		case 124: goto tr16;
+		case 126: goto tr16;
 	}
 	if ( (*p) < 45 ) {
 		if ( (*p) > 39 ) {
 			if ( 42 <= (*p) && (*p) <= 43 )
-				goto tr14;
+				goto tr16;
 		} else if ( (*p) >= 35 )
-			goto tr14;
+			goto tr16;
 	} else if ( (*p) > 46 ) {
 		if ( (*p) < 65 ) {
 			if ( 48 <= (*p) && (*p) <= 57 )
-				goto tr14;
+				goto tr16;
 		} else if ( (*p) > 90 ) {
 			if ( 94 <= (*p) && (*p) <= 122 )
-				goto tr14;
+				goto tr16;
 		} else
-			goto tr14;
+			goto tr16;
 	} else
-		goto tr14;
+		goto tr16;
 	goto st0;
-tr14:
+tr16:
 #line 54 "src/http11/httpclient_parser.rl"
 	{ MARK(field_start, p); }
 	goto st8;
@@ -363,12 +565,13 @@ st8:
 	if ( ++p == pe )
 		goto _test_eof8;
 case 8:
-#line 367 "src/http11/httpclient_parser.c"
+#line 569 "src/http11/httpclient_parser.c"
 	switch( (*p) ) {
-		case 13: goto tr15;
+		case 10: goto tr17;
+		case 13: goto tr18;
 		case 33: goto st8;
-		case 59: goto tr17;
-		case 61: goto tr18;
+		case 59: goto tr20;
+		case 61: goto tr21;
 		case 124: goto st8;
 		case 126: goto st8;
 	}
@@ -390,11 +593,11 @@ case 8:
 	} else
 		goto st8;
 	goto st0;
-tr18:
+tr21:
 #line 56 "src/http11/httpclient_parser.rl"
 	{ 
-    parser->field_len = LEN(field_start, p);
-  }
+        parser->field_len = LEN(field_start, p);
+    }
 #line 60 "src/http11/httpclient_parser.rl"
 	{ MARK(mark, p); }
 	goto st9;
@@ -402,31 +605,31 @@ st9:
 	if ( ++p == pe )
 		goto _test_eof9;
 case 9:
-#line 406 "src/http11/httpclient_parser.c"
+#line 609 "src/http11/httpclient_parser.c"
 	switch( (*p) ) {
-		case 33: goto tr19;
-		case 124: goto tr19;
-		case 126: goto tr19;
+		case 33: goto tr22;
+		case 124: goto tr22;
+		case 126: goto tr22;
 	}
 	if ( (*p) < 45 ) {
 		if ( (*p) > 39 ) {
 			if ( 42 <= (*p) && (*p) <= 43 )
-				goto tr19;
+				goto tr22;
 		} else if ( (*p) >= 35 )
-			goto tr19;
+			goto tr22;
 	} else if ( (*p) > 46 ) {
 		if ( (*p) < 65 ) {
 			if ( 48 <= (*p) && (*p) <= 57 )
-				goto tr19;
+				goto tr22;
 		} else if ( (*p) > 90 ) {
 			if ( 94 <= (*p) && (*p) <= 122 )
-				goto tr19;
+				goto tr22;
 		} else
-			goto tr19;
+			goto tr22;
 	} else
-		goto tr19;
+		goto tr22;
 	goto st0;
-tr19:
+tr22:
 #line 60 "src/http11/httpclient_parser.rl"
 	{ MARK(mark, p); }
 	goto st10;
@@ -434,11 +637,12 @@ st10:
 	if ( ++p == pe )
 		goto _test_eof10;
 case 10:
-#line 438 "src/http11/httpclient_parser.c"
+#line 641 "src/http11/httpclient_parser.c"
 	switch( (*p) ) {
-		case 13: goto tr20;
+		case 10: goto tr23;
+		case 13: goto tr24;
 		case 33: goto st10;
-		case 59: goto tr22;
+		case 59: goto tr26;
 		case 124: goto st10;
 		case 126: goto st10;
 	}
@@ -460,59 +664,65 @@ case 10:
 	} else
 		goto st10;
 	goto st0;
-tr9:
-#line 78 "src/http11/httpclient_parser.rl"
+tr10:
+#line 82 "src/http11/httpclient_parser.rl"
 	{
-    parser->chunk_size(parser->data, PTR_TO(mark), LEN(mark, p));
-  }
+        parser->chunked = 1;
+        parser->content_len = strtol(PTR_TO(mark), NULL, 16);
+        parser->chunks_done = parser->content_len <= 0;
+        if(parser->chunk_size != NULL)
+            parser->chunk_size(parser->data, PTR_TO(mark), LEN(mark, p));
+    }
 	goto st11;
-tr26:
+tr31:
 #line 56 "src/http11/httpclient_parser.rl"
 	{ 
-    parser->field_len = LEN(field_start, p);
-  }
+        parser->field_len = LEN(field_start, p);
+    }
 #line 60 "src/http11/httpclient_parser.rl"
 	{ MARK(mark, p); }
 #line 62 "src/http11/httpclient_parser.rl"
 	{ 
-    parser->http_field(parser->data, PTR_TO(field_start), parser->field_len, PTR_TO(mark), LEN(mark, p));
-  }
+        if(parser->http_field != NULL)
+            parser->http_field(parser->data, PTR_TO(field_start), parser->field_len, PTR_TO(mark), LEN(mark, p));
+    }
 	goto st11;
-tr31:
+tr37:
 #line 62 "src/http11/httpclient_parser.rl"
 	{ 
-    parser->http_field(parser->data, PTR_TO(field_start), parser->field_len, PTR_TO(mark), LEN(mark, p));
-  }
+        if(parser->http_field != NULL)
+            parser->http_field(parser->data, PTR_TO(field_start), parser->field_len, PTR_TO(mark), LEN(mark, p));
+    }
 	goto st11;
 st11:
 	if ( ++p == pe )
 		goto _test_eof11;
 case 11:
-#line 492 "src/http11/httpclient_parser.c"
+#line 702 "src/http11/httpclient_parser.c"
 	switch( (*p) ) {
-		case 33: goto tr23;
-		case 124: goto tr23;
-		case 126: goto tr23;
+		case 33: goto tr27;
+		case 124: goto tr27;
+		case 126: goto tr27;
 	}
 	if ( (*p) < 45 ) {
 		if ( (*p) > 39 ) {
 			if ( 42 <= (*p) && (*p) <= 43 )
-				goto tr23;
+				goto tr27;
 		} else if ( (*p) >= 35 )
-			goto tr23;
+			goto tr27;
 	} else if ( (*p) > 46 ) {
 		if ( (*p) < 65 ) {
 			if ( 48 <= (*p) && (*p) <= 57 )
-				goto tr23;
+				goto tr27;
 		} else if ( (*p) > 90 ) {
 			if ( 94 <= (*p) && (*p) <= 122 )
-				goto tr23;
+				goto tr27;
 		} else
-			goto tr23;
+			goto tr27;
 	} else
-		goto tr23;
+		goto tr27;
 	goto st0;
-tr23:
+tr27:
 #line 54 "src/http11/httpclient_parser.rl"
 	{ MARK(field_start, p); }
 	goto st12;
@@ -520,12 +730,13 @@ st12:
 	if ( ++p == pe )
 		goto _test_eof12;
 case 12:
-#line 524 "src/http11/httpclient_parser.c"
+#line 734 "src/http11/httpclient_parser.c"
 	switch( (*p) ) {
-		case 13: goto tr24;
+		case 10: goto tr28;
+		case 13: goto tr29;
 		case 33: goto st12;
-		case 59: goto tr26;
-		case 61: goto tr27;
+		case 59: goto tr31;
+		case 61: goto tr32;
 		case 124: goto st12;
 		case 126: goto st12;
 	}
@@ -547,11 +758,11 @@ case 12:
 	} else
 		goto st12;
 	goto st0;
-tr27:
+tr32:
 #line 56 "src/http11/httpclient_parser.rl"
 	{ 
-    parser->field_len = LEN(field_start, p);
-  }
+        parser->field_len = LEN(field_start, p);
+    }
 #line 60 "src/http11/httpclient_parser.rl"
 	{ MARK(mark, p); }
 	goto st13;
@@ -559,31 +770,31 @@ st13:
 	if ( ++p == pe )
 		goto _test_eof13;
 case 13:
-#line 563 "src/http11/httpclient_parser.c"
+#line 774 "src/http11/httpclient_parser.c"
 	switch( (*p) ) {
-		case 33: goto tr28;
-		case 124: goto tr28;
-		case 126: goto tr28;
+		case 33: goto tr33;
+		case 124: goto tr33;
+		case 126: goto tr33;
 	}
 	if ( (*p) < 45 ) {
 		if ( (*p) > 39 ) {
 			if ( 42 <= (*p) && (*p) <= 43 )
-				goto tr28;
+				goto tr33;
 		} else if ( (*p) >= 35 )
-			goto tr28;
+			goto tr33;
 	} else if ( (*p) > 46 ) {
 		if ( (*p) < 65 ) {
 			if ( 48 <= (*p) && (*p) <= 57 )
-				goto tr28;
+				goto tr33;
 		} else if ( (*p) > 90 ) {
 			if ( 94 <= (*p) && (*p) <= 122 )
-				goto tr28;
+				goto tr33;
 		} else
-			goto tr28;
+			goto tr33;
 	} else
-		goto tr28;
+		goto tr33;
 	goto st0;
-tr28:
+tr33:
 #line 60 "src/http11/httpclient_parser.rl"
 	{ MARK(mark, p); }
 	goto st14;
@@ -591,11 +802,12 @@ st14:
 	if ( ++p == pe )
 		goto _test_eof14;
 case 14:
-#line 595 "src/http11/httpclient_parser.c"
+#line 806 "src/http11/httpclient_parser.c"
 	switch( (*p) ) {
-		case 13: goto tr29;
+		case 10: goto tr34;
+		case 13: goto tr35;
 		case 33: goto st14;
-		case 59: goto tr31;
+		case 59: goto tr37;
 		case 124: goto st14;
 		case 126: goto st14;
 	}
@@ -617,53 +829,55 @@ case 14:
 	} else
 		goto st14;
 	goto st0;
-tr35:
+tr42:
 #line 56 "src/http11/httpclient_parser.rl"
 	{ 
-    parser->field_len = LEN(field_start, p);
-  }
+        parser->field_len = LEN(field_start, p);
+    }
 #line 60 "src/http11/httpclient_parser.rl"
 	{ MARK(mark, p); }
 #line 62 "src/http11/httpclient_parser.rl"
 	{ 
-    parser->http_field(parser->data, PTR_TO(field_start), parser->field_len, PTR_TO(mark), LEN(mark, p));
-  }
+        if(parser->http_field != NULL)
+            parser->http_field(parser->data, PTR_TO(field_start), parser->field_len, PTR_TO(mark), LEN(mark, p));
+    }
 	goto st15;
-tr40:
+tr48:
 #line 62 "src/http11/httpclient_parser.rl"
 	{ 
-    parser->http_field(parser->data, PTR_TO(field_start), parser->field_len, PTR_TO(mark), LEN(mark, p));
-  }
+        if(parser->http_field != NULL)
+            parser->http_field(parser->data, PTR_TO(field_start), parser->field_len, PTR_TO(mark), LEN(mark, p));
+    }
 	goto st15;
 st15:
 	if ( ++p == pe )
 		goto _test_eof15;
 case 15:
-#line 643 "src/http11/httpclient_parser.c"
+#line 857 "src/http11/httpclient_parser.c"
 	switch( (*p) ) {
-		case 33: goto tr32;
-		case 124: goto tr32;
-		case 126: goto tr32;
+		case 33: goto tr38;
+		case 124: goto tr38;
+		case 126: goto tr38;
 	}
 	if ( (*p) < 45 ) {
 		if ( (*p) > 39 ) {
 			if ( 42 <= (*p) && (*p) <= 43 )
-				goto tr32;
+				goto tr38;
 		} else if ( (*p) >= 35 )
-			goto tr32;
+			goto tr38;
 	} else if ( (*p) > 46 ) {
 		if ( (*p) < 65 ) {
 			if ( 48 <= (*p) && (*p) <= 57 )
-				goto tr32;
+				goto tr38;
 		} else if ( (*p) > 90 ) {
 			if ( 94 <= (*p) && (*p) <= 122 )
-				goto tr32;
+				goto tr38;
 		} else
-			goto tr32;
+			goto tr38;
 	} else
-		goto tr32;
+		goto tr38;
 	goto st0;
-tr32:
+tr38:
 #line 54 "src/http11/httpclient_parser.rl"
 	{ MARK(field_start, p); }
 	goto st16;
@@ -671,12 +885,13 @@ st16:
 	if ( ++p == pe )
 		goto _test_eof16;
 case 16:
-#line 675 "src/http11/httpclient_parser.c"
+#line 889 "src/http11/httpclient_parser.c"
 	switch( (*p) ) {
-		case 13: goto tr33;
+		case 10: goto tr39;
+		case 13: goto tr40;
 		case 33: goto st16;
-		case 59: goto tr35;
-		case 61: goto tr36;
+		case 59: goto tr42;
+		case 61: goto tr43;
 		case 124: goto st16;
 		case 126: goto st16;
 	}
@@ -698,11 +913,11 @@ case 16:
 	} else
 		goto st16;
 	goto st0;
-tr36:
+tr43:
 #line 56 "src/http11/httpclient_parser.rl"
 	{ 
-    parser->field_len = LEN(field_start, p);
-  }
+        parser->field_len = LEN(field_start, p);
+    }
 #line 60 "src/http11/httpclient_parser.rl"
 	{ MARK(mark, p); }
 	goto st17;
@@ -710,31 +925,31 @@ st17:
 	if ( ++p == pe )
 		goto _test_eof17;
 case 17:
-#line 714 "src/http11/httpclient_parser.c"
+#line 929 "src/http11/httpclient_parser.c"
 	switch( (*p) ) {
-		case 33: goto tr37;
-		case 124: goto tr37;
-		case 126: goto tr37;
+		case 33: goto tr44;
+		case 124: goto tr44;
+		case 126: goto tr44;
 	}
 	if ( (*p) < 45 ) {
 		if ( (*p) > 39 ) {
 			if ( 42 <= (*p) && (*p) <= 43 )
-				goto tr37;
+				goto tr44;
 		} else if ( (*p) >= 35 )
-			goto tr37;
+			goto tr44;
 	} else if ( (*p) > 46 ) {
 		if ( (*p) < 65 ) {
 			if ( 48 <= (*p) && (*p) <= 57 )
-				goto tr37;
+				goto tr44;
 		} else if ( (*p) > 90 ) {
 			if ( 94 <= (*p) && (*p) <= 122 )
-				goto tr37;
+				goto tr44;
 		} else
-			goto tr37;
+			goto tr44;
 	} else
-		goto tr37;
+		goto tr44;
 	goto st0;
-tr37:
+tr44:
 #line 60 "src/http11/httpclient_parser.rl"
 	{ MARK(mark, p); }
 	goto st18;
@@ -742,11 +957,12 @@ st18:
 	if ( ++p == pe )
 		goto _test_eof18;
 case 18:
-#line 746 "src/http11/httpclient_parser.c"
+#line 961 "src/http11/httpclient_parser.c"
 	switch( (*p) ) {
-		case 13: goto tr38;
+		case 10: goto tr45;
+		case 13: goto tr46;
 		case 33: goto st18;
-		case 59: goto tr40;
+		case 59: goto tr48;
 		case 124: goto st18;
 		case 126: goto st18;
 	}
@@ -768,7 +984,7 @@ case 18:
 	} else
 		goto st18;
 	goto st0;
-tr5:
+tr6:
 #line 52 "src/http11/httpclient_parser.rl"
 	{MARK(mark, p); }
 	goto st19;
@@ -776,7 +992,7 @@ st19:
 	if ( ++p == pe )
 		goto _test_eof19;
 case 19:
-#line 780 "src/http11/httpclient_parser.c"
+#line 996 "src/http11/httpclient_parser.c"
 	if ( (*p) == 84 )
 		goto st20;
 	goto st0;
@@ -829,25 +1045,26 @@ st26:
 		goto _test_eof26;
 case 26:
 	if ( (*p) == 32 )
-		goto tr48;
+		goto tr56;
 	if ( 48 <= (*p) && (*p) <= 57 )
 		goto st26;
 	goto st0;
-tr48:
-#line 74 "src/http11/httpclient_parser.rl"
+tr56:
+#line 77 "src/http11/httpclient_parser.rl"
 	{	
-    parser->http_version(parser->data, PTR_TO(mark), LEN(mark, p));
-  }
+        if(parser->http_version != NULL)
+            parser->http_version(parser->data, PTR_TO(mark), LEN(mark, p));
+    }
 	goto st27;
 st27:
 	if ( ++p == pe )
 		goto _test_eof27;
 case 27:
-#line 847 "src/http11/httpclient_parser.c"
+#line 1064 "src/http11/httpclient_parser.c"
 	if ( 48 <= (*p) && (*p) <= 57 )
-		goto tr49;
+		goto tr57;
 	goto st0;
-tr49:
+tr57:
 #line 52 "src/http11/httpclient_parser.rl"
 	{MARK(mark, p); }
 	goto st28;
@@ -855,25 +1072,28 @@ st28:
 	if ( ++p == pe )
 		goto _test_eof28;
 case 28:
-#line 859 "src/http11/httpclient_parser.c"
+#line 1076 "src/http11/httpclient_parser.c"
 	if ( (*p) == 32 )
-		goto tr50;
+		goto tr58;
 	if ( 48 <= (*p) && (*p) <= 57 )
 		goto st28;
 	goto st0;
-tr50:
-#line 70 "src/http11/httpclient_parser.rl"
+tr58:
+#line 72 "src/http11/httpclient_parser.rl"
 	{ 
-    parser->status_code(parser->data, PTR_TO(mark), LEN(mark, p));
-  }
+        if(parser->status_code != NULL)
+            parser->status_code(parser->data, PTR_TO(mark), LEN(mark, p));
+    }
 	goto st29;
 st29:
 	if ( ++p == pe )
 		goto _test_eof29;
 case 29:
-#line 875 "src/http11/httpclient_parser.c"
-	goto tr52;
-tr52:
+#line 1093 "src/http11/httpclient_parser.c"
+	if ( (*p) == 10 )
+		goto st0;
+	goto tr60;
+tr60:
 #line 52 "src/http11/httpclient_parser.rl"
 	{MARK(mark, p); }
 	goto st30;
@@ -881,134 +1101,167 @@ st30:
 	if ( ++p == pe )
 		goto _test_eof30;
 case 30:
-#line 885 "src/http11/httpclient_parser.c"
-	if ( (*p) == 13 )
-		goto tr54;
+#line 1105 "src/http11/httpclient_parser.c"
+	switch( (*p) ) {
+		case 10: goto tr62;
+		case 13: goto tr63;
+	}
 	goto st30;
-tr64:
+tr73:
 #line 62 "src/http11/httpclient_parser.rl"
 	{ 
-    parser->http_field(parser->data, PTR_TO(field_start), parser->field_len, PTR_TO(mark), LEN(mark, p));
-  }
+        if(parser->http_field != NULL)
+            parser->http_field(parser->data, PTR_TO(field_start), parser->field_len, PTR_TO(mark), LEN(mark, p));
+    }
 	goto st31;
-tr54:
-#line 66 "src/http11/httpclient_parser.rl"
+tr62:
+#line 67 "src/http11/httpclient_parser.rl"
 	{ 
-    parser->reason_phrase(parser->data, PTR_TO(mark), LEN(mark, p));
-  }
+        if(parser->reason_phrase != NULL)
+            parser->reason_phrase(parser->data, PTR_TO(mark), LEN(mark, p));
+    }
 	goto st31;
-tr61:
+tr69:
 #line 60 "src/http11/httpclient_parser.rl"
 	{ MARK(mark, p); }
 #line 62 "src/http11/httpclient_parser.rl"
 	{ 
-    parser->http_field(parser->data, PTR_TO(field_start), parser->field_len, PTR_TO(mark), LEN(mark, p));
-  }
+        if(parser->http_field != NULL)
+            parser->http_field(parser->data, PTR_TO(field_start), parser->field_len, PTR_TO(mark), LEN(mark, p));
+    }
 	goto st31;
 st31:
 	if ( ++p == pe )
 		goto _test_eof31;
 case 31:
-#line 913 "src/http11/httpclient_parser.c"
-	if ( (*p) == 10 )
-		goto st32;
-	goto st0;
-st32:
-	if ( ++p == pe )
-		goto _test_eof32;
-case 32:
+#line 1138 "src/http11/httpclient_parser.c"
 	switch( (*p) ) {
+		case 10: goto tr15;
 		case 13: goto st6;
-		case 33: goto tr57;
-		case 124: goto tr57;
-		case 126: goto tr57;
+		case 33: goto tr65;
+		case 124: goto tr65;
+		case 126: goto tr65;
 	}
 	if ( (*p) < 45 ) {
 		if ( (*p) > 39 ) {
 			if ( 42 <= (*p) && (*p) <= 43 )
-				goto tr57;
+				goto tr65;
 		} else if ( (*p) >= 35 )
-			goto tr57;
+			goto tr65;
 	} else if ( (*p) > 46 ) {
 		if ( (*p) < 65 ) {
 			if ( 48 <= (*p) && (*p) <= 57 )
-				goto tr57;
+				goto tr65;
 		} else if ( (*p) > 90 ) {
 			if ( 94 <= (*p) && (*p) <= 122 )
-				goto tr57;
+				goto tr65;
 		} else
-			goto tr57;
+			goto tr65;
 	} else
-		goto tr57;
+		goto tr65;
 	goto st0;
-tr57:
+tr65:
 #line 54 "src/http11/httpclient_parser.rl"
 	{ MARK(field_start, p); }
+	goto st32;
+st32:
+	if ( ++p == pe )
+		goto _test_eof32;
+case 32:
+#line 1172 "src/http11/httpclient_parser.c"
+	switch( (*p) ) {
+		case 33: goto st32;
+		case 58: goto tr67;
+		case 124: goto st32;
+		case 126: goto st32;
+	}
+	if ( (*p) < 45 ) {
+		if ( (*p) > 39 ) {
+			if ( 42 <= (*p) && (*p) <= 43 )
+				goto st32;
+		} else if ( (*p) >= 35 )
+			goto st32;
+	} else if ( (*p) > 46 ) {
+		if ( (*p) < 65 ) {
+			if ( 48 <= (*p) && (*p) <= 57 )
+				goto st32;
+		} else if ( (*p) > 90 ) {
+			if ( 94 <= (*p) && (*p) <= 122 )
+				goto st32;
+		} else
+			goto st32;
+	} else
+		goto st32;
+	goto st0;
+tr71:
+#line 60 "src/http11/httpclient_parser.rl"
+	{ MARK(mark, p); }
+	goto st33;
+tr67:
+#line 56 "src/http11/httpclient_parser.rl"
+	{ 
+        parser->field_len = LEN(field_start, p);
+    }
 	goto st33;
 st33:
 	if ( ++p == pe )
 		goto _test_eof33;
 case 33:
-#line 953 "src/http11/httpclient_parser.c"
+#line 1211 "src/http11/httpclient_parser.c"
 	switch( (*p) ) {
-		case 33: goto st33;
-		case 58: goto tr59;
-		case 124: goto st33;
-		case 126: goto st33;
+		case 10: goto tr69;
+		case 13: goto tr70;
+		case 32: goto tr71;
 	}
-	if ( (*p) < 45 ) {
-		if ( (*p) > 39 ) {
-			if ( 42 <= (*p) && (*p) <= 43 )
-				goto st33;
-		} else if ( (*p) >= 35 )
-			goto st33;
-	} else if ( (*p) > 46 ) {
-		if ( (*p) < 65 ) {
-			if ( 48 <= (*p) && (*p) <= 57 )
-				goto st33;
-		} else if ( (*p) > 90 ) {
-			if ( 94 <= (*p) && (*p) <= 122 )
-				goto st33;
-		} else
-			goto st33;
-	} else
-		goto st33;
-	goto st0;
-tr62:
+	goto tr68;
+tr68:
 #line 60 "src/http11/httpclient_parser.rl"
 	{ MARK(mark, p); }
-	goto st34;
-tr59:
-#line 56 "src/http11/httpclient_parser.rl"
-	{ 
-    parser->field_len = LEN(field_start, p);
-  }
 	goto st34;
 st34:
 	if ( ++p == pe )
 		goto _test_eof34;
 case 34:
-#line 992 "src/http11/httpclient_parser.c"
+#line 1226 "src/http11/httpclient_parser.c"
 	switch( (*p) ) {
-		case 13: goto tr61;
-		case 32: goto tr62;
+		case 10: goto tr73;
+		case 13: goto tr74;
 	}
-	goto tr60;
-tr60:
+	goto st34;
+tr74:
+#line 62 "src/http11/httpclient_parser.rl"
+	{ 
+        if(parser->http_field != NULL)
+            parser->http_field(parser->data, PTR_TO(field_start), parser->field_len, PTR_TO(mark), LEN(mark, p));
+    }
+	goto st35;
+tr63:
+#line 67 "src/http11/httpclient_parser.rl"
+	{ 
+        if(parser->reason_phrase != NULL)
+            parser->reason_phrase(parser->data, PTR_TO(mark), LEN(mark, p));
+    }
+	goto st35;
+tr70:
 #line 60 "src/http11/httpclient_parser.rl"
 	{ MARK(mark, p); }
+#line 62 "src/http11/httpclient_parser.rl"
+	{ 
+        if(parser->http_field != NULL)
+            parser->http_field(parser->data, PTR_TO(field_start), parser->field_len, PTR_TO(mark), LEN(mark, p));
+    }
 	goto st35;
 st35:
 	if ( ++p == pe )
 		goto _test_eof35;
 case 35:
-#line 1006 "src/http11/httpclient_parser.c"
-	if ( (*p) == 13 )
-		goto tr64;
-	goto st35;
+#line 1259 "src/http11/httpclient_parser.c"
+	if ( (*p) == 10 )
+		goto st31;
+	goto st0;
 	}
-	_test_eof2: cs = 2; goto _test_eof; 
 	_test_eof36: cs = 36; goto _test_eof; 
+	_test_eof2: cs = 2; goto _test_eof; 
 	_test_eof3: cs = 3; goto _test_eof; 
 	_test_eof4: cs = 4; goto _test_eof; 
 	_test_eof5: cs = 5; goto _test_eof; 
@@ -1047,45 +1300,45 @@ case 35:
 	_out: {}
 	}
 
-#line 162 "src/http11/httpclient_parser.rl"
+#line 175 "src/http11/httpclient_parser.rl"
 
-  parser->cs = cs;
-  parser->nread += p - (buffer + off);
+    parser->cs = cs;
+    parser->nread += p - (buffer + off);
 
-  assert(p <= pe && "buffer overflow after parsing execute");
-  assert(parser->nread <= len && "nread longer than length");
-  assert(parser->body_start <= len && "body starts after buffer end");
-  assert(parser->mark < len && "mark is after buffer end");
-  assert(parser->field_len <= len && "field has length longer than whole buffer");
-  assert(parser->field_start < len && "field starts after buffer end");
+    assert(p <= pe && "buffer overflow after parsing execute");
+    assert(parser->nread <= len && "nread longer than length");
+    assert(parser->body_start <= len && "body starts after buffer end");
+    assert(parser->mark < len && "mark is after buffer end");
+    assert(parser->field_len <= len && "field has length longer than whole buffer");
+    assert(parser->field_start < len && "field starts after buffer end");
 
-  if(parser->body_start) {
-    /* final \r\n combo encountered so stop right here */
-    parser->nread++;
-  }
+    if(parser->body_start) {
+        /* final \r\n combo encountered so stop right here */
+        parser->nread++;
+    }
 
-  return(parser->nread);
+    return(parser->nread);
 }
 
 int httpclient_parser_finish(httpclient_parser *parser)
 {
-  int cs = parser->cs;
+    int cs = parser->cs;
 
-  parser->cs = cs;
+    parser->cs = cs;
 
-  if (httpclient_parser_has_error(parser) ) {
-    return -1;
-  } else if (httpclient_parser_is_finished(parser) ) {
-    return 1;
-  } else {
-    return 0;
-  }
+    if (httpclient_parser_has_error(parser) ) {
+        return -1;
+    } else if (httpclient_parser_is_finished(parser) ) {
+        return 1;
+    } else {
+        return 0;
+    }
 }
 
 int httpclient_parser_has_error(httpclient_parser *parser) {
-  return parser->cs == httpclient_parser_error;
+    return parser->cs == httpclient_parser_error;
 }
 
 int httpclient_parser_is_finished(httpclient_parser *parser) {
-  return parser->cs == httpclient_parser_first_final;
+    return parser->cs == httpclient_parser_first_final;
 }
