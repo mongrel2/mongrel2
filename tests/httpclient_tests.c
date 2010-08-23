@@ -6,23 +6,12 @@
 
 FILE *LOG_FILE = NULL;
 
-const char *TE = "Transfer-Encoding";
-
-void debug_field_cb(void *data, const char *field, size_t flen, const char *value, size_t vlen)
-{
-    httpclient_parser *p = (httpclient_parser *)data;
-    if(strlen(TE) == flen && strncasecmp(TE, field, flen) == 0 && 
-            strncasecmp("chunked", value, vlen) == 0) {
-        p->chunked = 1;
-    }
-}
-
 
 httpclient_parser setup_parser()
 {
     httpclient_parser p;
     httpclient_parser_init(&p);
-    p.http_field = debug_field_cb;
+    p.http_field = NULL;
     p.reason_phrase = NULL;
     p.status_code = NULL;
     p.chunk_size = NULL;

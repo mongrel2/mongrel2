@@ -52,7 +52,12 @@ Proxy := (
         ),
 
         Sending: (
-            REQ_SENT @proxy_parse -> Proxying |
+            REQ_SENT @proxy_reply_parse -> Receiving |
+            REMOTE_CLOSE @proxy_close -> Closing
+        ),
+
+        Receiving: (
+            REQ_RECV @proxy_req_parse -> Proxying |
             REMOTE_CLOSE @proxy_close -> Closing
         ),
 

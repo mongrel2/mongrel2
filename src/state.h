@@ -54,7 +54,8 @@ typedef struct StateActions {
     state_action_cb http_to_directory;
     state_action_cb proxy_deliver;
     state_action_cb proxy_failed;
-    state_action_cb proxy_parse;
+    state_action_cb proxy_reply_parse;
+    state_action_cb proxy_req_parse;
     state_action_cb proxy_close;
 } StateActions;
 

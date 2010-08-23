@@ -67,7 +67,8 @@
     action proxy_failed { CALL(proxy_failed, fc); }
     action proxy_send_request { CALL(proxy_send_request, fc); }
     action proxy_send_response { CALL(proxy_send_response, fc); }
-    action proxy_parse { CALL(proxy_parse, fc); }
+    action proxy_reply_parse { CALL(proxy_reply_parse, fc); }
+    action proxy_req_parse { CALL(proxy_req_parse, fc); }
     action proxy_close { CALL(proxy_close, fc); }
 
 

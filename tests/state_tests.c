@@ -28,7 +28,8 @@ StateActions test_actions = {
     .http_to_directory = test_action_cb,
     .proxy_deliver = test_action_cb,
     .proxy_failed = test_action_cb,
-    .proxy_parse = test_action_cb,
+    .proxy_req_parse = test_action_cb,
+    .proxy_reply_parse = test_action_cb,
     .proxy_close = test_action_cb
 };
 
@@ -113,7 +114,7 @@ char *test_State_http()
     RUN(http_proxy,
             OPEN, ACCEPT,
             REQ_RECV, HTTP_REQ, PROXY, CONNECT, 
-            REQ_SENT, HTTP_REQ, REQ_SENT, REMOTE_CLOSE,
+            REQ_SENT, REQ_RECV, HTTP_REQ, REQ_SENT, REQ_RECV, REMOTE_CLOSE,
             CLOSE);
 
     // Simulates a proxy connect that needs to exit after a 
@@ -121,7 +122,7 @@ char *test_State_http()
     RUN(http_proxy_handler,
             OPEN, ACCEPT,
             REQ_RECV, HTTP_REQ, PROXY, CONNECT, 
-            REQ_SENT,
+            REQ_SENT, REQ_RECV,
             HANDLER, REQ_SENT, CLOSE);
 
     return NULL;

@@ -44,22 +44,22 @@
 #define CALL(A, C) if(state->actions && state->actions->A) next = state->actions->A(C, data)
 
 
-#line 86 "src/state.rl"
+#line 87 "src/state.rl"
 
 
 
 #line 52 "src/state.c"
-static const int StateActions_start = 14;
-static const int StateActions_first_final = 14;
+static const int StateActions_start = 15;
+static const int StateActions_first_final = 15;
 static const int StateActions_error = 0;
 
 static const int StateActions_en_Proxy = 9;
-static const int StateActions_en_main = 14;
+static const int StateActions_en_main = 15;
 static const int StateActions_en_main_Connection_Idle = 2;
 static const int StateActions_en_main_Connection_HTTPRouting = 4;
 
 
-#line 89 "src/state.rl"
+#line 90 "src/state.rl"
 
 int State_init(State *state, StateActions *actions)
 {
@@ -71,7 +71,7 @@ int State_init(State *state, StateActions *actions)
 	 state->cs = StateActions_start;
 	}
 
-#line 95 "src/state.rl"
+#line 96 "src/state.rl"
     return 1;
 }
 
@@ -80,15 +80,15 @@ static inline int State_invariant(State *state, int event)
     if ( state->cs == 
 #line 82 "src/state.c"
 0
-#line 100 "src/state.rl"
+#line 101 "src/state.rl"
  ) {
         return -1;
     }
 
     if ( state->cs >= 
 #line 90 "src/state.c"
-14
-#line 104 "src/state.rl"
+15
+#line 105 "src/state.rl"
  ) {
         return 1;
     }
@@ -113,9 +113,9 @@ int State_exec(State *state, int event, void *data)
 		goto _test_eof;
 	switch (  state->cs )
 	{
-case 14:
+case 15:
 	if ( (*p) == 109 )
-		goto tr18;
+		goto tr19;
 	goto st0;
 tr0:
 #line 52 "src/state.rl"
@@ -125,7 +125,7 @@ tr0:
 st0:
  state->cs = 0;
 	goto _out;
-tr18:
+tr19:
 #line 51 "src/state.rl"
 	{ CALL(open, (*p)); }
 	goto st1;
@@ -154,14 +154,14 @@ case 2:
 tr2:
 #line 54 "src/state.rl"
 	{ CALL(close, (*p)); }
-	goto st15;
-st15:
+	goto st16;
+st16:
 	if ( ++p == pe )
-		goto _test_eof15;
-case 15:
+		goto _test_eof16;
+case 16:
 #line 163 "src/state.c"
 	if ( (*p) == 109 )
-		goto tr18;
+		goto tr19;
 	goto tr0;
 tr3:
 #line 56 "src/state.rl"
@@ -278,7 +278,7 @@ tr13:
 	{ CALL(proxy_failed, (*p)); }
 	goto st11;
 tr14:
-#line 71 "src/state.rl"
+#line 72 "src/state.rl"
 	{ CALL(proxy_close, (*p)); }
 	goto st11;
 st11:
@@ -290,14 +290,14 @@ case 11:
 		goto tr16;
 	goto tr0;
 tr16:
-#line 75 "src/state.rl"
+#line 76 "src/state.rl"
 	{
         p--;
         {goto st2;} 
     }
 	goto st12;
-tr17:
-#line 79 "src/state.rl"
+tr18:
+#line 80 "src/state.rl"
 	{
         CALL(proxy_close, (*p));
         p--;
@@ -312,7 +312,7 @@ case 12:
 	goto tr0;
 tr15:
 #line 70 "src/state.rl"
-	{ CALL(proxy_parse, (*p)); }
+	{ CALL(proxy_reply_parse, (*p)); }
 	goto st13;
 st13:
 	if ( ++p == pe )
@@ -320,17 +320,31 @@ st13:
 case 13:
 #line 322 "src/state.c"
 	switch( (*p) ) {
-		case 104: goto tr17;
-		case 106: goto tr17;
+		case 111: goto tr14;
+		case 112: goto tr17;
+	}
+	goto tr0;
+tr17:
+#line 71 "src/state.rl"
+	{ CALL(proxy_req_parse, (*p)); }
+	goto st14;
+st14:
+	if ( ++p == pe )
+		goto _test_eof14;
+case 14:
+#line 336 "src/state.c"
+	switch( (*p) ) {
+		case 104: goto tr18;
+		case 106: goto tr18;
 		case 107: goto tr11;
-		case 110: goto tr17;
+		case 110: goto tr18;
 		case 111: goto tr14;
 	}
 	goto tr0;
 	}
 	_test_eof1:  state->cs = 1; goto _test_eof; 
 	_test_eof2:  state->cs = 2; goto _test_eof; 
-	_test_eof15:  state->cs = 15; goto _test_eof; 
+	_test_eof16:  state->cs = 16; goto _test_eof; 
 	_test_eof3:  state->cs = 3; goto _test_eof; 
 	_test_eof4:  state->cs = 4; goto _test_eof; 
 	_test_eof5:  state->cs = 5; goto _test_eof; 
@@ -342,6 +356,7 @@ case 13:
 	_test_eof11:  state->cs = 11; goto _test_eof; 
 	_test_eof12:  state->cs = 12; goto _test_eof; 
 	_test_eof13:  state->cs = 13; goto _test_eof; 
+	_test_eof14:  state->cs = 14; goto _test_eof; 
 
 	_test_eof: {}
 	if ( p == eof )
@@ -359,21 +374,22 @@ case 13:
 	case 11: 
 	case 12: 
 	case 13: 
+	case 14: 
 #line 52 "src/state.rl"
 	{ CALL(error, (*p)); }
 	break;
-	case 15: 
+	case 16: 
 #line 53 "src/state.rl"
 	{ CALL(finish, (*p)); }
 	break;
-#line 370 "src/state.c"
+#line 386 "src/state.c"
 	}
 	}
 
 	_out: {}
 	}
 
-#line 122 "src/state.rl"
+#line 123 "src/state.rl"
 
     return next;
 }

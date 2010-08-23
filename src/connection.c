@@ -35,6 +35,7 @@
 #include <connection.h>
 #include <host.h>
 #include <http11/http11_parser.h>
+#include <http11/httpclient_parser.h>
 #include <bstring.h>
 #include <dbg.h>
 #include <task/task.h>
@@ -47,14 +48,11 @@
 #include <assert.h>
 #include <sys/socket.h>
 #include <response.h>
+#include <mem/halloc.h>
 
 struct tagbstring PING_PATTERN = bsStatic("@[a-z/]- {\"type\":\\s*\"ping\"}");
 
-#ifdef NDEBUG
-#define TRACE(C)
-#else
 #define TRACE(C) debug("--> %s(%s:%d) %s:%d ", "" #C, State_event_name(event), event, __FUNCTION__, __LINE__)
-#endif
 
 #define error_response(F, C, M, ...)  {Response_send_status(F, &HTTP_##C); sentinel(M, ##__VA_ARGS__);}
 #define error_unless(T, F, C, M, ...) if(!(T)) error_response(F, C, M, ##__VA_ARGS__)
@@ -261,21 +259,15 @@ int connection_http_to_proxy(int event, void *data)
     TRACE(http_to_proxy);
     Connection *conn = (Connection *)data;
     Proxy *proxy = Request_get_action(conn->req, proxy);
-    ProxyConnect *to_listener = NULL;
+    check(proxy != NULL, "Should have a proxy backend.");
 
-    conn->proxy = Proxy_connect_backend(proxy, conn->fd);
-
-    check_debug(conn->proxy, "Failed to connect to backend proxy server: %s:%d",
+    conn->proxy_fd = netdial(1, bdata(proxy->server), proxy->port);
+    check(conn->proxy_fd != -1, "Failed to connect to proxy backend %s:%d",
             bdata(proxy->server), proxy->port);
-
-    to_listener = Proxy_sync_to_listener(conn->proxy);
-    check_debug(to_listener, "Failed to make the listener side of proxy.");
 
     return CONNECT;
 
 error:
-    if(to_listener && conn->proxy) fdclose(conn->proxy->proxy_fd);
-    ProxyConnect_destroy(to_listener);
     return FAILED;
 }
 
@@ -285,13 +277,12 @@ int connection_proxy_deliver(int event, void *data)
 {
     TRACE(proxy_deliver);
     Connection *conn = (Connection *)data;
-    ProxyConnect *to_proxy = conn->proxy;
     int rc = 0;
 
     int total_len = Request_header_length(conn->req) + Request_content_length(conn->req);
 
     if(total_len < conn->nread) {
-        rc = fdwrite(to_proxy->proxy_fd, conn->buf, total_len);
+        rc = fdsend(conn->proxy_fd, conn->buf, total_len);
         check_debug(rc > 0, "Failed to write request to proxy.");
 
         // setting up for the next request to be read
@@ -301,7 +292,7 @@ int connection_proxy_deliver(int event, void *data)
         // we haven't read everything, need to do some streaming
         do {
             // TODO: look at sendfile or splice to do this instead
-            rc = fdsend(to_proxy->proxy_fd, conn->buf, conn->nread);
+            rc = fdsend(conn->proxy_fd, conn->buf, conn->nread);
             check_debug(rc == conn->nread, "Failed to write full request to proxy after %d read.", conn->nread);
 
             total_len -= rc;
@@ -315,7 +306,7 @@ int connection_proxy_deliver(int event, void *data)
         } while(total_len > 0);
     } else {
         // not > and not < means ==, so we just write this and try again
-        rc = fdsend(to_proxy->proxy_fd, conn->buf, total_len);
+        rc = fdsend(conn->proxy_fd, conn->buf, total_len);
         check_debug(rc == total_len, "Failed to write complete request to proxy, wrote only: %d", rc);
         conn->nread = 0;
     }
@@ -327,9 +318,83 @@ error:
 }
 
 
-int connection_proxy_parse(int event, void *data)
+int connection_proxy_reply_parse(int event, void *data)
 {
-    TRACE(proxy_parse);
+    TRACE(proxy_reply_parse);
+    int nread = 0;
+    int nparsed = 0;
+    int rc = 0;
+    Connection *conn = (Connection *)data;
+    Proxy *proxy = Request_get_action(conn->req, proxy);
+    httpclient_parser client = {
+        .http_field = NULL,
+        .reason_phrase = NULL,
+        .status_code = NULL,
+        .chunk_size = NULL,
+        .http_version = NULL,
+        .header_done = NULL,
+        .last_chunk = NULL
+    };
+
+    if(!conn->proxy_buf) {
+        conn->proxy_buf = h_malloc(BUFFER_SIZE+1);
+        check_mem(conn->proxy_buf);
+        hattach(conn->proxy_buf, conn);
+    }
+
+    httpclient_parser_init(&client);
+   
+    nread = fdrecv(conn->proxy_fd, conn->proxy_buf, BUFFER_SIZE);
+    conn->proxy_buf[nread] = '\0';
+
+    check(nread != -1, "Failed to read from proxy server: %s:%d", 
+            bdata(proxy->server), proxy->port);
+
+    nparsed = httpclient_parser_execute(&client, conn->proxy_buf, nread, 0);
+    check(!httpclient_parser_has_error(&client), "Parsing error from server.");
+    check(httpclient_parser_finish(&client), "Parser didn't get a full response.");
+
+    if(client.chunked) {
+        debug("This is a chunked encoding response.");
+
+    } else if(client.content_len > 0) {
+        int total = client.body_start + client.content_len;
+        debug("There is a content length: total: %d, but nread: %d", total, nread);
+
+        // send what we've read already right now
+        rc = fdsend(conn->fd, conn->proxy_buf, nread);
+        check(rc == nread, "Failed to send all of the request: %d length.", nread);
+
+        for(total -= nread; total > 0; total -= nread) {
+            nread = fdrecv(conn->proxy_fd, conn->proxy_buf,
+                    total > BUFFER_SIZE ? BUFFER_SIZE : total);
+
+            check(nread != -1, "Failed to read from proxy.");
+
+            rc = fdsend(conn->fd, conn->proxy_buf, nread);
+            check(rc != -1, "Failed to send to client.");
+        }
+
+        assert(total == 0 && "Math screwed up on send.");
+    } else {
+        // really untested branch here
+        debug("No chunked encoding and no content length, we'll read until close.");
+
+        do {
+            rc = fdsend(conn->fd, conn->proxy_buf, nread);
+            check(rc == nread, "Failed to send all of the request: %d length.", nread);
+        } while((nread = fdrecv(conn->proxy_fd, conn->proxy_buf, BUFFER_SIZE)) > 0);
+    }
+
+    return REQ_RECV;
+
+error:
+    return FAILED;
+}
+
+int connection_proxy_req_parse(int event, void *data)
+{
+    TRACE(proxy_req_parse);
 
     int rc = 0;
     Connection *conn = (Connection *)data;
@@ -378,8 +443,6 @@ int connection_proxy_failed(int event, void *data)
 
     Response_send_status(conn->fd, &HTTP_502);
 
-    ProxyConnect_destroy(conn->proxy);
-
     return CLOSE;
 }
 
@@ -389,19 +452,8 @@ int connection_proxy_close(int event, void *data)
     TRACE(proxy_close);
 
     Connection *conn = (Connection *)data;
-
-    if(conn->proxy) {
-        ProxyConnect *to_proxy = conn->proxy;
-
-        fdclose(to_proxy->proxy_fd);
-
-        // this waits on the task in proxy.c that moves data from the proxy to the client
-        taskbarrier(to_proxy->waiter);
-
-        ProxyConnect_destroy(to_proxy);
-
-        conn->proxy = NULL;
-    }
+    fdclose(conn->proxy_fd);
+    conn->proxy_fd = 0;
 
     return CLOSE;
 }
@@ -411,7 +463,7 @@ int connection_close(int event, void *data)
     TRACE(close);
     Connection *conn = (Connection *)data;
 
-    if(conn->proxy) {
+    if(conn->proxy_fd) {
         connection_proxy_close(event, data);
     }
 
@@ -427,7 +479,7 @@ int connection_error(int event, void *data)
     TRACE(error);
     Connection *conn = (Connection *)data;
 
-    if(conn->proxy) {
+    if(conn->proxy_fd) {
         connection_proxy_close(event, data);
     }
 
@@ -493,7 +545,8 @@ StateActions CONN_ACTIONS = {
     .http_to_directory = connection_http_to_directory,
     .proxy_deliver = connection_proxy_deliver,
     .proxy_failed = connection_proxy_failed,
-    .proxy_parse = connection_proxy_parse,
+    .proxy_reply_parse = connection_proxy_reply_parse,
+    .proxy_req_parse = connection_proxy_req_parse,
     .proxy_close = connection_proxy_close
 };
 
@@ -502,16 +555,15 @@ StateActions CONN_ACTIONS = {
 void Connection_destroy(Connection *conn)
 {
     if(conn) {
-        if(conn->buf) free(conn->buf);
         Request_destroy(conn->req);
         conn->req = NULL;
-        free(conn);
+        h_free(conn);
     }
 }
 
 Connection *Connection_create(Server *srv, int fd, int rport, const char *remote)
 {
-    Connection *conn = calloc(sizeof(Connection), 1);
+    Connection *conn = h_calloc(sizeof(Connection), 1);
     check_mem(conn);
 
     conn->server = srv;
@@ -524,8 +576,9 @@ Connection *Connection_create(Server *srv, int fd, int rport, const char *remote
     conn->req = Request_create();
     check_mem(conn->req);
 
-    conn->buf = malloc(BUFFER_SIZE + 1);
-    check_mem(conn->buf)
+    conn->buf = h_malloc(BUFFER_SIZE + 1);
+    check_mem(conn->buf);
+    hattach(conn->buf, conn);
 
     return conn;
 

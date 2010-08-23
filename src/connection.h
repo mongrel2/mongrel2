@@ -50,17 +50,18 @@ enum
 typedef struct Connection {
     Server *server;
     int fd;
+    int proxy_fd;
     Request *req;
     int nread;
     size_t nparsed;
     int finished;
     int registered;
     int rport;
-    ProxyConnect *proxy;
 
     State state;
     char remote[IPADDR_SIZE+1];
     char *buf;
+    char *proxy_buf;
 } Connection;
 
 void Connection_destroy(Connection *conn);

@@ -5,16 +5,6 @@
 
 FILE *LOG_FILE = NULL;
 
-char *test_ProxyConnect_create_destroy()
-{
-    ProxyConnect *conn = ProxyConnect_create(12, NULL, 0);
-    mu_assert(conn != NULL, "Didn't make the proxy connection.");
-
-    ProxyConnect_destroy(conn);
-
-    return NULL;
-}
-
 
 char *test_Proxy_create_destroy()
 {
@@ -29,7 +19,6 @@ char *test_Proxy_create_destroy()
 char * all_tests() {
     mu_suite_start();
 
-    mu_run_test(test_ProxyConnect_create_destroy);
     mu_run_test(test_Proxy_create_destroy);
 
     return NULL;

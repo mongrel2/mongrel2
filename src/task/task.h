@@ -143,7 +143,6 @@ int    netannounce(int, char*, int);
 int    netaccept(int, char*, int*);
 int    netdial(int, char*, int);
 int    netlookup(char*, uint32_t*);  /* blocks entire program! */
-int    netdial(int, char*, int);
 
 #ifdef __cplusplus
 }

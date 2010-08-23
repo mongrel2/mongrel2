@@ -146,6 +146,8 @@ void Server_start(Server *srv)
         Connection_accept(conn);
     }
 
+    debug("SERVER EXITED with error: %s and return value: %d", strerror(errno), cfd);
+
     return;
 
 error:
