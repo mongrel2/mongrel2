@@ -10,3 +10,5 @@ curl http://localhost:6767/tests/sample.json
 
 curl http://localhost:6767/tests/crap
 
+curl -H 'X-Test-Bug: \"hi there"' http://localhost:6767/handlertest
+

@@ -118,11 +118,14 @@ static void query_string_cb(void *data, const char *at, size_t length)
     req->query_string = blk2bstr(at, length);
 }
 
+
 static void header_field_cb(void *data, const char *field, size_t flen,
         const char *value, size_t vlen)
 {
     Request *req = (Request *)data;
-    dict_alloc_insert(req->headers, blk2bstr(field, flen), blk2bstr(value, vlen));
+    bstring vstr = blk2bstr(value, vlen);
+
+    dict_alloc_insert(req->headers, blk2bstr(field, flen), vstr);
 }
 
 
@@ -230,6 +233,13 @@ int Request_get_date(Request *req, bstring field, const char *format)
 
 #define B(K, V) if((V) != NULL) bformata(headers, ",\"%s\":\"%s\"", bdata(K), bdata(V))
 
+static struct tagbstring QUOTE_CHAR = bsStatic("\"");
+static struct tagbstring QUOTE_REPLACE = bsStatic("\\\"");
+
+static struct tagbstring BSLASH_CHAR = bsStatic("\\");
+static struct tagbstring BSLASH_REPLACE = bsStatic("\\\\");
+
+
 bstring Request_to_payload(Request *req, bstring uuid, int fd, const char *buf, size_t len)
 {
     bstring headers = bformat("{\"%s\":\"%s\"", bdata(&HTTP_PATH), bdata(req->path));
@@ -253,7 +263,15 @@ bstring Request_to_payload(Request *req, bstring uuid, int fd, const char *buf, 
 
     for(i = dict_first(req->headers); i != NULL; i = dict_next(req->headers, i))
     {
-        B((bstring)dnode_getkey(i), (bstring)dnode_get(i));
+        // TODO: this isn't efficient at all, make it better
+        bstring vstr = bstrcpy((bstring)dnode_get(i));
+
+        // MUST GO IN THIS ORDER
+        bfindreplace(vstr, &BSLASH_CHAR, &BSLASH_REPLACE, 0);
+        bfindreplace(vstr, &QUOTE_CHAR, &QUOTE_REPLACE, 0);
+
+        B((bstring)dnode_getkey(i), vstr);
+        bdestroy(vstr);
     }
 
     bconchar(headers, '}');
