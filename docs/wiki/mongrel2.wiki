@@ -15,6 +15,7 @@ modern browser technologies.
     <a href="http://github.com/winks/m2php">PHP</a>,
     <a href="http://github.com/cmoore/web-mongrel2">Haskell</a>,
     <a href="http://github.com/vseloved/cl-mongrel2">Common Lisp</a>,
+    <a href="http://github.com/lestrrat/Plack-Handler-Mongrel2">Perl</a>,
     and <a href="http://github.com/jsimmons/mongrel2-lua/">Lua</a> all written by Mongrel2 fans.</li>
     <li><b>Modern Browser Friendly</b> designed to handle HTTP, Flash XMLSockets, or WebSockets, Long Polling on the same socket transparently.</li>
     <li><b><a href="http://zeromq.org">ZeroMQ</a> Enabled</b> as well as HTTP proxy support so it works with what you have already while giving you new super powers.</li>
@@ -72,6 +73,7 @@ Currently we have:<p>
     <li><a href="http://github.com/winks/m2php">PHP</a></li>
     <li><a href="http://github.com/cmoore/web-mongrel2">Haskell</a></li>
     <li><a href="http://github.com/vseloved/cl-mongrel2">Common Lisp</a></li>
+    <li><a href="http://github.com/lestrrat/Plack-Handler-Mongrel2">Perl (with Plack)</a></li>
     <li><a href="http://github.com/jsimmons/mongrel2-lua/">Lua</a></li>
 </ul>
 
