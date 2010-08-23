@@ -57,11 +57,11 @@ typedef struct Connection {
     int finished;
     int registered;
     int rport;
-
     State state;
-    char remote[IPADDR_SIZE+1];
     char *buf;
     char *proxy_buf;
+    struct httpclient_parser *client;
+    char remote[IPADDR_SIZE+1];
 } Connection;
 
 void Connection_destroy(Connection *conn);

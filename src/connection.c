@@ -265,6 +265,18 @@ int connection_http_to_proxy(int event, void *data)
     check(conn->proxy_fd != -1, "Failed to connect to proxy backend %s:%d",
             bdata(proxy->server), proxy->port);
 
+    if(!conn->proxy_buf) {
+        conn->proxy_buf = h_malloc(BUFFER_SIZE+1);
+        check_mem(conn->proxy_buf);
+        hattach(conn->proxy_buf, conn);
+    }
+
+    if(!conn->client) {
+        conn->client = h_calloc(sizeof(httpclient_parser), 1);
+        check_mem(conn->client);
+        hattach(conn->client, conn);
+    }
+
     return CONNECT;
 
 error:
@@ -318,66 +330,30 @@ error:
 }
 
 
+
 int connection_proxy_reply_parse(int event, void *data)
 {
     TRACE(proxy_reply_parse);
     int nread = 0;
-    int nparsed = 0;
     int rc = 0;
     Connection *conn = (Connection *)data;
     Proxy *proxy = Request_get_action(conn->req, proxy);
-    httpclient_parser client = {
-        .http_field = NULL,
-        .reason_phrase = NULL,
-        .status_code = NULL,
-        .chunk_size = NULL,
-        .http_version = NULL,
-        .header_done = NULL,
-        .last_chunk = NULL
-    };
+    httpclient_parser *client = conn->client;
 
-    if(!conn->proxy_buf) {
-        conn->proxy_buf = h_malloc(BUFFER_SIZE+1);
-        check_mem(conn->proxy_buf);
-        hattach(conn->proxy_buf, conn);
-    }
-
-    httpclient_parser_init(&client);
-   
-    nread = fdrecv(conn->proxy_fd, conn->proxy_buf, BUFFER_SIZE);
-    conn->proxy_buf[nread] = '\0';
-
+    nread = Proxy_read_and_parse(conn, 0);
     check(nread != -1, "Failed to read from proxy server: %s:%d", 
             bdata(proxy->server), proxy->port);
 
-    nparsed = httpclient_parser_execute(&client, conn->proxy_buf, nread, 0);
-    check(!httpclient_parser_has_error(&client), "Parsing error from server.");
-    check(httpclient_parser_finish(&client), "Parser didn't get a full response.");
+    if(client->chunked) {
+        rc = Proxy_stream_chunks(conn, nread);
+        check(rc != -1, "Failed to stream chunked encoding to client.");
 
-    if(client.chunked) {
-        debug("This is a chunked encoding response.");
+    } else if(client->content_len > 0) {
+        rc = Proxy_stream_response(conn, client->body_start + client->content_len, nread);
+        check(rc != -1, "Failed streaming non-chunked response.");
 
-    } else if(client.content_len > 0) {
-        int total = client.body_start + client.content_len;
-        debug("There is a content length: total: %d, but nread: %d", total, nread);
-
-        // send what we've read already right now
-        rc = fdsend(conn->fd, conn->proxy_buf, nread);
-        check(rc == nread, "Failed to send all of the request: %d length.", nread);
-
-        for(total -= nread; total > 0; total -= nread) {
-            nread = fdrecv(conn->proxy_fd, conn->proxy_buf,
-                    total > BUFFER_SIZE ? BUFFER_SIZE : total);
-
-            check(nread != -1, "Failed to read from proxy.");
-
-            rc = fdsend(conn->fd, conn->proxy_buf, nread);
-            check(rc != -1, "Failed to send to client.");
-        }
-
-        assert(total == 0 && "Math screwed up on send.");
     } else {
-        // really untested branch here
+        // TODO: write a broken web server to test this
         debug("No chunked encoding and no content length, we'll read until close.");
 
         do {
@@ -391,6 +367,7 @@ int connection_proxy_reply_parse(int event, void *data)
 error:
     return FAILED;
 }
+
 
 int connection_proxy_req_parse(int event, void *data)
 {

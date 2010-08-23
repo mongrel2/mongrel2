@@ -1,4 +1,5 @@
 import web
+import random
 
 urls = (
     '/(.*)', 'hello'
@@ -9,7 +10,8 @@ class hello:
     def GET(self, name):
         if not name: 
             name = 'World'
-        return 'Hello, ' + name + '!'
+        data = 'Hello, ' + name + '!'
+        return data * random.randint(1, 1000)
 
 if __name__ == "__main__":
     app.run()
