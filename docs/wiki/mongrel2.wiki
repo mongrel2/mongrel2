@@ -33,11 +33,11 @@ modern browser technologies.
 <h2>Download</h2>
 
 <p>We are currently crafting a release process, but for now you can get the latest source
-download from:</p>
+download from (updated Mon Aug 23 02:21:21 PDT 2010):</p>
 
 <ul>
-    <li><a href="/static/mongrel2-1.0beta.zip">mongrel2-1.0beta.zip</a></li>
-    <li><a href="/static/mongrel2-1.0beta.tar.bz2">mongrel2-1.0beta.tar.bz2</a></li>
+    <li><a href="/static/downloads/mongrel2-1.0beta1.zip">mongrel2-1.0beta1.zip</a> MD5: 7c508727be5f63e0b32718510b1da87a</li>
+    <li><a href="/static/downloads/mongrel2-1.0beta1.tar.bz2">mongrel2-1.0beta1.tar.bz2</a> MD5: b1116a29c2a4b25e9fd9a209dd104b83</li>
 </ul>
 
 <p>These files will be generated periodically, and contain a directory with the date/time they were made,
