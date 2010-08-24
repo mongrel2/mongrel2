@@ -266,7 +266,7 @@ int connection_http_to_proxy(int event, void *data)
             bdata(proxy->server), proxy->port);
 
     if(!conn->proxy_buf) {
-        conn->proxy_buf = h_malloc(BUFFER_SIZE+1);
+        conn->proxy_buf = h_calloc(sizeof(char), BUFFER_SIZE+1);
         check_mem(conn->proxy_buf);
         hattach(conn->proxy_buf, conn);
     }
@@ -553,7 +553,7 @@ Connection *Connection_create(Server *srv, int fd, int rport, const char *remote
     conn->req = Request_create();
     check_mem(conn->req);
 
-    conn->buf = h_malloc(BUFFER_SIZE + 1);
+    conn->buf = h_calloc(sizeof(char), BUFFER_SIZE + 1);
     check_mem(conn->buf);
     hattach(conn->buf, conn);
 
