@@ -102,7 +102,12 @@ void Server_destroy(Server *srv)
 
 void Server_init()
 {
-    int mq_threads = Setting_get_int("zeromq.threads", 2);
+    int mq_threads = Setting_get_int("zeromq.threads", 1);
+
+    if(mq_threads > 1) {
+        log_info("WARNING: Setting zeromq.threads greater than 1 can cause lockups in your handlers.");
+    }
+
     log_info("Starting 0MQ with %d threads.", mq_threads);
     mqinit(mq_threads);
     Register_init();

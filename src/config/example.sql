@@ -125,4 +125,6 @@ INSERT INTO route (path, host_id, target_id, target_type)
         "dir"
     );
 
+INSERT INTO setting (key, value) VALUES ('zeromq.threads', 1);
+
 commit;
