@@ -43,6 +43,8 @@
 #include <assert.h>
 #include <register.h>
 
+#include "setting.h"
+
 struct tagbstring LEAVE_HEADER = bsStatic("{\"METHOD\":\"JSON\"}");
 struct tagbstring LEAVE_MSG = bsStatic("{\"type\":\"disconnect\"}");
 
