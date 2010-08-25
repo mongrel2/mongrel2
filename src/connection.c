@@ -207,7 +207,7 @@ int connection_http_to_handler(int event, void *data)
         error_response(conn->fd, 413, "Request entity is too large: %d", content_len);    
     } else {
         if(total > BUFFER_SIZE) {
-            conn->buf = realloc(conn->buf, total);
+            conn->buf = h_realloc(conn->buf, total);
             body = conn->buf + header_len;
             rc = fdread(conn->fd, body, content_len);
             check_debug(rc == content_len, "Failed to read %d content as requested.", content_len);
