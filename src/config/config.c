@@ -264,7 +264,7 @@ list_t *Config_load_servers(const char *path, const char *name)
     int rc = DB_init(path);
     check(rc == 0, "Failed to load config database: %s", path);
 
-    query = SQL(SERVER_QUERY, name);
+    query = SQL(SERVER_QUERY, name, name);
 
     rc = DB_exec(query, Config_server_load_cb, servers);
     check(rc == 0, "Failed to select servers from: %s", path);
