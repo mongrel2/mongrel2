@@ -43,15 +43,15 @@
     &nbsp;<span class="sectionToc">2.1 <a href="#x1-120002.1" id=
     "QQ2-1-12" name="QQ2-1-12">Install Dependencies</a></span><br>
     &nbsp;<span class="sectionToc">2.2 <a href="#x1-130002.2" id=
-    "QQ2-1-14" name="QQ2-1-14">Building Mongrel2</a></span><br>
+    "QQ2-1-15" name="QQ2-1-15">Building Mongrel2</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">2.2.1 <a href=
-    "#x1-140002.2.1" id="QQ2-1-15" name="QQ2-1-15">Using
+    "#x1-140002.2.1" id="QQ2-1-16" name="QQ2-1-16">Using
     Fossil</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">2.2.2 <a href=
-    "#x1-150002.2.2" id="QQ2-1-17" name="QQ2-1-17">Using the .zip
+    "#x1-150002.2.2" id="QQ2-1-18" name="QQ2-1-18">Using the .zip
     File</a></span><br>
     &nbsp;<span class="sectionToc">2.3 <a href="#x1-160002.3" id=
-    "QQ2-1-18" name="QQ2-1-18">Building And
+    "QQ2-1-19" name="QQ2-1-19">Building And
     Installing</a></span><br>
     &nbsp;<span class="sectionToc">2.4 <a href="#x1-170002.4" id=
     "QQ2-1-20" name="QQ2-1-20">Testing The
@@ -114,7 +114,7 @@
     "#x1-380004.1.1" id="QQ2-1-54" name="QQ2-1-54">Introducing
     procer</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">4.1.2 <a href=
-    "#x1-390004.1.2" id="QQ2-1-55" name="QQ2-1-55">Installing
+    "#x1-390004.1.2" id="QQ2-1-56" name="QQ2-1-56">Installing
     procer</a></span><br>
     &nbsp;<span class="sectionToc">4.2 <a href="#x1-400004.2" id=
     "QQ2-1-58" name="QQ2-1-58">The Plan</a></span><br>
@@ -154,62 +154,62 @@
     "#x1-530005.1.2" id="QQ2-1-84" name=
     "QQ2-1-84">Proxying</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">5.1.3 <a href=
-    "#x1-540005.1.3" id="QQ2-1-85" name=
-    "QQ2-1-85">WebSockets</a></span><br>
+    "#x1-540005.1.3" id="QQ2-1-86" name=
+    "QQ2-1-86">WebSockets</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">5.1.4 <a href=
-    "#x1-550005.1.4" id="QQ2-1-87" name=
-    "QQ2-1-87">JSSocket</a></span><br>
+    "#x1-550005.1.4" id="QQ2-1-88" name=
+    "QQ2-1-88">JSSocket</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">5.1.5 <a href=
-    "#x1-560005.1.5" id="QQ2-1-88" name="QQ2-1-88">Long
+    "#x1-560005.1.5" id="QQ2-1-89" name="QQ2-1-89">Long
     Poll</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">5.1.6 <a href=
-    "#x1-570005.1.6" id="QQ2-1-89" name=
-    "QQ2-1-89">Streaming</a></span><br>
+    "#x1-570005.1.6" id="QQ2-1-90" name=
+    "QQ2-1-90">Streaming</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">5.1.7 <a href=
-    "#x1-580005.1.7" id="QQ2-1-90" name="QQ2-1-90">N:M
+    "#x1-580005.1.7" id="QQ2-1-91" name="QQ2-1-91">N:M
     Responses</a></span><br>
     &nbsp;<span class="sectionToc">5.2 <a href="#x1-590005.2" id=
-    "QQ2-1-91" name="QQ2-1-91">Introduction to
+    "QQ2-1-92" name="QQ2-1-92">Introduction to
     ZeroMQ</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">5.2.1 <a href=
-    "#x1-600005.2.1" id="QQ2-1-92" name="QQ2-1-92">A Quick Python
+    "#x1-600005.2.1" id="QQ2-1-93" name="QQ2-1-93">A Quick Python
     ZeroMQ Example</a></span><br>
     &nbsp;<span class="sectionToc">5.3 <a href="#x1-610005.3" id=
-    "QQ2-1-98" name="QQ2-1-98">Handler ZeroMQ Format</a></span><br>
+    "QQ2-1-99" name="QQ2-1-99">Handler ZeroMQ Format</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">5.3.1 <a href=
-    "#x1-620005.3.1" id="QQ2-1-99" name="QQ2-1-99">Socket Types
+    "#x1-620005.3.1" id="QQ2-1-100" name="QQ2-1-100">Socket Types
     Used</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">5.3.2 <a href=
-    "#x1-630005.3.2" id="QQ2-1-100" name="QQ2-1-100">UUID
+    "#x1-630005.3.2" id="QQ2-1-101" name="QQ2-1-101">UUID
     Addressing</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">5.3.3 <a href=
-    "#x1-640005.3.3" id="QQ2-1-101" name="QQ2-1-101">Numbers
+    "#x1-640005.3.3" id="QQ2-1-102" name="QQ2-1-102">Numbers
     Identify Listeners</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">5.3.4 <a href=
-    "#x1-650005.3.4" id="QQ2-1-102" name="QQ2-1-102">Paths Identify
+    "#x1-650005.3.4" id="QQ2-1-103" name="QQ2-1-103">Paths Identify
     Targets</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">5.3.5 <a href=
-    "#x1-660005.3.5" id="QQ2-1-103" name="QQ2-1-103">Request
+    "#x1-660005.3.5" id="QQ2-1-104" name="QQ2-1-104">Request
     Headers And Body</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">5.3.6 <a href=
-    "#x1-670005.3.6" id="QQ2-1-104" name="QQ2-1-104">Complete
+    "#x1-670005.3.6" id="QQ2-1-105" name="QQ2-1-105">Complete
     Message Examples</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">5.3.7 <a href=
-    "#x1-680005.3.7" id="QQ2-1-107" name="QQ2-1-107">Python Handler
+    "#x1-680005.3.7" id="QQ2-1-108" name="QQ2-1-108">Python Handler
     API</a></span><br>
     &nbsp;<span class="sectionToc">5.4 <a href="#x1-690005.4" id=
-    "QQ2-1-108" name="QQ2-1-108">Basic Handler Demo</a></span><br>
+    "QQ2-1-109" name="QQ2-1-109">Basic Handler Demo</a></span><br>
     &nbsp;<span class="sectionToc">5.5 <a href="#x1-700005.5" id=
-    "QQ2-1-112" name="QQ2-1-112">MP3 Streaming Demo</a></span><br>
+    "QQ2-1-113" name="QQ2-1-113">MP3 Streaming Demo</a></span><br>
     &nbsp;<span class="sectionToc">5.6 <a href="#x1-710005.6" id=
-    "QQ2-1-115" name="QQ2-1-115">Chat Demo</a></span><br>
+    "QQ2-1-116" name="QQ2-1-116">Chat Demo</a></span><br>
     &nbsp;<span class="sectionToc">5.7 <a href="#x1-720005.7" id=
-    "QQ2-1-116" name="QQ2-1-116">Other Language APIs</a></span><br>
+    "QQ2-1-117" name="QQ2-1-117">Other Language APIs</a></span><br>
     &nbsp;<span class="sectionToc">5.8 <a href="#x1-730005.8" id=
-    "QQ2-1-117" name="QQ2-1-117">Writing Your Own
+    "QQ2-1-118" name="QQ2-1-118">Writing Your Own
     m2sh</a></span><br>
-    <span class="chapterToc">6 <a href="#x1-740006" id="QQ2-1-118"
-    name="QQ2-1-118">Contributing</a></span>
+    <span class="chapterToc">6 <a href="#x1-740006" id="QQ2-1-119"
+    name="QQ2-1-119">Contributing</a></span>
   </div>
 
   <h2 class="chapterHead"><a id="x1-2000" name=
@@ -547,9 +547,35 @@
   <p class="noindent">Since every system is different, it is
   difficult to tell you exactly how to install required packages
   for your OS, but here's how I did it on my computer: 
-  <!--l. 41-->
+  <!--l. 40-->
 
   <p class="noindent"><a id="x1-12001r1" name="x1-12001r1"></a>
+  <hr class="float">
+
+  <div class="float">
+    <div class="caption">
+      <span class="id">Note 1:</span> <span class=
+      "content"><span class="pplri7t-">Use Virtualenv If You
+      Fear</span> <span class="pplri7t-">Pip</span></span>
+    </div><!--tex4ht:label?: x1-12001r1 -->
+
+    <div class="quote">
+      <!--l. 41-->
+
+      <p class="indent">For those who still want to use the package
+      management but want to use pip and distribute, I suggest you
+      check out <a href=
+      "http://pypi.python.org/pypi/virtualenv">virtualenv</a>. What
+      virtualenv does is create a little &ldquo;chroot
+      install&rdquo; of just the packages you need using pip or
+      distribute. When you don't want them anymore, you can
+      just delete one directory and you're fine.
+    </div>
+  </div>
+  <hr class="endfloat">
+  <!--l. 49-->
+
+  <p class="noindent"><a id="x1-12002r1" name="x1-12002r1"></a>
   <hr class="float">
 
   <div class="float">
@@ -557,20 +583,20 @@
       <span class="id">Source 1:</span> <span class=
       "content"><span class="pplri7t-">Installing Dependencies
       on</span> <span class="pplri7t-">ArchLinux</span></span>
-    </div><!--tex4ht:label?: x1-12001r1 -->
-    <!--l. 42-->
+    </div><!--tex4ht:label?: x1-12002r1 -->
+    <!--l. 50-->
 
     <div class="lstlisting" id="listing-1">
-      <span class="label"><a id="x1-12002r1" name=
-      "x1-12002r1"></a></span><span class=
+      <span class="label"><a id="x1-12003r1" name=
+      "x1-12003r1"></a></span><span class=
       "pcrr7t-x-x-90">#</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">install</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">ZeroMQ</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-12003r2" name=
-      "x1-12003r2"></a></span><span class=
+      <span class="label"><a id="x1-12004r2" name=
+      "x1-12004r2"></a></span><span class=
       "pcrr7t-x-x-90">&gt;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">wget</span><span class=
@@ -597,8 +623,8 @@
       "pcrr7t-x-x-90">.</span><span class=
       "pcrr7t-x-x-90">gz</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-12004r3" name=
-      "x1-12004r3"></a></span><span class=
+      <span class="label"><a id="x1-12005r3" name=
+      "x1-12005r3"></a></span><span class=
       "pcrr7t-x-x-90">&gt;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">tar</span><span class=
@@ -612,8 +638,8 @@
       "pcrr7t-x-x-90">.</span><span class=
       "pcrr7t-x-x-90">gz</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-12005r4" name=
-      "x1-12005r4"></a></span><span class=
+      <span class="label"><a id="x1-12006r4" name=
+      "x1-12006r4"></a></span><span class=
       "pcrr7t-x-x-90">&gt;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">cd</span><span class=
@@ -621,21 +647,21 @@
       "pcrr7t-x-x-90">zeromq</span><span class=
       "pcrr7t-x-x-90">-2.0.7/</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-12006r5" name=
-      "x1-12006r5"></a></span><span class=
+      <span class="label"><a id="x1-12007r5" name=
+      "x1-12007r5"></a></span><span class=
       "pcrr7t-x-x-90">&gt;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">./</span><span class=
       "pcrr7t-x-x-90">configure</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-12007r6" name=
-      "x1-12007r6"></a></span><span class=
+      <span class="label"><a id="x1-12008r6" name=
+      "x1-12008r6"></a></span><span class=
       "pcrr7t-x-x-90">&gt;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">make</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-12008r7" name=
-      "x1-12008r7"></a></span><span class=
+      <span class="label"><a id="x1-12009r7" name=
+      "x1-12009r7"></a></span><span class=
       "pcrr7t-x-x-90">&gt;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">sudo</span><span class=
@@ -644,19 +670,19 @@
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">install</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-12009r8" name=
-      "x1-12009r8"></a></span><span class=
+      <span class="label"><a id="x1-12010r8" name=
+      "x1-12010r8"></a></span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-12010r9" name=
-      "x1-12010r9"></a></span><span class=
+      <span class="label"><a id="x1-12011r9" name=
+      "x1-12011r9"></a></span><span class=
       "pcrr7t-x-x-90">#</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">install</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">python</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-12011r10" name=
-      "x1-12011r10"></a></span><span class=
+      <span class="label"><a id="x1-12012r10" name=
+      "x1-12012r10"></a></span><span class=
       "pcrr7t-x-x-90">&gt;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">sudo</span><span class=
@@ -668,19 +694,19 @@
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">python</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-12012r11" name=
-      "x1-12012r11"></a></span><span class=
+      <span class="label"><a id="x1-12013r11" name=
+      "x1-12013r11"></a></span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-12013r12" name=
-      "x1-12013r12"></a></span><span class=
+      <span class="label"><a id="x1-12014r12" name=
+      "x1-12014r12"></a></span><span class=
       "pcrr7t-x-x-90">#</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">install</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">sqlite3</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-12014r13" name=
-      "x1-12014r13"></a></span><span class=
+      <span class="label"><a id="x1-12015r13" name=
+      "x1-12015r13"></a></span><span class=
       "pcrr7t-x-x-90">&gt;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">sudo</span><span class=
@@ -692,11 +718,11 @@
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">sqlite3</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-12015r14" name=
-      "x1-12015r14"></a></span><span class=
+      <span class="label"><a id="x1-12016r14" name=
+      "x1-12016r14"></a></span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-12016r15" name=
-      "x1-12016r15"></a></span><span class=
+      <span class="label"><a id="x1-12017r15" name=
+      "x1-12017r15"></a></span><span class=
       "pcrr7t-x-x-90">#</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">install</span><span class=
@@ -707,8 +733,8 @@
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">pip</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-12017r16" name=
-      "x1-12017r16"></a></span><span class=
+      <span class="label"><a id="x1-12018r16" name=
+      "x1-12018r16"></a></span><span class=
       "pcrr7t-x-x-90">&gt;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">sudo</span><span class=
@@ -722,8 +748,8 @@
       "pcrr7t-x-x-90">-</span><span class=
       "pcrr7t-x-x-90">pip</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-12018r17" name=
-      "x1-12018r17"></a></span><span class=
+      <span class="label"><a id="x1-12019r17" name=
+      "x1-12019r17"></a></span><span class=
       "pcrr7t-x-x-90">&gt;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">sudo</span><span class=
@@ -734,11 +760,11 @@
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">distribute</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-12019r18" name=
-      "x1-12019r18"></a></span><span class=
+      <span class="label"><a id="x1-12020r18" name=
+      "x1-12020r18"></a></span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-12020r19" name=
-      "x1-12020r19"></a></span><span class=
+      <span class="label"><a id="x1-12021r19" name=
+      "x1-12021r19"></a></span><span class=
       "pcrr7t-x-x-90">#</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">install</span><span class=
@@ -749,8 +775,8 @@
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">github</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-12021r20" name=
-      "x1-12021r20"></a></span><span class=
+      <span class="label"><a id="x1-12022r20" name=
+      "x1-12022r20"></a></span><span class=
       "pcrr7t-x-x-90">&gt;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">sudo</span><span class=
@@ -762,8 +788,8 @@
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">git</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-12022r21" name=
-      "x1-12022r21"></a></span><span class=
+      <span class="label"><a id="x1-12023r21" name=
+      "x1-12023r21"></a></span><span class=
       "pcrr7t-x-x-90">&gt;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">git</span><span class=
@@ -782,8 +808,8 @@
       "pcrr7t-x-x-90">.</span><span class=
       "pcrr7t-x-x-90">git</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-12023r22" name=
-      "x1-12023r22"></a></span><span class=
+      <span class="label"><a id="x1-12024r22" name=
+      "x1-12024r22"></a></span><span class=
       "pcrr7t-x-x-90">&gt;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">sudo</span><span class=
@@ -796,19 +822,19 @@
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">install</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-12024r23" name=
-      "x1-12024r23"></a></span><span class=
+      <span class="label"><a id="x1-12025r23" name=
+      "x1-12025r23"></a></span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-12025r24" name=
-      "x1-12025r24"></a></span><span class=
+      <span class="label"><a id="x1-12026r24" name=
+      "x1-12026r24"></a></span><span class=
       "pcrr7t-x-x-90">#</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">web</span><span class=
       "pcrr7t-x-x-90">.</span><span class=
       "pcrr7t-x-x-90">py</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-12026r25" name=
-      "x1-12026r25"></a></span><span class=
+      <span class="label"><a id="x1-12027r25" name=
+      "x1-12027r25"></a></span><span class=
       "pcrr7t-x-x-90">&gt;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">sudo</span><span class=
@@ -822,7 +848,7 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 71-->
+  <!--l. 79-->
 
   <p class="noindent">If you run into parts that your OS is
   missing, which is likely on Debian and SuSE systems, then
@@ -830,11 +856,11 @@
 
   <h3 class="sectionHead"><span class="titlemark">2.2</span> <a id=
   "x1-130002.2" name="x1-130002.2"></a>Building Mongrel2</h3>
-  <!--l. 78-->
+  <!--l. 86-->
 
   <p class="noindent">If everything went well you should be able to
   grab the Mongrel2 source and try building it. There's two
-  ways you can get the source code to Mongrel2: <!--l. 82-->
+  ways you can get the source code to Mongrel2: <!--l. 90-->
 
   <p class="noindent">
 
@@ -845,18 +871,18 @@
 
     <li class="enumerate" id="x1-13004x2">Grab the source .zip
     release and install it from there.
-  </ol><!--l. 87-->
+  </ol><!--l. 95-->
 
   <p class="noindent">
 
   <h4 class="subsectionHead"><span class="titlemark">2.2.1</span>
   <a id="x1-140002.2.1" name="x1-140002.2.1"></a>Using Fossil</h4>
-  <!--l. 89-->
+  <!--l. 97-->
 
   <p class="noindent">Since it's early in Mongrel2
   development, we recommend you get fossil and install it so you
   can track the latest fixes and development. Here's the
-  easiest way to do that: <!--l. 93-->
+  easiest way to do that: <!--l. 101-->
 
   <p class="noindent">
 
@@ -873,10 +899,10 @@
     <li class="enumerate" id="x1-14006x3">If you find that your
     version of fossil ends up having problems with mongrel2.org let
     us know since we might need to upgrade.
-  </ol><!--l. 102-->
+  </ol><!--l. 110-->
 
   <p class="noindent">Once you have fossil you can then get the
-  Mongrel2 source and open it up: <!--l. 104-->
+  Mongrel2 source and open it up: <!--l. 112-->
 
   <p class="noindent"><a id="x1-14007r2" name="x1-14007r2"></a>
   <hr class="float">
@@ -887,7 +913,7 @@
       "content"><span class="pplri7t-">Cloning the Mongrel2</span>
       <span class="pplri7t-">Source</span></span>
     </div><!--tex4ht:label?: x1-14007r2 -->
-    <!--l. 105-->
+    <!--l. 113-->
 
     <div class="lstlisting" id="listing-2">
       <span class="label"><a id="x1-14008r1" name=
@@ -953,7 +979,7 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 114-->
+  <!--l. 122-->
 
   <p class="noindent">Make sure you do this in order (just like
   with every set of instructions you follow) or else you'll
@@ -966,7 +992,7 @@
 
   <h4 class="subsectionHead"><span class="titlemark">2.2.2</span>
   <a id="x1-150002.2.2" name="x1-150002.2.2"></a>Using the .zip
-  File</h4><!--l. 123-->
+  File</h4><!--l. 131-->
 
   <p class="noindent">If you don't want to install fossil
   then you will need to get the .zip file from our site and install
@@ -974,7 +1000,7 @@
   "pplri7t-">no guarantees</span> that this will work at all or
   that you will get a stable server. We have not made an official
   release, so using the .zip file is effectively a lame way of
-  avoiding using fossil. <!--l. 129-->
+  avoiding using fossil. <!--l. 137-->
 
   <p class="noindent">
 
@@ -991,25 +1017,25 @@
 
     <li class="enumerate" id="x1-15008x4">Unzip this file and cd
     into the resulting directory.
-  </ol><!--l. 137-->
+  </ol><!--l. 145-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">2.3</span> <a id=
   "x1-160002.3" name="x1-160002.3"></a>Building And Installing</h3>
-  <!--l. 139-->
+  <!--l. 147-->
 
   <p class="noindent">Once you have the source ready to go you can
   build it and then install it with one command: <span class=
-  "pcrro7t-">make all install</span> <!--l. 142-->
+  "pcrro7t-">make all install</span> <!--l. 150-->
 
   <p class="noindent">There is no <span class=
   "pcrro7t-">./configure</span> for Mongrel2 since we avoid too
   many OS specific differences or shield those away with good
-  feature checks in the code. <!--l. 145-->
+  feature checks in the code. <!--l. 153-->
 
   <p class="noindent">The end result of this should be: 
-  <!--l. 147-->
+  <!--l. 155-->
 
   <p class="noindent">
 
@@ -1031,13 +1057,13 @@
 
     <li class="enumerate" id="x1-16011x5">Finally, the mongrel2
     binary gets installed.
-  </ol><!--l. 155-->
+  </ol><!--l. 163-->
 
   <p class="noindent">If any of these stages fail, then you can
   simply try to fix them and then run: <span class=
   "pcrro7t-">make</span> <span class="pcrro7t-">clean all
   install</span> which will do everything all over again. 
-  <!--l. 158-->
+  <!--l. 166-->
 
   <p class="noindent">The most common error is if you didn't
   install pip or distribute and insist on using your own
@@ -1046,32 +1072,9 @@
   Linux's stupidity about versions and how it installs
   Python. If you don't want to use the package system every
   other Python programmer uses, then you're on your own. 
-  <!--l. 164-->
+  <!--l. 173-->
 
-  <p class="noindent"><a id="x1-16012r1" name="x1-16012r1"></a>
-  <hr class="float">
-
-  <div class="float">
-    <div class="caption">
-      <span class="id">Note 1:</span> <span class=
-      "content"><span class="pplri7t-">Use Virtualenv If You
-      Fear</span> <span class="pplri7t-">Pip</span></span>
-    </div><!--tex4ht:label?: x1-16012r1 -->
-
-    <div class="quote">
-      <!--l. 165-->
-
-      <p class="indent">For those who still want to use the package
-      management but want to use pip and distribute, I suggest you
-      check out <a href=
-      "http://pypi.python.org/pypi/virtualenv">virtualenv</a>. What
-      virtualenv does is create a little &ldquo;chroot
-      install&rdquo; of just the packages you need using pip or
-      distribute. When you don't want them anymore, you can
-      just delete one directory and you're fine.
-    </div>
-  </div>
-  <hr class="endfloat">
+  <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">2.4</span> <a id=
   "x1-170002.4" name="x1-170002.4"></a>Testing The
@@ -4322,17 +4325,57 @@
   "pcrro7t-">procer</span> to tell you how to setup everything. 
   <!--l. 112-->
 
-  <p class="noindent">
+  <p class="noindent"><a id="x1-38019r5" name="x1-38019r5"></a>
+  <hr class="float">
+
+  <div class="float">
+    <div class="caption">
+      <span class="id">Note 5:</span> <span class=
+      "content"><span class="pplri7t-">Alternatives To</span>
+      <span class="pplri7t-">procer</span></span>
+    </div><!--tex4ht:label?: x1-38019r5 -->
+
+    <div class="quote">
+      <!--l. 113-->
+
+      <p class="indent">I wrote procer mostly for this book, but I
+      also use it for my Mongrel2 deployments. It works for me but
+      you can try other solutions. By default, Mongrel2 will work
+      with either daemontools/runit style, or init.d style
+      launchers. If Mongrel2 runs as a regular user, it assumes
+      that you want runit style (don't fork, write to
+      stdout/stderr). If you run as root, it assumes you want
+      init.d style like what procer uses (fork, drop priv, chroot,
+      etc.). <!--l. 120-->
+
+      <p class="indent">You should check out <a href=
+      "http://github.com/peterkeen/proclaunch">proclaunch</a> as
+      another alternative that is similar to procer, and inspired
+      by procer, but written in Perl with a few more features. 
+      <!--l. 124-->
+
+      <p class="indent">Either way, Mongrel2 is practical, and does
+      generally the right thing with today's tools. Want to
+      use daemontools? Fine, just run it <span class=
+      "obeylines-h verb"><span class=
+      "pcrr7t-">mongrel2</span><span class=
+      "pcrr7t-">&nbsp;config.sqlite</span><span class=
+      "pcrr7t-">&nbsp;server</span></span> and it'll work
+      right. Want to put it in init.d or use procer or similar?
+      Fine, run it as root.
+    </div>
+  </div>
+  <hr class="endfloat">
 
   <h4 class="subsectionHead"><span class="titlemark">4.1.2</span>
   <a id="x1-390004.1.2" name="x1-390004.1.2"></a>Installing
-  procer</h4><!--l. 114-->
+  procer</h4><!--l. 132-->
 
   <p class="noindent">Installing procer is very easy. It's a
   single little binary and it lives in <span class=
   "pcrb7t-">examples/procer</span> in the Mongrel2 source.
   Here's how you'd install it totally from scratch as
-  if you hadn't even build Mongrel2 yet: <!--l. 118-->
+  if you hadn't even build Mongrel2 yet: <!--l. 136-->
 
   <p class="noindent"><a id="x1-39001r11" name="x1-39001r11"></a>
   <hr class="float">
@@ -4343,7 +4386,7 @@
       "content"><span class="pplri7t-">Install</span> <span class=
       "pplri7t-">procer</span></span>
     </div><!--tex4ht:label?: x1-39001r11 -->
-    <!--l. 119-->
+    <!--l. 137-->
 
     <div class="lstlisting" id="listing-9">
       <span class="label"><a id="x1-39002r1" name=
@@ -4392,54 +4435,19 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 127-->
+  <!--l. 145-->
 
   <p class="noindent">That's the entire install process, and
   now procer is in <span class="pcrb7t-">/usr/local/bin</span> so
   you can use it. In the rest of this chapter you'll learn
   how to use <span class="pcrro7t-">procer</span> by just setting
-  up the Mongrel2 demo completely and messing around with it. 
-  <!--l. 132-->
-
-  <p class="noindent"><a id="x1-39006r5" name="x1-39006r5"></a>
-  <hr class="float">
-
-  <div class="float">
-    <div class="caption">
-      <span class="id">Note 5:</span> <span class=
-      "content"><span class="pplri7t-">Quit Complaining, procer
-      Isn't</span> <span class=
-      "pplri7t-">Required</span></span>
-    </div><!--tex4ht:label?: x1-39006r5 -->
-
-    <div class="quote">
-      <!--l. 133-->
-
-      <p class="indent">I'm sure there's some neckbeard
-      who's reading this and immediately starts complaining
-      that procer doesn't have all the features of his
-      favorite stupid tool. You're right, and that's on
-      purpose. Nobody reading this manual needs all that crap or
-      any of your dogma. They need, and I needed, a little tool
-      that does 1/2 of what everything else does and was simple
-      enough to understand. None of the existing tools comes even
-      close to meeting that goal. <!--l. 141-->
-
-      <p class="indent">If you've got a problem with procer,
-      like I'm reinventing the wheel, then, fine, don't
-      use it. Do your thing, baby. But don't try to pretend
-      like the other tools are buttered baby Jesus crackers in a
-      gold spittoon. They suck hard, and I didn't feel like
-      spending half the manual telling people how to use them.
-    </div>
-  </div>
-  <hr class="endfloat">
+  up the Mongrel2 demo completely and messing around with it.
 
   <h3 class="sectionHead"><span class="titlemark">4.2</span> <a id=
-  "x1-400004.2" name="x1-400004.2"></a>The Plan</h3><!--l. 151-->
+  "x1-400004.2" name="x1-400004.2"></a>The Plan</h3><!--l. 153-->
 
   <p class="noindent">We need to plan this deployment to make sure
-  we get the end result correct: <!--l. 153-->
+  we get the end result correct: <!--l. 155-->
 
   <p class="noindent">
 
@@ -4463,27 +4471,27 @@
     keeping things running and play with taking things down and up
     and using <span class="pcrro7t-">m2sh</span> to work with the
     deployment.
-  </ol><!--l. 163-->
+  </ol><!--l. 165-->
 
   <p class="noindent">Once you have this setup working, you can
   then start to make your own deployments and tweak things as you
   need for your own applications. Remember that the goal is to get
   you to <span class="pplri7t-">automate</span> everything as much
   as possible, so you can go further than this then do it. 
-  <!--l. 168-->
+  <!--l. 170-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">4.3</span> <a id=
   "x1-410004.3" name="x1-410004.3"></a>Step 1: The Deployment
-  Area</h3><!--l. 170-->
+  Area</h3><!--l. 172-->
 
   <p class="noindent">We'll need a place to put all this
   stuff and run it so that Mongrel2 can chroot there, procer knows
   where its profiles are, and its all nice and clean. For these
   instructions, we're just going to make some directories in
   your home directory, but feel free to change this up later if you
-  find a better way. <!--l. 175-->
+  find a better way. <!--l. 177-->
 
   <p class="noindent"><a id="x1-41001r12" name="x1-41001r12"></a>
   <hr class="float">
@@ -4494,7 +4502,7 @@
       "content"><span class="pplri7t-">Make Deployment</span>
       <span class="pplri7t-">Directories</span></span>
     </div><!--tex4ht:label?: x1-41001r12 -->
-    <!--l. 176-->
+    <!--l. 178-->
 
     <div class="lstlisting" id="listing-10">
       <span class="label"><a id="x1-41002r1" name=
@@ -4788,7 +4796,7 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 205-->
+  <!--l. 207-->
 
   <p class="noindent">Hopefully, you're starting to see how
   you could easily automate this so that you don't have to do
@@ -4796,7 +4804,7 @@
   the sausage&rdquo; so that you know where everything goes. Future
   versions of <span class="pcrro7t-">m2sh</span> will most likely
   create deployment directories like this automatically. 
-  <!--l. 210-->
+  <!--l. 212-->
 
   <p class="noindent">What we've done here is the following:
 
@@ -4828,7 +4836,7 @@
 
   <h3 class="sectionHead"><span class="titlemark">4.4</span> <a id=
   "x1-420004.4" name="x1-420004.4"></a>Step 2: The mongrel2.org
-  Configuration</h3><!--l. 224-->
+  Configuration</h3><!--l. 226-->
 
   <p class="noindent">Now we're ready to get the
   configuration working. Here's the thing, though: you should
@@ -4836,7 +4844,7 @@
   you the file and you are going to have to make the changes to
   meet the requirements for this deployment directory. Here's
   what you have to change in <span class="pcrb7t-">config.py</span>
-  to make everything work right: <!--l. 229-->
+  to make everything work right: <!--l. 231-->
 
   <p class="noindent">
 
@@ -4871,7 +4879,7 @@
     <li class="enumerate" id="x1-42012x6">Finally, change any
     mention of &ldquo;mongrel2.org&rdquo; into
     &ldquo;localhost&rdquo; so that you can run it locally.
-  </ol><!--l. 242-->
+  </ol><!--l. 244-->
 
   <p class="noindent">Once you have that all edited, you should be
   able to run <span class="pcrro7t-">m2sh load -db</span>
@@ -4879,10 +4887,10 @@
   it'll just load it up. Try using <span class=
   "pcrro7t-">m2sh</span> <span class="pcrro7t-">servers</span> and
   <span class="pcrro7t-">m2sh hosts</span> to take a peek. 
-  <!--l. 247-->
+  <!--l. 249-->
 
   <p class="noindent">To test it out at this stage you can just run
-  the config.sqlite that you did with these commands: <!--l. 250-->
+  the config.sqlite that you did with these commands: <!--l. 252-->
 
   <p class="noindent"><a id="x1-42013r13" name="x1-42013r13"></a>
   <hr class="float">
@@ -4893,7 +4901,7 @@
       "content"><span class="pplri7t-">Testing The Initial</span>
       <span class="pplri7t-">Configuration</span></span>
     </div><!--tex4ht:label?: x1-42013r13 -->
-    <!--l. 251-->
+    <!--l. 253-->
 
     <div class="lstlisting" id="listing-11">
       <span class="label"><a id="x1-42014r1" name=
@@ -4981,7 +4989,7 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 260-->
+  <!--l. 262-->
 
   <p class="noindent">That's enough to make sure it runs, but
   you've got nothing running, so it mostly won't work
@@ -4989,7 +4997,7 @@
 
   <h3 class="sectionHead"><span class="titlemark">4.5</span> <a id=
   "x1-430004.5" name="x1-430004.5"></a>Step 3: Setup procer</h3>
-  <!--l. 267-->
+  <!--l. 269-->
 
   <p class="noindent">Now we want to make <span class=
   "pcrro7t-">procer</span> start everything for us and keep it
@@ -5001,11 +5009,11 @@
   main <span class="pcrb7t-">profiles</span> directory and it tries
   to run it. It's dead simple and very easy to automate, so
   we'll do it by hand and then you can do some automation
-  later. <!--l. 275-->
+  later. <!--l. 277-->
 
   <p class="noindent">Let's first setup a basic config that
   gets our skeleton profiles and make sure procer can run
-  everything: <!--l. 278-->
+  everything: <!--l. 280-->
 
   <p class="noindent"><a id="x1-43001r14" name="x1-43001r14"></a>
   <hr class="float">
@@ -5016,7 +5024,7 @@
       "content"><span class="pplri7t-">Skeleton procer</span>
       <span class="pplri7t-">Setup</span></span>
     </div><!--tex4ht:label?: x1-43001r14 -->
-    <!--l. 279-->
+    <!--l. 281-->
 
     <div class="lstlisting" id="listing-12">
       <span class="label"><a id="x1-43002r1" name=
@@ -5347,11 +5355,11 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 303-->
+  <!--l. 305-->
 
   <p class="noindent">With all of that, you can then try to run
   <span class="pcrro7t-">procer</span> to watch it fail but still
-  try to run everything: <!--l. 306-->
+  try to run everything: <!--l. 308-->
 
   <div class="lstlisting" id="listing-13">
     <span class="label"><a id="x1-43022r1" name=
@@ -5378,7 +5386,7 @@
     "pcrr7t-">&nbsp;</span><span class=
     "pcrr7t-">error</span><span class=
     "pcrr7t-">.</span><span class="pcrr7t-">log</span>
-  </div><!--l. 311-->
+  </div><!--l. 313-->
 
   <p class="noindent">This is assuming that you are still in the
   <span class="pcrb7t-">profiles</span> directory. You should see
@@ -5386,12 +5394,12 @@
   probably some messages printed to the screen. Just ignore any
   mention of Mongrel2 since that's probably just cruft from
   the <span class="pcrb7t-">libm2.a</span> we haven't
-  removed. <!--l. 317-->
+  removed. <!--l. 319-->
 
   <p class="noindent">Take a look in the <span class=
   "pcrb7t-">error.log</span> and you'll see it's not
   necessarily errors but information on how things were run. You
-  should see something like this for each profile: <!--l. 321-->
+  should see something like this for each profile: <!--l. 323-->
 
   <p class="noindent"><a id="x1-43024r15" name="x1-43024r15"></a>
   <hr class="float">
@@ -5402,7 +5410,7 @@
       "content"><span class="pplri7t-">First Dummy Run Of</span>
       <span class="pplri7t-">procer</span></span>
     </div><!--tex4ht:label?: x1-43024r15 -->
-    <!--l. 322-->
+    <!--l. 324-->
 
     <div class="lstlisting" id="listing-14">
       <span class="label"><a id="x1-43025r1" name=
@@ -5671,7 +5679,7 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 336-->
+  <!--l. 338-->
 
   <p class="noindent">I've cleaned this up a bit and, again,
   ignore that it's saying &ldquo;Mongrel2&rdquo;;
@@ -5701,10 +5709,10 @@
     <li class="enumerate" id="x1-43046x6">It does this for all of
     them and, since none of them run right, <span class=
     "pcrro7t-">procer</span> exits.
-  </ol><!--l. 350-->
+  </ol><!--l. 352-->
 
   <p class="noindent">Next up, let's get Mongrel2 running
-  inside <span class="pcrro7t-">procer</span>: <!--l. 352-->
+  inside <span class="pcrro7t-">procer</span>: <!--l. 354-->
 
   <p class="noindent"><a id="x1-43047r16" name="x1-43047r16"></a>
   <hr class="float">
@@ -5715,7 +5723,7 @@
       "content"><span class="pplri7t-">procer Config For</span>
       <span class="pplri7t-">Mongrel2</span></span>
     </div><!--tex4ht:label?: x1-43047r16 -->
-    <!--l. 353-->
+    <!--l. 355-->
 
     <div class="lstlisting" id="listing-15">
       <span class="label"><a id="x1-43048r1" name=
@@ -5980,17 +5988,17 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 374-->
+  <!--l. 376-->
 
   <p class="noindent">Obviously, you don't have to use a
   series of <span class="pcrro7t-">echo</span> commands to make
   these scripts. You can edit them just fine, we're just
   doing it this way so that you can follow along easier. 
-  <!--l. 378-->
+  <!--l. 380-->
 
   <p class="noindent">Now, make sure you don't have any other
   Mongrel2 processes running, and then start procer again to see if
-  it starts this configuration correctly. <!--l. 383-->
+  it starts this configuration correctly. <!--l. 385-->
 
   <p class="noindent"><a id="x1-43065r17" name="x1-43065r17"></a>
   <hr class="float">
@@ -6001,7 +6009,7 @@
       "content"><span class="pplri7t-">Using procer To Run</span>
       <span class="pplri7t-">Mongrel2</span></span>
     </div><!--tex4ht:label?: x1-43065r17 -->
-    <!--l. 384-->
+    <!--l. 386-->
 
     <div class="lstlisting" id="listing-16">
       <span class="label"><a id="x1-43066r1" name=
@@ -6217,7 +6225,7 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 403-->
+  <!--l. 405-->
 
   <p class="noindent">To watch <span class="pcrro7t-">procer</span>
   in action, try doing <span class="pcrro7t-">m2sh stop -db
@@ -6228,7 +6236,7 @@
 
   <h4 class="subsectionHead"><span class="titlemark">4.5.1</span>
   <a id="x1-440004.5.1" name="x1-440004.5.1"></a>The Python
-  Examples</h4><!--l. 410-->
+  Examples</h4><!--l. 412-->
 
   <p class="noindent">We've got a good setup of <span class=
   "pcrro7t-">procer</span> going and it keeps Mongrel2 running, so
@@ -6240,7 +6248,7 @@
   mongrel2 source is in <span class=
   "pcrb7t-">~/projects/mongrel2</span>, you will change
   <span class="pcrb7t-">profiles/chat/run</span> to be like this: 
-  <!--l. 418-->
+  <!--l. 420-->
 
   <p class="noindent"><a id="x1-44001r18" name="x1-44001r18"></a>
   <hr class="float">
@@ -6251,7 +6259,7 @@
       "content"><span class="pplri7t-">Run Script For Chat</span>
       <span class="pplri7t-">Demo</span></span>
     </div><!--tex4ht:label?: x1-44001r18 -->
-    <!--l. 419-->
+    <!--l. 421-->
 
     <div class="lstlisting" id="listing-17">
       <span class="label"><a id="x1-44002r1" name=
@@ -6353,7 +6361,7 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 432-->
+  <!--l. 434-->
 
   <p class="noindent">This little script uses some funky features
   you might not be familiar with, but which are nice to learn, so
@@ -6382,10 +6390,10 @@
     "obeylines-h verb pcrr7t-">$!</span> (the PID of the last
     process started in the background) to the <span class=
     "pcrb7t-">chat.pid</span> file in the profile directory.
-  </ol><!--l. 450-->
+  </ol><!--l. 452-->
 
   <p class="noindent">When you run this manually, you should see
-  something like this: <!--l. 452-->
+  something like this: <!--l. 454-->
 
   <div class="lstlisting" id="listing-18">
     <span class="label"><a id="x1-44019r1" name=
@@ -6453,11 +6461,11 @@
     "pcrr7t-">&nbsp;</span><span class=
     "pcrr7t-">-</span><span class="pcrr7t-">TERM</span><span class=
     "pcrr7t-">&nbsp;</span><span class="pcrr7t-">19305</span>
-  </div><!--l. 462-->
+  </div><!--l. 464-->
 
   <p class="noindent">After all that, you can then try out
   <span class="pcrro7t-">procer</span> again to see if it properly
-  runs the chat demo as well as mongrel2: <!--l. 465-->
+  runs the chat demo as well as mongrel2: <!--l. 467-->
 
   <p class="noindent"><a id="x1-44026r19" name="x1-44026r19"></a>
   <hr class="float">
@@ -6468,7 +6476,7 @@
       "content"><span class="pplri7t-">Running procer With
       Chat</span> <span class="pplri7t-">Demo</span></span>
     </div><!--tex4ht:label?: x1-44026r19 -->
-    <!--l. 466-->
+    <!--l. 468-->
 
     <div class="lstlisting" id="listing-19">
       <span class="label"><a id="x1-44027r1" name=
@@ -6779,18 +6787,18 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 488-->
+  <!--l. 490-->
 
   <p class="noindent">If you go look at <span class=
   "pcrb7t-">profiles/error.log</span>, you'll see that
   <span class="pcrro7t-">procer</span> is also running each of them
   as the right user, with chat being run as you, but Mongrel2 being
   run as root so it can chroot/drop privileges properly. 
-  <!--l. 492-->
+  <!--l. 494-->
 
   <p class="noindent">Rather than give you a walk through each of
   these setups, here's the run scripts for the remaining
-  files: <!--l. 495-->
+  files: <!--l. 497-->
 
   <p class="noindent"><a id="x1-44045r20" name="x1-44045r20"></a>
   <hr class="float">
@@ -6802,7 +6810,7 @@
       <span class="pplri7t-">Scripts</span></span>
     </div><!--tex4ht:label?: x1-44045r20 -->
     <span class=
-    "pcrb7t-x-x-90">profiles/handlertest/run</span>_________________________________________<!--l. 499-->
+    "pcrb7t-x-x-90">profiles/handlertest/run</span>_________________________________________<!--l. 501-->
 
     <div class="lstlisting" id="listing-20">
       <span class="label"><a id="x1-44046r1" name=
@@ -6901,10 +6909,10 @@
       "pcrr7t-x-x-90">handlertest</span><span class=
       "pcrr7t-x-x-90">.</span><span class=
       "pcrr7t-x-x-90">pid</span>
-    </div><!--l. 511-->
+    </div><!--l. 513-->
 
     <p class="noindent"><span class=
-    "pcrb7t-x-x-90">profiles/mp3stream/run</span>__________________________________________<!--l. 514-->
+    "pcrb7t-x-x-90">profiles/mp3stream/run</span>__________________________________________<!--l. 516-->
 
     <div class="lstlisting" id="listing-21">
       <span class="label"><a id="x1-44055r1" name=
@@ -7003,10 +7011,10 @@
       "pcrr7t-x-x-90">mp3stream</span><span class=
       "pcrr7t-x-x-90">.</span><span class=
       "pcrr7t-x-x-90">pid</span>
-    </div><!--l. 527-->
+    </div><!--l. 529-->
 
     <p class="noindent"><span class=
-    "pcrb7t-x-x-90">profiles/web/run</span>________________________________________________<!--l. 529-->
+    "pcrb7t-x-x-90">profiles/web/run</span>________________________________________________<!--l. 531-->
 
     <div class="lstlisting" id="listing-22">
       <span class="label"><a id="x1-44064r1" name=
@@ -7111,12 +7119,12 @@
 
   <h4 class="subsectionHead"><span class="titlemark">4.5.2</span>
   <a id="x1-450004.5.2" name="x1-450004.5.2"></a>Testing The New
-  Setup</h4><!--l. 546-->
+  Setup</h4><!--l. 548-->
 
   <p class="noindent">Once everything is running and <span class=
   "pcrro7t-">procer</span> is maintaining it, you just need to see
   if things work. Here's some curl commands to try: 
-  <!--l. 549-->
+  <!--l. 551-->
 
   <p class="noindent"><a id="x1-45001r21" name="x1-45001r21"></a>
   <hr class="float">
@@ -7127,7 +7135,7 @@
       "content"><span class="pplri7t-">Testing With</span>
       <span class="pplri7t-">Curl</span></span>
     </div><!--tex4ht:label?: x1-45001r21 -->
-    <!--l. 550-->
+    <!--l. 552-->
 
     <div class="lstlisting" id="listing-23">
       <span class="label"><a id="x1-45002r1" name=
@@ -7170,7 +7178,7 @@
 
   <h4 class="subsectionHead"><span class="titlemark">4.5.3</span>
   <a id="x1-460004.5.3" name="x1-460004.5.3"></a>Nice Features of
-  Procer</h4><!--l. 561-->
+  Procer</h4><!--l. 563-->
 
   <p class="noindent">There's some nice subtle features you
   get from using <span class="pcrro7t-">procer</span> to run your
@@ -7211,21 +7219,21 @@
     stuff it needs, then goes back to supervising. This means you
     can change the configs for procer then just kick it over and
     it'll do the right thing.
-  </dl><!--l. 581-->
+  </dl><!--l. 583-->
 
   <p class="noindent">The key thing, though, is that you now have
   the whole application for the mongrel2.org demo up and running,
   including automated process management, configuration, and
-  managing everything. <!--l. 585-->
+  managing everything. <!--l. 587-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">4.6</span> <a id=
   "x1-470004.6" name="x1-470004.6"></a>Step 4: Static Content</h3>
-  <!--l. 587-->
+  <!--l. 589-->
 
   <p class="noindent">The final thing we have to do is get the
-  static content we need to try out the chat demo: <!--l. 590-->
+  static content we need to try out the chat demo: <!--l. 592-->
 
   <p class="noindent"><a id="x1-47001r22" name="x1-47001r22"></a>
   <hr class="float">
@@ -7236,7 +7244,7 @@
       "content"><span class="pplri7t-">Setting Up Static</span>
       <span class="pplri7t-">Content</span></span>
     </div><!--tex4ht:label?: x1-47001r22 -->
-    <!--l. 591-->
+    <!--l. 593-->
 
     <div class="lstlisting" id="listing-24">
       <span class="label"><a id="x1-47002r1" name=
@@ -7304,7 +7312,7 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 598-->
+  <!--l. 600-->
 
   <p class="noindent">If you get a good response then you should be
   able to go to <a href="http://localhost:6767/chatdemo/" class=
@@ -7317,11 +7325,11 @@
 
   <h3 class="sectionHead"><span class="titlemark">4.7</span> <a id=
   "x1-480004.7" name="x1-480004.7"></a>Step 5: Testing And
-  Troubleshooting</h3><!--l. 606-->
+  Troubleshooting</h3><!--l. 608-->
 
   <p class="noindent">You should have been testing the
   configuration as you went, but the main things to test are: 
-  <!--l. 609-->
+  <!--l. 611-->
 
   <p class="noindent">
 
@@ -7352,35 +7360,37 @@
     <li class="enumerate" id="x1-48012x6">Stop <span class=
     "pcrro7t-">procer</span> and then start it again to see if it
     properly doesn't step on things.
-  </ol><!--l. 624-->
+  </ol><!--l. 626-->
 
   <p class="noindent">If you run into problems, make sure that you
   can run each little piece and that the files you were supposed to
   make are correct. The best tool to use is <span class=
-  "pcrro7t-">diff</span>. <!--l. 628-->
+  "pcrro7t-">diff</span>. <!--l. 630-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">4.8</span> <a id=
   "x1-490004.8" name="x1-490004.8"></a>Further Improvements</h3>
-  <!--l. 630-->
+  <!--l. 632-->
 
   <p class="noindent">That ends this chapter, and at this point you
   should know how to setup nearly everything Mongrel2 has to offer
   right now. You should have a good idea of how <span class=
   "pcrro7t-">procer</span> will work or not for your real
   deployments, and how it's used by me for my own
-  deployments. <!--l. 635-->
+  deployments. <!--l. 637-->
 
   <p class="noindent">A <span class="pplri7t-">major</span>
   improvement that we may eventually make is automating setup of
   <span class="pcrro7t-">procer</span> profiles, and just better
   overall management of the profiles with <span class=
   "pcrro7t-">m2sh</span>. If you feel like hacking on that, just go
-  ahead and try and let us know. <!--l. 640-->
+  ahead and try and let us know. <!--l. 642-->
 
   <p class="noindent">Other than that, automate, automate,
-  automate.
+  automate. <!--l. 1-->
+
+  <p class="noindent">
 
   <h2 class="chapterHead"><span class=
   "titlemark">Chapter&nbsp;5</span><br>
@@ -7539,13 +7549,13 @@
       <p class="indent">I don't know why, but people who
       implement RFCs pick up very weird cargo cult beliefs peddled
       by the people who write the standards. In HTTP it was two
-      things which the creators of HTTP have actually pack-peddled
+      things which the creators of HTTP have actually back-peddled
       on: Accept everything, and keep-alives with pipe-lines. 
       <!--l. 73-->
 
       <p class="indent">The truth is, if you want a secure server
       of <span class="pplri7t-">any</span> kind, blindly accepting
-      every single thing any idiots sends you is going to open your
+      every single thing any idiot sends you is going to open your
       server up to a huge number of attacks. If you look at every
       attack on existing HTTP servers you'll find that about
       80% of them are exploiting ambiguous parts of the HTTP
@@ -7557,7 +7567,7 @@
       you <span class="pplri7t-">why</span> the request was bad,
       just like a compiler. This doesn't mean Mongrel2 is
       ruthless, but it definitely doesn't tolerate ambiguity
-      or stupidity. <!--l. 83-->
+      or stupidity. <!--l. 84-->
 
       <p class="indent">Mongrel2 completey supports keep-alives
       because now, since it's not using Ruby <span class=
@@ -7568,7 +7578,7 @@
       greedy browsers that never close them. Mongrel2 doesn't
       have this limitation, so it uses full keep-alives and has a
       dead accurate state machine to manage them correctly. 
-      <!--l. 90-->
+      <!--l. 91-->
 
       <p class="indent">Where problems come in is with pipe-lined
       requests, meaning a browser sends a bunch of requests in a
@@ -7579,7 +7589,7 @@
       ton of request, wait a bit so they hit proxied backends, and
       then close the socket. The web server and the backends are
       now screwed having to handle these requests which will go
-      nowhere. <!--l. 98-->
+      nowhere. <!--l. 99-->
 
       <p class="indent">Mongrel2 does <span class=
       "pplri7t-">not</span> support pipe-lined requests. It sends
@@ -7587,7 +7597,7 @@
       tough. Screw you because it has <span class=
       "pplri7t-">no</span> advantage for Mongrel2 and dubious
       advantages to you. It is simply one more attack vector for
-      the server and is rejected outright. <!--l. 103-->
+      the server and is rejected outright. <!--l. 104-->
 
       <p class="indent">These two things are rejected outright by
       Mongrel2 simply because they are stupid ideas and in 2010
@@ -7599,19 +7609,19 @@
 
   <h4 class="subsectionHead"><span class="titlemark">5.1.2</span>
   <a id="x1-530005.1.2" name="x1-530005.1.2"></a>Proxying</h4>
-  <!--l. 109-->
+  <!--l. 110-->
 
   <p class="noindent">You've already seen configurations that
   have the Proxy routes working, so it should be easy to understand
   what's going on. You just create routes to backends that
   are HTTP servers and Mongrel2 shuttles requests to them, then
-  proxies responses back. <!--l. 113-->
+  proxies responses back. <!--l. 114-->
 
   <p class="noindent">The Proxying support in Mongrel2 is accurate,
   but it's not very capable right now. For example,
   there's not round-robin backend selection, or page caching,
   or other things you might need for more serious deployments.
-  Those features will come eventually, though. <!--l. 117-->
+  Those features will come eventually, though. <!--l. 118-->
 
   <p class="noindent">What you do get with Mongrel2's
   proxying, though, is a dead accurate way of slicing up your
@@ -7621,18 +7631,56 @@
   syntax&rdquo;, weird pseudo-turing logic if-statements, and other
   odd hacks to get flexible route selection. They also tend to not
   maintain keep-alives properly between proxy requests and other
-  requests. <!--l. 124-->
+  requests. <!--l. 125-->
 
   <p class="noindent">Mongrel2 uses the exact same routing syntax
   for all backends and has no distinction between them. It also
   properly does keep-alives for as long as it is efficient to do
   so. <!--l. 128-->
 
-  <p class="noindent">
+  <p class="noindent"><a id="x1-53001r8" name="x1-53001r8"></a>
+  <hr class="float">
+
+  <div class="float">
+    <div class="caption">
+      <span class="id">Note 8:</span> <span class=
+      "content"><span class="pplri7t-">Proxying And 0MQ Handlers
+      Are Like</span> <span class="pplri7t-">mod</span><span class=
+      "pplri7t-">_*</span></span>
+    </div><!--tex4ht:label?: x1-53001r8 -->
+
+    <div class="quote">
+      <!--l. 129-->
+
+      <p class="indent">A quick note for people coming from other
+      web servers. If you use nginx then you are probably familiar
+      with the concept of proxying to a &rdquo;backend&rdquo; like
+      Ruby on Rails or Django. If you use PHP or another language,
+      you may be used to a system like <span class=
+      "pcrro7t-">mod</span><span class="pcrro7t-">_php</span> which
+      manages your code for you and reloads when you make changes.
+      If you use Apache, then you probably think in terms of
+      &rdquo;virtual hosts&rdquo; and &rdquo;mod_rewrite
+      rules&rdquo;. <!--l. 135-->
+
+      <p class="indent">In Mongrel2 all the same concepts are
+      there, it's just cleaned up. If you want Mongrel2 to
+      &rdquo;nginx/mod_rewrite style&rdquo; talk to another backend
+      web server, then that's Proxying. If you want to have
+      fast backend handlers then that's 0MQ Handlers. 
+      <!--l. 139-->
+
+      <p class="indent">We really don't have anything like
+      mod_php because the whole idea of embedding a programming
+      language runtime inside Mongrel2 would defeat the point of
+      making it language agnostic.
+    </div>
+  </div>
+  <hr class="endfloat">
 
   <h4 class="subsectionHead"><span class="titlemark">5.1.3</span>
   <a id="x1-540005.1.3" name="x1-540005.1.3"></a>WebSockets</h4>
-  <!--l. 130-->
+  <!--l. 145-->
 
   <p class="noindent">Mongrel2 supports WebSockets, in that if
   someone connects with a WebSocket, then it will get sent to
@@ -7640,23 +7688,23 @@
   other request. WebSockets are the least supported, though, since
   they aren't fully baked and nobody's bothered to
   write helper gear for handlers. They work, in theory, but
-  haven't really been tried in practice. <!--l. 135-->
+  haven't really been tried in practice. <!--l. 150-->
 
   <p class="noindent">If you try them out and find things that need
-  fixing, let us know. <!--l. 137-->
+  fixing, let us know. <!--l. 152-->
 
-  <p class="noindent"><a id="x1-54001r8" name="x1-54001r8"></a>
+  <p class="noindent"><a id="x1-54001r9" name="x1-54001r9"></a>
   <hr class="float">
 
   <div class="float">
     <div class="caption">
-      <span class="id">Note 8:</span> <span class=
+      <span class="id">Note 9:</span> <span class=
       "content"><span class="pplri7t-">Death To</span> <span class=
       "pplri7t-">WebSockets</span></span>
-    </div><!--tex4ht:label?: x1-54001r8 -->
+    </div><!--tex4ht:label?: x1-54001r9 -->
 
     <div class="quote">
-      <!--l. 138-->
+      <!--l. 153-->
 
       <p class="indent">I am getting sick of these &ldquo;Backroom
       RFCs&rdquo; that are crafted around a bunch of huge
@@ -7664,7 +7712,7 @@
       products rather than things real programmers need. WebSockets
       is yet another example of this, with so many odd features and
       annoying agendas that I hope it fails miserably. 
-      <!--l. 143-->
+      <!--l. 158-->
 
       <p class="indent">First, it actually specifies <span class=
       "pplri7t-">Unicode</span> for the wire protocol in the HTTP
@@ -7679,7 +7727,7 @@
       standard which specifies ASCII for the wire protocol. As
       I've said before in this manual, writing protocols is
       hard enough without having to translate and deal with weird
-      UTF-8 Unicode bizarreness. <!--l. 152-->
+      UTF-8 Unicode bizarreness. <!--l. 167-->
 
       <p class="indent">Second, there is an idiotic
       &ldquo;encryption&rdquo; mechanism for a key exchange that
@@ -7695,7 +7743,7 @@
       not be used at all. Again, this smacks of some
       &ldquo;clever&rdquo; feature one of the many corporations out
       there invented and not something any real programmer needs. 
-      <!--l. 160-->
+      <!--l. 175-->
 
       <p class="indent">There's more, but these two alone are
       enough to decide to hold off on WebSockets until they get
@@ -7707,7 +7755,7 @@
 
   <h4 class="subsectionHead"><span class="titlemark">5.1.4</span>
   <a id="x1-550005.1.4" name="x1-550005.1.4"></a>JSSocket</h4>
-  <!--l. 166-->
+  <!--l. 181-->
 
   <p class="noindent">The Mongrel2 chat demo uses JSSocket to do
   its magic, and it works great, but it requires Flash and, oh,
@@ -7716,13 +7764,13 @@
   That means it's the first thing we implemented and the one
   we'll keep for a while until it proves itself not useful.
   The chat demo we'll cover will show you how to hook this up
-  for fast async messaging and presence detection. <!--l. 173-->
+  for fast async messaging and presence detection. <!--l. 188-->
 
   <p class="noindent">
 
   <h4 class="subsectionHead"><span class="titlemark">5.1.5</span>
   <a id="x1-560005.1.5" name="x1-560005.1.5"></a>Long Poll</h4>
-  <!--l. 175-->
+  <!--l. 190-->
 
   <p class="noindent">Mongrel2 just works as if everything is an
   HTTP long poll, it's just that normal request/responses are
@@ -7732,13 +7780,13 @@
   certain connected identity, and then you send stuff to that
   target. That's it. If you send it one response, or a stream
   of them, or setup a long poll configuration, then that's up
-  to you. <!--l. 182-->
+  to you. <!--l. 197-->
 
   <p class="noindent">
 
   <h4 class="subsectionHead"><span class="titlemark">5.1.6</span>
   <a id="x1-570005.1.6" name="x1-570005.1.6"></a>Streaming</h4>
-  <!--l. 184-->
+  <!--l. 199-->
 
   <p class="noindent">Because everything in Mongrel2 is
   asynchronous, and it allows you to target any connected listeners
@@ -7749,45 +7797,45 @@
   streaming video and MP3 streams to listeners is very trivial.
   We'll cover the mp3stream example where you get to see a
   simple implementation of the ICY MP3 streaming protocol. 
-  <!--l. 191-->
+  <!--l. 206-->
 
   <p class="noindent">
 
   <h4 class="subsectionHead"><span class="titlemark">5.1.7</span>
   <a id="x1-580005.1.7" name="x1-580005.1.7"></a>N:M Responses</h4>
-  <!--l. 193-->
+  <!--l. 208-->
 
   <p class="noindent">What makes streaming, async messaging, and
   long poll designs so efficient in Mongrel2 is that you can send
   <span class="pplri7t-">one</span> message and target up to 128
   clients with that one message. This means sending large scale
   replies to many browsers requires less copying of the message and
-  less transports. <!--l. 197-->
+  less transports. <!--l. 212-->
 
   <p class="noindent">In addition to this, you can setup Mongrel2
   with the help of some 0MQ to send one request from a browser to
   as many target handlers as you like. You can even send them
   messages using <a href=
   "http://code.google.com/p/openpgm/">OpenPGM</a> for sending UDP
-  messages reliably to clusters of computers. <!--l. 202-->
+  messages reliably to clusters of computers. <!--l. 217-->
 
   <p class="noindent">This means that Mongrel2 is the only web
   server capable of sending one request from a browser to N
   backends at once, and then return the replies from these handlers
   to M browsers. Not exactly sure what you could write with that,
-  but it's probably something really damn cool. <!--l. 208-->
+  but it's probably something really damn cool. <!--l. 223-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">5.2</span> <a id=
   "x1-590005.2" name="x1-590005.2"></a>Introduction to ZeroMQ</h3>
-  <!--l. 210-->
+  <!--l. 225-->
 
   <p class="noindent">Learning to use <a href=
   "http://zeromq.org">ZeroMQ</a> is a bit outside the scope of this
   book, but I'll give you a quick introduction to it so that
   you can explore it further. It is a very simple system, so
-  hopefully you can figure it out from here. <!--l. 214-->
+  hopefully you can figure it out from here. <!--l. 229-->
 
   <p class="noindent">What ZeroMQ ends up being is &ldquo;sockets
   the way programmers think sockets work&rdquo;. Programmers
@@ -7816,7 +7864,7 @@
     know UDP has a fixed upper bound size, but they don't get
     that UDP is very unreliable and that the addressing is fairly
     weak.
-  </dl><!--l. 233-->
+  </dl><!--l. 248-->
 
   <p class="noindent">What ZeroMQ does is create an API that looks
   a lot like sockets, and feels the same, but gives you the
@@ -7868,7 +7916,7 @@
 
     <dd class="description">A PAIR is just a direct connection
     between two peers, basically like a better TCP connection.
-  </dl><!--l. 256-->
+  </dl><!--l. 271-->
 
   <p class="noindent">The next thing ZeroMQ does is it separates
   these types of <span class="pplri7t-">messaging</span> from the
@@ -7900,7 +7948,7 @@
 
     <dd class="description">The &ldquo;encapsulated&rdquo; version
     that uses regular UDP to do reliable multicast messaging.
-  </dl><!--l. 268-->
+  </dl><!--l. 283-->
 
   <p class="noindent">Finally, ZeroMQ divorces who binds and
   connects from the above two configurations. This means that,
@@ -7911,7 +7959,7 @@
   the handler ports so that handlers can connect at will, which
   gives your handlers a nice &ldquo;zero config&rdquo; setup.
   Mongrel2 doesn't need to know about handlers; they just
-  need to know about Mongrel2. <!--l. 277-->
+  need to know about Mongrel2. <!--l. 292-->
 
   <p class="noindent">How this last part works, and why it works,
   is that when clients or servers connect or disconnect, ZeroMQ
@@ -7923,25 +7971,25 @@
   other than hold or drop messages. This is why you don't
   have to care about who binds or connects, because it's just
   an addressing mechanism, not a <span class="pplri7t-">state
-  management</span> mechanism. <!--l. 286-->
+  management</span> mechanism. <!--l. 301-->
 
   <p class="noindent">Another way to put this feature is
   there's no <span class="pplri7t-">accept</span> in ZeroMQ.
   Clients connect and go at will and the server is just reading
   messages off when they're available or sending them out for
-  clients. <!--l. 291-->
+  clients. <!--l. 306-->
 
   <p class="noindent">
 
   <h4 class="subsectionHead"><span class="titlemark">5.2.1</span>
   <a id="x1-600005.2.1" name="x1-600005.2.1"></a>A Quick Python
-  ZeroMQ Example</h4><!--l. 293-->
+  ZeroMQ Example</h4><!--l. 308-->
 
   <p class="noindent">I've written a simple abstraction over
   ZeroMQ that fits the Mongrel2 usage of it, but I think learning
   how you'd write your own ZeroMQ simple echo server in
   Python will help you get a handle on it. First the client then
-  the server: <!--l. 297-->
+  the server: <!--l. 312-->
 
   <p class="noindent"><a id="x1-60001r23" name="x1-60001r23"></a>
   <hr class="float">
@@ -7952,7 +8000,7 @@
       "content"><span class="pplri7t-">Simple Python ZeroMQ</span>
       <span class="pplri7t-">Client</span></span>
     </div><!--tex4ht:label?: x1-60001r23 -->
-    <!--l. 298-->
+    <!--l. 313-->
 
     <div class="lstlisting" id="listing-25">
       <span class="label"><a id="x1-60002r1" name=
@@ -8044,7 +8092,7 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 312-->
+  <!--l. 327-->
 
   <p class="noindent"><a id="x1-60011r24" name="x1-60011r24"></a>
   <hr class="float">
@@ -8055,7 +8103,7 @@
       "content"><span class="pplri7t-">Simple Python ZeroMQ</span>
       <span class="pplri7t-">Server</span></span>
     </div><!--tex4ht:label?: x1-60011r24 -->
-    <!--l. 313-->
+    <!--l. 328-->
 
     <div class="lstlisting" id="listing-26">
       <span class="label"><a id="x1-60012r1" name=
@@ -8144,7 +8192,7 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 328-->
+  <!--l. 343-->
 
   <p class="noindent">You can then run these two in different
   windows and they will talk to each other. Try playing around with
@@ -8152,10 +8200,10 @@
   that for a PUB/SUB setup we have to use <span class=
   "pcrro7t-">setsockopt</span> to subscribe the nothing
   (<span class="obeylines-h verb pcrr7t-">''</span>). This is the
-  same no matter what language you use. <!--l. 334-->
+  same no matter what language you use. <!--l. 349-->
 
   <p class="noindent">Here's an example that does the same
-  thing but with REQ/REP style of messages. <!--l. 336-->
+  thing but with REQ/REP style of messages. <!--l. 351-->
 
   <p class="noindent"><a id="x1-60022r25" name="x1-60022r25"></a>
   <hr class="float">
@@ -8166,7 +8214,7 @@
       "content"><span class="pplri7t-">ZeroMQ REQ/REP</span>
       <span class="pplri7t-">Client</span></span>
     </div><!--tex4ht:label?: x1-60022r25 -->
-    <!--l. 337-->
+    <!--l. 352-->
 
     <div class="lstlisting" id="listing-27">
       <span class="label"><a id="x1-60023r1" name=
@@ -8262,7 +8310,7 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 352-->
+  <!--l. 367-->
 
   <p class="noindent"><a id="x1-60033r26" name="x1-60033r26"></a>
   <hr class="float">
@@ -8273,7 +8321,7 @@
       "content"><span class="pplri7t-">ZeroMQ REQ/REP</span>
       <span class="pplri7t-">Server</span></span>
     </div><!--tex4ht:label?: x1-60033r26 -->
-    <!--l. 353-->
+    <!--l. 368-->
 
     <div class="lstlisting" id="listing-28">
       <span class="label"><a id="x1-60034r1" name=
@@ -8367,7 +8415,7 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 366-->
+  <!--l. 381-->
 
   <p class="noindent">As you can see when you run this, it's
   more like your classic web server style of messaging, where a
@@ -8375,20 +8423,20 @@
   replies. Try getting the order wrong and see how ZeroMQ aborts
   and tells you it's wrong. REQ sockets <span class=
   "pplri7t-">must</span> send first then recv, and REP sockets
-  <span class="pplri7t-">must</span> recv then send. <!--l. 371-->
+  <span class="pplri7t-">must</span> recv then send. <!--l. 386-->
 
-  <p class="noindent"><a id="x1-60043r9" name="x1-60043r9"></a>
+  <p class="noindent"><a id="x1-60043r10" name="x1-60043r10"></a>
   <hr class="float">
 
   <div class="float">
     <div class="caption">
-      <span class="id">Note 9:</span> <span class=
+      <span class="id">Note 10:</span> <span class=
       "content"><span class="pplri7t-">There's Always a Size
       in ZeroMQ</span> <span class="pplri7t-">Land</span></span>
-    </div><!--tex4ht:label?: x1-60043r9 -->
+    </div><!--tex4ht:label?: x1-60043r10 -->
 
     <div class="quote">
-      <!--l. 372-->
+      <!--l. 387-->
 
       <p class="indent">The lack of a reliable framing mechanism in
       TCP was a crime against humanity. What I mean by a
@@ -8399,7 +8447,7 @@
       Something as simple as a single byte that says you're
       sending up to 128 more bytes, with an extra bit to indicate
       the last byte would have saved the world much pain. 
-      <!--l. 379-->
+      <!--l. 394-->
 
       <p class="indent">This is basically what ZeroMQ has done, and
       so much more. ZeroMQ pulls out all the tricks to make sure
@@ -8407,7 +8455,7 @@
       and transports it faster than TCP can actually send it. It
       does this by framing things intelligently, using compression,
       reducing copying, and just generally being awesome. 
-      <!--l. 384-->
+      <!--l. 399-->
 
       <p class="indent">Of course, the only limitation is that it
       can't really <span class="pplri7t-">stream</span>
@@ -8420,7 +8468,7 @@
 
   <h3 class="sectionHead"><span class="titlemark">5.3</span> <a id=
   "x1-610005.3" name="x1-610005.3"></a>Handler ZeroMQ Format</h3>
-  <!--l. 391-->
+  <!--l. 406-->
 
   <p class="noindent">You've had the world's fastest
   crash course in <a href="http://zeromq.org">ZeroMQ</a> and now
@@ -8430,7 +8478,7 @@
   baked messages out of it. Instead, this is just a format, as if
   you got strings out of a file or something similar. This message
   format is designed to accomplish a few things in the simplest way
-  possible: <!--l. 397-->
+  possible: <!--l. 412-->
 
   <p class="noindent">
 
@@ -8457,7 +8505,7 @@
 
     <li class="enumerate" id="x1-61013x6">Be useful within ZeroMQ
     so that you can do subscriptions and routing.
-  </ol><!--l. 409-->
+  </ol><!--l. 424-->
 
   <p class="noindent">To satisfy these features we use haveo types
   of ZeroMQ sockets (soon to be configurable), a request format
@@ -8466,13 +8514,13 @@
   about the request and response</span> <span class="pplri7t-">that
   must be connected</span>. In most cases they will be connected,
   but you can receive a request from one browser and send a
-  response to a totally different one. <!--l. 415-->
+  response to a totally different one. <!--l. 430-->
 
   <p class="noindent">
 
   <h4 class="subsectionHead"><span class="titlemark">5.3.1</span>
   <a id="x1-620005.3.1" name="x1-620005.3.1"></a>Socket Types
-  Used</h4><!--l. 417-->
+  Used</h4><!--l. 432-->
 
   <p class="noindent">First, the types of ZeroMQ sockets used are a
   <span class="pcrro7t-">ZMQ</span><span class=
@@ -8491,18 +8539,18 @@
   will process the request.<span class="footnote-mark"><a href=
   "book-final6.html#fn2x7"><sup class=
   "textsuperscript">2</sup></a></span><a id="x1-62001f2" name=
-  "x1-62001f2"></a> <!--l. 429-->
+  "x1-62001f2"></a> <!--l. 444-->
 
   <p class="noindent">In the various APIs we've implemented,
   you don't need to care about this. They provide an
   abstraction on top of this, but it does help to know it so that
   you understand why the message format is the way it is. 
-  <!--l. 433-->
+  <!--l. 448-->
 
   <p class="noindent">This leads to rule number 1:
 
   <div class="quote">
-    <!--l. 436-->
+    <!--l. 451-->
 
     <p class="noindent"><span class="pplri7t-">Rule 1:</span>
     Handlers receive on with UPSTREAM and send with PUB sockets.
@@ -8510,7 +8558,7 @@
 
   <h4 class="subsectionHead"><span class="titlemark">5.3.2</span>
   <a id="x1-630005.3.2" name="x1-630005.3.2"></a>UUID
-  Addressing</h4><!--l. 441-->
+  Addressing</h4><!--l. 456-->
 
   <p class="noindent">Do you remember all those UUIDs all over the
   place in the configuration files? They may have seemed odd, but
@@ -8518,35 +8566,35 @@
   cluster. This will let you identify exactly which member of a
   cluster sent a message, so that you can return the right reply.
   This is the first part of our protocol format and it results in
-  the next rule 2: <!--l. 447-->
+  the next rule 2: <!--l. 462-->
 
   <p class="noindent">
 
   <div class="quote">
-    <!--l. 448-->
+    <!--l. 463-->
 
     <p class="noindent"><span class="pplri7t-">Rule 2:</span> Every
     message to and from Mongrel2 has that Mongrel2 instance's
     UUID as the very first thing.
-  </div><!--l. 452-->
+  </div><!--l. 467-->
 
   <p class="noindent">
 
   <h4 class="subsectionHead"><span class="titlemark">5.3.3</span>
   <a id="x1-640005.3.3" name="x1-640005.3.3"></a>Numbers Identify
-  Listeners</h4><!--l. 454-->
+  Listeners</h4><!--l. 469-->
 
   <p class="noindent">You then need a way to identify a particular
   listener (browser, client, etc.) that your message should target,
   <span class="pplri7t-">and</span> Mongrel2 needs to tell you who
   is sending your handler the request. This means Mongrel2 sends
   you is just one identifier, but you can send Mongrel2 a list of
-  them. This leads to rule 3: <!--l. 459-->
+  them. This leads to rule 3: <!--l. 474-->
 
   <p class="noindent">
 
   <div class="quote">
-    <!--l. 460-->
+    <!--l. 475-->
 
     <p class="noindent"><span class="pplri7t-">Rule 3:</span>
     Mongrel2 sends requests with one number right after the
@@ -8554,7 +8602,7 @@
     <span class="pplri7t-">netstring</span> with a list of numbers
     separated by spaces. The numbers indicate the connected browser
     the message is to/from.
-  </div><!--l. 466-->
+  </div><!--l. 481-->
 
   <p class="noindent">In case you don't know what a netstring
   is, it is a very simple way to encode a block of data such that
@@ -8565,80 +8613,80 @@
   "obeylines-h verb pcrr7t-">2:HI,</span>, and it is <span class=
   "pplri7t-">incredibly</span> easy to parse in every language,
   even C. It is also a fast format and you can read it even if
-  you're a human. <!--l. 473-->
+  you're a human. <!--l. 488-->
 
   <p class="noindent">
 
   <h4 class="subsectionHead"><span class="titlemark">5.3.4</span>
   <a id="x1-650005.3.4" name="x1-650005.3.4"></a>Paths Identify
-  Targets</h4><!--l. 475-->
+  Targets</h4><!--l. 490-->
 
   <p class="noindent">In order to make it possible to route or
   analyze a request in your handlers without having to parse a full
   request, every request has the path that was matched in the
-  server as the next piece. That gives us: <!--l. 479-->
+  server as the next piece. That gives us: <!--l. 494-->
 
   <p class="noindent">
 
   <div class="quote">
-    <!--l. 480-->
+    <!--l. 495-->
 
     <p class="noindent"><span class="pplri7t-">Rule 4:</span>
     Requests have the path as a single string followed by a space
     and <span class="pplri7t-">no paths may have spaces in
     them</span>.
-  </div><!--l. 485-->
+  </div><!--l. 500-->
 
   <p class="noindent">
 
   <h4 class="subsectionHead"><span class="titlemark">5.3.5</span>
   <a id="x1-660005.3.5" name="x1-660005.3.5"></a>Request Headers
-  And Body</h4><!--l. 487-->
+  And Body</h4><!--l. 502-->
 
   <p class="noindent">We only have two more rules to complete the
-  message format. <!--l. 489-->
+  message format. <!--l. 504-->
 
   <p class="noindent">
 
   <div class="quote">
-    <!--l. 490-->
+    <!--l. 505-->
 
     <p class="noindent"><span class="pplri7t-">Rule 5:</span>
     Mongrel2 sends requests with a <span class=
     "pcrro7t-">netstring</span> that contains a JSON hash (dict) of
     the request headers, and then another <span class=
     "pcrro7t-">netstring</span> with the body of the request.
-  </div><!--l. 495-->
+  </div><!--l. 510-->
 
   <p class="noindent">Then there's a similar rule for
-  responses: <!--l. 497-->
+  responses: <!--l. 512-->
 
   <p class="noindent">
 
   <div class="quote">
-    <!--l. 498-->
+    <!--l. 513-->
 
     <p class="noindent"><span class="pplri7t-">Rule 6:</span>
     Handlers return just the body after a space character. It can
     be <span class="pplri7t-">any</span> data that Mongel2 is
     supposed to send to the listeners.
-  </div><!--l. 502-->
+  </div><!--l. 517-->
 
   <p class="noindent">HTTP headers, image data, HTML pages,
   streaming video&hellip;You can also send as many as you like to
-  complete the request and any handler can send it. <!--l. 506-->
+  complete the request and any handler can send it. <!--l. 521-->
 
   <p class="noindent">
 
   <h4 class="subsectionHead"><span class="titlemark">5.3.6</span>
   <a id="x1-670005.3.6" name="x1-670005.3.6"></a>Complete Message
-  Examples</h4><!--l. 508-->
+  Examples</h4><!--l. 523-->
 
   <p class="noindent">Now, even though we laid out all of this as a
   series of rules, the actual code to implement these is very
   simple. First here's a simple &ldquo;grammar&rdquo; for how
   a request that gets sent to your handlers is formatted: 
-  <!--l. 512-->
+  <!--l. 527-->
 
   <div class="lstlisting" id="listing-29">
     <span class="label"><a id="x1-67001r1" name=
@@ -8654,15 +8702,15 @@
     "pcrr7t-">,</span><span class="pcrr7t-">SIZE</span><span class=
     "pcrr7t-">:</span><span class="pcrr7t-">BODY</span><span class=
     "pcrr7t-">,</span>
-  </div><!--l. 516-->
+  </div><!--l. 531-->
 
   <p class="noindent">That's obviously a much simpler way to
   specify the request than all those rules, but it also
   doesn't tell you why. The above description, while boring
-  as hell, tells you why each of these pieces exist. <!--l. 520-->
+  as hell, tells you why each of these pieces exist. <!--l. 535-->
 
   <p class="noindent">To parse this in Python we simply do this: 
-  <!--l. 522-->
+  <!--l. 537-->
 
   <p class="noindent"><a id="x1-67002r27" name="x1-67002r27"></a>
   <hr class="float">
@@ -8673,7 +8721,7 @@
       "content"><span class="pplri7t-">Parsing Mongrel2 Requests
       In</span> <span class="pplri7t-">Python</span></span>
     </div><!--tex4ht:label?: x1-67002r27 -->
-    <!--l. 523-->
+    <!--l. 538-->
 
     <div class="lstlisting" id="listing-30">
       <span class="label"><a id="x1-67003r1" name=
@@ -8914,17 +8962,17 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 543-->
+  <!--l. 558-->
 
   <p class="noindent">This is actually all of the code needed to
   parse a request, and is fairly the same in many other languages.
   If you look at the file <span class=
   "pcrb7t-">examples/python/mongrel2/request.py</span>,
   you'll see a more complete example of making a full request
-  object. <!--l. 548-->
+  object. <!--l. 563-->
 
   <p class="noindent">A response is then just as simple and
-  involves crafting a similar setup like this: <!--l. 551-->
+  involves crafting a similar setup like this: <!--l. 566-->
 
   <div class="lstlisting" id="listing-31">
     <span class="label"><a id="x1-67019r1" name=
@@ -8938,11 +8986,11 @@
     "pcrr7t-">&nbsp;</span><span class=
     "pcrr7t-">ID</span><span class="pcrr7t-">,</span><span class=
     "pcrr7t-">&nbsp;</span><span class="pcrr7t-">BODY</span>
-  </div><!--l. 555-->
+  </div><!--l. 570-->
 
   <p class="noindent">Notice I've got three IDs here, but you
   can do anywhere from 1 up to 128. Generating this is very easy in
-  Python: <!--l. 558-->
+  Python: <!--l. 573-->
 
   <p class="noindent"><a id="x1-67020r28" name="x1-67020r28"></a>
   <hr class="float">
@@ -8953,7 +9001,7 @@
       "content"><span class="pplri7t-">Generating</span>
       <span class="pplri7t-">Responses</span></span>
     </div><!--tex4ht:label?: x1-67020r28 -->
-    <!--l. 559-->
+    <!--l. 574-->
 
     <div class="lstlisting" id="listing-32">
       <span class="label"><a id="x1-67021r1" name=
@@ -9090,7 +9138,7 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 572-->
+  <!--l. 587-->
 
   <p class="noindent">That, again, is all there is to it. The
   <span class="pcrro7t-">send</span> method is the one doing the
@@ -9101,7 +9149,7 @@
 
   <h4 class="subsectionHead"><span class="titlemark">5.3.7</span>
   <a id="x1-680005.3.7" name="x1-680005.3.7"></a>Python Handler
-  API</h4><!--l. 580-->
+  API</h4><!--l. 595-->
 
   <p class="noindent">Instead of building all of this yourself,
   I've created a Python library that wraps all this up and
@@ -9109,20 +9157,20 @@
   around the same idea and should have a similar design. To check
   out how to use the Python API, we'll take a look at each of
   the demos that are available. These are the same demos you ran in
-  the previous section to create a sample deployment. <!--l. 587-->
+  the previous section to create a sample deployment. <!--l. 602-->
 
   <p class="noindent">For the Python API, you may want to start by
   looking at two very small files that should be able to understand
   quickly: <span class=
   "pcrb7t-">examples/python/mongrel2/request.py</span> and
   <span class="pcrb7t-">examples/python/mongrel2/handler.py</span>.
-  <!--l. 592-->
+  <!--l. 607-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">5.4</span> <a id=
   "x1-690005.4" name="x1-690005.4"></a>Basic Handler Demo</h3>
-  <!--l. 594-->
+  <!--l. 609-->
 
   <p class="noindent">The most basic handler you can write is in
   the <span class="pcrb7t-">examples/http</span><span class=
@@ -9130,7 +9178,7 @@
   possible:<span class="footnote-mark"><a href=
   "book-final7.html#fn3x7"><sup class=
   "textsuperscript">3</sup></a></span><a id="x1-69001f3" name=
-  "x1-69001f3"></a> <!--l. 598-->
+  "x1-69001f3"></a> <!--l. 613-->
 
   <p class="noindent"><a id="x1-69002r29" name="x1-69002r29"></a>
   <hr class="float">
@@ -9141,7 +9189,7 @@
       "content"><span class="pplri7t-">http.py</span> <span class=
       "pplri7t-">example</span></span>
     </div><!--tex4ht:label?: x1-69002r29 -->
-    <!--l. 599-->
+    <!--l. 614-->
 
     <div class="lstinputlisting">
       <a id="x1-69003" name="x1-69003"></a> <span class=
@@ -9455,7 +9503,7 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 602-->
+  <!--l. 617-->
 
   <p class="noindent">All this code does is print back a simple
   little dump of what it received, and it's not even a valid
@@ -9500,14 +9548,14 @@
     you are responding to so that it knows where to send things. In
     a normal socket-based server this is just assumed to be the
     socket you're talking about.
-  </ol><!--l. 623-->
+  </ol><!--l. 638-->
 
   <p class="noindent">This is all you need at first to do simple
   HTTP handlers. In reality, the <span class=
   "pcrro7t-">reply</span><span class="pcrro7t-">_http</span> method
   is just syntactic sugar on crafting a decent HTTP response.
   Here's the actual method that is crafting these replies: 
-  <!--l. 626-->
+  <!--l. 641-->
 
   <p class="noindent"><a id="x1-69041r30" name="x1-69041r30"></a>
   <hr class="float">
@@ -9518,7 +9566,7 @@
       "content"><span class="pplri7t-">HTTP Response Python</span>
       <span class="pplri7t-">Code</span></span>
     </div><!--tex4ht:label?: x1-69041r30 -->
-    <!--l. 627-->
+    <!--l. 642-->
 
     <div class="lstlisting" id="listing-33">
       <span class="label"><a id="x1-69042r1" name=
@@ -9708,7 +9756,7 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 639-->
+  <!--l. 654-->
 
   <p class="noindent">Which is then used by <span class=
   "pcrro7t-">Connection.reply</span><span class=
@@ -9725,7 +9773,7 @@
 
   <h3 class="sectionHead"><span class="titlemark">5.5</span> <a id=
   "x1-700005.5" name="x1-700005.5"></a>MP3 Streaming Demo</h3>
-  <!--l. 650-->
+  <!--l. 665-->
 
   <p class="noindent">The next example is a very simple and, well,
   kind of poorly implemented MP3 streaming demo that uses the ICY
@@ -9733,14 +9781,14 @@
   designed before HTTP was totally baked and probably by people who
   don't really get HTTP. It works in an odd way of having
   meta-data sent at specific sized intervals so the client can
-  display an update to the meta-data. <!--l. 657-->
+  display an update to the meta-data. <!--l. 672-->
 
   <p class="noindent">The mp3streamer demo creates a streaming
   system by having a thread that receives requests for connections,
   and then another thread that sends the current data to all
   currently connected clients. Rather than go through all the code,
   you can take a look at the main file and see how simple it is
-  once you get the streaming thread right: <!--l. 664-->
+  once you get the streaming thread right: <!--l. 679-->
 
   <p class="noindent"><a id="x1-70001r31" name="x1-70001r31"></a>
   <hr class="float">
@@ -9751,7 +9799,7 @@
       "content"><span class="pplri7t-">Base mp3stream</span>
       <span class="pplri7t-">Code</span></span>
     </div><!--tex4ht:label?: x1-70001r31 -->
-    <!--l. 665-->
+    <!--l. 680-->
 
     <div class="lstinputlisting">
       <a id="x1-70002" name="x1-70002"></a> <span class=
@@ -10306,7 +10354,7 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 668-->
+  <!--l. 683-->
 
   <p class="noindent">Walking through this example is fairly easy,
   assuming you just trust that the streaming thread stuff works:
@@ -10337,11 +10385,11 @@
     <li class="enumerate" id="x1-70062x7">Otherwise, we add them to
     the STATE and then send the initial ICY protocol header to get
     things going.
-  </ol><!--l. 687-->
+  </ol><!--l. 702-->
 
   <p class="noindent">That is the base of it, and if you point
   mplayer at it (which is the only player that works, really) you
-  should hear it play: <!--l. 690-->
+  should hear it play: <!--l. 705-->
 
   <div class="lstlisting" id="listing-34">
     <span class="label"><a id="x1-70063r1" name=
@@ -10354,10 +10402,10 @@
     "pcrr7t-">://</span><span class=
     "pcrr7t-">localhost</span><span class=
     "pcrr7t-">:6767/</span><span class="pcrr7t-">mp3stream</span>
-  </div><!--l. 694-->
+  </div><!--l. 709-->
 
   <p class="noindent">That is, assuming you put some mp3 files into
-  the directory and started the handler again. <!--l. 697-->
+  the directory and started the handler again. <!--l. 712-->
 
   <p class="noindent">For more on how the actual state and the
   protocol works, go look at mp3stream.py. Explaining it is far
@@ -10367,7 +10415,7 @@
   and streaming it.
 
   <h3 class="sectionHead"><span class="titlemark">5.6</span> <a id=
-  "x1-710005.6" name="x1-710005.6"></a>Chat Demo</h3><!--l. 706-->
+  "x1-710005.6" name="x1-710005.6"></a>Chat Demo</h3><!--l. 721-->
 
   <p class="noindent">The chat demo is the most involved
   demonstration, and I'm kind of getting tired of leading you
@@ -10394,16 +10442,16 @@
     <dd class="description">The configuration you created in the
     last chapter actually works with the demo, and if you've
     been following along you should have tested it.
-  </dl><!--l. 721-->
+  </dl><!--l. 736-->
 
   <p class="noindent">Hopefully, you can figure it out from the
-  code, but if not, let me know. <!--l. 724-->
+  code, but if not, let me know. <!--l. 739-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">5.7</span> <a id=
   "x1-720005.7" name="x1-720005.7"></a>Other Language APIs</h3>
-  <!--l. 726-->
+  <!--l. 741-->
 
   <p class="noindent">As mentioned before, there are currently APIs
   for Ruby, C++, and PHP in addition to the Python code:
@@ -10431,7 +10479,7 @@
 
     <dd class="description">PHP support by <a href=
     "http://github.com/winks/m2php">winks on github</a>.
-  </dl><!--l. 738-->
+  </dl><!--l. 753-->
 
   <p class="noindent">If you want to implement another language, it
   should be fairly trivial. Just base your design on the Python API
@@ -10439,13 +10487,13 @@
   the Python design if it doesn't fit the chosen language;
   creating a direct translation of the Python is fine at first, but
   try to make it idiomatic after that so people who use that
-  language feel at home and it's easy for them. <!--l. 746-->
+  language feel at home and it's easy for them. <!--l. 761-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">5.8</span> <a id=
   "x1-730005.8" name="x1-730005.8"></a>Writing Your Own m2sh</h3>
-  <!--l. 748-->
+  <!--l. 763-->
 
   <p class="noindent">The very last thing I will cover in the
   section on hacking Mongrel2 is how to write your own <span class=
@@ -10457,27 +10505,27 @@
   "x1-73001f4"></a> . What writing your own, or understanding what
   <span class="pcrro7t-">m2sh</span> is doing will do for you,
   though, is help you when you start to think about automating
-  Mongrel2 for your deployments. <!--l. 756-->
+  Mongrel2 for your deployments. <!--l. 771-->
 
   <p class="noindent">Hopefully, I may have motivated you to
   automate, automate, automate. This is why we write software. If I
   wanted to do stuff manually I'd go play guitars or juggle.
   I write software because I want a computer to do things for me,
   and nothing needs this more than managing your systems. 
-  <!--l. 761-->
+  <!--l. 776-->
 
   <p class="noindent">This is why Mongrel2 is designed the way it
   is, using the MVC model. It lets <span class=
   "pplri7t-">you</span> create your own View like m2sh, web
   interfaces, automation scripts, and anything else you need to
-  make it easier to manage more. <!--l. 765-->
+  make it easier to manage more. <!--l. 780-->
 
   <p class="noindent">If you want to write your own <span class=
   "pcrro7t-">m2sh</span> then first go have a look at the Python
   code in <span class="pcrb7t-">examples/python/config</span>. This
   is where each command lives, where the argument parsing is and,
   most importantly, the ORM model that works the raw SQLite
-  database. <!--l. 770-->
+  database. <!--l. 785-->
 
   <p class="noindent">The next thing to do is to make your tool
   craft databases and compare the results to what m2sh does for a
@@ -10486,7 +10534,7 @@
   via <span class="pcrro7t-">sqlite3</span>. After that, use your
   tool to make your own database, dump it, and then use
   <span class="pcrro7t-">diff</span> to compare your results to
-  mine. <!--l. 776-->
+  mine. <!--l. 791-->
 
   <p class="noindent">Finally, you'll need to look at two
   base schema files: <span class=
@@ -10497,12 +10545,10 @@
   "book-final9.html#fn5x7"><sup class=
   "textsuperscript">5</sup></a></span><a id="x1-73002f5" name=
   "x1-73002f5"></a> Your tool should be able to use this SQL to
-  make its database, or at least know what it does. <!--l. 783-->
+  make its database, or at least know what it does. <!--l. 798-->
 
   <p class="noindent">If you do something cool with all of this,
-  let us know. <!--l. 1-->
-
-  <p class="noindent">
+  let us know.
 
   <h2 class="chapterHead"><span class=
   "titlemark">Chapter&nbsp;6</span><br>

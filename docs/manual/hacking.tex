@@ -67,18 +67,19 @@ Another way to put this is if Mongrel2 says your request is invalid, it most def
 \begin{aside}{Idiots and RFC Implementers}
 I don't know why, but people who implement RFCs pick up very weird cargo cult
 beliefs peddled by the people who write the standards.  In HTTP it was two things
-which the creators of HTTP have actually pack-peddled on:  Accept everything, and
+which the creators of HTTP have actually back-peddled on:  Accept everything, and
 keep-alives with pipe-lines.
 
-The truth is, if you want a secure server of \emph{any} kind, blindly accepting every
-single thing any idiots sends you is going to open your server up to a huge number
-of attacks.  If you look at every attack on existing HTTP servers you'll find that
-about 80\% of them are exploiting ambiguous parts of the HTTP grammar to pass
-through malicious content or overflow buffers.  In Mongrel2 we use a parser that rejects
-invalid requests from first basic principles using technology that's 30 years old and
-backed by solid mathematics.  Not only does Mongrel2 reject bad requests, but it can
-tell you \emph{why} the request was bad, just like a compiler.  This doesn't mean
-Mongrel2 is ruthless, but it definitely doesn't tolerate ambiguity or stupidity.
+The truth is, if you want a secure server of \emph{any} kind, blindly accepting
+every single thing any idiot sends you is going to open your server up to a
+huge number of attacks.  If you look at every attack on existing HTTP servers
+you'll find that about 80\% of them are exploiting ambiguous parts of the HTTP
+grammar to pass through malicious content or overflow buffers.  In Mongrel2 we
+use a parser that rejects invalid requests from first basic principles using
+technology that's 30 years old and backed by solid mathematics.  Not only does
+Mongrel2 reject bad requests, but it can tell you \emph{why} the request was
+bad, just like a compiler.  This doesn't mean Mongrel2 is ruthless, but it
+definitely doesn't tolerate ambiguity or stupidity.
 
 Mongrel2 completey supports keep-alives because now, since it's not using Ruby
 \emph{at all} it can scale up beyond 1024 file descriptors.  Ruby was limited
@@ -124,6 +125,20 @@ between proxy requests and other requests.
 Mongrel2 uses the exact same routing syntax for all backends and has no distinction between
 them.  It also properly does keep-alives for as long as it is efficient to do so.
 
+\begin{aside}{Proxying And 0MQ Handlers Are Like mod\_*}
+A quick note for people coming from other web servers.  If you use nginx then you are probably
+familiar with the concept of proxying to a "backend" like Ruby on Rails or Django.
+If you use PHP or another language, you may be used to a system like \ident{mod\_php} which 
+manages your code for you and reloads when you make changes.
+If you use Apache, then you probably think in terms of "virtual hosts" and "mod\_rewrite rules".
+
+In Mongrel2 all the same concepts are there, it's just cleaned up.  If you want Mongrel2
+to "nginx/mod\_rewrite style" talk to another backend web server, then that's Proxying.
+If you want to have fast backend handlers then that's 0MQ Handlers.
+
+We really don't have anything like mod\_php because the whole idea of embedding a programming
+language runtime inside Mongrel2 would defeat the point of making it language agnostic.
+\end{aside}
 
 \subsection{WebSockets}
 

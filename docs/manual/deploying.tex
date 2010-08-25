@@ -109,6 +109,24 @@ Of course, if you have something else you like then, please, use it.  Anything t
 process management will be your friend.  In this manual, to keep things simple and easily
 understood, I'll be using \shell{procer} to tell you how to setup everything.
 
+\begin{aside}{Alternatives To procer}
+I wrote procer mostly for this book, but I also use it for my Mongrel2 deployments.
+It works for me but you can try other solutions.  By default, Mongrel2 will work with
+either daemontools/runit style, or init.d style launchers.  If Mongrel2 runs as a
+regular user, it assumes that you want runit style (don't fork, write to stdout/stderr).
+If you run as root, it assumes you want init.d style like what procer uses (fork, drop priv, 
+chroot, etc.).
+
+You should check out \href{http://github.com/peterkeen/proclaunch}{proclaunch} as another
+alternative that is similar to procer, and inspired by procer, but written in Perl with a
+few more features.
+
+Either way, Mongrel2 is practical, and does generally the right thing with today's tools.
+Want to use daemontools?  Fine, just run it \verb|mongrel2 config.sqlite server| and it'll
+work right.  Want to put it in init.d or use procer or similar?  Fine, run it as root.
+\end{aside}
+
+
 \subsection{Installing procer}
 
 Installing procer is very easy.  It's a single little binary and it lives in
@@ -128,22 +146,6 @@ That's the entire install process, and now procer is in \file{/usr/local/bin}
 so you can use it.  In the rest of this chapter you'll learn how to use \shell{procer}
 by just setting up the Mongrel2 demo completely and messing around with it.
 
-
-\begin{aside}{Quit Complaining, procer Isn't Required}
-I'm sure there's some neckbeard who's reading this and immediately starts
-complaining that procer doesn't have all the features of his favorite
-stupid tool.  You're right, and that's on purpose.  Nobody reading this
-manual needs all that crap or any of your dogma.  They need, and I needed,
-a little tool that does 1/2 of what everything else does and was simple
-enough to understand.  None of the existing tools comes even close to
-meeting that goal.
-
-If you've got a problem with procer, like I'm reinventing the wheel, then,
-fine, don't use it.  Do your thing, baby.  But don't try to pretend like
-the other tools are buttered baby Jesus crackers in a gold spittoon.
-They suck hard, and I didn't feel like spending half the manual telling
-people how to use them.
-\end{aside}
 
 
 \section{The Plan}
