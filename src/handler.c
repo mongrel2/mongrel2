@@ -305,7 +305,7 @@ Handler *Handler_create(const char *send_spec, const char *send_ident,
     handler->recv_ident = bfromcstr(recv_ident);
     handler->recv_spec = bfromcstr(recv_spec);
     handler->send_spec = bfromcstr(send_spec);
-    handler->running = 1;
+    handler->running = 0;
 
     return handler;
 error:

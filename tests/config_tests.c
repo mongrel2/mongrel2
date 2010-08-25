@@ -9,13 +9,15 @@ FILE *LOG_FILE = NULL;
 
 char *test_Config_load() 
 {
-    list_t *servers = Config_load_servers("tests/config.sqlite", "localhost");
+    Config_init_db("tests/config.sqlite");
+    list_t *servers = Config_load_servers("localhost");
 
     mu_assert(servers != NULL, "Should get a server list, is mongrel2 running already?");
     mu_assert(list_count(servers) == 1, "Failed to load the server.");
 
     Server_destroy(lnode_get(list_first(servers)));
-    DB_close();
+
+    Config_close_db();
 
     return NULL;
 }

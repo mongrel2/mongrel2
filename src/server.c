@@ -124,8 +124,16 @@ void handlers_receive_start(void *value, void *data)
 
         // TODO: make whether the handler is loaded immediately optional
         if(found->type == BACKEND_HANDLER) {
-            debug("LOADING BACKEND %s", bdata(route->pattern));
-            taskcreate(Handler_task, found->target.handler, HANDLER_STACK);
+            if(found->target.handler->running == 1)
+            {
+                debug("BACKEND %s ALREADY RUNNING", bdata(route->pattern));
+            }
+            else
+            {
+                debug("LOADING BACKEND %s", bdata(route->pattern));
+                taskcreate(Handler_task, found->target.handler, HANDLER_STACK);
+                found->target.handler->running = 1;
+            }
         }
     }
 }

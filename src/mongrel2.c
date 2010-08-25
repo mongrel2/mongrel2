@@ -121,7 +121,10 @@ void start_terminator()
 Server *load_server(const char *db_file, const char *server_name)
 {
     int rc = 0;
-    list_t *servers = Config_load_servers(db_file, server_name);
+    rc = Config_init_db(db_file);
+    check(rc == 0, "Failed to load config database at %s", db_file);
+
+    list_t *servers = Config_load_servers(server_name);
 
     check(servers, "Failed to load server config from %s for host %s", db_file, server_name);
     check(list_count(servers) == 1, "Currently only support running one server.");
@@ -137,15 +140,14 @@ Server *load_server(const char *db_file, const char *server_name)
     list_destroy_nodes(servers);
     list_destroy(servers);
 
-    DB_close();
-
     srv->listen_fd = netannounce(TCP, 0, srv->port);
     check(srv->listen_fd >= 0, "Can't announce on TCP port %d", srv->port);
     check(fdnoblock(srv->listen_fd) == 0, "Failed to set listening port %d nonblocking.", srv->port);
 
+    Config_close_db();
     return srv;
 error:
-
+    Config_close_db();
     return NULL;
 }
 

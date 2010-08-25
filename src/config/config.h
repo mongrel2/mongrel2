@@ -37,8 +37,10 @@
 
 #include <adt/list.h>
 
-list_t *Config_load_servers(const char *path, const char *name);
+int Config_init_db(const char *path);
+list_t *Config_load_servers(const char *name);
 int Config_load_mimetypes();
 int Config_load_settings();
+void Config_close_db();
 
 #endif
