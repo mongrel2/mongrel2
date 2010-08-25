@@ -47,6 +47,7 @@ struct tagbstring LEAVE_HEADER = bsStatic("{\"METHOD\":\"JSON\"}");
 struct tagbstring LEAVE_MSG = bsStatic("{\"type\":\"disconnect\"}");
 
 
+int HANDLER_STACK;
 
 void bstring_free(void *data, void *hint)
 {
@@ -290,6 +291,11 @@ error:
 Handler *Handler_create(const char *send_spec, const char *send_ident,
         const char *recv_spec, const char *recv_ident)
 {
+    if(!HANDLER_STACK) {
+        HANDLER_STACK = Setting_get_int("limits.handler_stack", 100 * 1024);
+        log_info("MAX limits.handler_stack=%d", HANDLER_STACK);
+    }
+
     Handler *handler = calloc(sizeof(Handler), 1);
     check_mem(handler);
 

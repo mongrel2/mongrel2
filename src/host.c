@@ -38,6 +38,10 @@
 #include <assert.h>
 #include <mem/halloc.h>
 #include <dir.h>
+#include "setting.h"
+
+int MAX_HOST_NAME = 0;
+int MAX_URL_PATH = 0;
 
 void backend_destroy_cb(Route *r, RouteMap *map)
 {
@@ -68,6 +72,13 @@ error:
 
 Host *Host_create(const char *name)
 {
+    if(!MAX_URL_PATH || !MAX_HOST_NAME) {
+        MAX_URL_PATH = Setting_get_int("limits.url_path", 256);
+        MAX_HOST_NAME = Setting_get_int("limits.host_name", 256);
+        log_info("MAX limits.url_path=%d, limits.host_name=%d",
+                MAX_URL_PATH, MAX_HOST_NAME);
+    }
+
     Host *host = h_calloc(sizeof(Host), 1);
     check_mem(host);
 

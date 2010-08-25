@@ -40,11 +40,9 @@
 #include <state.h>
 #include <proxy.h>
 
-enum
-{
-	CONNECTION_STACK = 32 * 1024,
-    BUFFER_SIZE = 2 * 1024
-};
+extern int CONNECTION_STACK;
+extern int BUFFER_SIZE;
+extern int MAX_CONTENT_LENGTH;
 
 
 typedef struct Connection {
@@ -74,8 +72,11 @@ void Connection_task(void *v);
 
 
 int Connection_deliver_raw(int to_fd, bstring buf);
+
 int Connection_deliver(int to_fd, bstring buf);
 
 int Connection_read_header(Connection *conn, Request *req);
+
+void Connection_init();
 
 #endif

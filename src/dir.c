@@ -43,6 +43,10 @@
 #include <mime.h>
 #include <response.h>
 #include "version.h"
+#include "setting.h"
+
+int MAX_DIR_PATH = 0;
+int MAX_SEND_BUFFER = 0;
 
 struct tagbstring ETAG_PATTERN = bsStatic("[a-e0-9]+-[a-e0-9]+");
 
@@ -165,6 +169,13 @@ Dir *Dir_create(const char *base, const char *prefix, const char *index_file, co
 {
     Dir *dir = calloc(sizeof(Dir), 1);
     check_mem(dir);
+
+    if(!MAX_SEND_BUFFER || !MAX_DIR_PATH) {
+        MAX_SEND_BUFFER = Setting_get_int("limits.dir_send_buffer", 16 * 1024);
+        MAX_DIR_PATH = Setting_get_int("limits.dir_max_path", 256);
+        log_info("MAX limits.dir_send_buffer=%d, limits.dir_max_path=%d",
+                MAX_SEND_BUFFER, MAX_DIR_PATH);
+    }
 
     dir->base = bfromcstr(base);
     check(blength(dir->base) < MAX_DIR_PATH, "Base directory is too long, must be less than %d", MAX_DIR_PATH);

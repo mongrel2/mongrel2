@@ -111,6 +111,8 @@ void Server_init()
     log_info("Starting 0MQ with %d threads.", mq_threads);
     mqinit(mq_threads);
     Register_init();
+    Request_init();
+    Connection_init();
 }
 
 

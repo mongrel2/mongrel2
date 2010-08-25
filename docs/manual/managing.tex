@@ -520,3 +520,47 @@ to changes in Mongrel2 behavior like frequent crashing, failures, slowness, or o
 Basically, there's nowhere to hide.  Mongrel2 will help operations figure out who needs to
 get fired the next time Twitter goes down.
 
+
+\section{Tweakable Expert Settings}
+
+Many of Mongrel2's internal settings are configurable using the settings system.
+Some of these are dangerous to mess with, so make sure you test any changes before
+you try to run them.  Setting them to 0 or negative numbers isn't checked, so if
+you make a setting and things go crazy, you need to not make that setting.  All
+of these have good defaults so you can leave them alone unless you need to change
+them.
+
+To configure your settings you just pass them to the \ident{commit} command when
+you setup your configuration like this:
+
+\begin{code}{Changing Settings}
+\begin{lstlisting}
+settings = {"zeromq.threads": 1, "limits.url_path": 1024}
+
+commit([main], settings=settings)
+\end{lstlisting}
+\end{code}
+
+Mongrel2 will read these on the fly and write INFO log messages telling you
+what the settings are so you can debug them if they cause problems.  The list
+of available settings are:
+
+\begin{description}
+\item[limits.buffer\_size=2 * 1024] Internal IO buffers used for things like proxying and handling requests.  This is a \emph{very} conservative setting, so if you head HTTP headers greater than this, you'll want to increase this setting.  You'll also want to shoto whoever is sending you those requests because the average is 400-600 bytes.
+\item[limits.connection\_stack\_size=32 * 1024] Size of the stack used for connection coroutines.  If you're trying to cram a ton of connections into very little ram, see how low this can go.
+\item[limits.content\_length=20 * 1024] Maximum allowed content length on submitted requests.  This is right now a hard limit so requests are rejected that go over it.  Later versions of Mongrel2 will use an upload mechanism that will allow any size upload.
+\item[limits.dir\_max\_path=256] Max path you can set for Dir handlers.
+\item[limits.dir\_send\_buffer=16 * 1024] Maximum buffer used for file sending when we need to use one.
+\item[limits.fdtask\_stack=100 * 1024] Stack frame size for the main IO reactor task.  There's only one so set it high if you can, but it could possibly go lower.
+\item[limits.handler\_stack=100 * 1024] The stack frame size for any Handler tasks, probably want this high, since there's not many of these, but adjust and see what your system can support.
+\item[limits.header\_count=128 * 10] Max number of allowed headers from a client connection.
+\item[limits.host\_name=256] Max hostname for Host specifiers and other DNS related settings.
+\item[limits.mime\_ext\_len=128] Maximum length of MIME type extensions.
+\item[limits.url\_path=256] Max URL paths, does not include query string, just path.
+\item[status\_file=/tmp/mongrel2\_status.txt] When you run as root this will put it in your CHROOT/tmp/ directory, but when you run as you it puts it in the /tmp.  Change this to something better if you run multiple servers.
+\item[superpoll.hot\_dividend=4] Ratio of the total (like 1/4th, 1/8th) that should be in the hot selection.  Set this higher if you have lots of idle connections, set it lower if you have more active connections.
+\item[superpoll.max\_fd=10 * 1024] Maximum possible open files.  Do not set this above 64 * 1024, and expect it to take a bit while Mongrel2 sets up constant structures.
+\item[zeromq.threads=1] Number of 0MQ IO threads to run.  Careful, we've experienced thread bugs in 0MQ sometimes with high numbers of these.
+\end{description}
+
+

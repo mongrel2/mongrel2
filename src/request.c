@@ -42,12 +42,18 @@
 #include <string.h>
 #include <headers.h>
 #include <register.h>
+#include <setting.h>
 
 #include <time.h>
 
-enum {
-    MAX_HEADER_COUNT=128 * 10
-};
+int MAX_HEADER_COUNT=0;
+
+
+void Request_init()
+{
+    MAX_HEADER_COUNT = Setting_get_int("limits.header_count", 128 * 10);
+    log_info("MAX limits.header_count=%d", MAX_HEADER_COUNT);
+}
 
 
 static dnode_t *req_alloc_dict(void *notused)

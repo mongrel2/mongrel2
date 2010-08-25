@@ -35,16 +35,20 @@
 #include <mime.h>
 #include <adt/tst.h>
 #include <dbg.h>
+#include "setting.h"
 
 
 static tst_t *MIME_MAP = NULL;
 
-enum {
-    MAX_EXT_LEN = 128
-};
+int MAX_EXT_LEN = 0;
 
 int MIME_add_type(const char *ext, const char *type)
 {
+    if(!MAX_EXT_LEN) {
+        MAX_EXT_LEN = Setting_get_int("limits.mime_ext_len", 128);
+        log_info("MAX limits.mime_ext_len=%d", MAX_EXT_LEN);
+    }
+
     bstring ext_rev = bfromcstr(ext);
     bReverse(ext_rev);
     bstring type_str = bfromcstr(type);

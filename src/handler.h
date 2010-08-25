@@ -39,10 +39,7 @@
 #include <bstring.h>
 #include <task/task.h>
 
-enum
-{
-    HANDLER_STACK = 100 * 1024
-};
+extern int HANDLER_STACK;
 
 typedef struct Handler {
     void *send_socket;

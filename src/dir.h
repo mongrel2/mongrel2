@@ -49,10 +49,8 @@
 #include <unistd.h>
 #include <request.h>
 
-enum {
-    MAX_SEND_BUFFER = 16 * 1024,
-    MAX_DIR_PATH = 256
-};
+extern int MAX_SEND_BUFFER;
+extern int MAX_DIR_PATH;
 
 typedef struct FileRecord {
     int is_dir;

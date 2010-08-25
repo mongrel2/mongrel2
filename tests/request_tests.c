@@ -11,6 +11,8 @@ char *test_Request_create()
     int rc = 0;
     size_t nparsed = 0;
 
+    Request_init();
+
     Request *req = Request_create();
     mu_assert(req != NULL, "Failed to create parser for request.");
 

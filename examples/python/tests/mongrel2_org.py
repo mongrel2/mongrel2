@@ -48,7 +48,7 @@ mongrel2 = Host(name="mongrel2.org", routes={
 
 main.hosts.add(mongrel2)
 
-settings = {"zeromq.threads": 4}
+settings = {"zeromq.threads": 1}
 
 commit([main], settings=settings)
 

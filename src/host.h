@@ -41,10 +41,8 @@
 #include <request.h>
 #include <routing.h>
 
-enum {
-   MAX_HOST_NAME=256,
-   MAX_URL_PATH=256
-};
+extern int MAX_HOST_NAME;
+extern int MAX_URL_PATH;
 
 
 typedef struct Host {

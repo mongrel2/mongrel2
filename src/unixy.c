@@ -34,12 +34,13 @@
 
 #include <unixy.h>
 #include <dbg.h>
-#include <dir.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <signal.h>
+#include <limits.h>
+#include <stdlib.h>
 
 
 
@@ -194,11 +195,11 @@ error:
 
 bstring Unixy_getcwd()
 {
-    char *wd = calloc(MAX_DIR_PATH + 1, 1);
+    char *wd = calloc(PATH_MAX + 1, 1);
     bstring dir = NULL;
 
-    check(getcwd(wd, MAX_DIR_PATH-1), "Could not get current working directory.");
-    wd[MAX_DIR_PATH] = '\0';
+    check(getcwd(wd, PATH_MAX-1), "Could not get current working directory.");
+    wd[PATH_MAX] = '\0';
 
     dir = bfromcstr(wd);
 

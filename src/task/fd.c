@@ -7,6 +7,7 @@
 #include <sys/socket.h>
 #include <superpoll.h>
 #include <dbg.h>
+#include "setting.h"
 
 
 static int STARTED_FDTASK = 0;
@@ -17,10 +18,7 @@ SuperPoll *POLL = NULL;
 
 void *ZMQ_CTX = NULL;
 
-enum
-{
-    FDSTACK= 100 * 1024 
-};
+int FDSTACK= 100 * 1024;
 
 #ifndef MSG_NOSIGNAL
 #define MSG_NOSIGNAL 0
@@ -138,6 +136,9 @@ int tasknuke(int id)
 static inline void startfdtask()
 {
     if(!STARTED_FDTASK) {
+        FDSTACK = Setting_get_int("limits.fdtask_stack", 100 * 1024);
+        log_info("MAX limits.fdtask_stack=%d", FDSTACK);
+
         POLL = SuperPoll_create();
         STARTED_FDTASK = 1;
         taskcreate(fdtask, 0, FDSTACK);
