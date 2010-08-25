@@ -42,6 +42,7 @@
 #include <assert.h>
 #include <mime.h>
 #include <response.h>
+#include "version.h"
 
 struct tagbstring ETAG_PATTERN = bsStatic("[a-e0-9]+-[a-e0-9]+");
 
@@ -51,12 +52,14 @@ const char *RESPONSE_FORMAT = "HTTP/1.1 200 OK\r\n"
     "Content-Length: %d\r\n"
     "Last-Modified: %s\r\n"
     "ETag: %s\r\n"
-    "Connection: close\r\n\r\n";
+    "Server: " VERSION
+    "\r\n\r\n";
 
 const char *DIR_REDIRECT_FORMAT = "HTTP/1.1 301 Moved Permanently\r\n"
     "Location: http://%s%s/\r\n"
     "Content-Length: 0\r\n"
-    "Connection: close\r\n\r\n";
+    "Server: " VERSION
+    "\r\n\r\n";
 
 const char *RFC_822_TIME = "%a, %d %b %y %T %z";
 

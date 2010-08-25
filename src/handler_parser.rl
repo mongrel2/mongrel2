@@ -102,7 +102,7 @@ int HandlerParser_execute(HandlerParser *parser, const char *buffer, size_t len)
     %% write init;
     %% write exec noend;
 
-    check(p <= pe, "Buffer overflow after parsing.  Tell Zed what you sent something from a handler that went %d past the end in the parser.", pe - p);
+    check(p <= pe, "Buffer overflow after parsing.  Tell Zed what you sent something from a handler that went %ld past the end in the parser.", pe - p);
 
     parser->body_start = p;
     parser->body_length = pe - p;

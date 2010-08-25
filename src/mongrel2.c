@@ -48,6 +48,7 @@
 #include "mime.h"
 #include "superpoll.h"
 #include "setting.h"
+#include "version.h"
 
 FILE *LOG_FILE = NULL;
 
@@ -313,6 +314,7 @@ void taskmain(int argc, char **argv)
 
     check(argc == 3, "usage: server config.sqlite default_host");
 
+
     SERVER = load_server(argv[1], argv[2]);
     check(SERVER, "Aborting since can't load server.");
 
@@ -329,6 +331,7 @@ void taskmain(int argc, char **argv)
     taskcreate(tickertask, NULL, 16 * 1024);
 
     while(1) {
+        log_info("Starting " VERSION ". Copyright (C) Zed A. Shaw. Licensed BSD.");
         Server_start(SERVER);
 
         if(RELOAD) {
