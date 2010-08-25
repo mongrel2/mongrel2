@@ -2288,7 +2288,7 @@
 
     <dd class="description">The access log file <span class=
     "pplri8t-">relative to the chroot</span>. Usually starts with a
-    &lsquo;/&rsquo;. Make sure you don&rsquo;t configure your
+    `/&rsquo;. Make sure you don&rsquo;t configure your
     server so that this and other files are accessible, or make
     this owned by root.
 
@@ -2407,7 +2407,7 @@
   with a few convenient syntaxes for doing simple string matching.
   When you configure a route, you write something like <span class=
   "pcrb8t-">/images/(.*.jpg)</span> and the part before the
-  &lsquo;(&rsquo; is used as a fast matched prefix, while the part
+  `(&rsquo; is used as a fast matched prefix, while the part
   after it is considered a pattern to match. When a request comes
   in, Mongrel2 quickly finds the longest prefix that matches the
   URL, and then tests its pattern if there is one. If the pattern
@@ -3646,7 +3646,7 @@
 
       <p class="indent">Yep, I get it. You think that everyone
       should use UTF-8 or some Unicode encoding for everything. You
-      despise the dominance of the &lsquo;A&rsquo; in ASCII and
+      despise the dominance of the `A&rsquo; in ASCII and
       hate that you can&rsquo;t put your spoken language right in a
       URL. <!--l. 445-->
 
@@ -6698,7 +6698,7 @@
       "pcrr8t-x-x-90">-</span><span class=
       "pcrr8t-x-x-90">TERM</span><span class=
       "pcrr8t-x-x-90">&nbsp;</span><span class=
-      "pcrr8t-x-x-90">&lsquo;</span><span class=
+      "pcrr8t-x-x-90">`</span><span class=
       "pcrr8t-x-x-90">cat</span><span class=
       "pcrr8t-x-x-90">&nbsp;</span><span class=
       "pcrr8t-x-x-90">profiles</span><span class=
@@ -6708,7 +6708,7 @@
       "pcrr8t-x-x-90">chat</span><span class=
       "pcrr8t-x-x-90">.</span><span class=
       "pcrr8t-x-x-90">pid</span><span class=
-      "pcrr8t-x-x-90">&lsquo;</span><span class=
+      "pcrr8t-x-x-90">`</span><span class=
       "pcrr8t-x-x-90">&nbsp;</span><br>
       <span class="label"><a id="x1-44042r16" name=
       "x1-44042r16"></a></span><span class=
