@@ -245,7 +245,7 @@ case 8:
 
 #line 104 "src/handler_parser.rl"
 
-    assert(p <= pe && "Buffer overflow after parsing.");
+    check(p <= pe, "Buffer overflow after parsing.  Tell Zed what you sent something from a handler that went %d past the end in the parser.", pe - p);
 
     parser->body_start = p;
     parser->body_length = pe - p;
