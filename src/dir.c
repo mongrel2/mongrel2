@@ -165,6 +165,9 @@ Dir *Dir_create(const char *base, const char *prefix, const char *index_file, co
 
     dir->base = bfromcstr(base);
     check(blength(dir->base) < MAX_DIR_PATH, "Base directory is too long, must be less than %d", MAX_DIR_PATH);
+    check(bchar(dir->base, 0) != '/', "Don't start the base with / in %s, that will fail when not in chroot.", base);
+    check(bchar(dir->base, blength(dir->base) - 1) == '/', "End directory base with / in %s or it won't work right.", base);
+
 
     // dir can come from the routing table so it could have a pattern in it, strip that off
     bstring pattern = bfromcstr(prefix);
