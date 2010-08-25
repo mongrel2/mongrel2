@@ -9,20 +9,12 @@
 
     <div class="author">
       <span class="pplr7t-x-x-120">Zed A. Shaw</span><br>
-      <span class="pplr7t-x-x-90">Guillermo O.
-      &iexcl;&iexcl;Tordek&iquest;&iquest;
-      Freschi</span><span class="thank-mark"><a href=
-      "#tk-1"><span class="cmsy-9">&lowast;</span></a></span>
+      <span class="pplr7t-x-x-90">Guillermo O. &rdquo;Tordek&rdquo;
+      Freschi</span>
     </div><br>
 
     <div class="date">
       <span class="pplr7t-x-x-120">July 2010</span>
-    </div>
-
-    <div class="thanks">
-      <br>
-      <a id="tk-1" name="tk-1"></a><span class=
-      "thank-mark cmsy-10">&lowast;</span>Guillemets rock.
     </div>
   </div>
 
