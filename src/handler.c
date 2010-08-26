@@ -103,6 +103,26 @@ static inline void handler_cap_payload(bstring payload)
     }
 }
 
+static inline int deliver_payload(int raw, int fd, bstring payload)
+{
+    int rc = 0;
+
+    if(raw) {
+        debug("Sending raw message to %d length %d", fd, blength(payload));
+        rc = Connection_deliver_raw(fd, payload);
+        check(rc != -1, "Error sending raw message to HTTP listener on FD %d, closing them.", fd);
+    } else {
+        debug("Sending BASE64 message to %d length %d", fd, blength(payload));
+        handler_cap_payload(payload);
+        rc = Connection_deliver(fd, payload);
+        check(rc != -1, "Error sending to MSG listener on FD %d, closing them.", fd);
+    }
+
+    return 0;
+error:
+    return -1;
+}
+
 static inline void handler_process_request(Handler *handler, int id,
         int fd, int conn_type,
         const char *body_start, size_t body_length)
@@ -115,24 +135,16 @@ static inline void handler_process_request(Handler *handler, int id,
         log_err("Ident %d (fd %d) is no longer connected.", id, fd);
         Handler_notify_leave(handler, id);
     } else {
-        payload = blk2bstr(body_start, body_length);
-        
-        if(conn_type == CONN_TYPE_MSG) {
-            handler_cap_payload(payload);
-            rc = Connection_deliver(fd, payload);
-            check(rc != -1, "Error sending to MSG listener %d, closing them.", fd);
-        } else if(conn_type == CONN_TYPE_HTTP) {
-            payload = blk2bstr(body_start, body_length);
-
-            rc = Connection_deliver_raw(fd, payload);
-            check(rc != -1, "Error sending raw message to HTTP listener %d, closing them.", fd);
+        if(body_length == 0) {
+            fdclose(fd);
         } else {
-            sentinel("Attempt to send to an invalid listener type.  Closing them.");
+            payload = blk2bstr(body_start, body_length);
+            rc = deliver_payload(conn_type != CONN_TYPE_MSG, fd, payload);
+            check(rc != -1, "Failed to deliver to connection %d on socket %d", id, fd);
         }
-
-        bdestroy(payload);
     }
 
+    bdestroy(payload);
     return;
 
 error:

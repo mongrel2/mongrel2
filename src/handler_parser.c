@@ -291,7 +291,10 @@ error:
 
 void HandlerParser_reset(HandlerParser *parser)
 {
-    if(parser->uuid) bdestroy(parser->uuid);
+    if(parser->uuid) {
+        bdestroy(parser->uuid);
+        parser->uuid = NULL;
+    }
 }
 
 void HandlerParser_destroy(HandlerParser *parser)

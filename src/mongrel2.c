@@ -129,7 +129,7 @@ Server *load_server(const char *db_file, const char *server_name, int reuse_fd)
 
     check(servers, "Failed to load server %s from %s, file probably missing.", server_name, db_file);
     check(list_count(servers) != 0, "Could NOT find a server named '%s' in config '%s'", server_name, db_file);
-    check(list_count(servers) > 1, "Currently only support running one server, but got %d", (int)list_count(servers));
+    check(list_count(servers) == 1, "Currently only support running one server, but got %d", (int)list_count(servers));
 
     Server *srv = lnode_get(list_first(servers));
 
