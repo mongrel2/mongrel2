@@ -38,8 +38,8 @@ modern browser technologies.
 download from (updated Wed Aug 25 02:38:13 PDT 2010):</p>
 
 <ul>
-    <li><a href="/static/downloads/mongrel2-1.0beta2.tar.bz2">mongrel2-1.0beta1.tar.bz2</a> MD5: 1f9fdd35e3266c7109884a6c2c5fe882</li>
-    <li><a href="/static/downloads/mongrel2-1.0beta2.zip">mongrel2-1.0beta1.zip</a> MD5: cd47830eb73886cd47198cff484549cc</li>
+    <li><a href="/static/downloads/mongrel2-1.0beta3.tar.bz2">mongrel2-1.0beta3.tar.bz2</a> MD5: cbf6c333a39840f9377d56bb345d3e8c</li>
+    <li><a href="/static/downloads/mongrel2-1.0beta3.zip">mongrel2-1.0beta3.zip</a> MD5: 0b5192f213c8b28404c24b0134c0170f</li>
 </ul>
 
 <p>These files will be generated periodically, and contain a directory with the date/time they were made,
