@@ -119,7 +119,7 @@ void start_terminator()
 }
 
 
-Server *load_server(const char *db_file, const char *server_name)
+Server *load_server(const char *db_file, const char *server_name, int reuse_fd)
 {
     int rc = 0;
     rc = Config_init_db(db_file);
@@ -141,9 +141,15 @@ Server *load_server(const char *db_file, const char *server_name)
     list_destroy_nodes(servers);
     list_destroy(servers);
 
-    srv->listen_fd = netannounce(TCP, 0, srv->port);
-    check(srv->listen_fd >= 0, "Can't announce on TCP port %d", srv->port);
-    check(fdnoblock(srv->listen_fd) == 0, "Failed to set listening port %d nonblocking.", srv->port);
+    if(reuse_fd == -1) {
+        srv->listen_fd = netannounce(TCP, 0, srv->port);
+        check(srv->listen_fd >= 0, "Can't announce on TCP port %d", srv->port);
+        check(fdnoblock(srv->listen_fd) == 0, "Failed to set listening port %d nonblocking.", srv->port);
+    } else {
+        srv->listen_fd = dup(reuse_fd);
+        check(srv->listen_fd != -1, "Failed to dup the socket from the running server.");
+        fdclose(reuse_fd);
+    }
 
     Config_close_db();
     return srv;
@@ -234,13 +240,10 @@ Server *reload_server(Server *old_srv, const char *db_file, const char *server_n
     Config_stop_proxies(old_srv);
     Setting_destroy();
 
-    Server *srv = load_server(db_file, server_name);
+    Server *srv = load_server(db_file, server_name, old_srv->listen_fd);
     check(srv, "Failed to load new server config.");
 
-    srv->listen_fd = dup(old_srv->listen_fd);
-
-    fdclose(SERVER->listen_fd);
-
+    RELOAD = 0;
     return srv;
 
 error:
@@ -287,7 +290,7 @@ void taskmain(int argc, char **argv)
     check(argc == 3, "usage: server config.sqlite default_host");
 
 
-    SERVER = load_server(argv[1], argv[2]);
+    SERVER = load_server(argv[1], argv[2], -1);
     check(SERVER, "Aborting since can't load server.");
 
     SuperPoll_get_max_fd();
