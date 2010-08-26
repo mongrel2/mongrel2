@@ -11,14 +11,18 @@ while True:
     req = conn.recv()
 
     if req.is_disconnect():
-        print "DICONNECT"
+        print "DISCONNECT"
         continue
 
-    response = "<pre>\nSENDER: %r\nIDENT:%r\nPATH: %r\nHEADERS:%r\nBODY:%r</pre>" % (
-        req.sender, req.conn_id, req.path, 
-        json.dumps(req.headers), req.body)
+    if req.headers.get("KILLME", None):
+        print "They want to be killed."
+        response = ""
+    else:
+        response = "<pre>\nSENDER: %r\nIDENT:%r\nPATH: %r\nHEADERS:%r\nBODY:%r</pre>" % (
+            req.sender, req.conn_id, req.path, 
+            json.dumps(req.headers), req.body)
 
-    print response
+        print response
 
     conn.reply_http(req, response)
 
