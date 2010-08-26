@@ -280,13 +280,21 @@ int connection_http_to_handler(int event, void *data)
     } else {
         if(total > BUFFER_SIZE) {
             conn->buf = h_realloc(conn->buf, total);
-            body = conn->buf + header_len;
-            rc = fdread(conn->fd, body, content_len);
-            check_debug(rc == content_len, "Failed to read %d content as requested.", content_len);
-        } else {
-            // got it already so just start off where it is
-            body = conn->buf + header_len;
-        }
+
+            // start at the tail of what we've got so far
+            body = conn->buf + conn->nread; 
+
+            int remaining = 0;
+            for(remaining = content_len; remaining > 0; remaining -= rc, body += rc) {
+                rc = fdrecv1(conn->fd, body, remaining);
+                check_debug(rc > 0, "Read error from MSG listener %d", conn->fd);
+            }
+
+            check(remaining == 0, "Bad math on reading request < MAX_CONTENT_LENGTH: %d", remaining);
+        }  // no else needed
+
+        // no matter what, the body will need to go here
+        body = conn->buf + header_len;
     }
 
     result = Request_to_payload(conn->req, handler->send_ident, conn->fd, body, content_len);
@@ -703,7 +711,7 @@ int Connection_read_header(Connection *conn, Request *req)
     conn->buf[BUFFER_SIZE] = '\0';  // always cap it off
 
     while(!finished && conn->nread < BUFFER_SIZE - 1) {
-        n = fdread(conn->fd, conn->buf, BUFFER_SIZE - 1 - conn->nread);
+        n = fdrecv(conn->fd, conn->buf, BUFFER_SIZE - 1 - conn->nread);
         check_debug(n > 0, "Failed to read from socket after %d read: %d parsed.",
                     conn->nread, (int)conn->nparsed);
 
