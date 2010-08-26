@@ -4,20 +4,22 @@
 #include <stdlib.h>
 #include <bstring.h>
 
-enum {
-    MAX_TARGETS = 128
-};
-
 typedef struct HandlerParser {
     const char *body_start;
     size_t body_length;
     bstring uuid;
 
     size_t target_count;
-    unsigned long targets[MAX_TARGETS];
+    size_t target_max;
+    unsigned long *targets;
 } HandlerParser;
 
+HandlerParser *HandlerParser_create(size_t max_targets);
+
+void HandlerParser_destroy(HandlerParser *parser);
 
 int HandlerParser_execute(HandlerParser *parser, const char *buffer, size_t len);
+
+void HandlerParser_reset(HandlerParser *parser);
 
 #endif

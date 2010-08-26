@@ -32,12 +32,14 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "handler_parser.h"
 #include <assert.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include <bstring.h>
-#include <dbg.h>
+
+#include "handler_parser.h"
+#include "bstring.h"
+#include "dbg.h"
+#include "mem/halloc.h"
 
 %%{
 
@@ -56,7 +58,7 @@
     }
 
     action identifier {
-        check(parser->target_count < MAX_TARGETS, "Request contains too many target listeners.");
+        check(parser->target_count < parser->target_max, "Request contains too many target listeners.");
         parser->targets[parser->target_count++] = strtoul(mark, NULL, 10); 
     }
 
@@ -102,7 +104,7 @@ int HandlerParser_execute(HandlerParser *parser, const char *buffer, size_t len)
     %% write init;
     %% write exec noend;
 
-    check(p <= pe, "Buffer overflow after parsing.  Tell Zed what you sent something from a handler that went %ld past the end in the parser.", pe - p);
+    check(p <= pe, "Buffer overflow after parsing.  Tell Zed that you sent something from a handler that went %ld past the end in the parser.", pe - p);
 
     parser->body_start = p;
     parser->body_length = pe - p;
@@ -119,4 +121,33 @@ error:
     return -1;
 }
 
+
+HandlerParser *HandlerParser_create(size_t max_targets)
+{
+    HandlerParser *parser = h_calloc(sizeof(HandlerParser), 1);
+    check_mem(parser);
+
+    parser->target_max = max_targets;
+    parser->targets = h_calloc(sizeof(unsigned long), max_targets);
+    check_mem(parser->targets);
+    hattach(parser->targets, parser);
+
+    return parser;
+
+error:
+    return NULL;
+}
+
+void HandlerParser_reset(HandlerParser *parser)
+{
+    if(parser->uuid) bdestroy(parser->uuid);
+}
+
+void HandlerParser_destroy(HandlerParser *parser)
+{
+    if(parser != NULL) {
+        HandlerParser_reset(parser);
+        h_free(parser);
+    }
+}
 

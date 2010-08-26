@@ -179,34 +179,41 @@ void Handler_task(void *v)
     int rc = 0;
     int i = 0;
     Handler *handler = (Handler *)v;
-    HandlerParser parser;
+    HandlerParser *parser = NULL;
+    int max_targets = Setting_get_int("limits.handler_targets", 128);
+    log_info("MAX allowing limits.handler_targets=%d", 128);
+
+    parser = HandlerParser_create(max_targets);
+    check_mem(parser);
 
     check(Handler_setup(handler) == 0, "Failed to initialize handler, exiting.");
 
     while(handler->running) {
         taskstate("delivering");
 
-        rc = handler_recv_parse(handler, &parser);
-        if(rc == -1 || parser.target_count == 0) {
+        rc = handler_recv_parse(handler, parser);
+        if(rc == -1 || parser->target_count == 0) {
             continue;
         }
 
-        for(i = 0; i < parser.target_count; i++) {
-            int id = (int)parser.targets[i];
+        for(i = 0; i < parser->target_count; i++) {
+            int id = (int)parser->targets[i];
             int fd = Register_fd_for_id(id);
             int conn_type = Register_fd_exists(fd);
 
             handler_process_request(handler, id, fd,
-                    conn_type, parser.body_start, parser.body_length);
+                    conn_type, parser->body_start, parser->body_length);
         }
 
-        bdestroy(parser.uuid);
+        HandlerParser_reset(parser);
     }
 
+    HandlerParser_destroy(parser);
     debug("HANDLER EXITED.");
     taskexit(0);
 
 error:
+    HandlerParser_destroy(parser);
     log_err("HANDLER TASK DIED");
     taskexit(1);
 }

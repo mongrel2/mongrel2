@@ -4259,6 +4259,14 @@
     these, but adjust and see what your system can support.
 
     <dt class="description"><span class=
+    "pplb7t-">limits.handler</span><span class=
+    "pplb7t-">_targets=128</span>
+
+    <dd class="description">The maximum number of connection IDs a
+    message from a Handler may target. It's not smart to set
+    this really high.
+
+    <dt class="description"><span class=
     "pplb7t-">limits.header</span><span class="pplb7t-">_count=128
     * 10</span>
 
