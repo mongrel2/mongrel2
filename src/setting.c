@@ -92,3 +92,4 @@ void Setting_destroy()
         SETTINGS_MAP = NULL;
     }
 }
+

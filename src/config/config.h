@@ -40,15 +40,17 @@
 
 
 int Config_init_db(const char *path);
+
 list_t *Config_load_servers(const char *name);
+
 int Config_load_mimetypes();
+
 int Config_load_settings();
+
 void Config_close_db();
 
-struct Server;
-void Config_stop_handlers(struct Server *srv);
+void Config_stop_handlers();
 
-extern tst_t *LOADED_HANDLERS;
-extern tst_t *LOADED_PROXIES;
+void Config_stop_proxies();
 
 #endif

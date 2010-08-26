@@ -220,6 +220,7 @@ void Dir_destroy(Dir *dir)
         bdestroy(dir->index_file);
         bdestroy(dir->normalized_base);
         bdestroy(dir->default_ctype);
+        if(dir->fr_cache) Cache_destroy(dir->fr_cache);
         free(dir);
     }
 }

@@ -231,6 +231,8 @@ Server *reload_server(Server *old_srv, const char *db_file, const char *server_n
     MIME_destroy();
 
     Config_stop_handlers(old_srv);
+    Config_stop_proxies(old_srv);
+    Setting_destroy();
 
     Server *srv = load_server(db_file, server_name);
     check(srv, "Failed to load new server config.");
@@ -250,6 +252,7 @@ void complete_shutdown(Server *srv)
 {
     fdclose(srv->listen_fd);
     Config_stop_handlers(srv);
+    Config_stop_proxies(srv);
 
     int left = taskwaiting();
 
@@ -268,6 +271,8 @@ void complete_shutdown(Server *srv)
     Server_destroy(srv);
 
     zmq_term(ZMQ_CTX);
+
+    Setting_destroy();
 
     taskexitall(0);
 }

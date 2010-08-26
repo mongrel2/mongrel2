@@ -55,8 +55,8 @@
 #define SQL(Q, ...) sqlite3_mprintf((Q), ##__VA_ARGS__)
 #define SQL_FREE(Q) if(Q) sqlite3_free(Q)
 
-tst_t *LOADED_HANDLERS = NULL;
-tst_t *LOADED_PROXIES = NULL;
+static tst_t *LOADED_HANDLERS = NULL;
+static tst_t *LOADED_PROXIES = NULL;
 
 static int Config_load_handler_cb(void *param, int cols, char **data, char **names)
 {
@@ -71,8 +71,8 @@ static int Config_load_handler_cb(void *param, int cols, char **data, char **nam
 
     return 0;
 
-    error:
-        return -1;
+error:
+    return -1;
 }
 
 static int Config_load_handlers()
@@ -84,8 +84,8 @@ static int Config_load_handlers()
 
     return 0;
 
-    error:
-        return -1;
+error:
+    return -1;
 }
 
 static int Config_load_proxy_cb(void *param, int cols, char **data, char **names)
@@ -94,15 +94,15 @@ static int Config_load_proxy_cb(void *param, int cols, char **data, char **names
 
     Proxy *proxy = Proxy_create(bfromcstr(data[1]), atoi(data[2]));
     check(proxy != NULL, "Failed to create proxy %s with address=%s port=%s", data[0], data[1], data[2]);
-    
+
     log_info("Loaded proxy %s with address=%s port=%s", data[0], data[1], data[2]);
 
     LOADED_PROXIES = tst_insert(LOADED_PROXIES, data[0], strlen(data[0]), proxy);
 
     return 0;
 
-    error:
-        return -1;
+error:
+    return -1;
 }
 
 static int Config_load_proxies()
@@ -114,8 +114,8 @@ static int Config_load_proxies()
 
     return 0;
 
-    error:
-        return -1;
+error:
+    return -1;
 }
 
 static int Config_load_dir_cb(void *param, int cols, char **data, char **names)
@@ -130,14 +130,14 @@ static int Config_load_dir_cb(void *param, int cols, char **data, char **names)
 
     return 0;
 
-    error:
-        return -1;
+error:
+    return -1;
 }
 
 static int Config_load_route_cb(void *param, int cols, char **data, char **names)
 {
     arity(4);
-    
+
     Host *host = (Host*)param;
     check(host, "Expected host as param");
 
@@ -145,8 +145,8 @@ static int Config_load_route_cb(void *param, int cols, char **data, char **names
     BackendType type = 0;
 
     const char *DIR_QUERY = "SELECT directory.id as id, base, route.path as prefix, index_file, default_ctype "
-                            "FROM route, directory "
-                            "WHERE directory.id = target_id AND target_type='dir' AND target_id=%s AND route.id=%s";
+        "FROM route, directory "
+        "WHERE directory.id = target_id AND target_type='dir' AND target_id=%s AND route.id=%s";
 
     if(strcmp("handler", data[3]) == 0)
     {
@@ -187,14 +187,15 @@ static int Config_load_route_cb(void *param, int cols, char **data, char **names
 
     return 0;
 
-    error:
-        return -1;
+error:
+    return -1;
 }
 
 static int Config_load_host_cb(void *param, int cols, char **data, char **names)
 {
     arity(3);
 
+    char *query = NULL;
     Server *server = (Server*)param;
     check(server, "Expected server as param");
 
@@ -202,7 +203,7 @@ static int Config_load_host_cb(void *param, int cols, char **data, char **names)
     check(host != NULL, "Failed to create host %s with %s", data[0], data[1]);
 
     const char *ROUTE_QUERY = "SELECT id, path, target_id, target_type FROM route WHERE host_id=%s";
-    char *query = SQL(ROUTE_QUERY, data[0]);
+    query = SQL(ROUTE_QUERY, data[0]);
 
     int rc = DB_exec(query, Config_load_route_cb, host);
     check(rc == 0, "Failed to load routes for host %s:%s", data[0], data[1]);
@@ -214,10 +215,12 @@ static int Config_load_host_cb(void *param, int cols, char **data, char **names)
     if(server->default_host == NULL)
         Server_set_default_host(server, host);
 
+    SQL_FREE(query);
     return 0;
 
-    error:
-        return -1;
+error:
+    SQL_FREE(query);
+    return -1;
 }
 
 static int Config_load_server_cb(void* param, int cols, char **data, char **names)
@@ -243,10 +246,10 @@ static int Config_load_server_cb(void* param, int cols, char **data, char **name
     SQL_FREE(query);
     return 0;
 
-    error:
-        SQL_FREE(query);
-        return -1;
-    
+error:
+    SQL_FREE(query);
+    return -1;
+
 }
 
 list_t *Config_load_servers(const char *name)
@@ -264,9 +267,9 @@ list_t *Config_load_servers(const char *name)
     SQL_FREE(query);
     return servers;
 
-    error:
-        SQL_FREE(query);
-        return NULL;
+error:
+    SQL_FREE(query);
+    return NULL;
 }
 
 static int Config_load_mimetypes_cb(void *param, int cols, char **data, char **names)
@@ -278,8 +281,8 @@ static int Config_load_mimetypes_cb(void *param, int cols, char **data, char **n
 
     return 0;
 
-    error:
-        return -1;
+error:
+    return -1;
 }
 
 int Config_load_mimetypes()
@@ -291,8 +294,8 @@ int Config_load_mimetypes()
 
     return 0;
 
-    error:
-        return -1;
+error:
+    return -1;
 }
 
 static int Config_load_settings_cb(void *param, int cols, char **data, char **names)
@@ -304,8 +307,8 @@ static int Config_load_settings_cb(void *param, int cols, char **data, char **na
 
     return 0;
 
-    error:
-        return -1;
+error:
+    return -1;
 }
 
 int Config_load_settings()
@@ -317,8 +320,8 @@ int Config_load_settings()
 
     return 0;
 
-    error:
-        return -1;
+error:
+    return -1;
 }
 
 int Config_init_db(const char *path)
@@ -336,7 +339,7 @@ void Config_close_db()
 static void shutdown_handlers(void *value, void *data)
 {
     Handler *handler = (Handler *)value;
-    assert(handler && "Fucking handler is NULL.");
+    assert(handler && "Why? Handler is NULL.");
 
     if(handler->running) {
         handler->running = 0;
@@ -350,7 +353,8 @@ static void shutdown_handlers(void *value, void *data)
 static void close_handlers(void *value, void *data)
 {
     Handler *handler = (Handler *)value;
-    assert(handler && "Fucking handler is NULL.");
+    assert(handler && "Why? Handler is NULL.");
+
 
     if(handler->send_socket) {
         zmq_close(handler->send_socket);
@@ -361,12 +365,32 @@ static void close_handlers(void *value, void *data)
         zmq_close(handler->recv_socket);
         handler->recv_socket = NULL;
     }
+
+    Handler_destroy(handler);
 }
 
-void Config_stop_handlers(Server *srv)
+void Config_stop_handlers()
 {
     tst_traverse(LOADED_HANDLERS, shutdown_handlers, NULL);
     taskyield();
     taskdelay(1000);
     tst_traverse(LOADED_HANDLERS, close_handlers, NULL);
+
+    tst_destroy(LOADED_HANDLERS);
+
+    LOADED_HANDLERS = NULL;
 }
+
+static void stop_proxy(void *value, void *data)
+{
+    Proxy_destroy((Proxy *)value);
+}
+
+void Config_stop_proxies()
+{
+    tst_traverse(LOADED_PROXIES, stop_proxy, NULL);
+
+    tst_destroy(LOADED_PROXIES);
+    LOADED_PROXIES = NULL;
+}
+

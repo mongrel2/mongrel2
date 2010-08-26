@@ -45,29 +45,17 @@ int MAX_URL_PATH = 0;
 
 void backend_destroy_cb(Route *r, RouteMap *map)
 {
-    if(r->data) {
-        Backend *backend = (Backend *)r->data;
-        switch(backend->type) {
-            case BACKEND_HANDLER:
-                // Handler_destroy(backend->target.handler);
-                break;
-            case BACKEND_PROXY:
-                // Proxy_destroy(backend->target.proxy);
-                break;
-            case BACKEND_DIR:
+    Backend *backend = (Backend *)r->data;
+
+    if(backend) {
+        if(backend->type == BACKEND_DIR) {
                 Dir_destroy(backend->target.dir);
-                break;
-            default:
-                sentinel("Invalid backend type, Tell Zed.");
         }
 
         free(backend);
 
         r->data = NULL;
     }
-
-error:
-    return;
 }
 
 Host *Host_create(const char *name)
