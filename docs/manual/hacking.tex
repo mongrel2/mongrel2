@@ -219,6 +219,16 @@ from a browser to N backends at once, and then return the replies from these
 handlers to M browsers.  Not exactly sure what you could write with that, but
 it's probably something really damn cool.
 
+\subsection{Async Uploads}
+
+Mongrel2 also solves the problem of large uploads choking your server
+because you can't stop them before they're complete.  Mongrel2 will stream
+large requests to temporary files, but it sends your handlers an initial
+upload started message.  When the upload is done you get a final upload 
+finished message.  If at any time you want to kill the upload, you just
+send a 0 length reply (the official KILL MESSAGE) and the whole thing is
+aborted and cleaned up.
+
 
 \section{Introduction to ZeroMQ}
 
@@ -658,6 +668,50 @@ to the real browser, and how it's delivered is irrelevant.  For example,
 the \ident{deliver\_http} method means that, yes, you can have one
 handler send a single response to target \emph{multiple} browsers
 at once.
+
+
+\section{Async File Upload Demo}
+
+Mongrel2 uses an asynchronous method of doing uploads that helps you 
+avoid receiving files you either can't accept or shouldn't accept.  It does
+this by sending your handler an initial message with just the headers, streaming
+the file to disk, and then a final message so you can read the resulting file.
+If you don't want the upload, then you can send a kill message (a 0 length message)
+and the connection closes, and the file never lands.
+
+The upload mechanism works entirely on content length, and whether the file
+is larger than the \ident{limits.content\_length}.  This means if you don't
+want to deal with this for most form uploads, then just set \ident{limits.content\_length}
+high enough and you won't have to.
+
+However, if you want to handle file uploads or large requests, then you add
+the setting \ident{upload.temp\_store} to a \ident{mkstemp} compatible path
+like \file{/tmp/mongrel2.upload.XXXXXX} with the XXXXXX chars being replaced
+with random characters.  It doesn't have to /tmp either, and can be any store
+you want, network disk, anything.
+
+Here's an example handler in \file{examples/http\_0mq/upload.py} that shows
+you how to do it:
+
+\begin{code}{Async Upload Example}
+\lstinputlisting[language=Python]{../../examples/http_0mq/upload.py}
+\end{code}
+
+You can test this with something like
+\verb|curl -T tests/config.sqlite http://localhost:6767/handlertes| to upload a big file.
+
+What's happening is the following process:
+
+\begin{enumerate}
+\item Mongrel2 receives a request from a browser (or curl in this case) that is greater than \ident{limits.content\_length} in size.  It actually doesn't read all of it yet, only about 2k.
+\item Mongrel2 looks up the \ident{upload.temp\_store} setting and makes a temp file there to write the contents.  If you don't have this setting then it aborts and returns an error to the browser.
+\item Mongrel2 sees that the request is for a Handler, so it crafts an initial request message.  This request message has all the original headers, plus a \ident{X-Mongrel2-Upload-Start} header with the path of the expected tmpfile you will read later.
+\item Your handler receives this message, which has no actual content, but the original content length, all the headers, and this new header to indicate an upload is starting.
+\item At this point, your handler can decide to kill the connection by simply responding with a kill message, or even with a valid HTTP error reponse then a kill message.
+\item Otherwise your handler does nothing, and Mongrel2 is already streaming the file into the designated tmpfile for this upload.
+\item When the upload is finally saved to the file, it \emph{adds} a new header of \ident{X-Mongrel2-Upload-Done} set to the same file as the first header.  Remember that \emph{both} headers are in this final request.
+\item Finally, you get a final request message that has both the \ident{X-Mongrel2-Upload-Start} and \ident{X-Mongrel2-Upload-Done} headers, which you can then use to read the finaly upload contents.  You should also make sure the headers match to prevent someone forging completed uploads.
+\end{enumerate}
 
 
 \section{MP3 Streaming Demo}

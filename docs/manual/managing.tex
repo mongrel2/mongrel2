@@ -561,6 +561,7 @@ of available settings are:
 \item[status\_file=/tmp/mongrel2\_status.txt] When you run as root this will put it in your CHROOT/tmp/ directory, but when you run as you it puts it in the /tmp.  Change this to something better if you run multiple servers.
 \item[superpoll.hot\_dividend=4] Ratio of the total (like 1/4th, 1/8th) that should be in the hot selection.  Set this higher if you have lots of idle connections, set it lower if you have more active connections.
 \item[superpoll.max\_fd=10 * 1024] Maximum possible open files.  Do not set this above 64 * 1024, and expect it to take a bit while Mongrel2 sets up constant structures.
+\item[upload.temp\_store=None] This is not set by default.  If you want large requests to reach your handlers, then set this to a directory they can access the results, and make sure they can handle it.  Read about it in the Hacking section under Uploads.  The file has to end in XXXXXX chars to work (read man mkstemp).
 \item[zeromq.threads=1] Number of 0MQ IO threads to run.  Careful, we've experienced thread bugs in 0MQ sometimes with high numbers of these.
 \end{description}
 

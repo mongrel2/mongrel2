@@ -16,7 +16,13 @@ while True:
         continue
 
     elif req.headers.get('X-Mongrel2-Upload-Done', None):
+        expected = req.headers.get('X-Mongrel2-Upload-Start', "BAD")
         upload = req.headers.get('X-Mongrel2-Upload-Done', None)
+
+        if expected != upload:
+            print "GOT THE WRONG TARGET FILE: ", expected, upload
+            continue
+
         body = open(upload, 'r').read()
         print "UPLOAD DONE: BODY IS %d long, content length is %s" % (
             len(body), req.headers['Content-Length'])
