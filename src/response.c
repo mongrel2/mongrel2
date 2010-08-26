@@ -118,6 +118,13 @@ struct tagbstring HTTP_304 = bsStatic("HTTP/1.1 304 Not Modified\r\n"
     "Not Modified");
 
 
+struct tagbstring HTTP_205 = bsStatic("HTTP/1.1 205 Reset Content\r\n"
+    "Content-Type: text/plain\r\n"
+    "Connection: close\r\n"
+    "Content-Length: 13\r\n"
+    "Server: " VERSION 
+    "\r\n\r\n"
+    "Reset Content");
 
 struct tagbstring FLASH_RESPONSE = bsStatic("<?xml version=\"1.0\"?>"
         "<!DOCTYPE cross-domain-policy SYSTEM \"http://www.macromedia.com/xml/dtds/cross-domain-policy.dtd\">"
