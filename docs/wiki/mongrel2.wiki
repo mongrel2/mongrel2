@@ -35,7 +35,8 @@ modern browser technologies.
 <h2>Download</h2>
 
 <p>We are currently crafting a release process, but for now you can get the latest source
-download from (updated Wed Aug 25 02:38:13 PDT 2010):</p>
+download from (updated Thu Aug 26 02:44:53 PDT 2010):</p>
+
 
 <ul>
     <li><a href="/static/downloads/mongrel2-1.0beta3.tar.bz2">mongrel2-1.0beta3.tar.bz2</a> MD5: cbf6c333a39840f9377d56bb345d3e8c</li>
