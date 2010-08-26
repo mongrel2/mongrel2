@@ -5,7 +5,7 @@
 <p style="font-size: 1.2em;">Mongrel2 is an <em>application</em>,
 <em>language</em>, and <em>network architecture</em> <b>agnostic</b> web
 server that focuses on web <b>applications</b> using <em>modern</em> browser
-technologies over just serving files.  </p>
+technologies.</p>
 
 <h2>Features</h2>
 
