@@ -238,14 +238,21 @@ Response *Response_fetch(Request *req)
     
 
     ssize_t nread = 0;
-
+    ssize_t nparsed = 0;
     while(!httpclient_parser_finish(&parser)) {
         nread = fdrecv(fd, buffer, FETCH_BUFFER_SIZE - 1);
         check(nread > 0, "Failed to get all of headers");
         buffer[nread] = '\0';
-        size_t nparsed = httpclient_parser_execute(&parser, buffer, nread, 0);
+        nparsed = httpclient_parser_execute(&parser, buffer, nread, 0);
     }
     check(httpclient_parser_finish(&parser) == 1, "Didn't parse.");
+    
+    // We parse one character into the body before we're done, so we have to
+    // subtract one.
+    nparsed--;
+
+    if(nparsed < nread)
+        bcatblk(rsp->body, buffer + nparsed, nread - nparsed);
 
     if(rsp->chunked_body) {
         check(Response_read_chunks(rsp, nread, buffer, fd) == 0, "Failed to read chunked response.");
