@@ -34,17 +34,17 @@
 
 #define _XOPEN_SOURCE 1
 
-#include <request.h>
-#include <dbg.h>
 #include <stdlib.h>
 #include <assert.h>
-#include <adt/dict.h>
 #include <string.h>
-#include <headers.h>
-#include <register.h>
-#include <setting.h>
-
 #include <time.h>
+
+#include "setting.h"
+#include "register.h"
+#include "headers.h"
+#include "adt/dict.h"
+#include "dbg.h"
+#include "request.h"
 
 int MAX_HEADER_COUNT=0;
 

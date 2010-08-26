@@ -187,6 +187,69 @@ error:
 }
 
 
+static inline bstring connection_upload_file(Connection *conn, Handler *handler,
+        int header_len, int content_len)
+{
+    int rc = 0;
+    int tmpfd = 0;
+    bstring result = NULL;
+
+    // need a setting for the moby store where large uploads should go
+    bstring upload_store = Setting_get_str("upload.temp_store", NULL);
+    error_unless(upload_store, conn->fd, 413, "Request entity is too large: %d, and no upload.temp_store setting for where to put the big files.", content_len);
+
+    upload_store = bstrcpy(upload_store); // Setting owns the original
+
+    // TODO: handler should be set to allow large uploads, otherwise error
+
+    tmpfd = mkstemp((char *)upload_store->data);
+    check(tmpfd != -1, "Failed to create secure tempfile, did you end it with XXXXXX?");
+    log_info("Writing tempfile %s for large upload.", bdata(upload_store));
+
+    // send the initial headers we have so they can kill it if they want
+    dict_alloc_insert(conn->req->headers, bfromcstr("X-Mongrel2-Upload-Start"), upload_store);
+
+    result = Request_to_payload(conn->req, handler->send_ident, conn->fd, "", 0);
+    check(result, "Failed to create initial payload for upload attempt.");
+
+    rc = Handler_deliver(handler->send_socket, bdata(result), blength(result));
+    check(rc != -1, "Failed to deliver upload attempt to handler.");
+
+    // all good so start streaming chunks into the temp file in the moby dir
+    if(conn->nread - header_len > 0) {
+        rc = fdwrite(tmpfd, conn->buf + header_len, conn->nread - header_len);
+        check(rc == conn->nread - header_len, "Failed to write initial chunk to upload file: %s", bdata(upload_store));
+    }
+
+    conn->nread = 0;
+
+    for(content_len -= rc; content_len > 0; content_len -= rc)
+    {
+        int nread = content_len < BUFFER_SIZE ? content_len : BUFFER_SIZE;
+
+        nread = fdrecv(conn->fd, conn->buf, nread);
+        check(nread > 0, "Failed to read from socket on upload.");
+
+        rc = fdwrite(tmpfd, conn->buf, nread);
+        check(rc > 0, "Failed to write to %s upload tempfile.", bdata(upload_store));
+    }
+
+    check(content_len == 0, "Bad math on writing out the upload tmpfile: %s, it's %d", bdata(upload_store), content_len);
+
+    // moby dir write is done, add a header to the request that indicates where to get it
+    dict_alloc_insert(conn->req->headers, bfromcstr("X-Mongrel2-Upload-Done"), upload_store);
+
+    bdestroy(result);
+    fdclose(tmpfd);
+    return upload_store;
+
+error:
+    bdestroy(result);
+    bdestroy(upload_store);
+    fdclose(tmpfd);
+    return NULL;
+}
+
 int connection_http_to_handler(int event, void *data)
 {
     TRACE(http_to_handler);
@@ -204,7 +267,11 @@ int connection_http_to_handler(int event, void *data)
     if(content_len == 0) {
         body = "";
     } else if(content_len > MAX_CONTENT_LENGTH) {
-        error_response(conn->fd, 413, "Request entity is too large: %d", content_len);    
+        bstring upload_store = connection_upload_file(conn, handler, header_len, content_len);
+
+        body = "";
+        content_len = 0;
+        check(upload_store != NULL, "Failed to upload file.");
     } else {
         if(total > BUFFER_SIZE) {
             conn->buf = h_realloc(conn->buf, total);
@@ -376,7 +443,7 @@ int connection_proxy_req_parse(int event, void *data)
 
     int rc = 0;
     Connection *conn = (Connection *)data;
-    bstring host = bstrcpy(conn->req->host);
+    bstring host = NULL;
     Host *target_host = conn->req->target_host;
     Backend *req_action = conn->req->action;
 
@@ -386,6 +453,7 @@ int connection_proxy_req_parse(int event, void *data)
     error_unless(Request_is_http(conn->req), conn->fd, 400,
             "Someone tried to change the protocol on us from HTTP.");
 
+    host = bstrcpy(conn->req->host);
     // do a light find of this request compared to the last one
     if(!biseq(host, conn->req->host)) {
         bdestroy(host);
@@ -409,6 +477,8 @@ int connection_proxy_req_parse(int event, void *data)
 
     error_response(conn->fd, 500, "Invalid code branch, tell Zed.");
 error:
+
+    bdestroy(host);
     return REMOTE_CLOSE;
 }
 

@@ -126,5 +126,6 @@ INSERT INTO route (path, host_id, target_id, target_type)
     );
 
 INSERT INTO setting (key, value) VALUES ('zeromq.threads', 1);
+INSERT INTO setting (key, value) VALUES ('upload.temp_store', '/tmp/mongrel2.upload.XXXXXX');
 
 commit;
