@@ -245,8 +245,13 @@ static inline bstring connection_upload_file(Connection *conn, Handler *handler,
 
 error:
     bdestroy(result);
-    bdestroy(upload_store);
     fdclose(tmpfd);
+
+    if(upload_store) {
+        unlink((char *)upload_store->data);
+        bdestroy(upload_store);
+    }
+
     return NULL;
 }
 
