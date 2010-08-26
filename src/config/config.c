@@ -55,8 +55,8 @@
 #define SQL(Q, ...) sqlite3_mprintf((Q), ##__VA_ARGS__)
 #define SQL_FREE(Q) if(Q) sqlite3_free(Q)
 
-static tst_t *handlers = NULL;
-static tst_t *proxies = NULL;
+tst_t *LOADED_HANDLERS = NULL;
+tst_t *LOADED_PROXIES = NULL;
 
 static int Config_load_handler_cb(void *param, int cols, char **data, char **names)
 {
@@ -67,7 +67,7 @@ static int Config_load_handler_cb(void *param, int cols, char **data, char **nam
 
     log_info("Loaded handler %s with send_spec=%s send_ident=%s recv_spec=%s recv_ident=%s", data[0], data[1], data[2], data[3], data[4]);
 
-    handlers = tst_insert(handlers, data[0], strlen(data[0]), handler);
+    LOADED_HANDLERS = tst_insert(LOADED_HANDLERS, data[0], strlen(data[0]), handler);
 
     return 0;
 
@@ -97,7 +97,7 @@ static int Config_load_proxy_cb(void *param, int cols, char **data, char **names
     
     log_info("Loaded proxy %s with address=%s port=%s", data[0], data[1], data[2]);
 
-    proxies = tst_insert(proxies, data[0], strlen(data[0]), proxy);
+    LOADED_PROXIES = tst_insert(LOADED_PROXIES, data[0], strlen(data[0]), proxy);
 
     return 0;
 
@@ -150,7 +150,7 @@ static int Config_load_route_cb(void *param, int cols, char **data, char **names
 
     if(strcmp("handler", data[3]) == 0)
     {
-        Handler *handler = tst_search(handlers, data[2], strlen(data[2]));
+        Handler *handler = tst_search(LOADED_HANDLERS, data[2], strlen(data[2]));
         check(handler, "Failed to find handler %s for route %s:%s", data[2], data[0], data[1]);
 
         log_info("Created handler route %s:%s -> %s:%s", data[0], data[1], bdata(handler->send_ident), bdata(handler->send_spec));
@@ -160,7 +160,7 @@ static int Config_load_route_cb(void *param, int cols, char **data, char **names
     }
     else if(strcmp("proxy", data[3]) == 0)
     {
-        Proxy *proxy = tst_search(proxies, data[2], strlen(data[2]));
+        Proxy *proxy = tst_search(LOADED_PROXIES, data[2], strlen(data[2]));
         check(proxy, "Failed to find proxy %s for route %s:%s", data[2], data[0], data[1]);
 
         log_info("Created proxy route %s:%s -> %s:%d", data[0], data[1], bdata(proxy->server), proxy->port);
@@ -329,4 +329,44 @@ int Config_init_db(const char *path)
 void Config_close_db()
 {
     DB_close();
+}
+
+
+
+static void shutdown_handlers(void *value, void *data)
+{
+    Handler *handler = (Handler *)value;
+    assert(handler && "Fucking handler is NULL.");
+
+    if(handler->running) {
+        handler->running = 0;
+
+        if(tasknuke(taskgetid(handler->task)) == 0) {
+            taskready(handler->task);
+        }
+    }
+}
+
+static void close_handlers(void *value, void *data)
+{
+    Handler *handler = (Handler *)value;
+    assert(handler && "Fucking handler is NULL.");
+
+    if(handler->send_socket) {
+        zmq_close(handler->send_socket);
+        handler->send_socket = NULL;
+    }
+
+    if(handler->recv_socket) {
+        zmq_close(handler->recv_socket);
+        handler->recv_socket = NULL;
+    }
+}
+
+void Config_stop_handlers(Server *srv)
+{
+    tst_traverse(LOADED_HANDLERS, shutdown_handlers, NULL);
+    taskyield();
+    taskdelay(1000);
+    tst_traverse(LOADED_HANDLERS, close_handlers, NULL);
 }

@@ -36,6 +36,7 @@
 #include <string.h>
 #include <signal.h>
 #include <time.h>
+#include <assert.h>
 
 #include "server.h"
 #include "dbg.h"
@@ -222,42 +223,6 @@ void final_setup()
 }
 
 
-void shutdown_handlers(void *value, void *data)
-{
-    Route *route = (Route *)value;
-    Backend *bk = (Backend *)route->data;
-
-    if(bk->type == BACKEND_HANDLER) {
-        Handler *handler = bk->target.handler;
-        handler->running = 0;
-
-        if(tasknuke(taskgetid(handler->task)) == 0) {
-            taskready(handler->task);
-        }
-    }
-}
-
-void close_handlers(void *value, void *data)
-{
-    Route *route = (Route *)value;
-    Backend *bk = (Backend *)route->data;
-
-    if(bk->type == BACKEND_HANDLER) {
-        Handler *handler = bk->target.handler;
-        zmq_close(handler->send_socket); handler->send_socket = NULL;
-        zmq_close(handler->recv_socket); handler->recv_socket = NULL;
-    }
-}
-
-
-void stop_handlers(Server *srv)
-{
-    tst_traverse(srv->default_host->routes->routes, shutdown_handlers, NULL);
-    taskyield();
-    taskdelay(100);
-    tst_traverse(srv->default_host->routes->routes, close_handlers, NULL);
-}
-
 
 Server *reload_server(Server *old_srv, const char *db_file, const char *server_name)
 {
@@ -265,7 +230,7 @@ Server *reload_server(Server *old_srv, const char *db_file, const char *server_n
 
     MIME_destroy();
 
-    stop_handlers(old_srv);
+    Config_stop_handlers(old_srv);
 
     Server *srv = load_server(db_file, server_name);
     check(srv, "Failed to load new server config.");
@@ -284,7 +249,7 @@ error:
 void complete_shutdown(Server *srv)
 {
     fdclose(srv->listen_fd);
-    stop_handlers(srv);
+    Config_stop_handlers(srv);
 
     int left = taskwaiting();
 

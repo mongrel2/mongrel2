@@ -49,10 +49,10 @@ void backend_destroy_cb(Route *r, RouteMap *map)
         Backend *backend = (Backend *)r->data;
         switch(backend->type) {
             case BACKEND_HANDLER:
-                Handler_destroy(backend->target.handler);
+                // Handler_destroy(backend->target.handler);
                 break;
             case BACKEND_PROXY:
-                Proxy_destroy(backend->target.proxy);
+                // Proxy_destroy(backend->target.proxy);
                 break;
             case BACKEND_DIR:
                 Dir_destroy(backend->target.dir);

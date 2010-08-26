@@ -35,12 +35,20 @@
 #ifndef __config_h__
 #define __config_h__
 
-#include <adt/list.h>
+#include "adt/list.h"
+#include "adt/tst.h"
+
 
 int Config_init_db(const char *path);
 list_t *Config_load_servers(const char *name);
 int Config_load_mimetypes();
 int Config_load_settings();
 void Config_close_db();
+
+struct Server;
+void Config_stop_handlers(struct Server *srv);
+
+extern tst_t *LOADED_HANDLERS;
+extern tst_t *LOADED_PROXIES;
 
 #endif
