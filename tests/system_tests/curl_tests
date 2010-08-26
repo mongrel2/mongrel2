@@ -14,3 +14,4 @@ curl -H 'X-Test-Bug: \"hi there"' http://localhost:6767/handlertest
 
 curl -H "KILLME: 1" http://localhost:6767/handlertest
 
+curl -T tests/config.sqlite http://localhost:6767/handlertest

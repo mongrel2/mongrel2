@@ -10985,13 +10985,12 @@
     as the first header. Remember that <span class=
     "pplri7t-">both</span> headers are in this final request.
 
-    <li class="enumerate" id="x1-72064x8">Finally, you get a final
-    request message that has both the <span class=
+    <li class="enumerate" id="x1-72064x8">Your handler then gets
+    this final request message that has both the <span class=
     "pcrro7t-">X-Mongrel2-Upload-Start</span> and <span class=
     "pcrro7t-">X-Mongrel2-Upload-Done</span> headers, which you can
-    then use to read the finaly upload contents. You should also
-    make sure the headers match to prevent someone forging
-    completed uploads.
+    then use to read the upload contents. You should also make sure
+    the headers match to prevent someone forging completed uploads.
   </ol>
 
   <h3 class="sectionHead"><span class="titlemark">5.6</span> <a id=

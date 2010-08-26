@@ -710,7 +710,7 @@ What's happening is the following process:
 \item At this point, your handler can decide to kill the connection by simply responding with a kill message, or even with a valid HTTP error reponse then a kill message.
 \item Otherwise your handler does nothing, and Mongrel2 is already streaming the file into the designated tmpfile for this upload.
 \item When the upload is finally saved to the file, it \emph{adds} a new header of \ident{X-Mongrel2-Upload-Done} set to the same file as the first header.  Remember that \emph{both} headers are in this final request.
-\item Finally, you get a final request message that has both the \ident{X-Mongrel2-Upload-Start} and \ident{X-Mongrel2-Upload-Done} headers, which you can then use to read the finaly upload contents.  You should also make sure the headers match to prevent someone forging completed uploads.
+\item Your handler then gets this final request message that has both the \ident{X-Mongrel2-Upload-Start} and \ident{X-Mongrel2-Upload-Done} headers, which you can then use to read the upload contents.  You should also make sure the headers match to prevent someone forging completed uploads.
 \end{enumerate}
 
 
