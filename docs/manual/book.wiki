@@ -10938,8 +10938,8 @@
   "pcrr7t-">curl</span><span class=
   "pcrr7t-">&nbsp;-T</span><span class=
   "pcrr7t-">&nbsp;tests/config.sqlite</span><span class=
-  "pcrr7t-">&nbsp;http://localhost:6767/handlertes</span></span> to
-  upload a big file. <!--l. 703-->
+  "pcrr7t-">&nbsp;http://localhost:6767/handlertest</span></span>
+  to upload a big file. <!--l. 703-->
 
   <p class="noindent">What's happening is the following
   process:
