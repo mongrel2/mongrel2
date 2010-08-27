@@ -231,7 +231,7 @@ Here's what you have to change in \file{config.py} to make everything work right
 \begin{enumerate}
 \item Get rid of the \ident{test\_directory} handler, since we won't need it, and
     any routes that mention it.
-\item Change the \ident{base} of \ident{chat\_demo\_dir} to \file{'static/chatdemo'}, which we'll setup at the end.
+\item Change the \ident{base} of \ident{chat\_demo\_dir} to \file{'static/chatdemo/'}, which we'll setup at the end.
 \item Modify the server \ident{chroot} so that it's \file{/home/YOU/deployment/}.
 \item Use the \shell{m2sh uuid} command to make some new UUIDs for all the
     existing ones.  This is optional, but probably a good idea to get in the
