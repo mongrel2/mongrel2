@@ -51,7 +51,7 @@ struct tagbstring LEAVE_MSG = bsStatic("{\"type\":\"disconnect\"}");
 
 int HANDLER_STACK;
 
-void bstring_free(void *data, void *hint)
+static void bstring_free(void *data, void *hint)
 {
     bdestroy((bstring)hint);
 }

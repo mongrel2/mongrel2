@@ -52,8 +52,9 @@ $(TESTS): %: %.c build/libm2.a
 	$(CC) $(CFLAGS) $(LIBS) -o $@ $< build/libm2.a
 
 src/state.c: src/state.rl src/state_machine.rl
-
 src/http11/http11_parser.c: src/http11/http11_parser.rl
+src/http11/httpclient_parser.c: src/http11/httpclient_parser.rl
+src/control.c: src/control.rl
 
 check:
 	@echo Files with potentially dangerous functions.
@@ -75,6 +76,7 @@ ragel:
 	ragel -G2 src/http11/http11_parser.rl
 	ragel -G2 src/handler_parser.rl
 	ragel -G2 src/http11/httpclient_parser.rl
+	ragel -G2 src/control.rl
 
 valgrind:
 	valgrind --leak-check=full --show-reachable=yes --log-file=valgrind.log --suppressions=tests/valgrind.sup ./bin/mongrel2 tests/config.sqlite localhost

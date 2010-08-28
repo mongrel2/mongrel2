@@ -50,6 +50,7 @@
 #include "superpoll.h"
 #include "setting.h"
 #include "version.h"
+#include "control.h"
 
 FILE *LOG_FILE = NULL;
 
@@ -57,30 +58,10 @@ extern int RUNNING;
 int RELOAD;
 int MURDER;
 
-struct tagbstring DEFAULT_STATUS_FILE = bsStatic("/tmp/mongrel2_status.txt");
 struct tagbstring PRIV_DIR = bsStatic("/");
 
 Server *SERVER = NULL;
 
-static void dump_status()
-{
-    bstring status = taskgetinfo();
-    bstring status_file = Setting_get_str("status_file", &DEFAULT_STATUS_FILE);
-
-    unlink((char *)status_file->data);
-
-    int fd = open((char *)status_file->data, O_WRONLY | O_CREAT, 0600);
-    check(fd >= 0, "Failed to open status file: %s", bdata(status_file));
-
-    int rc = write(fd, bdata(status), blength(status));
-    check(rc > 0, "Failed to write to status file: %s", bdata(status_file));
-
-    log_info("Wrote status to file: %s", bdata(status_file));
-
-    error:  // Fallthrough on purpose.
-        close(fd);
-        bdestroy(status);
-}
 
 void terminate(int s)
 {
@@ -91,9 +72,6 @@ void terminate(int s)
             RELOAD = 1;
             RUNNING = 0;
             log_info("RELOAD REQUESTED, I'll do it on the next request.");
-            break;
-        case SIGQUIT:
-            dump_status();
             break;
         default:
             RUNNING = 0;
@@ -112,7 +90,6 @@ void start_terminator()
     sigaction(SIGINT, &sa, &osa);
     sigaction(SIGTERM, &sa, &osa);
     sigaction(SIGHUP, &sa, &osa);
-    sigaction(SIGQUIT, &sa, &osa);
 
     sa.sa_handler = SIG_IGN;
     sigaction(SIGPIPE, &sa, &osa);
@@ -261,7 +238,7 @@ void complete_shutdown(Server *srv)
     int left = taskwaiting();
 
     log_info("Waiting for connections to die: %d", left);
-    while((left = taskwaiting()) > 0 && !MURDER) {
+    while((left = taskwaiting()) > 1 && !MURDER) {
         // TODO: after a certain time close all of the connection sockets forcefully
         taskdelay(3000);
         log_info("Waiting for connections to die: %d", left);
@@ -304,6 +281,7 @@ void taskmain(int argc, char **argv)
 
     final_setup();
 
+    Control_port_start();
     taskcreate(tickertask, NULL, 16 * 1024);
 
     while(1) {
