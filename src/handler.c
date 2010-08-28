@@ -267,11 +267,11 @@ error:
 void *Handler_send_create(const char *send_spec, const char *identity)
 {
     
-    void *handler_socket = mqsocket(ZMQ_DOWNSTREAM);
+    void *handler_socket = mqsocket(ZMQ_PUSH);
     int rc = zmq_setsockopt(handler_socket, ZMQ_IDENTITY, identity, strlen(identity));
     check(rc == 0, "Failed to set handler socket %s identity %s", send_spec, identity);
 
-    log_info("Binding handler PUB socket %s with identity: %s", send_spec, identity);
+    log_info("Binding handler PUSH socket %s with identity: %s", send_spec, identity);
 
     rc = zmq_bind(handler_socket, send_spec);
     while(rc != 0) {

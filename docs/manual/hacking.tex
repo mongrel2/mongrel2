@@ -270,9 +270,9 @@ currently implemented (as documented in \shell{man zmq\_socket}):
     asynchronous messaging.  PUB sockets just send out messages to multiple subscribers, without
     expecting a reply.  SUB sockets just read messages that are sent to them, and can subscribe
     to prefixes on the messages.
-  \item [\texttt{ZMQ\_DOWNSTREAM}/\texttt{ZMQ\_UPSTREAM}] DOWN/UP sockets are more like asynchronous round-robin
+  \item [\texttt{ZMQ\_PUSH}/\texttt{ZMQ\_PULL}] PUSH/PULL sockets are more like asynchronous round-robin
     sockets.  They work like PUB/SUB, but instead of the message going to all subscribers that
-    are subscribed or not, a DOWN/UP socket will have a message go to just one of the receivers
+    are subscribed or not, a PUSH/PULL socket will have a message go to just one of the receivers
     in a cluster.  This is a lot like having a round-robin proxy configuration in your web server.
   \item [\texttt{ZMQ\_PAIR}] A PAIR is just a direct connection between two peers, basically like a better
     TCP connection.
@@ -439,9 +439,9 @@ to a totally different one.
 
 \subsection{Socket Types Used}
 
-First, the types of ZeroMQ sockets used are a \ident{ZMQ\_DOWNSTREAM} socket
+First, the types of ZeroMQ sockets used are a \ident{ZMQ\_PUSH} socket
 for messages from Mongrel2 to Handlers, which means your Handler's receive
-socket should be a \ident{ZMQ\_UPSTREAM}.  Mongrel2 then uses a
+socket should be a \ident{ZMQ\_PULL}.  Mongrel2 then uses a
 \ident{ZMQ\_SUB} socket for receiving responses, which means your Handlers
 should send on a \ident{ZMQ\_PUB} socket.  This setup
 allows multiple handlers to connect to a Mongrel2 server, but only
@@ -458,7 +458,7 @@ so that you understand why the message format is the way it is.
 This leads to rule number 1:
 
 \begin{quote}
-\emph{Rule 1:} Handlers receive on with UPSTREAM and send with PUB sockets.
+\emph{Rule 1:} Handlers receive on with PULL and send with PUB sockets.
 \end{quote}
 
 \subsection{UUID Addressing}

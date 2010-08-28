@@ -321,7 +321,7 @@ testing has been done with TCP transports.
 
 \begin{description}
 \item[send\_spec]  This is the 0MQ sender specification, something like ``tcp://127.0.0.1:9999'' will
-    use TCP to connect to a server on 127.0.0.1 at port 9999.  The type of socket used is a DOWNSTREAM
+    use TCP to connect to a server on 127.0.0.1 at port 9999.  The type of socket used is a PUSH
     socket, so that handlers receive messages in round-robin style.
 \item[send\_ident] This is an identifier (usually a UUID) that will be used to register the send
     socket.  This makes it so that messages are persisted between crashes.

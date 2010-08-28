@@ -2516,8 +2516,8 @@
     <dd class="description">This is the 0MQ sender specification,
     something like &ldquo;tcp://127.0.0.1:9999&rdquo; will use TCP
     to connect to a server on 127.0.0.1 at port 9999. The type of
-    socket used is a DOWNSTREAM socket, so that handlers receive
-    messages in round-robin style.
+    socket used is a PUSH socket, so that handlers receive messages
+    in round-robin style.
 
     <dt class="description"><span class=
     "pplb7t-">send</span><span class="pplb7t-">_ident</span>
@@ -8142,14 +8142,14 @@
 
     <dt class="description"><span class=
     "pcrb7t-">ZMQ</span><span class=
-    "pcrb7t-">_DOWNSTREAM</span><span class=
+    "pcrb7t-">_PUSH</span><span class=
     "pplb7t-">/</span><span class="pcrb7t-">ZMQ</span><span class=
-    "pcrb7t-">_UPSTREAM</span>
+    "pcrb7t-">_PULL</span>
 
-    <dd class="description">DOWN/UP sockets are more like
+    <dd class="description">PUSH/PULL sockets are more like
     asynchronous round-robin sockets. They work like PUB/SUB, but
     instead of the message going to all subscribers that are
-    subscribed or not, a DOWN/UP socket will have a message go to
+    subscribed or not, a PUSH/PULL socket will have a message go to
     just one of the receivers in a cluster. This is a lot like
     having a round-robin proxy configuration in your web server.
 
@@ -8766,10 +8766,10 @@
 
   <p class="noindent">First, the types of ZeroMQ sockets used are a
   <span class="pcrro7t-">ZMQ</span><span class=
-  "pcrro7t-">_DOWNSTREAM</span> socket for messages from Mongrel2
-  to Handlers, which means your Handler's receive socket
-  should be a <span class="pcrro7t-">ZMQ</span><span class=
-  "pcrro7t-">_UPSTREAM</span>. Mongrel2 then uses a <span class=
+  "pcrro7t-">_PUSH</span> socket for messages from Mongrel2 to
+  Handlers, which means your Handler's receive socket should
+  be a <span class="pcrro7t-">ZMQ</span><span class=
+  "pcrro7t-">_PULL</span>. Mongrel2 then uses a <span class=
   "pcrro7t-">ZMQ</span><span class="pcrro7t-">_SUB</span> socket
   for receiving responses, which means your Handlers should send on
   a <span class="pcrro7t-">ZMQ</span><span class=
@@ -8795,7 +8795,7 @@
     <!--l. 461-->
 
     <p class="noindent"><span class="pplri7t-">Rule 1:</span>
-    Handlers receive on with UPSTREAM and send with PUB sockets.
+    Handlers receive on with PULL and send with PUB sockets.
   </div>
 
   <h4 class="subsectionHead"><span class="titlemark">5.3.2</span>
