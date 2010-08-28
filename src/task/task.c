@@ -281,7 +281,6 @@ taskgetinfo(void)
 
     bstring data;
     char* extra;
-    bstring taskline;
 
     data = bfromcstr("{\"task_list\":[");
 
@@ -296,15 +295,12 @@ taskgetinfo(void)
         else
             extra = "";
 
-        taskline = bformat("{\"id\": %d, \"system\": %d, \"name\": \"%s\", \"state\": \"%s\", \"extra\": \"%s\"}", t->id, t->system ? 1 : 0, t->name, t->state, extra);
+        bformata(data, "{\"id\": %d, \"system\": %d, \"name\": \"%s\", \"state\": \"%s\", \"extra\": \"%s\"}", t->id, t->system ? 1 : 0, t->name, t->state, extra);
 
         if(i < nalltask - 1)
         {
-            bcatcstr(taskline, ",\n");
+            bcatcstr(data, ",\n");
         }
-
-        bconcat(data, taskline);
-        bdestroy(taskline);
     }
 
     bcatcstr(data, "]}\n");
