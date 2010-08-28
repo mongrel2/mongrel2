@@ -40,7 +40,6 @@
 #include <string.h>
 #include <unistd.h>
 
-#define MAX_REGISTERED_FDS  64 * 1024
 
 static Registration REGISTRATIONS[MAX_REGISTERED_FDS];
 // this has to stay uint16_t so we wrap around
@@ -133,6 +132,7 @@ int Register_id_for_fd(int fd)
 bstring Register_info()
 {
     int i = 0;
+    int total = 0;
     bstring result = bfromcstr("{");
     time_t now = time(NULL);
 
@@ -140,9 +140,10 @@ bstring Register_info()
         if(REGISTRATIONS[i].conn_type) {
             bformata(result, "\"%d\":%d,", REGISTRATIONS[i].id,
                     now - REGISTRATIONS[i].last_ping);
+            total++;
         }
     }
 
-    bformata(result, "\"total\": %d}", i);
+    bformata(result, "\"total\": %d}", total);
     return result;
 }

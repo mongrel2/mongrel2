@@ -237,7 +237,8 @@ void complete_shutdown(Server *srv)
 
     int left = taskwaiting();
 
-    log_info("Waiting for connections to die: %d", left);
+    // need -1 for the control port
+    log_info("Waiting for connections to die: %d", left - 1);
     while((left = taskwaiting()) > 1 && !MURDER) {
         // TODO: after a certain time close all of the connection sockets forcefully
         taskdelay(3000);

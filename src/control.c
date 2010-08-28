@@ -65,7 +65,7 @@ error:
 static int CONTROL_RUNNING = 1;
 
 
-#line 97 "src/control.rl"
+#line 107 "src/control.rl"
 
 
 
@@ -77,7 +77,7 @@ static const int ControlParser_error = 0;
 static const int ControlParser_en_main = 1;
 
 
-#line 100 "src/control.rl"
+#line 110 "src/control.rl"
 
 bstring Control_execute(bstring req)
 {
@@ -95,7 +95,7 @@ bstring Control_execute(bstring req)
 	cs = ControlParser_start;
 	}
 
-#line 112 "src/control.rl"
+#line 122 "src/control.rl"
     
 #line 101 "src/control.c"
 	{
@@ -247,10 +247,20 @@ tr20:
 #line 82 "src/control.rl"
 	{
         int id = atoi(p);
-        check(id >= 0, "Invalid id given: %d", id);
-        int fd = Register_fd_for_id(id);
-        fdclose(fd);
-        reply = bformat("{\"result\": \"killed %d\"}", id);
+
+        if(id < 0 || id > MAX_REGISTERED_FDS) {
+            reply = bformat("{\"error\": \"invalid id: %d\"}", id);
+        } else {
+            int fd = Register_fd_for_id(id);
+
+            if(fd > 0) {
+                fdclose(fd);
+                reply = bformat("{\"result\": \"killed %d\"}", id);
+            } else {
+                reply = bformat("{\"error\": \"does not exist: %d\"}", id);
+            }
+        }
+
         {p++; cs = 35; goto _out;}
     }
 	goto st35;
@@ -258,17 +268,27 @@ tr38:
 #line 82 "src/control.rl"
 	{
         int id = atoi(p);
-        check(id >= 0, "Invalid id given: %d", id);
-        int fd = Register_fd_for_id(id);
-        fdclose(fd);
-        reply = bformat("{\"result\": \"killed %d\"}", id);
+
+        if(id < 0 || id > MAX_REGISTERED_FDS) {
+            reply = bformat("{\"error\": \"invalid id: %d\"}", id);
+        } else {
+            int fd = Register_fd_for_id(id);
+
+            if(fd > 0) {
+                fdclose(fd);
+                reply = bformat("{\"result\": \"killed %d\"}", id);
+            } else {
+                reply = bformat("{\"error\": \"does not exist: %d\"}", id);
+            }
+        }
+
         {p++; cs = 35; goto _out;}
     }
 	goto st35;
 st35:
 	p += 1;
 case 35:
-#line 272 "src/control.c"
+#line 292 "src/control.c"
 	if ( 48 <= (*p) && (*p) <= 57 )
 		goto tr38;
 	goto st0;
@@ -380,14 +400,14 @@ case 33:
 	_out: {}
 	}
 
-#line 113 "src/control.rl"
+#line 123 "src/control.rl"
 
     check(p <= pe, "Buffer overflow after parsing.  Tell Zed that you sent something from a handler that went %ld past the end in the parser.", pe - p);
 
     if ( cs == 
-#line 389 "src/control.c"
+#line 409 "src/control.c"
 0
-#line 116 "src/control.rl"
+#line 126 "src/control.rl"
  ) {
         check(pe - p > 0, "Major erorr in the parser, tell Zed.");
         return bformat("{\"error\": \"parsing error at: ...%s\"}", bdata(req) + (pe - p));
@@ -401,19 +421,22 @@ error:
     return bfromcstr("{\"error\": \"fatal error\"}");
 }
 
+struct tagbstring DEFAULT_CONTROL_SPEC = bsStatic("ipc://run/control");
 
 void Control_task(void *v)
 {
     int rc = 0;
     bstring req = NULL;
     bstring rep = NULL;
+    bstring spec = Setting_get_str("control_port", &DEFAULT_CONTROL_SPEC);
     taskname("control");
 
-    debug("Setting up control socket in run/control");
+    log_info("Setting up control socket in at %s", bdata(spec));
+
     void *sock = mqsocket(ZMQ_REP);
     check(sock != NULL, "Can't create contol socket.");
 
-    rc = zmq_bind(sock, "ipc://run/control");
+    rc = zmq_bind(sock, bdata(spec));
     check(rc == 0, "Failed to bind control port to run/control.");
 
     while(CONTROL_RUNNING) {

@@ -561,12 +561,15 @@ int connection_identify_request(int event, void *data)
 
     if(Request_is_socket(conn->req)) {
         Register_connect(conn->fd, CONN_TYPE_SOCKET);
+        taskname("SOCKET");
         return SOCKET_REQ;
     } else if(Request_is_json(conn->req)) {
+        taskname("MSG");
         Register_connect(conn->fd, CONN_TYPE_MSG);
         return MSG_REQ;
     } else if(Request_is_http(conn->req)) {
         Register_connect(conn->fd, CONN_TYPE_HTTP);
+        taskname("HTTP");
         return HTTP_REQ;
     } else {
         error_response(conn->fd, 500, "Invalid code branch, tell Zed.");

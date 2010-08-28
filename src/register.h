@@ -45,6 +45,8 @@ enum {
     CONN_TYPE_SOCKET
 };
 
+#define MAX_REGISTERED_FDS  64 * 1024
+
 typedef struct Registration {
     uint8_t conn_type;
     uint16_t id;

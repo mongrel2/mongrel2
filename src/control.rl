@@ -81,10 +81,20 @@ static int CONTROL_RUNNING = 1;
 
     action kill {
         int id = atoi(p);
-        check(id >= 0, "Invalid id given: %d", id);
-        int fd = Register_fd_for_id(id);
-        fdclose(fd);
-        reply = bformat("{\"result\": \"killed %d\"}", id);
+
+        if(id < 0 || id > MAX_REGISTERED_FDS) {
+            reply = bformat("{\"error\": \"invalid id: %d\"}", id);
+        } else {
+            int fd = Register_fd_for_id(id);
+
+            if(fd > 0) {
+                fdclose(fd);
+                reply = bformat("{\"result\": \"killed %d\"}", id);
+            } else {
+                reply = bformat("{\"error\": \"does not exist: %d\"}", id);
+            }
+        }
+
         fbreak;
     }
 
@@ -126,19 +136,22 @@ error:
     return bfromcstr("{\"error\": \"fatal error\"}");
 }
 
+struct tagbstring DEFAULT_CONTROL_SPEC = bsStatic("ipc://run/control");
 
 void Control_task(void *v)
 {
     int rc = 0;
     bstring req = NULL;
     bstring rep = NULL;
+    bstring spec = Setting_get_str("control_port", &DEFAULT_CONTROL_SPEC);
     taskname("control");
 
-    debug("Setting up control socket in run/control");
+    log_info("Setting up control socket in at %s", bdata(spec));
+
     void *sock = mqsocket(ZMQ_REP);
     check(sock != NULL, "Can't create contol socket.");
 
-    rc = zmq_bind(sock, "ipc://run/control");
+    rc = zmq_bind(sock, bdata(spec));
     check(rc == 0, "Failed to bind control port to run/control.");
 
     while(CONTROL_RUNNING) {
