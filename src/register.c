@@ -129,3 +129,20 @@ int Register_id_for_fd(int fd)
     return REGISTRATIONS[fd].id;
 }
 
+
+bstring Register_info()
+{
+    int i = 0;
+    bstring result = bfromcstr("{");
+    time_t now = time(NULL);
+
+    for(i = 0; i < MAX_REGISTERED_FDS; i++) {
+        if(REGISTRATIONS[i].conn_type) {
+            bformata(result, "\"%d\":%d,", REGISTRATIONS[i].id,
+                    now - REGISTRATIONS[i].last_ping);
+        }
+    }
+
+    bformata(result, "\"total\": %d}", i);
+    return result;
+}

@@ -1,8 +1,10 @@
 #include "control.h"
 #include "bstring.h"
 #include "task/task.h"
+#include "register.h"
 #include "dbg.h"
 #include <stdlib.h>
+#include <time.h>
 
 
 void bstring_free(void *data, void *hint)
@@ -58,16 +60,40 @@ error:
     return;
 }
 
+static int CONTROL_RUNNING = 1;
 
 %%{
     machine ControlParser;
 
+    action mark { mark = fpc; }
+
     action status_tasks { reply = taskgetinfo(); fbreak; }
-    action status_net { reply = bfromcstr("not ready"); fbreak; }
+    action status_net { reply = Register_info(); fbreak; }
 
-    StatusCmd = "status" space* ("tasks" @status_tasks | "net" @status_net);
+    action control_stop {
+        reply = bfromcstr("{\"msg\": \"stopping control port\"}");
+        CONTROL_RUNNING = 0; fbreak;
+    }
 
-    main := StatusCmd;
+    action time {
+        reply = bformat("{\"time\": %d}", (int)time(NULL)); fbreak;
+    }
+
+    action kill {
+        int id = atoi(p);
+        check(id >= 0, "Invalid id given: %d", id);
+        int fd = Register_fd_for_id(id);
+        fdclose(fd);
+        reply = bformat("{\"result\": \"killed %d\"}", id);
+        fbreak;
+    }
+
+    Status = "status" space+ ("tasks" @status_tasks | "net" @status_net);
+    Control = "control stop" @control_stop;
+    Time = "time" @time;
+    Kill = "kill" space+ digit+ >mark @kill;
+
+    main := Status | Control | Time | Kill;
 }%%
 
 %% write data;
@@ -76,6 +102,7 @@ bstring Control_execute(bstring req)
 {
     const char *p = bdata(req);
     const char *pe = p+blength(req);
+    const char *mark = NULL;
     int cs = 0;
     bstring reply = NULL;
 
@@ -114,7 +141,7 @@ void Control_task(void *v)
     rc = zmq_bind(sock, "ipc://run/control");
     check(rc == 0, "Failed to bind control port to run/control.");
 
-    while(1) {
+    while(CONTROL_RUNNING) {
         taskstate("waiting");
         
         req = read_message(sock);
@@ -127,6 +154,7 @@ void Control_task(void *v)
         check(rep, "Faild to create a reply.");
     }
 
+    log_info("Control port exiting.");
     taskexit(0);
 
 error:

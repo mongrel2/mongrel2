@@ -373,7 +373,7 @@ void Config_stop_handlers()
 {
     tst_traverse(LOADED_HANDLERS, shutdown_handlers, NULL);
     taskyield();
-    taskdelay(1000);
+    taskdelay(100);
     tst_traverse(LOADED_HANDLERS, close_handlers, NULL);
 
     tst_destroy(LOADED_HANDLERS);

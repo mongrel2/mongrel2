@@ -37,6 +37,7 @@
 
 #include <time.h>
 #include <stdint.h>
+#include <bstring.h>
 
 enum {
     CONN_TYPE_HTTP=1,
@@ -63,5 +64,7 @@ int Register_fd_exists(int fd);
 int Register_id_for_fd(int fd);
 
 int Register_fd_for_id(int id);
+
+bstring Register_info();
 
 #endif
