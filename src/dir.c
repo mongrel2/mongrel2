@@ -450,8 +450,6 @@ static inline bstring Dir_calculate_response(Request *req, FileRecord *file)
     return &HTTP_500;
 }
 
-static struct tagbstring DEV_NULL = bsStatic("/dev/null");
-
 int Dir_serve_file(Dir *dir, Request *req, int fd)
 {
     FileRecord *file = NULL;
@@ -467,10 +465,6 @@ int Dir_serve_file(Dir *dir, Request *req, int fd)
         rc = Response_send_status(fd, &HTTP_405);
         check_debug(rc == blength(&HTTP_405), "Failed to send 405 to client.");
         return -1;
-    } else if(bisstemeqblk(dir->prefix, bdata(&DEV_NULL), blength(&DEV_NULL))) {
-        debug("/dev/null is better than MongoDB!");
-        rc = Response_send_status(fd, &HTTP_205);
-        check(rc != -1, "Awww, they left before we can play joke!");
     } else {
         file = Dir_resolve_file(dir, path);
         resp = Dir_calculate_response(req, file);
