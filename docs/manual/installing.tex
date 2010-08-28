@@ -22,7 +22,7 @@ To get everything working you will need the following dependencies:
 
 \begin{itemize}
 \item GNU make (gmake).
-\item \href{http://zeromq.org}{ZeroMQ} for the messaging.
+\item \href{http://zeromq.org}{ZeroMQ 2.0.8} for the messaging.
 \item \href{http://python.org}{Python 2.6} for the m2sh management and examples.
 \item \href{http://www.sqlite.org/}{SQLite3} and make sure \emph{Python} has the ability to access SQLite3.
 \item \href{http://pypi.python.org/pypi/distribute}{distribute} and \href{http://pypi.python.org/pypi/pip/0.7.2}{pip}.
@@ -49,9 +49,9 @@ delete one directory and you're fine.
 \begin{code}{Installing Dependencies on ArchLinux}
 \begin{lstlisting}
 # install ZeroMQ
-> wget http://www.zeromq.org/local--files/area:download/zeromq-2.0.7.tar.gz
-> tar -xzvf zeromq-2.0.7.tar.gz
-> cd zeromq-2.0.7/
+> wget http://www.zeromq.org/local--files/area:download/zeromq-2.0.8.tar.gz
+> tar -xzvf zeromq-2.0.8.tar.gz
+> cd zeromq-2.0.8/
 > ./configure
 > make
 > sudo make install

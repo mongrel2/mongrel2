@@ -527,8 +527,8 @@
   <ul class="itemize1">
     <li class="itemize">GNU make (gmake).
 
-    <li class="itemize"><a href="http://zeromq.org">ZeroMQ</a> for
-    the messaging.
+    <li class="itemize"><a href="http://zeromq.org">ZeroMQ
+    2.0.8</a> for the messaging.
 
     <li class="itemize"><a href="http://python.org">Python 2.6</a>
     for the m2sh management and examples.
@@ -628,7 +628,7 @@
       "pcrr7t-x-x-90">download</span><span class=
       "pcrr7t-x-x-90">/</span><span class=
       "pcrr7t-x-x-90">zeromq</span><span class=
-      "pcrr7t-x-x-90">-2.0.7.</span><span class=
+      "pcrr7t-x-x-90">-2.0.8.</span><span class=
       "pcrr7t-x-x-90">tar</span><span class=
       "pcrr7t-x-x-90">.</span><span class=
       "pcrr7t-x-x-90">gz</span><span class=
@@ -643,7 +643,7 @@
       "pcrr7t-x-x-90">xzvf</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">zeromq</span><span class=
-      "pcrr7t-x-x-90">-2.0.7.</span><span class=
+      "pcrr7t-x-x-90">-2.0.8.</span><span class=
       "pcrr7t-x-x-90">tar</span><span class=
       "pcrr7t-x-x-90">.</span><span class=
       "pcrr7t-x-x-90">gz</span><span class=
@@ -655,7 +655,7 @@
       "pcrr7t-x-x-90">cd</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">zeromq</span><span class=
-      "pcrr7t-x-x-90">-2.0.7/</span><span class=
+      "pcrr7t-x-x-90">-2.0.8/</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
       <span class="label"><a id="x1-12007r5" name=
       "x1-12007r5"></a></span><span class=
@@ -5084,7 +5084,7 @@
     "pcrro7t-">base</span> of <span class=
     "pcrro7t-">chat</span><span class=
     "pcrro7t-">_demo</span><span class="pcrro7t-">_dir</span> to
-    <span class="pcrb7t-">'static/chatdemo'</span>, which
+    <span class="pcrb7t-">'static/chatdemo/'</span>, which
     we'll setup at the end.
 
     <li class="enumerate" id="x1-43006x3">Modify the server
