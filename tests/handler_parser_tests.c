@@ -7,18 +7,18 @@ FILE *LOG_FILE = NULL;
 
 int test_parse(const char *test, int target_count)
 {
-    HandlerParser parser;
+    HandlerParser *parser = HandlerParser_create(128);
 
     bstring T1 = bfromcstr(test);
 
-    int rc = HandlerParser_execute(&parser, bdata(T1), blength(T1));
+    int rc = HandlerParser_execute(parser, bdata(T1), blength(T1));
     debug("BODY %d long at %s with rc: %d, uuid: %s, target_count: %d",
-            (int)parser.body_length, parser.body_start, rc, 
-            bdata(parser.uuid), (int)parser.target_count);
+            (int)parser->body_length, parser->body_start, rc, 
+            bdata(parser->uuid), (int)parser->target_count);
 
     bdestroy(T1);
 
-    return rc == 1 && target_count == parser.target_count;
+    return rc == 1 && target_count == parser->target_count;
 }
 
 #define TEST(T, C, M) mu_assert(test_parse(T, C) == 1, "Failed to parse: " #M);
