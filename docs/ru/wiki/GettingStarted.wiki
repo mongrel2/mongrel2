@@ -1,0 +1,109 @@
+﻿<h1>Mongrel2: Быстрый старт</h1>
+
+<p>В этой странице описывается минимальный набор команд, чтобы запустить Mongrel2.
+Здесь приведены только команды без объяснений. Если вам нужны детальные инструкции,
+то читайте <a href="/doc/tip/docs/manual/book.wiki">Руководство пользователя Mongrel2 (HTML)</a> &mdash;
+документ, охватывающий всё, от запуска до написания своих обработчиков.
+</p>
+
+<p>Предполагается, что вы знакомы с линуксом и знаете, что делаете, когда выполняете команды в командной строке.</p>
+
+<h1>Установка зависимостей</h1>
+
+<p>Вот как это делается в ArchLinux:</p>
+
+<pre>
+# установка ZeroMQ 
+wget http://www.zeromq.org/local--files/area:download/zeromq-2.0.7.tar.gz 
+tar -xzvf zeromq-2.0.7.tar.gz 
+cd zeromq-2.0.7/ 
+./configure 
+make 
+sudo make install 
+ 
+# установка питона
+sudo pacman -S python 
+ 
+# установка sqlite3 
+sudo pacman -S sqlite3 
+ 
+# устанока пакетов distribute и pip 
+sudo pacman -S python-pip 
+sudo pip install distribute 
+ 
+# установка PyZMQ c github'а
+sudo pacman -S git 
+git clone http://github.com/zeromq/pyzmq.git 
+sudo python setup.py install 
+ 
+# web.py 
+sudo pip install web.py
+</pre>
+
+
+<h1>Загрузка исходников</h1>
+
+<p>Самый быстрый путь &mdash; слить файл tar.bz2:</p>
+
+<pre>
+wget http://mongrel2.org/static/mongrel2-1.0beta4.tar.bz2
+</pre>
+
+
+<h1>Сборка сервера</h1>
+
+<p>Необходимо скомпилировать и установить Mongrel2:</p>
+
+<pre>
+tar -xjvf mongrel2-1.0beta4.tar.bz2
+cd mongrel2_2010-08-17_011326_58fb817f8e/
+make clean all install
+</pre>
+
+<p>Номер версии в названии директории может отличаться, поскольку сервер часто обновляется.</p>
+
+
+<h1>Настройка</h1>
+
+<p>Вы можете воспользоваться файлом настроек из примеров:</p>
+
+<pre>
+cp examples/python/tests/sample_conf.py myconfig.py
+m2sh init -db myconfig.sqlite
+m2sh load -db myconfig.sqlite  -config myconfig.py
+</pre>
+
+<p><b>ЗАМЕТКА:</b> В исходниках есть файл examples/python/tests/mongrel2_org.py как пример более продвинутой конфигурации.</p>
+
+
+<h1>Запуск</h1>
+
+<p>Ну а теперь, наконец-то, можно запустить. Убедитесь, что вы всё ещё находитесь в папке mongrel2:</p>
+
+<pre>
+mkdir run logs tmp
+m2sh start -db myconfig.sqlite -host localhost
+</pre>
+
+<p>Чтобы протестировать сервер в новом окне (Alt-F2) выполните:</p>
+
+<pre>
+curl http://localhost:6767/tests/sample.html
+hi there
+</pre>
+
+
+<h1>Остановка</h1>
+
+<p>Просто нажмите CTRL-C и сервер завершит работу.</p>
+
+<p>Для управления сервером воспользуйтесь утилитой <b>m2sh</b>.
+Выполните <b>m2sh help</b>, чтобы узнать полный список команд &mdash; среди них есть те, которыми можно запустить и остановить сервер.
+</p>
+
+
+<h1>Что дальше?</h1>
+
+<p>Ну вот вы и прошли курс молодого бойца по установке и запуску веб-сервера Mongrel2.
+Дальше вам нужно ознакомиться с <a href="/doc/tip/docs/manual/book.wiki">Руководством пользователя Mongrel2 (HTML)</a>
+&mdash; в нём мы более детально описываем все нюансы работы с сервером.</p>
