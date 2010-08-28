@@ -824,6 +824,14 @@
       "x1-12024r22"></a></span><span class=
       "pcrr7t-x-x-90">&gt;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">cd</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">pyzmq</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br>
+      <span class="label"><a id="x1-12025r23" name=
+      "x1-12025r23"></a></span><span class=
+      "pcrr7t-x-x-90">&gt;</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">sudo</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">python</span><span class=
@@ -834,19 +842,19 @@
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">install</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-12025r23" name=
-      "x1-12025r23"></a></span><span class=
-      "pcrr7t-x-x-90">&nbsp;</span><br>
       <span class="label"><a id="x1-12026r24" name=
       "x1-12026r24"></a></span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br>
+      <span class="label"><a id="x1-12027r25" name=
+      "x1-12027r25"></a></span><span class=
       "pcrr7t-x-x-90">#</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">web</span><span class=
       "pcrr7t-x-x-90">.</span><span class=
       "pcrr7t-x-x-90">py</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-12027r25" name=
-      "x1-12027r25"></a></span><span class=
+      <span class="label"><a id="x1-12028r26" name=
+      "x1-12028r26"></a></span><span class=
       "pcrr7t-x-x-90">&gt;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">sudo</span><span class=
@@ -860,7 +868,7 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 79-->
+  <!--l. 80-->
 
   <p class="noindent">If you run into parts that your OS is
   missing, which is likely on Debian and SuSE systems, then
@@ -868,11 +876,11 @@
 
   <h3 class="sectionHead"><span class="titlemark">2.2</span> <a id=
   "x1-130002.2" name="x1-130002.2"></a>Building Mongrel2</h3>
-  <!--l. 86-->
+  <!--l. 87-->
 
   <p class="noindent">If everything went well you should be able to
   grab the Mongrel2 source and try building it. There's two
-  ways you can get the source code to Mongrel2: <!--l. 90-->
+  ways you can get the source code to Mongrel2: <!--l. 91-->
 
   <p class="noindent">
 
@@ -883,18 +891,18 @@
 
     <li class="enumerate" id="x1-13004x2">Grab the source .zip
     release and install it from there.
-  </ol><!--l. 95-->
+  </ol><!--l. 96-->
 
   <p class="noindent">
 
   <h4 class="subsectionHead"><span class="titlemark">2.2.1</span>
   <a id="x1-140002.2.1" name="x1-140002.2.1"></a>Using Fossil</h4>
-  <!--l. 97-->
+  <!--l. 98-->
 
   <p class="noindent">Since it's early in Mongrel2
   development, we recommend you get fossil and install it so you
   can track the latest fixes and development. Here's the
-  easiest way to do that: <!--l. 101-->
+  easiest way to do that: <!--l. 102-->
 
   <p class="noindent">
 
@@ -911,10 +919,10 @@
     <li class="enumerate" id="x1-14006x3">If you find that your
     version of fossil ends up having problems with mongrel2.org let
     us know since we might need to upgrade.
-  </ol><!--l. 110-->
+  </ol><!--l. 111-->
 
   <p class="noindent">Once you have fossil you can then get the
-  Mongrel2 source and open it up: <!--l. 112-->
+  Mongrel2 source and open it up: <!--l. 113-->
 
   <p class="noindent"><a id="x1-14007r2" name="x1-14007r2"></a>
   <hr class="float">
@@ -925,7 +933,7 @@
       "content"><span class="pplri7t-">Cloning the Mongrel2</span>
       <span class="pplri7t-">Source</span></span>
     </div><!--tex4ht:label?: x1-14007r2 -->
-    <!--l. 113-->
+    <!--l. 114-->
 
     <div class="lstlisting" id="listing-2">
       <span class="label"><a id="x1-14008r1" name=
@@ -991,7 +999,7 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 122-->
+  <!--l. 123-->
 
   <p class="noindent">Make sure you do this in order (just like
   with every set of instructions you follow) or else you'll
@@ -1004,7 +1012,7 @@
 
   <h4 class="subsectionHead"><span class="titlemark">2.2.2</span>
   <a id="x1-150002.2.2" name="x1-150002.2.2"></a>Using the .zip
-  File</h4><!--l. 131-->
+  File</h4><!--l. 132-->
 
   <p class="noindent">If you don't want to install fossil
   then you will need to get the .zip file from our site and install
@@ -1012,7 +1020,7 @@
   "pplri7t-">no guarantees</span> that this will work at all or
   that you will get a stable server. We have not made an official
   release, so using the .zip file is effectively a lame way of
-  avoiding using fossil. <!--l. 137-->
+  avoiding using fossil. <!--l. 138-->
 
   <p class="noindent">
 
@@ -1029,25 +1037,25 @@
 
     <li class="enumerate" id="x1-15008x4">Unzip this file and cd
     into the resulting directory.
-  </ol><!--l. 145-->
+  </ol><!--l. 146-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">2.3</span> <a id=
   "x1-160002.3" name="x1-160002.3"></a>Building And Installing</h3>
-  <!--l. 147-->
+  <!--l. 148-->
 
   <p class="noindent">Once you have the source ready to go you can
   build it and then install it with one command: <span class=
-  "pcrro7t-">make all install</span> <!--l. 150-->
+  "pcrro7t-">make all install</span> <!--l. 151-->
 
   <p class="noindent">There is no <span class=
   "pcrro7t-">./configure</span> for Mongrel2 since we avoid too
   many OS specific differences or shield those away with good
-  feature checks in the code. <!--l. 153-->
+  feature checks in the code. <!--l. 154-->
 
   <p class="noindent">The end result of this should be: 
-  <!--l. 155-->
+  <!--l. 156-->
 
   <p class="noindent">
 
@@ -1069,13 +1077,13 @@
 
     <li class="enumerate" id="x1-16011x5">Finally, the mongrel2
     binary gets installed.
-  </ol><!--l. 163-->
+  </ol><!--l. 164-->
 
   <p class="noindent">If any of these stages fail, then you can
   simply try to fix them and then run: <span class=
   "pcrro7t-">make</span> <span class="pcrro7t-">clean all
   install</span> which will do everything all over again. 
-  <!--l. 166-->
+  <!--l. 167-->
 
   <p class="noindent">The most common error is if you didn't
   install pip or distribute and insist on using your own
@@ -1084,19 +1092,19 @@
   Linux's stupidity about versions and how it installs
   Python. If you don't want to use the package system every
   other Python programmer uses, then you're on your own. 
-  <!--l. 173-->
+  <!--l. 174-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">2.4</span> <a id=
   "x1-170002.4" name="x1-170002.4"></a>Testing The
-  Installation</h3><!--l. 175-->
+  Installation</h3><!--l. 176-->
 
   <p class="noindent">When you are done, you probably want to make
   sure that it installed correctly. There's a test
   configuration file in <span class=
   "pcrb7t-">tests/config.sqlite</span> that you can use to try it
-  out: <!--l. 179-->
+  out: <!--l. 180-->
 
   <p class="noindent"><a id="x1-17001r3" name="x1-17001r3"></a>
   <hr class="float">
@@ -1107,7 +1115,7 @@
       "content"><span class="pplri7t-">First Test</span>
       <span class="pplri7t-">Run</span></span>
     </div><!--tex4ht:label?: x1-17001r3 -->
-    <!--l. 180-->
+    <!--l. 181-->
 
     <div class="lstlisting" id="listing-3">
       <span class="label"><a id="x1-17002r1" name=
@@ -1175,14 +1183,14 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 189-->
+  <!--l. 190-->
 
   <p class="noindent">That's it. Just hit CTRL-c for now and
   we'll get into playing with this setup later.
 
   <h3 class="sectionHead"><span class="titlemark">2.5</span> <a id=
   "x1-180002.5" name="x1-180002.5"></a>Upgrading from trunk</h3>
-  <!--l. 193-->
+  <!--l. 194-->
 
   <p class="noindent"><a id="x1-18001r4" name="x1-18001r4"></a>
   <hr class="float">
@@ -1193,7 +1201,7 @@
       "content"><span class="pplri7t-">Update your</span>
       <span class="pplri7t-">checkout</span></span>
     </div><!--tex4ht:label?: x1-18001r4 -->
-    <!--l. 194-->
+    <!--l. 195-->
 
     <div class="lstlisting" id="listing-4">
       <span class="label"><a id="x1-18002r1" name=
@@ -1228,13 +1236,13 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 201-->
+  <!--l. 202-->
 
   <p class="noindent">Don't forget <span class=
   "pcrro7t-">make clean all install</span>.
 
   <h3 class="sectionHead"><span class="titlemark">2.6</span> <a id=
-  "x1-190002.6" name="x1-190002.6"></a>Up Next</h3><!--l. 206-->
+  "x1-190002.6" name="x1-190002.6"></a>Up Next</h3><!--l. 207-->
 
   <p class="noindent">You now should have a working Mongrel2 system
   installed and the m2sh configuration interface ready to go. In
@@ -3599,7 +3607,7 @@
 
     <li class="itemize"><span class=
     "obeylines-h verb pcrr7t-">&#91;^set&#93;</span> Inverse character set,
-    so &#91;<img src="book-final237x.png" alt="^0 " class="circ">-9&#93; is
+    so &#91;<img src="book-final239x.png" alt="^0 " class="circ">-9&#93; is
     anything but digits.
 
     <li class="itemize"><span class=
