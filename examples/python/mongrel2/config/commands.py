@@ -396,6 +396,38 @@ def running_command(db=None, host="", name=""):
         print "NO: Mongrel2 server %s NOT at PID %d" % (host, pid)
 
 
+def control_command(db=None, host="", name=""):
+    """
+    Start a simple control console for working with mongrel2.
+    This is *very* bare bones at the moment but should improve.
+
+        m2sh control -db config.sqlite -host localhost
+        m2sh control -db config.sqlite -name test
+    """
+    store = model.load_db("sqlite:" + db)
+    import zmq
+
+    CTX = zmq.Context()
+
+    results = store.find(model.Setting, model.Setting.key == unicode("control_port"))
+    addr = results[0].value if results.count() > 1 else "ipc://run/control"
+
+    ctl = CTX.socket(zmq.REQ)
+
+    print "CONNECTING..."
+    ctl.connect(addr)
+
+    try:
+        while True:
+            cmd = raw_input("> ")
+            ctl.send(cmd)
+            print ctl.recv()
+
+    except EOFError:
+        ctl.close()
+
+
+
 def get_server_pid(db, host = None, name = None):
     store = model.load_db("sqlite:" + db)
     results = []
@@ -419,4 +451,5 @@ def get_server_pid(db, host = None, name = None):
     pid = int(open(pid_file, 'r').read())
 
     return pid
+
 

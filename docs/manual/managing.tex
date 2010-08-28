@@ -521,6 +521,85 @@ Basically, there's nowhere to hide.  Mongrel2 will help operations figure out wh
 get fired the next time Twitter goes down.
 
 
+\section{Control Port}
+
+Just before the release of 1.0 we added a feature called the "Control Port" which
+lets you connect to a running Mongrel2 server over a unix (domain) socket and
+give it control commands.  These commands let you get the status of running
+tasks, lists of currently connected sockets and how long they've been connected,
+the server's current time, and kill a connection.  Using this control port you
+can then implement any monitoring and timeout policies you want and provide 
+better status.
+
+By default the control port is in your chroot at run/control but you can set
+the setting \ident{control\_port} to change this.  You can actually change it 
+to any ZeroMQ valid spec you want, although you're advised to use IPC for security.
+
+Once Mongrel2 starts you can then use \file{m2sh} to connect to Mongrel2 and 
+control it using the simple command language.  Currently what you get back is
+very raw, but it will improve as we work on the control port and what it does.
+
+The list of commands you can issue are:
+
+\begin{description}
+\item[status tasks] Dumps a JSON formatted dict (object) of all the currently
+    running tasks and what they're doing.  Think of it like an internal \file{ps}
+    command.
+\item[status net] Dumps a JSON dict that matches connections IDs (same ones your
+        handlers get) to the seconds since their last ping.  In the case of an
+        HTTP connection this is how long they've been connected.  In the case
+        of a JSON socket this is the last time a ping message was received.
+\item[time] Prints the unix time the server thinks it's using.  Useful for synching.
+\item[kill ID] Does a forced close on the socket that is at this ID from the \ident{status net}
+    command.  This is a rather violent way to kill a connection so don't do it that
+    often, but if you're overloaded then this is where to go.
+\item[control stop] Shuts down the control port permanently in case you want to keep
+    it from being accessed for some reason.
+\end{description}
+
+You then use the control port by running \ident{m2sh}:
+
+\begin{Verbatim}
+m2sh control -db config.sqlite -name test
+CONNECTING...
+> status net
+{"total": 0}
+> time
+{"time": 1282980306}
+\end{Verbatim}
+
+As we work on this feature more we'll have a nicer interface to it.
+If you wanted to connect on your own, then this is the simple Python
+script showing how to do it:
+
+
+\begin{code}{Python Control Port Example}
+\begin{lstlisting}
+import zmq
+
+CTX = zmq.Context()
+
+addr = "ipc://run/control"
+
+ctl = CTX.socket(zmq.REQ)
+
+print "CONNECTING"
+ctl.connect(addr)
+
+while True:
+    cmd = raw_input("> ")
+
+    ctl.send(cmd)
+
+    print ctl.recv()
+
+ctl.close()
+\end{lstlisting}
+\end{code}
+
+You obviously don't need to do this, but should you want to do
+something special like a management interface, this is your start.
+
 \section{Tweakable Expert Settings}
 
 Many of Mongrel2's internal settings are configurable using the settings system.
@@ -546,6 +625,7 @@ what the settings are so you can debug them if they cause problems.  The list
 of available settings are:
 
 \begin{description}
+\item[control\_port=ipc://run/control] This is where Mongrel2 will listen with 0MQ for control messages.  You should use ipc:// for the spec so that only a local user with file access can get at it.
 \item[limits.buffer\_size=2 * 1024] Internal IO buffers used for things like proxying and handling requests.  This is a \emph{very} conservative setting, so if you head HTTP headers greater than this, you'll want to increase this setting.  You'll also want to shoto whoever is sending you those requests because the average is 400-600 bytes.
 \item[limits.connection\_stack\_size=32 * 1024] Size of the stack used for connection coroutines.  If you're trying to cram a ton of connections into very little ram, see how low this can go.
 \item[limits.content\_length=20 * 1024] Maximum allowed content length on submitted requests.  This is right now a hard limit so requests are rejected that go over it.  Later versions of Mongrel2 will use an upload mechanism that will allow any size upload.
@@ -558,7 +638,6 @@ of available settings are:
 \item[limits.host\_name=256] Max hostname for Host specifiers and other DNS related settings.
 \item[limits.mime\_ext\_len=128] Maximum length of MIME type extensions.
 \item[limits.url\_path=256] Max URL paths, does not include query string, just path.
-\item[status\_file=/tmp/mongrel2\_status.txt] When you run as root this will put it in your CHROOT/tmp/ directory, but when you run as you it puts it in the /tmp.  Change this to something better if you run multiple servers.
 \item[superpoll.hot\_dividend=4] Ratio of the total (like 1/4th, 1/8th) that should be in the hot selection.  Set this higher if you have lots of idle connections, set it lower if you have more active connections.
 \item[superpoll.max\_fd=10 * 1024] Maximum possible open files.  Do not set this above 64 * 1024, and expect it to take a bit while Mongrel2 sets up constant structures.
 \item[upload.temp\_store=None] This is not set by default.  If you want large requests to reach your handlers, then set this to a directory they can access the results, and make sure they can handle it.  Read about it in the Hacking section under Uploads.  The file has to end in XXXXXX chars to work (read man mkstemp).
