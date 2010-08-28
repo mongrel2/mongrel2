@@ -4,6 +4,7 @@
 
 <ul>
 
+<li><a href="http://innergysoftware.com/">Victor Olteanu, Innergy Software</a>
 <li><a href="http://ThinkCode.TV">ThinkCode.TV</a></li>
 <li><a href="http://envato.com/">Envato</a></li>
 <li><a href="http://highgroove.com/">Highgroove Studios</a></li>
