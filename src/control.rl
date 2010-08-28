@@ -5,6 +5,7 @@
 #include "dbg.h"
 #include <stdlib.h>
 #include <time.h>
+#include "setting.h"
 
 
 void bstring_free(void *data, void *hint)

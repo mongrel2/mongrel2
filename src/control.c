@@ -7,6 +7,7 @@
 #include "dbg.h"
 #include <stdlib.h>
 #include <time.h>
+#include "setting.h"
 
 
 void bstring_free(void *data, void *hint)
@@ -65,11 +66,11 @@ error:
 static int CONTROL_RUNNING = 1;
 
 
-#line 107 "src/control.rl"
+#line 108 "src/control.rl"
 
 
 
-#line 73 "src/control.c"
+#line 74 "src/control.c"
 static const int ControlParser_start = 1;
 static const int ControlParser_first_final = 34;
 static const int ControlParser_error = 0;
@@ -77,7 +78,7 @@ static const int ControlParser_error = 0;
 static const int ControlParser_en_main = 1;
 
 
-#line 110 "src/control.rl"
+#line 111 "src/control.rl"
 
 bstring Control_execute(bstring req)
 {
@@ -90,14 +91,14 @@ bstring Control_execute(bstring req)
     debug("RECEIVED CONTROL COMMAND: %s", bdata(req));
 
     
-#line 94 "src/control.c"
+#line 95 "src/control.c"
 	{
 	cs = ControlParser_start;
 	}
 
-#line 122 "src/control.rl"
+#line 123 "src/control.rl"
     
-#line 101 "src/control.c"
+#line 102 "src/control.c"
 	{
 	switch ( cs )
 	{
@@ -179,22 +180,22 @@ case 12:
 		goto tr15;
 	goto st0;
 tr15:
-#line 73 "src/control.rl"
+#line 74 "src/control.rl"
 	{
         reply = bfromcstr("{\"msg\": \"stopping control port\"}");
         CONTROL_RUNNING = 0; {p++; cs = 34; goto _out;}
     }
 	goto st34;
 tr30:
-#line 71 "src/control.rl"
+#line 72 "src/control.rl"
 	{ reply = Register_info(); {p++; cs = 34; goto _out;} }
 	goto st34;
 tr34:
-#line 70 "src/control.rl"
+#line 71 "src/control.rl"
 	{ reply = taskgetinfo(); {p++; cs = 34; goto _out;} }
 	goto st34;
 tr37:
-#line 78 "src/control.rl"
+#line 79 "src/control.rl"
 	{
         reply = bformat("{\"time\": %d}", (int)time(NULL)); {p++; cs = 34; goto _out;}
     }
@@ -202,7 +203,7 @@ tr37:
 st34:
 	p += 1;
 case 34:
-#line 206 "src/control.c"
+#line 207 "src/control.c"
 	goto st0;
 st13:
 	p += 1;
@@ -242,9 +243,9 @@ case 17:
 		goto st17;
 	goto st0;
 tr20:
-#line 68 "src/control.rl"
+#line 69 "src/control.rl"
 	{ mark = p; }
-#line 82 "src/control.rl"
+#line 83 "src/control.rl"
 	{
         int id = atoi(p);
 
@@ -265,7 +266,7 @@ tr20:
     }
 	goto st35;
 tr38:
-#line 82 "src/control.rl"
+#line 83 "src/control.rl"
 	{
         int id = atoi(p);
 
@@ -288,7 +289,7 @@ tr38:
 st35:
 	p += 1;
 case 35:
-#line 292 "src/control.c"
+#line 293 "src/control.c"
 	if ( 48 <= (*p) && (*p) <= 57 )
 		goto tr38;
 	goto st0;
@@ -400,14 +401,14 @@ case 33:
 	_out: {}
 	}
 
-#line 123 "src/control.rl"
+#line 124 "src/control.rl"
 
     check(p <= pe, "Buffer overflow after parsing.  Tell Zed that you sent something from a handler that went %ld past the end in the parser.", pe - p);
 
     if ( cs == 
-#line 409 "src/control.c"
+#line 410 "src/control.c"
 0
-#line 126 "src/control.rl"
+#line 127 "src/control.rl"
  ) {
         check(pe - p > 0, "Major erorr in the parser, tell Zed.");
         return bformat("{\"error\": \"parsing error at: ...%s\"}", bdata(req) + (pe - p));
