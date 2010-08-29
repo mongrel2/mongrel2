@@ -65,7 +65,8 @@ const char *DIR_REDIRECT_FORMAT = "HTTP/1.1 301 Moved Permanently\r\n"
     "Server: " VERSION
     "\r\n\r\n";
 
-const char *RFC_822_TIME = "%a, %d %b %Y %H:%M:%S %z";
+// TODO: confirm that we are actually doing the GMT time right
+const char *RFC_822_TIME = "%a, %d %b %Y %H:%M:%S GMT";
 
 static int filerecord_cache_lookup(void *data, void *key) {
     bstring request_path = (bstring) key;
