@@ -713,6 +713,13 @@ What's happening is the following process:
 \item Your handler then gets this final request message that has both the \ident{X-Mongrel2-Upload-Start} and \ident{X-Mongrel2-Upload-Done} headers, which you can then use to read the upload contents.  You should also make sure the headers match to prevent someone forging completed uploads.
 \end{enumerate}
 
+\begin{aside}
+Remember, when you run Mongrel2 it will store the file relative to its \ident{chroot} setting.  In testing you probably aren't
+running Mongrel2 as root so it works fine.  You just then have to make sure that your handler know to look for the file in the
+same place.  So if you have \file{/var/www/mongrel2.org} for your \ident{chroot} and \file{/uploads/file.XXXXXX} then the
+actual file will be in \file{/var/www/mongrel2.org/uploads/file.XXXXXX}.  The good thing is you can read the config database
+in your handlers and find out all this information as well.
+\end{aside}
 
 \section{MP3 Streaming Demo}
 

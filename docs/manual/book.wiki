@@ -212,16 +212,16 @@
     "QQ2-1-118" name="QQ2-1-118">Async File Upload
     Demo</a></span><br>
     &nbsp;<span class="sectionToc">5.6 <a href="#x1-740005.6" id=
-    "QQ2-1-121" name="QQ2-1-121">MP3 Streaming Demo</a></span><br>
+    "QQ2-1-122" name="QQ2-1-122">MP3 Streaming Demo</a></span><br>
     &nbsp;<span class="sectionToc">5.7 <a href="#x1-750005.7" id=
-    "QQ2-1-124" name="QQ2-1-124">Chat Demo</a></span><br>
+    "QQ2-1-125" name="QQ2-1-125">Chat Demo</a></span><br>
     &nbsp;<span class="sectionToc">5.8 <a href="#x1-760005.8" id=
-    "QQ2-1-125" name="QQ2-1-125">Other Language APIs</a></span><br>
+    "QQ2-1-126" name="QQ2-1-126">Other Language APIs</a></span><br>
     &nbsp;<span class="sectionToc">5.9 <a href="#x1-770005.9" id=
-    "QQ2-1-126" name="QQ2-1-126">Writing Your Own
+    "QQ2-1-127" name="QQ2-1-127">Writing Your Own
     m2sh</a></span><br>
-    <span class="chapterToc">6 <a href="#x1-780006" id="QQ2-1-127"
-    name="QQ2-1-127">Contributing</a></span>
+    <span class="chapterToc">6 <a href="#x1-780006" id="QQ2-1-128"
+    name="QQ2-1-128">Contributing</a></span>
   </div>
 
   <h2 class="chapterHead"><a id="x1-2000" name=
@@ -11269,11 +11269,40 @@
     "pcrro7t-">X-Mongrel2-Upload-Done</span> headers, which you can
     then use to read the upload contents. You should also make sure
     the headers match to prevent someone forging completed uploads.
-  </ol>
+  </ol><!--l. 717-->
+
+  <p class="noindent"><a id="x1-73065r11" name="x1-73065r11"></a>
+  <hr class="float">
+
+  <div class="float">
+    <div class="caption">
+      <span class="id">Note 11:</span> <span class=
+      "content pplri7t-">R</span>
+    </div><!--tex4ht:label?: x1-73065r11 -->
+
+    <div class="quote">
+      <!--l. 717-->
+
+      <p class="indent">emember, when you run Mongrel2 it will
+      store the file relative to its <span class=
+      "pcrro7t-">chroot</span> setting. In testing you probably
+      aren't running Mongrel2 as root so it works fine. You
+      just then have to make sure that your handler know to look
+      for the file in the same place. So if you have <span class=
+      "pcrb7t-">/var/www/mongrel2.org</span> for your <span class=
+      "pcrro7t-">chroot</span> and <span class=
+      "pcrb7t-">/uploads/file.XXXXXX</span> then the actual file
+      will be in <span class=
+      "pcrb7t-">/var/www/mongrel2.org/uploads/file.XXXXXX</span>.
+      The good thing is you can read the config database in your
+      handlers and find out all this information as well.
+    </div>
+  </div>
+  <hr class="endfloat">
 
   <h3 class="sectionHead"><span class="titlemark">5.6</span> <a id=
   "x1-740005.6" name="x1-740005.6"></a>MP3 Streaming Demo</h3>
-  <!--l. 719-->
+  <!--l. 726-->
 
   <p class="noindent">The next example is a very simple and, well,
   kind of poorly implemented MP3 streaming demo that uses the ICY
@@ -11281,14 +11310,14 @@
   designed before HTTP was totally baked and probably by people who
   don't really get HTTP. It works in an odd way of having
   meta-data sent at specific sized intervals so the client can
-  display an update to the meta-data. <!--l. 726-->
+  display an update to the meta-data. <!--l. 733-->
 
   <p class="noindent">The mp3streamer demo creates a streaming
   system by having a thread that receives requests for connections,
   and then another thread that sends the current data to all
   currently connected clients. Rather than go through all the code,
   you can take a look at the main file and see how simple it is
-  once you get the streaming thread right: <!--l. 733-->
+  once you get the streaming thread right: <!--l. 740-->
 
   <p class="noindent"><a id="x1-74001r34" name="x1-74001r34"></a>
   <hr class="float">
@@ -11299,7 +11328,7 @@
       "content"><span class="pplri7t-">Base mp3stream</span>
       <span class="pplri7t-">Code</span></span>
     </div><!--tex4ht:label?: x1-74001r34 -->
-    <!--l. 734-->
+    <!--l. 741-->
 
     <div class="lstinputlisting">
       <a id="x1-74002" name="x1-74002"></a> <span class=
@@ -11854,7 +11883,7 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 737-->
+  <!--l. 744-->
 
   <p class="noindent">Walking through this example is fairly easy,
   assuming you just trust that the streaming thread stuff works:
@@ -11885,11 +11914,11 @@
     <li class="enumerate" id="x1-74062x7">Otherwise, we add them to
     the STATE and then send the initial ICY protocol header to get
     things going.
-  </ol><!--l. 756-->
+  </ol><!--l. 763-->
 
   <p class="noindent">That is the base of it, and if you point
   mplayer at it (which is the only player that works, really) you
-  should hear it play: <!--l. 759-->
+  should hear it play: <!--l. 766-->
 
   <div class="lstlisting" id="listing-36">
     <span class="label"><a id="x1-74063r1" name=
@@ -11902,10 +11931,10 @@
     "pcrr7t-">://</span><span class=
     "pcrr7t-">localhost</span><span class=
     "pcrr7t-">:6767/</span><span class="pcrr7t-">mp3stream</span>
-  </div><!--l. 763-->
+  </div><!--l. 770-->
 
   <p class="noindent">That is, assuming you put some mp3 files into
-  the directory and started the handler again. <!--l. 766-->
+  the directory and started the handler again. <!--l. 773-->
 
   <p class="noindent">For more on how the actual state and the
   protocol works, go look at mp3stream.py. Explaining it is far
@@ -11915,7 +11944,7 @@
   and streaming it.
 
   <h3 class="sectionHead"><span class="titlemark">5.7</span> <a id=
-  "x1-750005.7" name="x1-750005.7"></a>Chat Demo</h3><!--l. 775-->
+  "x1-750005.7" name="x1-750005.7"></a>Chat Demo</h3><!--l. 782-->
 
   <p class="noindent">The chat demo is the most involved
   demonstration, and I'm kind of getting tired of leading you
@@ -11942,16 +11971,16 @@
     <dd class="description">The configuration you created in the
     last chapter actually works with the demo, and if you've
     been following along you should have tested it.
-  </dl><!--l. 790-->
+  </dl><!--l. 797-->
 
   <p class="noindent">Hopefully, you can figure it out from the
-  code, but if not, let me know. <!--l. 793-->
+  code, but if not, let me know. <!--l. 800-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">5.8</span> <a id=
   "x1-760005.8" name="x1-760005.8"></a>Other Language APIs</h3>
-  <!--l. 795-->
+  <!--l. 802-->
 
   <p class="noindent">As mentioned before, there are currently APIs
   for Ruby, C++, and PHP in addition to the Python code:
@@ -11979,7 +12008,7 @@
 
     <dd class="description">PHP support by <a href=
     "http://github.com/winks/m2php">winks on github</a>.
-  </dl><!--l. 807-->
+  </dl><!--l. 814-->
 
   <p class="noindent">If you want to implement another language, it
   should be fairly trivial. Just base your design on the Python API
@@ -11987,13 +12016,13 @@
   the Python design if it doesn't fit the chosen language;
   creating a direct translation of the Python is fine at first, but
   try to make it idiomatic after that so people who use that
-  language feel at home and it's easy for them. <!--l. 815-->
+  language feel at home and it's easy for them. <!--l. 822-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">5.9</span> <a id=
   "x1-770005.9" name="x1-770005.9"></a>Writing Your Own m2sh</h3>
-  <!--l. 817-->
+  <!--l. 824-->
 
   <p class="noindent">The very last thing I will cover in the
   section on hacking Mongrel2 is how to write your own <span class=
@@ -12005,27 +12034,27 @@
   "x1-77001f4"></a> . What writing your own, or understanding what
   <span class="pcrro7t-">m2sh</span> is doing will do for you,
   though, is help you when you start to think about automating
-  Mongrel2 for your deployments. <!--l. 825-->
+  Mongrel2 for your deployments. <!--l. 832-->
 
   <p class="noindent">Hopefully, I may have motivated you to
   automate, automate, automate. This is why we write software. If I
   wanted to do stuff manually I'd go play guitars or juggle.
   I write software because I want a computer to do things for me,
   and nothing needs this more than managing your systems. 
-  <!--l. 830-->
+  <!--l. 837-->
 
   <p class="noindent">This is why Mongrel2 is designed the way it
   is, using the MVC model. It lets <span class=
   "pplri7t-">you</span> create your own View like m2sh, web
   interfaces, automation scripts, and anything else you need to
-  make it easier to manage more. <!--l. 834-->
+  make it easier to manage more. <!--l. 841-->
 
   <p class="noindent">If you want to write your own <span class=
   "pcrro7t-">m2sh</span> then first go have a look at the Python
   code in <span class="pcrb7t-">examples/python/config</span>. This
   is where each command lives, where the argument parsing is and,
   most importantly, the ORM model that works the raw SQLite
-  database. <!--l. 839-->
+  database. <!--l. 846-->
 
   <p class="noindent">The next thing to do is to make your tool
   craft databases and compare the results to what m2sh does for a
@@ -12034,7 +12063,7 @@
   via <span class="pcrro7t-">sqlite3</span>. After that, use your
   tool to make your own database, dump it, and then use
   <span class="pcrro7t-">diff</span> to compare your results to
-  mine. <!--l. 845-->
+  mine. <!--l. 852-->
 
   <p class="noindent">Finally, you'll need to look at two
   base schema files: <span class=
@@ -12045,12 +12074,10 @@
   "book-final9.html#fn5x7"><sup class=
   "textsuperscript">5</sup></a></span><a id="x1-77002f5" name=
   "x1-77002f5"></a> Your tool should be able to use this SQL to
-  make its database, or at least know what it does. <!--l. 852-->
+  make its database, or at least know what it does. <!--l. 859-->
 
   <p class="noindent">If you do something cool with all of this,
-  let us know. <!--l. 1-->
-
-  <p class="noindent">
+  let us know.
 
   <h2 class="chapterHead"><span class=
   "titlemark">Chapter&nbsp;6</span><br>
