@@ -1,0 +1,107 @@
+<h1>Empezando con Mongrel2</h1>
+
+<p>Esta es la forma mas rápida de empezar con Mongrel2. Nada se explica en profundidad, 
+sólo se muestra los componentes que se necesitan preparar y se muestra tambien como 
+correr unos cuantos comandos.
+Si necestás una muy buena explicación de todo esto, podés leer 
+<a href="/doc/tip/docs/manual/book.wiki">El Manual de Mongrel2 (HTML)</a> un completo manual que cubre todo desde el comienzo hasta como crear tu primer handler.</p>
+<p>Esta guía asume que sabés qué estás haciendo y sabés como usar comandos en Unix.</p>
+
+
+<h1>Construyendo las dependencias</h1>
+
+<p>Así es como lo haríamos en ArchLinux:</p>
+
+<pre>
+# instalar ZeroMQ 
+wget http://www.zeromq.org/local--files/area:download/zeromq-2.0.8.tar.gz 
+tar -xzvf zeromq-2.0.8.tar.gz 
+cd zeromq-2.0.8/ 
+./configure 
+make 
+sudo make install 
+ 
+# instalar python 
+sudo pacman -S python 
+ 
+# instalar sqlite3 
+sudo pacman -S sqlite3 
+ 
+# instalar distribute and pip 
+sudo pacman -S python-pip 
+sudo pip install distribute 
+ 
+# instalar PyZMQ from github 
+sudo pacman -S git 
+git clone http://github.com/zeromq/pyzmq.git 
+cd pyzmq
+sudo python setup.py install 
+ 
+# web.py 
+sudo pip install web.py
+</pre>
+
+
+<h1>Consiguiendo el codigo fuente</h1>
+
+<p>La forma mas rápida de hacer esto es bajar el archivo tar.bz2 desde el sitio:</p>
+
+<pre>
+wget http://mongrel2.org/static/mongrel2-1.0beta4.tar.bz2
+</pre>
+
+
+<h1>Construyendo Mongrel2</h1>
+
+<p>Ahora necesitamos compilar mongrel2</p>
+
+<pre>
+tar -xjvf mongrel2-1.0beta4.tar.bz2
+cd mongrel2_2010-08-17_011326_58fb817f8e/
+make clean all install
+</pre>
+
+<p>El número de version para tu directorio puede ser diferente porque 
+actualizamos frecuentemente</p>
+
+<h1>Configurando la primera vez</h1>
+
+<p>Ahora podés probar la configuracion mas simple y hacer que arranque:</p>
+
+<pre>
+cp examples/python/tests/sample_conf.py myconfig.py
+m2sh init -db myconfig.sqlite
+m2sh load -db myconfig.sqlite  -config myconfig.py
+</pre>
+
+<p><b>NOTA:</b>Tambien hay un examples/python/tests/mongrel2_org.py que es un ejemplo mas completo.</p>
+
+
+<h1>Corriendo Mongrel2</h1>
+
+<p>Ahora podes correr esto e intentarlo. Asegurate que todavía estás en el directorio del código fuente de mongrel2:</p>
+
+<pre>
+mkdir run logs tmp
+m2sh start -db myconfig.sqlite -host localhost
+</pre>
+
+<p>Desde otra ventana hacé:</p>
+
+<pre>
+curl http://localhost:6767/tests/sample.html
+hi there
+</pre>
+
+
+<h1>Bajando el servidor</h1>
+
+<p>Sólo necesitas hacer CTRL-C y hará exit. <b>m2sh</b> tiene otro monton de comandos y
+algunos de ellos apagan cosas o reinician. Ejecuta <b>m2sh help</b> para saber mas de esto. </p>
+
+
+<h1>Aprende más del manual</h1>
+
+<p>Este es el curso intensivo para tener Mongrel2 instalado y andando. Ahora 
+deberías ir y leer <a href="/doc/tip/docs/manual/book.wiki">El Manual de mongrel2 (HTML)</a>
+para el cual tomamos mucho tiempo en escribir y haciendolo fácil e interesante.</p>
