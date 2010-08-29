@@ -31,6 +31,7 @@ typedef struct KegogiTestArgs {
     Command *commands;
     ParamDict *defaults;
     int tests_per_thread;
+    Rendez *rendez;
     int threads_running;
     int passed;
     int failed;
@@ -55,16 +56,10 @@ void kegogitest(void *arg)
         Response_destroy(actual);
     }
 
-    // reduce the running thread count 
     args->threads_running--;
-    
-    if(args->threads_running == 0) {
-        printf("Passed %d of %d\n", args->passed, args->passed + args->failed);
-        free(args);
-        taskexitall((args->failed > 0) ? 1 : 0);
-    }
-    else
-        taskexit(0);
+    taskwakeup(args->rendez);
+
+    taskexit(0);
  }
 
 void runkegogi(void *arg)
@@ -76,6 +71,11 @@ void runkegogi(void *arg)
 
     testArgs->passed = 0;
     testArgs->failed = 0;
+
+    // calloc zeroes out the rendez, which is all that's required to initialize
+    // it (per the docs)
+    testArgs->rendez = calloc(sizeof(*testArgs->rendez), 1);
+
     testArgs->threads_running = runArgs->num_threads;
     testArgs->commands = calloc(sizeof(Command), MAX_COMMANDS);
     check_mem(testArgs->commands);
@@ -87,10 +87,22 @@ void runkegogi(void *arg)
     check(testArgs->num_commands > 0, "No kegogi tests in file");
     testArgs->tests_per_thread = 
         runArgs->iterations_per_thread * testArgs->num_commands;
-    
+
     int i;
     for(i = 0; i < runArgs->num_threads; i++)
         taskcreate(kegogitest, testArgs, 128 * 1024);
+
+    while(testArgs->threads_running > 0)
+        tasksleep(testArgs->rendez);
+
+    printf("Passed %d of %d\n", testArgs->passed,
+           testArgs->passed + testArgs->failed);
+
+    free(runArgs);
+    free(testArgs);
+
+    taskexitall((testArgs->failed > 0) ? 1 : 0);
+    
 
     free(runArgs);
     taskexit(0);

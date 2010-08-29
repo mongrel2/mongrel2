@@ -1,4 +1,4 @@
-#!./build/kegogi
+#!./build/kegogi -t 10
 # This is a very basic kegogi file
 # It sends requests using the method provided to a host with the specified
 # uri.  It then checks the status code against the one specified in the expect
