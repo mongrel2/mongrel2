@@ -10,7 +10,7 @@ ein komplettes Handbuch mit allen Informationen, vom Einstieg bis zum Schreiben 
 
 <h1>Kompilieren der Abhängigkeiten</h1>
 
-<p>So würde man es auf ArchLinux tun:</p>
+<p>So würde man es auf ArchLinux vorgehen:</p>
 
 <pre>
 # ZeroMQ installieren
@@ -75,7 +75,7 @@ m2sh init -db myconfig.sqlite
 m2sh load -db myconfig.sqlite  -config myconfig.py
 </pre>
 
-<p><b>HINWEIS:</b>Ein ausführlicheres Beispiel findest du unter examples/python/tests/mongrel2_org.py.</p>
+<p><b>HINWEIS:</b> Ein ausführlicheres Beispiel findest du unter examples/python/tests/mongrel2_org.py.</p>
 
 
 <h1>Mongrel2 ausführen</h1>
@@ -96,14 +96,14 @@ hallo
 </pre>
 
 
-<h1>Herunterfahren</h1>
+<h1>Stoppen von Mongrel2</h1>
 
-<p>Betätige CTRLC und Mongrel2 wird stoppen. <b>m2sh</b> hat mehr Optionen und manche
-starten oder stoppen Dinge. Führ <b2>m2sh help</b> aus, um mehr herauszufinden.</p>
+<p>Betätige CTRL-C und Mongrel2 wird stoppen. <b>m2sh</b> hat mehr Optionen und manche
+starten oder stoppen etwas. Führ <b2>m2sh help</b> aus, um mehr herauszufinden.</p>
 
 
 <h1>Mehr aus dem Handbuch erfahren</h1>
 
 <p>Das war der schnellste Crashkurs um Mongrel2 zum Laufen zu bringen. Jetzt solltest
-du <a href="/doc/tip/docs/manual/book.wiki">Das Mongrel2-Handbuch (HTML)</p> lesen,
-in das wir viel mehr Zeit fürs Schreiben und verschönern gesteckt haben.</p>
+du <a href="/doc/tip/docs/manual/book.wiki">Das Mongrel2-Handbuch (HTML)</a> lesen,
+in das wir viel mehr Zeit fürs Schreiben und Verschönern gesteckt haben.</p>
