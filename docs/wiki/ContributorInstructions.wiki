@@ -1,0 +1,21 @@
+<p>These are rough, so join the #mongrel2 channel on irc.freenode.org for more direct help.</p>
+
+<p>To get the source, first you need to go to <a href="http://www.fossil-scm.org/download.html">fossil downloads</a> and download a static binary for your platform.</p>
+
+<p>Next do this:</p>
+
+<pre>
+mkdir ~/fossils
+fossil clone http://mongrel2.org:44445/ ~/fossils/mongrel2.fossil
+mkdir -p ~/projects/mongrel2
+cd ~/projects/mongrel2
+fossil open ~/fossils/mongrel2.fossil
+</pre>
+
+<p>If you are registered as a committer then your clone line is actually:</p>
+
+<pre>
+fossil clone http://YOU@mongrel2.org:44445/ ~/fossils/mongrel2.fossil
+</pre>
+
+<p>After that you can check out [GettingStarted] or <a href="/doc/tip/docs/manual/book.wiki">The Manual</a> to do more.</p>
