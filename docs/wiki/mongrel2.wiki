@@ -7,7 +7,7 @@
 server that focuses on web <b>applications</b> using <em>modern</em> browser
 technologies.</p>
 
-<h2>Features</h2>
+<h2><a name="features">Features</a></h2>
 
 <ul>
     <li><b>Language Agnostic</b> with a simple backend protocol supporting <a href="http://github.com/perplexes/m2r">Ruby</a>,
@@ -28,15 +28,16 @@ technologies.</p>
     to handle that I/O, and smart reasonable defaults with zero configuration needed usually.</li>
     <li><b>Documented, Documented, Documented</b> We <a href="/doc/tip/docs/manual/book.wiki">document everything</a> in a well written manual that
     shows you how to use every feature.</li>
-    <li><b>BSD Licensed</b> and all with a <a href="/wiki?name=License">BSD 3-clause license</a>.
+    <li><b>BSD Licensed</b> and all with a <a href="/wiki?name=License">BSD 3-clause license</a>.</li>
 </ul>
 
 
 
-<h2>Download</h2>
+<h2><a name="download">Download</a></h2>
 
 <p>We are currently crafting a release process, but for now you can get the latest source
-download from (updated Thu Aug 26 02:44:53 PDT 2010):</p>
+download from (updated Sat Aug 28 07:49:00 UTC 2010):</p>
+
 
 
 <ul>
@@ -50,7 +51,7 @@ directory structure.
 </p>
 
 
-<h2>Documentation</h2>
+<h2><a name="docs">Documentation</a></h2>
 
 <p>Mongrel2 is a very well documented piece of software, as we think great docs will make you
 more productive and get you running.  The documentation is written to be easy to read, pack a lot
@@ -64,8 +65,13 @@ Currently we have:<p>
     <li><a href="/wiki?name=DesignCriticisms">DesignCriticisms</a></li>
 </ul>
 
+<h2><a name="translations">Translations</a></h2>
 
-<h2>Languages</h2>
+<p>We've started translating the manual into Russian as well, you can read the <a href="/doc/tip/docs/ru/wiki/GettingStarted.wiki">in Russian</a>
+with more to come.</p>
+
+
+<h2><a name="languages">Languages</a></h2>
 
 <p>Mongrel2 fans have written quite a few handlers already:</p>
 
@@ -85,7 +91,9 @@ Currently we have:<p>
 information on writing one for your language.</p>
 
 
-<h2>IRC and Mailing Lists</h2>
+
+
+<h2><a name="lists">IRC and Mailing Lists</a></h2>
 
 <ul>
     <li>You can join the <a href="http://librelist.com">Librelist</a> mailing list by emailing <a href="mailto:mongrel2@librelist.com">mongrel2@librelist.com</a>.</li>
@@ -95,4 +103,18 @@ information on writing one for your language.</p>
 <p>I reserve the right to boot anyone I want off these for being obnoxious, and I arbitrarily define "obnoxious" however I want.</p>
 
 
+<h2><a name="contributors">Contributors</a></h2>
+
+<p>Here's the current list of contributors of people hacking on Mongrel2:</p>
+
+<ul>
+    <li><a href="http://twitter.com/alexgartrell"><b>agartrell</b></a> works on core Mongrel2 like directory serving and the kegogi testing tool.</li>
+    <li><a href="http://twitter.com/justinlilly"><b>jlilly</b></a> will maybe hack on the Python support.</li>
+    <li><b>jsimmons</b> wrote the Lua binding and hacks on the core Mongrel2.</li>
+    <li><b>pbastov</b> works on translating things to Russian.</li>
+    <li><b>phred</b> hacks on procer and some of the core Mongrel2.</li>
+    <li><b>tordek</b> finds bugs in Mongrel2 and edited <a href="/doc/tip/docs/manual/book.wiki">the manual</a>.</li>
+    <li><a href="http://twitter.com/anderiasch"><b>wink</b></a> wrote the PHP stuff and hacks on Mongrel2.</li>
+    <li><a href="http://twitter.com/zedshaw"><b>zedshaw</b></a> started it all.</li>
+</ul>
 
