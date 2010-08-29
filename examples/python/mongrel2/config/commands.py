@@ -315,7 +315,27 @@ def log_command(db=None, count=20):
         print log
 
 
-def start_command(db=None, uuid= "", host="", name="", sudo=False, startall=False):
+def find_servers(db=None, uuid="", host="", name="", every=False):
+    """
+    Finds all the servers which match the given uuid, host or name.
+    If every is true all servers in the database will be returned.
+    """
+    store = model.begin(db)
+    servers = []
+
+    if every:
+        servers = store.find(model.Server)
+    elif uuid:
+        servers = store.find(model.Server, model.Server.uuid == unicode(uuid))
+    elif host:
+        servers = store.find(model.Server, model.Server.default_host == unicode(host))
+    elif name:
+        servers = store.find(model.Server, model.Server.name == unicode(name))
+    
+    return servers
+
+
+def start_command(db=None, uuid= "", host="", name="", sudo=False, every=False):
     """
     Does a simple start of the given server(s) identified by the uuid, host
     (default_host) parameter or the name.:
@@ -324,13 +344,13 @@ def start_command(db=None, uuid= "", host="", name="", sudo=False, startall=Fals
         m2sh start -db config.sqlite -uuid 3d815ade-9081-4c36-94dc-77a9b060b021
         m2sh start -db config.sqlite -host localhost
         m2sh start -db config.sqlite -name test
-        m2sh start -db config.sqlite -startall
+        m2sh start -db config.sqlite -every
 
 
     Give the -sudo options if you want it to start mongrel2 as root for you
     (must have sudo installed).
 
-    Give the -startall option if you want mongrel2 to launch all servers listed in
+    Give the -every option if you want mongrel2 to launch all servers listed in
     the given db.
 
     Note when using the host or name to select servers, all servers matching
@@ -338,20 +358,7 @@ def start_command(db=None, uuid= "", host="", name="", sudo=False, startall=Fals
     """
     root_enabler = 'sudo' if sudo else ''
 
-    store = model.begin(db)
-    servers = None
-
-    if startall == True:
-        servers = store.find(model.Server)
-    elif uuid:
-        servers = store.find(model.Server, model.Server.uuid == unicode(uuid))
-    elif host:
-        servers = store.find(model.Server, model.Server.default_host == unicode(host))
-    elif name:
-        servers = store.find(model.Server, model.Server.name == unicode(name))
-    else:
-        print "One of uuid, host, name or startall required to launch servers"
-        return
+    servers = find_servers(db, uuid, host, name, every)
 
     if servers.count() == 0:
         print 'No matching servers found, nothing launched'
@@ -361,7 +368,7 @@ def start_command(db=None, uuid= "", host="", name="", sudo=False, startall=Fals
             os.system('%s mongrel2 %s %s' % (root_enabler, db, server.uuid))
 
 
-def stop_command(db=None, host="", name="", murder=False):
+def stop_command(db=None, uuid="", host="", name="", every=False, murder=False):
     """
     Stops a running mongrel2 process according to the host, either
     gracefully (INT) or murderous (TERM):
@@ -369,6 +376,7 @@ def stop_command(db=None, host="", name="", murder=False):
         m2sh stop -db config.sqlite -host localhost
         m2sh stop -db config.sqlite -host localhost -murder
         m2sh stop -db config.sqlite -name test -murder
+        m2sh stop -db config.sqlite -every
 
     You shouldn't need sudo to stop a running mongrel if you
     are also the user that owns the chroot directory or root.
@@ -378,50 +386,57 @@ def stop_command(db=None, host="", name="", murder=False):
     semi-gracefully.  You can also do it again with -murder if it's waiting
     for some dead connections and you want it to just quit.
     """
-    pid = get_server_pid(db, host=host, name=name)
-    if not pid: return
+    for server in find_servers(db, uuid, host, name, every):
+        pid = get_server_pid(server)
+        if pid:
+            sig = signal.SIGTERM if murder else signal.SIGINT
+            os.kill(pid, sig)
 
-    sig = signal.SIGTERM if murder else signal.SIGINT
 
-    os.kill(pid, sig)
-
-
-def reload_command(db=None, host="", name=""):
+def reload_command(db=None, uuid="", host="", name="", every=False):
     """
     Causes Mongrel2 to do a soft-reload which will re-read the config
     database and then attempt to load a whole new configuration without
     losing connections on the previous one:
 
+        m2sh reload -db config.sqlite -uuid 3d815ade-9081-4c36-94dc-77a9b060b021
         m2sh reload -db config.sqlite -host localhost
         m2sh reload -db config.sqlite -name test
+        m2sh reload -db config.sqlite -every
 
     This reload will need access to the config database from within the 
     chroot for it to work, and it's not totally guaranteed to be 100%
     reliable, but if you are doing development and need to do quick changes
     then this is what you do.
     """
-    pid = get_server_pid(db, host=host, name=name)
-    if not pid: return
+    for server in find_servers(db, uuid, host, name, every):
+        pid = get_server_pid(server)
+        if pid:
+            os.kill(pid, signal.SIGHUP)
 
-    os.kill(pid, signal.SIGHUP)
 
-
-def running_command(db=None, host="", name=""):
+def running_command(db=None, uuid="", host="", name="", every=False):
     """
     Tells you if the given server is still running:
 
+        m2sh running -db config.sqlite -uuid 3d815ade-9081-4c36-94dc-77a9b060b021
         m2sh running -db config.sqlite -host localhost
         m2sh running -db config.sqlite -name test
+        m2sh running -db config.sqlite -every
     """
-
-    pid = get_server_pid(db, host=host, name=name)
-    if not pid: return
-
-    try:
-        os.kill(pid, 0)
-        print "YES: Mongrel2 server %s running at PID %d" % (host, pid)
-    except OSError:
-        print "NO: Mongrel2 server %s NOT at PID %d" % (host, pid)
+    for server in find_servers(db, uuid, host, name, every):
+        pid = get_server_pid(server)
+        # TODO: Clean this up.
+        if pid:
+            try:
+                os.kill(pid, 0)
+                print "Found server %s %s RUNNING at PID %i" % (server.name,
+                                                                server.uuid,
+                                                                pid)
+            except OSError:
+                print "Server %s %s NOT RUNNING at PID %i" % (server.name,
+                                                              server.uuid,
+                                                              pid)
 
 
 def control_command(db=None, host="", name=""):
@@ -456,28 +471,13 @@ def control_command(db=None, host="", name=""):
 
 
 
-def get_server_pid(db, host = None, name = None):
-    store = model.load_db("sqlite:" + db)
-    results = []
-
-    if host:
-        results = store.find(model.Server, model.Server.default_host == unicode(host))
-    else:
-        results = store.find(model.Server, model.Server.name == unicode(name))
-
-    if results.count() == 0:
-        print "No servers found for %s."
-        return None
-
-    server = results[0]
+def get_server_pid(server):
     pid_file = os.path.realpath(server.chroot + server.pid_file)
-
     if not os.path.isfile(pid_file):
-        print "ERROR: PID file %s not found." % pid_file
+        print "PID file %s not found for server %s %s" % (pid_file,
+                                                          server.name,
+                                                          server.uuid)
         return None
-
-    pid = int(open(pid_file, 'r').read())
-
-    return pid
-
+    else:
+        return int(open(pid_file, 'r').read())
 
