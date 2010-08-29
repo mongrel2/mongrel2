@@ -19,7 +19,7 @@ struct tagbstring REQ_STATUS_TASKS = bsStatic("status tasks");
 struct tagbstring REQ_STATUS_NET = bsStatic("status net");
 
 
-inline bstring read_message(void *sock)
+static inline bstring read_message(void *sock)
 {
     bstring req = NULL;
     int rc = 0;
@@ -43,7 +43,7 @@ error:
     return NULL;
 }
 
-inline void send_reply(void *sock, bstring rep)
+static inline void send_reply(void *sock, bstring rep)
 {
     int rc = 0;
     zmq_msg_t *outmsg = NULL;
