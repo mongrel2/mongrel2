@@ -5,6 +5,7 @@
 #include <task/task.h>
 #include <bstr/bstrlib.h>
 #include <pattern.h>
+#include <getopt.h>
 
 #include "httpclient.h"
 #include "kegogi_parser.h"
@@ -19,35 +20,86 @@ struct tagbstring DEFAULT_PORT_KEY = bsStatic("port");
 static int verify_response(Expect *expect, Request *req, Response *actual);
 static Request *create_request(Send *send, ParamDict *defaults);
 
-void runkegogi(void *arg)
-{
-    bstring path = (bstring) arg;
-    Command commands[MAX_COMMANDS];
-    ParamDict *defaults;
-    int passed = 0;
-    int failed = 0;
-    int num_commands = 0;
+typedef struct RunKegogiArgs {
+    bstring script_path;
+    int num_threads;
+    int iterations_per_thread;
+} RunKegogiArgs;
 
-    num_commands = parse_kegogi_file(bdata(path), commands, MAX_COMMANDS,
-                                     &defaults);
+typedef struct KegogiTestArgs {
+    int num_commands;
+    Command *commands;
+    ParamDict *defaults;
+    int tests_per_thread;
+    int threads_running;
+    int passed;
+    int failed;
+} KegogiTestArgs;
+
+void kegogitest(void *arg)
+{
+    KegogiTestArgs *args = (KegogiTestArgs*) arg;
 
     int i;
-    for(i = 0; i < num_commands; i++) {
-        Request *req = create_request(&commands[i].send, defaults);
+    for(i = 0; i < args->tests_per_thread; i++) {
+        int n = i % args->num_commands;
+        Request *req = create_request(&args->commands[n].send, args->defaults);
 
         Response *actual = Response_fetch(req);
         
-        if(verify_response(&commands[i].expect, req, actual))
-            passed++;
+        if(verify_response(&args->commands[n].expect, req, actual))
+            args->passed++;
         else
-            failed++;
+            args->failed++;
         Request_destroy(req);
         Response_destroy(actual);
     }
-    
-    printf("Passed: %d / %d\n", passed, num_commands);
 
-    taskexitall(failed == 0 ? 0 : 1);
+    // reduce the running thread count 
+    args->threads_running--;
+    
+    if(args->threads_running == 0) {
+        printf("Passed %d of %d\n", args->passed, args->passed + args->failed);
+        free(args);
+        taskexitall((args->failed > 0) ? 1 : 0);
+    }
+    else
+        taskexit(0);
+ }
+
+void runkegogi(void *arg)
+{
+    RunKegogiArgs *runArgs = (RunKegogiArgs *) arg;
+
+    KegogiTestArgs *testArgs = calloc(sizeof(*testArgs), 1);
+    check_mem(testArgs);
+
+    testArgs->passed = 0;
+    testArgs->failed = 0;
+    testArgs->threads_running = runArgs->num_threads;
+    testArgs->commands = calloc(sizeof(Command), MAX_COMMANDS);
+    check_mem(testArgs->commands);
+
+    testArgs->num_commands = parse_kegogi_file(bdata(runArgs->script_path), 
+                                               testArgs->commands, 
+                                               MAX_COMMANDS, 
+                                               &testArgs->defaults);
+    check(testArgs->num_commands > 0, "No kegogi tests in file");
+    testArgs->tests_per_thread = 
+        runArgs->iterations_per_thread * testArgs->num_commands;
+    
+    int i;
+    for(i = 0; i < runArgs->num_threads; i++)
+        taskcreate(kegogitest, testArgs, 128 * 1024);
+
+    free(runArgs);
+    taskexit(0);
+
+error:
+    if(runArgs) free(runArgs);
+    if(testArgs) free(testArgs);
+
+    taskexitall(1);
 }
 
 static Request *create_request(Send *send, ParamDict *defaults)
@@ -141,9 +193,40 @@ error:
 void taskmain(int argc, char *argv[])
 {
     LOG_FILE = stderr;
-    check(argc > 1, "Expected kegogi file");
 
-    taskcreate(runkegogi, bfromcstr(argv[1]), 128 * 1024);
+    RunKegogiArgs *args = calloc(sizeof(*args), 1);
+    check_mem(args);
+    args->script_path = NULL;
+    args->num_threads = 1;
+    args->iterations_per_thread = 1;
+
+    struct option long_options[] = {
+        {"threads", 1, 0, 't'},
+        {"iterations", 1, 0, 'i'}
+    };
+
+    char c;
+    while((c = getopt_long(argc, argv, "t:i:", long_options, NULL)) != -1) {
+        switch(c) {
+        case 't':
+            args->num_threads = atoi(optarg);
+            check(args->num_threads > 0, "Invalid number of threads");
+            break;
+        case 'i':
+            args->iterations_per_thread = atoi(optarg);
+            check(args->iterations_per_thread > 0, "Invalid number of "
+                  "iterations per thread");
+            break;
+        default:
+            check(0, "Invalid argument");
+        }
+    }
+
+    check(optind < argc, "Expected kegogi file");
+
+    args->script_path = bfromcstr(argv[optind]);
+
+    taskcreate(runkegogi, args, 128 * 1024);
 
     taskexit(0);
 
