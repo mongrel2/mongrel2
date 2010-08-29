@@ -1,4 +1,4 @@
-<img src="/static/logo.png" align="right"><p></p>
+﻿<img src="/static/logo.png" align="right"><p></p>
 
 <h1>About Mongrel2</h1>
 
@@ -67,7 +67,11 @@ Currently we have:<p>
 
 <h2><a name="translations">Translations</a></h2>
 
-<p>We've started translating the manual into Russian as well, you can read the <a href="/doc/tip/docs/ru/wiki/GettingStarted.wiki">in Russian</a>
+<p>We've started translating the manual into Russian as well, for now you can read the 
+<a href="/wiki?name=GettingStarted">GettingStarted</a> document in
+<a href="/doc/tip/docs/ru/wiki/GettingStarted.wiki">Russian</a>,
+<a href="/doc/tip/docs/es/wiki/GettingStarted.wiki">Spanish</a> and
+<a href="/doc/tip/docs/de/wiki/GettingStarted.wiki">German</a> 
 with more to come.</p>
 
 
