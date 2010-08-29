@@ -47,7 +47,7 @@ sudo pip install web.py
 <p>Quickest way to do that is to grab the tar.bz2 file:</p>
 
 <pre>
-wget http://mongrel2.org/static/mongrel2-1.0beta4.tar.bz2
+wget http://mongrel2.org/static/downloads/mongrel2-1.0beta4.tar.bz2
 </pre>
 
 
