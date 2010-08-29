@@ -1,5 +1,6 @@
 ﻿<h1>Erste Schritte mit Mongrel2</h1>
 
+<p>Dies ist der schnellste Weg, um Mongrel2 zum Laufen zu bekommen. Es wird nicht viel erklärt,
 nur alle benötigten Dinge und du führst ein paar Befehle aus.
 Wenn du Erklärungen haben willst, lies <a href="/doc/tip/docs/manual/book.wiki">Das Mongrel2-Handbuch (HTML)</a>,
 ein komplettes Handbuch mit allen Informationen, vom Einstieg bis zum Schreiben deines ersten Handlers.</p>
