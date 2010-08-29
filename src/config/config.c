@@ -41,7 +41,6 @@
 
 #include <sqlite3.h>
 
-#include "adt/list.h"
 #include "adt/tst.h"
 #include "config/db.h"
 #include "dir.h"
@@ -227,45 +226,49 @@ static int Config_load_server_cb(void* param, int cols, char **data, char **name
 {
     arity(8);
 
-    list_t *servers = (list_t*)param;
+    Server **server = (Server **)param;
+    if(*server != NULL)
+    {
+        log_info("More than one server object matches given uuid, using last found");
+        Server_destroy(*server);
+    }
 
-    Server *server = Server_create(data[1], data[3], data[4], data[5], data[6], data[7]);
-    check(server, "Failed to create server %s:%s on port %s", data[0], data[2], data[3]);
+    *server = Server_create(data[1], data[3], data[4], data[5], data[6], data[7]);
+    check(*server, "Failed to create server %s:%s on port %s", data[0], data[2], data[3]);
 
     const char *HOST_QUERY = "SELECT id, name, matching FROM host WHERE server_id = %s";
     char *query = SQL(HOST_QUERY, data[0]);
     check(query, "Failed to craft query string");
 
-    int rc = DB_exec(query, Config_load_host_cb, server);
+    int rc = DB_exec(query, Config_load_host_cb, *server);
     check(rc == 0, "Failed to find hosts for server %s:%s on port %s", data[0], data[1], data[2]);
 
     log_info("Loaded server %s:%s on port %s with default host %s", data[0], data[1], data[3], data[2]); 
-
-    list_append(servers, lnode_create(server));
 
     SQL_FREE(query);
     return 0;
 
 error:
+    Server_destroy(*server);
     SQL_FREE(query);
     return -1;
 
 }
 
-list_t *Config_load_servers(const char *name)
+Server *Config_load_server(const char *uuid)
 {
     Config_load_handlers();
     Config_load_proxies();
 
-    const char *SERVER_QUERY = "SELECT id, uuid, default_host, port, chroot, access_log, error_log, pid_file FROM server WHERE default_host=%Q OR name=%Q";
-    char *query = SQL(SERVER_QUERY, name, name);
+    const char *SERVER_QUERY = "SELECT id, uuid, default_host, port, chroot, access_log, error_log, pid_file FROM server WHERE uuid=%Q";
+    char *query = SQL(SERVER_QUERY, uuid);
 
-    list_t *servers = list_create(LISTCOUNT_T_MAX);
-    int rc = DB_exec(query, Config_load_server_cb, servers);
-    check(rc == 0, "Failed to select servers with name/default_host %s", name);
+    Server *server = NULL;
+    int rc = DB_exec(query, Config_load_server_cb, &server);
+    check(rc == 0, "Failed to select server with uuid %s", uuid);
 
     SQL_FREE(query);
-    return servers;
+    return server;
 
 error:
     SQL_FREE(query);

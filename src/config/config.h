@@ -35,13 +35,11 @@
 #ifndef __config_h__
 #define __config_h__
 
-#include "adt/list.h"
-#include "adt/tst.h"
-
+#include "server.h"
 
 int Config_init_db(const char *path);
 
-list_t *Config_load_servers(const char *name);
+Server *Config_load_server(const char *uuid);
 
 int Config_load_mimetypes();
 

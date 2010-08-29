@@ -315,22 +315,50 @@ def log_command(db=None, count=20):
         print log
 
 
-def start_command(db=None, host="", name="", sudo=False):
+def start_command(db=None, uuid= "", host="", name="", sudo=False, startall=False):
     """
-    Does a simple start of the given server identified by the host
-    (default_host) parameter or the name:
+    Does a simple start of the given server(s) identified by the uuid, host
+    (default_host) parameter or the name.:
 
 
+        m2sh start -db config.sqlite -uuid 3d815ade-9081-4c36-94dc-77a9b060b021
         m2sh start -db config.sqlite -host localhost
         m2sh start -db config.sqlite -name test
+        m2sh start -db config.sqlite -startall
+
 
     Give the -sudo options if you want it to start mongrel2 as root for you
-    (must have sudo installed).  It'll actually find your servers whether you
-    give host or name even by the host.  Basically it'll get it right.
+    (must have sudo installed).
+
+    Give the -startall option if you want mongrel2 to launch all servers listed in
+    the given db.
+
+    Note when using the host or name to select servers, all servers matching
+    will be started.
     """
     root_enabler = 'sudo' if sudo else ''
 
-    os.system('%s mongrel2 %s %s' % (root_enabler, db, host or name))
+    store = model.begin(db)
+    servers = None
+
+    if startall == True:
+        servers = store.find(model.Server)
+    elif uuid:
+        servers = store.find(model.Server, model.Server.uuid == unicode(uuid))
+    elif host:
+        servers = store.find(model.Server, model.Server.default_host == unicode(host))
+    elif name:
+        servers = store.find(model.Server, model.Server.name == unicode(name))
+    else:
+        print "One of uuid, host, name or startall required to launch servers"
+        return
+
+    if servers.count() == 0:
+        print 'No matching servers found, nothing launched'
+    else:
+        for server in servers:
+            print 'Launching server %s %s on port %d' % (server.name, server.uuid, server.port)
+            os.system('%s mongrel2 %s %s' % (root_enabler, db, server.uuid))
 
 
 def stop_command(db=None, host="", name="", murder=False):

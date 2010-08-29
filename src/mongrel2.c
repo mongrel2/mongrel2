@@ -96,28 +96,20 @@ void start_terminator()
 }
 
 
-Server *load_server(const char *db_file, const char *server_name, int reuse_fd)
+Server *load_server(const char *db_file, const char *server_uuid, int reuse_fd)
 {
     int rc = 0;
     rc = Config_init_db(db_file);
     check(rc == 0, "Failed to load config database at %s", db_file);
 
-    list_t *servers = Config_load_servers(server_name);
-
-    check(servers, "Failed to load server %s from %s, file probably missing.", server_name, db_file);
-    check(list_count(servers) != 0, "Could NOT find a server named '%s' in config '%s'", server_name, db_file);
-    check(list_count(servers) == 1, "Currently only support running one server, but got %d", (int)list_count(servers));
-
-    Server *srv = lnode_get(list_first(servers));
+    Server *srv = Config_load_server(server_uuid);
+    check(srv, "Failed to load server %s from %s", server_uuid, db_file);
 
     rc = Config_load_mimetypes();
     check(rc == 0, "Failed to load mime types.");
 
     rc = Config_load_settings();
     check(rc == 0, "Failed to load global settings.");
-
-    list_destroy_nodes(servers);
-    list_destroy(servers);
 
     if(reuse_fd == -1) {
         srv->listen_fd = netannounce(TCP, 0, srv->port);
@@ -132,6 +124,7 @@ Server *load_server(const char *db_file, const char *server_name, int reuse_fd)
     Config_close_db();
     return srv;
 error:
+    Server_destroy(srv);
     Config_close_db();
     return NULL;
 }
@@ -208,7 +201,7 @@ void final_setup()
 
 
 
-Server *reload_server(Server *old_srv, const char *db_file, const char *server_name)
+Server *reload_server(Server *old_srv, const char *db_file, const char *server_uuid)
 {
     RUNNING = 1;
 
@@ -218,7 +211,7 @@ Server *reload_server(Server *old_srv, const char *db_file, const char *server_n
     Config_stop_proxies(old_srv);
     Setting_destroy();
 
-    Server *srv = load_server(db_file, server_name, old_srv->listen_fd);
+    Server *srv = load_server(db_file, server_uuid, old_srv->listen_fd);
     check(srv, "Failed to load new server config.");
 
     RELOAD = 0;
