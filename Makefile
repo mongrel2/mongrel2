@@ -63,6 +63,7 @@ check:
 install: all install-bin install-py 
 
 install-bin:
+	sudo install -d $(PREFIX)/bin/
 	sudo install bin/mongrel2 $(PREFIX)/bin/
 
 install-py: examples/python/mongrel2/sql/config.sql
