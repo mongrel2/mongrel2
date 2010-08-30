@@ -331,8 +331,17 @@ def find_servers(db=None, uuid="", host="", name="", every=False):
         servers = store.find(model.Server, model.Server.default_host == unicode(host))
     elif name:
         servers = store.find(model.Server, model.Server.name == unicode(name))
-    
-    return servers
+
+    if servers.count() > 1 and not every:
+        print "Not sure which server to run, what I found:"
+        print "NAME HOST UUID"
+        print "--------------"
+        for server in servers:
+            print server.name, server.default_host, server.uuid
+        print "* Use -every to run them all."
+        return []
+    else:
+        return servers
 
 
 def start_command(db=None, uuid= "", host="", name="", sudo=False, every=False):
@@ -360,7 +369,7 @@ def start_command(db=None, uuid= "", host="", name="", sudo=False, every=False):
 
     servers = find_servers(db, uuid, host, name, every)
 
-    if servers.count() == 0:
+    if not servers or servers.count() == 0:
         print 'No matching servers found, nothing launched'
     else:
         for server in servers:
@@ -453,12 +462,8 @@ def control_command(db=None, host="", name="", uuid=""):
 
     servers = find_servers(db, uuid, host, name, False)
 
-    if servers.count() > 1:
-        print "Not sure which server to run, here's a list:"
-        print "NAME HOST UUID"
-        for server in servers:
-            print server.name, server.default_host, server.uuid
-    else:
+    if servers:
+        server = servers[0]
         CTX = zmq.Context()
 
         results = store.find(model.Setting, model.Setting.key == unicode("control_port"))
@@ -466,7 +471,8 @@ def control_command(db=None, host="", name="", uuid=""):
 
         ctl = CTX.socket(zmq.REQ)
 
-        print "CONNECTING..."
+        print "CONNECTING to: %s in %s" % (addr, server.chroot)
+        os.chdir(server.chroot)
         ctl.connect(addr)
 
         try:
