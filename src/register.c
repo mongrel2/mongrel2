@@ -54,12 +54,18 @@ void Register_init()
 
 int Register_connect(int fd, int conn_type)
 {
+    int rc = 0;
     assert(fd < MAX_REGISTERED_FDS && "FD given to register is greater than max.");
     assert(conn_type != 0 && "conn_type can't be 0");
 
     Registration *reg = &REGISTRATIONS[fd];
 
-    check(reg->conn_type == 0, "Attempt to connect fd %d to slot already owned by someone else.", fd);
+    if(reg->conn_type) {
+        debug("Looks like stale registration in %d, kill it before it gets out.", fd);
+        // a new Register_connect came in, but we haven't disconnected the previous
+        rc = Register_disconnect(fd);
+        check(rc != -1, "Weird error, tried to disconnect something that exists then got an error: %d", fd);
+    }
 
     reg->conn_type = conn_type;
     reg->last_ping = time(NULL);
@@ -69,7 +75,6 @@ int Register_connect(int fd, int conn_type)
     REG_ID_TO_FD[reg->id] = fd;
 
     return reg->id;
-
 error:
     return -1;
 }
@@ -78,6 +83,7 @@ error:
 int Register_disconnect(int fd)
 {
     assert(fd < MAX_REGISTERED_FDS && "FD given to register is greater than max.");
+    check(fd >= 0, "Invalid FD given for disconnect: %d", fd);
 
     Registration *reg = &REGISTRATIONS[fd];
     check(reg->conn_type != 0, "Attempt to unregister FD %d which is already gone.", fd);
@@ -90,6 +96,7 @@ int Register_disconnect(int fd)
     return reg->id;
 
 error:
+    fdclose(fd);
     return -1;
 }
 

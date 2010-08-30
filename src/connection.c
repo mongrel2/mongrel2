@@ -545,7 +545,6 @@ int connection_error(int event, void *data)
     }
 
     Register_disconnect(conn->fd);
-    fdclose(conn->fd);
 
     return CLOSE;
 }

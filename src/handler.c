@@ -136,7 +136,8 @@ static inline void handler_process_request(Handler *handler, int id,
         Handler_notify_leave(handler, id);
     } else {
         if(body_length == 0) {
-            fdclose(fd);
+            rc = Register_disconnect(fd);
+            check(rc != -1, "Register disconnect failed for: %d", fd);
         } else {
             payload = blk2bstr(body_start, body_length);
             rc = deliver_payload(conn_type != CONN_TYPE_MSG, fd, payload);
@@ -149,7 +150,7 @@ static inline void handler_process_request(Handler *handler, int id,
 
 error:
     bdestroy(payload);
-    Register_disconnect(fd);
+    Register_disconnect(fd);  // return ignored
     return;
 }
 
