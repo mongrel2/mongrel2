@@ -36,7 +36,7 @@ technologies.</p>
 <h2><a name="download">Download</a></h2>
 
 <p>We are currently crafting a release process, but for now you can get the latest source
-download from (updated Sat Aug 28 07:49:00 UTC 2010):</p>
+download from (updated Mon Aug 30 01:46:16 PDT 2010):</p> 
 
 
 
