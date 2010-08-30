@@ -528,8 +528,11 @@ int connection_close(int event, void *data)
         connection_proxy_close(event, data);
     }
 
-    Register_disconnect(conn->fd);
+    check(Register_disconnect(conn->fd) != -1, "Register disconnect didn't work for %d", conn->fd);
 
+
+error:
+    // fallthrough on purpose
     return 0;
 }
 
@@ -544,8 +547,10 @@ int connection_error(int event, void *data)
         connection_proxy_close(event, data);
     }
 
-    Register_disconnect(conn->fd);
 
+    check(Register_disconnect(conn->fd) != -1, "Register disconnect didn't work for %d", conn->fd);
+
+error: // fallthrough on purpose
     return CLOSE;
 }
 
