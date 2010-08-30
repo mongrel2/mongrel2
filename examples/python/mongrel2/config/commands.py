@@ -502,6 +502,6 @@ def version_command():
     Prints out the version of your mongrel2 binary."
     """
 
-    print "Mongrel2/1.0beta5-fc8f668907"
+    print "Mongrel2/1.0beta5-6df3bc934a"
 
 
