@@ -109,6 +109,7 @@ static inline int scan_chunks(Connection *conn, httpclient_parser *client, int n
         // find all the possible chunks we've got so far
         httpclient_parser_init(client);
         rc = httpclient_parser_execute(client, conn->proxy_buf, nread, end);
+        check(rc != -1, "Fatal error from httpclient parser parsing:\n-----\n%.*s", nread, conn->proxy_buf);
         check(!httpclient_parser_has_error(client), "Parsing error from server.");
 
         if(!client->chunked) {

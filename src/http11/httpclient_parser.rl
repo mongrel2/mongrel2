@@ -38,6 +38,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
+#include "dbg.h"
 
 #define LEN(AT, FPC) (FPC - buffer - parser->AT)
 #define MARK(M,FPC) (parser->M = (FPC) - buffer)
@@ -168,7 +169,7 @@ int httpclient_parser_init(httpclient_parser *parser)  {
 
 
 /** exec **/
-size_t httpclient_parser_execute(httpclient_parser *parser, const char *buffer, size_t len, size_t off)  
+int httpclient_parser_execute(httpclient_parser *parser, const char *buffer, size_t len, size_t off)  
 {
     const char *p, *pe;
     int cs = parser->cs;
@@ -190,9 +191,9 @@ size_t httpclient_parser_execute(httpclient_parser *parser, const char *buffer, 
     assert(p <= pe && "buffer overflow after parsing execute");
     assert(parser->nread <= len && "nread longer than length");
     assert(parser->body_start <= len && "body starts after buffer end");
-    assert(parser->mark < len && "mark is after buffer end");
-    assert(parser->field_len <= len && "field has length longer than whole buffer");
-    assert(parser->field_start < len && "field starts after buffer end");
+    check(parser->mark < len, "mark is after buffer end");
+    check(parser->field_len <= len, "field has length longer than whole buffer");
+    check(parser->field_start < len, "field starts after buffer end");
 
     if(parser->body_start) {
         /* final \r\n combo encountered so stop right here */
@@ -200,6 +201,9 @@ size_t httpclient_parser_execute(httpclient_parser *parser, const char *buffer, 
     }
 
     return(parser->nread);
+
+error:
+    return -1;
 }
 
 int httpclient_parser_finish(httpclient_parser *parser)

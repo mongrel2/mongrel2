@@ -63,7 +63,7 @@ typedef struct httpclient_parser {
 
 int httpclient_parser_init(httpclient_parser *parser);
 int httpclient_parser_finish(httpclient_parser *parser);
-size_t httpclient_parser_execute(httpclient_parser *parser, const char *data, size_t len, size_t off);
+int httpclient_parser_execute(httpclient_parser *parser, const char *data, size_t len, size_t off);
 int httpclient_parser_has_error(httpclient_parser *parser);
 int httpclient_parser_is_finished(httpclient_parser *parser);
 
