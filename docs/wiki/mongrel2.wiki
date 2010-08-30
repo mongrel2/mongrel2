@@ -41,8 +41,8 @@ download from (updated Sat Aug 28 07:49:00 UTC 2010):</p>
 
 
 <ul>
-    <li><a href="/static/downloads/mongrel2-1.0beta5.tar.bz2">mongrel2-1.0beta5.tar.bz2</a> MD5: </li>
-    <li><a href="/static/downloads/mongrel2-1.0beta5.zip">mongrel2-1.0beta5.zip</a> MD5: </li>
+    <li><a href="/static/downloads/mongrel2-1.0beta5.tar.bz2">mongrel2-1.0beta5.tar.bz2</a> MD5: d43996cc410e67342c724661867b8463</li>
+    <li><a href="/static/downloads/mongrel2-1.0beta5.zip">mongrel2-1.0beta5.zip</a> MD5: eee81940ad2ecf780b93fa390238eaec</li>
 </ul>
 
 <p>These files will be generated periodically, and contain a directory with the date/time they were made,
