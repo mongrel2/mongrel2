@@ -439,35 +439,44 @@ def running_command(db=None, uuid="", host="", name="", every=False):
                                                               pid)
 
 
-def control_command(db=None, host="", name=""):
+def control_command(db=None, host="", name="", uuid=""):
     """
     Start a simple control console for working with mongrel2.
     This is *very* bare bones at the moment but should improve.
 
+        m2sh control -db config.sqlite -uuid 3d815ade-9081-4c36-94dc-77a9b060b021
         m2sh control -db config.sqlite -host localhost
         m2sh control -db config.sqlite -name test
     """
     store = model.load_db("sqlite:" + db)
     import zmq
 
-    CTX = zmq.Context()
+    servers = find_servers(db, uuid, host, name, False)
 
-    results = store.find(model.Setting, model.Setting.key == unicode("control_port"))
-    addr = results[0].value if results.count() > 1 else "ipc://run/control"
+    if servers.count() > 1:
+        print "Not sure which server to run, here's a list:"
+        print "NAME HOST UUID"
+        for server in servers:
+            print server.name, server.default_host, server.uuid
+    else:
+        CTX = zmq.Context()
 
-    ctl = CTX.socket(zmq.REQ)
+        results = store.find(model.Setting, model.Setting.key == unicode("control_port"))
+        addr = results[0].value if results.count() > 1 else "ipc://run/control"
 
-    print "CONNECTING..."
-    ctl.connect(addr)
+        ctl = CTX.socket(zmq.REQ)
 
-    try:
-        while True:
-            cmd = raw_input("> ")
-            ctl.send(cmd)
-            print ctl.recv()
+        print "CONNECTING..."
+        ctl.connect(addr)
 
-    except EOFError:
-        ctl.close()
+        try:
+            while True:
+                cmd = raw_input("> ")
+                ctl.send(cmd)
+                print ctl.recv()
+
+        except EOFError:
+            ctl.close()
 
 
 
