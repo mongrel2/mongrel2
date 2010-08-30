@@ -52,6 +52,13 @@ void Register_init()
     memset(REG_ID_TO_FD, 0, sizeof(REG_ID_TO_FD));
 }
 
+static inline void Register_clear(Registration *reg)
+{
+    reg->conn_type = 0;
+    reg->last_ping = 0;
+    REG_ID_TO_FD[reg->id] = 0;
+}
+
 int Register_connect(int fd, int conn_type)
 {
     int rc = 0;
@@ -63,7 +70,7 @@ int Register_connect(int fd, int conn_type)
     if(reg->conn_type) {
         debug("Looks like stale registration in %d, kill it before it gets out.", fd);
         // a new Register_connect came in, but we haven't disconnected the previous
-        rc = Register_disconnect(fd);
+        Register_clear(reg);
         check(rc != -1, "Weird error, tried to disconnect something that exists then got an error: %d", fd);
     }
 
@@ -88,11 +95,9 @@ int Register_disconnect(int fd)
     Registration *reg = &REGISTRATIONS[fd];
     check(reg->conn_type != 0, "Attempt to unregister FD %d which is already gone.", fd);
 
-    reg->conn_type = 0;
-    reg->last_ping = 0;
+    Register_clear(reg);
     fdclose(fd);
 
-    REG_ID_TO_FD[reg->id] = 0;
     return reg->id;
 
 error:
