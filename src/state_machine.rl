@@ -71,7 +71,19 @@ Proxy := (
 Connection = (
         start: ( OPEN @open -> Accepting ),
 
-        Accepting: ( ACCEPT @parse -> Idle ),
+        Accepting: ( ACCEPT @parse -> Identifying ),
+
+        Identifying: (
+            REQ_RECV @register_request -> Registered |
+            CLOSE @close -> final
+        ),
+
+        Registered: (
+            HTTP_REQ @route_request -> HTTPRouting |
+            MSG_REQ @route_request -> MSGRouting |
+            SOCKET_REQ @send_socket_response -> Responding |
+            CLOSE @close -> final
+        ),
 
         Idle: (
             REQ_RECV @identify_request HTTP_REQ @route_request -> HTTPRouting |
