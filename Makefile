@@ -1,6 +1,6 @@
 CFLAGS=-g -Wall -Isrc 
 LIBS=-lzmq -lsqlite3
-PREFIX=/usr/local
+PREFIX?=/usr/local
 
 ASM=$(wildcard src/**/*.S src/*.S)
 RAGEL_TARGETS=src/state.c src/http11/http11_parser.c
@@ -13,7 +13,7 @@ TESTS=$(patsubst %.c,%,${TEST_SRC})
 
 all: bin/mongrel2 tests
 
-release: CFLAGS=-g -O2 -Wall -Isrc -DNDEBUG
+release: CFLAGS=-O2 -Wall -Isrc -DNDEBUG
 release: all
 
 bin/mongrel2: build/libm2.a src/mongrel2.o
