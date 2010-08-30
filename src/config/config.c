@@ -192,7 +192,7 @@ error:
 
 static int Config_load_host_cb(void *param, int cols, char **data, char **names)
 {
-    arity(3);
+    arity(4);
 
     char *query = NULL;
     Server *server = (Server*)param;
@@ -201,8 +201,10 @@ static int Config_load_host_cb(void *param, int cols, char **data, char **names)
     Host *host = Host_create(data[1]);
     check(host != NULL, "Failed to create host %s with %s", data[0], data[1]);
 
-    const char *ROUTE_QUERY = "SELECT id, path, target_id, target_type FROM route WHERE host_id=%s";
-    query = SQL(ROUTE_QUERY, data[0]);
+    const char *ROUTE_QUERY = "SELECT route.id, route.path, route.target_id, route.target_type "
+        "FROM route, host WHERE host_id=%s AND "
+        "host.server_id=%s AND host.id = route.host_id";
+    query = SQL(ROUTE_QUERY, data[0], data[3]);
 
     int rc = DB_exec(query, Config_load_route_cb, host);
     check(rc == 0, "Failed to load routes for host %s:%s", data[0], data[1]);
@@ -236,7 +238,7 @@ static int Config_load_server_cb(void* param, int cols, char **data, char **name
     *server = Server_create(data[1], data[3], data[4], data[5], data[6], data[7]);
     check(*server, "Failed to create server %s:%s on port %s", data[0], data[2], data[3]);
 
-    const char *HOST_QUERY = "SELECT id, name, matching FROM host WHERE server_id = %s";
+    const char *HOST_QUERY = "SELECT id, name, matching, server_id FROM host WHERE server_id = %s";
     char *query = SQL(HOST_QUERY, data[0]);
     check(query, "Failed to craft query string");
 
