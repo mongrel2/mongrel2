@@ -1,5 +1,7 @@
 #include "minunit.h"
 #include <unixy.h>
+#include <unistd.h>
+#include <sys/types.h>
 
 FILE *LOG_FILE = NULL;
 
@@ -62,8 +64,10 @@ char * all_tests() {
     mu_suite_start();
 
     mu_run_test(test_Unixy_getcwd);
-    mu_run_test(test_Unixy_chroot_fails);
-    mu_run_test(test_Unixy_drop_priv_fails);
+    if(getuid() != 0) {
+        mu_run_test(test_Unixy_chroot_fails);
+        mu_run_test(test_Unixy_drop_priv_fails);
+    }
     mu_run_test(test_Unixy_pid_file);
 
     return NULL;
