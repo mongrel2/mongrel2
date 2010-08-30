@@ -53,6 +53,7 @@
     action finish { CALL(finish, fc); }
     action close { CALL(close, fc); }
     action parse { CALL(parse, fc); }
+    action register_request { CALL(register_request, fc); }
     action identify_request { CALL(identify_request, fc); }
     action send_socket_response { CALL(send_socket_response, fc); }
     action route_request { CALL(route_request, fc); }

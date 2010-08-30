@@ -45,6 +45,7 @@ typedef struct StateActions {
     state_action_cb finish;
     state_action_cb close;
     state_action_cb parse;
+    state_action_cb register_request;
     state_action_cb identify_request;
     state_action_cb route_request;
     state_action_cb send_socket_response;

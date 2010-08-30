@@ -554,33 +554,47 @@ error: // fallthrough on purpose
     return CLOSE;
 }
 
-
-
-
-int connection_identify_request(int event, void *data)
+static inline int ident_and_register(int event, void *data, int reg_too)
 {
     Connection *conn = (Connection *)data;
-
-    TRACE(ident_req);
+    int conn_type = 0;
+    int next = CLOSE;
 
     if(Request_is_socket(conn->req)) {
-        Register_connect(conn->fd, CONN_TYPE_SOCKET);
+        conn_type = CONN_TYPE_SOCKET;
         taskname("SOCKET");
-        return SOCKET_REQ;
+        next = SOCKET_REQ;
     } else if(Request_is_json(conn->req)) {
+        conn_type = CONN_TYPE_MSG;
         taskname("MSG");
-        Register_connect(conn->fd, CONN_TYPE_MSG);
-        return MSG_REQ;
+        next = MSG_REQ;
     } else if(Request_is_http(conn->req)) {
-        Register_connect(conn->fd, CONN_TYPE_HTTP);
+        conn_type = CONN_TYPE_HTTP;
         taskname("HTTP");
-        return HTTP_REQ;
+        next = HTTP_REQ;
     } else {
         error_response(conn->fd, 500, "Invalid code branch, tell Zed.");
     }
 
+    if(reg_too) Register_connect(conn->fd, conn_type);
+    return next;
+
 error:
     return CLOSE;
+
+}
+
+int connection_register_request(int event, void *data)
+{
+    TRACE(register_request);
+    return ident_and_register(event, data, 1);
+}
+
+
+int connection_identify_request(int event, void *data)
+{
+    TRACE(identify_request);
+    return ident_and_register(event, data, 0);
 }
 
 
@@ -604,6 +618,7 @@ StateActions CONN_ACTIONS = {
     .finish = connection_finish,
     .close = connection_close,
     .parse = connection_parse,
+    .register_request = connection_register_request,
     .identify_request = connection_identify_request,
     .route_request = connection_route_request,
     .send_socket_response = connection_send_socket_response,

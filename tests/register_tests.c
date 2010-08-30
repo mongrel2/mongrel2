@@ -41,9 +41,9 @@ char *test_Register_ping()
     mu_assert(Register_ping(12232), "Ping didn't work.");
 
     // attempt a double registration which should NOT work
-    id = Register_connect(12232, CONN_TYPE_MSG);
-    mu_assert(id == -1, "Second register should have an error.");
-    mu_assert(Register_fd_exists(12232) != CONN_TYPE_MSG, "Shouldn't register again.");
+    int new_id = Register_connect(12232, CONN_TYPE_MSG);
+    mu_assert(new_id != id, "Second register should get new id.");
+    mu_assert(Register_fd_exists(12232) == CONN_TYPE_MSG, "Should have different conntype");
 
     id = Register_disconnect(12232);
     mu_assert(id != -1, "Didn't disconnect after some pings.");
