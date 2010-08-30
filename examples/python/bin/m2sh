@@ -3,5 +3,12 @@
 from mongrel2.config import args, commands
 import sys
 
+# some people just type these instinctively
+if sys.argv[1].endswith("-help"):
+    sys.argv[1] = "help"
+elif sys.argv[1].endswith("-version"):
+    sys.argv[1] = "version"
+
 args.parse_and_run_command(sys.argv[1:], commands, default_command="shell")
+
 

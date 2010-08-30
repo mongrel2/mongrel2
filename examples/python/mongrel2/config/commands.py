@@ -496,3 +496,12 @@ def get_server_pid(server):
     else:
         return int(open(pid_file, 'r').read())
 
+
+def version_command():
+    """
+    Prints out the version of your mongrel2 binary."
+    """
+
+    print "Mongrel2/1.0beta4-f837a14c6a"
+
+
