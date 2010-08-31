@@ -322,7 +322,7 @@
   at once. Plenty of language specific web servers like Node.js and
   Jetty have asynchronous operation, but they're not language
   agnostic<span class="footnote-mark"><a href=
-  "book.wiki#fn1x3"><sup class=
+  "book-final2.html#fn1x3"><sup class=
   "textsuperscript">1</sup></a></span><a id="x1-4001f1" name=
   "x1-4001f1"></a> . Other web servers will let you talk to any
   language as a backend, but they insist on using HTTP proxying or
@@ -347,7 +347,7 @@
 
       <p class="indent">Don't want to read the
       manual?<span class="footnote-mark"><a href=
-      "book.wiki#fn2x3"><sup class=
+      "book-final3.html#fn2x3"><sup class=
       "textsuperscript">2</sup></a></span><a id="x1-4003f2" name=
       "x1-4003f2"></a> You can read <a href=
       "http://mongrel2.org/wiki?name=GettingStarted">the
@@ -443,7 +443,7 @@
   "pplri7t-">and</span> doing it asynchronously. The advent of the
   bewildering numbers of ways to hack HTTP into an async messaging
   protocol<span class="footnote-mark"><a href=
-  "book.wiki#fn3x3"><sup class=
+  "book-final4.html#fn3x3"><sup class=
   "textsuperscript">3</sup></a></span><a id="x1-8001f3" name=
   "x1-8001f3"></a> is proof enough that the pressure is on for web
   servers to be for applications with highly interactive
@@ -1098,7 +1098,7 @@
 
     <li class="enumerate" id="x1-16004x2">All the unit tests
     run.<span class="footnote-mark"><a href=
-    "book.wiki#fn1x4"><sup class=
+    "book-final5.html#fn1x4"><sup class=
     "textsuperscript">1</sup></a></span><a id="x1-16005f1" name=
     "x1-16005f1"></a>
 
@@ -9348,7 +9348,7 @@
     <li class="enumerate" id="x1-66008x4">Be language agnostic and
     use a data format everyone can accept without complaining that
     it should be done with their favorite<span class=
-    "footnote-mark"><a href="book.wiki#fn1x7"><sup class=
+    "footnote-mark"><a href="book-final6.html#fn1x7"><sup class=
     "textsuperscript">1</sup></a></span><a id="x1-66009f1" name=
     "x1-66009f1"></a> .
 
@@ -9390,7 +9390,7 @@
   sockets, though, will let Handlers send back replies to a cluster
   of Mongrel2 servers, but only the one with the right subscription
   will process the request.<span class="footnote-mark"><a href=
-  "book.wiki#fn2x7"><sup class=
+  "book-final7.html#fn2x7"><sup class=
   "textsuperscript">2</sup></a></span><a id="x1-67001f2" name=
   "x1-67001f2"></a> <!--l. 454-->
 
@@ -10029,7 +10029,7 @@
   the <span class="pcrb7t-">examples/http</span><span class=
   "pcrb7t-">_0mq/http.py</span> file and it just the simplest thing
   possible:<span class="footnote-mark"><a href=
-  "book.wiki#fn3x7"><sup class=
+  "book-final8.html#fn3x7"><sup class=
   "textsuperscript">3</sup></a></span><a id="x1-74001f3" name=
   "x1-74001f3"></a> <!--l. 623-->
 
@@ -12363,7 +12363,7 @@
   "pcrro7t-">m2sh</span> script in your favorite language.
   Obviously, if you're doing this you should probably have a
   good reason<span class="footnote-mark"><a href=
-  "book.wiki#fn4x7"><sup class=
+  "book-final9.html#fn4x7"><sup class=
   "textsuperscript">4</sup></a></span><a id="x1-79001f4" name=
   "x1-79001f4"></a> . What writing your own, or understanding what
   <span class="pcrro7t-">m2sh</span> is doing will do for you,
@@ -12405,7 +12405,7 @@
   "pcrb7t-">src/config/mimetypes.sql</span>, where the database
   schema is created and the large list of mimetypes that Mongrel2
   knows is stored.<span class="footnote-mark"><a href=
-  "book.wiki#fn5x7"><sup class=
+  "book-final10.html#fn5x7"><sup class=
   "textsuperscript">5</sup></a></span><a id="x1-79002f5" name=
   "x1-79002f5"></a> Your tool should be able to use this SQL to
   make its database, or at least know what it does. <!--l. 859-->
