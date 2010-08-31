@@ -149,8 +149,7 @@
     &nbsp;<span class="sectionToc">4.8 <a href="#x1-510004.8" id=
     "QQ2-1-82" name="QQ2-1-82">Further Improvements</a></span><br>
     &nbsp;<span class="sectionToc">4.9 <a href="#x1-520004.9" id=
-    "QQ2-1-83" name="QQ2-1-83">Running With and Without
-    chroot</a></span><br>
+    "QQ2-1-83" name="QQ2-1-83">Deployment Tips</a></span><br>
     <span class="chapterToc">5 <a href="#x1-530005" id="QQ2-1-84"
     name="QQ2-1-84">Hacking</a></span><br>
     &nbsp;<span class="sectionToc">5.1 <a href="#x1-540005.1" id=
@@ -7900,8 +7899,8 @@
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">4.9</span> <a id=
-  "x1-520004.9" name="x1-520004.9"></a>Running With and Without
-  chroot</h3><!--l. 646-->
+  "x1-520004.9" name="x1-520004.9"></a>Deployment Tips</h3>
+  <!--l. 646-->
 
   <p class="noindent">Mongrel2 enforces the correct behavior when
   you run as root, which is to drop priv and chroot. This makes the
@@ -7945,10 +7944,10 @@
     virtualenv or anything similar to get yourself a totally local
     environment. Too many systems, such as OSX, have very outdated
     packages and will change versions on you without telling you.
-    The best way to make sure your software keeps working and works
-    as one cohesive deployment is to use a virtualenv inside your
-    chroot. It should even work cross platform if you don't
-    have compiled packages in there.
+    The best way to make sure your software keeps (working and
+    works as one cohesive deployment) is to use a virtualenv inside
+    your chroot. It should even work cross platform if you
+    don't have compiled packages in there.
 
     <li class="enumerate" id="x1-52008x4">Create a user for your
     application and live in there. I don't have any root
@@ -7988,7 +7987,7 @@
     "pplri7t-">not</span> root and can do chroot for you. If
     you're running your Mongrel2 as root you're doing
     it wrong. Actually if you're running any services as root
-    that don't absolutely need to be you're doing it
+    that doesn't absolutely need to be you're doing it
     wrong.
 
     <li class="enumerate" id="x1-52016x2">Mongrel2 is happy to run

@@ -641,7 +641,7 @@ just go ahead and try and let us know.
 
 Other than that, automate, automate, automate.
 
-\section{Running With and Without chroot}
+\section{Deployment Tips}
 
 Mongrel2 enforces the correct behavior when you run as root, which is to drop priv and
 chroot.  This makes the server more secure and it also simplifies your deployments. 
@@ -670,8 +670,8 @@ has to live in the chroot anyway and the chroot enforces that it is completely s
 
 \item Use Python's virtualenv or anything similar to get yourself a totally local environment.
 Too many systems, such as OSX, have very outdated packages and will change versions on you
-without telling you.  The best way to make sure your software keeps working and works as
-one cohesive deployment is to use a virtualenv inside your chroot.  It should even work
+without telling you.  The best way to make sure your software keeps (working and works as
+one cohesive deployment) is to use a virtualenv inside your chroot.  It should even work
 cross platform if you don't have compiled packages in there.
 
 \item Create a user for your application and live in there.  I don't have any root
@@ -698,7 +698,7 @@ follow this advice:
 \begin{enumerate}
 \item Whatever you use for process management, make sure it can run stuff as \emph{not} root
 and can do chroot for you.  If you're running your Mongrel2 as root you're doing it wrong.
-Actually if you're running any services as root that don't absolutely need to be you're doing
+Actually if you're running any services as root that doesn't absolutely need to be you're doing
 it wrong.
 
 \item Mongrel2 is happy to run as a regular user, and assumes that if you do not run as root,
