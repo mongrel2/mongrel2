@@ -12,6 +12,7 @@ int Log_init(Server *server)
     if(ACCESS_LOG == NULL) {
         ACCESS_LOG = fopen(bdata(server->access_log), "a+");
         check(ACCESS_LOG != NULL, "Failed to open the access log: %s", bdata(server->access_log));
+        setbuf(ACCESS_LOG, NULL);
     }
 
     return 0;
