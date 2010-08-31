@@ -112,7 +112,7 @@ error:
 void Cache_evict_object(Cache *cache, void *obj)
 {
     check(cache, "NULL cache argument to Cache_evict_object");
-    check(cache, "NULL obj argument to Cache_evict_object");
+    check(obj, "NULL obj argument to Cache_evict_object");
 
     int i;
     for(i = 0; i < cache->size; i++) {
