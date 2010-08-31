@@ -3639,8 +3639,8 @@
     where is a set of chars, like &#91;0-9&#93; for all digits.
 
     <li class="itemize"><span class=
-    "obeylines-h verb pcrr7t-">&#91;\^set&#93;</span> Inverse character
-    set, so <span class="obeylines-h verb pcrr7t-">&#91;^0-9&#93;</span> is
+    "obeylines-h verb pcrr7t-">&#91;^set&#93;</span> Inverse character set,
+    so <span class="obeylines-h verb pcrr7t-">&#91;^0-9&#93;</span> is
     anything but digits.
 
     <li class="itemize"><span class=
