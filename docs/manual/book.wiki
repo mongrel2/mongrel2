@@ -27,205 +27,205 @@
     <span class="chapterToc">1 <a href="#x1-40001" id="QQ2-1-4"
     name="QQ2-1-4">Introduction</a></span><br>
     &nbsp;<span class="sectionToc">1.1 <a href="#x1-50001.1" id=
-    "QQ2-1-5" name="QQ2-1-5">Language Agnostic</a></span><br>
+    "QQ2-1-6" name="QQ2-1-6">Language Agnostic</a></span><br>
     &nbsp;<span class="sectionToc">1.2 <a href="#x1-60001.2" id=
-    "QQ2-1-6" name="QQ2-1-6">Asynchronous</a></span><br>
+    "QQ2-1-7" name="QQ2-1-7">Asynchronous</a></span><br>
     &nbsp;<span class="sectionToc">1.3 <a href="#x1-70001.3" id=
-    "QQ2-1-7" name="QQ2-1-7">Message Protocol</a></span><br>
+    "QQ2-1-8" name="QQ2-1-8">Message Protocol</a></span><br>
     &nbsp;<span class="sectionToc">1.4 <a href="#x1-80001.4" id=
-    "QQ2-1-8" name="QQ2-1-8">Application Oriented</a></span><br>
+    "QQ2-1-9" name="QQ2-1-9">Application Oriented</a></span><br>
     &nbsp;<span class="sectionToc">1.5 <a href="#x1-90001.5" id=
-    "QQ2-1-9" name="QQ2-1-9">Automated Management</a></span><br>
+    "QQ2-1-10" name="QQ2-1-10">Automated Management</a></span><br>
     &nbsp;<span class="sectionToc">1.6 <a href="#x1-100001.6" id=
-    "QQ2-1-10" name="QQ2-1-10">Using This Manual</a></span><br>
-    <span class="chapterToc">2 <a href="#x1-110002" id="QQ2-1-11"
-    name="QQ2-1-11">Installing</a></span><br>
+    "QQ2-1-11" name="QQ2-1-11">Using This Manual</a></span><br>
+    <span class="chapterToc">2 <a href="#x1-110002" id="QQ2-1-12"
+    name="QQ2-1-12">Installing</a></span><br>
     &nbsp;<span class="sectionToc">2.1 <a href="#x1-120002.1" id=
-    "QQ2-1-12" name="QQ2-1-12">Install Dependencies</a></span><br>
+    "QQ2-1-13" name="QQ2-1-13">Install Dependencies</a></span><br>
     &nbsp;<span class="sectionToc">2.2 <a href="#x1-130002.2" id=
-    "QQ2-1-15" name="QQ2-1-15">Building Mongrel2</a></span><br>
+    "QQ2-1-16" name="QQ2-1-16">Building Mongrel2</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">2.2.1 <a href=
-    "#x1-140002.2.1" id="QQ2-1-16" name="QQ2-1-16">Using
+    "#x1-140002.2.1" id="QQ2-1-17" name="QQ2-1-17">Using
     Fossil</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">2.2.2 <a href=
-    "#x1-150002.2.2" id="QQ2-1-18" name="QQ2-1-18">Using the .zip
+    "#x1-150002.2.2" id="QQ2-1-19" name="QQ2-1-19">Using the .zip
     File</a></span><br>
     &nbsp;<span class="sectionToc">2.3 <a href="#x1-160002.3" id=
-    "QQ2-1-19" name="QQ2-1-19">Building And
+    "QQ2-1-20" name="QQ2-1-20">Building And
     Installing</a></span><br>
     &nbsp;<span class="sectionToc">2.4 <a href="#x1-170002.4" id=
-    "QQ2-1-20" name="QQ2-1-20">Testing The
+    "QQ2-1-21" name="QQ2-1-21">Testing The
     Installation</a></span><br>
     &nbsp;<span class="sectionToc">2.5 <a href="#x1-180002.5" id=
-    "QQ2-1-22" name="QQ2-1-22">Upgrading from trunk</a></span><br>
+    "QQ2-1-23" name="QQ2-1-23">Upgrading from trunk</a></span><br>
     &nbsp;<span class="sectionToc">2.6 <a href="#x1-190002.6" id=
-    "QQ2-1-24" name="QQ2-1-24">Up Next</a></span><br>
-    <span class="chapterToc">3 <a href="#x1-200003" id="QQ2-1-25"
-    name="QQ2-1-25">Managing</a></span><br>
+    "QQ2-1-25" name="QQ2-1-25">Up Next</a></span><br>
+    <span class="chapterToc">3 <a href="#x1-200003" id="QQ2-1-26"
+    name="QQ2-1-26">Managing</a></span><br>
     &nbsp;<span class="sectionToc">3.1 <a href="#x1-210003.1" id=
-    "QQ2-1-27" name="QQ2-1-27">Model-View-Controller</a></span><br>
+    "QQ2-1-28" name="QQ2-1-28">Model-View-Controller</a></span><br>
     &nbsp;<span class="sectionToc">3.2 <a href="#x1-220003.2" id=
-    "QQ2-1-28" name="QQ2-1-28">Trying m2sh</a></span><br>
+    "QQ2-1-29" name="QQ2-1-29">Trying m2sh</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">3.2.1 <a href=
-    "#x1-230003.2.1" id="QQ2-1-31" name="QQ2-1-31">What The Hell
+    "#x1-230003.2.1" id="QQ2-1-32" name="QQ2-1-32">What The Hell
     Just Happened?</a></span><br>
     &nbsp;<span class="sectionToc">3.3 <a href="#x1-240003.3" id=
-    "QQ2-1-32" name="QQ2-1-32">A Simple Configuration
+    "QQ2-1-33" name="QQ2-1-33">A Simple Configuration
     File</a></span><br>
     &nbsp;<span class="sectionToc">3.4 <a href="#x1-250003.4" id=
-    "QQ2-1-36" name="QQ2-1-36">How A Config Is
+    "QQ2-1-37" name="QQ2-1-37">How A Config Is
     Structured</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">3.4.1 <a href=
-    "#x1-260003.4.1" id="QQ2-1-37" name=
-    "QQ2-1-37">Server</a></span><br>
+    "#x1-260003.4.1" id="QQ2-1-38" name=
+    "QQ2-1-38">Server</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">3.4.2 <a href=
-    "#x1-270003.4.2" id="QQ2-1-38" name=
-    "QQ2-1-38">Host</a></span><br>
+    "#x1-270003.4.2" id="QQ2-1-39" name=
+    "QQ2-1-39">Host</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">3.4.3 <a href=
-    "#x1-280003.4.3" id="QQ2-1-39" name=
-    "QQ2-1-39">Route</a></span><br>
+    "#x1-280003.4.3" id="QQ2-1-40" name=
+    "QQ2-1-40">Route</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">3.4.4 <a href=
-    "#x1-290003.4.4" id="QQ2-1-40" name=
-    "QQ2-1-40">Dir</a></span><br>
+    "#x1-290003.4.4" id="QQ2-1-41" name=
+    "QQ2-1-41">Dir</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">3.4.5 <a href=
-    "#x1-300003.4.5" id="QQ2-1-41" name=
-    "QQ2-1-41">Proxy</a></span><br>
+    "#x1-300003.4.5" id="QQ2-1-42" name=
+    "QQ2-1-42">Proxy</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">3.4.6 <a href=
-    "#x1-310003.4.6" id="QQ2-1-42" name=
-    "QQ2-1-42">Handler</a></span><br>
+    "#x1-310003.4.6" id="QQ2-1-43" name=
+    "QQ2-1-43">Handler</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">3.4.7 <a href=
-    "#x1-320003.4.7" id="QQ2-1-43" name=
-    "QQ2-1-43">Others</a></span><br>
+    "#x1-320003.4.7" id="QQ2-1-44" name=
+    "QQ2-1-44">Others</a></span><br>
     &nbsp;<span class="sectionToc">3.5 <a href="#x1-330003.5" id=
-    "QQ2-1-44" name="QQ2-1-44">A More Complex
+    "QQ2-1-45" name="QQ2-1-45">A More Complex
     Example</a></span><br>
     &nbsp;<span class="sectionToc">3.6 <a href="#x1-340003.6" id=
-    "QQ2-1-47" name="QQ2-1-47">Routing And Host
+    "QQ2-1-48" name="QQ2-1-48">Routing And Host
     Patterns</a></span><br>
     &nbsp;<span class="sectionToc">3.7 <a href="#x1-350003.7" id=
-    "QQ2-1-49" name="QQ2-1-49">Deployment Logs And
+    "QQ2-1-50" name="QQ2-1-50">Deployment Logs And
     Commits</a></span><br>
     &nbsp;<span class="sectionToc">3.8 <a href="#x1-360003.8" id=
-    "QQ2-1-51" name="QQ2-1-51">Control Port</a></span><br>
+    "QQ2-1-52" name="QQ2-1-52">Control Port</a></span><br>
     &nbsp;<span class="sectionToc">3.9 <a href="#x1-370003.9" id=
-    "QQ2-1-53" name="QQ2-1-53">Multiple Servers</a></span><br>
+    "QQ2-1-54" name="QQ2-1-54">Multiple Servers</a></span><br>
     &nbsp;<span class="sectionToc">3.10 <a href="#x1-380003.10" id=
-    "QQ2-1-54" name="QQ2-1-54">Tweakable Expert
+    "QQ2-1-55" name="QQ2-1-55">Tweakable Expert
     Settings</a></span><br>
-    <span class="chapterToc">4 <a href="#x1-390004" id="QQ2-1-56"
-    name="QQ2-1-56">Deploying</a></span><br>
+    <span class="chapterToc">4 <a href="#x1-390004" id="QQ2-1-57"
+    name="QQ2-1-57">Deploying</a></span><br>
     &nbsp;<span class="sectionToc">4.1 <a href="#x1-400004.1" id=
-    "QQ2-1-57" name="QQ2-1-57">Mongrel2 Deployment
+    "QQ2-1-58" name="QQ2-1-58">Mongrel2 Deployment
     Requirements</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">4.1.1 <a href=
-    "#x1-410004.1.1" id="QQ2-1-59" name="QQ2-1-59">Introducing
+    "#x1-410004.1.1" id="QQ2-1-60" name="QQ2-1-60">Introducing
     procer</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">4.1.2 <a href=
-    "#x1-420004.1.2" id="QQ2-1-61" name="QQ2-1-61">Installing
+    "#x1-420004.1.2" id="QQ2-1-62" name="QQ2-1-62">Installing
     procer</a></span><br>
     &nbsp;<span class="sectionToc">4.2 <a href="#x1-430004.2" id=
-    "QQ2-1-63" name="QQ2-1-63">The Plan</a></span><br>
+    "QQ2-1-64" name="QQ2-1-64">The Plan</a></span><br>
     &nbsp;<span class="sectionToc">4.3 <a href="#x1-440004.3" id=
-    "QQ2-1-64" name="QQ2-1-64">Step 1: The Deployment
+    "QQ2-1-65" name="QQ2-1-65">Step 1: The Deployment
     Area</a></span><br>
     &nbsp;<span class="sectionToc">4.4 <a href="#x1-450004.4" id=
-    "QQ2-1-66" name="QQ2-1-66">Step 2: The mongrel2.org
+    "QQ2-1-67" name="QQ2-1-67">Step 2: The mongrel2.org
     Configuration</a></span><br>
     &nbsp;<span class="sectionToc">4.5 <a href="#x1-460004.5" id=
-    "QQ2-1-68" name="QQ2-1-68">Step 3: Setup procer</a></span><br>
+    "QQ2-1-69" name="QQ2-1-69">Step 3: Setup procer</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">4.5.1 <a href=
-    "#x1-470004.5.1" id="QQ2-1-73" name="QQ2-1-73">The Python
+    "#x1-470004.5.1" id="QQ2-1-74" name="QQ2-1-74">The Python
     Examples</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">4.5.2 <a href=
-    "#x1-480004.5.2" id="QQ2-1-77" name="QQ2-1-77">Testing The New
+    "#x1-480004.5.2" id="QQ2-1-78" name="QQ2-1-78">Testing The New
     Setup</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">4.5.3 <a href=
-    "#x1-490004.5.3" id="QQ2-1-79" name="QQ2-1-79">Nice Features of
+    "#x1-490004.5.3" id="QQ2-1-80" name="QQ2-1-80">Nice Features of
     Procer</a></span><br>
     &nbsp;<span class="sectionToc">4.6 <a href="#x1-500004.6" id=
-    "QQ2-1-80" name="QQ2-1-80">Step 4: Static
+    "QQ2-1-81" name="QQ2-1-81">Step 4: Static
     Content</a></span><br>
     &nbsp;<span class="sectionToc">4.7 <a href="#x1-510004.7" id=
-    "QQ2-1-82" name="QQ2-1-82">Step 5: Testing And
+    "QQ2-1-83" name="QQ2-1-83">Step 5: Testing And
     Troubleshooting</a></span><br>
     &nbsp;<span class="sectionToc">4.8 <a href="#x1-520004.8" id=
-    "QQ2-1-83" name="QQ2-1-83">Further Improvements</a></span><br>
+    "QQ2-1-84" name="QQ2-1-84">Further Improvements</a></span><br>
     &nbsp;<span class="sectionToc">4.9 <a href="#x1-530004.9" id=
-    "QQ2-1-84" name="QQ2-1-84">Deployment Tips</a></span><br>
-    <span class="chapterToc">5 <a href="#x1-540005" id="QQ2-1-85"
-    name="QQ2-1-85">Hacking</a></span><br>
+    "QQ2-1-85" name="QQ2-1-85">Deployment Tips</a></span><br>
+    <span class="chapterToc">5 <a href="#x1-540005" id="QQ2-1-86"
+    name="QQ2-1-86">Hacking</a></span><br>
     &nbsp;<span class="sectionToc">5.1 <a href="#x1-550005.1" id=
-    "QQ2-1-87" name="QQ2-1-87">Front-end Goodies</a></span><br>
+    "QQ2-1-88" name="QQ2-1-88">Front-end Goodies</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">5.1.1 <a href=
-    "#x1-560005.1.1" id="QQ2-1-88" name=
-    "QQ2-1-88">HTTP</a></span><br>
+    "#x1-560005.1.1" id="QQ2-1-89" name=
+    "QQ2-1-89">HTTP</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">5.1.2 <a href=
-    "#x1-570005.1.2" id="QQ2-1-90" name=
-    "QQ2-1-90">Proxying</a></span><br>
+    "#x1-570005.1.2" id="QQ2-1-91" name=
+    "QQ2-1-91">Proxying</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">5.1.3 <a href=
-    "#x1-580005.1.3" id="QQ2-1-92" name=
-    "QQ2-1-92">WebSockets</a></span><br>
+    "#x1-580005.1.3" id="QQ2-1-93" name=
+    "QQ2-1-93">WebSockets</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">5.1.4 <a href=
-    "#x1-590005.1.4" id="QQ2-1-94" name=
-    "QQ2-1-94">JSSocket</a></span><br>
+    "#x1-590005.1.4" id="QQ2-1-95" name=
+    "QQ2-1-95">JSSocket</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">5.1.5 <a href=
-    "#x1-600005.1.5" id="QQ2-1-95" name="QQ2-1-95">Long
+    "#x1-600005.1.5" id="QQ2-1-96" name="QQ2-1-96">Long
     Poll</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">5.1.6 <a href=
-    "#x1-610005.1.6" id="QQ2-1-96" name=
-    "QQ2-1-96">Streaming</a></span><br>
+    "#x1-610005.1.6" id="QQ2-1-97" name=
+    "QQ2-1-97">Streaming</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">5.1.7 <a href=
-    "#x1-620005.1.7" id="QQ2-1-97" name="QQ2-1-97">N:M
+    "#x1-620005.1.7" id="QQ2-1-98" name="QQ2-1-98">N:M
     Responses</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">5.1.8 <a href=
-    "#x1-630005.1.8" id="QQ2-1-98" name="QQ2-1-98">Async
+    "#x1-630005.1.8" id="QQ2-1-99" name="QQ2-1-99">Async
     Uploads</a></span><br>
     &nbsp;<span class="sectionToc">5.2 <a href="#x1-640005.2" id=
-    "QQ2-1-99" name="QQ2-1-99">Introduction to
+    "QQ2-1-100" name="QQ2-1-100">Introduction to
     ZeroMQ</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">5.2.1 <a href=
-    "#x1-650005.2.1" id="QQ2-1-100" name="QQ2-1-100">A Quick Python
+    "#x1-650005.2.1" id="QQ2-1-101" name="QQ2-1-101">A Quick Python
     ZeroMQ Example</a></span><br>
     &nbsp;<span class="sectionToc">5.3 <a href="#x1-660005.3" id=
-    "QQ2-1-106" name="QQ2-1-106">Handler ZeroMQ
+    "QQ2-1-107" name="QQ2-1-107">Handler ZeroMQ
     Format</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">5.3.1 <a href=
-    "#x1-670005.3.1" id="QQ2-1-107" name="QQ2-1-107">Socket Types
+    "#x1-670005.3.1" id="QQ2-1-108" name="QQ2-1-108">Socket Types
     Used</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">5.3.2 <a href=
-    "#x1-680005.3.2" id="QQ2-1-108" name="QQ2-1-108">UUID
+    "#x1-680005.3.2" id="QQ2-1-109" name="QQ2-1-109">UUID
     Addressing</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">5.3.3 <a href=
-    "#x1-690005.3.3" id="QQ2-1-109" name="QQ2-1-109">Numbers
+    "#x1-690005.3.3" id="QQ2-1-110" name="QQ2-1-110">Numbers
     Identify Listeners</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">5.3.4 <a href=
-    "#x1-700005.3.4" id="QQ2-1-110" name="QQ2-1-110">Paths Identify
+    "#x1-700005.3.4" id="QQ2-1-111" name="QQ2-1-111">Paths Identify
     Targets</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">5.3.5 <a href=
-    "#x1-710005.3.5" id="QQ2-1-111" name="QQ2-1-111">Request
+    "#x1-710005.3.5" id="QQ2-1-112" name="QQ2-1-112">Request
     Headers And Body</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">5.3.6 <a href=
-    "#x1-720005.3.6" id="QQ2-1-112" name="QQ2-1-112">Complete
+    "#x1-720005.3.6" id="QQ2-1-113" name="QQ2-1-113">Complete
     Message Examples</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">5.3.7 <a href=
-    "#x1-730005.3.7" id="QQ2-1-115" name="QQ2-1-115">Python Handler
+    "#x1-730005.3.7" id="QQ2-1-116" name="QQ2-1-116">Python Handler
     API</a></span><br>
     &nbsp;<span class="sectionToc">5.4 <a href="#x1-740005.4" id=
-    "QQ2-1-116" name="QQ2-1-116">Basic Handler Demo</a></span><br>
+    "QQ2-1-117" name="QQ2-1-117">Basic Handler Demo</a></span><br>
     &nbsp;<span class="sectionToc">5.5 <a href="#x1-750005.5" id=
-    "QQ2-1-120" name="QQ2-1-120">Async File Upload
+    "QQ2-1-121" name="QQ2-1-121">Async File Upload
     Demo</a></span><br>
     &nbsp;<span class="sectionToc">5.6 <a href="#x1-760005.6" id=
-    "QQ2-1-124" name="QQ2-1-124">MP3 Streaming Demo</a></span><br>
+    "QQ2-1-125" name="QQ2-1-125">MP3 Streaming Demo</a></span><br>
     &nbsp;<span class="sectionToc">5.7 <a href="#x1-770005.7" id=
-    "QQ2-1-127" name="QQ2-1-127">Chat Demo</a></span><br>
+    "QQ2-1-128" name="QQ2-1-128">Chat Demo</a></span><br>
     &nbsp;<span class="sectionToc">5.8 <a href="#x1-780005.8" id=
-    "QQ2-1-128" name="QQ2-1-128">Other Language APIs</a></span><br>
+    "QQ2-1-129" name="QQ2-1-129">Other Language APIs</a></span><br>
     &nbsp;<span class="sectionToc">5.9 <a href="#x1-790005.9" id=
-    "QQ2-1-129" name="QQ2-1-129">Writing Your Own
+    "QQ2-1-130" name="QQ2-1-130">Writing Your Own
     m2sh</a></span><br>
-    <span class="chapterToc">6 <a href="#x1-800006" id="QQ2-1-130"
-    name="QQ2-1-130">Contributing</a></span>
+    <span class="chapterToc">6 <a href="#x1-800006" id="QQ2-1-131"
+    name="QQ2-1-131">Contributing</a></span>
   </div><!--l. 1-->
 
   <p class="noindent">
@@ -331,11 +331,36 @@
 
   <p class="noindent">Mongrel2 is the only web server I know of
   that actively tries to focus on these features as a cohesive
-  whole.
+  whole. <!--l. 25-->
+
+  <p class="noindent"><a id="x1-4002r1" name="x1-4002r1"></a>
+  <hr class="float">
+
+  <div class="float">
+    <div class="caption">
+      <span class="id">Note 1:</span> <span class=
+      "content pplri7t-">TL;DR!</span>
+    </div><!--tex4ht:label?: x1-4002r1 -->
+
+    <div class="quote">
+      <!--l. 26-->
+
+      <p class="indent">Don't want to read the
+      manual?<span class="footnote-mark"><a href=
+      "book-final3.html#fn2x3"><sup class=
+      "textsuperscript">2</sup></a></span><a id="x1-4003f2" name=
+      "x1-4003f2"></a> You can read <a href=
+      "http://mongrel2.org/wiki?name=GettingStarted">the
+      GettingStarted page</a> available many languages even.
+      It's a fast crash course in getting Mongrel2 up and
+      running.
+    </div>
+  </div>
+  <hr class="endfloat">
 
   <h3 class="sectionHead"><span class="titlemark">1.1</span> <a id=
   "x1-50001.1" name="x1-50001.1"></a>Language Agnostic</h3>
-  <!--l. 28-->
+  <!--l. 33-->
 
   <p class="noindent">The term &ldquo;language agnostic&rdquo; came
   from people who read about Mongrel2 in the early days, and it
@@ -345,7 +370,7 @@
   hard PHP fan, or if you hate PHP and love only Ruby on Rails.
   Mongrel2 only knows about HTTP requests, HTTP responses, async
   messages, and getting them to your gear to meet those
-  requirements. <!--l. 35-->
+  requirements. <!--l. 40-->
 
   <p class="noindent">Language Agnosticism is the most important
   feature of Mongrel2, and its entire purpose stems from the desire
@@ -354,12 +379,12 @@
   technology is the best or force other people to use their
   favorite toys. Instead, Mongrel2 works to just be great for every
   language and make it easy to use what works best for a given
-  problem. <!--l. 43-->
+  problem. <!--l. 48-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">1.2</span> <a id=
-  "x1-60001.2" name="x1-60001.2"></a>Asynchronous</h3><!--l. 45-->
+  "x1-60001.2" name="x1-60001.2"></a>Asynchronous</h3><!--l. 50-->
 
   <p class="noindent">Many web servers are
   &ldquo;asynchronous&rdquo; internally, and some force you to know
@@ -368,7 +393,7 @@
   different is that it extends to <span class=
   "pplri7t-">outside</span> the Mongrel2 server. This is a powerful
   concept that even your backends can operate asynchronously using
-  simple identification of connected clients. <!--l. 51-->
+  simple identification of connected clients. <!--l. 56-->
 
   <p class="noindent">Other servers assume that every request is
   received by a browser, then sent to a backend, and then directly
@@ -377,18 +402,18 @@
   but it makes no assumptions about how those backends respond to
   the clients. All it requires is that the backend application send
   messages addressed to the client and it will write them on the
-  socket. <!--l. 58-->
+  socket. <!--l. 63-->
 
   <p class="noindent">Because of this design, Mongrel2 can easily
   house both classic HTTP clients, keep-alive style HTTP client,
   chunked encoding responses, JSSockets, or WebSockets using the
-  same code. <!--l. 63-->
+  same code. <!--l. 68-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">1.3</span> <a id=
   "x1-70001.3" name="x1-70001.3"></a>Message Protocol</h3>
-  <!--l. 65-->
+  <!--l. 70-->
 
   <p class="noindent">In order to properly do asynchronous
   messaging in a language agnostic way, Mongrel2 needed a good base
@@ -398,18 +423,18 @@
   its special powers is ZeroMQ, a language- and
   transport-mechanism-agnostic messaging system that does
   <span class="pplri7t-">not</span> require a centralized messaging
-  server to operate. <!--l. 72-->
+  server to operate. <!--l. 77-->
 
   <p class="noindent">Using ZeroMQ lets Mongrel2 talk to a huge
   number of languages, operate within any kind of network
   architecture, and do it with a very simple communication model
-  and API that most programmers can understand. <!--l. 77-->
+  and API that most programmers can understand. <!--l. 82-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">1.4</span> <a id=
   "x1-80001.4" name="x1-80001.4"></a>Application Oriented</h3>
-  <!--l. 79-->
+  <!--l. 84-->
 
   <p class="noindent">Web servers today are written as if it was
   still 1995 and all anyone needs to do is serve files, maybe some
@@ -418,11 +443,11 @@
   "pplri7t-">and</span> doing it asynchronously. The advent of the
   bewildering numbers of ways to hack HTTP into an async messaging
   protocol<span class="footnote-mark"><a href=
-  "book-final3.html#fn2x3"><sup class=
-  "textsuperscript">2</sup></a></span><a id="x1-8001f2" name=
-  "x1-8001f2"></a> is proof enough that the pressure is on for web
+  "book-final4.html#fn3x3"><sup class=
+  "textsuperscript">3</sup></a></span><a id="x1-8001f3" name=
+  "x1-8001f3"></a> is proof enough that the pressure is on for web
   servers to be for applications with highly interactive
-  interfaces. <!--l. 87-->
+  interfaces. <!--l. 92-->
 
   <p class="noindent">Mongrel2 can still serve files just fine. In
   fact, it's got very accurate and easy-to-understand file
@@ -434,7 +459,7 @@
 
   <h3 class="sectionHead"><span class="titlemark">1.5</span> <a id=
   "x1-90001.5" name="x1-90001.5"></a>Automated Management</h3>
-  <!--l. 94-->
+  <!--l. 99-->
 
   <p class="noindent">The language agnostic philosophy even extends
   to the configuration system where you can use any language you
@@ -442,7 +467,7 @@
   SQLite3 database Mongrel2 can read and work with to run. There
   are great tools for managing this database already written in
   Python, but if you hate Python then you can write anything you
-  want. <!--l. 100-->
+  want. <!--l. 105-->
 
   <p class="noindent">This pattern is established with servers like
   Postfix, Exim, Sendmail, qmail, and others, that convert
@@ -452,13 +477,13 @@
   designed today. The Model is a SQLite3 database file, which any
   programming language can access. The Controller is a Mongrel2
   process that reads this file and sets itself up accordingly. 
-  <!--l. 108-->
+  <!--l. 113-->
 
   <p class="noindent">The View is a Python script called m2sh that
   gives you a command line &ldquo;UI&rdquo; to configure and setup
   the Mongrel2 sqlite model. It gives you commands for managing it,
   crafting configurations, looking at them; the works. 
-  <!--l. 112-->
+  <!--l. 117-->
 
   <p class="noindent">But, most importantly, <span class=
   "pplri7t-">you can write your own</span>. You don't have to
@@ -466,41 +491,43 @@
   parser for your favorite language, or use some hack job Nagios
   Perl junk to automate or scan it. It's SQLite3 with a
   solid, simple schema and well written Python code showing you how
-  it works. <!--l. 118-->
+  it works. <!--l. 123-->
 
   <p class="noindent">Nothing stops you from automating the hell
-  out of Mongrel2 with that. <!--l. 121-->
+  out of Mongrel2 with that. <!--l. 126-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">1.6</span> <a id=
   "x1-100001.6" name="x1-100001.6"></a>Using This Manual</h3>
-  <!--l. 123-->
+  <!--l. 128-->
 
   <p class="noindent">This manual is intended to be fun to read, so
   probably the best way to use it is to actually <span class=
-  "pplri7t-">read it</span>. <!--l. 126-->
+  "pplri7t-">read it</span>. <!--l. 131-->
 
   <p class="noindent">I know! Revolutionary, right? I mean, who has
   time to read and learn about something these days. You just want
   to get in there and get whatever problem you have done, now! No
   time for words. You just want a straight dump right into your
   brain so that you are able to solve all your problems instantly
-  and screw all this talking. <!--l. 131-->
+  and screw all this talking. <!--l. 136-->
 
   <p class="noindent">You ever ask yourself if this attitude about
   not wanting to read and learn is possibly the reason you always
   get stuck in emergencies with no time to read and learn? 
-  <!--l. 135-->
+  <!--l. 140-->
 
-  <p class="noindent">Something to think about. <!--l. 137-->
+  <p class="noindent">Something to think about. <!--l. 142-->
 
   <p class="noindent">My recommendation is that you go through
   every page of this manual and do the stuff in it. Even if you
   think you won't need something, because you're not a
   programmer, or you're not in operations, you should learn
   it. Doing so will make the parts you do need clearer and give you
-  better ideas for later.
+  better ideas for later. <!--l. 1-->
+
+  <p class="noindent">
 
   <h2 class="chapterHead"><span class=
   "titlemark">Chapter&nbsp;2</span><br>
@@ -567,15 +594,15 @@
   for your OS, but here's how I did it on my computer: 
   <!--l. 40-->
 
-  <p class="noindent"><a id="x1-12001r1" name="x1-12001r1"></a>
+  <p class="noindent"><a id="x1-12001r2" name="x1-12001r2"></a>
   <hr class="float">
 
   <div class="float">
     <div class="caption">
-      <span class="id">Note 1:</span> <span class=
+      <span class="id">Note 2:</span> <span class=
       "content"><span class="pplri7t-">Use Virtualenv If You
       Fear</span> <span class="pplri7t-">Pip</span></span>
-    </div><!--tex4ht:label?: x1-12001r1 -->
+    </div><!--tex4ht:label?: x1-12001r2 -->
 
     <div class="quote">
       <!--l. 41-->
@@ -1071,7 +1098,7 @@
 
     <li class="enumerate" id="x1-16004x2">All the unit tests
     run.<span class="footnote-mark"><a href=
-    "book-final4.html#fn1x4"><sup class=
+    "book-final5.html#fn1x4"><sup class=
     "textsuperscript">1</sup></a></span><a id="x1-16005f1" name=
     "x1-16005f1"></a>
 
@@ -1274,15 +1301,15 @@
   system is structured so that you know what goes where, but in the
   end it's just a simple storage mechanism. <!--l. 14-->
 
-  <p class="noindent"><a id="x1-20001r2" name="x1-20001r2"></a>
+  <p class="noindent"><a id="x1-20001r3" name="x1-20001r3"></a>
   <hr class="float">
 
   <div class="float">
     <div class="caption">
-      <span class="id">Note 2:</span> <span class=
+      <span class="id">Note 3:</span> <span class=
       "content"><span class="pplri7t-">Apparently SQL
       Inspires</span> <span class="pplri7t-">FUD</span></span>
-    </div><!--tex4ht:label?: x1-20001r2 -->
+    </div><!--tex4ht:label?: x1-20001r3 -->
 
     <div class="quote">
       <!--l. 15-->
@@ -3661,16 +3688,16 @@
   "obeylines-h verb pcrr7t-">\</span> characters in the string. 
   <!--l. 440-->
 
-  <p class="noindent"><a id="x1-34001r3" name="x1-34001r3"></a>
+  <p class="noindent"><a id="x1-34001r4" name="x1-34001r4"></a>
   <hr class="float">
 
   <div class="float">
     <div class="caption">
-      <span class="id">Note 3:</span> <span class=
+      <span class="id">Note 4:</span> <span class=
       "content"><span class="pplri7t-">Sorry, Unicodians,
       It's All</span> <span class=
       "pplri7t-">ASCII</span></span>
-    </div><!--tex4ht:label?: x1-34001r3 -->
+    </div><!--tex4ht:label?: x1-34001r4 -->
 
     <div class="quote">
       <!--l. 441-->
@@ -4852,15 +4879,15 @@
   go we'll do various other setups to get our application
   working. <!--l. 30-->
 
-  <p class="noindent"><a id="x1-40001r4" name="x1-40001r4"></a>
+  <p class="noindent"><a id="x1-40001r5" name="x1-40001r5"></a>
   <hr class="float">
 
   <div class="float">
     <div class="caption">
-      <span class="id">Note 4:</span> <span class=
+      <span class="id">Note 5:</span> <span class=
       "content"><span class="pplri7t-">Learning</span> <span class=
       "pplri7t-">Python</span></span>
-    </div><!--tex4ht:label?: x1-40001r4 -->
+    </div><!--tex4ht:label?: x1-40001r5 -->
 
     <div class="quote">
       <!--l. 31-->
@@ -4999,15 +5026,15 @@
   "pcrro7t-">procer</span> to tell you how to setup everything. 
   <!--l. 112-->
 
-  <p class="noindent"><a id="x1-41019r5" name="x1-41019r5"></a>
+  <p class="noindent"><a id="x1-41019r6" name="x1-41019r6"></a>
   <hr class="float">
 
   <div class="float">
     <div class="caption">
-      <span class="id">Note 5:</span> <span class=
+      <span class="id">Note 6:</span> <span class=
       "content"><span class="pplri7t-">Alternatives To</span>
       <span class="pplri7t-">procer</span></span>
-    </div><!--tex4ht:label?: x1-41019r5 -->
+    </div><!--tex4ht:label?: x1-41019r6 -->
 
     <div class="quote">
       <!--l. 113-->
@@ -8277,16 +8304,16 @@
   which allows you to route requests to basic web server backends
   that don't support 0MQ. <!--l. 33-->
 
-  <p class="noindent"><a id="x1-54001r6" name="x1-54001r6"></a>
+  <p class="noindent"><a id="x1-54001r7" name="x1-54001r7"></a>
   <hr class="float">
 
   <div class="float">
     <div class="caption">
-      <span class="id">Note 6:</span> <span class=
+      <span class="id">Note 7:</span> <span class=
       "content"><span class="pplri7t-">What About</span>
       <span class=
       "pplri7t-">FastCGI/AJP/CGI/SCGI/WSGI/Rack?</span></span>
-    </div><!--tex4ht:label?: x1-54001r6 -->
+    </div><!--tex4ht:label?: x1-54001r7 -->
 
     <div class="quote">
       <!--l. 34-->
@@ -8343,15 +8370,15 @@
   <p class="noindent">Another way to put this is if Mongrel2 says
   your request is invalid, it most definitely is. <!--l. 67-->
 
-  <p class="noindent"><a id="x1-56001r7" name="x1-56001r7"></a>
+  <p class="noindent"><a id="x1-56001r8" name="x1-56001r8"></a>
   <hr class="float">
 
   <div class="float">
     <div class="caption">
-      <span class="id">Note 7:</span> <span class=
+      <span class="id">Note 8:</span> <span class=
       "content"><span class="pplri7t-">Idiots and RFC</span>
       <span class="pplri7t-">Implementers</span></span>
-    </div><!--tex4ht:label?: x1-56001r7 -->
+    </div><!--tex4ht:label?: x1-56001r8 -->
 
     <div class="quote">
       <!--l. 68-->
@@ -8448,16 +8475,16 @@
   properly does keep-alives for as long as it is efficient to do
   so. <!--l. 128-->
 
-  <p class="noindent"><a id="x1-57001r8" name="x1-57001r8"></a>
+  <p class="noindent"><a id="x1-57001r9" name="x1-57001r9"></a>
   <hr class="float">
 
   <div class="float">
     <div class="caption">
-      <span class="id">Note 8:</span> <span class=
+      <span class="id">Note 9:</span> <span class=
       "content"><span class="pplri7t-">Proxying And 0MQ Handlers
       Are Like</span> <span class="pplri7t-">mod</span><span class=
       "pplri7t-">_*</span></span>
-    </div><!--tex4ht:label?: x1-57001r8 -->
+    </div><!--tex4ht:label?: x1-57001r9 -->
 
     <div class="quote">
       <!--l. 129-->
@@ -8503,15 +8530,15 @@
   <p class="noindent">If you try them out and find things that need
   fixing, let us know. <!--l. 152-->
 
-  <p class="noindent"><a id="x1-58001r9" name="x1-58001r9"></a>
+  <p class="noindent"><a id="x1-58001r10" name="x1-58001r10"></a>
   <hr class="float">
 
   <div class="float">
     <div class="caption">
-      <span class="id">Note 9:</span> <span class=
+      <span class="id">Note 10:</span> <span class=
       "content"><span class="pplri7t-">Death To</span> <span class=
       "pplri7t-">WebSockets</span></span>
-    </div><!--tex4ht:label?: x1-58001r9 -->
+    </div><!--tex4ht:label?: x1-58001r10 -->
 
     <div class="quote">
       <!--l. 153-->
@@ -9251,15 +9278,15 @@
   "pplri7t-">must</span> send first then recv, and REP sockets
   <span class="pplri7t-">must</span> recv then send. <!--l. 396-->
 
-  <p class="noindent"><a id="x1-65043r10" name="x1-65043r10"></a>
+  <p class="noindent"><a id="x1-65043r11" name="x1-65043r11"></a>
   <hr class="float">
 
   <div class="float">
     <div class="caption">
-      <span class="id">Note 10:</span> <span class=
+      <span class="id">Note 11:</span> <span class=
       "content"><span class="pplri7t-">There's Always a Size
       in ZeroMQ</span> <span class="pplri7t-">Land</span></span>
-    </div><!--tex4ht:label?: x1-65043r10 -->
+    </div><!--tex4ht:label?: x1-65043r11 -->
 
     <div class="quote">
       <!--l. 397-->
@@ -9321,7 +9348,7 @@
     <li class="enumerate" id="x1-66008x4">Be language agnostic and
     use a data format everyone can accept without complaining that
     it should be done with their favorite<span class=
-    "footnote-mark"><a href="book-final5.html#fn1x7"><sup class=
+    "footnote-mark"><a href="book-final6.html#fn1x7"><sup class=
     "textsuperscript">1</sup></a></span><a id="x1-66009f1" name=
     "x1-66009f1"></a> .
 
@@ -9363,7 +9390,7 @@
   sockets, though, will let Handlers send back replies to a cluster
   of Mongrel2 servers, but only the one with the right subscription
   will process the request.<span class="footnote-mark"><a href=
-  "book-final6.html#fn2x7"><sup class=
+  "book-final7.html#fn2x7"><sup class=
   "textsuperscript">2</sup></a></span><a id="x1-67001f2" name=
   "x1-67001f2"></a> <!--l. 454-->
 
@@ -10002,7 +10029,7 @@
   the <span class="pcrb7t-">examples/http</span><span class=
   "pcrb7t-">_0mq/http.py</span> file and it just the simplest thing
   possible:<span class="footnote-mark"><a href=
-  "book-final7.html#fn3x7"><sup class=
+  "book-final8.html#fn3x7"><sup class=
   "textsuperscript">3</sup></a></span><a id="x1-74001f3" name=
   "x1-74001f3"></a> <!--l. 623-->
 
@@ -11575,21 +11602,22 @@
     "pcrro7t-">X-Mongrel2-Upload-Done</span> headers, which you can
     then use to read the upload contents. You should also make sure
     the headers match to prevent someone forging completed uploads.
-  </ol><!--l. 717-->
+  </ol><!--l. 716-->
 
-  <p class="noindent"><a id="x1-75065r11" name="x1-75065r11"></a>
+  <p class="noindent"><a id="x1-75065r12" name="x1-75065r12"></a>
   <hr class="float">
 
   <div class="float">
     <div class="caption">
-      <span class="id">Note 11:</span> <span class=
-      "content pplri7t-">R</span>
-    </div><!--tex4ht:label?: x1-75065r11 -->
+      <span class="id">Note 12:</span> <span class=
+      "content"><span class="pplri7t-">Watch The chroot</span>
+      <span class="pplri7t-">Too</span></span>
+    </div><!--tex4ht:label?: x1-75065r12 -->
 
     <div class="quote">
       <!--l. 717-->
 
-      <p class="indent">emember, when you run Mongrel2 it will
+      <p class="indent">Remember, when you run Mongrel2 it will
       store the file relative to its <span class=
       "pcrro7t-">chroot</span> setting. In testing you probably
       aren't running Mongrel2 as root so it works fine. You
@@ -12335,7 +12363,7 @@
   "pcrro7t-">m2sh</span> script in your favorite language.
   Obviously, if you're doing this you should probably have a
   good reason<span class="footnote-mark"><a href=
-  "book-final8.html#fn4x7"><sup class=
+  "book-final9.html#fn4x7"><sup class=
   "textsuperscript">4</sup></a></span><a id="x1-79001f4" name=
   "x1-79001f4"></a> . What writing your own, or understanding what
   <span class="pcrro7t-">m2sh</span> is doing will do for you,
@@ -12377,7 +12405,7 @@
   "pcrb7t-">src/config/mimetypes.sql</span>, where the database
   schema is created and the large list of mimetypes that Mongrel2
   knows is stored.<span class="footnote-mark"><a href=
-  "book-final9.html#fn5x7"><sup class=
+  "book-final10.html#fn5x7"><sup class=
   "textsuperscript">5</sup></a></span><a id="x1-79002f5" name=
   "x1-79002f5"></a> Your tool should be able to use this SQL to
   make its database, or at least know what it does. <!--l. 859-->
