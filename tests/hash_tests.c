@@ -168,7 +168,7 @@ char *test_hash_operations()
                 }
                 break;
             case 'q':
-                exit(0);
+                return NULL;
                 break;
             case '\0':
                 break;

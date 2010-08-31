@@ -259,7 +259,7 @@ char *test_dict_operations()
                 }
                 break;
             case 'q':
-                exit(0);
+                return NULL;
                 break;
             case '\0':
                 break;
