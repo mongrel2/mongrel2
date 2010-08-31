@@ -10,7 +10,7 @@ config = {
     'url': 'http://pypi.python.org/pypi/mongrel2-python',
     'download_url': 'http://pypi.python.org/pypi/mongrel2-python',
     'author_email': 'zedshaw@zedshaw.com',
-    'version': '1.0beta6',
+    'version': '1.0beta7',
     'scripts': ['bin/m2sh'],
     'install_requires': ['nose', 'simplejson', 'pyrepl', 'storm'],
     'packages': ['mongrel2', 'mongrel2.config'],
