@@ -174,6 +174,8 @@ static inline void Request_nuke_parts(Request *req)
     bdestroy(req->fragment); req->fragment = NULL;
     // we don't own the host header
     bdestroy(req->host_name); req->host_name = NULL;
+    req->status_code = 0;
+    req->response_size = 0;
 }
 
 void Request_destroy(Request *req)

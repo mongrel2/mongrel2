@@ -75,6 +75,8 @@
     }
 
     action status_code { 
+        parser->status = strtol(PTR_TO(mark), NULL, 10);
+
         if(parser->status_code != NULL)
             parser->status_code(parser->data, PTR_TO(mark), LEN(mark, fpc));
     }

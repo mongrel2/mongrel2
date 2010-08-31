@@ -377,17 +377,20 @@ error:
 static inline bstring Dir_if_modified_since(Request *req, FileRecord *file, int if_modified_since)
 {
     if(if_modified_since <= (int)time(NULL) && file->sb.st_mtime <= if_modified_since) {
+        req->status_code = 304;
         return &HTTP_304;
     } else {
         return NULL;
     }
 
+    req->status_code = 500;
     return &HTTP_500;
 }
 
 static inline bstring Dir_none_match(Request *req, FileRecord *file, int if_modified_since, bstring if_none_match)
 {
     if(biseqcstr(if_none_match, "*") || biseq(if_none_match, file->etag)) {
+        req->status_code = 304;
         return &HTTP_304;
     } else {
         if(if_modified_since) {
@@ -397,6 +400,7 @@ static inline bstring Dir_none_match(Request *req, FileRecord *file, int if_modi
         }
     }
 
+    req->status_code = 500;
     return &HTTP_500;
 }
 
@@ -427,6 +431,7 @@ static inline bstring Dir_calculate_response(Request *req, FileRecord *file)
 
             if(if_unmodified_since) {
                 if(file->sb.st_mtime > if_unmodified_since) {
+                    req->status_code = 412;
                     return &HTTP_412;
                 } else if(if_none_match) {
                     return Dir_none_match(req, file, if_modified_since, if_none_match);
@@ -439,15 +444,19 @@ static inline bstring Dir_calculate_response(Request *req, FileRecord *file)
                 return Dir_if_modified_since(req, file, if_modified_since);
             } else {
                 // they've got nothing, 200
+                req->status_code = 200;
                 return NULL;
             }
         } else {
+            req->status_code = 412;
             return &HTTP_412;
         }
     } else {
+        req->status_code = 404;
         return &HTTP_404;
     }
 
+    req->status_code = 500;
     return &HTTP_500;
 }
 
@@ -461,8 +470,10 @@ int Dir_serve_file(Dir *dir, Request *req, int fd)
     int is_head = is_get ? 0 : biseq(req->request_method, &HTTP_HEAD);
 
     check(path, "Request had not path. That's weird.");
+    req->response_size = 0;
 
     if(!(is_get || is_head)) {
+        req->status_code = 405;
         rc = Response_send_status(fd, &HTTP_405);
         check_debug(rc == blength(&HTTP_405), "Failed to send 405 to client.");
         return -1;
@@ -475,6 +486,7 @@ int Dir_serve_file(Dir *dir, Request *req, int fd)
             check_debug(rc == blength(resp), "Failed to send error response on file serving.");
         } else if(is_get) {
             rc = Dir_stream_file(file, fd);
+            req->response_size = rc;
             check_debug(rc == file->sb.st_size, "Didn't send all of the file, sent %d of %s.", rc, bdata(path));
         } else if(is_head) {
             rc = Dir_send_header(file, fd);

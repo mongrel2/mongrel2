@@ -51,6 +51,7 @@
 #include "setting.h"
 #include "version.h"
 #include "control.h"
+#include "log.h"
 
 FILE *LOG_FILE = NULL;
 
@@ -110,6 +111,8 @@ Server *load_server(const char *db_file, const char *server_uuid, int reuse_fd)
 
     rc = Config_load_settings();
     check(rc == 0, "Failed to load global settings.");
+
+    rc = Log_init(srv); // ignored for now depending on if this should be an error
 
     if(reuse_fd == -1) {
         srv->listen_fd = netannounce(TCP, 0, srv->port);

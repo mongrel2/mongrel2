@@ -59,6 +59,8 @@ typedef struct Request {
     struct Host *target_host;
     dict_t *headers;
     struct Backend *action;
+    int status_code;
+    int response_size;
     http_parser parser;
 } Request;
 

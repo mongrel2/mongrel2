@@ -32,24 +32,26 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <connection.h>
-#include <host.h>
-#include <http11/http11_parser.h>
-#include <http11/httpclient_parser.h>
-#include <bstring.h>
-#include <dbg.h>
-#include <task/task.h>
-#include <events.h>
-#include <register.h>
-#include <handler.h>
-#include <pattern.h>
-#include <dir.h>
-#include <proxy.h>
 #include <assert.h>
 #include <sys/socket.h>
-#include <response.h>
-#include <mem/halloc.h>
+
+#include "connection.h"
+#include "host.h"
+#include "http11/http11_parser.h"
+#include "http11/httpclient_parser.h"
+#include "bstring.h"
+#include "dbg.h"
+#include "task/task.h"
+#include "events.h"
+#include "register.h"
+#include "handler.h"
+#include "pattern.h"
+#include "dir.h"
+#include "proxy.h"
+#include "response.h"
+#include "mem/halloc.h"
 #include "setting.h"
+#include "log.h"
 
 struct tagbstring PING_PATTERN = bsStatic("@[a-z/]- {\"type\":\\s*\"ping\"}");
 
@@ -162,12 +164,16 @@ int connection_msg_to_handler(int event, void *data)
     check(handler, "JSON request doesn't match any handler: %s", 
             bdata(Request_path(conn->req)));
 
+
     if(pattern_match(conn->buf, conn->nparsed, bdata(&PING_PATTERN))) {
+        Log_request(conn, 200, 0);
         Register_ping(conn->fd);
     } else {
         // TODO: Get ragel to do this, not us.
         int header_len = blength(Request_path(conn->req)) + 1;
         check(conn->nread - header_len - 1 >= 0, "Header length calculation is wrong.");
+
+        Log_request(conn, 200, conn->nread - header_len - 1);
 
         bstring payload = Request_to_payload(conn->req, handler->send_ident,
                 conn->fd, conn->buf + header_len, conn->nread - header_len - 1);
@@ -269,6 +275,7 @@ int connection_http_to_handler(int event, void *data)
     Handler *handler = Request_get_action(conn->req, handler);
     error_unless(handler, conn->fd, 404, "No action for request: %s", bdata(Request_path(conn->req)));
 
+
     if(content_len == 0) {
         body = "";
     } else if(content_len > MAX_CONTENT_LENGTH) {
@@ -296,6 +303,8 @@ int connection_http_to_handler(int event, void *data)
         // no matter what, the body will need to go here
         body = conn->buf + header_len;
     }
+
+    Log_request(conn, 200, content_len);
 
     result = Request_to_payload(conn->req, handler->send_ident, conn->fd, body, content_len);
     check(result, "Failed to create payload for request.");
@@ -325,6 +334,8 @@ int connection_http_to_directory(int event, void *data)
 
     int rc = Dir_serve_file(dir, conn->req, conn->fd);
     check_debug(rc == 0, "Failed to serve file: %s", bdata(Request_path(conn->req)));
+
+    Log_request(conn, conn->req->status_code, conn->req->response_size);
 
     return RESP_SENT;
 
@@ -434,8 +445,8 @@ int connection_proxy_reply_parse(int event, void *data)
         check(rc != -1, "Failed streaming non-chunked response.");
 
     } else if(client->content_len == -1) {
-        // TODO: write a broken web server to test this
-        debug("No chunked encoding and no content-length header, we'll read until close.");
+        debug("No chunked encoding and no content-length header, we'll read until close: %s",
+               conn->proxy_buf);
 
         do {
             rc = fdsend(conn->fd, conn->proxy_buf, nread);
@@ -445,6 +456,7 @@ int connection_proxy_reply_parse(int event, void *data)
         sentinel("Should not reach this code, Tell Zed.");
     }
 
+    Log_request(conn, client->status, client->content_len);
     return REQ_RECV;
 
 error:

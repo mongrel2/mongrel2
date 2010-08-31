@@ -41,6 +41,7 @@ typedef struct httpclient_parser {
   int cs;
   size_t body_start;
   int content_len;
+  int status;
   int chunked;
   int chunks_done;
   size_t nread;
