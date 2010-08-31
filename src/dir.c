@@ -192,8 +192,11 @@ Dir *Dir_create(const char *base, const char *prefix, const char *index_file, co
 
     check(blength(dir->prefix) < MAX_DIR_PATH, "Prefix is too long, must be less than %d", MAX_DIR_PATH);
 
-    check(bchar(dir->prefix, 0) == '/' && bchar(dir->prefix, blength(dir->prefix)-1) == '/',
-                "Dir route prefix (%s) must start with / and end with / or else you break the internet.", prefix);
+    check(bchar(dir->prefix, 0) == '/', "Dir route prefix (%s) must start with / or else it won't work.", bdata(dir->prefix));
+
+    if(bchar(dir->prefix, blength(dir->prefix)-1) != '/') {
+        log_info("Dir prefix %s doesn't end in / so assuming it's a file.", bdata(dir->prefix));
+    }
 
     dir->index_file = bfromcstr(index_file);
     dir->default_ctype = bfromcstr(default_ctype);
@@ -260,7 +263,7 @@ static inline int normalize_path(bstring target)
     ballocmin(target, PATH_MAX);
     char *path_buf = calloc(PATH_MAX+1, 1);
 
-    // Some platforms (OSX!) don't allocated for you, so we have to
+    // Some platforms (OSX!) don't allocate for you, so we have to
     char *normalized = realpath((const char *)target->data, path_buf);
     check(normalized, "Failed to normalize path: %s", bdata(target));
 
@@ -278,7 +281,7 @@ static inline int Dir_lazy_normalize_base(Dir *dir)
     if(dir->normalized_base == NULL) {
         dir->normalized_base = bstrcpy(dir->base);
         check(normalize_path(dir->normalized_base) == 0, 
-                "Failed to normalize base path: %s", bdata(dir->normalized_base));
+            "Failed to normalize base path: %s", bdata(dir->normalized_base));
 
         debug("Lazy normalized base path %s into %s", bdata(dir->base), bdata(dir->normalized_base));
     }
@@ -336,12 +339,24 @@ FileRecord *Dir_resolve_file(Dir *dir, bstring path)
     // We subtract one from the blengths below, because dir->prefix includes
     // a trailing '/'.  If we skip over this in path->data, we drop the '/'
     // from the URI, breaking the target path
+    debug("Building target from base: %s prefix: %s index_file: %s path: %s", 
+            bdata(dir->normalized_base),
+            bdata(dir->prefix),
+            bdata(dir->index_file),
+            bdata(path));
+
     if(bchar(path, blength(path) - 1) == '/') {
+        // a directory so figureo out the index file
         target = bformat("%s%s%s",
                     bdata(dir->normalized_base),
                     path->data + blength(dir->prefix) - 1,
                     bdata(dir->index_file));
+    } else if(biseq(dir->prefix, path)) {
+        // a full path to a file that matches the Dir prefix as a file
+        // TODO: optimize this somewhat and make sure it doesn't make weird paths
+        target = bformat("%s%s", bdata(dir->normalized_base), bdata(path)); 
     } else {
+        // all other requests for files
         target = bformat("%s%s",
                 bdata(dir->normalized_base),
                 path->data + blength(dir->prefix) - 1);
@@ -349,7 +364,8 @@ FileRecord *Dir_resolve_file(Dir *dir, bstring path)
 
     check(target, "Couldn't construct target path for %s", bdata(path));
 
-    check_debug(normalize_path(target) == 0, "Failed to normalize target path.");
+    check_debug(normalize_path(target) == 0,
+            "Failed to normalize target path: %s", bdata(target));
    
     check_debug(bstrncmp(target, dir->normalized_base, blength(dir->normalized_base)) == 0, 
             "Request for path %s does not start with %s base after normalizing.", 
