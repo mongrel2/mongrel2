@@ -122,7 +122,7 @@ alternative that is similar to procer, and inspired by procer, but written in Pe
 few more features.
 
 Either way, Mongrel2 is practical, and does generally the right thing with today's tools.
-Want to use daemontools?  Fine, just run it \verb|mongrel2 config.sqlite server| and it'll
+Want to use daemontools?  Fine, just run it \verb|mongrel2 config.sqlite server_uuid| and it'll
 work right.  Want to put it in init.d or use procer or similar?  Fine, run it as root.
 \end{aside}
 
@@ -397,7 +397,7 @@ deployment > ps ax | grep procer
 
 # see if mongrel2 is running
 deployment > ps ax | grep mongrel2
-17944 ?        Ssl    0:00 mongrel2 config.sqlite localhost
+17944 ?        Ssl    0:00 mongrel2 config.sqlite ba0019c0-9140-4f82-80ca-0f4f2e81def7
 
 \end{lstlisting}
 \end{code}
@@ -474,7 +474,7 @@ deployment > ps ax | grep procer
 19607 ?        Ss     0:00 procer /home/zedshaw/deployment/profiles /home/zedshaw/deployment/run/procer.pid
 
 deployment > ps ax | grep mongrel2
-19621 ?        Ssl    0:00 mongrel2 config.sqlite localhost
+19621 ?        Ssl    0:00 mongrel2 config.sqlite ba0019c0-9140-4f82-80ca-0f4f2e81def7
 
 deployment > ps ax | grep chat
 19609 ?        Sl     0:00 python chat.py

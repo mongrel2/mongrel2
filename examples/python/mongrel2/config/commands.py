@@ -362,8 +362,8 @@ def start_command(db=None, uuid= "", host="", name="", sudo=False, every=False):
     Give the -every option if you want mongrel2 to launch all servers listed in
     the given db.
 
-    Note when using the host or name to select servers, all servers matching
-    will be started.
+    If multiple servers match and -every is not given, m2sh will ask you which
+    to start.
     """
     root_enabler = 'sudo' if sudo else ''
 

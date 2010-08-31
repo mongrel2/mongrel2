@@ -600,6 +600,51 @@ ctl.close()
 You obviously don't need to do this, but should you want to do
 something special like a management interface, this is your start.
 
+
+\section{Multiple Servers}
+
+A Mongrel2 process itself does not have any support for running multiple servers,
+instead it takes two simple parameters, a sqlite config database and a server uuid
+that names the server to be launched. This is done to keep the mongrel2 code simple
+and workable.
+
+However.
+
+Mongrel2's m2sh supports launching multiple servers from a single configuration
+database. By passing -every to many m2sh commands, you are able to perform actions
+on all configured servers at once. You can also perform actions on single servers
+by specifying their uuid, name or host. If any parameter given is ambiguious, that
+is if for example you search with \shell{-host localhost} and your config contains
+two servers which attempt to bind to localhost, m2sh will list the matching servers
+and ask you to clarify your selection.
+
+For example:
+\begin{Verbatim}
+> m2sh start -db config.sqlite -every
+Launching server localhost 9f0cbd7d-aeff-4195-921e-2ce1c25512d3 on port 6768
+...
+Launching server localhost 3d815ade-9081-4c36-94dc-77a9b060b021 on port 6767
+...
+
+> m2sh start -db config.sqlite -host localhost
+Not sure which server to run, what I found:
+NAME HOST UUID
+--------------
+localhost localhost 3d815ade-9081-4c36-94dc-77a9b060b021
+localhost localhost 9f0cbd7d-aeff-4195-921e-2ce1c25512d3
+* Use -every to run them all.
+
+> m2sh start -db config.sqlite -uuid 3d815ade-9081-4c36-94dc-77a9b060b021
+Launching server localhost 3d815ade-9081-4c36-94dc-77a9b060b021 on port 6767
+...
+
+> m2sh running -db config.sqlite -every
+Found server localhost 3d815ade-9081-4c36-94dc-77a9b060b021 RUNNING at PID 28525
+PID file run/mongrel2.pid not found for server localhost 9f0cbd7d-aeff-4195-921e-2ce1c25512d3
+
+> m2sh stop -db config.sqlite -every
+\end{Verbatim}
+
 \section{Tweakable Expert Settings}
 
 Many of Mongrel2's internal settings are configurable using the settings system.
