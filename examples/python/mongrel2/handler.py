@@ -38,7 +38,7 @@ class Connection(object):
         """
         self.sender_id = sender_id
 
-        reqs = CTX.socket(zmq.UPSTREAM)
+        reqs = CTX.socket(zmq.PULL)
         reqs.connect(sub_addr)
 
         resp = CTX.socket(zmq.PUB)
