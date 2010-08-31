@@ -641,3 +641,85 @@ just go ahead and try and let us know.
 
 Other than that, automate, automate, automate.
 
+\section{Running With and Without chroot}
+
+Mongrel2 enforces the correct behavior when you run as root, which is to drop priv and
+chroot.  This makes the server more secure and it also simplifies your deployments. 
+Since everything you do always runs in a chroot, you now just need to rsync that chroot
+directory or put it into a git or hg repo and you're set.  You're literally forced to
+make your deployments portable to different directories and systems.
+
+As of the 1.0 push for Mongrel2 we haven't done much work on how you deploy all
+the different languages.  They sort of sprung up during development and our plan is
+to expand that out in the 2.0 version so that deployment is very well documented
+for all the different languages we support.  That means, you'll probably run into
+some snags and things we didn't anticipate.
+
+The following are some general points we've come up with while deploying our
+own apps, with more to come as we do the 2.0 version:
+
+\begin{enumerate}
+\item Don't run things as root if you can.  It's bad habit that everyone tries to
+do their sysadmin completely as root, so Mongrel2 is designed to be run very easily
+as under a regular user account.  The only time you really should be running as root
+is when you do a quick -sudo to m2sh to start \file{mongrel2} up so it can chroot.
+
+\item Use the chroot to keep your deployment simpler.  I literally do all my work
+locally and then just rsync my changes up to my remote staging server.  Everything
+has to live in the chroot anyway and the chroot enforces that it is completely self-contained.
+
+\item Use Python's virtualenv or anything similar to get yourself a totally local environment.
+Too many systems, such as OSX, have very outdated packages and will change versions on you
+without telling you.  The best way to make sure your software keeps working and works as
+one cohesive deployment is to use a virtualenv inside your chroot.  It should even work
+cross platform if you don't have compiled packages in there.
+
+\item Create a user for your application and live in there.  I don't have any root
+access on my stuff.  \emph{Everything} is run as a user named after the website and
+is deployed right in the /home/USER directory.  I login as that user, manage as that user,
+and I don't give them sudo access.  For the times when I need to sudo to restart or run
+Mongrel2 I then use a separate login that I have open (with screen) and do it there.  This
+reduces your risk of hacks, but also just simplifies things.  It's no problem for me to
+move my configuration over to new machines with this setup, or deploy clusters.  I know as
+long as there's the right user on the target, I'm set.
+
+\item Use \href{http://www.gnu.org/software/screen/}{GNU screen} or die.
+
+\item Keep your config.sqlite and the .py file in your chroot, and keep your content and
+everything else under that.  This makes sure that the config isn't accessible outside your
+content directories.  Mongrel2 helps you get this right by not allowing certain Dir 
+configurations that would expose your chroot to the world.
+\end{enumerate}
+
+There's a few additional tips for people who want to use alternative process supervision
+like daemontools, runit, or init.d setups.  No matter what you use, you should probably
+follow this advice:
+
+\begin{enumerate}
+\item Whatever you use for process management, make sure it can run stuff as \emph{not} root
+and can do chroot for you.  If you're running your Mongrel2 as root you're doing it wrong.
+Actually if you're running any services as root that don't absolutely need to be you're doing
+it wrong.
+
+\item Mongrel2 is happy to run as a regular user, and assumes that if you do not run as root,
+then you probably want to run under daemontools or similar.  It won't chroot or drop priv and
+logs to stdout/stderr.
+
+\item If you need to bind to port 80 but run under daemontools as a regular user, then use
+\href{http://manpages.ubuntu.com/manpages/lucid/man1/privbind.1.html}{privbind} to do it.
+This tool will run any command, like \file{mongrel2} but it does it in a way that lets the
+executable grab ports below 1024.  This restriction on ports is actually really stupid so
+don't worry about doing this.
+
+\item Make sure your process monitor is not a single point of failure.  Some of
+them out there will take your whole world down if they crash.  Try doing a
+harsh \ident{kill} on your process manager and see how it behaves.  As much as
+they like to tell you not to worry about this because they "run forever",
+everything has bugs and stupid people tend to kill things they don't get.
+If taking one process down nukes your whole server, then that's a bad
+design.
+
+\end{enumerate}
+
+As we work on the next phase of Mongrel2 development, this will improve so watch for
+news about deployment and real applications.
