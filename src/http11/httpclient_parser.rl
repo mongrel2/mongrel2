@@ -156,7 +156,7 @@ int httpclient_parser_init(httpclient_parser *parser)  {
 
     parser->cs = cs;
     parser->body_start = 0;
-    parser->content_len = 0;
+    parser->content_len = -1;
     parser->chunked = 0;
     parser->chunks_done = 0;
     parser->mark = 0;

@@ -429,18 +429,20 @@ int connection_proxy_reply_parse(int event, void *data)
         rc = Proxy_stream_chunks(conn, nread);
         check(rc != -1, "Failed to stream chunked encoding to client.");
 
-    } else if(client->content_len > 0) {
+    } else if(client->content_len >= 0) {
         rc = Proxy_stream_response(conn, client->body_start + client->content_len, nread);
         check(rc != -1, "Failed streaming non-chunked response.");
 
-    } else {
+    } else if(client->content_len == -1) {
         // TODO: write a broken web server to test this
-        debug("No chunked encoding and no content length, we'll read until close.");
+        debug("No chunked encoding and no content-length header, we'll read until close.");
 
         do {
             rc = fdsend(conn->fd, conn->proxy_buf, nread);
             check(rc == nread, "Failed to send all of the request: %d length.", nread);
         } while((nread = fdrecv(conn->proxy_fd, conn->proxy_buf, BUFFER_SIZE)) > 0);
+    } else {
+        sentinel("Should not reach this code, Tell Zed.");
     }
 
     return REQ_RECV;
