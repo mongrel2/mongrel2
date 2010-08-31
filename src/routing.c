@@ -172,19 +172,16 @@ list_t *RouteMap_match(RouteMap *map, bstring path)
             blength(path), RouteMap_collect_match);
 }
 
-
-list_t *RouteMap_match_suffix(RouteMap *map, bstring target)
+Route *RouteMap_match_suffix(RouteMap *map, bstring target)
 {
-    // TODO: create a suffix collect so we don't have to do this
-    bstring reversed = bstrcpy(target);
-    bReverse(reversed);
+    Route *route = tst_search_suffix(map->routes, bdata(target), blength(target));
 
-    list_t *results = tst_collect(map->routes, bdata(reversed),
-                        blength(reversed), NULL);
-
-    bdestroy(reversed);
-
-    return results;
+    if(route) {
+        debug("Found simple prefix: %s", bdata(route->pattern));
+        return bstring_match(target, route->pattern) ? route : NULL;
+    } else {
+        return NULL;
+    }
 }
 
 

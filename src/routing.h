@@ -64,7 +64,7 @@ list_t *RouteMap_match(RouteMap *routes, bstring path);
 
 int RouteMap_insert_reversed(RouteMap *routes, bstring pattern, void *data);
 
-list_t *RouteMap_match_suffix(RouteMap *map, bstring target);
+Route *RouteMap_match_suffix(RouteMap *map, bstring target);
 
 Route *RouteMap_simple_prefix_match(RouteMap *map, bstring target);
 

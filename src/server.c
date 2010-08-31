@@ -187,27 +187,7 @@ void Server_set_default_host(Server *srv, Host *host)
 
 Host *Server_match_backend(Server *srv, bstring target)
 {
-    // TODO: figure out the best matching policy, longest? first? all?
-    Route *found = NULL;
-
     debug("Looking for target host: %s", bdata(target));
-
-    list_t *results = RouteMap_match_suffix(srv->hosts, target);
-    lnode_t *n = list_first(results);
-
-    if(n) {
-        found = lnode_get(n);
-        assert(found && "RouteMap returned a list node with NULL.");
-        debug("Found host at %s", bdata(found->pattern));
-    }
-
-    list_destroy_nodes(results);
-    list_destroy(results);
-
-    if(found) {
-        assert(found->data && "Invalid value for stored route.");
-        return found->data;
-    } else {
-        return NULL;
-    }
+    Route *found = RouteMap_match_suffix(srv->hosts, target);
+    return found != NULL ? found->data : NULL;
 }
