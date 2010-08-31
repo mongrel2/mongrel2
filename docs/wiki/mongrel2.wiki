@@ -114,7 +114,7 @@ information on writing one for your language.</p>
 <ul>
     <li><a href="http://twitter.com/alexgartrell"><b>agartrell</b></a> works on core Mongrel2 like directory serving and the kegogi testing tool.</li>
     <li><a href="http://twitter.com/justinlilly"><b>jlilly</b></a> will maybe hack on the Python support.</li>
-    <li><b>jsimmons</b> wrote the Lua binding and hacks on the core Mongrel2.</li>
+    <li><a href="http://twitter.com/joshrsimmons"><b>jsimmons</b></a> wrote the Lua binding and hacks on the core Mongrel2.</li>
     <li><b>pbastov</b> works on translating things to Russian.</li>
     <li><b>phred</b> hacks on procer and some of the core Mongrel2.</li>
     <li><a href="http://twitter.com/tordek"><b>tordek</b></a> finds bugs in Mongrel2 and edited <a href="/doc/tip/docs/manual/book.wiki">the manual</a>.</li>
