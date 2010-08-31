@@ -32,17 +32,18 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <dbg.h>
-#include <task/task.h>
-#include <connection.h>
-#include <register.h>
-#include <server.h>
-#include <host.h>
-#include <assert.h>
-#include <string.h>
-#include <mem/halloc.h>
-#include <routing.h>
-#include <setting.h>
+#include "dbg.h"
+#include "task/task.h"
+#include "connection.h"
+#include "register.h"
+#include "server.h"
+#include "host.h"
+#include "assert.h"
+#include "string.h"
+#include "mem/halloc.h"
+#include "routing.h"
+#include "setting.h"
+#include "pattern.h"
 
 int RUNNING=1;
 
@@ -54,8 +55,8 @@ void host_destroy_cb(Route *r, RouteMap *map)
     }
 }
 
-Server *Server_create(const char *uuid, const char *port,
-        const char *chroot, const char *access_log,
+Server *Server_create(const char *uuid, const char *default_host,
+        const char *port, const char *chroot, const char *access_log,
         const char *error_log, const char *pid_file)
 {
     Server *srv = h_calloc(sizeof(Server), 1);
@@ -74,6 +75,7 @@ Server *Server_create(const char *uuid, const char *port,
     srv->access_log = bfromcstr(access_log); check_mem(srv->access_log);
     srv->error_log = bfromcstr(error_log); check_mem(srv->error_log);
     srv->pid_file = bfromcstr(pid_file); check_mem(srv->pid_file);
+    srv->default_hostname = bfromcstr(default_host);
 
     return srv;
 
@@ -144,7 +146,7 @@ void Server_start(Server *srv)
     int rport;
     char remote[IPADDR_SIZE];
 
-    check(srv->default_host, "No default_host set.");
+    check(srv->default_host, "No default_host set, you need one host named: %s", bdata(srv->default_hostname));
 
     taskname("SERVER");
 
@@ -189,5 +191,17 @@ Host *Server_match_backend(Server *srv, bstring target)
 {
     debug("Looking for target host: %s", bdata(target));
     Route *found = RouteMap_match_suffix(srv->hosts, target);
-    return found != NULL ? found->data : NULL;
+
+    if(found) {
+        return found->data;
+    } else {
+        if(bstring_match(target, srv->default_hostname)) {
+            return srv->default_host;
+        } else {
+            debug("Failed to match against any target and didn't match default_host: %s", bdata(srv->default_hostname));
+            return NULL;
+        }
+    }
+
+    return NULL;
 }

@@ -213,8 +213,10 @@ static int Config_load_host_cb(void *param, int cols, char **data, char **names)
 
     Server_add_host(server, bfromcstr(data[2]), host);
 
-    if(server->default_host == NULL)
-        Server_set_default_host(server, host);
+    if(biseq(host->name, server->default_hostname)) {
+        debug("Setting default host to host %s:%s", data[0], data[1]);
+        server->default_host = host;
+    }
 
     SQL_FREE(query);
     return 0;
@@ -235,8 +237,9 @@ static int Config_load_server_cb(void* param, int cols, char **data, char **name
         Server_destroy(*server);
     }
 
-    *server = Server_create(data[1], data[3], data[4], data[5], data[6], data[7]);
+    *server = Server_create(data[1], data[2], data[3], data[4], data[5], data[6], data[7]);
     check(*server, "Failed to create server %s:%s on port %s", data[0], data[2], data[3]);
+
 
     const char *HOST_QUERY = "SELECT id, name, matching, server_id FROM host WHERE server_id = %s";
     char *query = SQL(HOST_QUERY, data[0]);
@@ -248,6 +251,7 @@ static int Config_load_server_cb(void* param, int cols, char **data, char **name
     log_info("Loaded server %s:%s on port %s with default host %s", data[0], data[1], data[3], data[2]); 
 
     SQL_FREE(query);
+
     return 0;
 
 error:
@@ -270,6 +274,7 @@ Server *Config_load_server(const char *uuid)
     check(rc == 0, "Failed to select server with uuid %s", uuid);
 
     SQL_FREE(query);
+
     return server;
 
 error:

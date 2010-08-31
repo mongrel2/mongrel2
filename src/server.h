@@ -54,11 +54,12 @@ typedef struct Server {
     bstring access_log;
     bstring error_log;
     bstring pid_file;
+    bstring default_hostname;
 } Server;
 
 
-Server *Server_create(const char *uuid, const char *port,
-        const char *chroot, const char *access_log,
+Server *Server_create(const char *uuid, const char *default_host,
+        const char *port, const char *chroot, const char *access_log,
         const char *error_log, const char *pid_file);
 
 void Server_destroy(Server *srv);
