@@ -562,6 +562,21 @@ static inline int ident_and_register(int event, void *data, int reg_too)
     int conn_type = 0;
     int next = CLOSE;
 
+#ifndef NDEBUG
+    bstring user_agent = Request_get(conn->req, &HTTP_USER_AGENT);
+
+    if(user_agent) {
+        debug("Got a user-agent: %s", bdata(user_agent));
+        if(pattern_match(bdata(user_agent), blength(user_agent), "httperf.*")) {
+            log_err("\n\n\n\n\n------\nWHAT!? WHY ARE YOU PERFORMANCE TESTING WITH DEBUGGING ON?!\nAt least you're using httperf.\n\n\n\n");
+        } else if(pattern_match(bdata(user_agent), blength(user_agent), "ApacheBench.*")) {
+            log_err("\n\n\n\n\n------\nWHAT!? WHY ARE YOU PERFORMANCE TESTING WITH DEBUGGING ON?!\nAB is a giant piece of crap that uses HTTP/1.0.\n\n\n\n");
+        } else if(pattern_match(bdata(user_agent), blength(user_agent), ".*Siege.*")) {
+            log_err("\n\n\n\n\n------\nWHAT!? WHY ARE YOU PERFORMANCE TESTING WITH DEBUGGING ON?!\nSiege is junk, there's no such measurable concept as 'user'. Snakeoil.\n\n\n\n");
+        }
+    }
+#endif
+
     if(Request_is_socket(conn->req)) {
         conn_type = CONN_TYPE_SOCKET;
         taskname("SOCKET");
