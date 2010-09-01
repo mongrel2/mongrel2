@@ -164,8 +164,8 @@ int attempt_chroot_drop(Server *srv)
     if(Unixy_chroot(srv->chroot) == 0) {
         log_info("All loaded up, time to turn into a server.");
 
-        check(access("/logs", F_OK) == 0, "logs directory doesn't exist in %s or isn't owned right.", bdata(srv->chroot));
-        check(access("/run", F_OK) == 0, "run directory doesn't exist in %s or isn't owned right.", bdata(srv->chroot));
+        check(access("/run", F_OK) == 0, "/run directory doesn't exist in %s or isn't owned right.", bdata(srv->chroot));
+        check(access("/tmp", F_OK) == 0, "/tmp directory doesn't exist in %s or isn't owned right.", bdata(srv->chroot));
 
         rc = Unixy_daemonize();
         check(rc == 0, "Failed to daemonize, looks like you're hosed.");
