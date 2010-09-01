@@ -760,8 +760,6 @@ int Connection_read_header(Connection *conn, Request *req)
     conn->buf[BUFFER_SIZE] = '\0';  // always cap it off
 
     while(finished != 1 && remaining >= 0) {
-        debug("READ: %d of %d", conn->nread, remaining);
-
         n = fdrecv(conn->fd, cur_buf, remaining);
         check_debug(n > 0, "Failed to read from socket after %d read: %d parsed.",
                     conn->nread, (int)conn->nparsed);
