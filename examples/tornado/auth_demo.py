@@ -16,6 +16,6 @@ main = Server(
     ]
 )
 
-commit([main])
+commit([main], settings={'limits.buffer_size': 4 * 1024})
 
 
