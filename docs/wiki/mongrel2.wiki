@@ -38,12 +38,11 @@ technologies.</p>
 <p>We are currently crafting a release process, but for now you can get the latest source
 download from (updated Wed Sep 1 01:04:34 PDT 2010):</p> 
 
-
-
-
 <ul>
-    <li><a href="/static/downloads/mongrel2-1.0rc1.tar.bz2">mongrel2-1.0rc1.tar.bz2</a> MD5: </li>
-    <li><a href="/static/downloads/mongrel2-1.0rc1.zip">mongrel2-1.0rc1.zip</a> MD5: </li>
+    <li><a href="/static/downloads/mongrel2-1.0rc1.tar.bz2">mongrel2-1.0rc1.tar.bz2</a> 
+    MD5: 6b1de0da935f747e0358fa96965a5e88</li>
+    <li><a href="/static/downloads/mongrel2-1.0rc1.zip">mongrel2-1.0rc1.zip</a>
+    MD5: a0e59180a2e2e132d04880ae949c3053</li>
 </ul>
 
 <p>These files will be generated periodically, and contain a directory with the date/time they were made,
