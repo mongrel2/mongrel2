@@ -36,13 +36,14 @@ technologies.</p>
 <h2><a name="download">Download</a></h2>
 
 <p>We are currently crafting a release process, but for now you can get the latest source
-download from (updated Mon Aug 30 01:46:16 PDT 2010):</p> 
+download from (updated Wed Sep 1 01:04:34 PDT 2010):</p> 
+
 
 
 
 <ul>
-    <li><a href="/static/downloads/mongrel2-1.0beta7.tar.bz2">mongrel2-1.0beta7.tar.bz2</a> MD5: 301b4a2816ae6b4b643526bba33cea7f</li>
-    <li><a href="/static/downloads/mongrel2-1.0beta7.zip">mongrel2-1.0beta7.zip</a> MD5: 12d3c86e820b2ddc2f0e1081ded5ccba</li>
+    <li><a href="/static/downloads/mongrel2-1.0rc1.tar.bz2">mongrel2-1.0rc1.tar.bz2</a> MD5: </li>
+    <li><a href="/static/downloads/mongrel2-1.0rc1.zip">mongrel2-1.0rc1.zip</a> MD5: </li>
 </ul>
 
 <p>These files will be generated periodically, and contain a directory with the date/time they were made,
