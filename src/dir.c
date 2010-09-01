@@ -159,7 +159,7 @@ int Dir_stream_file(FileRecord *file, int sock_fd)
     check(total == file->sb.st_size, "Did not write enough!");
     check(total <= file->sb.st_size, "Wrote way too much, wrote %d but size was %d", (int)total, (int)file->sb.st_size);
 
-    return sent;
+    return total;
 
 error:
     return -1;
