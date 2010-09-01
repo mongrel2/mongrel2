@@ -156,8 +156,13 @@ int Dir_stream_file(FileRecord *file, int sock_fd)
         check_debug(sent > 0, "Failed to sendfile on socket: %d from file %d", sock_fd, file->fd);
     }
     
-    check(total == file->sb.st_size, "Did not write enough!");
-    check(total <= file->sb.st_size, "Wrote way too much, wrote %d but size was %d", (int)total, (int)file->sb.st_size);
+    check(total <= file->sb.st_size, 
+            "Wrote way too much, wrote %d but size was %d",
+            (int)total, (int)file->sb.st_size);
+
+    check(total == file->sb.st_size,
+            "Sent other than expected, sent: %d, but expected: %d", 
+            (int)total, (int)file->sb.st_size);
 
     return total;
 
