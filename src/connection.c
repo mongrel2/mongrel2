@@ -533,9 +533,8 @@ int connection_proxy_close(int event, void *data)
     return CLOSE;
 }
 
-int connection_close(int event, void *data)
+static inline int close_or_error(int event, void *data, int next)
 {
-    TRACE(close);
     Connection *conn = (Connection *)data;
 
     if(conn->proxy_fd) {
@@ -544,10 +543,16 @@ int connection_close(int event, void *data)
 
     check(Register_disconnect(conn->fd) != -1, "Register disconnect didn't work for %d", conn->fd);
 
-
 error:
     // fallthrough on purpose
-    return 0;
+    return next;
+}
+
+
+int connection_close(int event, void *data)
+{
+    TRACE(close);
+    return close_or_error(event, data, 0);
 }
 
 
@@ -555,18 +560,9 @@ error:
 int connection_error(int event, void *data)
 {
     TRACE(error);
-    Connection *conn = (Connection *)data;
-
-    if(conn->proxy_fd) {
-        connection_proxy_close(event, data);
-    }
-
-
-    check(Register_disconnect(conn->fd) != -1, "Register disconnect didn't work for %d", conn->fd);
-
-error: // fallthrough on purpose
-    return CLOSE;
+    return close_or_error(event, data, CLOSE);
 }
+
 
 static inline int ident_and_register(int event, void *data, int reg_too)
 {
@@ -756,30 +752,32 @@ int Connection_read_header(Connection *conn, Request *req)
     int finished = 0;
     int n = 0;
     conn->nparsed = 0;
+    int remaining = BUFFER_SIZE - 1;
+    char *cur_buf = conn->buf;
 
     Request_start(req);
 
     conn->buf[BUFFER_SIZE] = '\0';  // always cap it off
 
-    while(!finished && conn->nread < BUFFER_SIZE - 1) {
-        n = fdrecv(conn->fd, conn->buf, BUFFER_SIZE - 1 - conn->nread);
+    while(finished != 1 && remaining >= 0) {
+        debug("READ: %d of %d", conn->nread, remaining);
+
+        n = fdrecv(conn->fd, cur_buf, remaining);
         check_debug(n > 0, "Failed to read from socket after %d read: %d parsed.",
                     conn->nread, (int)conn->nparsed);
-
         conn->nread += n;
 
         check(conn->buf[BUFFER_SIZE] == '\0', "Trailing \\0 was clobbered, buffer overflow potentially.");
-        check(conn->nread < BUFFER_SIZE, "Read too much, FATAL error: nread: %d, buffer size: %d", conn->nread, BUFFER_SIZE);
 
         finished = Request_parse(req, conn->buf, conn->nread, &conn->nparsed);
 
-        error_unless(finished != -1, conn->fd, 400, 
-                "Error in parsing: %d, bytes: %d, value: %.*s, parsed: %d", 
-                finished, conn->nread, conn->nread, conn->buf, (int)conn->nparsed);
-
+        remaining = BUFFER_SIZE - 1 - conn->nread;
+        cur_buf = conn->buf + conn->nread; 
     }
 
-    error_unless(finished, conn->fd, 400, "HEADERS and/or request too big.");
+    error_unless(finished == 1, conn->fd, 400, 
+            "Error in parsing: %d, bytes: %d, value: %.*s, parsed: %d", 
+            finished, conn->nread, conn->nread, conn->buf, (int)conn->nparsed);
 
     return conn->nread; 
 
