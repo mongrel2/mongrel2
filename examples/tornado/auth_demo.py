@@ -12,7 +12,7 @@ main = Server(
     port=6767,
     hosts = [
         Host(name="localhost", 
-             routes={ r'/(.*)': Proxy(addr='127.0.0.1', port=8888) })
+             routes={ r'/': Proxy(addr='127.0.0.1', port=8888) })
     ]
 )
 
