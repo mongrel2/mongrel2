@@ -75,9 +75,14 @@ void terminate(int s)
             log_info("RELOAD REQUESTED, I'll do it on the next request.");
             break;
         default:
-            RUNNING = 0;
-            log_info("SHUTDOWN REQUESTED: %s", MURDER ? "MURDER" : "GRACEFUL");
-            fdclose(SERVER->listen_fd);
+            if(!RUNNING) {
+                log_info("SIGINT CAUGHT AGAIN, ASSUMING MURDER.");
+                MURDER = 1;
+            } else {
+                RUNNING = 0;
+                log_info("SHUTDOWN REQUESTED: %s", MURDER ? "MURDER" : "GRACEFUL");
+                fdclose(SERVER->listen_fd);
+            }
             break;
     }
 }

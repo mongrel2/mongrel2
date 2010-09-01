@@ -12,7 +12,9 @@ for i in range(0, 500):
     s = socket.socket()
     s.connect(("127.0.0.1", 6767))
     s.send(req)
-    s.send(leaker * i)
+    for x in range(0, 5000):
+        s.send(leaker)
+        time.sleep(0.2)
     s.send(ending)
     time.sleep(1)
     s.close()
