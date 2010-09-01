@@ -4,15 +4,20 @@
 #include "dbg.h"
 #include "request.h"
 #include "headers.h"
+#include "setting.h"
 
 FILE *ACCESS_LOG = NULL;
 
 int Log_init(Server *server)
 {
     if(ACCESS_LOG == NULL) {
-        ACCESS_LOG = fopen(bdata(server->access_log), "a+");
-        check(ACCESS_LOG != NULL, "Failed to open the access log: %s", bdata(server->access_log));
-        setbuf(ACCESS_LOG, NULL);
+        if(Setting_get_int("disable.access_logging", 0)) {
+            log_info("Access log is disabled according to disable.access_logging.");
+        } else {
+            ACCESS_LOG = fopen(bdata(server->access_log), "a+");
+            check(ACCESS_LOG != NULL, "Failed to open the access log: %s", bdata(server->access_log));
+            setbuf(ACCESS_LOG, NULL);
+        }
     }
 
     return 0;
