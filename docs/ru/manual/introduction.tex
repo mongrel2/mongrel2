@@ -1,0 +1,147 @@
+\chapter{Introduction}
+
+Mongrel2 is a web server.  HTTP requests come in, HTTP responses go out.
+Request, response.  There is nothing revolutionary or extravagant in what
+Mongrel2 does with a browser, apart from supporting fancy asynchronous socket
+protocols.  To the browser, Mongrel2 is just this nice web server that has
+WebSockets and Flash Sockets in it.  That's it.
+
+What makes Mongrel2 special is how it satisfies these requests in a \emph{
+language agnostic} and \emph{asynchronous} way using a \emph{simple messaging
+protocol} to talk to \emph{applications}; not just serve files.  Mongrel2 is also
+designed to be incredibly easy to \emph{automatically manage} it as part of your
+infrastructure.
+
+Other web servers do some of these things, but they either do them in a bastardized
+way or not all of them at once.  Plenty of language specific web servers like Node.js
+and Jetty have asynchronous operation, but they're not language
+agnostic\footnote{Who the hell wants to code Javascript all day?  Yuck.}.  Other web servers
+will let you talk to any language as a backend, but they insist on using HTTP
+proxying or FastCGI, which is \emph{not} friendly to asynchronous operations.
+
+Mongrel2 is the only web server I know of that actively tries to focus on these
+features as a cohesive whole.
+
+\begin{aside}{TL;DR!}
+Don't want to read the manual?\footnote{I guess you'll be one of the first people with questions then.}
+You can read \href{http://mongrel2.org/wiki?name=GettingStarted}{the GettingStarted page} available
+many languages even.  It's a fast crash course in getting Mongrel2 up and running.
+\end{aside}
+
+\section{Language Agnostic}
+
+The term ``language agnostic'' came from people who read about Mongrel2 in the
+early days, and it means that Mongrel2 does \emph{not} try to promote any one
+language over any others.  Mongrel2 does not care if you run a ``Python shop'', or
+if you're a die hard PHP fan, or if you hate PHP and love only Ruby on Rails.
+Mongrel2 only knows about HTTP requests, HTTP responses, async messages, and
+getting them to your gear to meet those requirements.
+
+Language Agnosticism is the most important feature of Mongrel2, and its entire
+purpose stems from the desire to reduce the amount of programming language
+religion in the world.  Real people want to get things done, not wanker on
+which technology is the best or force other people to use their favorite toys.
+Instead, Mongrel2 works to just be great for every language and make it easy
+to use what works best for a given problem.
+
+
+\section{Asynchronous}
+
+Many web servers are ``asynchronous'' internally, and some force you to
+know way too much about how they work internally to get anything done.  What makes
+Mongrel2's version of asynchronous messaging different is that it extends to
+\emph{outside} the Mongrel2 server.  This is a powerful concept that even your backends
+can operate asynchronously using simple identification of connected clients.
+
+Other servers assume that every request is received by a browser, then sent to a backend,
+and then directly sent out to the client and that's it.  Mongrel2 assumes that there
+is a connected client, and it sends requests to backends, but it makes no assumptions
+about how those backends respond to the clients.  All it requires is that the backend
+application send messages addressed to the client and it will write them on the
+socket.
+
+Because of this design, Mongrel2 can easily house both classic HTTP clients, keep-alive
+style HTTP client, chunked encoding responses, JSSockets, or WebSockets using the same
+code.
+
+
+\section{Message Protocol}
+
+In order to properly do asynchronous messaging in a language agnostic way, Mongrel2
+needed a good base protocol that allowed for different messaging styles and worked
+with many different languages.  HTTP proxying already does this, although it's not
+asynchronous at all.  What gives Mongrel2 its special powers is ZeroMQ, a language-
+and transport-mechanism-agnostic messaging system that does \emph{not} require a
+centralized messaging server to operate.
+
+Using ZeroMQ lets Mongrel2 talk to a huge number of languages, operate within any
+kind of network architecture, and do it with a very simple communication model and
+API that most programmers can understand.
+
+
+\section{Application Oriented}
+
+Web servers today are written as if it was still 1995 and all anyone needs to do
+is serve files, maybe some graphics.  Today's web applications are not about serving
+files; they're about serving application logic \emph{and} doing it asynchronously.
+The advent of the bewildering numbers of ways to hack HTTP into an async messaging
+protocol\footnote{Comet, long poll, Juggernaut, etc.} is proof enough that the
+pressure is on for web servers to be for applications with highly interactive
+interfaces.
+
+Mongrel2 can still serve files just fine.  In fact, it's got very accurate and
+easy-to-understand file serving code.  However, Mongrel2 will always be about applications.
+Fast, scalable, awesome, asynchronous or synchronous applications that need to use languages
+that mere mortals can work with, like PHP.  If there's ever a choice, apps win.
+
+\section{Automated Management}
+
+The language agnostic philosophy even extends to the configuration system where
+you can use any language you need to configure it and manage it, as long as the
+results are a SQLite3 database Mongrel2 can read and work with to run.  There are
+great tools for managing this database already written in Python, but if you hate
+Python then you can write anything you want.
+
+This pattern is established with servers like Postfix, Exim, Sendmail, qmail,
+and others, that convert configuration files to half-assed SQL databases.
+Mongrel2 effectively adopts a Model-View-Controller design for its
+configuration system, the same way every web application is designed today.
+The Model is a SQLite3 database file, which any programming language can access.
+The Controller is a Mongrel2 process that reads this file and sets itself up
+accordingly.
+
+The View is a Python script called m2sh that gives you a command line ``UI'' to
+configure and setup the Mongrel2 sqlite model.  It gives you commands for
+managing it, crafting configurations, looking at them; the works.
+
+But, most importantly, \emph{you can write your own}.  You don't have to wait
+for a Mongrel2 developer to craft a configuration file parser for your favorite
+language, or use some hack job Nagios Perl junk to automate or scan it.  It's
+SQLite3 with a solid, simple schema and well written Python code showing you how
+it works.
+
+Nothing stops you from automating the hell out of Mongrel2 with that.
+
+
+\section{Using This Manual}
+
+This manual is intended to be fun to read, so probably the best way to use it
+is to actually \emph{read it}.
+
+I know! Revolutionary, right?  I mean, who has time to read and learn about something
+these days.  You just want to get in there and get whatever problem you have done,
+now! No time for words.  You just want a straight dump right into your brain so
+that you are able to solve all your problems instantly and screw all this talking.
+
+You ever ask yourself if this attitude about not wanting to read and learn is
+possibly the reason you always get stuck in emergencies with no time to read
+and learn?
+
+Something to think about.
+
+My recommendation is that you go through every page of this manual and do the
+stuff in it.  Even if you think you won't need something, because you're not
+a programmer, or you're not in operations, you should learn it.  Doing so will
+make the parts you do need clearer and give you better ideas for later.
+
+
