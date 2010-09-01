@@ -239,7 +239,7 @@
   Mongrel2. That means, if you're an operations professional,
   software developer, hacker or just curious, it's for you.
   However, if you're too serious and think &ldquo;flowery
-  language&rdquo; (A.K.A.&nbsp;good entertaining writing) does not
+  language&rdquo; (A.K.A.&nbsp;good, entertaining writing) does not
   belong in your software manuals, then you should just go read the
   source code and save everyone a huge headache dealing with you. 
   <!--l. 11-->
@@ -4159,7 +4159,7 @@
   configuration files, but it doesn't tell you what happened
   on each server. In many cases, the configuration files also need
   to be reworked or altered for each deployment. With the m2sh log
-  and commits system you can augment your revision control with
+  and commit system, you can augment your revision control with
   deployment action tracking. <!--l. 517-->
 
   <p class="noindent">Later versions of Mongrel2 will keep small
@@ -4175,26 +4175,26 @@
   "x1-360003.8" name="x1-360003.8"></a>Control Port</h3>
   <!--l. 526-->
 
-  <p class="noindent">Just before the release of 1.0 we added a
-  feature called the &rdquo;Control Port&rdquo; which lets you
+  <p class="noindent">Just before the release of 1.0, we added a
+  feature called the &ldquo;Control Port&rdquo;, which lets you
   connect to a running Mongrel2 server over a unix (domain) socket
   and give it control commands. These commands let you get the
   status of running tasks, lists of currently connected sockets and
   how long they've been connected, the server's current
-  time, and kill a connection. Using this control port you can then
-  implement any monitoring and timeout policies you want and
+  time and kill a connection. Using this control port, you can then
+  implement any monitoring and timeout policies you want, and
   provide better status. <!--l. 534-->
 
-  <p class="noindent">By default the control port is in your chroot
-  at run/control but you can set the setting <span class=
-  "pcrro7t-">control</span><span class="pcrro7t-">_port</span> to
-  change this. You can actually change it to any ZeroMQ valid spec
-  you want, although you're advised to use IPC for security. 
-  <!--l. 538-->
+  <p class="noindent">By default, the control port is in your
+  chroot at run/control, but you can set the <span class=
+  "pcrro7t-">control</span><span class="pcrro7t-">_port</span>
+  setting to change this. You can actually change it to any ZeroMQ
+  valid spec you want, although you're advised to use IPC for
+  security. <!--l. 538-->
 
-  <p class="noindent">Once Mongrel2 starts you can then use
+  <p class="noindent">Once Mongrel2 starts, you can then use
   <span class="pcrb7t-">m2sh</span> to connect to Mongrel2 and
-  control it using the simple command language. Currently what you
+  control it using the simple command language. Currently, what you
   get back is very raw, but it will improve as we work on the
   control port and what it does. <!--l. 542-->
 
@@ -4274,9 +4274,9 @@
     "pcrr7t-">&nbsp;1282980306}</span>
   </div><!--l. 571-->
 
-  <p class="noindent">As we work on this feature more we'll
+  <p class="noindent">As we work on this feature more, we'll
   have a nicer interface to it. If you wanted to connect on your
-  own, then this is the simple Python script showing how to do it: 
+  own, here is a simple Python script showing how to do it: 
   <!--l. 576-->
 
   <p class="noindent"><a id="x1-36013r11" name="x1-36013r11"></a>
@@ -4446,23 +4446,23 @@
   <!--l. 606-->
 
   <p class="noindent">A Mongrel2 process itself does not have any
-  support for running multiple servers, instead it takes two simple
-  parameters, a sqlite config database and a server uuid that names
-  the server to be launched. This is done to keep the mongrel2 code
-  simple and workable. <!--l. 611-->
+  support for running multiple servers; instead, it takes two
+  simple parameters: a sqlite config database and a server uuid
+  that names the server to be launched. This is done to keep the
+  mongrel2 code simple and workable. <!--l. 611-->
 
   <p class="noindent">However. <!--l. 613-->
 
-  <p class="noindent">Mongrel2's m2sh supports launching
+  <p class="noindent">Mongrel2's m2sh does support launching
   multiple servers from a single configuration database. By passing
   -every to many m2sh commands, you are able to perform actions on
   all configured servers at once. You can also perform actions on
   single servers by specifying their uuid, name or host. If any
-  parameter given is ambiguious, that is if for example you search
-  with <span class="pcrro7t-">-host localhost</span> and your
-  config contains two servers which attempt to bind to localhost,
-  m2sh will list the matching servers and ask you to clarify your
-  selection. <!--l. 621-->
+  parameter given is ambiguous (that is if, for example, you search
+  with <span class="pcrro7t-">-host</span> <span class=
+  "pcrro7t-">localhost</span> and your config contains two servers
+  which attempt to bind to localhost), m2sh will list the matching
+  servers and ask you to clarify your selection. <!--l. 621-->
 
   <p class="noindent">For example:
 
@@ -4620,9 +4620,9 @@
   defaults so you can leave them alone unless you need to change
   them. <!--l. 657-->
 
-  <p class="noindent">To configure your settings you just pass them
-  to the <span class="pcrro7t-">commit</span> command when you
-  setup your configuration like this: <!--l. 660-->
+  <p class="noindent">To configure your settings, you just pass
+  them to the <span class="pcrro7t-">commit</span> command when you
+  setup your configuration. Like this: <!--l. 660-->
 
   <p class="noindent"><a id="x1-38001r12" name="x1-38001r12"></a>
   <hr class="float">
@@ -4688,20 +4688,20 @@
     "pplb7t-">_port=ipc://run/control</span>
 
     <dd class="description">This is where Mongrel2 will listen with
-    0MQ for control messages. You should use ipc:// for the spec so
-    that only a local user with file access can get at it.
+    0MQ for control messages. You should use <span class=
+    "obeylines-h verb pcrr7t-">ipc://</span> for the spec so that
+    only a local user with file access can get at it.
 
     <dt class="description"><span class=
     "pplb7t-">limits.buffer</span><span class="pplb7t-">_size=2 *
     1024</span>
 
-    <dd class="description">Internal IO buffers used for things
+    <dd class="description">Internal IO buffers, used for things
     like proxying and handling requests. This is a <span class=
-    "pplri7t-">very</span> conservative setting, so if you head
-    HTTP headers greater than this, you'll want to increase
-    this setting. You'll also want to shoto whoever is
-    sending you those requests because the average is 400-600
-    bytes.
+    "pplri7t-">very</span> conservative setting, so if you get HTTP
+    headers greater than this, you'll want to increase this
+    setting. You'll also want to shoot whoever is sending you
+    those requests, because the average is 400-600 bytes.
 
     <dt class="description"><span class=
     "pplb7t-">limits.connection</span><span class=
@@ -4710,22 +4710,24 @@
 
     <dd class="description">Size of the stack used for connection
     coroutines. If you're trying to cram a ton of connections
-    into very little ram, see how low this can go.
+    into very little RAM, see how low this can go.
 
     <dt class="description"><span class=
     "pplb7t-">limits.content</span><span class="pplb7t-">_length=20
     * 1024</span>
 
     <dd class="description">Maximum allowed content length on
-    submitted requests. This is right now a hard limit so requests
-    are rejected that go over it. Later versions of Mongrel2 will
-    use an upload mechanism that will allow any size upload.
+    submitted requests. This is, right now, a hard limit so
+    requests that go over it are rejected. Later versions of
+    Mongrel2 will use an upload mechanism that will allow any size
+    upload.
 
     <dt class="description"><span class=
     "pplb7t-">limits.dir</span><span class=
     "pplb7t-">_max</span><span class="pplb7t-">_path=256</span>
 
-    <dd class="description">Max path you can set for Dir handlers.
+    <dd class="description">Max path length you can set for Dir
+    handlers.
 
     <dt class="description"><span class=
     "pplb7t-">limits.dir</span><span class=
@@ -4740,16 +4742,16 @@
     * 1024</span>
 
     <dd class="description">Stack frame size for the main IO
-    reactor task. There's only one so set it high if you can,
-    but it could possibly go lower.
+    reactor task. There's only one, so set it high if you
+    can, but it could possibly go lower.
 
     <dt class="description"><span class=
     "pplb7t-">limits.handler</span><span class="pplb7t-">_stack=100
     * 1024</span>
 
     <dd class="description">The stack frame size for any Handler
-    tasks, probably want this high, since there's not many of
-    these, but adjust and see what your system can support.
+    tasks. You probably want this high, since there's not
+    many of these, but adjust and see what your system can handle.
 
     <dt class="description"><span class=
     "pplb7t-">limits.handler</span><span class=
@@ -4763,15 +4765,15 @@
     "pplb7t-">limits.header</span><span class="pplb7t-">_count=128
     * 10</span>
 
-    <dd class="description">Max number of allowed headers from a
-    client connection.
+    <dd class="description">Maximum number of allowed headers from
+    a client connection.
 
     <dt class="description"><span class=
     "pplb7t-">limits.host</span><span class=
     "pplb7t-">_name=256</span>
 
-    <dd class="description">Max hostname for Host specifiers and
-    other DNS related settings.
+    <dd class="description">Maximum hostname for Host specifiers
+    and other DNS related settings.
 
     <dt class="description"><span class=
     "pplb7t-">limits.mime</span><span class=
@@ -4783,7 +4785,7 @@
     "pplb7t-">limits.url</span><span class=
     "pplb7t-">_path=256</span>
 
-    <dd class="description">Max URL paths, does not include query
+    <dd class="description">Max URL paths. Does not include query
     string, just path.
 
     <dt class="description"><span class=
@@ -4792,7 +4794,7 @@
 
     <dd class="description">Ratio of the total (like 1/4th, 1/8th)
     that should be in the hot selection. Set this higher if you
-    have lots of idle connections, set it lower if you have more
+    have lots of idle connections; set it lower if you have more
     active connections.
 
     <dt class="description"><span class=
@@ -4809,9 +4811,9 @@
 
     <dd class="description">This is not set by default. If you want
     large requests to reach your handlers, then set this to a
-    directory they can access the results, and make sure they can
-    handle it. Read about it in the Hacking section under Uploads.
-    The file has to end in XXXXXX chars to work (read man mkstemp).
+    directory they can access, and make sure they can handle it.
+    Read about it in the Hacking section under Uploads. The file
+    has to end in XXXXXX chars to work (read man mkstemp).
 
     <dt class="description"><span class=
     "pplb7t-">zeromq.threads=1</span>
@@ -4826,13 +4828,13 @@
   <a id="x1-390004" name="x1-390004"></a>Deploying</h2><!--l. 3-->
 
   <p class="noindent">I am now going to try to get you to setup a
-  small tiny little version of a good deployment that matches the
+  small, tiny, little version of a good deployment that matches the
   configuration of the site at <a href="http://mongrel2.org" class=
   "url"><span class="pcrr7t-">http://mongrel2.org</span></a>, with
   all the examples running. This configuration will give you all
   the tools you need to make automated and managed deployments, but
   it is using small scale tools. The idea is that you learn what is
-  involved in a nice easy to manage setup using simple things
+  involved in a nice, easy-to-manage setup, using simple things
   first, then you can extrapolate that out into your own setup or
   something better.
 
@@ -4869,14 +4871,14 @@
     other means.
 
     <dt class="description"><span class="pplb7t-">Basic Python
-    Coding</span>
+    coding</span>
 
     <dd class="description">Right now, you should be able to do
     some basic Python.
   </dl><!--l. 27-->
 
-  <p class="noindent">That will get you going at first, and as we
-  go we'll do various other setups to get our application
+  <p class="noindent">That will get you going at first and, as we
+  go, we'll do various other setups to get our application
   working. <!--l. 30-->
 
   <p class="noindent"><a id="x1-40001r5" name="x1-40001r5"></a>
@@ -4950,7 +4952,7 @@
 
   <p class="noindent">There's just one catch: all of them
   suck. There's <a href=
-  "http://cr.yp.to/daemontools.html">daemontools</a> which barely
+  "http://cr.yp.to/daemontools.html">daemontools</a>, which barely
   builds (if at all) and then assumes that daemons don't
   fork. Stupid. There's <a href=
   "http://www.fefe.de/minit/">minit</a>, which bafflingly required
@@ -5032,7 +5034,7 @@
   <div class="float">
     <div class="caption">
       <span class="id">Note 6:</span> <span class=
-      "content"><span class="pplri7t-">Alternatives To</span>
+      "content"><span class="pplri7t-">Alternatives to</span>
       <span class="pplri7t-">procer</span></span>
     </div><!--tex4ht:label?: x1-41019r6 -->
 
@@ -8111,24 +8113,24 @@
 
   <p class="noindent">Mongrel2 enforces the correct behavior when
   you run as root, which is to drop priv and chroot. This makes the
-  server more secure and it also simplifies your deployments. Since
-  everything you do always runs in a chroot, you now just need to
-  rsync that chroot directory or put it into a git or hg repo and
-  you're set. You're literally forced to make your
-  deployments portable to different directories and systems. 
+  server more secure, and it also simplifies your deployments.
+  Since everything you do always runs in a chroot, you now just
+  need to rsync that chroot directory, or put it into a git or hg
+  repo, and you're set. You're literally forced to make
+  your deployments portable to different directories and systems. 
   <!--l. 652-->
 
-  <p class="noindent">As of the 1.0 push for Mongrel2 we
+  <p class="noindent">As of the 1.0 push for Mongrel2, we
   haven't done much work on how you deploy all the different
   languages. They sort of sprung up during development and our plan
   is to expand that out in the 2.0 version so that deployment is
   very well documented for all the different languages we support.
-  That means, you'll probably run into some snags and things
+  That means you'll probably run into some snags and things
   we didn't anticipate. <!--l. 658-->
 
   <p class="noindent">The following are some general points
   we've come up with while deploying our own apps, with more
-  to come as we do the 2.0 version: <!--l. 661-->
+  to come as we work on the 2.0 version: <!--l. 661-->
 
   <p class="noindent">
 
@@ -8144,31 +8146,31 @@
     <li class="enumerate" id="x1-53004x2">Use the chroot to keep
     your deployment simpler. I literally do all my work locally and
     then just rsync my changes up to my remote staging server.
-    Everything has to live in the chroot anyway and the chroot
+    Everything has to live in the chroot anyway, and the chroot
     enforces that it is completely self-contained.
 
     <li class="enumerate" id="x1-53006x3">Use Python's
     virtualenv or anything similar to get yourself a totally local
     environment. Too many systems, such as OSX, have very outdated
     packages and will change versions on you without telling you.
-    The best way to make sure your software keeps (working and
+    The best way to make sure your software keeps working (and
     works as one cohesive deployment) is to use a virtualenv inside
-    your chroot. It should even work cross platform if you
+    your chroot. It should even work cross-platform if you
     don't have compiled packages in there.
 
     <li class="enumerate" id="x1-53008x4">Create a user for your
     application and live in there. I don't have any root
     access on my stuff. <span class="pplri7t-">Everything</span> is
-    run as a user named after the website and is deployed right in
+    run as a user named after the website, and is deployed right in
     the /home/USER directory. I login as that user, manage as that
     user, and I don't give them sudo access. For the times
-    when I need to sudo to restart or run Mongrel2 I then use a
+    when I need to sudo to restart or run Mongrel2, I then use a
     separate login that I have open (with screen) and do it there.
     This reduces your risk of hacks, but also just simplifies
     things. It's no problem for me to move my configuration
     over to new machines with this setup, or deploy clusters. I
-    know as long as there's the right user on the target,
-    I'm set.
+    know that as long as there's the right user on the
+    target, I'm set.
 
     <li class="enumerate" id="x1-53010x5">Use <a href=
     "http://www.gnu.org/software/screen/">GNU screen</a> or die.
@@ -8192,10 +8194,10 @@
     <li class="enumerate" id="x1-53014x1">Whatever you use for
     process management, make sure it can run stuff as <span class=
     "pplri7t-">not</span> root and can do chroot for you. If
-    you're running your Mongrel2 as root you're doing
-    it wrong. Actually if you're running any services as root
-    that doesn't absolutely need to be you're doing it
-    wrong.
+    you're running your Mongrel2 as root, you're doing
+    it wrong. Actually, if you're running any services as
+    root that don't absolutely need to be, you're doing
+    it wrong.
 
     <li class="enumerate" id="x1-53016x2">Mongrel2 is happy to run
     as a regular user, and assumes that if you do not run as root,
@@ -8224,8 +8226,8 @@
   </ol><!--l. 724-->
 
   <p class="noindent">As we work on the next phase of Mongrel2
-  development, this will improve so watch for news about deployment
-  and real applications. <!--l. 1-->
+  development, this will improve, so watch for news about
+  deployment and real applications. <!--l. 1-->
 
   <p class="noindent">
 
@@ -8672,11 +8674,11 @@
   uploads choking your server because you can't stop them
   before they're complete. Mongrel2 will stream large
   requests to temporary files, but it sends your handlers an
-  initial upload started message. When the upload is done you get a
-  final upload finished message. If at any time you want to kill
-  the upload, you just send a 0 length reply (the official KILL
-  MESSAGE) and the whole thing is aborted and cleaned up. 
-  <!--l. 233-->
+  initial &ldquo;upload started&rdquo; message. When the upload is
+  done, you get a final &ldquo;upload finished&rdquo; message. If,
+  at any time, you want to kill the upload, you just send a
+  0-length reply (the official KILL MESSAGE) and the whole thing is
+  aborted and cleaned up. <!--l. 233-->
 
   <p class="noindent">
 

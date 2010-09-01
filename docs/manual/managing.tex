@@ -511,8 +511,8 @@ Here's an example from mongrel2.org:
 The motivation for this feature is the trend that operations store server configurations
 in revision control systems like git or etckeeper.  This works great for holding the configuration
 files, but it doesn't tell you what happened on each server.  In many cases, the configuration
-files also need to be reworked or altered for each deployment.  With the m2sh log and commits
-system you can augment your revision control with deployment action tracking.
+files also need to be reworked or altered for each deployment.  With the m2sh log and commit
+system, you can augment your revision control with deployment action tracking.
 
 Later versions of Mongrel2 will keep small amounts of statistics which will link these actions
 to changes in Mongrel2 behavior like frequent crashing, failures, slowness, or other problems.
@@ -523,20 +523,20 @@ get fired the next time Twitter goes down.
 
 \section{Control Port}
 
-Just before the release of 1.0 we added a feature called the "Control Port" which
+Just before the release of 1.0, we added a feature called the ``Control Port'', which
 lets you connect to a running Mongrel2 server over a unix (domain) socket and
 give it control commands.  These commands let you get the status of running
 tasks, lists of currently connected sockets and how long they've been connected,
-the server's current time, and kill a connection.  Using this control port you
-can then implement any monitoring and timeout policies you want and provide 
+the server's current time and kill a connection.  Using this control port, you
+can then implement any monitoring and timeout policies you want, and provide
 better status.
 
-By default the control port is in your chroot at run/control but you can set
-the setting \ident{control\_port} to change this.  You can actually change it 
+By default, the control port is in your chroot at run/control, but you can set
+the \ident{control\_port} setting to change this.  You can actually change it
 to any ZeroMQ valid spec you want, although you're advised to use IPC for security.
 
-Once Mongrel2 starts you can then use \file{m2sh} to connect to Mongrel2 and 
-control it using the simple command language.  Currently what you get back is
+Once Mongrel2 starts, you can then use \file{m2sh} to connect to Mongrel2 and 
+control it using the simple command language.  Currently, what you get back is
 very raw, but it will improve as we work on the control port and what it does.
 
 The list of commands you can issue are:
@@ -568,8 +568,8 @@ CONNECTING...
 {"time": 1282980306}
 \end{Verbatim}
 
-As we work on this feature more we'll have a nicer interface to it.
-If you wanted to connect on your own, then this is the simple Python
+As we work on this feature more, we'll have a nicer interface to it.
+If you wanted to connect on your own, here is a simple Python
 script showing how to do it:
 
 
@@ -603,19 +603,19 @@ something special like a management interface, this is your start.
 
 \section{Multiple Servers}
 
-A Mongrel2 process itself does not have any support for running multiple servers,
-instead it takes two simple parameters, a sqlite config database and a server uuid
+A Mongrel2 process itself does not have any support for running multiple servers;
+instead, it takes two simple parameters: a sqlite config database and a server uuid
 that names the server to be launched. This is done to keep the mongrel2 code simple
 and workable.
 
 However.
 
-Mongrel2's m2sh supports launching multiple servers from a single configuration
+Mongrel2's m2sh does support launching multiple servers from a single configuration
 database. By passing -every to many m2sh commands, you are able to perform actions
 on all configured servers at once. You can also perform actions on single servers
-by specifying their uuid, name or host. If any parameter given is ambiguious, that
-is if for example you search with \shell{-host localhost} and your config contains
-two servers which attempt to bind to localhost, m2sh will list the matching servers
+by specifying their uuid, name or host. If any parameter given is ambiguous (that
+is if, for example, you search with \shell{-host localhost} and your config contains
+two servers which attempt to bind to localhost), m2sh will list the matching servers
 and ask you to clarify your selection.
 
 For example:
@@ -654,8 +654,8 @@ you make a setting and things go crazy, you need to not make that setting.  All
 of these have good defaults so you can leave them alone unless you need to change
 them.
 
-To configure your settings you just pass them to the \ident{commit} command when
-you setup your configuration like this:
+To configure your settings, you just pass them to the \ident{commit} command when
+you setup your configuration. Like this:
 
 \begin{code}{Changing Settings}
 \begin{lstlisting}
@@ -670,22 +670,22 @@ what the settings are so you can debug them if they cause problems.  The list
 of available settings are:
 
 \begin{description}
-\item[control\_port=ipc://run/control] This is where Mongrel2 will listen with 0MQ for control messages.  You should use ipc:// for the spec so that only a local user with file access can get at it.
-\item[limits.buffer\_size=2 * 1024] Internal IO buffers used for things like proxying and handling requests.  This is a \emph{very} conservative setting, so if you head HTTP headers greater than this, you'll want to increase this setting.  You'll also want to shoto whoever is sending you those requests because the average is 400-600 bytes.
-\item[limits.connection\_stack\_size=32 * 1024] Size of the stack used for connection coroutines.  If you're trying to cram a ton of connections into very little ram, see how low this can go.
-\item[limits.content\_length=20 * 1024] Maximum allowed content length on submitted requests.  This is right now a hard limit so requests are rejected that go over it.  Later versions of Mongrel2 will use an upload mechanism that will allow any size upload.
-\item[limits.dir\_max\_path=256] Max path you can set for Dir handlers.
+\item[control\_port=ipc://run/control] This is where Mongrel2 will listen with 0MQ for control messages.  You should use \verb|ipc://| for the spec so that only a local user with file access can get at it.
+\item[limits.buffer\_size=2 * 1024] Internal IO buffers, used for things like proxying and handling requests.  This is a \emph{very} conservative setting, so if you get HTTP headers greater than this, you'll want to increase this setting.  You'll also want to shoot whoever is sending you those requests, because the average is 400-600 bytes.
+\item[limits.connection\_stack\_size=32 * 1024] Size of the stack used for connection coroutines.  If you're trying to cram a ton of connections into very little RAM, see how low this can go.
+\item[limits.content\_length=20 * 1024] Maximum allowed content length on submitted requests.  This is, right now, a hard limit so requests that go over it are rejected.  Later versions of Mongrel2 will use an upload mechanism that will allow any size upload.
+\item[limits.dir\_max\_path=256] Max path length you can set for Dir handlers.
 \item[limits.dir\_send\_buffer=16 * 1024] Maximum buffer used for file sending when we need to use one.
-\item[limits.fdtask\_stack=100 * 1024] Stack frame size for the main IO reactor task.  There's only one so set it high if you can, but it could possibly go lower.
-\item[limits.handler\_stack=100 * 1024] The stack frame size for any Handler tasks, probably want this high, since there's not many of these, but adjust and see what your system can support.
+\item[limits.fdtask\_stack=100 * 1024] Stack frame size for the main IO reactor task.  There's only one, so set it high if you can, but it could possibly go lower.
+\item[limits.handler\_stack=100 * 1024] The stack frame size for any Handler tasks. You probably want this high, since there's not many of these, but adjust and see what your system can handle.
 \item[limits.handler\_targets=128] The maximum number of connection IDs a message from a Handler may target.  It's not smart to set this really high.
-\item[limits.header\_count=128 * 10] Max number of allowed headers from a client connection.
-\item[limits.host\_name=256] Max hostname for Host specifiers and other DNS related settings.
+\item[limits.header\_count=128 * 10] Maximum number of allowed headers from a client connection.
+\item[limits.host\_name=256] Maximum hostname for Host specifiers and other DNS related settings.
 \item[limits.mime\_ext\_len=128] Maximum length of MIME type extensions.
-\item[limits.url\_path=256] Max URL paths, does not include query string, just path.
-\item[superpoll.hot\_dividend=4] Ratio of the total (like 1/4th, 1/8th) that should be in the hot selection.  Set this higher if you have lots of idle connections, set it lower if you have more active connections.
+\item[limits.url\_path=256] Max URL paths. Does not include query string, just path.
+\item[superpoll.hot\_dividend=4] Ratio of the total (like 1/4th, 1/8th) that should be in the hot selection.  Set this higher if you have lots of idle connections; set it lower if you have more active connections.
 \item[superpoll.max\_fd=10 * 1024] Maximum possible open files.  Do not set this above 64 * 1024, and expect it to take a bit while Mongrel2 sets up constant structures.
-\item[upload.temp\_store=None] This is not set by default.  If you want large requests to reach your handlers, then set this to a directory they can access the results, and make sure they can handle it.  Read about it in the Hacking section under Uploads.  The file has to end in XXXXXX chars to work (read man mkstemp).
+\item[upload.temp\_store=None] This is not set by default.  If you want large requests to reach your handlers, then set this to a directory they can access, and make sure they can handle it.  Read about it in the Hacking section under Uploads.  The file has to end in XXXXXX chars to work (read man mkstemp).
 \item[zeromq.threads=1] Number of 0MQ IO threads to run.  Careful, we've experienced thread bugs in 0MQ sometimes with high numbers of these.
 \end{description}
 

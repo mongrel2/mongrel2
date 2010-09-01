@@ -1,10 +1,10 @@
 \chapter{Deploying}
 
-I am now going to try to get you to setup a small tiny little version of a good
+I am now going to try to get you to setup a small, tiny, little version of a good
 deployment that matches the configuration of the site at \url{http://mongrel2.org}, with
 all the examples running.  This configuration will give you all the tools you
 need to make automated and managed deployments, but it is using small scale tools.
-The idea is that you learn what is involved in a nice easy to manage setup using simple
+The idea is that you learn what is involved in a nice, easy-to-manage setup, using simple
 things first, then you can extrapolate that out into your own setup or something
 better.
 
@@ -21,10 +21,10 @@ on in this section:
 \item [Python] Obviously, if you have \shell{m2sh}, then you have Python, but some systems
     (like Debian) don't install all of Python.  Make sure your Python setup is good.
 \item [root] You'll need root access on your box.  Either through \shell{sudo} or some other means.
-\item [Basic Python Coding] Right now, you should be able to do some basic Python.
+\item [Basic Python coding] Right now, you should be able to do some basic Python.
 \end{description}
 
-That will get you going at first, and as we go we'll do various other setups to
+That will get you going at first and, as we go, we'll do various other setups to
 get our application working.
 
 \begin{aside}{Learning Python}
@@ -65,7 +65,7 @@ be running, these USPMs are fantastic.  They usually read some startup profile d
 what needs to start and what they depend on, and then it kicks everything into gear
 and watches them.  If any of the processes crash, they try to restart them.  Very simple.
 
-There's just one catch: all of them suck.  There's \href{http://cr.yp.to/daemontools.html}{daemontools}
+There's just one catch: all of them suck.  There's \href{http://cr.yp.to/daemontools.html}{daemontools},
 which barely builds (if at all) and then assumes that daemons don't fork.  Stupid.  There's
 \href{http://www.fefe.de/minit/}{minit}, which bafflingly required dietlibc to even compile
 and assumed it was going to be the one true init (not user space at all).  There's
@@ -109,7 +109,7 @@ Of course, if you have something else you like then, please, use it.  Anything t
 process management will be your friend.  In this manual, to keep things simple and easily
 understood, I'll be using \shell{procer} to tell you how to setup everything.
 
-\begin{aside}{Alternatives To procer}
+\begin{aside}{Alternatives to procer}
 I wrote procer mostly for this book, but I also use it for my Mongrel2 deployments.
 It works for me but you can try other solutions.  By default, Mongrel2 will work with
 either daemontools/runit style, or init.d style launchers.  If Mongrel2 runs as a
@@ -644,19 +644,19 @@ Other than that, automate, automate, automate.
 \section{Deployment Tips}
 
 Mongrel2 enforces the correct behavior when you run as root, which is to drop priv and
-chroot.  This makes the server more secure and it also simplifies your deployments. 
+chroot.  This makes the server more secure, and it also simplifies your deployments.
 Since everything you do always runs in a chroot, you now just need to rsync that chroot
-directory or put it into a git or hg repo and you're set.  You're literally forced to
+directory, or put it into a git or hg repo, and you're set.  You're literally forced to
 make your deployments portable to different directories and systems.
 
-As of the 1.0 push for Mongrel2 we haven't done much work on how you deploy all
+As of the 1.0 push for Mongrel2, we haven't done much work on how you deploy all
 the different languages.  They sort of sprung up during development and our plan is
 to expand that out in the 2.0 version so that deployment is very well documented
-for all the different languages we support.  That means, you'll probably run into
+for all the different languages we support.  That means you'll probably run into
 some snags and things we didn't anticipate.
 
 The following are some general points we've come up with while deploying our
-own apps, with more to come as we do the 2.0 version:
+own apps, with more to come as we work on the 2.0 version:
 
 \begin{enumerate}
 \item Don't run things as root if you can.  It's bad habit that everyone tries to
@@ -666,28 +666,28 @@ is when you do a quick -sudo to m2sh to start \file{mongrel2} up so it can chroo
 
 \item Use the chroot to keep your deployment simpler.  I literally do all my work
 locally and then just rsync my changes up to my remote staging server.  Everything
-has to live in the chroot anyway and the chroot enforces that it is completely self-contained.
+has to live in the chroot anyway, and the chroot enforces that it is completely self-contained.
 
 \item Use Python's virtualenv or anything similar to get yourself a totally local environment.
 Too many systems, such as OSX, have very outdated packages and will change versions on you
-without telling you.  The best way to make sure your software keeps (working and works as
+without telling you.  The best way to make sure your software keeps working (and works as
 one cohesive deployment) is to use a virtualenv inside your chroot.  It should even work
-cross platform if you don't have compiled packages in there.
+cross-platform if you don't have compiled packages in there.
 
 \item Create a user for your application and live in there.  I don't have any root
-access on my stuff.  \emph{Everything} is run as a user named after the website and
+access on my stuff.  \emph{Everything} is run as a user named after the website, and
 is deployed right in the /home/USER directory.  I login as that user, manage as that user,
 and I don't give them sudo access.  For the times when I need to sudo to restart or run
-Mongrel2 I then use a separate login that I have open (with screen) and do it there.  This
+Mongrel2, I then use a separate login that I have open (with screen) and do it there.  This
 reduces your risk of hacks, but also just simplifies things.  It's no problem for me to
-move my configuration over to new machines with this setup, or deploy clusters.  I know as
+move my configuration over to new machines with this setup, or deploy clusters.  I know that as
 long as there's the right user on the target, I'm set.
 
 \item Use \href{http://www.gnu.org/software/screen/}{GNU screen} or die.
 
 \item Keep your config.sqlite and the .py file in your chroot, and keep your content and
 everything else under that.  This makes sure that the config isn't accessible outside your
-content directories.  Mongrel2 helps you get this right by not allowing certain Dir 
+content directories.  Mongrel2 helps you get this right by not allowing certain Dir
 configurations that would expose your chroot to the world.
 \end{enumerate}
 
@@ -697,8 +697,8 @@ follow this advice:
 
 \begin{enumerate}
 \item Whatever you use for process management, make sure it can run stuff as \emph{not} root
-and can do chroot for you.  If you're running your Mongrel2 as root you're doing it wrong.
-Actually if you're running any services as root that doesn't absolutely need to be you're doing
+and can do chroot for you.  If you're running your Mongrel2 as root, you're doing it wrong.
+Actually, if you're running any services as root that don't absolutely need to be, you're doing
 it wrong.
 
 \item Mongrel2 is happy to run as a regular user, and assumes that if you do not run as root,
@@ -721,5 +721,5 @@ design.
 
 \end{enumerate}
 
-As we work on the next phase of Mongrel2 development, this will improve so watch for
+As we work on the next phase of Mongrel2 development, this will improve, so watch for
 news about deployment and real applications.

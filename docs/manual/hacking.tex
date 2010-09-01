@@ -224,9 +224,9 @@ it's probably something really damn cool.
 Mongrel2 also solves the problem of large uploads choking your server
 because you can't stop them before they're complete.  Mongrel2 will stream
 large requests to temporary files, but it sends your handlers an initial
-upload started message.  When the upload is done you get a final upload 
-finished message.  If at any time you want to kill the upload, you just
-send a 0 length reply (the official KILL MESSAGE) and the whole thing is
+``upload started'' message.  When the upload is done, you get a final ``upload 
+finished'' message.  If, at any time, you want to kill the upload, you just
+send a 0-length reply (the official KILL MESSAGE) and the whole thing is
 aborted and cleaned up.
 
 
