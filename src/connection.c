@@ -62,7 +62,7 @@ struct tagbstring PING_PATTERN = bsStatic("@[a-z/]- {\"type\":\\s*\"ping\"}");
 
 
 int MAX_CONTENT_LENGTH = 20 * 1024;
-int BUFFER_SIZE = 2 * 1024;
+int BUFFER_SIZE = 4 * 1024;
 int CONNECTION_STACK = 32 * 1024;
 
 static inline int Connection_backend_event(Backend *found, int fd)
@@ -792,7 +792,7 @@ error:
 void Connection_init()
 {
     MAX_CONTENT_LENGTH = Setting_get_int("limits.content_length", 20 * 1024);
-    BUFFER_SIZE = Setting_get_int("limits.buffer_size", 2 * 1024);
+    BUFFER_SIZE = Setting_get_int("limits.buffer_size", 4 * 1024);
     CONNECTION_STACK = Setting_get_int("limits.connection_stack_size", 32 * 1024);
 
     log_info("MAX limits.content_length=%d, limits.buffer_size=%d, limits.connection_stack_size=%d",
