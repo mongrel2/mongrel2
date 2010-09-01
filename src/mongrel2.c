@@ -80,7 +80,7 @@ void terminate(int s)
                 MURDER = 1;
             } else {
                 RUNNING = 0;
-                log_info("SHUTDOWN REQUESTED: %s", MURDER ? "MURDER" : "GRACEFUL");
+                log_info("SHUTDOWN REQUESTED: %s", MURDER ? "MURDER" : "GRACEFUL (SIGINT again to EXIT NOW)");
                 fdclose(SERVER->listen_fd);
             }
             break;
