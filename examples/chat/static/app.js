@@ -22,6 +22,26 @@ function removeUser(user) {
     // ignored for now
 }
 
+function handlekeys(field, state, e)
+{
+    var keycode;
+
+    if (window.event) {
+        keycode = window.event.keyCode;
+    } else if (e) {
+        keycode = e.which;
+    } else {
+        return true;
+    }
+
+    if (keycode == 13) {
+       state.handle('SEND');
+       return false;
+    } else {
+       return true;
+    }
+}
+
 function addMessage(text) {
     var div = document.createElement("div");
     div.innerHTML = text;

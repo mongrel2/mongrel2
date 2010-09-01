@@ -14,7 +14,10 @@
 		<script src="js/jsSocket.js" type="text/javascript"></script>
 		<script src="chat.js" type="text/javascript"></script>
 		<script src="fsm.js" type="text/javascript"></script>
-		<script src="app.js" type="text/javascript"></script>
+        <script src="app.js" type="text/javascript"></script>
+        <SCRIPT TYPE="text/javascript">
+        </SCRIPT>
+
 	</head>
 
 	<body>
@@ -24,32 +27,17 @@
                 <h1>Mongrel2 Chat Demo</h1>
             </div>
 
-			<div id="chat" class="grid_9">
+			<div id="chat" class="grid_12">
 				<div id="chatlog">
                 </div>
                 <div>
-                    <div class="grid_8">
-                        <form onSubmit="state.handle('SEND'); return false;">
-                            <input type="text" id="msginput" />
-                            <input type="button" value="Send" id="sendmsg" onClick="state.handle('SEND'); return false;" />
+                    <div class="grid_12">
+                        <form>
+                            <input type="text" id="msginput" onKeyPress="return handlekeys(this, state, event);" />
                         </form>
                     </div>
                 </div>
             </div>
-
-            <div id="sidebar" class="grid_2">
-                <dl>
-                    <dt><a href="http://mongrel2.org/">Mongrel2.org</a></dt>
-                    <dd>The main site where you can submit bugs.</dd>
-                    <dt><a href="http://mongrel2.org:6767/">Proxy Test</a></dt>
-                    <dd>Main site but through Mongrel2 as a proxy.</dd>
-                    <dt><a href="http://mongrel2.org:6767/tests/index.html">File Serve Test</a></dt>
-                    <dd>A simple file serving test with some info.</dd>
-                    <dt><a href="http://mongrel2.org:6767/handlertest">HTTP->0MQ Test</a></dt>
-                    <dd>A very basic test of HTTP to a 0MQ.</dd>
-                </dl>
-            </div>
-            <div class="clear"></div>
 		</div>
     </body>
 

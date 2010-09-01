@@ -1,69 +1,64 @@
 body {
-    font-family: Gill Sans, sans-serif;
+    font-family:Gill Sans,sans-serif;
 }
-
 #header {
-    font-family: monospace;
+    font-family:monospace;
 }
-
 #header h1 {
-    font-size: 2em;
+    font-size:2em;
 }
-
 #sidebar {
-    text-align: right;
+    display:none;
+    text-align:right;
 }
-
 #sidebar dt {
-    font-size: 1.25em;
-    font-family: monospace;
+    font-family:monospace;
+    font-size:1.25em;
 }
-
-#sidebar dd {
-    font-style: italic;
-}
-
 a {
-    color: #999;
-    text-decoration: none;
+    color:#999999;
+    text-decoration:none;
 }
-
 h1 {
-    font-size: 2.5em;
+    font-size:2.5em;
 }
-
 h1 a {
-    color: #333;
+    color:#333333;
 }
-
 h2 a {
-    color: #333;
+    color:#333333;
 }
-
 h3 a {
-    color: #333;
+    color:#333333;
 }
-
 a:hover {
-    color: #333;
+    color:#333333;
+}
+em {
+    color:red;
 }
 
-
-em { color: red;}
-
-#chatlog { 
-    font-size: 14px;
-    font-family: helvetica;
-    padding: 5px;
-    border: 1px solid black;
+#chatlog {
+    background:none repeat scroll 0 0 #FFFFFF;
+    border:1px solid black;
+    font-family:helvetica;
+    font-size:14px;
+    height:543px;
+    margin-bottom:0.5em;
     overflow-y: auto;
-    height: 400px;
-    background: #fff; 
-    margin-bottom: 0.5em;
+    padding:5px;
 }
 
-#msginput { width: 490px; padding: 4px; border: 1px solid gray; }
+#msginput {
+    border:1px solid gray;
+    margin-left:-10px;
+    padding:7px;
+    width:923px;
+}
 
-#sendmsg { width: 100px; }
+#chat {
+    float:left;
+    height:100%;
+    margin-right:15px;
+}
 
-#chat { float: left; margin-right: 15px;  }
