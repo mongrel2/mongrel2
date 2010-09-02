@@ -932,10 +932,10 @@
   <a id="x1-140002.2.1" name="x1-140002.2.1"></a>Using Fossil</h4>
   <!--l. 98-->
 
-  <p class="noindent">Since it's early in Mongrel2
-  development, we recommend you get fossil and install it so you
-  can track the latest fixes and development. Here's the
-  easiest way to do that: <!--l. 102-->
+  <p class="noindent">Mongrel2 is still fairly new, and new
+  software has bugs. Hell, old software has bugs. If you want to
+  get the latest and greatest, then use fossil to grab the source
+  and stay with updates: <!--l. 102-->
 
   <p class="noindent">
 
