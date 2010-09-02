@@ -431,7 +431,7 @@ format is designed to accomplish a few things in the simplest way possible:
 \item Be useful within ZeroMQ so that you can do subscriptions and routing.
 \end{enumerate}
 
-To satisfy these features we use haveo types of ZeroMQ sockets (soon to be configurable),
+To satisfy these features we use different types of ZeroMQ sockets (soon to be configurable),
 a request format that Mongrel2 sends and a response format that the handlers send back.  Most
 importantly, there is \emph{nothing about the request and response that must be connected}.  In most
 cases they will be connected, but you can receive a request from one browser and send a response
@@ -458,7 +458,7 @@ so that you understand why the message format is the way it is.
 This leads to rule number 1:
 
 \begin{quote}
-\emph{Rule 1:} Handlers receive on with PULL and send with PUB sockets.
+\emph{Rule 1:} Handlers receive with PULL and send with PUB sockets.
 \end{quote}
 
 \subsection{UUID Addressing}
@@ -478,7 +478,7 @@ UUID as the very first thing.
 
 You then need a way to identify a particular listener (browser, client, etc.)
 that your message should target, \emph{and} Mongrel2 needs to tell you who is
-sending your handler the request.  This means Mongrel2 sends you is just one
+sending your handler the request.  This means Mongrel2 sends you just one
 identifier, but you can send Mongrel2 a list of them.  This leads to rule 3:
 
 \begin{quote}
