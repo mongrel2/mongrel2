@@ -498,7 +498,7 @@ if {[info exists login]} {
 </div>
 ');
 REPLACE INTO config VALUES('footer','<div class="footer">
-Copyright 2010 Zed A. Shaw.  All rights reserved.  <a href="http://mongrel2.org/wiki?name=License">BSD Licensed.</a> Mongrel2 is Trademark by Zed A. Shaw.
+Copyright 2010 Zed A. Shaw.  All rights reserved.  <a href="http://mongrel2.org/wiki?name=License">BSD Licensed.</a> Mongrel2 is Trademark by Zed A. Shaw. Hosting by <a href="http://cramerdev.com">Cramerdev</a>.
 </div>
 </body></html>
 ');
