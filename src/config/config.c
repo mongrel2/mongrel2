@@ -192,9 +192,9 @@ error:
 
 static int Config_load_host_cb(void *param, int cols, char **data, char **names)
 {
+    char *query = NULL;
     arity(4);
 
-    char *query = NULL;
     Server *server = (Server*)param;
     check(server, "Expected server as param");
 
@@ -228,9 +228,11 @@ error:
 
 static int Config_load_server_cb(void* param, int cols, char **data, char **names)
 {
+	Server **server = NULL;
+    char *query = NULL;
     arity(8);
 
-    Server **server = (Server **)param;
+    server = (Server **)param;
     if(*server != NULL)
     {
         log_info("More than one server object matches given uuid, using last found");
@@ -242,7 +244,7 @@ static int Config_load_server_cb(void* param, int cols, char **data, char **name
 
 
     const char *HOST_QUERY = "SELECT id, name, matching, server_id FROM host WHERE server_id = %s";
-    char *query = SQL(HOST_QUERY, data[0]);
+    query = SQL(HOST_QUERY, data[0]);
     check(query, "Failed to craft query string");
 
     int rc = DB_exec(query, Config_load_host_cb, *server);
@@ -255,7 +257,7 @@ static int Config_load_server_cb(void* param, int cols, char **data, char **name
     return 0;
 
 error:
-    Server_destroy(*server);
+	if (server) Server_destroy(*server);
     SQL_FREE(query);
     return -1;
 

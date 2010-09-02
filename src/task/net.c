@@ -87,7 +87,10 @@ netaccept(int fd, char *server, int *port)
 static int
 parseip(char *name, uint32_t *ip)
 {
-    unsigned char addr[4];
+    union {
+        char bytes[4];
+        uint32_t intval;
+    } addr;
     char *p;
     int i, x;
 
@@ -100,32 +103,32 @@ parseip(char *name, uint32_t *ip)
             return -1;
         if(*p == '.')
             p++;
-        addr[i] = x;
+        addr.bytes[i] = x;
     }
 
-    switch(CLASS(addr)){
+    switch(CLASS(addr.bytes)){
     case 0:
     case 1:
         if(i == 3){
-            addr[3] = addr[2];
-            addr[2] = addr[1];
-            addr[1] = 0;
+            addr.bytes[3] = addr.bytes[2];
+            addr.bytes[2] = addr.bytes[1];
+            addr.bytes[1] = 0;
         }else if(i == 2){
-            addr[3] = addr[1];
-            addr[2] = 0;
-            addr[1] = 0;
+            addr.bytes[3] = addr.bytes[1];
+            addr.bytes[2] = 0;
+            addr.bytes[1] = 0;
         }else if(i != 4)
             return -1;
         break;
     case 2:
         if(i == 3){
-            addr[3] = addr[2];
-            addr[2] = 0;
+            addr.bytes[3] = addr.bytes[2];
+            addr.bytes[2] = 0;
         }else if(i != 4)
             return -1;
         break;
     }
-    *ip = *(uint32_t*)addr;
+    *ip = addr.intval;
     return 0;
 }
 
