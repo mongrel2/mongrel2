@@ -3,7 +3,6 @@
 <p>Some donors request that their names be put on a list of donors to show support for Mongrel, and some wanted everyone to know how much they donated (usually because it was a funny joke).</p>
 
 <ul>
-
 <li><a href="http://innergysoftware.com/">Victor Olteanu, Innergy Software</a>
 <li><a href="http://ThinkCode.TV">ThinkCode.TV</a></li>
 <li><a href="http://envato.com/">Envato</a></li>

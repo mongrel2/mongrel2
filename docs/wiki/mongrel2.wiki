@@ -1,11 +1,26 @@
-﻿<img src="/static/logo.png" align="right"><p></p>
-
+﻿
 <h1>About Mongrel2</h1>
 
 <p style="font-size: 1.2em;">Mongrel2 is an <em>application</em>,
 <em>language</em>, and <em>network architecture</em> <b>agnostic</b> web
 server that focuses on web <b>applications</b> using <em>modern</em> browser
 technologies.</p>
+
+<div class="donors">
+<img src="/static/logo.png" align="right"><br/>
+
+<h3>Thanks To</h3>
+<ul class="donors">
+<li><a href="http://websterclay.com/">Webster Clay</a></li>
+<li><a href="http://cramerdev.com">Cramerdev</a></li>
+<li><a href="http://ThinkCode.TV">ThinkCode.TV</a></li>
+<li><a href="http://envato.com/">Envato</a></li>
+<li><a href="http://highgroove.com/">Highgroove Studios</a></li>
+<li><a href="http://infinitelybeta.com">Infinitely Beta</a></li>
+<li><a href="http://pragmaticbadger.com/">Pragmatic Badger</a></li>
+<li><a href="http://mongrel2.org/wiki?name=Donors">.. and Friends.</a></li>
+</ul>
+</div>
 
 <h2><a name="features">Features</a></h2>
 
@@ -36,20 +51,14 @@ technologies.</p>
 
 <h2><a name="download">Download</a></h2>
 
-<p>We are currently crafting a release process, but for now you can get the latest source
-download from (updated Wed Sep 1 01:04:34 PDT 2010):</p> 
+<p>Mongrel2 is now 1.0 as of Sep 1 2010:</p>
 
 <ul>
     <li><a href="/static/downloads/mongrel2-1.0.tar.bz2">mongrel2-1.0.tar.bz2</a> 
-    MD5: </li>
+    MD5: e09793c3725fcb5977af9aa6d7c48002</li>
     <li><a href="/static/downloads/mongrel2-1.0.zip">mongrel2-1.0.zip</a>
-    MD5: </li>
+    MD5: 1af42b2f80e10305e4fcd7f11a8a564d</li>
 </ul>
-
-<p>These files will be generated periodically, and contain a directory with the date/time they were made,
-the repository version number, and the full checkout.  As we get closer to release we'll have a better
-directory structure.
-</p>
 
 
 <h2><a name="docs">Documentation</a></h2>
@@ -123,4 +132,5 @@ information on writing one for your language.</p>
     <li><a href="http://twitter.com/anderiasch"><b>wink</b></a> wrote the PHP stuff and hacks on Mongrel2.</li>
     <li><a href="http://twitter.com/zedshaw"><b>zedshaw</b></a> started it all.</li>
 </ul>
+
 

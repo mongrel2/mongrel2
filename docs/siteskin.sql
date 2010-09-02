@@ -398,6 +398,46 @@ div.sidefloat {
     width:102px;
 }
 
+div.donors {
+    float: right;
+    font-size: 1.2em;
+    text-align: center;
+    margin-left: 40px;
+}
+
+div.donors h3 {
+    display: block;
+    padding: 7px;
+    border-bottom: 1px solid #f3f2e8;
+    font-size: 1.25em;
+}
+
+ul.donors {
+    list-style-type: none;
+    padding: 0;
+    margin-left: 0;
+    border: 1px solid #f3f2e8;
+}
+
+ul.donors li {
+    margin: 0 0 2px 0;
+    position: relative;
+}
+
+ul.donors li a {
+    display: block;
+    padding: 7px;
+    border-bottom: 1px solid #f3f2e8;
+    font-weight: bold;
+    text-decoration: none;
+    color: #3792b3;
+}
+
+ul.donors li a:hover {
+    background: #eceb1f;
+}
+
+
 ');
 REPLACE INTO config VALUES('header','<html>
 <head>
