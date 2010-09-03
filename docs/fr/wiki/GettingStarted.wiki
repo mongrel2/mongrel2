@@ -1,6 +1,6 @@
-﻿<h1>Voici la manière la plus rapide pour commencer avec Mongrel2. </h1>
+﻿<h1>Voici la manière la plus rapide pour commencer avec Mongrel2.</h1>
 
-<p>Rien n'est vraiment expliqué, tout ce dont vous avez besoin de faire c'est de configurer et lancer quelques commandes. Si vous voulez de plus amples explications, lisez <a href="/doc/tip/docs/manual/book.wiki</a>le manuel complet</a> qui couvre tout de comment commencer à comment écrire vos premiers handlers.</p>
+<p>Rien n'est vraiment expliqué, tout ce dont vous avez besoin de faire c'est de configurer et lancer quelques commandes. Si vous voulez de plus amples explications, lisez <a href="/doc/tip/docs/manual/book.wiki">le manuel complet</a> qui couvre tout de comment commencer à comment écrire vos premiers handlers.</p>
 
 <p>Ce document suppose que vous savez ce que vous faites, et que vous connaissez comment lancer des commandes sur un système Unix.</p>
 
@@ -91,4 +91,4 @@ hi there
 
 <h1>Pour en savoir plus, consultez le Manuel</h1>
 
-<p>Ceci est une sorte de cours intensif pour avoir Mongrel2 en route le plus rapidement possible . Vous devriez maintenant aller lire <a href="/doc/tip/docs/manual/book.wiki">le manuel Mongrel2</a> sur lequel nous avons passé plus de temps, et fait en sorte qu'il soit abouti.</p>
+<p>Ceci est une sorte de cours intensif pour avoir Mongrel2 en route le plus rapidement possible . Vous devriez maintenant aller lire <a href="/doc/tip/docs/manual/book.wiki">le manuel Mongrel2 (HTML)</a> sur lequel nous avons passé plus de temps, et fait en sorte qu'il soit abouti.</p>
