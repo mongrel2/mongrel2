@@ -1,11 +1,14 @@
-Voici la manière la plus rapide pour commencer avec Mongrel2. Rien n'est vraiment expliqué, tout ce dont vous avez besoin de faire c'est de configurer et lancer quelques commandes. Si vous voulez de plus amples explications, lisez http://mongrel2.org/doc/tip/docs/manual/book.wiki un manuel complet qui couvre tout de comment commencer à comment écrire vos premiers handlers.
+﻿<h1>Voici la manière la plus rapide pour commencer avec Mongrel2. </h1>
 
-Ce document suppose que vous savez ce que vous faites, et que vous connaissez comment lancer des commandes sur un système Unix.
+<p>Rien n'est vraiment expliqué, tout ce dont vous avez besoin de faire c'est de configurer et lancer quelques commandes. Si vous voulez de plus amples explications, lisez <a href="/doc/tip/docs/manual/book.wiki</a>le manuel complet</a> qui couvre tout de comment commencer à comment écrire vos premiers handlers.</p>
 
-Installer les dépendances.
+<p>Ce document suppose que vous savez ce que vous faites, et que vous connaissez comment lancer des commandes sur un système Unix.</p>
 
-Voilà comment je ferais sur ArchLinux:
+<h1>Installer les dépendances.</h1>
 
+<p>Voilà comment je ferais sur ArchLinux:</p>
+
+<pre>
 # install ZeroMQ 
 wget http://www.zeromq.org/local--files/area:download/zeromq-2.0.8.tar.gz 
 tar -xzvf zeromq-2.0.8.tar.gz 
@@ -32,43 +35,60 @@ sudo python setup.py install
  
 # web.py 
 sudo pip install web.py
+</pre>
 
-Récupérer les sources
-La manière la plus rapide est de récupérer le fichier tar.bz2
+<h1>Récupérer les sources</h1>
+
+<p>La manière la plus rapide est de récupérer le fichier tar.bz2</p>
+
+<pre>
 wget http://mongrel2.org/static/downloads/mongrel2-1.0beta7.tar.bz2
+</pre>
 
-Installer Mongrel2
-Vous allez maintenant installer Mongrel2
+<h1>Installer Mongrel2</h1>
 
+<p>Vous allez maintenant installer Mongrel2</p>
+
+<pre>
 tar -xjvf mongrel2-1.0beta7.tar.bz2
 cd mongrel2_2010-08-17_011326_58fb817f8e/
 make clean all install
+</pre>
 
-Le numéro de version de votre répertoire peut être différent, étant donné que nous faisons des mises à jour assez souvent.
+<p>Le numéro de version de votre répertoire peut être différent, étant donné que nous faisons des mises à jour assez souvent.</p>
 
-La première configuration
+<h1>La première configuration</h1>
 
-Vous pouvez maintenant tester la configuration la plus simple et lancer mongrel2
+<p>Vous pouvez maintenant tester la configuration la plus simple et lancer mongrel2</p>
 
+<pre>
 cp examples/python/tests/sample_conf.py myconfig.py
 m2sh init -db myconfig.sqlite
 m2sh load -db myconfig.sqlite  -config myconfig.py
+</pre>
 
-NOTE:Il y a aussi examples/python/tests/mongrel2_org.py qui est un exemple plus complet.
+<p><b>NOTE:</b>Il y a aussi examples/python/tests/mongrel2_org.py qui est un exemple plus complet.</p>
 
-Lancer Mongrel2 
+<h1>Lancer Mongrel2</h1>
 
-Vous pouvez maintenant lancer Mongrel2 et l'essayer. Vérifier que vous êtes toujours dans le répertoire de source de mongrel2:
+<p>Vous pouvez maintenant lancer Mongrel2 et l'essayer. Vérifier que vous êtes toujours dans le répertoire de source de mongrel2:</p>
 
+<pre>
 mkdir run logs tmp
 m2sh start -db myconfig.sqlite -host localhost
+</pre>
 
-Dans une autre fenêtre taper:
+<p>Dans une autre fenêtre taper:</p>
+
+<pre>
 curl http://localhost:6767/tests/sample.html
 hi there
+</pre>
 
-Quitter Mongrel2
-Taper: CTRL+C et Mongrel2 quittera. m2sh a plein d'autre commandes, certaines arrêtent ou redémarrent des choses. Pour plus de détails, taper: m2sh help.
+<h1>Quitter Mongrel2</h1>
 
-Pour en savoir plus, consultez le Manuel
-Ceci est une sorte de cours intensif pour avoir Mongrel2 en route le plus rapidement possible . Vous devriez maintenant aller lire http://mongrel2.org/doc/tip/docs/manual/book.wiki sur lequel nous avons passé plus de temps, et fait en sorte qu'il soit abouti.
+<p>Taper: CTRL+C et Mongrel2 quittera. m2sh a plein d'autre commandes, certaines arrêtent ou redémarrent des choses. Pour plus de détails, taper: <b>m2sh help</b>.</p>
+
+<h1>Pour en savoir plus, consultez le Manuel</h1>
+
+<p>Ceci est une sorte de cours intensif pour avoir Mongrel2 en route le plus rapidement possible . Vous devriez maintenant aller lire <a href="/doc/tip/docs/manual/book.wiki">le manuel Mongrel2</a> sur lequel nous avons passé plus de temps, et fait en sorte qu'il soit abouti.</p>
