@@ -1,0 +1,74 @@
+Voici la manière la plus rapide pour commencer avec Mongrel2. Rien n'est vraiment expliqué, tout ce dont vous avez besoin de faire c'est de configurer et lancer quelques commandes. Si vous voulez de plus amples explications, lisez http://mongrel2.org/doc/tip/docs/manual/book.wiki un manuel complet qui couvre tout de comment commencer à comment écrire vos premiers handlers.
+
+Ce document suppose que vous savez ce que vous faites, et que vous connaissez comment lancer des commandes sur un système Unix.
+
+Installer les dépendances.
+
+Voilà comment je ferais sur ArchLinux:
+
+# install ZeroMQ 
+wget http://www.zeromq.org/local--files/area:download/zeromq-2.0.8.tar.gz 
+tar -xzvf zeromq-2.0.8.tar.gz 
+cd zeromq-2.0.8/ 
+./configure 
+make 
+sudo make install 
+ 
+# install python 
+sudo pacman -S python 
+ 
+# install sqlite3 
+sudo pacman -S sqlite3 
+ 
+# install distribute and pip 
+sudo pacman -S python-pip 
+sudo pip install distribute 
+ 
+# install PyZMQ from github 
+sudo pacman -S git 
+git clone http://github.com/zeromq/pyzmq.git 
+cd pyzmq
+sudo python setup.py install 
+ 
+# web.py 
+sudo pip install web.py
+
+Récupérer les sources
+La manière la plus rapide est de récupérer le fichier tar.bz2
+wget http://mongrel2.org/static/downloads/mongrel2-1.0beta7.tar.bz2
+
+Installer Mongrel2
+Vous allez maintenant installer Mongrel2
+
+tar -xjvf mongrel2-1.0beta7.tar.bz2
+cd mongrel2_2010-08-17_011326_58fb817f8e/
+make clean all install
+
+Le numéro de version de votre répertoire peut être différent, étant donné que nous faisons des mises à jour assez souvent.
+
+La première configuration
+
+Vous pouvez maintenant tester la configuration la plus simple et lancer mongrel2
+
+cp examples/python/tests/sample_conf.py myconfig.py
+m2sh init -db myconfig.sqlite
+m2sh load -db myconfig.sqlite  -config myconfig.py
+
+NOTE:Il y a aussi examples/python/tests/mongrel2_org.py qui est un exemple plus complet.
+
+Lancer Mongrel2 
+
+Vous pouvez maintenant lancer Mongrel2 et l'essayer. Vérifier que vous êtes toujours dans le répertoire de source de mongrel2:
+
+mkdir run logs tmp
+m2sh start -db myconfig.sqlite -host localhost
+
+Dans une autre fenêtre taper:
+curl http://localhost:6767/tests/sample.html
+hi there
+
+Quitter Mongrel2
+Taper: CTRL+C et Mongrel2 quittera. m2sh a plein d'autre commandes, certaines arrêtent ou redémarrent des choses. Pour plus de détails, taper: m2sh help.
+
+Pour en savoir plus, consultez le Manuel
+Ceci est une sorte de cours intensif pour avoir Mongrel2 en route le plus rapidement possible . Vous devriez maintenant aller lire http://mongrel2.org/doc/tip/docs/manual/book.wiki sur lequel nous avons passé plus de temps, et fait en sorte qu'il soit abouti.
