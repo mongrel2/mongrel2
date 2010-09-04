@@ -7,7 +7,7 @@ server that focuses on web <b>applications</b> using <em>modern</em> browser
 technologies.</p>
 
 <div class="donors">
-<img src="/static/logo.png" align="right"><br/>
+<img src="http://mongrel2.org/static/logo.png" align="right"><br/>
 
 <h3>Thanks To</h3>
 <ul class="donors">
