@@ -45,11 +45,11 @@
     &nbsp;<span class="sectionToc">2.2 <a href="#x1-130002.2" id=
     "QQ2-1-16" name="QQ2-1-16">Building Mongrel2</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">2.2.1 <a href=
-    "#x1-140002.2.1" id="QQ2-1-17" name="QQ2-1-17">Using
-    Fossil</a></span><br>
+    "#x1-140002.2.1" id="QQ2-1-17" name="QQ2-1-17">Using the
+    .tar.bz2 File</a></span><br>
     &nbsp;&nbsp;<span class="subsectionToc">2.2.2 <a href=
-    "#x1-150002.2.2" id="QQ2-1-19" name="QQ2-1-19">Using the .zip
-    File</a></span><br>
+    "#x1-150002.2.2" id="QQ2-1-18" name="QQ2-1-18">Using
+    Fossil</a></span><br>
     &nbsp;<span class="sectionToc">2.3 <a href="#x1-160002.3" id=
     "QQ2-1-20" name="QQ2-1-20">Building And
     Installing</a></span><br>
@@ -922,42 +922,55 @@
     "http://fossil-scm.org">Fossil SCM</a> and check out the
     source.
 
-    <li class="enumerate" id="x1-13004x2">Grab the source .zip
-    release and install it from there.
+    <li class="enumerate" id="x1-13004x2">Grab the source .zip or
+    tar.bz2 release and install it from there.
   </ol><!--l. 96-->
 
   <p class="noindent">
 
   <h4 class="subsectionHead"><span class="titlemark">2.2.1</span>
-  <a id="x1-140002.2.1" name="x1-140002.2.1"></a>Using Fossil</h4>
-  <!--l. 98-->
+  <a id="x1-140002.2.1" name="x1-140002.2.1"></a>Using the .tar.bz2
+  File</h4><!--l. 98-->
+
+  <p class="noindent">The easiest way to build Mongrel2 is to use
+  the .tar.bz2 file from <a href=
+  "http://mongrel2.org/home#download">the main page downlaoads</a>
+  section. Simply download it and you're done. <!--l. 103-->
+
+  <p class="noindent">
+
+  <h4 class="subsectionHead"><span class="titlemark">2.2.2</span>
+  <a id="x1-150002.2.2" name="x1-150002.2.2"></a>Using Fossil</h4>
+  <!--l. 105-->
 
   <p class="noindent">Mongrel2 is still fairly new, and new
   software has bugs. Hell, old software has bugs. If you want to
   get the latest and greatest, then use fossil to grab the source
-  and stay with updates: <!--l. 102-->
+  and stay with updates. This isn't required because we try
+  to fix bugs fast but if you are living on the edge then
+  here's how to do it: <!--l. 110-->
 
   <p class="noindent">
 
   <ol class="enumerate1">
-    <li class="enumerate" id="x1-14002x1">Go to <a href=
+    <li class="enumerate" id="x1-15002x1">Go to <a href=
     "http://www.fossil-scm.org/download.html">the fossil download
     page</a> and grab the binary that fits your system, or the
     source tar.gz.
 
-    <li class="enumerate" id="x1-14004x2">Follow their <a href=
+    <li class="enumerate" id="x1-15004x2">Follow their <a href=
     "http://fossil-scm.org/index.html/doc/tip/www/build.wiki">install
     instructions</a> to get it on your system.
 
-    <li class="enumerate" id="x1-14006x3">If you find that your
+    <li class="enumerate" id="x1-15006x3">If you find that your
     version of fossil ends up having problems with mongrel2.org let
     us know since we might need to upgrade.
-  </ol><!--l. 111-->
+  </ol><!--l. 119-->
 
   <p class="noindent">Once you have fossil you can then get the
-  Mongrel2 source and open it up: <!--l. 113-->
+  Mongrel2 source and open it up: <!--l. 121-->
 
-  <p class="noindent"><a id="x1-14007r2" name="x1-14007r2"></a>
+  <p class="noindent"><a id="x1-15007r2" name="x1-15007r2"></a>
   <hr class="float">
 
   <div class="float">
@@ -965,12 +978,12 @@
       <span class="id">Source 2:</span> <span class=
       "content"><span class="pplri7t-">Cloning the Mongrel2</span>
       <span class="pplri7t-">Source</span></span>
-    </div><!--tex4ht:label?: x1-14007r2 -->
-    <!--l. 114-->
+    </div><!--tex4ht:label?: x1-15007r2 -->
+    <!--l. 122-->
 
     <div class="lstlisting" id="listing-2">
-      <span class="label"><a id="x1-14008r1" name=
-      "x1-14008r1"></a></span><span class=
+      <span class="label"><a id="x1-15008r1" name=
+      "x1-15008r1"></a></span><span class=
       "pcrr7t-x-x-90">&gt;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">mkdir</span><span class=
@@ -978,8 +991,8 @@
       "pcrr7t-x-x-90">~/</span><span class=
       "pcrr7t-x-x-90">fossils</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-14009r2" name=
-      "x1-14009r2"></a></span><span class=
+      <span class="label"><a id="x1-15009r2" name=
+      "x1-15009r2"></a></span><span class=
       "pcrr7t-x-x-90">&gt;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">fossil</span><span class=
@@ -1000,24 +1013,24 @@
       "pcrr7t-x-x-90">.</span><span class=
       "pcrr7t-x-x-90">fossil</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-14010r3" name=
-      "x1-14010r3"></a></span><span class=
+      <span class="label"><a id="x1-15010r3" name=
+      "x1-15010r3"></a></span><span class=
       "pcrr7t-x-x-90">&gt;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">mkdir</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">mongrel2</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-14011r4" name=
-      "x1-14011r4"></a></span><span class=
+      <span class="label"><a id="x1-15011r4" name=
+      "x1-15011r4"></a></span><span class=
       "pcrr7t-x-x-90">&gt;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">cd</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">mongrel2</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-14012r5" name=
-      "x1-14012r5"></a></span><span class=
+      <span class="label"><a id="x1-15012r5" name=
+      "x1-15012r5"></a></span><span class=
       "pcrr7t-x-x-90">&gt;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">fossil</span><span class=
@@ -1033,7 +1046,7 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 123-->
+  <!--l. 131-->
 
   <p class="noindent">Make sure you do this in order (just like
   with every set of instructions you follow) or else you'll
@@ -1044,52 +1057,21 @@
   the ~/fossils directory</span>. Just pay attention and
   don't blame fossil if you can't.
 
-  <h4 class="subsectionHead"><span class="titlemark">2.2.2</span>
-  <a id="x1-150002.2.2" name="x1-150002.2.2"></a>Using the .zip
-  File</h4><!--l. 132-->
-
-  <p class="noindent">If you don't want to install fossil
-  then you will need to get the .zip file from our site and install
-  it that way. Since the code is new, you have <span class=
-  "pplri7t-">no guarantees</span> that this will work at all or
-  that you will get a stable server. We have not made an official
-  release, so using the .zip file is effectively a lame way of
-  avoiding using fossil. <!--l. 138-->
-
-  <p class="noindent">
-
-  <ol class="enumerate1">
-    <li class="enumerate" id="x1-15002x1">Login as an anonymous
-    user <a href="http://mongrel2.org/login">at mongrel2.org</a>.
-
-    <li class="enumerate" id="x1-15004x2">Go to the <a href=
-    "http://mongrel2.org/info/tip">latest source tip</a>.
-
-    <li class="enumerate" id="x1-15006x3">Click on the &ldquo;ZIP
-    archive&rdquo; link to download the latest zip file of the
-    source.
-
-    <li class="enumerate" id="x1-15008x4">Unzip this file and cd
-    into the resulting directory.
-  </ol><!--l. 146-->
-
-  <p class="noindent">
-
   <h3 class="sectionHead"><span class="titlemark">2.3</span> <a id=
   "x1-160002.3" name="x1-160002.3"></a>Building And Installing</h3>
-  <!--l. 148-->
+  <!--l. 142-->
 
   <p class="noindent">Once you have the source ready to go you can
   build it and then install it with one command: <span class=
-  "pcrro7t-">make all install</span> <!--l. 151-->
+  "pcrro7t-">make all install</span> <!--l. 145-->
 
   <p class="noindent">There is no <span class=
   "pcrro7t-">./configure</span> for Mongrel2 since we avoid too
   many OS specific differences or shield those away with good
-  feature checks in the code. <!--l. 154-->
+  feature checks in the code. <!--l. 148-->
 
   <p class="noindent">The end result of this should be: 
-  <!--l. 156-->
+  <!--l. 150-->
 
   <p class="noindent">
 
@@ -1111,13 +1093,13 @@
 
     <li class="enumerate" id="x1-16011x5">Finally, the mongrel2
     binary gets installed.
-  </ol><!--l. 164-->
+  </ol><!--l. 158-->
 
   <p class="noindent">If any of these stages fail, then you can
   simply try to fix them and then run: <span class=
   "pcrro7t-">make</span> <span class="pcrro7t-">clean all
   install</span> which will do everything all over again. 
-  <!--l. 167-->
+  <!--l. 161-->
 
   <p class="noindent">The most common error is if you didn't
   install pip or distribute and insist on using your own
@@ -1126,19 +1108,19 @@
   Linux's stupidity about versions and how it installs
   Python. If you don't want to use the package system every
   other Python programmer uses, then you're on your own. 
-  <!--l. 174-->
+  <!--l. 168-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">2.4</span> <a id=
   "x1-170002.4" name="x1-170002.4"></a>Testing The
-  Installation</h3><!--l. 176-->
+  Installation</h3><!--l. 170-->
 
   <p class="noindent">When you are done, you probably want to make
   sure that it installed correctly. There's a test
   configuration file in <span class=
   "pcrb7t-">tests/config.sqlite</span> that you can use to try it
-  out: <!--l. 180-->
+  out: <!--l. 174-->
 
   <p class="noindent"><a id="x1-17001r3" name="x1-17001r3"></a>
   <hr class="float">
@@ -1149,7 +1131,7 @@
       "content"><span class="pplri7t-">First Test</span>
       <span class="pplri7t-">Run</span></span>
     </div><!--tex4ht:label?: x1-17001r3 -->
-    <!--l. 181-->
+    <!--l. 175-->
 
     <div class="lstlisting" id="listing-3">
       <span class="label"><a id="x1-17002r1" name=
@@ -1217,14 +1199,14 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 190-->
+  <!--l. 184-->
 
   <p class="noindent">That's it. Just hit CTRL-c for now and
   we'll get into playing with this setup later.
 
   <h3 class="sectionHead"><span class="titlemark">2.5</span> <a id=
   "x1-180002.5" name="x1-180002.5"></a>Upgrading from trunk</h3>
-  <!--l. 194-->
+  <!--l. 188-->
 
   <p class="noindent"><a id="x1-18001r4" name="x1-18001r4"></a>
   <hr class="float">
@@ -1235,7 +1217,7 @@
       "content"><span class="pplri7t-">Update your</span>
       <span class="pplri7t-">checkout</span></span>
     </div><!--tex4ht:label?: x1-18001r4 -->
-    <!--l. 195-->
+    <!--l. 189-->
 
     <div class="lstlisting" id="listing-4">
       <span class="label"><a id="x1-18002r1" name=
@@ -1270,19 +1252,21 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 202-->
+  <!--l. 196-->
 
   <p class="noindent">Don't forget <span class=
   "pcrro7t-">make clean all install</span>.
 
   <h3 class="sectionHead"><span class="titlemark">2.6</span> <a id=
-  "x1-190002.6" name="x1-190002.6"></a>Up Next</h3><!--l. 207-->
+  "x1-190002.6" name="x1-190002.6"></a>Up Next</h3><!--l. 201-->
 
   <p class="noindent">You now should have a working Mongrel2 system
   installed and the m2sh configuration interface ready to go. In
   the rest of this manual we'll be simply learning how to do
   more with Mongrel2, like making our own configs, writing
-  handlers, and other fun stuff.
+  handlers, and other fun stuff. <!--l. 1-->
+
+  <p class="noindent">
 
   <h2 class="chapterHead"><span class=
   "titlemark">Chapter&nbsp;3</span><br>
@@ -9363,14 +9347,15 @@
     so that you can do subscriptions and routing.
   </ol><!--l. 434-->
 
-  <p class="noindent">To satisfy these features we use haveo types
-  of ZeroMQ sockets (soon to be configurable), a request format
-  that Mongrel2 sends and a response format that the handlers send
-  back. Most importantly, there is <span class="pplri7t-">nothing
-  about the request and response</span> <span class="pplri7t-">that
-  must be connected</span>. In most cases they will be connected,
-  but you can receive a request from one browser and send a
-  response to a totally different one. <!--l. 440-->
+  <p class="noindent">To satisfy these features we use different
+  types of ZeroMQ sockets (soon to be configurable), a request
+  format that Mongrel2 sends and a response format that the
+  handlers send back. Most importantly, there is <span class=
+  "pplri7t-">nothing about the request and response</span>
+  <span class="pplri7t-">that must be connected</span>. In most
+  cases they will be connected, but you can receive a request from
+  one browser and send a response to a totally different one. 
+  <!--l. 440-->
 
   <p class="noindent">
 
@@ -9409,7 +9394,7 @@
     <!--l. 461-->
 
     <p class="noindent"><span class="pplri7t-">Rule 1:</span>
-    Handlers receive on with PULL and send with PUB sockets.
+    Handlers receive with PULL and send with PUB sockets.
   </div>
 
   <h4 class="subsectionHead"><span class="titlemark">5.3.2</span>
@@ -9444,7 +9429,7 @@
   listener (browser, client, etc.) that your message should target,
   <span class="pplri7t-">and</span> Mongrel2 needs to tell you who
   is sending your handler the request. This means Mongrel2 sends
-  you is just one identifier, but you can send Mongrel2 a list of
+  you just one identifier, but you can send Mongrel2 a list of
   them. This leads to rule 3: <!--l. 484-->
 
   <p class="noindent">
