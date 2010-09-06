@@ -1,5 +1,5 @@
-CFLAGS=-g -Wall -Isrc 
-LIBS=-lzmq -lsqlite3
+CFLAGS=-g -Wall -Isrc $(OPTFLAGS)
+LIBS=-lzmq -lsqlite3  $(OPTLIBS)
 PREFIX?=/usr/local
 
 ASM=$(wildcard src/**/*.S src/*.S)
