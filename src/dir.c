@@ -136,24 +136,44 @@ error:
     return NULL;
 }
 
-static inline int Dir_send_header(FileRecord *file, int sock_fd)
+static inline int Dir_send_header(FileRecord *file, Connection *conn)
 {
-    return fdsend(sock_fd, bdata(file->header), blength(file->header)) == blength(file->header);
+    return conn->send(conn, bdata(file->header), blength(file->header)) == blength(file->header);
 }
 
-int Dir_stream_file(FileRecord *file, int sock_fd)
+int Dir_stream_file(FileRecord *file, Connection *conn)
 {
     ssize_t sent = 0;
     size_t total = 0;
     off_t offset = 0;
     size_t block_size = MAX_SEND_BUFFER;
 
-    int rc = Dir_send_header(file, sock_fd);
+    // For the non-sendfile slowpath
+    char *file_buffer;
+    int nread;
+
+    int rc = Dir_send_header(file, conn);
     check_debug(rc, "Failed to write header to socket.");
 
-    for(total = 0; fdwait(sock_fd, 'w') == 0 && total < file->sb.st_size; total += sent) {
-        sent = Dir_send(sock_fd, file->fd, &offset, block_size);
-        check_debug(sent > 0, "Failed to sendfile on socket: %d from file %d", sock_fd, file->fd);
+    if(conn->ssl == NULL) {
+        for(total = 0; fdwait(conn->fd, 'w') == 0 && total < file->sb.st_size;
+            total += sent) {
+            sent = Dir_send(conn->fd, file->fd, &offset, block_size);
+            check_debug(sent > 0, "Failed to sendfile on socket: %d from "
+                        "file %d", conn->fd, file->fd);
+        }
+    }
+    else {
+        file_buffer = malloc(MAX_SEND_BUFFER);
+        check_mem(file_buffer);
+
+        while((nread = fdread(file->fd, file_buffer, MAX_SEND_BUFFER)) > 0) {
+            for(total = 0; total < file->sb.st_size; total += sent) {
+                sent = conn->send(conn, file_buffer + sent, nread - sent);
+                check_debug(sent > 0, "Failed to send on socket: %d from "
+                            "file %d", conn->fd, file->fd);
+            }
+        }
     }
     
     check(total <= file->sb.st_size, 
@@ -481,7 +501,7 @@ static inline bstring Dir_calculate_response(Request *req, FileRecord *file)
     return &HTTP_500;
 }
 
-int Dir_serve_file(Dir *dir, Request *req, int fd)
+int Dir_serve_file(Dir *dir, Request *req, Connection *conn)
 {
     FileRecord *file = NULL;
     bstring resp = NULL;
@@ -495,7 +515,7 @@ int Dir_serve_file(Dir *dir, Request *req, int fd)
 
     if(!(is_get || is_head)) {
         req->status_code = 405;
-        rc = Response_send_status(fd, &HTTP_405);
+        rc = Response_send_status(conn, &HTTP_405);
         check_debug(rc == blength(&HTTP_405), "Failed to send 405 to client.");
         return -1;
     } else {
@@ -503,14 +523,14 @@ int Dir_serve_file(Dir *dir, Request *req, int fd)
         resp = Dir_calculate_response(req, file);
 
         if(resp) {
-            rc = Response_send_status(fd, resp);
+            rc = Response_send_status(conn, resp);
             check_debug(rc == blength(resp), "Failed to send error response on file serving.");
         } else if(is_get) {
-            rc = Dir_stream_file(file, fd);
+            rc = Dir_stream_file(file, conn);
             req->response_size = rc;
             check_debug(rc == file->sb.st_size, "Didn't send all of the file, sent %d of %s.", rc, bdata(path));
         } else if(is_head) {
-            rc = Dir_send_header(file, fd);
+            rc = Dir_send_header(file, conn);
             check_debug(rc, "Failed to write header to socket.");
         } else {
             sentinel("How the hell did you get to here. Tell Zed.");

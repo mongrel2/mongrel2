@@ -39,6 +39,7 @@
 #include <adt/list.h>
 #include <host.h>
 #include <routing.h>
+#include <ssl/ssl.h>
 
 enum {
     IPADDR_SIZE = 16
@@ -55,6 +56,7 @@ typedef struct Server {
     bstring error_log;
     bstring pid_file;
     bstring default_hostname;
+    SSL_CTX *ssl_ctx;
 } Server;
 
 

@@ -1,11 +1,21 @@
 #include "minunit.h"
 #include <response.h>
+#include <connection.h>
 
 FILE *LOG_FILE = NULL;
 
+static ssize_t my_send(Connection *conn, char *buff, int len)
+{
+    return -1;
+}
+
 char *test_Response_send_status() 
 {
-    int rc = Response_send_status(2, &HTTP_304);
+    Connection conn = {0};
+    conn.fd = 2;
+    conn.send = my_send;
+
+    int rc = Response_send_status(&conn, &HTTP_304);
     mu_assert(rc == -1, "This SHOULD fail.");
 
     return NULL;
@@ -13,7 +23,11 @@ char *test_Response_send_status()
 
 char *test_Response_send_socket_policy()
 {
-    int rc = Response_send_socket_policy(2);
+    Connection conn = {0};
+    conn.fd = 2;
+    conn.send = my_send;
+
+    int rc = Response_send_socket_policy(&conn);
     mu_assert(rc == -1, "This SHOULD fail.");
 
     return NULL;

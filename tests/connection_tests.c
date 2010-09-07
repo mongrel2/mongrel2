@@ -15,7 +15,7 @@ char *test_Connection_create_destroy()
 {
     const char remote[IPADDR_SIZE];
 
-    Connection *conn = Connection_create(NULL, 0, 0, remote);
+    Connection *conn = Connection_create(NULL, 0, 0, remote, NULL);
     Connection_destroy(conn);
 
     return NULL;
@@ -38,7 +38,7 @@ int test_task_with_sample(const char *sample_file)
 {
     check(SRV, "Server isn't configured.");
 
-    Connection *conn = Connection_create(SRV, 12, 1400, "127.0.0.1");
+    Connection *conn = Connection_create(SRV, 12, 1400, "127.0.0.1", NULL);
     check(conn, "Failed to create the conn.");
 
     conn->fd = open(sample_file, O_RDONLY);

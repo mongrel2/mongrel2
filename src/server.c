@@ -77,6 +77,8 @@ Server *Server_create(const char *uuid, const char *default_host,
     srv->pid_file = bfromcstr(pid_file); check_mem(srv->pid_file);
     srv->default_hostname = bfromcstr(default_host);
 
+    srv->ssl_ctx = NULL;
+
     return srv;
 
 error:
@@ -159,7 +161,8 @@ void Server_start(Server *srv)
         debug("Connection from %s:%d to %s:%d", remote, rport, 
                 bdata(srv->default_host->name), srv->port);
 
-        Connection *conn = Connection_create(srv, cfd, rport, remote);
+        Connection *conn = Connection_create(srv, cfd, rport, remote,
+                                             srv->ssl_ctx);
         Connection_accept(conn);
     }
 

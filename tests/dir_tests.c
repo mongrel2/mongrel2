@@ -69,6 +69,11 @@ error:
     return NULL;
 }
 
+static ssize_t my_send(Connection *conn, char *buffer, int len)
+{
+    return -1;
+}
+
 char *test_Dir_serve_file()
 {
     int rc = 0;
@@ -76,16 +81,20 @@ char *test_Dir_serve_file()
 
     Dir *test = Dir_create("tests/", "/", "sample.html", "test/plain");
 
+    Connection conn = {0};
+    conn.fd = 1;
+    conn.send = my_send;
+
     req = fake_req("GET", "/sample.json");
-    rc = Dir_serve_file(test, req, 1);
+    rc = Dir_serve_file(test, req, &conn);
     mu_assert(rc == -1, "Should fail to write since it's not a socket.");
 
     req = fake_req("HEAD", "/sample.json");
-    rc = Dir_serve_file(test, req, 1);
+    rc = Dir_serve_file(test, req, &conn);
     mu_assert(rc == -1, "Should fail to write since it's not a socket.");
 
     req = fake_req("POST", "/sample.json");
-    rc = Dir_serve_file(test, req, 1);
+    rc = Dir_serve_file(test, req, &conn);
     mu_assert(rc == -1, "Should fail to write since it's not a socket.");
 
     return NULL;

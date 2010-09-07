@@ -36,6 +36,7 @@
 #define _response_h
 
 #include <bstring.h>
+#include <connection.h>
 
 extern struct tagbstring HTTP_304;
 extern struct tagbstring HTTP_400;
@@ -50,8 +51,8 @@ extern struct tagbstring HTTP_205;
 
 extern struct tagbstring FLASH_RESPONSE;
 
-int Response_send_status(int fd, bstring error);
+int Response_send_status(Connection *conn, bstring error);
 
-int Response_send_socket_policy(int fd);
+int Response_send_socket_policy(Connection *conn);
 
 #endif

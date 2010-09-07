@@ -39,6 +39,7 @@
 #include <request.h>
 #include <state.h>
 #include <proxy.h>
+#include <ssl/ssl.h>
 
 extern int CONNECTION_STACK;
 extern int BUFFER_SIZE;
@@ -60,11 +61,19 @@ typedef struct Connection {
     char *proxy_buf;
     struct httpclient_parser *client;
     char remote[IPADDR_SIZE+1];
+
+    ssize_t (*send)(struct Connection *, char *buffer, int len);
+    ssize_t (*recv)(struct Connection *, char *buffer, int len);
+
+    SSL *ssl;
+    char *ssl_buff;
+    int ssl_buff_len;
 } Connection;
 
 void Connection_destroy(Connection *conn);
 
-Connection *Connection_create(Server *srv, int fd, int rport, const char *remote);
+Connection *Connection_create(Server *srv, int fd, int rport,
+                              const char *remote, SSL_CTX *ctx);
 
 void Connection_accept(Connection *conn);
 

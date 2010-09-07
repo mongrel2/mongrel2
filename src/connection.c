@@ -65,7 +65,7 @@ int MAX_CONTENT_LENGTH = 20 * 1024;
 int BUFFER_SIZE = 4 * 1024;
 int CONNECTION_STACK = 32 * 1024;
 
-static inline int Connection_backend_event(Backend *found, int fd)
+static inline int Connection_backend_event(Backend *found, Connection *conn)
 {
     switch(found->type) {
         case BACKEND_HANDLER:
@@ -75,7 +75,7 @@ static inline int Connection_backend_event(Backend *found, int fd)
         case BACKEND_PROXY:
             return PROXY;
         default:
-            error_response(fd, 501, "Invalid backend type: %d", found->type);
+            error_response(conn, 501, "Invalid backend type: %d", found->type);
     }
 
 error:
@@ -113,7 +113,7 @@ int connection_send_socket_response(int event, void *data)
     TRACE(socket_req);
     Connection *conn = (Connection *)data;
 
-    int rc = Response_send_socket_policy(conn->fd);
+    int rc = Response_send_socket_policy(conn);
     check_debug(rc > 0, "Failed to write Flash socket response.");
 
     return RESP_SENT;
@@ -137,16 +137,16 @@ int connection_route_request(int event, void *data)
     } else {
         host = conn->server->default_host;
     }
-    error_unless(host, conn->fd, 404, "Request for a host we don't have registered: %s", bdata(conn->req->host_name));
+    error_unless(host, conn, 404, "Request for a host we don't have registered: %s", bdata(conn->req->host_name));
 
     Backend *found = Host_match_backend(host, path, &pattern);
-    error_unless(found, conn->fd, 404, "Handler not found: %s", bdata(path));
+    error_unless(found, conn, 404, "Handler not found: %s", bdata(path));
 
     Request_set_action(conn->req, found);
     conn->req->target_host = host;
     conn->req->pattern = pattern;
 
-    return Connection_backend_event(found, conn->fd);
+    return Connection_backend_event(found, conn);
 
 error:
     return CLOSE;
@@ -202,7 +202,7 @@ static inline bstring connection_upload_file(Connection *conn, Handler *handler,
 
     // need a setting for the moby store where large uploads should go
     bstring upload_store = Setting_get_str("upload.temp_store", NULL);
-    error_unless(upload_store, conn->fd, 413, "Request entity is too large: %d, and no upload.temp_store setting for where to put the big files.", content_len);
+    error_unless(upload_store, conn, 413, "Request entity is too large: %d, and no upload.temp_store setting for where to put the big files.", content_len);
 
     upload_store = bstrcpy(upload_store); // Setting owns the original
 
@@ -233,7 +233,7 @@ static inline bstring connection_upload_file(Connection *conn, Handler *handler,
     {
         int nread = content_len < BUFFER_SIZE ? content_len : BUFFER_SIZE;
 
-        nread = fdrecv(conn->fd, conn->buf, nread);
+        nread = conn->recv(conn, conn->buf, nread);
         check(nread > 0, "Failed to read from socket on upload.");
 
         rc = fdwrite(tmpfd, conn->buf, nread);
@@ -273,7 +273,7 @@ int connection_http_to_handler(int event, void *data)
     bstring result = NULL;
 
     Handler *handler = Request_get_action(conn->req, handler);
-    error_unless(handler, conn->fd, 404, "No action for request: %s", bdata(Request_path(conn->req)));
+    error_unless(handler, conn, 404, "No action for request: %s", bdata(Request_path(conn->req)));
 
 
     if(content_len == 0) {
@@ -293,7 +293,7 @@ int connection_http_to_handler(int event, void *data)
 
             int remaining = 0;
             for(remaining = content_len; remaining > 0; remaining -= rc, body += rc) {
-                rc = fdrecv1(conn->fd, body, remaining);
+                rc = conn->recv(conn, body, remaining);
                 check_debug(rc > 0, "Read error from MSG listener %d", conn->fd);
             }
 
@@ -312,7 +312,7 @@ int connection_http_to_handler(int event, void *data)
     debug("HTTP TO HANDLER: %s", bdata(result));
 
     rc = Handler_deliver(handler->send_socket, bdata(result), blength(result));
-    error_unless(rc != -1, conn->fd, 502, "Failed to deliver to handler: %s", 
+    error_unless(rc != -1, conn, 502, "Failed to deliver to handler: %s", 
             bdata(Request_path(conn->req)));
 
     bdestroy(result);
@@ -332,7 +332,7 @@ int connection_http_to_directory(int event, void *data)
 
     Dir *dir = Request_get_action(conn->req, dir);
 
-    int rc = Dir_serve_file(dir, conn->req, conn->fd);
+    int rc = Dir_serve_file(dir, conn->req, conn);
     check_debug(rc == 0, "Failed to serve file: %s", bdata(Request_path(conn->req)));
 
     Log_request(conn, conn->req->status_code, conn->req->response_size);
@@ -402,7 +402,7 @@ int connection_proxy_deliver(int event, void *data)
             total_len -= rc;
 
             if(total_len > 0) {
-                conn->nread = fdrecv(conn->fd, conn->buf, BUFFER_SIZE);
+                conn->nread = conn->recv(conn, conn->buf, BUFFER_SIZE);
                 check_debug(conn->nread > 0, "Failed to read from client more data with %d left.", total_len);
             } else {
                 conn->nread = 0;
@@ -449,7 +449,7 @@ int connection_proxy_reply_parse(int event, void *data)
                conn->proxy_buf);
 
         do {
-            rc = fdsend(conn->fd, conn->proxy_buf, nread);
+            rc = conn->send(conn, conn->proxy_buf, nread);
             check(rc == nread, "Failed to send all of the request: %d length.", nread);
         } while((nread = fdrecv(conn->proxy_fd, conn->proxy_buf, BUFFER_SIZE)) > 0);
     } else {
@@ -477,7 +477,7 @@ int connection_proxy_req_parse(int event, void *data)
     // unlike other places, we keep the nread rather than reset
     rc = Connection_read_header(conn, conn->req);
     check_debug(rc > 0, "Failed to read another header.");
-    error_unless(Request_is_http(conn->req), conn->fd, 400,
+    error_unless(Request_is_http(conn->req), conn, 400,
             "Someone tried to change the protocol on us from HTTP.");
 
     host = bstrcpy(conn->req->host);
@@ -490,19 +490,19 @@ int connection_proxy_req_parse(int event, void *data)
 
         // query up the path to see if it gets the current request action
         Backend *found = Host_match_backend(target_host, Request_path(conn->req), NULL);
-        error_unless(found, conn->fd, 404, 
+        error_unless(found, conn, 404, 
                 "Handler not found: %s", bdata(Request_path(conn->req)));
 
         if(found != req_action) {
             Request_set_action(conn->req, found);
-            return Connection_backend_event(found, conn->fd);
+            return Connection_backend_event(found, conn);
         } else {
             // TODO: since we found it already, keep it set and reuse
             return HTTP_REQ;
         }
     }
 
-    error_response(conn->fd, 500, "Invalid code branch, tell Zed.");
+    error_response(conn, 500, "Invalid code branch, tell Zed.");
 error:
 
     bdestroy(host);
@@ -516,7 +516,7 @@ int connection_proxy_failed(int event, void *data)
     TRACE(proxy_failed);
     Connection *conn = (Connection *)data;
 
-    Response_send_status(conn->fd, &HTTP_502);
+    Response_send_status(conn, &HTTP_502);
 
     return CLOSE;
 }
@@ -598,7 +598,7 @@ static inline int ident_and_register(int event, void *data, int reg_too)
         taskname("HTTP");
         next = HTTP_REQ;
     } else {
-        error_response(conn->fd, 500, "Invalid code branch, tell Zed.");
+        error_response(conn, 500, "Invalid code branch, tell Zed.");
     }
 
     if(reg_too) Register_connect(conn->fd, conn_type);
@@ -669,7 +669,79 @@ void Connection_destroy(Connection *conn)
     }
 }
 
-Connection *Connection_create(Server *srv, int fd, int rport, const char *remote)
+static ssize_t plaintext_send(Connection *conn, char *buffer, int len)
+{
+    return fdsend(conn->fd, buffer, len);
+}
+
+static ssize_t plaintext_recv(Connection *conn, char *buffer, int len)
+{
+    return fdrecv(conn->fd, buffer, len);
+}
+
+static ssize_t ssl_send(Connection *conn, char *buffer, int len)
+{
+    check(conn->ssl != NULL, "Cannot ssl_send on a connection without ssl");
+    
+    return ssl_write(conn->ssl, (const unsigned char*) buffer, len);
+
+error:
+    return -1;
+}
+
+static ssize_t ssl_recv(Connection *conn, char *buffer, int len)
+{
+    check(conn->ssl != NULL, "Cannot ssl_recv on a connection without ssl");
+    char *pread;
+    int nread;
+
+    // If we didn't read all of what we recieved last time
+    if(conn->ssl_buff != NULL) {
+        if(conn->ssl_buff_len < len) {
+            nread = conn->ssl_buff_len;
+            pread = conn->ssl_buff;
+            conn->ssl_buff_len = 0;
+            conn->ssl_buff = NULL;
+        }
+        else {
+            nread = len;
+            pread = conn->ssl_buff;
+            conn->ssl_buff += nread;
+            conn->ssl_buff_len -= nread;
+        }
+    }
+    else {
+        do {
+            nread = ssl_read(conn->ssl, (unsigned char **) &pread);
+            printf("atg nread = %d\n", nread);
+            ssl_display_error(nread);
+            perror("atg");
+        } while(nread == SSL_OK);
+
+        // If we got more than they asked for, we should stash it for
+        // successive calls.
+        if(nread > len) {
+            debug("atg Storing extra");
+            conn->ssl_buff = buffer + len;
+            conn->ssl_buff_len = nread - len;
+            nread = len;
+        }
+    }
+    if(nread < 0) 
+        return nread;
+
+    check(pread != NULL, "Got a NULL from ssl_read despite no error code");
+    
+    memcpy(buffer, pread, nread);
+    debug("atg nread = %d", nread);
+    return nread;
+
+error:
+    return -1;
+}
+
+Connection *Connection_create(Server *srv, int fd, int rport, 
+                              const char *remote, SSL_CTX *ssl_ctx)
 {
     Connection *conn = h_calloc(sizeof(Connection), 1);
     check_mem(conn);
@@ -688,6 +760,22 @@ Connection *Connection_create(Server *srv, int fd, int rport, const char *remote
     check_mem(conn->buf);
     hattach(conn->buf, conn);
 
+    conn->ssl_buff = 0;
+    conn->ssl_buff_len = 0;
+    conn->ssl = NULL;
+    if(ssl_ctx != NULL)
+    {
+        conn->ssl = ssl_server_new(ssl_ctx, conn->fd);
+        check(conn->ssl != NULL, "Failed to create new ssl for connection");
+        conn->send = ssl_send;
+        conn->recv = ssl_recv;
+    }
+    else
+    {
+        conn->ssl = NULL;
+        conn->send = plaintext_send;
+        conn->recv = plaintext_recv;
+    }
     return conn;
 
 error:
@@ -713,7 +801,7 @@ void Connection_task(void *v)
 
     for(i = 0, next = OPEN; next != CLOSE; i++) {
         next = State_exec(&conn->state, next, (void *)conn);
-        error_unless(next >= FINISHED && next < EVENT_END, conn->fd, 500, 
+        error_unless(next >= FINISHED && next < EVENT_END, conn, 500, 
                 "!!! Invalid next event[%d]: %d, Tell ZED!", i, next);
     }
 
@@ -760,7 +848,7 @@ int Connection_read_header(Connection *conn, Request *req)
     conn->buf[BUFFER_SIZE] = '\0';  // always cap it off
 
     while(finished != 1 && remaining >= 0) {
-        n = fdrecv(conn->fd, cur_buf, remaining);
+        n = conn->recv(conn, cur_buf, remaining);
         check_debug(n > 0, "Failed to read from socket after %d read: %d parsed.",
                     conn->nread, (int)conn->nparsed);
         conn->nread += n;
@@ -773,7 +861,7 @@ int Connection_read_header(Connection *conn, Request *req)
         cur_buf = conn->buf + conn->nread; 
     }
 
-    error_unless(finished == 1, conn->fd, 400, 
+    error_unless(finished == 1, conn, 400, 
             "Error in parsing: %d, bytes: %d, value: %.*s, parsed: %d", 
             finished, conn->nread, conn->nread, conn->buf, (int)conn->nparsed);
 
