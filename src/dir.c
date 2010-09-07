@@ -149,8 +149,10 @@ int Dir_stream_file(FileRecord *file, Connection *conn)
     size_t block_size = MAX_SEND_BUFFER;
 
     // For the non-sendfile slowpath
-    char *file_buffer;
-    int nread;
+    char *file_buffer = NULL;
+    int nread = 0;
+    int amt = 0;
+    int tempfd = -1;
 
     int rc = Dir_send_header(file, conn);
     check_debug(rc, "Failed to write header to socket.");
@@ -164,16 +166,24 @@ int Dir_stream_file(FileRecord *file, Connection *conn)
         }
     }
     else {
+        // We have to reopen the file, so we don't get ourselves into seek
+        // position trouble
+        int tempfd = open(bdata(file->full_path), O_RDONLY);
+        check(tempfd >= 0, "Could not reopen open file");
+
         file_buffer = malloc(MAX_SEND_BUFFER);
         check_mem(file_buffer);
 
-        while((nread = fdread(file->fd, file_buffer, MAX_SEND_BUFFER)) > 0) {
-            for(total = 0; total < file->sb.st_size; total += sent) {
-                sent = conn->send(conn, file_buffer + sent, nread - sent);
-                check_debug(sent > 0, "Failed to send on socket: %d from "
-                            "file %d", conn->fd, file->fd);
+        while((nread = fdread(tempfd, file_buffer, MAX_SEND_BUFFER)) > 0) {
+            for(amt = 0, sent = 0; sent < nread; sent += amt) {
+                amt = conn->send(conn, file_buffer + sent, nread - sent);
+                check_debug(amt > 0, "Failed to send on socket: %d from "
+                            "file %d", conn->fd, tempfd);
             }
+            total += nread;
         }
+        free(file_buffer);
+        close(tempfd); tempfd = -1;
     }
     
     check(total <= file->sb.st_size, 
@@ -187,6 +197,8 @@ int Dir_stream_file(FileRecord *file, Connection *conn)
     return total;
 
 error:
+    if(file_buffer) free(file_buffer);
+    if(tempfd >= 0) close(tempfd);
     return -1;
 }
 

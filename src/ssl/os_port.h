@@ -42,6 +42,7 @@ extern "C" {
 #endif
 
 #include <stdio.h>
+#include <task/task.h>
 
 #if defined(WIN32)
 #define STDCALL                 __stdcall
@@ -79,8 +80,8 @@ extern "C" {
 #undef dup2
 #undef unlink
 
-#define SOCKET_READ(A,B,C)      recv(A,B,C,0)
-#define SOCKET_WRITE(A,B,C)     send(A,B,C,0)
+#define SOCKET_READ(A,B,C)      fdrecv1(A,B,C)
+#define SOCKET_WRITE(A,B,C)     fdsend(A,B,C)
 #define SOCKET_CLOSE(A)         closesocket(A)
 #define SOCKET_BLOCK(A)         u_long argp = 0; \
                                 ioctlsocket(A, FIONBIO, &argp)
@@ -150,8 +151,8 @@ EXP_FUNC int STDCALL getdomainname(char *buf, int buf_size);
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#define SOCKET_READ(A,B,C)      read(A,B,C)
-#define SOCKET_WRITE(A,B,C)     write(A,B,C)
+#define SOCKET_READ(A,B,C)      fdrecv1(A,B,C)
+#define SOCKET_WRITE(A,B,C)     fdsend(A,B,C)
 #define SOCKET_CLOSE(A)         close(A)
 #define SOCKET_BLOCK(A)         int fd = fcntl(A, F_GETFL, NULL); \
                                 fcntl(A, F_SETFL, fd & ~O_NONBLOCK)

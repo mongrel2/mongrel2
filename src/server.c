@@ -78,6 +78,8 @@ Server *Server_create(const char *uuid, const char *default_host,
     srv->default_hostname = bfromcstr(default_host);
 
     srv->ssl_ctx = NULL;
+    // For a sneak peak of ssl, uncomment the following line
+    // srv->ssl_ctx = ssl_ctx_new(0, 0);
 
     return srv;
 

@@ -77,7 +77,7 @@ int Proxy_stream_response(Connection *conn, int total, int nread)
     int remaining = total;
 
     // send what we've read already right now
-    rc = fdsend(conn->fd, conn->proxy_buf, nread);
+    rc = conn->send(conn, conn->proxy_buf, nread);
     check(rc == nread, "Failed to send all of the request: %d length.", nread);
 
     for(remaining -= nread; remaining > 0; remaining -= nread) {
@@ -86,7 +86,7 @@ int Proxy_stream_response(Connection *conn, int total, int nread)
 
         check(nread != -1, "Failed to read from proxy.");
 
-        rc = fdsend(conn->fd, conn->proxy_buf, nread);
+        rc = conn->send(conn, conn->proxy_buf, nread);
         check(rc != -1, "Failed to send to client->");
     }
 
