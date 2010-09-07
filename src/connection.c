@@ -665,6 +665,8 @@ void Connection_destroy(Connection *conn)
     if(conn) {
         Request_destroy(conn->req);
         conn->req = NULL;
+        if(conn->ssl) 
+            ssl_free(conn->ssl);
         h_free(conn);
     }
 }
@@ -713,15 +715,11 @@ static ssize_t ssl_recv(Connection *conn, char *buffer, int len)
     else {
         do {
             nread = ssl_read(conn->ssl, (unsigned char **) &pread);
-            printf("atg nread = %d\n", nread);
-            ssl_display_error(nread);
-            perror("atg");
         } while(nread == SSL_OK);
 
         // If we got more than they asked for, we should stash it for
         // successive calls.
         if(nread > len) {
-            debug("atg Storing extra");
             conn->ssl_buff = buffer + len;
             conn->ssl_buff_len = nread - len;
             nread = len;
@@ -733,7 +731,6 @@ static ssize_t ssl_recv(Connection *conn, char *buffer, int len)
     check(pread != NULL, "Got a NULL from ssl_read despite no error code");
     
     memcpy(buffer, pread, nread);
-    debug("atg nread = %d", nread);
     return nread;
 
 error:
