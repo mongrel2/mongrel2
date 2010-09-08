@@ -1,6 +1,6 @@
 
 #line 1 "src/lexer.rl"
-#include "token.h"
+#include "config.h"
 #include "parser.h"
 
 #include <stdio.h>
@@ -10,20 +10,29 @@
 #include <adt/list.h>
 #include <stdlib.h>
 
+void *ParseAlloc(void *(*mallocProc)(size_t));
+void ParseFree(void *p, void (*freeProc)(void*));
+
+void Parse(
+  void *yyp,                   /* The parser */
+  int yymajor,                 /* The major token code number */
+  Token *yyminor,       /* The value for the token */
+  hash_t **out_settings
+);
+
 
 #define TK(N) debug("> " # N ": %.*s", (int)(te - ts), ts);\
     temp = calloc(sizeof(Token), 1);\
     temp->type = TK##N;\
     temp->data = blk2bstr(ts, (int)(te - ts));\
-    list_append(token_list, lnode_create(temp)); 
-     
+    Parse(parser, TK##N, temp, &settings);
 
 
-#line 54 "src/lexer.rl"
+#line 63 "src/lexer.rl"
 
 
 
-#line 27 "src/lexer.c"
+#line 36 "src/lexer.c"
 static const char _m2sh_lexer_key_offsets[] = {
 	0, 0, 2, 2, 3, 5, 5, 7, 
 	7, 29, 31, 38
@@ -95,13 +104,14 @@ static const int m2sh_lexer_error = 0;
 static const int m2sh_lexer_en_main = 8;
 
 
-#line 57 "src/lexer.rl"
+#line 66 "src/lexer.rl"
 
-list_t *Lexer_tokenize(bstring content) 
+hash_t *Parse_config_string(bstring content) 
 {
-    list_t *token_list = list_create(LISTCOUNT_T_MAX);
-    check_mem(token_list);
-    Token *temp;
+    Token *temp = NULL;
+    void *parser = ParseAlloc(malloc);
+    check_mem(parser);
+    hash_t *settings = NULL;
 
     char *p = bdata(content);
     char *pe = p + blength(content);
@@ -112,7 +122,7 @@ list_t *Lexer_tokenize(bstring content)
     char *te = NULL;
 
     
-#line 116 "src/lexer.c"
+#line 126 "src/lexer.c"
 	{
 	cs = m2sh_lexer_start;
 	ts = 0;
@@ -120,9 +130,9 @@ list_t *Lexer_tokenize(bstring content)
 	act = 0;
 	}
 
-#line 73 "src/lexer.rl"
+#line 83 "src/lexer.rl"
     
-#line 126 "src/lexer.c"
+#line 136 "src/lexer.c"
 	{
 	int _klen;
 	const char *_keys;
@@ -138,7 +148,7 @@ _resume:
 #line 1 "src/lexer.rl"
 	{ts = p;}
 	break;
-#line 142 "src/lexer.c"
+#line 152 "src/lexer.c"
 	}
 
 	_keys = _m2sh_lexer_trans_keys + _m2sh_lexer_key_offsets[cs];
@@ -198,63 +208,63 @@ _eof_trans:
 
 	switch ( _m2sh_lexer_trans_actions[_trans] ) {
 	case 1:
-#line 35 "src/lexer.rl"
+#line 44 "src/lexer.rl"
 	{te = p+1;{ TK(QSTRING) }}
 	break;
 	case 3:
-#line 36 "src/lexer.rl"
+#line 45 "src/lexer.rl"
 	{te = p+1;{ TK(PATTERN) }}
 	break;
 	case 11:
-#line 37 "src/lexer.rl"
+#line 46 "src/lexer.rl"
 	{te = p+1;{ TK(EQ) }}
 	break;
 	case 15:
-#line 38 "src/lexer.rl"
+#line 47 "src/lexer.rl"
 	{te = p+1;{ TK(LBRACKET) }}
 	break;
 	case 16:
-#line 39 "src/lexer.rl"
+#line 48 "src/lexer.rl"
 	{te = p+1;{ TK(RBRACKET) }}
 	break;
 	case 13:
-#line 40 "src/lexer.rl"
+#line 49 "src/lexer.rl"
 	{te = p+1;{ TK(LBRACE) }}
 	break;
 	case 14:
-#line 41 "src/lexer.rl"
+#line 50 "src/lexer.rl"
 	{te = p+1;{ TK(RBRACE) }}
 	break;
 	case 7:
-#line 42 "src/lexer.rl"
+#line 51 "src/lexer.rl"
 	{te = p+1;{ TK(LPAREN) }}
 	break;
 	case 8:
-#line 43 "src/lexer.rl"
+#line 52 "src/lexer.rl"
 	{te = p+1;{ TK(RPAREN) }}
 	break;
 	case 9:
-#line 44 "src/lexer.rl"
+#line 53 "src/lexer.rl"
 	{te = p+1;{ TK(COMMA) }}
 	break;
 	case 10:
-#line 45 "src/lexer.rl"
+#line 54 "src/lexer.rl"
 	{te = p+1;{ TK(COLON) }}
 	break;
 	case 6:
-#line 47 "src/lexer.rl"
+#line 56 "src/lexer.rl"
 	{te = p+1;}
 	break;
 	case 2:
-#line 48 "src/lexer.rl"
+#line 57 "src/lexer.rl"
 	{te = p+1;}
 	break;
 	case 17:
-#line 50 "src/lexer.rl"
+#line 59 "src/lexer.rl"
 	{te = p;p--;{ TK(NUMBER) }}
 	break;
 	case 20:
-#line 52 "src/lexer.rl"
+#line 61 "src/lexer.rl"
 	{te = p;p--;{ TK(IDENT) }}
 	break;
 	case 18:
@@ -272,16 +282,16 @@ _eof_trans:
 	case 19:
 #line 1 "src/lexer.rl"
 	{te = p+1;}
-#line 51 "src/lexer.rl"
+#line 60 "src/lexer.rl"
 	{act = 15;}
 	break;
 	case 12:
 #line 1 "src/lexer.rl"
 	{te = p+1;}
-#line 52 "src/lexer.rl"
+#line 61 "src/lexer.rl"
 	{act = 16;}
 	break;
-#line 285 "src/lexer.c"
+#line 295 "src/lexer.c"
 	}
 
 _again:
@@ -290,7 +300,7 @@ _again:
 #line 1 "src/lexer.rl"
 	{ts = 0;}
 	break;
-#line 294 "src/lexer.c"
+#line 304 "src/lexer.c"
 	}
 
 	if ( cs == 0 )
@@ -309,27 +319,63 @@ _again:
 	_out: {}
 	}
 
-#line 74 "src/lexer.rl"
+#line 84 "src/lexer.rl"
+
+    Parse(parser, TKEOF, NULL, &settings);
+    Parse(parser, 0, 0, &settings);
 
     if ( cs == 
-#line 316 "src/lexer.c"
+#line 329 "src/lexer.c"
 0
-#line 75 "src/lexer.rl"
+#line 88 "src/lexer.rl"
  ) {
         debug("ERROR AT: %d\n%s", (int)(pe - p), p);
     } else if ( cs >= 
-#line 322 "src/lexer.c"
+#line 335 "src/lexer.c"
 8
-#line 77 "src/lexer.rl"
+#line 90 "src/lexer.rl"
  ) {
         debug("FINISHED");
     } else {
         debug("NOT FINISHED");
     }
 
-    return token_list;
+    ParseFree(parser, free);
+    return settings;
 
 error:
-    list_destroy(token_list);
+    ParseFree(parser, free);
     return NULL;
 }
+
+
+int Parse_config_file(const char *path)
+{
+    FILE *script;
+    bstring buffer = NULL;
+    lnode_t *n = NULL;
+    hash_t *settings = NULL;
+
+    script = fopen(path, "r");
+    check(script, "Failed to open file: %s", path);
+
+    buffer = bread((bNread)fread, script);
+    check_mem(buffer);
+
+    fclose(script); script = NULL;
+
+    settings = Parse_config_string(buffer);
+    check(settings != NULL, "Failed to parse file: %s", path);
+
+    bdestroy(buffer);
+    buffer = NULL;
+
+    debug("FINAL COUNT: %d", (int)hash_count(settings));
+    return 0;
+
+error:
+    bdestroy(buffer);
+    if(script) fclose(script);
+    return -1;
+}
+

@@ -1,4 +1,4 @@
-#include "token.h"
+#include "config.h"
 #include "parser.h"
 
 #include <stdio.h>
@@ -8,13 +8,22 @@
 #include <adt/list.h>
 #include <stdlib.h>
 
+void *ParseAlloc(void *(*mallocProc)(size_t));
+void ParseFree(void *p, void (*freeProc)(void*));
+
+void Parse(
+  void *yyp,                   /* The parser */
+  int yymajor,                 /* The major token code number */
+  Token *yyminor,       /* The value for the token */
+  hash_t **out_settings
+);
+
 
 #define TK(N) debug("> " # N ": %.*s", (int)(te - ts), ts);\
     temp = calloc(sizeof(Token), 1);\
     temp->type = TK##N;\
     temp->data = blk2bstr(ts, (int)(te - ts));\
-    list_append(token_list, lnode_create(temp)); 
-     
+    Parse(parser, TK##N, temp, &settings);
 
 %%{
     machine m2sh_lexer;
@@ -55,11 +64,12 @@
 
 %% write data;
 
-list_t *Lexer_tokenize(bstring content) 
+hash_t *Parse_config_string(bstring content) 
 {
-    list_t *token_list = list_create(LISTCOUNT_T_MAX);
-    check_mem(token_list);
-    Token *temp;
+    Token *temp = NULL;
+    void *parser = ParseAlloc(malloc);
+    check_mem(parser);
+    hash_t *settings = NULL;
 
     char *p = bdata(content);
     char *pe = p + blength(content);
@@ -72,6 +82,9 @@ list_t *Lexer_tokenize(bstring content)
     %% write init;
     %% write exec;
 
+    Parse(parser, TKEOF, NULL, &settings);
+    Parse(parser, 0, 0, &settings);
+
     if ( cs == %%{ write error; }%% ) {
         debug("ERROR AT: %d\n%s", (int)(pe - p), p);
     } else if ( cs >= %%{ write first_final; }%% ) {
@@ -80,9 +93,42 @@ list_t *Lexer_tokenize(bstring content)
         debug("NOT FINISHED");
     }
 
-    return token_list;
+    ParseFree(parser, free);
+    return settings;
 
 error:
-    list_destroy(token_list);
+    ParseFree(parser, free);
     return NULL;
 }
+
+
+int Parse_config_file(const char *path)
+{
+    FILE *script;
+    bstring buffer = NULL;
+    lnode_t *n = NULL;
+    hash_t *settings = NULL;
+
+    script = fopen(path, "r");
+    check(script, "Failed to open file: %s", path);
+
+    buffer = bread((bNread)fread, script);
+    check_mem(buffer);
+
+    fclose(script); script = NULL;
+
+    settings = Parse_config_string(buffer);
+    check(settings != NULL, "Failed to parse file: %s", path);
+
+    bdestroy(buffer);
+    buffer = NULL;
+
+    debug("FINAL COUNT: %d", (int)hash_count(settings));
+    return 0;
+
+error:
+    bdestroy(buffer);
+    if(script) fclose(script);
+    return -1;
+}
+

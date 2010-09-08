@@ -1,5 +1,5 @@
 #include "minunit.h"
-#include "token.h"
+#include "config.h"
 #include "parser.h"
 #include <stdio.h>
 #include <bstring.h>
@@ -8,7 +8,7 @@ FILE *LOG_FILE = NULL;
 
 char *test_parser() 
 {
-    int rc = parse_file("tests/sample.conf");
+    int rc = Parse_config_file("tests/sample.conf");
     mu_assert(rc == 0, "Error parsing.");
 
     return NULL;

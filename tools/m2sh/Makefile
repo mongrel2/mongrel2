@@ -9,7 +9,7 @@ TESTS=$(patsubst %.c,%,${TEST_SRC})
 LIB_SRC=$(filter-out src/m2sh.c,${SOURCES})
 LIB_OBJ=$(filter-out src/m2sh.o,${OBJECTS})
 
-all: tests m2sh
+all: ../lemon/lemon tests m2sh
 
 install: all
 	install build/m2sh ${PREFIX}

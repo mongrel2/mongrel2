@@ -3,43 +3,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <dbg.h>
-#include "token.h"
-#include "parser.h"
+#include "ast.h"
 #include <task/task.h>
-#include <adt/list.h>
-#include <adt/hash.h>
 
-#define assert(S) {                                     \
-        if(!(S)) {                                      \
-            debug(#S);                                  \
-            taskexitall(-1);                            \
-        }                                               \
-    }
-
-typedef struct Pair {
-    Token *key;
-    void *value;
-} Pair;
-
-typedef struct Class {
-    Token *ident;
-    hash_t *params;
-} Class;
-
-typedef enum ValueType {
-    VAL_QSTRING, VAL_PATTERN, VAL_NUMBER, VAL_CLASS, VAL_LIST, VAL_HASH, VAL_IDENT
-} ValueType;
-
-typedef struct Value {
-    ValueType type;    
-    void *data;
-} Value;
-
-static inline Value *Value_create(ValueType type, void *data) {
-    Value *val = calloc(sizeof(Value), 1);
-    val->type = type; val->data = data;
-    return val;
-}
+#define assert(S) if(!(S)) { log_err("PARSER ASSERT FAILED: " #S); taskexitall(-1); }
 
 }
 
@@ -56,6 +23,7 @@ static inline Value *Value_create(ValueType type, void *data) {
     log_err("There was a stack overflow");
 }
 
+%token_destructor { Token_destroy($$); }
 
 config ::= vars(V).  { *settings = V; } 
 
@@ -79,7 +47,7 @@ expr(E) ::= NUMBER(A). { E = Value_create(VAL_NUMBER, A); }
 expr(E) ::= class(A). { E = Value_create(VAL_CLASS, A); }
 expr(E) ::= list(A). { E = Value_create(VAL_LIST, A); }
 expr(E) ::= hash(A). { E = Value_create(VAL_HASH, A); }
-expr(E) ::= IDENT(A). { E = Value_create(VAL_IDENT, A); }
+expr(E) ::= IDENT(A). { E = Value_create(VAL_REF, A); }
 
 
 %type assignment { Pair }
