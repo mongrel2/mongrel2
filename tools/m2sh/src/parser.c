@@ -81,10 +81,10 @@ typedef union {
 #ifndef YYSTACKDEPTH
 #define YYSTACKDEPTH 100
 #endif
-#define ParseARG_SDECL hash_t **settings;
-#define ParseARG_PDECL ,hash_t **settings
-#define ParseARG_FETCH hash_t **settings = yypParser->settings
-#define ParseARG_STORE yypParser->settings = settings
+#define ParseARG_SDECL ParserState *state;
+#define ParseARG_PDECL ,ParserState *state
+#define ParseARG_FETCH ParserState *state = yypParser->state
+#define ParseARG_STORE yypParser->state = state
 #define YYNSTATE 40
 #define YYNRULE 26
 #define YY_NO_ACTION      (YYNSTATE+YYNRULE+2)
@@ -595,7 +595,7 @@ static void yyStackOverflow(yyParser *yypParser, YYMINORTYPE *yypMinor){
    ** stack every overflows */
 #line 22 "src/parser.y"
 
-    log_err("There was a stack overflow");
+    log_err("There was a stack overflow at line: %d", state->line_number);
 #line 600 "src/parser.c"
    ParseARG_STORE; /* Suppress warning about unused %extra_argument var */
 }
@@ -735,7 +735,7 @@ static void yy_reduce(
   */
       case 0: /* config ::= vars */
 #line 28 "src/parser.y"
-{ *settings = yymsp[0].minor.yy50; }
+{ state->settings = yymsp[0].minor.yy50; }
 #line 740 "src/parser.c"
         break;
       case 1: /* vars ::= vars assignment */
@@ -859,7 +859,7 @@ static void yy_reduce(
         break;
       case 24: /* hash_pair ::= QSTRING COLON expr */
       case 25: /* hash_pair ::= PATTERN COLON expr */ yytestcase(yyruleno==25);
-#line 106 "src/parser.y"
+#line 107 "src/parser.y"
 { yygotominor.yy25.key = yymsp[-2].minor.yy0; yygotominor.yy25.value = yymsp[0].minor.yy48;   yy_destructor(yypParser,15,&yymsp[-1].minor);
 }
 #line 866 "src/parser.c"
@@ -926,7 +926,7 @@ static void yy_syntax_error(
 #define TOKEN (yyminor.yy0)
 #line 18 "src/parser.y"
 
-    log_err("There was a syntax error");
+    state->error = 1;
 #line 931 "src/parser.c"
   ParseARG_STORE; /* Suppress warning about unused %extra_argument variable */
 }

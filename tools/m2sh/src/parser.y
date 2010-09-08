@@ -13,19 +13,19 @@
 %token_prefix TK
 
 %token_type {Token*}
-%extra_argument {hash_t **settings}
+%extra_argument {ParserState *state}
 
 %syntax_error {
-    log_err("There was a syntax error");
+    state->error = 1;
 }
 
 %stack_overflow {
-    log_err("There was a stack overflow");
+    log_err("There was a stack overflow at line: %d", state->line_number);
 }
 
 %token_destructor { Token_destroy($$); }
 
-config ::= vars(V).  { *settings = V; } 
+config ::= vars(V).  { state->settings = V; } 
 
 %type vars { hash_t * }
 vars(V) ::= vars(O) assignment(A). 
@@ -101,6 +101,7 @@ hash_elements(H) ::= hash_elements(E) hash_pair(P).
 
 hash_elements(H) ::= . 
     { H = hash_create(HASHCOUNT_T_MAX, NULL, NULL); }
+
 
 %type hash_pair { Pair }
 hash_pair(P) ::= QSTRING(A) COLON expr(B).  { P.key = A; P.value = B; }

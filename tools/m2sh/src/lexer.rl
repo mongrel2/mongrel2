@@ -2,7 +2,7 @@
 #include "parser.h"
 
 #include <stdio.h>
-
+#include <assert.h>
 #include <bstring.h>
 #include <dbg.h>
 #include <adt/list.h>
@@ -15,15 +15,15 @@ void Parse(
   void *yyp,                   /* The parser */
   int yymajor,                 /* The major token code number */
   Token *yyminor,       /* The value for the token */
-  hash_t **out_settings
+  ParserState *state
 );
 
 
-#define TK(N) debug("> " # N ": %.*s", (int)(te - ts), ts);\
-    temp = calloc(sizeof(Token), 1);\
+#define TK(N) temp = calloc(sizeof(Token), 1);\
     temp->type = TK##N;\
     temp->data = blk2bstr(ts, (int)(te - ts));\
-    Parse(parser, TK##N, temp, &settings);
+    Parse(parser, TK##N, temp, &state);\
+    if(state.error) goto error;
 
 %%{
     machine m2sh_lexer;
@@ -53,7 +53,9 @@ void Parse(
         ',' { TK(COMMA) };
         ':' { TK(COLON) };
 
-        space;
+        '\n' { state.line_number++; };
+        space -- '\n';
+
         comment;
 
         digit+ { TK(NUMBER) };
@@ -64,15 +66,26 @@ void Parse(
 
 %% write data;
 
+void Parse_print_error(const char *message, bstring content, int at, int line_number)
+{
+    int prev_nl = bstrrchrp(content, '\n', at);
+    int next_nl = bstrchrp(content, '\n', at);
+
+    log_err("%s AT '%c' on line %d:%.*s\n%*s", message,
+            bchar(content, at), line_number, 
+            next_nl - prev_nl, bdataofs(content, prev_nl),
+            at - prev_nl, "^");
+}
+
 hash_t *Parse_config_string(bstring content) 
 {
     Token *temp = NULL;
     void *parser = ParseAlloc(malloc);
     check_mem(parser);
-    hash_t *settings = NULL;
+    ParserState state = {.settings = NULL, .error = 0, .line_number = 1};
 
     char *p = bdata(content);
-    char *pe = p + blength(content);
+    char *pe = bdataofs(content, blength(content) - 1);
     char *eof = pe;
     int cs = -1;
     int act = -1;
@@ -82,21 +95,30 @@ hash_t *Parse_config_string(bstring content)
     %% write init;
     %% write exec;
 
-    Parse(parser, TKEOF, NULL, &settings);
-    Parse(parser, 0, 0, &settings);
 
-    if ( cs == %%{ write error; }%% ) {
-        debug("ERROR AT: %d\n%s", (int)(pe - p), p);
-    } else if ( cs >= %%{ write first_final; }%% ) {
+    if(state.error) {
+        Parse_print_error("SYNTAX ERROR", content, 
+                (int)(ts - bdata(content)), ++state.line_number);
+    } else if( cs == %%{ write error; }%% ) {
+        Parse_print_error("INVALID CHARACTER", content,
+                (int)(ts - bdata(content)), ++state.line_number);
+    } else if( cs >= %%{ write first_final; }%% ) {
+        Parse(parser, TKEOF, NULL, &state);
         debug("FINISHED");
     } else {
-        debug("NOT FINISHED");
+        log_err("INCOMPLETE CONFIG FILE. There needs to be more to this.");
     }
 
+    Parse(parser, 0, 0, &state);
     ParseFree(parser, free);
-    return settings;
+
+    return state.settings;
 
 error:
+    if(state.error) {
+        Parse_print_error("SYNTAX ERROR", content, 
+                (int)(ts - bdata(content)), ++state.line_number);
+    }
     ParseFree(parser, free);
     return NULL;
 }

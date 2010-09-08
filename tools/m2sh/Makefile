@@ -33,7 +33,7 @@ tests: build/libm2sh.a ${TESTS}
 	../lemon/lemon -s $< 
 
 %.c: %.rl
-	ragel -T1 $<
+	ragel -G2 $<
 
 $(TESTS): %: %.c build/libm2sh.a
 	$(CC) $(CFLAGS) $(LIBS) -o $@ $< build/libm2sh.a ../../build/libm2.a
