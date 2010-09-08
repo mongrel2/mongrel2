@@ -15,7 +15,7 @@ void Token_destroy(Token *tk);
 
 hash_t *Parse_config_string(bstring content);
 
-int Parse_config_file(const char *path);
+hash_t *Parse_config_file(const char *path);
 
 typedef struct ParserState {
     hash_t *settings;

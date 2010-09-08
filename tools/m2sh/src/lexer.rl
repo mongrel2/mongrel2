@@ -124,7 +124,7 @@ error:
 }
 
 
-int Parse_config_file(const char *path)
+hash_t *Parse_config_file(const char *path)
 {
     FILE *script;
     bstring buffer = NULL;
@@ -146,11 +146,11 @@ int Parse_config_file(const char *path)
     buffer = NULL;
 
     debug("FINAL COUNT: %d", (int)hash_count(settings));
-    return 0;
+    return settings;
 
 error:
     bdestroy(buffer);
     if(script) fclose(script);
-    return -1;
+    return NULL;
 }
 

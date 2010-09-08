@@ -1,6 +1,7 @@
 #include "minunit.h"
 #include "config.h"
 #include "parser.h"
+#include "ast.h"
 #include <stdio.h>
 #include <bstring.h>
 
@@ -8,8 +9,10 @@ FILE *LOG_FILE = NULL;
 
 char *test_parser() 
 {
-    int rc = Parse_config_file("tests/sample.conf");
-    mu_assert(rc == 0, "Error parsing.");
+    hash_t *settings = Parse_config_file("tests/sample.conf");
+    mu_assert(settings, "Error parsing.");
+
+    AST_walk(settings);
 
     return NULL;
 }
