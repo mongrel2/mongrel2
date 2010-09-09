@@ -14,7 +14,7 @@
 <li><a href="http://www.onepageperday.com">Matt Murphy</a></li>
 <li><font size="1%">Paul T ($1 so funny)</font></li>
 <li>Ben Aτkin ($6.28)</li>
-<li>Kevin Stewart</li>
+<li><a href="http://working-code.com">Kevin Stewart</a></li>
 <li>Shane Emmons</li>
 <li>Silas Sewell</li>
 <li>Íslenska lýðnetsfélagið ehf.</li>
