@@ -49,6 +49,8 @@ void Config_close_db();
 
 void Config_stop_handlers();
 
+void Config_start_handlers();
+
 void Config_stop_proxies();
 
 #endif

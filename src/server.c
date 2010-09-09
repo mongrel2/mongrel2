@@ -44,6 +44,7 @@
 #include "routing.h"
 #include "setting.h"
 #include "pattern.h"
+#include "config/config.h"
 
 int RUNNING=1;
 
@@ -122,28 +123,6 @@ void Server_init()
 }
 
 
-void handlers_receive_start(void *value, void *data)
-{
-    Route *route = (Route *)value;
-    if(route) { 
-        Backend *found = (Backend *)route->data;
-
-        // TODO: make whether the handler is loaded immediately optional
-        if(found->type == BACKEND_HANDLER) {
-            if(found->target.handler->running == 1)
-            {
-                debug("BACKEND %s ALREADY RUNNING", bdata(route->pattern));
-            }
-            else
-            {
-                debug("LOADING BACKEND %s", bdata(route->pattern));
-                taskcreate(Handler_task, found->target.handler, HANDLER_STACK);
-                found->target.handler->running = 1;
-            }
-        }
-    }
-}
-
 void Server_start(Server *srv)
 {
     int cfd;
@@ -156,8 +135,7 @@ void Server_start(Server *srv)
 
     log_info("Starting server on port %d", srv->port);
 
-    tst_traverse(srv->default_host->routes->routes, handlers_receive_start, srv);
-
+    Config_start_handlers();
 
     while(RUNNING && (cfd = netaccept(srv->listen_fd, remote, &rport)) >= 0) {
         debug("Connection from %s:%d to %s:%d", remote, rport, 

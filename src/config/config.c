@@ -406,3 +406,20 @@ void Config_stop_proxies()
     LOADED_PROXIES = NULL;
 }
 
+void handlers_receive_start(void *value, void *data)
+{
+    Handler *handler = (Handler *)value;
+
+    if(!handler->running) {
+        debug("LOADING BACKEND %s", bdata(handler->send_spec));
+        taskcreate(Handler_task, handler, HANDLER_STACK);
+        handler->running = 1;
+    }
+}
+
+void Config_start_handlers()
+{
+    debug("LOADING ALL HANDLERS...");
+    tst_traverse(LOADED_HANDLERS, handlers_receive_start, NULL);
+}
+
