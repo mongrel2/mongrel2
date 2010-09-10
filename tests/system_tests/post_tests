@@ -1,0 +1,8 @@
+#!/bin/bash
+
+curl http://localhost:6767/handlertest
+curl -X POST -d @tests/config.sqlite http://localhost:6767/handlertest
+curl -X POST -d @Makefile http://localhost:6767/handlertest
+curl -X POST "HI" http://localhost:6767/handlertest
+curl -X POST "" http://localhost:6767/handlertest
+

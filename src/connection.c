@@ -286,19 +286,26 @@ int connection_http_to_handler(int event, void *data)
         check(upload_store != NULL, "Failed to upload file.");
     } else {
         if(total > BUFFER_SIZE) {
+            debug("GREATER THAN BUF SIZE: %d", total);
             conn->buf = h_realloc(conn->buf, total);
+        } else {
+            debug("LESS THAN MAX_CONTENT AND LESS THAN BUFFER SIZE: %d but %d read", total, conn->nread);
+        }
 
+        if(conn->nread < total) {
             // start at the tail of what we've got so far
             body = conn->buf + conn->nread; 
 
             int remaining = 0;
+            int total_read = total;
             for(remaining = content_len; remaining > 0; remaining -= rc, body += rc) {
                 rc = conn->recv(conn, body, remaining);
                 check_debug(rc > 0, "Read error from MSG listener %d", conn->fd);
+                total_read += rc;
             }
-
             check(remaining == 0, "Bad math on reading request < MAX_CONTENT_LENGTH: %d", remaining);
-        }  // no else needed
+            debug("TOTAL READ IS: %d EXPECTED %d", total_read, total);
+        }
 
         // no matter what, the body will need to go here
         body = conn->buf + header_len;
@@ -309,7 +316,7 @@ int connection_http_to_handler(int event, void *data)
     result = Request_to_payload(conn->req, handler->send_ident, conn->fd, body, content_len);
     check(result, "Failed to create payload for request.");
 
-    debug("HTTP TO HANDLER: %s", bdata(result));
+    debug("HTTP TO HANDLER: %.*s", blength(result) - content_len, bdata(result));
 
     rc = Handler_deliver(handler->send_socket, bdata(result), blength(result));
     error_unless(rc != -1, conn, 502, "Failed to deliver to handler: %s", 
