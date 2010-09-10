@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from m2sh.config import args, commands
+from mongrel2.config import args, commands
 import sys
 
 # some people just type these instinctively
