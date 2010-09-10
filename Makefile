@@ -33,7 +33,6 @@ clean:
 
 pristine: clean
 	sudo rm -rf examples/python/build examples/python/dist examples/python/m2py.egg-info
-	sudo rm -rf examples/m2shpy/build examples/m2shpy/dist examples/m2shpy/m2sh.egg-info
 	sudo find . -name "*.pyc" -exec rm {} \;
 	cd docs/manual && make clean
 	cd docs/ && make clean
@@ -61,7 +60,7 @@ check:
 	@echo Files with potentially dangerous functions.
 	@egrep '[^_.>a-zA-Z0-9](str(n?cpy|n?cat|xfrm|n?dup|str|pbrk|tok|_)|stpn?cpy|a?sn?printf|byte_)' $(filter-out src/bstr/bsafe.c,${SOURCES})
 
-install: all install-bin install-m2py install-m2shpy
+install: all install-bin install-m2py
 
 install-bin:
 	sudo install -d $(PREFIX)/bin/
@@ -70,10 +69,7 @@ install-bin:
 install-m2py: 
 	cd examples/python && sudo python setup.py install
 
-install-m2shpy: examples/m2shpy/mongrel2/sql/config.sql
-	cd examples/m2shpy && sudo python setup.py install
-
-examples/m2shpy/mongrel2/sql/config.sql: src/config/config.sql src/config/mimetypes.sql
+examples/python/mongrel2/sql/config.sql: src/config/config.sql src/config/mimetypes.sql
 	cat src/config/config.sql src/config/mimetypes.sql > $@
 
 ragel:

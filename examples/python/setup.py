@@ -12,7 +12,9 @@ config = {
     'author_email': 'zedshaw@zedshaw.com',
     'version': '1.0beta7',
     'install_requires': ['nose', 'simplejson'],
-    'packages': ['mongrel2'],
+    'packages': ['mongrel2', 'mongrel2.config'],
+    'package_data': {'mongrel2': ['sql/config.sql']},
+    'scripts': ['bin/m2sh'],
     'name': 'm2py'
 }
 
