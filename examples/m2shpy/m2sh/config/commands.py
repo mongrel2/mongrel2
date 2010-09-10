@@ -44,7 +44,7 @@ def shell_command():
             cmd = try_reading(reader)
             if cmd:
                 try:
-                    args.parse_and_run_command(cmd, mongrel2.config.commands)
+                    args.parse_and_run_command(cmd, m2sh.config.commands)
                 except Exception, e:
                     print "ERROR:", e
 
@@ -203,7 +203,7 @@ def init_command(db=None):
     from pkg_resources import resource_stream
     import sqlite3
 
-    sql = resource_stream('mongrel2', 'sql/config.sql').read()
+    sql = resource_stream('m2sh', 'sql/config.sql').read()
 
     if model.store:
         model.store.close()
@@ -240,7 +240,7 @@ def load_command(db=None, config=None, clear=True):
     try:
 
         model.begin(db, clear=clear)
-        imp.load_source('mongrel2_config_main', config)
+        imp.load_source('m2sh_config_main', config)
 
         commit_command(db=db, what="load_command", why=" ".join(sys.argv))
     except OperationalError, exc:

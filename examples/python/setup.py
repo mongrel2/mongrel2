@@ -11,7 +11,7 @@ config = {
     'download_url': 'http://pypi.python.org/pypi/mongrel2-python',
     'author_email': 'zedshaw@zedshaw.com',
     'version': '1.0beta7',
-    'install_requires': ['nose', 'simplejson', 'pyrepl', 'storm'],
+    'install_requires': ['nose', 'simplejson'],
     'packages': ['mongrel2'],
     'name': 'm2py'
 }
