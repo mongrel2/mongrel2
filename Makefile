@@ -70,10 +70,10 @@ install-bin:
 install-m2py: 
 	cd examples/python && sudo python setup.py install
 
-install-m2shpy: examples/m2shpy/m2sh/sql/config.sql
+install-m2shpy: examples/m2shpy/mongrel2/sql/config.sql
 	cd examples/m2shpy && sudo python setup.py install
 
-examples/m2shpy/m2sh/sql/config.sql: src/config/config.sql src/config/mimetypes.sql
+examples/m2shpy/mongrel2/sql/config.sql: src/config/config.sql src/config/mimetypes.sql
 	cat src/config/config.sql src/config/mimetypes.sql > $@
 
 ragel:
