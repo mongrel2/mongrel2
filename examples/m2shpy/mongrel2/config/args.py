@@ -1,7 +1,7 @@
 import re
 import sys
 import inspect
-from m2sh.config import rc
+from mongrel2.config import rc
 
 
 S_IP_ADDRESS = lambda x, token: ['ip_address', token]

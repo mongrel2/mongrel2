@@ -1,4 +1,4 @@
-from m2sh.config.model import *
+from mongrel2.config.model import *
 
 def include(name, script):
     import imp

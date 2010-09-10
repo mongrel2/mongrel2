@@ -934,7 +934,7 @@
 
   <p class="noindent">The easiest way to build Mongrel2 is to use
   the .tar.bz2 file from <a href=
-  "http://mongrel2.org/home#download">the main page downlaoads</a>
+  "http://mongrel2.org/home#download">the main page downloads</a>
   section. Simply download it and you're done. <!--l. 103-->
 
   <p class="noindent">
