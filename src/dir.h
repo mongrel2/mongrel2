@@ -70,14 +70,13 @@ typedef struct FileRecord {
 
 typedef struct Dir {
     Cache *fr_cache;
-    bstring prefix;
     bstring base;
     bstring normalized_base;
     bstring index_file;
     bstring default_ctype;
 } Dir;
 
-Dir *Dir_create(const char *base, const char *prefix, const char *index_file,
+Dir *Dir_create(const char *base, const char *index_file,
         const char *default_ctype);
 
 void Dir_destroy(Dir *dir);
@@ -88,7 +87,7 @@ int Dir_stream_file(FileRecord *file, Connection *conn);
 
 int Dir_serve_file(Dir *dir, Request *req, Connection *conn);
 
-FileRecord *Dir_resolve_file(Dir *dir, bstring path);
+FileRecord *Dir_resolve_file(Dir *dir, bstring pattern, bstring path);
 
 void FileRecord_release(FileRecord *file);
 void FileRecord_destroy(FileRecord *file);

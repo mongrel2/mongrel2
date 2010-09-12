@@ -119,13 +119,13 @@ error:
 
 static int Config_load_dir_cb(void *param, int cols, char **data, char **names)
 {
-    arity(5);
+    arity(4);
 
     void **target = (void **)param;
-    *target = Dir_create(data[1], data[2], data[3], data[4]);
-    check(*target, "Failed to create dir %s with base=%s prefix=%s index=%s def_ctype=%s", data[0], data[1], data[2], data[3], data[4]);
+    *target = Dir_create(data[1], data[2], data[3]);
+    check(*target, "Failed to create dir %s with base=%s index=%s def_ctype=%s", data[0], data[1], data[2], data[3]);
 
-    log_info("Created dir %s with base=%s prefix=%s index=%s def_ctype=%s", data[0], data[1], data[2], data[3], data[4]);
+    log_info("Created dir %s with base=%s index=%s def_ctype=%s", data[0], data[1], data[2], data[3]);
 
     return 0;
 
@@ -143,9 +143,7 @@ static int Config_load_route_cb(void *param, int cols, char **data, char **names
     void *target = NULL;
     BackendType type = 0;
 
-    const char *DIR_QUERY = "SELECT directory.id as id, base, route.path as prefix, index_file, default_ctype "
-        "FROM route, directory "
-        "WHERE directory.id = target_id AND target_type='dir' AND target_id=%s AND route.id=%s";
+    const char *DIR_QUERY = "SELECT id, base, index_file, default_ctype FROM directory WHERE id=%s";
 
     if(strcmp("handler", data[3]) == 0)
     {
@@ -169,7 +167,7 @@ static int Config_load_route_cb(void *param, int cols, char **data, char **names
     }
     else if(strcmp("dir", data[3]) == 0)
     {
-        char *query = SQL(DIR_QUERY, data[2], data[0]);
+        char *query = SQL(DIR_QUERY, data[2]);
         int rc = DB_exec(query, Config_load_dir_cb, &target);
         SQL_FREE(query);
 

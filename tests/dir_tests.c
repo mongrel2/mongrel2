@@ -22,24 +22,24 @@ char *test_Dir_find_file()
 
 char *test_Dir_resolve_file()
 {
-    Dir *test = Dir_create("tests/", "/", "sample.html", "test/plain");
+    Dir *test = Dir_create("tests/", "sample.html", "test/plain");
     mu_assert(test != NULL, "Failed to make test dir.");
 
-    FileRecord *rec = Dir_resolve_file(test, bfromcstr("/sample.json"));
+    FileRecord *rec = Dir_resolve_file(test, bfromcstr("/"), bfromcstr("/sample.json"));
     mu_assert(rec != NULL, "Failed to resolve file that should be there.");
 
-    rec = Dir_resolve_file(test, bfromcstr("/"));
+    rec = Dir_resolve_file(test, bfromcstr("/"), bfromcstr("/"));
     mu_assert(rec != NULL, "Failed to find default file.");
 
-    rec = Dir_resolve_file(test, bfromcstr("/../../../../../etc/passwd"));
+    rec = Dir_resolve_file(test, bfromcstr("/"), bfromcstr("/../../../../../etc/passwd"));
     mu_assert(rec == NULL, "HACK! should not find this.");
    
     Dir_destroy(test);
 
-    test = Dir_create("foobar/", "/", "sample.html", "test/plan");
+    test = Dir_create("foobar/", "sample.html", "test/plan");
     mu_assert(test != NULL, "Failed to make the failed dir.");
 
-    rec = Dir_resolve_file(test, bfromcstr("/sample.json"));
+    rec = Dir_resolve_file(test, bfromcstr("/"), bfromcstr("/sample.json"));
     mu_assert(rec == NULL, "Should not get something from a bad base directory.");
 
     Dir_destroy(test);
@@ -79,7 +79,7 @@ char *test_Dir_serve_file()
     int rc = 0;
     Request *req = NULL;
 
-    Dir *test = Dir_create("tests/", "/", "sample.html", "test/plain");
+    Dir *test = Dir_create("tests/", "sample.html", "test/plain");
 
     Connection conn = {0};
     conn.fd = 1;
