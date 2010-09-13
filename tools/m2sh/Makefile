@@ -9,7 +9,7 @@ TESTS=$(patsubst %.c,%,${TEST_SRC})
 LIB_SRC=$(filter-out src/m2sh.c,${SOURCES})
 LIB_OBJ=$(filter-out src/m2sh.o,${OBJECTS})
 
-all: ../lemon/lemon tests m2sh
+all: ../lemon/lemon tests build/m2sh
 
 install: all
 	install build/m2sh ${PREFIX}
@@ -19,9 +19,9 @@ build/libm2sh.a: ${LIB_OBJ}
 	ar rcs $@ ${LIB_OBJ}
 	ranlib $@
 
-m2sh: ../lemon/lemon ../../build/libm2.a build/libm2sh.a src/m2sh.o
+build/m2sh: ../lemon/lemon ../../build/libm2.a build/libm2sh.a src/m2sh.o
 	mkdir -p build
-	$(CC) ${CFLAGS} -o build/m2sh ${LIBS} build/libm2sh.a src/m2sh.o
+	$(CC) $(CFLAGS) $(LIBS) -o build/m2sh src/m2sh.o build/libm2sh.a ../../build/libm2.a
 
 ../lemon/lemon: ../lemon/lemon.c
 	$(CC) -O2 ../lemon/lemon.c -o ../lemon/lemon

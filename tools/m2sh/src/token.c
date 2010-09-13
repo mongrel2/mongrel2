@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <dbg.h>
-#include "config.h"
+#include "config_file.h"
 #include <assert.h>
 
 void Token_destroy(Token *tk)

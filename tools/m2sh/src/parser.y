@@ -56,10 +56,7 @@ assignment(A) ::= IDENT(I) EQ expr(E).  { A.key = I; A.value = E; }
 
 %type class { Class *}
 class(C) ::= CLASS(I) LPAREN parameters(P) RPAREN. 
-      {
-          debug("CLASS: %s with %d", bdata(I->data), (int)hash_count(P)); 
-          C = calloc(sizeof(Class), 1); C->ident = I; C->params = P;
-      }
+      { C = calloc(sizeof(Class), 1); C->ident = I; C->params = P; }
 
 %type parameters { hash_t *}
 parameters(P) ::= parameters(O) COMMA assignment(A). 
@@ -73,9 +70,7 @@ parameters(P) ::= .
 
 
 %type list { list_t *}
-list(L) ::= LBRACE list_elements(E) RBRACE.
-    { L = E; debug("LIST: %d", (int)list_count(L)); }
-
+list(L) ::= LBRACE list_elements(E) RBRACE.  { L = E; }
 
 %type list_elements { list_t * }
 list_elements(L) ::= list_elements(M) COMMA expr(E).
@@ -89,8 +84,7 @@ list_elements(L) ::= .
 
 
 %type hash { hash_t *}
-hash(H) ::= LBRACKET hash_elements(E) RBRACKET.  
-    { H = E; debug("HASH: %d", (int)hash_count(H)); }
+hash(H) ::= LBRACKET hash_elements(E) RBRACKET.  { H = E; }
 
 %type hash_elements { hash_t * }
 hash_elements(H) ::= hash_elements(E) COMMA hash_pair(P).

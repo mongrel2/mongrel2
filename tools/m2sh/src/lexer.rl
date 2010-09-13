@@ -1,4 +1,4 @@
-#include "config.h"
+#include "config_file.h"
 #include "parser.h"
 
 #include <stdio.h>
@@ -18,12 +18,15 @@ void Parse(
   ParserState *state
 );
 
-
-#define TK(N) temp = calloc(sizeof(Token), 1);\
+// TODO: don't make the blk2bstr on simple 1 char things
+#define TKBASE(N, S, E) temp = calloc(sizeof(Token), 1);\
     temp->type = TK##N;\
-    temp->data = blk2bstr(ts, (int)(te - ts));\
+    temp->data = blk2bstr(S, (int)(E - S));\
     Parse(parser, TK##N, temp, &state);\
     if(state.error) goto error;
+
+#define TK(N) TKBASE(N, ts, te)
+#define TKSTR(N) TKBASE(N, ts+1, te-3)
 
 %%{
     machine m2sh_lexer;
@@ -41,8 +44,8 @@ void Parse(
     class = [A-Z] alpha+;
 
     main := |*
-        qstring { TK(QSTRING) };
-        pattern { TK(PATTERN) };
+        qstring { TKSTR(QSTRING) };
+        pattern { TKSTR(PATTERN) };
         '=' { TK(EQ) };
         '{' { TK(LBRACKET) };
         '}' { TK(RBRACKET) };
@@ -104,7 +107,6 @@ hash_t *Parse_config_string(bstring content)
                 (int)(ts - bdata(content)), ++state.line_number);
     } else if( cs >= %%{ write first_final; }%% ) {
         Parse(parser, TKEOF, NULL, &state);
-        debug("FINISHED");
     } else {
         log_err("INCOMPLETE CONFIG FILE. There needs to be more to this.");
     }
@@ -145,7 +147,6 @@ hash_t *Parse_config_file(const char *path)
     bdestroy(buffer);
     buffer = NULL;
 
-    debug("FINAL COUNT: %d", (int)hash_count(settings));
     return settings;
 
 error:

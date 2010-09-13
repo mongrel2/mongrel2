@@ -800,69 +800,66 @@ static void yy_reduce(
         break;
       case 12: /* class ::= CLASS LPAREN parameters RPAREN */
 #line 59 "src/parser.y"
-{
-          debug("CLASS: %s with %d", bdata(yymsp[-3].minor.yy0->data), (int)hash_count(yymsp[-1].minor.yy50)); 
-          yygotominor.yy29 = calloc(sizeof(Class), 1); yygotominor.yy29->ident = yymsp[-3].minor.yy0; yygotominor.yy29->params = yymsp[-1].minor.yy50;
-        yy_destructor(yypParser,8,&yymsp[-2].minor);
+{ yygotominor.yy29 = calloc(sizeof(Class), 1); yygotominor.yy29->ident = yymsp[-3].minor.yy0; yygotominor.yy29->params = yymsp[-1].minor.yy50;   yy_destructor(yypParser,8,&yymsp[-2].minor);
   yy_destructor(yypParser,9,&yymsp[0].minor);
 }
-#line 810 "src/parser.c"
+#line 807 "src/parser.c"
         break;
       case 13: /* parameters ::= parameters COMMA assignment */
       case 21: /* hash_elements ::= hash_elements COMMA hash_pair */ yytestcase(yyruleno==21);
-#line 66 "src/parser.y"
+#line 63 "src/parser.y"
 { yygotominor.yy50 = yymsp[-2].minor.yy50; hash_alloc_insert(yygotominor.yy50, bdata(yymsp[0].minor.yy25.key->data), yymsp[0].minor.yy25.value);   yy_destructor(yypParser,10,&yymsp[-1].minor);
 }
-#line 817 "src/parser.c"
+#line 814 "src/parser.c"
         break;
       case 14: /* parameters ::= parameters assignment */
       case 22: /* hash_elements ::= hash_elements hash_pair */ yytestcase(yyruleno==22);
-#line 69 "src/parser.y"
+#line 66 "src/parser.y"
 { yygotominor.yy50 = yymsp[-1].minor.yy50; hash_alloc_insert(yygotominor.yy50, bdata(yymsp[0].minor.yy25.key->data), yymsp[0].minor.yy25.value); }
-#line 823 "src/parser.c"
+#line 820 "src/parser.c"
         break;
       case 15: /* parameters ::= */
       case 23: /* hash_elements ::= */ yytestcase(yyruleno==23);
-#line 72 "src/parser.y"
+#line 69 "src/parser.y"
 { yygotominor.yy50 = hash_create(HASHCOUNT_T_MAX, NULL, NULL); }
-#line 829 "src/parser.c"
+#line 826 "src/parser.c"
         break;
       case 16: /* list ::= LBRACE list_elements RBRACE */
-#line 77 "src/parser.y"
-{ yygotominor.yy18 = yymsp[-1].minor.yy18; debug("LIST: %d", (int)list_count(yygotominor.yy18));   yy_destructor(yypParser,11,&yymsp[-2].minor);
+#line 73 "src/parser.y"
+{ yygotominor.yy18 = yymsp[-1].minor.yy18;   yy_destructor(yypParser,11,&yymsp[-2].minor);
   yy_destructor(yypParser,12,&yymsp[0].minor);
 }
-#line 836 "src/parser.c"
+#line 833 "src/parser.c"
         break;
       case 17: /* list_elements ::= list_elements COMMA expr */
-#line 82 "src/parser.y"
+#line 77 "src/parser.y"
 { yygotominor.yy18 = yymsp[-2].minor.yy18; list_append(yygotominor.yy18, lnode_create(yymsp[0].minor.yy48));   yy_destructor(yypParser,10,&yymsp[-1].minor);
 }
-#line 842 "src/parser.c"
+#line 839 "src/parser.c"
         break;
       case 18: /* list_elements ::= list_elements expr */
-#line 85 "src/parser.y"
+#line 80 "src/parser.y"
 { yygotominor.yy18 = yymsp[-1].minor.yy18; list_append(yygotominor.yy18, lnode_create(yymsp[0].minor.yy48)); }
-#line 847 "src/parser.c"
+#line 844 "src/parser.c"
         break;
       case 19: /* list_elements ::= */
-#line 88 "src/parser.y"
+#line 83 "src/parser.y"
 { yygotominor.yy18 = list_create(LISTCOUNT_T_MAX); }
-#line 852 "src/parser.c"
+#line 849 "src/parser.c"
         break;
       case 20: /* hash ::= LBRACKET hash_elements RBRACKET */
-#line 93 "src/parser.y"
-{ yygotominor.yy50 = yymsp[-1].minor.yy50; debug("HASH: %d", (int)hash_count(yygotominor.yy50));   yy_destructor(yypParser,13,&yymsp[-2].minor);
+#line 87 "src/parser.y"
+{ yygotominor.yy50 = yymsp[-1].minor.yy50;   yy_destructor(yypParser,13,&yymsp[-2].minor);
   yy_destructor(yypParser,14,&yymsp[0].minor);
 }
-#line 859 "src/parser.c"
+#line 856 "src/parser.c"
         break;
       case 24: /* hash_pair ::= QSTRING COLON expr */
       case 25: /* hash_pair ::= PATTERN COLON expr */ yytestcase(yyruleno==25);
-#line 107 "src/parser.y"
+#line 101 "src/parser.y"
 { yygotominor.yy25.key = yymsp[-2].minor.yy0; yygotominor.yy25.value = yymsp[0].minor.yy48;   yy_destructor(yypParser,15,&yymsp[-1].minor);
 }
-#line 866 "src/parser.c"
+#line 863 "src/parser.c"
         break;
       default:
         break;
@@ -927,7 +924,7 @@ static void yy_syntax_error(
 #line 18 "src/parser.y"
 
     state->error = 1;
-#line 931 "src/parser.c"
+#line 928 "src/parser.c"
   ParseARG_STORE; /* Suppress warning about unused %extra_argument variable */
 }
 

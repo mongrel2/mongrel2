@@ -74,3 +74,8 @@ error:
 }
 
 
+int DB_lastid()
+{
+    return (int)sqlite3_last_insert_rowid(CONFIG_DB);
+}
+
