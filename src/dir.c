@@ -168,7 +168,7 @@ int Dir_stream_file(FileRecord *file, Connection *conn)
     else {
         // We have to reopen the file, so we don't get ourselves into seek
         // position trouble
-        int tempfd = open(bdata(file->full_path), O_RDONLY);
+        int tempfd = open((const char *)(file->full_path->data), O_RDONLY);
         check(tempfd >= 0, "Could not reopen open file");
 
         file_buffer = malloc(MAX_SEND_BUFFER);
