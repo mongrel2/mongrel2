@@ -48,12 +48,7 @@ void backend_destroy_cb(Route *r, RouteMap *map)
     Backend *backend = (Backend *)r->data;
 
     if(backend) {
-        if(backend->type == BACKEND_DIR) {
-                Dir_destroy(backend->target.dir);
-        }
-
         free(backend);
-
         r->data = NULL;
     }
 }

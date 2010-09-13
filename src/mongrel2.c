@@ -214,8 +214,9 @@ Server *reload_server(Server *old_srv, const char *db_file, const char *server_u
 
     MIME_destroy();
 
-    Config_stop_handlers(old_srv);
-    Config_stop_proxies(old_srv);
+    Config_stop_handlers();
+    Config_stop_proxies();
+    Config_stop_dirs();
     Setting_destroy();
 
     Server *srv = load_server(db_file, server_uuid, old_srv->listen_fd);
@@ -232,8 +233,9 @@ error:
 void complete_shutdown(Server *srv)
 {
     fdclose(srv->listen_fd);
-    Config_stop_handlers(srv);
-    Config_stop_proxies(srv);
+    Config_stop_handlers();
+    Config_stop_proxies();
+    Config_stop_dirs();
 
     int left = taskwaiting();
 

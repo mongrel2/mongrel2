@@ -56,6 +56,7 @@
 
 static tst_t *LOADED_HANDLERS = NULL;
 static tst_t *LOADED_PROXIES = NULL;
+static tst_t *LOADED_DIRS = NULL;
 
 static int Config_load_handler_cb(void *param, int cols, char **data, char **names)
 {
@@ -121,11 +122,25 @@ static int Config_load_dir_cb(void *param, int cols, char **data, char **names)
 {
     arity(4);
 
-    void **target = (void **)param;
-    *target = Dir_create(data[1], data[2], data[3]);
-    check(*target, "Failed to create dir %s with base=%s index=%s def_ctype=%s", data[0], data[1], data[2], data[3]);
+    Dir* dir = Dir_create(data[1], data[2], data[3]);
+    check(dir != NULL, "Failed to create dir %s with base=%s index=%s def_ctype=%s", data[0], data[1], data[2], data[3]);
 
-    log_info("Created dir %s with base=%s index=%s def_ctype=%s", data[0], data[1], data[2], data[3]);
+    log_info("Loaded dir %s with base=%s index=%s def_ctype=%s", data[0], data[1], data[2], data[3]);
+
+    LOADED_DIRS = tst_insert(LOADED_DIRS, data[0], strlen(data[0]), dir);
+
+    return 0;
+
+error:
+    return -1;
+}
+
+static int Config_load_dirs()
+{
+    const char *DIR_QUERY = "SELECT id, base, index_file, default_ctype FROM directory";
+
+    int rc = DB_exec(DIR_QUERY, Config_load_dir_cb, NULL);
+    check(rc == 0, "Failed to load directories");
 
     return 0;
 
@@ -143,7 +158,6 @@ static int Config_load_route_cb(void *param, int cols, char **data, char **names
     void *target = NULL;
     BackendType type = 0;
 
-    const char *DIR_QUERY = "SELECT id, base, index_file, default_ctype FROM directory WHERE id=%s";
 
     if(strcmp("handler", data[3]) == 0)
     {
@@ -167,11 +181,11 @@ static int Config_load_route_cb(void *param, int cols, char **data, char **names
     }
     else if(strcmp("dir", data[3]) == 0)
     {
-        char *query = SQL(DIR_QUERY, data[2]);
-        int rc = DB_exec(query, Config_load_dir_cb, &target);
-        SQL_FREE(query);
+        Dir *dir = tst_search(LOADED_DIRS, data[2], strlen(data[2]));
+        check(dir, "Failed to find dir %s for route %s:%s", data[2], data[0], data[1]);
 
-        check(rc == 0, "Failed to find dir for route %s:%s", data[0], data[1]);
+        log_info("Created directory route %s:%s -> %s:%s", data[0], data[1], data[2], bdata(dir->base));
+        target = dir;
 
         type = BACKEND_DIR;
     }
@@ -265,6 +279,7 @@ Server *Config_load_server(const char *uuid)
 {
     Config_load_handlers();
     Config_load_proxies();
+    Config_load_dirs();
 
     const char *SERVER_QUERY = "SELECT id, uuid, default_host, port, chroot, access_log, error_log, pid_file FROM server WHERE uuid=%Q";
     char *query = SQL(SERVER_QUERY, uuid);
@@ -346,7 +361,24 @@ void Config_close_db()
 
 
 
-static void shutdown_handlers(void *value, void *data)
+static void handlers_receive_start(void *value, void *data)
+{
+    Handler *handler = (Handler *)value;
+
+    if(!handler->running) {
+        debug("LOADING BACKEND %s", bdata(handler->send_spec));
+        taskcreate(Handler_task, handler, HANDLER_STACK);
+        handler->running = 1;
+    }
+}
+
+void Config_start_handlers()
+{
+    debug("LOADING ALL HANDLERS...");
+    tst_traverse(LOADED_HANDLERS, handlers_receive_start, NULL);
+}
+
+static void shutdown_handler(void *value, void *data)
 {
     Handler *handler = (Handler *)value;
     assert(handler && "Why? Handler is NULL.");
@@ -360,7 +392,7 @@ static void shutdown_handlers(void *value, void *data)
     }
 }
 
-static void close_handlers(void *value, void *data)
+static void close_handler(void *value, void *data)
 {
     Handler *handler = (Handler *)value;
     assert(handler && "Why? Handler is NULL.");
@@ -381,10 +413,12 @@ static void close_handlers(void *value, void *data)
 
 void Config_stop_handlers()
 {
-    tst_traverse(LOADED_HANDLERS, shutdown_handlers, NULL);
+    debug("STOPPING ALL HANDLERS");
+
+    tst_traverse(LOADED_HANDLERS, shutdown_handler, NULL);
     taskyield();
     taskdelay(100);
-    tst_traverse(LOADED_HANDLERS, close_handlers, NULL);
+    tst_traverse(LOADED_HANDLERS, close_handler, NULL);
 
     tst_destroy(LOADED_HANDLERS);
 
@@ -398,26 +432,25 @@ static void stop_proxy(void *value, void *data)
 
 void Config_stop_proxies()
 {
+    debug("STOPPING ALL PROXIES");
     tst_traverse(LOADED_PROXIES, stop_proxy, NULL);
 
     tst_destroy(LOADED_PROXIES);
     LOADED_PROXIES = NULL;
 }
 
-void handlers_receive_start(void *value, void *data)
+static void stop_dir(void *value, void *data)
 {
-    Handler *handler = (Handler *)value;
-
-    if(!handler->running) {
-        debug("LOADING BACKEND %s", bdata(handler->send_spec));
-        taskcreate(Handler_task, handler, HANDLER_STACK);
-        handler->running = 1;
-    }
+    Dir_destroy((Dir *)value);
 }
 
-void Config_start_handlers()
+void Config_stop_dirs()
 {
-    debug("LOADING ALL HANDLERS...");
-    tst_traverse(LOADED_HANDLERS, handlers_receive_start, NULL);
-}
+    debug("STOPPING ALL DIRECTORIES");
 
+    tst_traverse(LOADED_DIRS, stop_dir, NULL);
+
+    tst_destroy(LOADED_DIRS);
+
+    LOADED_DIRS = NULL;
+}

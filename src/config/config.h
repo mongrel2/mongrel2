@@ -53,4 +53,6 @@ void Config_start_handlers();
 
 void Config_stop_proxies();
 
+void Config_stop_dirs();
+
 #endif
