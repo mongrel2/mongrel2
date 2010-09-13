@@ -1,8 +1,6 @@
 #include "constants.h"
 
 struct tagbstring CONFIG_SCHEMA = bsStatic(
-"begin transaction;"
-""
 "DROP TABLE IF EXISTS server;"
 "DROP TABLE IF EXISTS host;"
 "DROP TABLE IF EXISTS handler;"
@@ -73,7 +71,5 @@ struct tagbstring CONFIG_SCHEMA = bsStatic(
 "    location TEXT,"
 "    happened_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,"
 "    how TEXT,"
-"    why TEXT);"
-""
-"commit;");
+"    why TEXT);");
 
