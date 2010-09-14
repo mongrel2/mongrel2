@@ -68,17 +68,34 @@ error:
     return -1;
 }
 
+int Mimetypes_import()
+{
+    return DB_exec(bdata(&MIMETYPES_DEFAULT_SQL), NULL, NULL);
+}
+
+int Mimetypes_load(hash_t *settings, const char *ext, Value *val)
+{
+    const char *sql = sqlite3_mprintf(bdata(&MIMETYPE_SQL),
+            ext, bdata(val->as.string->data));
+
+    int rc = DB_exec(sql, NULL, NULL);
+    check(rc == 0, "Failed to add mimetype: %s=%s", 
+            ext, bdata(val->as.string->data));
+
+    return 0;
+
+error:
+    return -1;
+}
 
 int Settings_load(hash_t *settings, const char *name, Value *val)
 {
-    hash_t *sets = val->as.hash;
-
     const char *sql = sqlite3_mprintf(bdata(&SETTING_SQL),
-            name, bdata(val->as.string));
+            name, bdata(val->as.string->data));
 
     int rc = DB_exec(sql, NULL, NULL);
     check(rc == 0, "Failed to add setting: %s=%s",
-            name, bdata(val->as.string));
+            name, bdata(val->as.string->data));
 
     return 0;
 
@@ -178,9 +195,18 @@ int Server_load(hash_t *settings, Value *val)
     AST_walk_list(settings, hosts->as.list, Host_load);
 
     Value *set = AST_get(settings, "settings", VAL_HASH);
-
     if(set) {
-        AST_walk_hash(settings, set, Settings_load);
+        rc = AST_walk_hash(settings, set, Settings_load);
+        check(rc == 0, "Failed to load the settings. Aborting.");
+    }
+
+    rc = Mimetypes_import();
+    check(rc == 0, "Failed to import default mimetypes.");
+
+    Value *mime = AST_get(settings, "mimetypes", VAL_HASH);
+    if(mime) {
+        AST_walk_hash(settings, mime, Mimetypes_load);
+        check(rc == 0, "Failed to load the mimetypes. Aborting.");
     }
 
     return 0;

@@ -116,7 +116,7 @@ error:
 Value *AST_get(hash_t *fr, const char *name, ValueType type)
 {
     hnode_t *hn = hash_lookup(fr, name);
-    check(hn, "Failed to find %s", name);
+    check_debug(hn, "Variable %s not found, assuming not given.", name);
 
     Value *val = hnode_get(hn);
     check(val->type == type, "Invalid type for %s, should be %s not %s",
