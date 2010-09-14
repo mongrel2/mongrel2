@@ -58,48 +58,58 @@ error:
     return NULL;
 }
 
-void AST_walk_list(hash_t *settings, list_t *data, ast_walk_cb cb)
+int AST_walk_list(hash_t *settings, list_t *data, ast_walk_cb cb)
 {
     lnode_t *n = NULL;
+    int rc = 0;
 
     for(n = list_first(data); n != NULL; n = list_next(data, n)) {
         Value *ref = lnode_get(n);
         Value *found = Value_resolve(settings, ref);
+
         check(found, "Invalid reference: %s", bdata(ref->as.ref->data));
-        cb(settings, found);
+        rc = cb(settings, found);
+        check_debug(rc == 0, "Failure processing config file. Aborting.");
     }
 
+    return 0;
+
 error:
-    return;
+    return -1;
 }
 
-void AST_walk(hash_t *settings, ast_walk_cb cb)
+int AST_walk(hash_t *settings, ast_walk_cb cb)
 {
     hnode_t *n = hash_lookup(settings, "servers");
     check(n, "You didn't set a servers variable to say what servers you want.");
 
     Value *val = hnode_get(n);
-    check(val->type == VAL_LIST, "servers variable should be a list.");
+    check(val->type == VAL_LIST, "servers variable should be a list of server configs to load.");
 
-    AST_walk_list(settings, val->as.list, cb);
+    return AST_walk_list(settings, val->as.list, cb);
 
 error:
-    return;
+    return -1;
 }
 
-void AST_walk_hash(hash_t *settings, Value *data, ast_hash_walk_cb cb)
+int AST_walk_hash(hash_t *settings, Value *data, ast_hash_walk_cb cb)
 {
-    assert(Value_is(data, HASH) && "Invalid type, expected Hash.");
-
     hscan_t s;
     hnode_t *n = NULL;
     hash_scan_begin(&s, data->as.hash);
     Value *val = NULL;
+    int rc = 0;
 
     while((n = hash_scan_next(&s)) != NULL) {
         val = hnode_get(n);
-        cb(settings, hnode_getkey(n), Value_resolve(settings, val));
+        rc = cb(settings, hnode_getkey(n), Value_resolve(settings, val));
+        check_debug(rc == 0, "Failed processing config file. Aborting.");
     }
+
+    return 0;
+
+error:
+    return -1;
 }
 
 
@@ -117,6 +127,7 @@ error:
     return NULL;
 }
 
+
 bstring AST_get_bstr(hash_t *fr, const char *name, ValueType type)
 {
     Value *val = AST_get(fr, name, type);
@@ -127,3 +138,4 @@ bstring AST_get_bstr(hash_t *fr, const char *name, ValueType type)
 error:
     return NULL;
 }
+

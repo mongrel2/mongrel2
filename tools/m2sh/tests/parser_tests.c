@@ -8,9 +8,10 @@
 FILE *LOG_FILE = NULL;
 int CB_FIRED = 0;
 
-void check_callback(hash_t *parent, Value *val)
+int check_callback(hash_t *parent, Value *val)
 {
     CB_FIRED = 1;
+    return 0;
 }
 
 char *test_parser() 

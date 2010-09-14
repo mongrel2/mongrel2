@@ -40,19 +40,18 @@ const char *Value_type_name(ValueType type);
 Value *Value_create(ValueType type, void *data);
 #define Value_is(V, T) ((V)->type == (VAL_##T))
 
-typedef void (*ast_walk_cb)(hash_t *settings, Value *val);
-typedef void (*ast_hash_walk_cb)(hash_t *settings, const char *name, Value *val);
-void AST_walk(hash_t *settings, ast_walk_cb cb);
-void AST_walk_list(hash_t *settings, list_t *data, ast_walk_cb cb);
-void AST_walk_hash(hash_t *settings, Value *data, ast_hash_walk_cb cb);
+typedef int (*ast_walk_cb)(hash_t *settings, Value *val);
+typedef int (*ast_hash_walk_cb)(hash_t *settings, const char *name, Value *val);
+
+int AST_walk(hash_t *settings, ast_walk_cb cb);
+int AST_walk_list(hash_t *settings, list_t *data, ast_walk_cb cb);
+int AST_walk_hash(hash_t *settings, Value *data, ast_hash_walk_cb cb);
 
 #define Class_ident(C) ((C)->ident->data)
 #define Class_params(C) ((C)->params)
 
-void AST_walk_hash(hash_t *settings, Value *data, ast_hash_walk_cb cb);
 Value *AST_get(hash_t *fr, const char *name, ValueType type);
 bstring AST_get_bstr(hash_t *fr, const char *name, ValueType type);
-
 #define AST_str(H, N, T) bdata(AST_get_bstr(H, N, T))
 
 #endif

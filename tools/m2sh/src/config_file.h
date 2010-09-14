@@ -23,4 +23,22 @@ typedef struct ParserState {
     int error;
 } ParserState;
 
+struct Value;
+
+int Dir_load(hash_t *settings, hash_t *params);
+
+int Handler_load(hash_t *settings, hash_t *params);
+
+int Proxy_load(hash_t *settings, hash_t *params);
+
+int Settings_load(hash_t *settings, const char *name, struct Value *val);
+
+int Route_load(hash_t *settings, const char *name, struct Value *val);
+
+int Host_load(hash_t *settings, struct Value *val);
+
+int Server_load(hash_t *settings, struct Value *val);
+
+int Config_load(const char *config_file, const char *db_file);
+
 #endif
