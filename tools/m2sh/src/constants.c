@@ -73,3 +73,19 @@ struct tagbstring CONFIG_SCHEMA = bsStatic(
 "    how TEXT,"
 "    why TEXT);");
 
+
+
+struct tagbstring SERVER_SQL = bsStatic("INSERT INTO server (uuid, access_log, error_log, pid_file, chroot, default_host, name, port) VALUES (%Q, %Q, %Q, %Q, %Q, %Q, %Q, %s);");
+
+struct tagbstring HOST_SQL = bsStatic("INSERT INTO host (server_id, name, matching) VALUES (%d, %Q, %Q);");
+
+struct tagbstring SETTING_SQL = bsStatic("INSERT INTO setting (key, value) VALUES (%Q, %Q);");
+
+struct tagbstring DIR_SQL = bsStatic("INSERT INTO directory (base, index_file, default_ctype) VALUES (%Q, %Q, %Q);");
+
+struct tagbstring PROXY_SQL = bsStatic("INSERT INTO proxy (addr, port) VALUES (%Q, %Q);");
+
+struct tagbstring HANDLER_SQL = bsStatic("INSERT INTO handler (send_spec, send_ident, recv_spec, recv_ident) VALUES (%Q, %Q, %Q, %Q);");
+
+struct tagbstring ROUTE_SQL = bsStatic("INSERT INTO route (path, host_id, target_id, target_type) VALUES (%Q, %d, %d, %Q);");
+

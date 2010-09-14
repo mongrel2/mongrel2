@@ -101,3 +101,29 @@ void AST_walk_hash(hash_t *settings, Value *data, ast_hash_walk_cb cb)
         cb(settings, hnode_getkey(n), Value_resolve(settings, val));
     }
 }
+
+
+Value *AST_get(hash_t *fr, const char *name, ValueType type)
+{
+    hnode_t *hn = hash_lookup(fr, name);
+    check(hn, "Failed to find %s", name);
+
+    Value *val = hnode_get(hn);
+    check(val->type == type, "Invalid type for %s, should be %s not %s",
+            name, Value_type_name(type), Value_type_name(val->type));
+    return val;
+
+error:
+    return NULL;
+}
+
+bstring AST_get_bstr(hash_t *fr, const char *name, ValueType type)
+{
+    Value *val = AST_get(fr, name, type);
+    check(val != NULL, "Failed resolving %s %s.", name, Value_type_name(type));
+
+    return val->as.string->data;
+
+error:
+    return NULL;
+}

@@ -9,48 +9,6 @@
 
 FILE *LOG_FILE = NULL;
 
-struct tagbstring SERVER_SQL = bsStatic("INSERT INTO server (uuid, access_log, error_log, pid_file, chroot, default_host, name, port) VALUES (%Q, %Q, %Q, %Q, %Q, %Q, %Q, %s);");
-
-struct tagbstring HOST_SQL = bsStatic("INSERT INTO host (server_id, name, matching) VALUES (%d, %Q, %Q);");
-
-struct tagbstring SETTING_SQL = bsStatic("INSERT INTO setting (key, value) VALUES (%Q, %Q);");
-
-struct tagbstring DIR_SQL = bsStatic("INSERT INTO directory (base, index_file, default_ctype) VALUES (%Q, %Q, %Q);");
-
-struct tagbstring PROXY_SQL = bsStatic("INSERT INTO proxy (addr, port) VALUES (%Q, %Q);");
-
-struct tagbstring HANDLER_SQL = bsStatic("INSERT INTO handler (send_spec, send_ident, recv_spec, recv_ident) VALUES (%Q, %Q, %Q, %Q);");
-
-struct tagbstring ROUTE_SQL = bsStatic("INSERT INTO route (path, host_id, target_id, target_type) VALUES (%Q, %d, %d, %Q);");
-
-
-Value *AST_get(hash_t *fr, const char *name, ValueType type)
-{
-    hnode_t *hn = hash_lookup(fr, name);
-    check(hn, "Failed to find %s", name);
-
-    Value *val = hnode_get(hn);
-    check(val->type == type, "Invalid type for %s, should be %s not %s",
-            name, Value_type_name(type), Value_type_name(val->type));
-    return val;
-
-error:
-    return NULL;
-}
-
-bstring AST_get_bstr(hash_t *fr, const char *name, ValueType type)
-{
-    Value *val = AST_get(fr, name, type);
-    check(val != NULL, "Failed resolving %s %s.", name, Value_type_name(type));
-
-    return val->as.string->data;
-
-error:
-    return NULL;
-}
-
-#define AST_str(H, N, T) bdata(AST_get_bstr(H, N, T))
-
 
 #define CONFIRM_TYPE(N) check(Value_is(val, CLASS), "Not a class.");\
     check(biseqcstr(Class_ident(val->as.cls), N), "Should be a " # N ".");
