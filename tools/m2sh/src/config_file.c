@@ -247,10 +247,11 @@ int Config_load(const char *config_file, const char *db_file)
     rc = Config_setup(db_file);
     check(rc == 0, "Failed to configure config db: %s", db_file);
 
-    AST_walk(settings, Server_load);
+    rc = AST_walk(settings, Server_load);
+    check(rc == 0, "Failed to process the config file: %s", config_file);
 
     rc = Config_commit();
-    check(rc == 0, "Faild to commit config db: %s", db_file);
+    check(rc == 0, "Failed to commit config db: %s", db_file);
 
     return 0;
 error:
