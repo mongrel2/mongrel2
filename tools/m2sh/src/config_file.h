@@ -1,5 +1,5 @@
-#ifndef _config_file_h
-#define _config_file_h
+#ifndef _m2sh_config_file_h
+#define _m2sh_config_file_h
 
 #include <bstring.h>
 #include <adt/hash.h>

@@ -1,5 +1,5 @@
-#ifndef _constants_h
-#define _constants_h
+#ifndef _m2sh_constants_h
+#define _m2sh_constants_h
 
 #include <bstring.h>
 extern struct tagbstring CONFIG_SCHEMA;

@@ -1,5 +1,5 @@
-#ifndef _ast_h
-#define _ast_h
+#ifndef _m2sh_ast_h
+#define _m2sh_ast_h
 
 #include <adt/list.h>
 #include <adt/hash.h>

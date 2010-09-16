@@ -1,5 +1,5 @@
-#ifndef cli_h
-#define cli_h
+#ifndef _m2sh_cli_h
+#define _m2sh_cli_h
 
 #include <bstring.h>
 #include "ast.h"
