@@ -1,4 +1,5 @@
-JUNK_FILES=book-final.* *.aux *.log styles/*.aux book-final*
+PDF=mongrel2-1.0-guide-ru.pdf
+JUNK_FILES=book-final.* *.aux *.log styles/*.aux book-final* $(PDF)
 SOURCE=book
 WEBSITE=zedshaw.com:/usr/local/nginx/html/projects/build_your_own_mongrel
 
@@ -12,7 +13,7 @@ book-final.dvi:
 	latex -halt-on-error book-final.tex
 
 book-final.pdf: book-final.dvi
-	dvipdf book-final.dvi
+	dvipdf book-final.dvi $(PDF)
 
 view: book-final.pdf
 	evince book-final.pdf
@@ -24,4 +25,4 @@ clean:
 release: clean book-final.pdf
 	rsync -vz $(FINAL).pdf $(WEBSITE)
 
-
+pdf: book-final.pdf

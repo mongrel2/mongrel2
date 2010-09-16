@@ -1,80 +1,88 @@
-\chapter{Managing}
+\chapter{Управление}
 
-Mongrel2 is designed to be easy to deploy and \emph{automate} the deployment.
-This is why it uses \href{http://www.sqlite.org/}{SQLite} to store the configuration,
-but m2sh as an interface to creating the configuration.  Doing this lets
-you access the configuration using any language that works for you, augment it,
-alter it, migrate it and automate it.
+Mongrel2 создан так, чтобы его можно было легко развёртывать, более
+того --- \emph{автоматизировать} развёртывание. Именно поэтому он
+использует \href{http://www.sqlite.org/}{SQLite}, чтобы хранить
+настройки, и утилиту m2sh в качестве интерфейса к этой базе настроек.
+По сути, вы можете управлять этой базой из любого языка.
 
-In this chapter, I'm going to show you how to make a basic configuration using
-m2sh and all the commands that are available.  You'll learn how the configuration
-system is structured so that you know what goes where, but in the end it's just
-a simple storage mechanism.
+В этой главе я продемонстрирую создание базовой конфигурации в m2sh, а
+также другие доступные команды. Вы узнаете внутренню структуру
+конфигурационной системы, которая в общем является простым и удобным
+механизмом хранения данных.
 
-\begin{aside}{Apparently SQL Inspires FUD}
-When I first started talking about Mongrel2, I said I'd store the configuration
-in SQLite and do a Model-View-Controller kind of design.  Immediately people who
-can't read flipped out and thought this meant they'd be back in ``Windows registry hell'',
-but with SQL as their only way to access it.  They thought that they'd be stuck writing
-configurations with SQL; that SQL couldn't possibly configure a web server.
+\begin{aside}{SQL вводит в заблуждение}
 
-They were wrong on many levels.  Nobody was \emph{ever} going to make \emph{anyone} use
-SQL.  That was repeated over and over but, again, people don't read and love spreading
-FUD.  The SQLite config database is nothing like the Windows Registry.  No other web
-server really uses a true hierarchy; they just cram a relational model into a weirdo
-configuration format.  The real goal was to make a web server that was easy to manage from
-\emph{any} language, and then give people a nice tool to get their job done without
-having to ever touch SQL.  \emph{EVER!}
+Когда я впервые упомянул Mongrel2, я сказал, что буду хранить
+настройки с помощью SQLite и создам MVC архитектуру.  Те, кто не умеют
+читать, начали биться в истерике и кричать, что это равносильно
+``реестру Windows'', только для доступа к данным используется язык
+запросов.  Они думали, что придётся конфигурировать сервер с помощью
+SQL. Естественно, звучит, мягко говоря, непривычно.
 
-In the end, what we got despite all this fear mongering is a bad ass configuration
-tool and a design that is simple, elegant, and works fantastic.  If you read that
-Mongrel2 uses SQLite and though this was weird, well, welcome to the future.  Sometimes
-it's weird out here (even though Postfix has been doing this for a decade or more).
+Всё это --- большое заблуждение. \emph{Никто никого} не заставляет
+использовать SQL.  Я повторял это снова и снова, но многие не слышали
+этого.  SQLite не имеет ничего общего с реестром Windows. Моя
+изначальная цель --- создать сервер, который можно настроить из
+\emph{любого языка программирования}, а затем предоставить удобный
+инструмент, чтобы люди вообще \emph{навсегда} забыли про SQL.
+
+В итоге, что мы имеем, несмотря на всю суету? Офигительный инструмент
+для конфигурирования сервера с простым и элегантным дизайном, который,
+вдобавок к этому, отлично работает. Если союз Mongrel2 и SQLite
+кажется вам необычным, то добро пожаловать в будущее --- иногда оно
+очень и очень странное (хотя Postfix делает то же самое на протяжении
+десяти лет).
+
 \end{aside}
 
 
-\section{Model-View-Controller}
+\section{MVC}
 
-When you hear Model-View-Controller, you think about web applications.  This is a design pattern
-where you place different concerns into different parts of your system and try not to mix them
-too much.  For an interactive application, if you keep the part that stores data (Model) separated
-from the logic (Controller) and use another piece to display and interact with the user (View), then
-it's easier to change the system and adapt it over time to new features.
+Когда вы слышите MVC\footnote{Model-View-Controller}, вы думаете о
+веб-приложениях, где этот паттерн проектирования стал стандартом. Суть его в
+разделении системы на уровни по функциональному признаку. В такой системе
+\emph{модель} хранит данные, \emph{контроллер} реализует бизнес-логику, а
+взаимодействие с пользователем происходит посредством \emph{вида}.
 
-The power of MVC is simply that these things really are separate orthogonal pieces that get
-ugly if they're mixed together.  There's no math or theory that says why; just lots of
-experience has told us it's usually a bad idea.  When you start mixing them, you find out that
-it's hard to change for new requirements later, because you've sprinkled logic all over your
-web pages.  Or you can't update your database because there's all these stored procedures that
-assume the tables are a certain way.
+Сила такой архитектуры в том, что все компоненты достаточно независимы
+и автономны и их легко адаптировать к новым требованиям. Однако они
+перестают быть таковыми, как только вы начинаете их смешивать.  Нет
+какой-либо строгой математически обоснованной теории, подтверждающей
+это. Но есть многолетний опыт сообщества, который подсказывает:
+смешивать уровни --- плохая идея, иначе возникнут проблемы. Например,
+вы раскидали бизнес-логику (контроллер) по веб-страницам (вид) и позже
+обнаруживаете, что её достаточно сложно изменять.  Или не можете
+изменить схему базы (модель), потому что это противоречит хранимым
+процедурам (контроллер).
 
-Mongrel2 needed a way to allow you to use various languages and tools to automate its configuration.
-Letting you automate your deployments is the entire point of the server.  The idea was that if we
-gave you the Controller and the Model, then you can craft any \emph{View} you wanted, and there's
-no better Model than a SQL database like SQLite:  it's embeddable, easily accessed from C or any
-language, portable, small, fast enough and full of all the features you need and then some.
+Mongrel2 нуждался в механизме автоматизации: ведь это одна из ключевых
+функций сервера, если не самая ключевая. Сервер является контроллером,
+т.е.  он реализует бизнес-логику и придаёт смысл модели. В качестве
+модели был выбран SQLite. Он идеально подходит: внедряемый движок,
+легко доступный из любого языка программирования, портируемый,
+маленький, быстрый и т.п. Дело оставалось за видом --- так и появилась
+утилита m2sh.
 
-What you are doing when you use m2sh to configure a configuration for Mongrel2, is working with
-a View we've given you to create a Model for the Mongrel2 server to work with.  That's it, and
-you can create your own View if you want.  It could be automated deployment scripts, a web
-interface, monitoring scripts, anything you need.
+m2sh --- это \emph{вид}, интерфейс к модели, которая хранит
+конфигурацию сервера. Эта утилита только пример; вы можете создать
+свой вид на любимом языке программирования. Это может быть всё что
+угодно --- скрипт для автоматического развёртывания сервера,
+веб-интерфейс, скрипт мониторинга, и т.п.
 
-The point is, if you just want to get Mongrel2 up and running, then use m2sh.  If you want to
-do more advanced stuff, then get into the configuration database schema and see what you can
-do.  The structure of the database very closely matches Mongrel2's internal structure, so
-understanding that means you understand how Mongrel2 works.  This is a vast improvement over
-other web servers like Apache where you've got no idea why one stanza has to go in a particular
-place, or why information has to be duplicated.
+В общем и целом всё просто: если вы просто хотите выполнять базовые
+операции с сервером --- запускать, останавливать, создавать и
+загружать конфигурации --- используйте m2sh. Если же вам нужно что-то
+более продвинутое, то изучите схему базы и пробуйте. Структура базы
+достаточно хорошо отражает внутренню структуру сервера, так что если
+вы поймёте её, то вы в принципе поймёте как работает Mongrel2.
 
-With Mongrel2, it's all right there.
+\section{Пробуем m2sh}
 
+Пробовать будем на конфигурационном файле, который используется в
+юнит-тестах. Для разогрева выполним самые базовые команды:
 
-\section{Trying m2sh}
-
-To give this configuration system a try you just need to run the test configuration used
-in the unit tests.  Let's try doing a few of the most basic commands with this configuration:
-
-\begin{code}{Sample m2sh Commands}
+\begin{code}{m2sh в действии}
 \begin{lstlisting}
 > m2sh dump -db tests/config.sqlite
 > m2sh servers -db tests/config.sqlite
@@ -84,14 +92,18 @@ in the unit tests.  Let's try doing a few of the most basic commands with this c
 \end{lstlisting}
 \end{code}
 
-At this point you should have seen some raw dumps of the database, lists of servers and hosts,
-seen that mongrel2 is not running, and then started it.  You can find out about all the commands
-and get help for them with \shell{m2sh help} or \shell{ms2h help -for command}.
+Вы только что сделали следующее: вывели настройки на экран; вывели
+список серверов, затем список хостов; проверили, запущен ли сервер
+(он не запущен); и запустили сервер.
 
-You can now try doing some simple starting, stopping and reloading using sudo (make sure you CTRL-c
-to exit from the previous start command):
+Чтобы узнать больше об этой команде, вызовите справку --- \shell{m2sh
+help} или \shell{m2sh help -for <command>}.
 
-\begin{code}{Starting, Stopping, Reloading}
+Теперь попробуем запустить-остановить сервер в sudo-режиме и
+перезагрузить настройки (нажмите CTRL+c, чтобы прервать предыдущую
+команду):
+
+\begin{code}{Запускаем, останавливаем, перезагружаем}
 \begin{lstlisting}
 > m2sh start -db tests/config.sqlite -host localhost -sudo
 > tail logs/error.log
@@ -104,64 +116,66 @@ to exit from the previous start command):
 \end{lstlisting}
 \end{code}
 
-Awesome, right?  Using just this one little Python management script, you
-are able to completely manage a Mongrel2 instance without having to hack
-on a config file at all.  But you probably need to know how this is all
-working anyway.
+Круто, да? Используя этот маленький Python-скрипт можно полностью
+контролировать сервер. И не нужно ковыряться в конфигурационных
+файлах. Однако неплохо бы знать как всё это работает.
 
+\subsection{А что произошло?}
 
-\subsection{What The Hell Just Happened?}
-
-You now have done nearly everything you can to a configuration, but you might not know exactly
-what's going on.  Here's an explanation of what's going on behind the scenes:
+А произошло следующее --- вы выполнили большинство из возможных
+операций над базой настроек. Ниже приведено детальное
+объяснение всех запущенных команд:
 
 \begin{enumerate}
-\item When you did \shell{m2sh start} with the \shell{-sudo} option, it actually runs
-    \shell{sudo mongrel2 tests/config.sqlite localhost} to start the server.
-\item Mongrel2 is now running in the background as a daemon process, just like a regular server.
-    However, what it did was chroot to the current directory and then drop privileges so that
-    they match the owner of that directory (you).  Use \shell{ps aux} to take a look.
-\item With Mongrel2 running, you can look in the logs/error.log file to see what it said.  It should
-    be a bunch of debug logging, but check out the messages: nice and detailed.
-\item Next you did a soft reload with \shell{m2sh reload} and you should notice that your mongrel2
-    process was able to load the new config \emph{without restarting}.
-\item However, there's a slight bug that doesn't do the reload until the next request is served. That's
-    what the \shell{curl http://localhost:6767/} was for.
-\item Now that you can see this reload work in \file{logs/error.log}, you used \shell{m2sh running} to
-    see if it's running.  This command is just reading the config database to find out where the PID file
-    is (\file{run/mongrel2.pid}) and then checking if that process is running.
-\item Finally, you tell mongrel2 to stop, and since it dropped privileges to be owned by you, you can do
-    that without having to use sudo.
+\item Вызов \shell{m2sh start} с опцией \shell{-sudo} транслируется в
+    \shell{sudo mongrel2 tests/config.sqlite localhost} и запускает
+    сервер.
+\item Mongrel2 запущен и работает в фоновом процессе, как и подобает
+    серверу. Но предварительно текущую директорию он сделал рутовой
+    \footnote{С помощью команды chroot}, а текущего пользователя ---
+    владельцем процесса. Вызовите \shell{ps aux}, чтобы убедиться, что
+    сервер действительно запущен.
+\item Смотрим логи в logs/error.log: там куча отладочной информации.
+    Но обратите внимание на сообщения --- детальные и адекватные.
+\item Горячая перезагрузка: процесс mongrel2 заново считывает и загружает
+    настройки.
+\item Однако из-за небольшого бага перезагрузка не осуществляется
+    немедленно --- надо подождать до следующего запроса, который
+    эмулируется с помощью \shell{curl http://localhost:6767/}.
+\item Чтобы убедиться, что перезагрузка прошла успешно, смотрим логи и
+    выполняем \shell{m2sh running}. Эта команда считывает с базы настроек
+    расположение PID-файла (\file{run/mongrel2.pid}) и проверяет, запущен
+    ли этот процесс.
+\item Наконец, останавливаем сервер. Замечательная вещь в том, что,
+    поскольку в момент запуска текущий пользователь стал владельцем
+    процесса, вы можете остановить этот процесс не прибегая sudo.
 \end{enumerate}
 
-All of this is happening by reading the \file{tests/config.sqlite} file and not reading any configuration
-files.  You can now try building your own configuration that matches this one or some others.
+\section{Базовый конфигурационный файл}
 
+Чтобы создать новый файл настроек мы напишем Python-скрипт, который
+очень похож на конфигурационный файл, но плюс к этому может нести в
+себе бизнес-логику, т.е. получается своего рода умная конфигурация.
+Это очень полезно, например, если настройки должны меняться в
+зависимости от машины, на которой будет развёрнут сервер. Также такой
+файл очень удобно хранить в системе управления версиями.
 
-\section{A Simple Configuration File}
+Прежде всего, нужно инициализировать чистую базу настроек с помощью
+\shell{m2sh init}, а затем загрузить в неё конфигурацию из скрипта с
+помощью \shell{m2sh load}.
 
-To configure a new config database you'll write a Python file that looks a lot like
-a configuration file.  The advantage of using Python is that you can put actual
-real logic in your configuration file in order to make your configuration smarter.
-A great application of this is when your configuration has to change depending on the
-server it is deployed on, but you want to check the configuration file into a revision
-control system.  With Python you just write your configuration like it's code and
-you're set.
+Для наших целей мы воспользуемся файлом из
+примеров \file{examples/python/tests/sample\_conf.py}:
 
-The first thing you need to do is initialize a fresh configuration database to get
-started by using \shell{m2sh init} and then you load your configuration into it using
-\shell{m2sh load}.  For our example, we'll use the example configuration
-from \file{examples/python/tests/sample\_conf.py} to make a simple one:
-
-\begin{code}{Simple Little Config Example}
-  \lstinputlisting[language=Python]{../../examples/python/tests/sample_conf.py}
+\begin{code}{Простой маленький скрипт настроек}
+  \lstinputlisting[language=Python]{../../../examples/python/tests/sample_conf.py}
 \end{code}
 
-If you aren't familiar with Python then this code might look freaky, but it's really
-simple.  We'll get into how its structured in a second, but to load this file
-we would just do this:
+Если Python вам не знаком, то код может показаться необычным, но на
+самом деле он довольно прост. Мы вскоре вернёмся к нему, а пока
+выполните следующее:
 
-\begin{code}{Loading The Simple Config}
+\begin{code}{Загружаем скрипт}
 \begin{lstlisting}
 > m2sh init -db simple.sqlite
 > m2sh load -db simple.sqlite -config examples/python/tests/sample_conf.py
@@ -171,329 +185,380 @@ we would just do this:
 \end{lstlisting}
 \end{code}
 
-With this sequence of commands you:
+Последовательность этих команд выполняет следующее:
 
 \begin{enumerate}
-\item Create a raw fresh config database name \file{simple.sqlite}
-\item Load the \file{sample\_conf.py} into it.
-\item List the servers it has configured.
-\item List the hosts that server has, with what routes it has.
-\item Start this server to try it out.
+\item Создаёт чистую базу настроек \file{simple.sqlite}.
+\item Загружает скрипт \file{sample\_conf.py} в неё.
+\item Выводит список серверов из базы.
+\item Выводит список хостов со всеми маршрутами.
+\item Запускает сервер.
 \end{enumerate}
 
-By now you should be getting the hang of the pattern here, which is to use
-m2sh and little Python configuration ``script'' to generate .sqlite files
-that Mongrel2 understands.
+Полагаю, у вас начала складываться картина того, как создать новую
+конфигурацию --- использовать m2sh, чтобы загрузить скрипт и
+сгенерировать .sqlite, с которым непосредственно работает Mongrel2.
 
-\section{How A Config Is Structured}
+\section{Структура базы настроек}
 
-The base structure of a Mongrel2 configuration is:
+База настроек структурирована следующим образом:
 
 \begin{description}
-  \item[Server] This is the root of a config, and you can have multiples of these in one database,
-    even though each start command only runs one at a time.
+  \item[Server] Является корнем в иерархии; их может быть несколько, несмотря на то, что 
+    Mongrel2 одновременно может запустить один их них.
   \begin{description}
-    \item[Host] Servers have Hosts inside them, which say what DNS hostname Mongrel2 should answer for.
-      You can have multiples of these in each Server.
+    \item[Host] Внутри сервера --- хосты, т.е. доменные имена, на
+      которые должен отвечать веб-сервер. Их тоже может быть несколько.
     \begin{description}
-      \item[Route] Hosts have Routes in them, which tells Mongrel2 what to do with URL paths and patterns
-        that match them.  Routes then have \ident{Dir}, \ident{Handler} or \ident{Proxy} items in them.
+      \item[Route] Внутри хостов находятся маршруты, которые
+        разруливают приходящие запросы в зависимости от URL. Внутри
+        маршрута может быть \ident{Dir}, \ident{Handler} или \ident{Proxy}.
       \begin{description}
-        \item[Dir] A Dir serves files out of a directory, full with 304 and ETag support, default content types,
-          and most of the things you need to serve them.
-        \item[Proxy] A Proxy takes requests matching the Route they're attached to and sends them to another
-          HTTP server somewhere else.  Mongrel2 will then act as a full proxy and also try to keep connections
-          open in keep-alive mode if the browser supports it.
-        \item[Handler] A Handler is the best part of Mongrel2.  It takes HTTP requests, and turns them into
-          nicely packed and processed ZeroMQ messages for your asynchronous handlers.
+        \item[Dir] Самый простой маршрут --- говорит серверу, что надо
+          выдавать файлы из директории. Mongrel2 поддерживает 304-й статус,
+          ETag, типы данных по умолчанию, и вообще всё необходимое для
+          обслуживания статических файлов.
+        \item[Proxy] Прокси берёт запрос и перенаправляет его на
+          другой http-сервер. Mongrel2 держит соединения открытыми в keep-alive
+          режиме, если браузер поддерживает их.
+        \item[Handler] Это самая лучшая часть Mongrel2. Обработчик
+          получает http-запрос, заворачивает его в ZeroMQ сообщение и передаёт
+          его в бэкенд, но делает это асинхронно.
       \end{description}
     \end{description}
   \end{description}
 \end{description}
 
-Each of these nested ``objects'' then has a set of attributes you can use to configure them, and
-most of them have reasonable defaults.
-
+Каждый из этих ``объектов'' имеет свой набор атрибутов для более
+тонкой настройки и большинству из этих атрибутов присваиваются
+достаточно адекватные значения по умолчанию.
 
 \subsection{Server}
 
-The server is all about telling Mongrel2 where to listen on its port, where to chroot,
-and general server specific deployment gear.
+Этот раздел хранит настройки, характерные для любого сервера: какой
+порт слушать, куда писать логи и т.п.
 
 \begin{description}
-\item[uuid] A UUID is used to make sure that each deployed server is unique in your infrastructure.
-    You could easily use any string that's letters, numbers, or - characters.
-\item[chroot] This is the directory that Mongrel2 should chroot to and drop privileges.
-\item[access\_log] The access log file \emph{relative to the chroot}.  Usually starts with a `/'.  Make sure
-    you don't configure your server so that this and other files are accessible, or make this owned by root.
-\item[error\_log] The error log file just like access\_log.
-\item[pid\_file] Like the access log, where within the chroot directory is the pid file stored.
-\item[default\_host] The server has a bunch of hosts listed, but it needs to know what the default host is.  This is also
-    used as a convenient way to refer to this Server.
-\item[port] The port the server should listen on for new connections.
+\item[uuid] Уникальный идентификатор сервера внутри вашей
+    инфраструктуры. Это может быть любая строка, но традиционно
+    используется UUID --- универсальный уникальный идентификатор, который
+    можно сгенерировать с помощью \shell{m2sh uuid}.
+\item[chroot] Директория, которую Mongrel2 делает рутовой.
+\item[access\_log] Путь к лог-файлу запросов.
+    Путь задаётся относительно \emph{рутовой директории}. Обычно
+    начинается с `/'. Убедитесь, что этот и другие подобные файлы
+    недоступны из браузера.
+\item[error\_log] Путь к лог-файлу ошибок.
+\item[pid\_file] Путь к pid-файлу.
+\item[default\_host] Сервер может иметь произвольное количество
+    хостов, но среди них должен быть один по умолчанию. С помощью этого
+    хоста удобно ссылаться на весь сервер.
+\item[port] Порт, который должен слушать сервер.
 \end{description}
 
 
 \subsection{Host}
 
-A host is matched using a kind of \emph{inverse route} that matches the ending of \ident{Host:}
-headers against a pattern.  You'll see how this works when we talk about routes, but for now
-you just need to know that request to the \ident{Server.port} are routed based on these \ident{Host}
-configurations the \ident{Server} contains.
+Раздел Host хранит информацию о каждом хосте, доступном из сервера.
 
 \begin{description}
-\item[name] The name that you use to talk about this Host in the server configuration.
-\item[matching] This is a pattern that's used to match incoming Host headers for routing purposes.
-\item[server] If you want to set the server separately you can use this attribute.
-\item[maintenance] This will a setting for the future that will let you have Mongrel2 throw up a maintenance page
-    for this host.
-\item[routes] This is a dict (hashmap) of the URL patterns mapped to the targets that should be run.
+\item[name] Имя хоста.
+\item[matching] Паттерн, который используется, чтобы сопоставить с
+    хостом в заголовке для принятия решения о дальнейшей маршрутизации запроса.
+\item[server] Используйте этот атрибут, если хотите назначить сервер отдельно.
+\item[maintenance] Настройка для будущего использования. Если сервер
+    некоторое время недоступен из-за проведения профилактических работ,
+    этот атрибут будет указывать на временную страничку, которая будет
+    уведомлять об этом посетителей.
+\item[routes] Хеш-таблица, которая хранит данные по маршрутизации запросов.
 \end{description}
 
 
 \subsection{Route}
 
-The \ident{Route} is the workhorse of the whole system.  It uses some very fancy but still simple
-code in Mongrel2 to translate \ident{Host:} headers to \ident{Hosts} and URL paths to \ident{Handlers},
-\ident{Dirs}, and \ident{Proxies}.
+Route --- или маршрут --- рабочая лошадка всей системы. Маршруты
+используют довольно интересный, но простой код, чтобы транслировать
+путь в http-заголовке в один из пунктов назначения на сервере:
+\ident{Handler}, \ident{Dir}, \ident{Proxy}.
 
 \begin{description}
-\item[path] This is path \emph{pattern} that matches a route.  The pattern uses the Mongrel2 pattern langauge
-    which is a reduced version of the Lua pattern matching system.
-\item[reversed] Determines if this pattern is reversed, which is useful for matching file extensions, hostnames,
-    and other naming systems where the ending is really the prefix.  Usually you don't set this.
-\item[host] You can use this attribute to set the host manually.
-\item[target] This is the target that should handle the request, either a \ident{Dir}, \ident{Handler} or \ident{Proxy}.
+\item[path] \emph{Паттерн} соответствия маршруту. Mongrel2 использует
+    упрощённую версию системы сопоставления паттернов из Lua.
+\item[reversed] Определяет, является ли паттерн реверсивным. Этот
+    атрибут полезен для сравнения расширений файлов, хостов и пр., где
+    окончание фактически является префиксом. Обычно этот атрибут игнорируется.
+\item[host] Используется, чтобы задать хост вручную.
+\item[target] Пункт назначения запроса, т.е. что-либо из списка:
+\ident{Dir}, \ident{Handler}, \ident{Proxy}.
 \end{description}
 
-Later on, you'll learn about the pattern matching that's used, but it's basically a stripped down version of your
-normal regular expressions, but with a few convenient syntaxes for doing simple string matching.  When you configure
-a route, you write something like \file{/images/(.*.jpg)} and the part before the `(' is used as a fast matched
-prefix, while the part after it is considered a pattern to match.  When a request comes in, Mongrel2 quickly finds the
-longest prefix that matches the URL, and then tests its pattern if there is one.  If the pattern is valid, the
-request goes through.  If not, 404.
-
+Позже вы узнаете о системе сравнения паттернов, используемой в
+сервере, но по сути это упрощённая версия регулярных выражений c
+некоторыми добавлениями. При конфигурировании маршрута пишется
+что-то вроде \file{/images/(.*.jpg)}. Всё, что идёт до первой скобки,
+используется как префикс (который легко сравнить); в то время как всё
+после скобки --- собственно паттерн. Когда приходит запрос, Mongrel2
+ищет самый длинный подходящий префикс и проверяет паттерн. Если
+паттерн подходит, то запрос идёт дальше. В противно случае --- 404.
 
 \subsection{Dir}
 
-A \ident{Dir} is a simple directory-serving route target that serves files out of a directory.  It has caching
-built-in, handles if-modified-since, ETags, and all the various bizarre HTTP caching mechanisms as RFC-accurate
-as possible.  It also has default content-types and index files.
+\ident{Dir} --- инструктирует веб-сервер обслуживать файлы из
+директории. Поддерживает if-modified-since, ETag и прочие странные
+механизмы кэширования согласно протокола HTTP. Также поддерживает
+индексные файлы и типы данных по умолчанию.
 
 \begin{description}
-\item[base]  This is the base directory \emph{from the chroot} that is served.  Files should not
-    be served outside of this base directory even in the chroot.
-\item[index\_file] This is the default index file to use if a request doesn't give one.  The \ident{Dir}
-    also will do redirects if a request for a directory doesn't end in a / slash.
-\item[default\_ctype] The default Content-Type to use if none matches the MIMEType table.
+\item[base] Базовая директория \emph{внутри рутовой}, из которой будут
+    выдаваться файлы.
+\item[index\_file] Файл по умолчанию; он выдаётся, если в запросе файл явно
+    не указан. \ident{Dir} также делает редирект, если запрашивается
+    директория, а на конце нет слэша.
+\item[default\_ctype] Content-Type по умолчанию; используется, если в
+    таблице типов нет подходящего MIMEType.
 \end{description}
 
-Currently, we don't offer more parameters for configuration, but eventually you'll be able to tweak more and
-more of the settings to control how Dirs work.
+На данный момент это все доступные параметры, но со временем мы будем
+добавлять больше настроек, чтобы управлять работой
+\ident{Dir}-маршрутов.
 
 \subsection{Proxy}
 
-A Proxy is a Ghetto.  It is used so that you can use Mongrel2 but not have to throw
-out your existing infrastructure.  Mongrel2 goes to great pains to make sure that it
-implements a fast and dead accurate proxy system internally, but no matter how good it
-is it, can't compete with ZeroMQ handlers.  The idea with giving Proxy functionality is
-you can point Mongrel2 at existing servers, and then slowly carve out pieces that
-will work as handlers.
-
+Прокси --- это гетто. Добавлено в Mongrel2 для того, чтобы вы могли
+использовать существующую инфраструктуру. Мы приложили все усилия,
+чтобы сделать систему проксирования быстрой и надёжной внутри
+Mongrel2, тем не менее, она не конкурент обработчикам ZeroMQ. Я вижу
+один сценарий развития --- вы добавляете прокси, чтобы Mongrel2
+перенаправлял запросы на ваши текущие серверы; но постепенно вы
+переводите всё на обработчики.
 
 \begin{description}
-\item[addr] The DNS address of the server.
-\item[port] The port to connect to.
+\item[addr] DNS-адрес сервера.
+\item[port] Порт подключения.
 \end{description}
 
-Requests that match a Proxy route are still parsed by Mongrel2's incredibly accurate
-HTTP parser, so that your backend servers should not be receiving badly formatted
-HTTP requests.  Responses from a Proxy server, however, are sent unaltered to the
-browser directly.
-
+Mongrel2 распарсивает запросы, которые попадают под проксирование,
+поэтому ваши серверы должны получать эти запросы в нормальном виде.
+Ответы же от прокси передаются как есть в браузер.
 
 \subsection{Handler}
 
-Now we get to the best part: the ZeroMQ \ident{Handlers} that will receive asynchronous requests
-from Mongrel2.  You need to use the ZeroMQ syntax for configuring them, but this means with one
-configuration format you can use handlers that are using UDP, TCP, Unix, or PGM transports.  Most
-testing has been done with TCP transports.
+Ну вот, мы подошли к самой интересной части:
+\ident{ZeroMQ-обработчикам}, которые получают асинхронные запросы от
+Mongrel2. Для их конфигурирования нужно использовать ZeroMQ-синтаксис.
+Плюс его в том, что разные транспортные протоколы --- UDP, TCP, Unix,
+PGM --- одинаково настраиваются. Мы в основном тестировали TCP.
 
 \begin{description}
-\item[send\_spec]  This is the 0MQ sender specification, something like ``tcp://127.0.0.1:9999'' will
-    use TCP to connect to a server on 127.0.0.1 at port 9999.  The type of socket used is a PUSH
-    socket, so that handlers receive messages in round-robin style.
-\item[send\_ident] This is an identifier (usually a UUID) that will be used to register the send
-    socket.  This makes it so that messages are persisted between crashes.
-\item[recv\_spec] Same as the send spec, but it's for receiving responses from Handlers.  The type of
-    socket used is a SUB socket, so that a cluster of Mongrel2 servers will receive handler responses
-    but only the one with the right recv\_ident will process it.
-\item[recv\_ident] This is another UUID if you want the receive socket to subscribe to its messages.
-    Handlers properly mention the send\_ident on all returned messages, so you should either set this
-    to nothing and don't subscribe, or set it to the same as send\_ident.
+\item[send\_spec] Спецификация отправителя в формате 0MQ. Например,
+    строка ``tcp://127.0.0.1:9999'' говорит, что надо соединяться с
+    сервером по адресу 127.0.0.1 на порт 9999, используя протокол TCP.
+    Отправители используют PUSH-сокеты, чтобы обработчики получали запросы
+    в стиле round-robin.
+\item[send\_ident] Этот идентификатор (обычно UUID) используется для
+    регистрации отправителя. Если ваш сервер рухнет по каким-то причинам,
+    этот идентификатор используется, чтобы восстановить необработанные
+    сообщения.
+\item[recv\_spec] Подобно спецификации отправителя, только для
+    получения ответов от обработчиков. Получатели используют SUB-сокеты,
+    т.е. подписчики. Это позволяет кластеру из серверов Mongrel2 слушать
+    ответы, но только одному из них с подходящим recv\_ident --- реагировать.
+\item[recv\_ident] Ещё один UUID. Полезен, если необходимо подписаться
+    и слушать ответы. В ответах обработчики передают send\_ident ---
+    идентификатор отправителя. Так что у вас два варианта: присвоить
+    recv\_ident то же значение, что и send\_ident и таким образом
+    подписаться на ответы; либо ничего не присваивать и не подписываться.
 \end{description}
 
-The interesting thing about the \ident{Handler} configuration is you don't have to say where the
-actual backend handlers live.  Did you notice you aren't declaring large clusters of proxies, proxy selection
-methods, or anything else, other than two 0MQ endpoints and some identifiers?  This is because Mongrel2 is
-\emph{binding} these sockets and listening.  Mongrel2 doesn't actively connect to backends; they connect
-to Mongrel2.  This means, if you want to fire up 10 more handlers, you just start them; no need to restart
-or reconfigure Mongrel2 to make them active.
+Примечательный факт --- веб-серверу абсолютно \emph{безралично} где
+расположены бэкенды. Вы обратили внимание на то, что не нужно
+прописывать кластеры из прокси, или методы выбора прокси-сервера, или
+ещё что-либо в этом духе? Всё что нужно определить --- две конечные
+точки и их идентификаторы. Это потому что Mongrel2 \emph{связывается}
+с сокетами и слушает. Mongrel2 не подключается к бэкэндам; напротив
+--- бэкенды подключаются к нему. Это значит, что если вам нужно ещё 10
+обработчиков, чтобы справиться с нагрузкой, вы просто их запускаете и
+всё. Не надо перегружать или заново конфигурировать веб-сервер.
 
+\subsection{Другое}
 
-\subsection{Others}
+Есть также объекты/таблицы \ident{MIMEType}, \ident{Log}, и
+\ident{Setting}. Но они не нужны, чтобы понять структуру сервера,
+поэтому мы вернёмся к ним позже.
 
-There's also \ident{Log}, \ident{MIMEType}, and \ident{Setting} objects/tables you can work
-with, but we'll get into those later since you don't need to know about them to understand
-the Mongrel2 structure.
+\section{Более сложный пример}
 
+Теперь, вооружившись всеми необходимыми знаниями о структуре Mongrel2,
+можно взглянуть на более сложный пример. Я буду комментировать, вы ---
+сопоставлять мои комментарии с кодом.  Файл с примером находится
+здесь: \file{examples/python/tests/mongrel2\_org.py}:
 
-
-\section{A More Complex Example}
-
-All of this knowledge about the Mongrel2 configuration structure can now be used to take a look at
-a more complex example.  We'll take a look at this example and I'll just say what's
-going on, and you try to match what I'm saying to the code.  Here's the file \file{examples/python/tests/mongrel2\_org.py}:
-
-\begin{code}{Mongrel2.org Config Script}
-  \lstinputlisting[language=Python]{../../examples/python/tests/mongrel2_org.py}
+\begin{code}{Скрипт настроек mongrel2.org}
+  \lstinputlisting[language=Python]{../../../examples/python/tests/mongrel2_org.py}
 \end{code}
 
-If you haven't guessed yet, this configuration is what's used on \url{http://mongrel2.org}
-to configure the main test system.  In it we've got the following things to check out:
+Если вы ещё не догадались, этот скрипт используется для сайта
+\url{http://mongrel2.org}. И вот что в нём есть:
 
 \begin{enumerate}
-\item Our basic server, with a default host of mongrel2.org.
-\item The route targets are separated out into their own variables, unlike the \file{sample\_conf.py} file
-    where they're just tossed into one big structure.
-\item First target is a \ident{Dir} that serves up files out of the \file{tests} directory and uses \file{index.html}
-    as its default file.
-\item Next we setup a \ident{Proxy} pointing at the main website's server for testing the proxy.
-\item Then there's a \ident{Dir} target for the \url{http://mongrel2.org:6767/chatdemo/} that we'll look at later.
-\item And you have the \ident{Handler} for the same chat demo that does the actual logic of a chat system.
-\item After that's a little \ident{Handler} for testing out doing HTTP requests to a handler.  Notice how even
-    though the chat demo and this handler use different protocols (chat demo is using JSSockets) you don't have
-    tell mongrel2 that?  It figures it out based on how they're being used rather than by configurations.
-\item With all those handler targets, we can now make the \ident{mongrel2} \ident{Host} with all the routes
-    assigned once, nice and clean.  However, look how I was lazy and just tossed the mp3stream demo
-    right into the routes dict?  You can totally do this and m2sh will figure it out.  Remember also that
-    you can use the \verb|r'blah'| string format to not have to double up on your \verb|\| chars in the patterns.
-\item We then assign this \ident{mongrel2} variable as the hosts for the \ident{main} server.
-\item There is also a \ident{settings} feature, which is just a dict of global settings you can tweak.  In this case,
-    we're upping the number of threads that 0MQ is using for its operations.
-\item Finally, we commit the whole thing to the database by passing in the servers to save and the settings
-    to use.
+\item Простой сервер и в нём mongrel2.org как хост по умолчанию.
+\item Маршруты хранятся в отдельных переменных, а не в одной куче как
+    в примере \file{sample\_conf.py}.
+\item Первый маршрут --- Dir --- обслуживает файлы из директории
+    \file{tests} и использует \file{index.html} в качестве индексного файла.
+\item Создаём прокси и направляем его на локальный веб-сервер; удобно
+    для тестирования \ident{Proxy}-маршрута.
+\item Далее идет \ident{Dir} для \url{http://mongrel2.org:6767/chatdemo/}. Посмотрим позже.
+\item Также для демо-чата создаём \ident{Handler}, который и реализует всю логику.
+\item После этого следует небольшой \ident{Handler} для тестирования
+    обращений к обработчикам. Обратите внимание, несмотря на то, что они
+    используют разные протоколы (демо-чат использует JSSockets) не нужно
+    это явно указывать. Mongrel2 определяет это не из конфигурации, а по
+    поведению.
+\item Теперь, имея все переменные, мы можем создать хост
+\ident{mongrel2}. Обратите внимание, я поленился выносить настройки
+    для mp3stream-демо в отдельную переменную, и объявил их прямо в хэш-таблице. Это вполне
+    допустимо. Запомните также, что можно использовать строки вида
+    \verb|r'blah'|, чтобы не экранировать обратные слэши.
+\item Добавляем все хосты из переменной \ident{mongrel2} в \ident{main}-сервер.
+\item Переменной \ident{settings} присваимваем массив глобальных
+    настроек. В данном случае мы только увеличиваем количество рабочих
+    потоков, которые 0MQ использует для своих нужд.
+\item Наконец, заносим конфигурацию в базу.
 \end{enumerate}
 
-And that, my friends, is the most complex configuration we have so far.
+И это, пожалуй, самая сложная конфигурация на сегодняшний день.
 
 
-\section{Routing And Host Patterns}
+\section{Маршрутизация и паттерны}
 
-The pattern code was taken from \href{http://www.lua.org/}{Lua} and is some of
-the simplest code for doing fast pattern matches.  It is very much like regular
-expressions, except it removes a lot of features you don't need for routes.
-Also, unlike regular expressions, URL patterns always match from the start.
-Mongrel2 uses them by breaking routes up into a prefix and pattern part.  It
-then uses routes to find the longest matching prefix and then tests the
-pattern.  If the pattern matches, then the route works.  If the route doesn't
-have a pattern, then it's assumed to match, and you're done.
+Код для работы с паттернами был взят из
+\href{http://www.lua.org/}{Lua} и это, пожалуй, самый быстрый код
+такого рода. Он очень похож на регулярные выражения, за исключением
+того, что из него выкинуто всё лишнее и не нужное для маршрутизации
+запросов. Также, в отличие от регулярных выражений, паттерны для
+URLов всегда сравниваются с начала строки.
 
-The only caveat is you have to wrap your pattern parts in parenthesis, but these don't mean anything
-other than to delimit where a pattern starts.  So instead of \shell{/images/.*.jpg}, write \shell{/images/(.*.jpg)}
-for it to work.
+Вот как Mongrel2 ищет подходящий маршрут для заданного URLа. Он
+разбивает маршруты на две части: префикс и паттерн. Затем ищет среди
+маршрутов подходящий с самым длинным префиксом и анализирует паттерн.
+Если паттерн подходит --- маршрут найден. Если паттерна нет вообще, то
+маршрут снова подходит, поскольку фиксированная часть маршрута ---
+префикс --- подошла.
 
-Here's the list of characters you can use in your patterns:
+Единственный нюанс, о котором надо помнить --- паттерны надо брать в
+скобки. Собственно, здесь скобки используются исключительно для этих
+целей --- отделять паттерн (в отличие от регулярных выражений, где они
+обозначают группу). Таким образом, например, вместо
+\shell{/images/.*.jpg} надо писать \shell{/images/(.*.jpg)}
+
+Ниже приведён более детальный список символов, которые можно
+использовать в паттернах:
 
 \begin{itemize}
-\item \verb|.| (period) All characters.
-\item \verb|\a| Letters.
-\item \verb|\c| Control characters.
-\item \verb|\d| Digits.
-\item \verb|\l| Lowercase letters.
-\item \verb|\p| Punctuation characters.
-\item \verb|\s| Space characters.
-\item \verb|\u| Uppercase letters.
-\item \verb|\w| Alphanumeric characters.
-\item \verb|\x| Hexadecimal digits.
-\item \verb|\z| The 0 character (null terminator).
-\item \verb|[set]| Just like a regex [] where is a set of chars, like [0-9] for all digits.
-\item \verb|[^set]| Inverse character set, so \verb|[^0-9]| is anything but digits.
-\item \verb|*| Longest match of 0 or more of the preceding character.
-\item \verb|+| Longest match of 1 or more of the preceding character.
-\item \verb|-| Shortest match of 0 or more of the preceding character.
-\item \verb|?| 0 or 1 match of of the preceding character
-\item \verb|\b|\emph{xy} Balanced match a substring starting with \emph{x}
-  and ending in \emph{y}.  So \verb|\b()| will match balanced parentheses.
-\item \verb|$| End of the string.
+\item \verb|.| (точка) Все символы.
+\item \verb|\a| Буквы.
+\item \verb|\c| Управляющие символы.
+\item \verb|\d| Цифры.
+\item \verb|\l| Строчные буквы.
+\item \verb|\p| Символы пунктуации.
+\item \verb|\s| Пробелы.
+\item \verb|\u| Заглавные буквы.
+\item \verb|\w| Буквы и цифры.
+\item \verb|\x| Шестнадцатиричные цифры.
+\item \verb|\z| Символ окончания строки (null terminator).
+\item \verb|[set]| Как и в регулярных выражениях --- [] обозначает
+множество символом, например, [0-9] --- все цифры.
+\item \verb|[^set]| Обратное множество, т.е. \verb|[^0-9]| --- всё что
+угодно, кроме цифр.
+\item \verb|*| Максимально возможное вхождение предыдущего символа; от
+0 и больше.
+\item \verb|+| Максимально возможное вхождение предыдущего символа; от
+1 и больше.
+\item \verb|-| Минимально возможное вхождение предыдущего символа; от
+0 и больше.
+\item \verb|?| 0 или 1 предыдущий символ.
+\item \verb|\b|\emph{xy} Сбалансированное сопоставление подстроки,
+начинающейся с \emph{x} и заканчивающейся на \emph{y}. Паттерн
+\verb|\b()|, например, сопоставляет сбалансированные скобки.
+\item \verb|$| Конец строки.
 \end{itemize}
 
-Using the uppercase version of an escaped character makes it work the opposite
-way (i.e., \verb|\A| matches any character that \emph{isn't} a letter). The backslash
-can be used to escape the following character, disabling its special abilities (i.e.,
-\verb|\\| will match a backslash).
+Экранированный символ в верхнем регистре работает с точностью до
+наоборот, в отличие от своего младшего брата в нижнем. Т.е. \verb|\A| сопоставляет
+любой символ, который \emph{не является} буквой. Обратный слэш
+экранирует следующий за ним символ, отменяя, таким образом, его
+специальные возможности (например, \verb|\\| сопоставляет бэкслэш).
 
-Anything that's not listed here is matched literally.  Remember also that when you write the Python
-code for your scripts you can use the \verb|r'blah'| string syntax to avoid having to double up on your
-\verb|\| characters in the string.
+Всё что здесь не упомянуто сопоставляется как есть. Запомните, что в
+Питоне вы можете использовать \verb|r'blah'|, чтобы не экранировать
+бэкслэш.
 
-\begin{aside}{Sorry, Unicodians, It's All ASCII}
-Yep, I get it.  You think that everyone should use UTF-8 or some Unicode encoding for everything.
-You despise the dominance of the `A' in ASCII and hate that you can't put your spoken language
-right in a URL.
+\begin{aside}{Извините, юникодеры, но здесь всё в ASCII}
+Да, я понимаю, всё должно быть в UTF-8 или какой другой разновидности
+юникода. И вас, видимо, раздражает тот факт, что вы не можете
+создавать URLы на том же языке, на котором говорите.
 
-Well, I hate to say it, but tough.  Protocols are hard enough without having to
-worry about the bewildering mess that is Unicode.  When you sit down to write a
-network protocol, the last thing you need is a format that's inconsistent, has
-multiple interpretations, can't be properly capitalized or lowercased, and
-requires extra translations steps for every operation.  With ASCII, every
-computer just knows what it is, and it's the fastest for creating wire protocol
-formats.
+Что я могу сказать на это? Протоколы --- достаточно сложно
+разрабатывать и если бы вам пришлось писать свой протокол, то,
+вероятно, вы бы не хотели в конечном итоге иметь противоречивый
+формат, который имеет несколько интерпретаций, который иногда сложно
+переводить в верхний или нижний регистр, и который нужно транслировать
+каждый раз, чтобы что-то с ним сделать. Поэтому юникоду здесь не
+место. С ASCII жизнь сильно упрощается --- каждый компьютер просто
+знает что это такое и с чем его едят.
 
-This is why, on the Internet, you have to do things to URLs to make them ASCII,
-like encoding them with \% signs.  It's in the standard, and it's the smart
-thing to do.  I don't want to have to know the difference between the various
-accents in your spoken language to route a URL around.  I just want to deal
-with a fixed set of characters and be done with it.  Don't blame me or Mongrel2
-for this, it's just the way the standard is and the way to get a server that is
-stable and works.
+Вот почему в интернете нередко приходится транслировать URLв в ASCII;
+например, кодировать с помощью \%. Так говорит нам стандарт и это
+весьма разумная вещь. Честно, я не хочу знать в чём разница между
+крышечкой, двоеточием и прочими акцентами. Я хочу работать с
+фиксированным набором символов. Не вините меня или Mongrel2 в этом;
+это стандарт и, к тому же, хороший способ получить в итоге стабильный
+сервер.
 
-Protocols work better when there's less politics in their design.  This means
-you can't put Unicode into your URL patterns.  I mean, you can try; but the
-behavior is completely undefined.
+Протоколы работают тем лучше, чем меньше в них политики. Это значит,
+что вы не можеет использовать юникод в паттернах. То есть вы можете,
+конечно, но никто не гарантирует стабильный результат.
 
 \end{aside}
 
-
-Here are some example routes you can try to get a feel for the system:
+Вот примеры маршрутов для изучения --- они помогут вам прочувствовать
+систему немного лучше:
 
 \begin{itemize}
-\item \verb|r"/images/"|  This will just match any path that has /images/ in it without any patterns.
-\item \verb|r"/"| The fastest possible route you can have.
-\item \verb|r"/images/(.*.jpg)"| Match only requests for jpg images in the images directory.  Keep in mind that this
-    isn't actually looking in the directory, it's just matching the \ident{(.*.jpg)} pattern.
-\item \verb|r"/images/(\a-\-\d+\.jpg)"| A more complex example that matches a short sequence of 0 or more letters (remember -), then a dash
-    (\verb|\-| escapes the -), then 1 or long sequence of digits and finally a .jpg) with the \verb|\|. escaping the period.
+\item \verb|r"/images/"|  Сопоставляет любой путь, который содержит
+/images/ без всяких паттернов.
+\item \verb|r"/"| Самый быстрый маршрут из всех возможных.
+\item \verb|r"/images/(.*.jpg)"| Сопоставляет картинки в формате jpg в
+папке images. Обратите внимание на то, что паттерн не смотрит внутрь
+директории, он только проверят паттерн \ident{(.*.jpg)}.
+\item \verb|r"/images/(\a-\-\d+\.jpg)"| Пример посложнее: он
+сопоставляет короткую последовательность из 0 или больше букв (помните
+-); затем тире (\verb|\-| экранирует -); далее длинная
+последовательносить из 1 и больше цифр; и, наконец, .jpg, где
+\verb|\|. экранирует точку.
 \end{itemize}
 
-That should give the idea of how you can use them.  Notice also that I'm using the Python \verb|r"blah"| string syntax which is
-interchangeable with the \verb|r'blah'| syntax so I don't have to double escape everything.
+Этого должно быть достаточно, чтобы понять как использовать паттерны.
+Обратите внимание, чтобы явно не экранировать каждый раз спецсимволы,
+я использую синтаксис \verb|r"blah"|.
 
 
-\section{Deployment Logs And Commits}
+\section{Логи}
 
-A very nice feature for people doing operations work is that m2sh keeps track of all the
-commands you run on it while you work, and lets you add little commit logs to the
-log for documentation later.  These commit logs are then maintained even across
-\shell{m2sh init} and \shell{m2sh load} commands so you can see what's going on.  They
-track who did something, what server they did it on, what time they did it and what they
-did.
+m2sh ведёт логи всех операций, выполненных с помощью этой утилиты.
+Кроме этого, с помощью команды \shell{m2sh commit} можно добавлять
+свои комментарии. Все эти логи сохраняются, даже если вы выполняете
+инициализацию (\shell{m2sh init}) или загрузку из скрипта (\shell{m2sh
+load}). В логах хранится подробная информация: кто и что сделал с
+конфигурацией, когда это было сделано и для какого сервера.
 
-To see the logs for your own tests, just do \shell{m2sh log -db simple.sqlite} and then,
-if you want to add a commit log message, you use the \shell{m2sh commit} command.
-Here's an example from mongrel2.org:
+Чтобы посмотреть логи для нашего маленького примера, запустите
+\shell{m2sh log -db simple.sqlite}.
 
-\begin{code}{Example Commit Log}
+Ниже --- пример для mongrel2.org:
+
+\begin{code}{Пример логов}
 \begin{lstlisting}
 > m2sh log -db config.sqlite 
 [2010-07-18T04:14:53, mongrel2@zedshaw, init_command] /usr/bin/m2sh init -db config.sqlite
@@ -508,56 +573,57 @@ Here's an example from mongrel2.org:
 \end{lstlisting}
 \end{code}
 
-The motivation for this feature is the trend that operations store server configurations
-in revision control systems like git or etckeeper.  This works great for holding the configuration
-files, but it doesn't tell you what happened on each server.  In many cases, the configuration
-files also need to be reworked or altered for each deployment.  With the m2sh log and commit
-system, you can augment your revision control with deployment action tracking.
+На сегодняшний день наблюдается тенденция хранить серверные
+конфигурации в системах управления версиями, такими как git или
+mercurial. Эти системы хранят историю изменений, но ничего не говорят
+о причинах изменений. Логи восполняют этот пробел; собственно поэтому
+эта фича и была добавлена в m2sh.
 
-Later versions of Mongrel2 will keep small amounts of statistics which will link these actions
-to changes in Mongrel2 behavior like frequent crashing, failures, slowness, or other problems.
+В будущем Mongrel2 будет вести статистику, которая привяжет изменения
+в конфигурации с негативными изменениями в поведении сервера: частые
+сбои, ошибки, медленная работа и прочие проблемы.
 
-Basically, there's nowhere to hide.  Mongrel2 will help operations figure out who needs to
-get fired the next time Twitter goes down.
+В общем, всё тайное становится явным. Mongrel2 позволит админам
+вычислить, кто ``уронил'' Твиттер и кого надо за это уволить :-)
 
+\section{Порт управления}
 
-\section{Control Port}
+Перед самым релизом 1.0 мы добавили фичу под названием ``порт
+управления'', которая позволяет соединиться с сервером через unix-сокет
+и посылать команды. Вот что можно делать с помощью этих команд:
+получать статус запущенных задач, получать список открытых соединений
+и узнать как долго они открыты, принудительно закрыть соединение. С
+помощью этого порта можно реализовать любой инструмент мониторинга.
 
-Just before the release of 1.0, we added a feature called the ``Control Port'', which
-lets you connect to a running Mongrel2 server over a unix (domain) socket and
-give it control commands.  These commands let you get the status of running
-tasks, lists of currently connected sockets and how long they've been connected,
-the server's current time and kill a connection.  Using this control port, you
-can then implement any monitoring and timeout policies you want, and provide
-better status.
+По умолчанию этот порт находится в файле \file{run/control} в рабочей
+директории (та, которую веб-сервер делает рутовой, помните?), но можно
+изменить этот путь с помощью настройки \ident{control\_port}. Можно
+использовать любую спецификацю ZeroMQ, но в целях безопасности я
+рекомендую использовать IPC.
 
-By default, the control port is in your chroot at run/control, but you can set
-the \ident{control\_port} setting to change this.  You can actually change it
-to any ZeroMQ valid spec you want, although you're advised to use IPC for security.
+Как только Mongrel2 запущен, можно подключиться к нему с помощью
+\file{m2sh} и управлять сервером с помощью простых команд. На данный
+момент сервер возвращает не очень читабельный текст, но со временем мы
+его улучшим.
 
-Once Mongrel2 starts, you can then use \file{m2sh} to connect to Mongrel2 and 
-control it using the simple command language.  Currently, what you get back is
-very raw, but it will improve as we work on the control port and what it does.
-
-The list of commands you can issue are:
+Ниже приведён список команд:
 
 \begin{description}
-\item[status tasks] Dumps a JSON formatted dict (object) of all the currently
-    running tasks and what they're doing.  Think of it like an internal \file{ps}
-    command.
-\item[status net] Dumps a JSON dict that matches connections IDs (same ones your
-        handlers get) to the seconds since their last ping.  In the case of an
-        HTTP connection this is how long they've been connected.  In the case
-        of a JSON socket this is the last time a ping message was received.
-\item[time] Prints the unix time the server thinks it's using.  Useful for synching.
-\item[kill ID] Does a forced close on the socket that is at this ID from the \ident{status net}
-    command.  This is a rather violent way to kill a connection so don't do it that
-    often, but if you're overloaded then this is where to go.
-\item[control stop] Shuts down the control port permanently in case you want to keep
-    it from being accessed for some reason.
+\item[status tasks] Возвращает список задач в JSON-формате. Что-то вроде
+    внутренней команды \shell{ps}.
+\item[status net] Возвращает список идентификаторов соединений и время
+    (в секундах) с момента последней активности: если это HTTP-соединение,
+    то время с момента подключения; если же сокет --- время с момента
+    последнего пинга.
+\item[time] Выводит время с сервера. Полезно для синхронизации.
+\item[kill ID] Принудительно закрывает сокет с заданным
+    идентификатором (его можно получить из \ident{status net}). Это
+    достаточно жёсткий способ, поэтому используйте его как можно реже.
+\item[control stop] Закрывает порт управления. Открыть сможет только
+    перезагрузка сервера.
 \end{description}
 
-You then use the control port by running \ident{m2sh}:
+И пример того, как управлять с помощью \ident{m2sh}:
 
 \begin{Verbatim}
 m2sh control -db config.sqlite -name test
@@ -568,12 +634,14 @@ CONNECTING...
 {"time": 1282980306}
 \end{Verbatim}
 
-As we work on this feature more, we'll have a nicer interface to it.
-If you wanted to connect on your own, here is a simple Python
-script showing how to do it:
+Эта фича ещё в разработке и со временем у неё будет более удобный
+интерфейс.
+
+Если вы хотите вручную соединиться и управлять сервером, то вот пример
+на Питоне:
 
 
-\begin{code}{Python Control Port Example}
+\begin{code}{Управление сервером: пример на Питоне}
 \begin{lstlisting}
 import zmq
 
@@ -597,28 +665,27 @@ ctl.close()
 \end{lstlisting}
 \end{code}
 
-You obviously don't need to do this, but should you want to do
-something special like a management interface, this is your start.
+\section{Несколько серверов}
 
+Процесс Mongrel2 не может хостить несколько серверов; при запуске вы
+передаёте два параметра: базу настроек и UUID сервера, который надо
+запустить. Такой подход упрощает код и позволяет поддерживать его в
+рабочем состоянии.
 
-\section{Multiple Servers}
+Однако.
 
-A Mongrel2 process itself does not have any support for running multiple servers;
-instead, it takes two simple parameters: a sqlite config database and a server uuid
-that names the server to be launched. This is done to keep the mongrel2 code simple
-and workable.
+Утилита m2sh позволяет запускать несколько серверов из одной и той же
+конфигурационной базы. Передавая параметр \ident{-every} вы сообщаете
+о том, что надо выполнять действия над всеми серверами, определёнными
+в настройках. Наряду с этим можно указать один сервер с помощью
+идентификатора, хоста или названия. Если передаваемый параметр нельзя
+трактовать однозначно (например, вы ищите с помощью \shell{-host
+localhost} и вашей базе задано два сервера, которые обслуживают этот
+домен), то m2sh выведет список соответствующих серверов и попросит
+выбрать один.
 
-However.
+Например:
 
-Mongrel2's m2sh does support launching multiple servers from a single configuration
-database. By passing -every to many m2sh commands, you are able to perform actions
-on all configured servers at once. You can also perform actions on single servers
-by specifying their uuid, name or host. If any parameter given is ambiguous (that
-is if, for example, you search with \shell{-host localhost} and your config contains
-two servers which attempt to bind to localhost), m2sh will list the matching servers
-and ask you to clarify your selection.
-
-For example:
 \begin{Verbatim}
 > m2sh start -db config.sqlite -every
 Launching server localhost 9f0cbd7d-aeff-4195-921e-2ce1c25512d3 on port 6768
@@ -645,19 +712,18 @@ PID file run/mongrel2.pid not found for server localhost 9f0cbd7d-aeff-4195-921e
 > m2sh stop -db config.sqlite -every
 \end{Verbatim}
 
-\section{Tweakable Expert Settings}
+\section{Продвинутые настройки}
 
-Many of Mongrel2's internal settings are configurable using the settings system.
-Some of these are dangerous to mess with, so make sure you test any changes before
-you try to run them.  Setting them to 0 or negative numbers isn't checked, so if
-you make a setting and things go crazy, you need to not make that setting.  All
-of these have good defaults so you can leave them alone unless you need to change
-them.
+Mongrel2 можно конфигурировать с помощью настроек. Некоторые из них
+нужно менять осторожно, поэтому тестируйте, прежде чем внести
+изменения в рабочую систему. Все они имеют приемлемые значения по
+умолчанию, так что, возможно, ничего и не надо менять, если нет острой
+необходимости.
 
-To configure your settings, you just pass them to the \ident{commit} command when
-you setup your configuration. Like this:
+Чтобы настройки вступили в силу, их нужно передать в команду
+\ident{commit}, при сохранени конфигурации, как в этом примере:
 
-\begin{code}{Changing Settings}
+\begin{code}{Изменение настроек}
 \begin{lstlisting}
 settings = {"zeromq.threads": 1, "limits.url_path": 1024}
 
@@ -665,28 +731,60 @@ commit([main], settings=settings)
 \end{lstlisting}
 \end{code}
 
-Mongrel2 will read these on the fly and write INFO log messages telling you
-what the settings are so you can debug them if they cause problems.  The list
-of available settings are:
+Mongrel2 считывает настройки на лету и для каждой из них создаёт
+INFO-сообщение в логах со значением переменной --- это облегчает
+отладку, в случае возникновения проблем.
+
+Итак, полный список настроек:
 
 \begin{description}
-\item[control\_port=ipc://run/control] This is where Mongrel2 will listen with 0MQ for control messages.  You should use \verb|ipc://| for the spec so that only a local user with file access can get at it.
-\item[limits.buffer\_size=2 * 1024] Internal IO buffers, used for things like proxying and handling requests.  This is a \emph{very} conservative setting, so if you get HTTP headers greater than this, you'll want to increase this setting.  You'll also want to shoot whoever is sending you those requests, because the average is 400-600 bytes.
-\item[limits.connection\_stack\_size=32 * 1024] Size of the stack used for connection coroutines.  If you're trying to cram a ton of connections into very little RAM, see how low this can go.
-\item[limits.content\_length=20 * 1024] Maximum allowed content length on submitted requests.  This is, right now, a hard limit so requests that go over it are rejected.  Later versions of Mongrel2 will use an upload mechanism that will allow any size upload.
-\item[limits.dir\_max\_path=256] Max path length you can set for Dir handlers.
-\item[limits.dir\_send\_buffer=16 * 1024] Maximum buffer used for file sending when we need to use one.
-\item[limits.fdtask\_stack=100 * 1024] Stack frame size for the main IO reactor task.  There's only one, so set it high if you can, but it could possibly go lower.
-\item[limits.handler\_stack=100 * 1024] The stack frame size for any Handler tasks. You probably want this high, since there's not many of these, but adjust and see what your system can handle.
-\item[limits.handler\_targets=128] The maximum number of connection IDs a message from a Handler may target.  It's not smart to set this really high.
-\item[limits.header\_count=128 * 10] Maximum number of allowed headers from a client connection.
-\item[limits.host\_name=256] Maximum hostname for Host specifiers and other DNS related settings.
-\item[limits.mime\_ext\_len=128] Maximum length of MIME type extensions.
-\item[limits.url\_path=256] Max URL paths. Does not include query string, just path.
-\item[superpoll.hot\_dividend=4] Ratio of the total (like 1/4th, 1/8th) that should be in the hot selection.  Set this higher if you have lots of idle connections; set it lower if you have more active connections.
-\item[superpoll.max\_fd=10 * 1024] Maximum possible open files.  Do not set this above 64 * 1024, and expect it to take a bit while Mongrel2 sets up constant structures.
-\item[upload.temp\_store=None] This is not set by default.  If you want large requests to reach your handlers, then set this to a directory they can access, and make sure they can handle it.  Read about it in the Hacking section under Uploads.  The file has to end in XXXXXX chars to work (read man mkstemp).
-\item[zeromq.threads=1] Number of 0MQ IO threads to run.  Careful, we've experienced thread bugs in 0MQ sometimes with high numbers of these.
+\item[control\_port=ipc://run/control] Mongrel2 слушает этот порт с
+помощью 0MQ на предмет управляющих команд. Вам следует использовать
+\verb|ipc://| для этих целей, чтобы только локальные пользователи
+могли управлять сервером.
+\item[limits.buffer\_size=2 * 1024] Внутренний буфер для ввода-вывода.
+Используется для обработки запросов и проксирования. Это \emph{очень}
+консервативное значение, так что если сервер получает HTTP-запросы
+больше этого размера, то его надо увеличить. Возможно вы захотите
+пристрелить того, кто посылает такие запросы: в среднем запрос обычно
+не привышает 400-600 байт.
+\item[limits.connection\_stack\_size=32 * 1024] Размер стэка для
+корутин.
+\item[limits.content\_length=20 * 1024] Максимальный размер контента,
+который сервер принимает от клиентов. Сейчас это жёстко прописанный
+лимит и все запросы, превышающие его, отвергаются. Будущие версии
+позволят загружать файлы любого размера.
+\item[limits.dir\_max\_path=256] Максимальная длина пути в
+Dir-обработчиках.
+\item[limits.dir\_send\_buffer=16 * 1024] Максимальный размер буфера
+для пересылки файлов.
+\item[limits.fdtask\_stack=100 * 1024] Размер стека подсистемы
+управления соединениями и состояниями сервера. Это сердце веб-сервера
+и, как в любом организме, оно одно, поэтому для него можно выделить
+побольше ресурсов.
+\item[limits.fdtask\_stack=100 * 1024] Размер стэка для одного
+обработчика. Поскольку их обычно не очень много, то можно установить
+достаточно большое значение. 
+\item[limits.hanlder\_targets=128] Максимальное количество
+обработчиков в бэкенде для получения сообщений. Не очень разумно
+устанавливать большое значение.
+\item[limits.header\_count=128 * 10] Максимальное количество
+заголовков в клиентском соединении.
+\item[limits.host\_name=256] Максимальная длина хоста.
+\item[limits.mime\_ext\_len=128] Максимальная длина MIME-типа.
+\item[limits.url\_path=256] Максимальная длина URLа. Длина параметров
+не включена, только длина пути.
+\item[superpoll.hot\_dividend=4] Доля ``горячих'' соединений (т.е.
+1/4, 1/8). Чем больше простаивающих соединений, тем выше должно быть
+это число. И наоборот, чем больше активных соединений, тем оно ниже.
+\item[superpoll.max\_fd=10 * 1024] Максимально возможное количество
+открытых файлов. Не устанавливайте больше чем 64 * 1024, и учтите, что
+серверу понадобится некоторое время, чтобы создать необходимые
+структуры данных.
+\item[upload.temp\_store=None] Единственная переменная без значения по
+умолчанию. Если вы планируете обрабатывать большие запросы, то задайте
+временную папку, в которую сервер может писать. В секции
+\ref{sec:async_file_upload_demo} эта настройка рассматривается более подробно.
+\item[zeromq.threads=1] Количество потоков для 0MQ. Осторожно! У нас
+возникали проблемы, если установить большое значение.
 \end{description}
-
-
