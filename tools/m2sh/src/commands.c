@@ -46,18 +46,27 @@ static int Command_shell(Command *cmd)
 {
     char *line = NULL;
     bstring args = NULL;
+    char *home_dir = getenv("HOME");
+    bstring hist_file = NULL;
 
-    // TODO: create a ~/.m2sh dir on startup
-    linenoiseHistoryLoad(".m2sh");
+    if(home_dir != NULL) {
+        hist_file = bformat("%s/.m2sh", home_dir);
+        linenoiseHistoryLoad(bdata(hist_file));
+    } else {
+        log_err("You don't have a HOME environment variable. Oh well, no history.");
+        hist_file = NULL;
+    }
 
     while((line = linenoise("m2> ")) != NULL) {
         if (line[0] != '\0') {
             args = bformat("%s %s", bdata(cmd->name), line);
             Command_run(args);
-
-            linenoiseHistoryAdd(line);
-            linenoiseHistorySave(".m2sh"); /* Save every new entry */
             bdestroy(args);
+
+            if(hist_file) {
+                linenoiseHistoryAdd(line);
+                linenoiseHistorySave(bdata(hist_file)); /* Save every new entry */
+            }
         }
 
         free(line);
