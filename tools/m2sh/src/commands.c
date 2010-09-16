@@ -3,6 +3,8 @@
 #include "commands.h"
 #include <dbg.h>
 #include <stdio.h>
+#include "linenoise.h"
+#include <stdlib.h>
 
 typedef int (*Command_handler_cb)(Command *cmd);
 
@@ -42,7 +44,28 @@ error:
 
 static int Command_shell(Command *cmd)
 {
+    char *line = NULL;
+    bstring args = NULL;
 
+    // TODO: create a ~/.m2sh dir on startup
+    linenoiseHistoryLoad(".m2sh");
+
+    while((line = linenoise("m2> ")) != NULL) {
+        if (line[0] != '\0') {
+            args = bformat("%s %s", bdata(cmd->name), line);
+            Command_run(args);
+
+            linenoiseHistoryAdd(line);
+            linenoiseHistorySave(".m2sh"); /* Save every new entry */
+            bdestroy(args);
+        }
+
+        free(line);
+    }
+
+    return 0;
+
+error:
     return -1;
 }
 
@@ -54,7 +77,7 @@ static int Command_dump(Command *cmd)
 
 static int Command_uuid(Command *cmd)
 {
-
+    
     return -1;
 }
 
@@ -136,7 +159,7 @@ static CommandHandler COMMAND_MAPPING[] = {
     {.name = "uuid", .cb = Command_uuid,
         .help = "Prints out a uuid: uuid " },
     {.name = "hosts", .cb = Command_hosts,
-        .help = ": hosts " },
+        .help = "Dumps the hosts a server has: hosts " },
     {.name = "init", .cb = Command_init,
         .help = "deprecated, just use load" },
     {.name = "commit", .cb = Command_commit,
@@ -165,13 +188,26 @@ static int Command_help(Command *cmd)
 {
     CommandHandler *handler;
 
-    printf("Mongrel2 m2sh has these commands available:\n\t");
-    
-    for(handler = COMMAND_MAPPING; handler->name != NULL; handler++) {
-        printf("%s\t%s", handler->name, handler->help);
-    }
+    lnode_t *ex = list_first(cmd->extra);
 
-    printf("\nSorry there's not much better help yet.\n");
+    if(ex) {
+        bstring arg = lnode_get(ex);
+
+        for(handler = COMMAND_MAPPING; handler->name != NULL; handler++) {
+            if(biseqcstr(arg, handler->name)) {
+                printf("%s\t%s\n", handler->name, handler->help);
+                return 0;
+            }
+        }
+
+        printf("No help for %s. Use m2sh help to see a list.", bdata(arg));
+    } else {
+        printf("Mongrel2 m2sh has these commands available:\n\n");
+        
+        for(handler = COMMAND_MAPPING; handler->name != NULL; handler++) {
+            printf("%8s  %s\n", handler->name, handler->help);
+        }
+    }
 
     return 0;
 }
