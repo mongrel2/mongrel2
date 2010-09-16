@@ -136,8 +136,13 @@ static inline int Command_parse(struct params *p, Command *cmd)
     cmd->extra = list_create(LISTCOUNT_T_MAX);
     check_mem(cmd->extra);
 
-    cmd->progname = match(p, TKIDENT);
-    check(cmd->progname, "No program name given in command.");
+    next = peek(p);
+    if(next == TKIDENT || next == TKBLOB) {
+        cmd->progname = match(p, next);
+        check(cmd->progname, "No program name given in command.");
+    } else {
+        sentinel("Expected the name of the program you're running.");
+    }
 
     cmd->name = match(p, TKIDENT);
     check(cmd->name, "No command name given.");
