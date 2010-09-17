@@ -214,7 +214,9 @@ static int Command_control(Command *cmd)
 
 static int Command_version(Command *cmd)
 {
-    return -1;
+#include <version.h>
+    printf("%s\n", VERSION);
+#undef VERSION
 }
 
 
