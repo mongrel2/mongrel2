@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include "linenoise.h"
 #include <stdlib.h>
+#include <config/db.h>
 
 typedef int (*Command_handler_cb)(Command *cmd);
 
@@ -22,7 +23,7 @@ static inline bstring option(Command *cmd, const char *name, const char *def)
     if(def != NULL) {
         return val == NULL ? bfromcstr(def) : hnode_get(val);
     } else {
-        return hnode_get(val);
+        return val == NULL ? NULL : hnode_get(val);
     }
 }
 
@@ -78,29 +79,100 @@ error:
     return -1;
 }
 
-static int Command_dump(Command *cmd)
-{
 
+static int table_print(void *param, int cols, char **data, char **names)
+{
+    int i = 0;
+
+    for(i = 0; i < cols; i++) {
+        printf(" %s ", data[i]);
+    }
+
+    printf("\n");
+
+    return 0;
+}
+
+static inline int simple_query_print(bstring db_file, const char *sql)
+{
+    int rc = 0;
+
+    rc = DB_init(bdata(db_file));
+    check(rc != -1, "Failed to open database %s", bdata(db_file));
+
+    rc = DB_exec(sql, table_print, NULL);
+    check(rc == 0, "Failed to list the hosts in: %s.", bdata(db_file));
+
+    bdestroy(db_file);
+    DB_close();
+    return 0;
+
+error:
+    bdestroy(db_file);
+    DB_close();
     return -1;
 }
 
 static int Command_servers(Command *cmd)
 {
+    int rc = 0;
+    bstring db_file = option(cmd, "db", "config.sqlite");
 
-    return -1;
+    printf("SERVERS:\n------\n");
+    return simple_query_print(db_file, "SELECT name, default_host, uuid from server");
 }
+
 
 
 static int Command_hosts(Command *cmd)
 {
-    return -1;
+    bstring db_file = option(cmd, "db", "config.sqlite");
+    bstring server = option(cmd, "server", NULL);
+    char *sql = NULL;
+    int rc = 0;
+
+    check(server, "You need to give a -server of the server to list hosts from.");
+
+    sql = sqlite3_mprintf("SELECT id, name from host where server_id = (select id from server where name = %Q)", bdata(server));
+
+    printf("HOSTS in %s:\n-----\n", bdata(server));
+    rc = simple_query_print(db_file, sql);
+
+error: // fallthrough
+    if(sql) sqlite3_free(sql);
+    return rc;
 }
 
 
-static int Command_init(Command *cmd)
+static int Command_routes(Command *cmd)
 {
-    printf("init is deprecated and simply done for you.\n");
-    return 0;
+    bstring db_file = option(cmd, "db", "config.sqlite");
+    bstring server = option(cmd, "server", NULL);
+    bstring host = option(cmd, "host", NULL);
+    bstring host_id = option(cmd, "id", NULL);
+    char *sql = NULL;
+    int rc = 0;
+
+
+    if(host_id) {
+        printf("ROUTES in host id %s\n-----\n", bdata(host_id));
+        sql = sqlite3_mprintf("SELECT path from route where host_id=%q", bdata(host_id));
+    } else {
+        check(server, "Must set the -server name you want or use -id.");
+        check(host, "Must set the -host in that server you want or use -id.");
+
+        printf("ROUTES in host %s, server %s\n-----\n", bdata(host), bdata(server));
+
+        sql = sqlite3_mprintf("SELECT route.path from route, host, server where "
+                "host.name = %Q and route.host_id = host.id and server.name = %Q and "
+                "host.server_id = server.id", bdata(host), bdata(server));
+    }
+
+    rc = simple_query_print(db_file, sql);
+
+error: //fallthrough
+    sqlite3_free(sql);
+    return rc;
 }
 
 
@@ -156,13 +228,11 @@ static CommandHandler COMMAND_MAPPING[] = {
     {.name = "shell", .cb = Command_shell,
         .help = "Starts an interactive shell." },
     {.name = "servers", .cb = Command_servers,
-        .help = "Lists the servers." },
-    {.name = "dump", .cb = Command_dump,
-        .help = "Dumps a quick view of the db." },
+        .help = "Lists the servers in a config database." },
     {.name = "hosts", .cb = Command_hosts,
-        .help = "Dumps the hosts a server has." },
-    {.name = "init", .cb = Command_init,
-        .help = "deprecated, just use load" },
+        .help = "Lists the hosts in a server." },
+    {.name = "routes", .cb = Command_routes,
+        .help = "Lists the routes in a host." },
     {.name = "commit", .cb = Command_commit,
         .help = "Adds a message to the log." },
     {.name = "log", .cb = Command_log,
