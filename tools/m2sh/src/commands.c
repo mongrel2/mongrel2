@@ -6,6 +6,8 @@
 #include "linenoise.h"
 #include <stdlib.h>
 #include <config/db.h>
+#include <sys/types.h>
+#include <signal.h>
 
 typedef int (*Command_handler_cb)(Command *cmd);
 
@@ -191,7 +193,64 @@ struct ServerRun {
     int ran;
     bstring db_file;
     const char *sudo;
+    int murder;
 };
+
+
+static inline int exec_server_operations(Command *cmd,
+        int (*callback)(void*,int,char**,char**), const char *select)
+{
+    int rc = 0;
+    char *sql = NULL;
+
+    bstring db_file = option(cmd, "db", "config.sqlite");
+    struct ServerRun run = {.ran = 0, .db_file = db_file, .sudo = "", .murder = 0};
+
+    bstring name = option(cmd, "name", NULL);
+    bstring uuid = option(cmd, "uuid", NULL);
+    bstring host = option(cmd, "host", NULL);
+    bstring sudo = option(cmd, "sudo", NULL);
+    bstring every = option(cmd, "every", NULL);
+    run.murder = option(cmd, "murder", NULL) != NULL;
+
+    check(!(name && uuid && host), "Just one please, not all of the options.");
+
+    if(sudo) {
+        run.sudo = biseqcstr(sudo, "") ? "sudo" : bdata(sudo);
+    } else {
+        run.sudo = "";
+    }
+
+    if(every) {
+        sql= sqlite3_mprintf("SELECT %s FROM server", select);
+    } else if(name) {
+        sql = sqlite3_mprintf("SELECT %s FROM server where name = %Q", select, bdata(name));
+    } else if(host) {
+        sql = sqlite3_mprintf("SELECT %s FROM server where host = %Q", select, bdata(host));
+    } else if(uuid) {
+        // yes, this is necessary, so that the callback runs
+        sql = sqlite3_mprintf("SELECT %s FROM server where uuid = %Q", select, bdata(uuid));
+    } else {
+        sentinel("You must give either -name, -uuid, or -host to start a server.");
+    }
+
+    rc = DB_init(bdata(db_file));
+    check(rc == 0, "Failed to open db: %s", bdata(db_file));
+
+    rc = DB_exec(sql, callback, &run);
+
+    check(run.ran, "Didn't find a server to run.");
+
+    if(sql) sqlite3_free(sql);
+    DB_close();
+    return 0;
+
+error:
+    if(sql) sqlite3_free(sql);
+    DB_close();
+    return -1;
+}
+
 
 static int run_server(void *param, int cols, char **data, char **names)
 {
@@ -210,72 +269,86 @@ error:
     return -1;
 }
 
-
 static int Command_start(Command *cmd)
 {
+    return exec_server_operations(cmd, run_server, "uuid");
+}
+
+
+static int stop_server(void *param, int cols, char **data, char **names)
+{
+    struct ServerRun *r = (struct ServerRun *)param;
     int rc = 0;
-    char *sql = NULL;
+    bstring pid_path = bformat("%s%s", data[0], data[1]);
 
-    bstring db_file = option(cmd, "db", "config.sqlite");
-    struct ServerRun run = {.ran = 0, .db_file = db_file, .sudo = ""};
+    FILE *pid_file = fopen(bdata(pid_path), "r");
+    check(pid_file, "Couldn't open pid file: %s", bdata(pid_path));
 
-    bstring name = option(cmd, "name", NULL);
-    bstring uuid = option(cmd, "uuid", NULL);
-    bstring host = option(cmd, "host", NULL);
-    bstring sudo = option(cmd, "sudo", NULL);
-    bstring every = option(cmd, "every", NULL);
+    bstring pid = bread((bNread)fread, pid_file);
+    check(pid, "Couldn't read the pid from pid file: %s", bdata(pid_path));
 
-    check(!(name && uuid && host), "Just one please, not all of the options.");
+    int signal = r->murder ? SIGTERM : SIGINT;
 
-    if(sudo) {
-        run.sudo = biseqcstr(sudo, "") ? "sudo" : bdata(sudo);
-    } else {
-        run.sudo = "";
-    }
+    rc = kill(atoi(bdata(pid)), signal);
+    check(rc == 0, "Failed to send SIGTERM to target: %s", bdata(pid));
 
-    if(every) {
-        sql= sqlite3_mprintf("SELECT uuid FROM server");
-    } else if(name) {
-        sql = sqlite3_mprintf("SELECT uuid FROM server where name = %Q", bdata(name));
-    } else if(host) {
-        sql = sqlite3_mprintf("SELECT uuid FROM server where host = %Q", bdata(host));
-    } else if(uuid) {
-        // yes, this is necessary, so that the callback runs
-        sql = sqlite3_mprintf("SELECT uuid FROM server where uuid = %Q", bdata(uuid));
-    } else {
-        sentinel("You must give either -name, -uuid, or -host to start a server.");
-    }
-
-    rc = DB_init(bdata(db_file));
-    check(rc == 0, "Failed to open db: %s", bdata(db_file));
-
-    rc = DB_exec(sql, run_server, &run);
-    sqlite3_free(sql);
-
-    check(run.ran, "Didn't find a server to run.");
-
-    DB_close();
+    bdestroy(pid);
+    bdestroy(pid_path);
+    fclose(pid_file);
+    r->ran = 1;
     return 0;
 
 error:
-    DB_close();
+    bdestroy(pid);
+    bdestroy(pid_path);
+    fclose(pid_file);
+    r->ran = 0;
     return -1;
 }
 
 static int Command_stop(Command *cmd)
 {
+    return exec_server_operations(cmd, stop_server, "chroot, pid_file");
+}
+
+static int reload_server(void *param, int cols, char **data, char **names)
+{
+    struct ServerRun *r = (struct ServerRun *)param;
+    r->ran = 0;
+
+    printf("running: %s, %s", data[0], data[1]);
+
+    r->ran = 1;
+    return 0;
+
+error:
     return -1;
 }
 
 static int Command_reload(Command *cmd)
 {
+    return exec_server_operations(cmd, reload_server, "chroot, pid_file");
+}
+
+static int check_server(void *param, int cols, char **data, char **names)
+{
+    struct ServerRun *r = (struct ServerRun *)param;
+    r->ran = 0;
+
+    printf("checking: %s, %s", data[0], data[1]);
+
+    r->ran = 1;
+    return 0;
+
+error:
     return -1;
 }
 
 static int Command_running(Command *cmd)
 {
-    return -1;
+    return exec_server_operations(cmd, check_server, "chroot, pid_file");
 }
+
 
 static int Command_control(Command *cmd)
 {
