@@ -239,7 +239,7 @@ static inline int exec_server_operations(Command *cmd,
 
     rc = DB_exec(sql, callback, &run);
 
-    check(run.ran, "Didn't find a server to run.");
+    check(run.ran, "Operation on server failed.");
 
     if(sql) sqlite3_free(sql);
     DB_close();
@@ -286,7 +286,7 @@ static int stop_server(void *param, int cols, char **data, char **names)
 
     bstring pid = bread((bNread)fread, pid_file);
     check(pid, "Couldn't read the pid from pid file: %s", bdata(pid_path));
-    fclose(pid_file);
+    fclose(pid_file); pid_file = NULL;
 
     int signal = r->murder ? SIGTERM : SIGINT;
 
@@ -322,7 +322,7 @@ static int reload_server(void *param, int cols, char **data, char **names)
 
     bstring pid = bread((bNread)fread, pid_file);
     check(pid, "Couldn't read the pid from pid file: %s", bdata(pid_path));
-    fclose(pid_file);
+    fclose(pid_file); pid_file = NULL;
 
     rc = kill(atoi(bdata(pid)), SIGHUP);
     check(rc == 0, "Failed to reload PID: %s", bdata(pid));
@@ -362,7 +362,7 @@ static int check_server(void *param, int cols, char **data, char **names)
     }
 
     bstring pid = bread((bNread)fread, pid_file);
-    fclose(pid_file);
+    fclose(pid_file); pid_file = NULL;
 
     check(pid, "Couldn't read the pid from pid file: %s", bdata(pid_path));
 
