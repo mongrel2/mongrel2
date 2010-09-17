@@ -290,7 +290,7 @@ static int stop_server(void *param, int cols, char **data, char **names)
     int signal = r->murder ? SIGTERM : SIGINT;
 
     rc = kill(atoi(bdata(pid)), signal);
-    check(rc == 0, "Failed to send SIGTERM to target: %s", bdata(pid));
+    check(rc == 0, "Failed to stop server with PID: %s", bdata(pid));
 
     bdestroy(pid);
     bdestroy(pid_path);
@@ -314,16 +314,32 @@ static int Command_stop(Command *cmd)
 static int reload_server(void *param, int cols, char **data, char **names)
 {
     struct ServerRun *r = (struct ServerRun *)param;
-    r->ran = 0;
+    int rc = 0;
+    bstring pid_path = bformat("%s%s", data[0], data[1]);
 
-    printf("running: %s, %s", data[0], data[1]);
+    FILE *pid_file = fopen(bdata(pid_path), "r");
+    check(pid_file, "Couldn't open pid file: %s", bdata(pid_path));
 
+    bstring pid = bread((bNread)fread, pid_file);
+    check(pid, "Couldn't read the pid from pid file: %s", bdata(pid_path));
+
+    rc = kill(atoi(bdata(pid)), SIGHUP);
+    check(rc == 0, "Failed to reload PID: %s", bdata(pid));
+
+    bdestroy(pid);
+    bdestroy(pid_path);
+    fclose(pid_file);
     r->ran = 1;
     return 0;
 
 error:
+    bdestroy(pid);
+    bdestroy(pid_path);
+    fclose(pid_file);
+    r->ran = 0;
     return -1;
 }
+
 
 static int Command_reload(Command *cmd)
 {
