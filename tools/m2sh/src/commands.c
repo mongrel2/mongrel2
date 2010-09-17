@@ -286,6 +286,7 @@ static int stop_server(void *param, int cols, char **data, char **names)
 
     bstring pid = bread((bNread)fread, pid_file);
     check(pid, "Couldn't read the pid from pid file: %s", bdata(pid_path));
+    fclose(pid_file);
 
     int signal = r->murder ? SIGTERM : SIGINT;
 
@@ -294,14 +295,13 @@ static int stop_server(void *param, int cols, char **data, char **names)
 
     bdestroy(pid);
     bdestroy(pid_path);
-    fclose(pid_file);
     r->ran = 1;
     return 0;
 
 error:
     bdestroy(pid);
     bdestroy(pid_path);
-    fclose(pid_file);
+    if(pid_file) fclose(pid_file);
     r->ran = 0;
     return -1;
 }
@@ -322,20 +322,20 @@ static int reload_server(void *param, int cols, char **data, char **names)
 
     bstring pid = bread((bNread)fread, pid_file);
     check(pid, "Couldn't read the pid from pid file: %s", bdata(pid_path));
+    fclose(pid_file);
 
     rc = kill(atoi(bdata(pid)), SIGHUP);
     check(rc == 0, "Failed to reload PID: %s", bdata(pid));
 
     bdestroy(pid);
     bdestroy(pid_path);
-    fclose(pid_file);
     r->ran = 1;
     return 0;
 
 error:
     bdestroy(pid);
     bdestroy(pid_path);
-    fclose(pid_file);
+    if(pid_file) fclose(pid_file);
     r->ran = 0;
     return -1;
 }
@@ -349,14 +349,40 @@ static int Command_reload(Command *cmd)
 static int check_server(void *param, int cols, char **data, char **names)
 {
     struct ServerRun *r = (struct ServerRun *)param;
-    r->ran = 0;
+    int rc = 0;
+    bstring pid_path = bformat("%s%s", data[0], data[1]);
 
-    printf("checking: %s, %s", data[0], data[1]);
+    FILE *pid_file = fopen(bdata(pid_path), "r");
 
+    if(pid_file == NULL) {
+        printf("mongrel2 is not running because pid_file %s isn't there.\n", bdata(pid_path));
+        bdestroy(pid_path);
+        r->ran = 1;
+        return 0;
+    }
+
+    bstring pid = bread((bNread)fread, pid_file);
+    fclose(pid_file);
+
+    check(pid, "Couldn't read the pid from pid file: %s", bdata(pid_path));
+
+    rc = kill(atoi(bdata(pid)), 0);
+    if(rc != 0) {
+        printf("mongrel2 at PID %s is NOT running.\n", bdata(pid));
+    } else {
+        printf("mongrel2 at PID %s running.\n", bdata(pid));
+    }
+
+    bdestroy(pid);
+    bdestroy(pid_path);
     r->ran = 1;
     return 0;
 
 error:
+    bdestroy(pid);
+    bdestroy(pid_path);
+    if(pid_file) fclose(pid_file);
+    r->ran = 0;
     return -1;
 }
 
