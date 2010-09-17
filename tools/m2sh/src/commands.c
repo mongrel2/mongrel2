@@ -84,12 +84,6 @@ static int Command_dump(Command *cmd)
     return -1;
 }
 
-static int Command_uuid(Command *cmd)
-{
-    
-    return -1;
-}
-
 static int Command_servers(Command *cmd)
 {
 
@@ -105,7 +99,7 @@ static int Command_hosts(Command *cmd)
 
 static int Command_init(Command *cmd)
 {
-    printf("init is deprecated and simply done for you.");
+    printf("init is deprecated and simply done for you.\n");
     return 0;
 }
 
@@ -156,37 +150,35 @@ static int Command_help(Command *cmd);
 
 static CommandHandler COMMAND_MAPPING[] = {
     {.name = "load", .cb = Command_load,
-        .help = "Load a config: load -db config.sqlite -config mongrel2.conf"},
+        .help = "Load a config."},
     {.name = "config", .cb = Command_load,
-        .help = "Alias for load: config -db config.sqlite -config mongrel2.conf" },
+        .help = "Alias for load." },
     {.name = "shell", .cb = Command_shell,
-        .help = "Starts an interactive shell (not implemented)." },
+        .help = "Starts an interactive shell." },
     {.name = "servers", .cb = Command_servers,
-        .help = "Lists the servers: servers " },
+        .help = "Lists the servers." },
     {.name = "dump", .cb = Command_dump,
-        .help = "Dumps a quick view of the db: dump " },
-    {.name = "uuid", .cb = Command_uuid,
-        .help = "Prints out a uuid: uuid " },
+        .help = "Dumps a quick view of the db." },
     {.name = "hosts", .cb = Command_hosts,
-        .help = "Dumps the hosts a server has: hosts " },
+        .help = "Dumps the hosts a server has." },
     {.name = "init", .cb = Command_init,
         .help = "deprecated, just use load" },
     {.name = "commit", .cb = Command_commit,
-        .help = "Adds a message to the log: commit " },
+        .help = "Adds a message to the log." },
     {.name = "log", .cb = Command_log,
-        .help = "Prints the commit log: log " },
+        .help = "Prints the commit log." },
     {.name = "start", .cb = Command_start,
-        .help = "Starts a server: start " },
+        .help = "Starts a server." },
     {.name = "stop", .cb = Command_stop,
-        .help = "Stops a server: stop " },
+        .help = "Stops a server." },
     {.name = "reload", .cb = Command_reload,
-        .help = "Reloads a server: reload " },
+        .help = "Reloads a server." },
     {.name = "running", .cb = Command_running,
-        .help = "Tells you what's running: running " },
+        .help = "Tells you what's running." },
     {.name = "control", .cb = Command_control,
-        .help = "Connects to the control port: control " },
+        .help = "Connects to the control port." },
     {.name = "version", .cb = Command_version,
-        .help = "Prints the Mongrel2 and m2sh version: version " },
+        .help = "Prints the Mongrel2 and m2sh version." },
     {.name = "help", .cb = Command_help,
         .help = "Get help, lists commands." },
     {.name = NULL, .cb = NULL, .help = NULL}
