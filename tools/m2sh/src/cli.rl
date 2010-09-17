@@ -103,12 +103,12 @@ static inline void Command_option(Command *cmd, struct params *p)
     bstring value = NULL;
     int next = peek(p);
 
-    if(next == -1) {
-        value = NULL; // tail end, so done
-    } else if(next != TKOPTION) {
-        value = match(p, next);
+    if(next == TKOPTION || next == -1) {
+        // simple true/false setting
+        value = bfromcstr("");
     } else {
-        value = NULL;
+        // it's not an option so it's some value we want
+        value = match(p, next);
     }
 
     hash_alloc_insert(cmd->options, bdata(key), value);

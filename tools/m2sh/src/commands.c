@@ -171,7 +171,7 @@ static int Command_routes(Command *cmd)
     rc = simple_query_print(db_file, sql);
 
 error: //fallthrough
-    sqlite3_free(sql);
+    if(sql) sqlite3_free(sql);
     return rc;
 }
 
@@ -187,8 +187,78 @@ static int Command_log(Command *cmd)
     return -1;
 }
 
+struct ServerRun {
+    int ran;
+    bstring db_file;
+    const char *sudo;
+};
+
+static int run_server(void *param, int cols, char **data, char **names)
+{
+    struct ServerRun *r = (struct ServerRun *)param;
+    r->ran = 0;
+
+    bstring command = bformat("%s mongrel2 %s %s", r->sudo,
+            bdata(r->db_file), data[0]);
+
+    system(bdata(command));
+
+    r->ran = 1;
+    return 0;
+
+error:
+    return -1;
+}
+
+
 static int Command_start(Command *cmd)
 {
+    int rc = 0;
+    char *sql = NULL;
+
+    bstring db_file = option(cmd, "db", "config.sqlite");
+    struct ServerRun run = {.ran = 0, .db_file = db_file, .sudo = ""};
+
+    bstring name = option(cmd, "name", NULL);
+    bstring uuid = option(cmd, "uuid", NULL);
+    bstring host = option(cmd, "host", NULL);
+    bstring sudo = option(cmd, "sudo", NULL);
+    bstring every = option(cmd, "every", NULL);
+
+    check(!(name && uuid && host), "Just one please, not all of the options.");
+
+    if(sudo) {
+        run.sudo = biseqcstr(sudo, "") ? "sudo" : bdata(sudo);
+    } else {
+        run.sudo = "";
+    }
+
+    if(every) {
+        sql= sqlite3_mprintf("SELECT uuid FROM server");
+    } else if(name) {
+        sql = sqlite3_mprintf("SELECT uuid FROM server where name = %Q", bdata(name));
+    } else if(host) {
+        sql = sqlite3_mprintf("SELECT uuid FROM server where host = %Q", bdata(host));
+    } else if(uuid) {
+        // yes, this is necessary, so that the callback runs
+        sql = sqlite3_mprintf("SELECT uuid FROM server where uuid = %Q", bdata(uuid));
+    } else {
+        sentinel("You must give either -name, -uuid, or -host to start a server.");
+    }
+
+    rc = DB_init(bdata(db_file));
+    check(rc == 0, "Failed to open db: %s", bdata(db_file));
+
+    rc = DB_exec(sql, run_server, &run);
+    sqlite3_free(sql);
+
+    check(run.ran, "Didn't find a server to run.");
+
+    DB_close();
+    return 0;
+
+error:
+    DB_close();
     return -1;
 }
 
@@ -304,3 +374,4 @@ int Command_run(bstring arguments)
 error:  // fallthrough on purpose
     return -1;
 }
+

@@ -76,7 +76,7 @@ int Mimetypes_import()
 int Mimetypes_load(hash_t *settings, const char *ext, Value *val)
 {
     const char *sql = sqlite3_mprintf(bdata(&MIMETYPE_SQL),
-            ext, bdata(val->as.string->data));
+            ext, ext, bdata(val->as.string->data));
 
     int rc = DB_exec(sql, NULL, NULL);
     check(rc == 0, "Failed to add mimetype: %s=%s", 

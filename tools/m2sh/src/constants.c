@@ -79,7 +79,7 @@ struct tagbstring SERVER_SQL = bsStatic("INSERT INTO server (uuid, access_log, e
 struct tagbstring HOST_SQL = bsStatic("INSERT INTO host (server_id, name, matching) VALUES (%d, %Q, %Q);");
 
 struct tagbstring SETTING_SQL = bsStatic("INSERT INTO setting (key, value) VALUES (%Q, %Q);");
-struct tagbstring MIMETYPE_SQL = bsStatic("INSERT INTO mimetype (extension, mimetype) VALUES (%Q, %Q);");
+struct tagbstring MIMETYPE_SQL = bsStatic("DELETE from mimetype where extension=%Q; INSERT INTO mimetype (extension, mimetype) VALUES (%Q, %Q);");
 
 struct tagbstring DIR_SQL = bsStatic("INSERT INTO directory (base, index_file, default_ctype) VALUES (%Q, %Q, %Q);");
 
