@@ -19,6 +19,45 @@ typedef struct CommandHandler {
 } CommandHandler;
 
 
+static inline log_action(bstring db_file, bstring what, bstring why, bstring where, bstring how)
+{
+    int rc = 0;
+    char *sql = NULL;
+    bstring who = bfromcstr(getlogin());
+ 
+    rc = DB_init(bdata(db_file));
+    check(rc == 0, "Failed to open db: %s", bdata(db_file));
+
+    if(!where) {
+        char name_buf[128] = {0};
+        int rc = gethostname(name_buf, 127);
+        check(rc == 0, "Failed to get your machines hostname, use -where to force it.");
+        where = bfromcstr(name_buf);
+    }
+
+    sql = sqlite3_mprintf("INSERT INTO log (who, what, location, how, why) VALUES (%Q, %Q, %Q, %Q, %Q)",
+            bdata(who), bdata(what), bdata(where), bdata(how), bdata(why));
+
+    rc = DB_exec(sql, NULL, NULL);
+    check(rc == 0, "Failed to add log message, you're flying blind.");
+
+
+    if(biseqcstr(who, "root")) {
+        log_err("You shouldn't be running things as root.  Use a safe user instead.");
+    }
+
+    sqlite3_free(sql);
+    DB_close();
+    return 0;
+
+error:
+    sqlite3_free(sql);
+    DB_close();
+    return -1;
+}
+
+
+
 static inline bstring option(Command *cmd, const char *name, const char *def)
 {
     hnode_t *val = hash_lookup(cmd->options, name);
@@ -35,9 +74,10 @@ static int Command_load(Command *cmd)
     bstring db_file = option(cmd, "db", "config.sqlite");
     bstring conf_file = option(cmd, "config", "mongrel2.conf");
 
-    debug("LOADING db: %s, config: %s", bdata(db_file), bdata(conf_file));
 
     Config_load(bdata(conf_file), bdata(db_file));
+
+    log_action(db_file, bfromcstr("load"), bfromcstr("command"), NULL, conf_file);
 
     return 0;
 
@@ -181,44 +221,13 @@ error: //fallthrough
 
 static int Command_commit(Command *cmd)
 {
-    bstring who = bfromcstr(getlogin());
     bstring what = option(cmd, "what", "");
     bstring why = option(cmd, "why", NULL);
     bstring where = option(cmd, "where", NULL);
     bstring how = option(cmd, "how", "m2sh");
     bstring db_file = option(cmd, "db", "config.sqlite");
-    int rc = 0;
-    char *sql = NULL;
 
-    rc = DB_init(bdata(db_file));
-    check(rc == 0, "Failed to open db: %s", bdata(db_file));
-
-    if(!where) {
-        char name_buf[128] = {0};
-        int rc = gethostname(name_buf, 127);
-        check(rc == 0, "Failed to get your machines hostname, use -where to force it.");
-        where = bfromcstr(name_buf);
-    }
-
-    sql = sqlite3_mprintf("INSERT INTO log (who, what, location, how, why) VALUES (%Q, %Q, %Q, %Q, %Q)",
-            bdata(who), bdata(what), bdata(where), bdata(how), bdata(why));
-
-    rc = DB_exec(sql, NULL, NULL);
-    check(rc == 0, "Failed to add log message, you're flying blind.");
-
-
-    if(biseqcstr(who, "root")) {
-        log_err("You shouldn't be running things as root.  Use a safe user instead.");
-    }
-
-    sqlite3_free(sql);
-    DB_close();
-    return 0;
-
-error:
-    sqlite3_free(sql);
-    DB_close();
-    return -1;
+    return log_action(db_file, what, why, where, how);
 }
 
 
