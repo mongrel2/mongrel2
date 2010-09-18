@@ -86,7 +86,7 @@ error:
 }
 
 
-static int Command_shell(Command *cmd)
+static inline int linenoise_runner(int (*callback)(bstring arg))
 {
     char *line = NULL;
     bstring args = NULL;
@@ -103,8 +103,8 @@ static int Command_shell(Command *cmd)
 
     while((line = linenoise("m2> ")) != NULL) {
         if (line[0] != '\0') {
-            args = bformat("%s %s", bdata(cmd->name), line);
-            Command_run(args);
+            args = bformat("%s %s", "m2sh", line);
+            callback(args);
             bdestroy(args);
 
             if(hist_file) {
@@ -120,6 +120,12 @@ static int Command_shell(Command *cmd)
 
 error:
     return -1;
+}
+
+
+static int Command_shell(Command *cmd)
+{
+    return linenoise_runner(Command_run);
 }
 
 
@@ -446,10 +452,23 @@ static int Command_running(Command *cmd)
     return exec_server_operations(cmd, check_server, "chroot, pid_file");
 }
 
+static int send_recv_control(bstring args)
+{
+    debug("NOT READY YET.");
+}
+
+static int control_server(void *param, int cols, char **data, char **names)
+{
+    // build the ipc path from the chroot
+    // start 0mq and connect to the control port
+    // loop a REQ socket on a linenoise repl
+    
+    return linenoise_runner(send_recv_control);
+}
 
 static int Command_control(Command *cmd)
 {
-    return -1;
+    return exec_server_operations(cmd, control_server, "chroot");
 }
 
 static int Command_version(Command *cmd)
