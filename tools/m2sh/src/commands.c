@@ -226,7 +226,7 @@ static inline int exec_server_operations(Command *cmd,
     } else if(name) {
         sql = sqlite3_mprintf("SELECT %s FROM server where name = %Q", select, bdata(name));
     } else if(host) {
-        sql = sqlite3_mprintf("SELECT %s FROM server where host = %Q", select, bdata(host));
+        sql = sqlite3_mprintf("SELECT %s FROM server where default_host = %Q", select, bdata(host));
     } else if(uuid) {
         // yes, this is necessary, so that the callback runs
         sql = sqlite3_mprintf("SELECT %s FROM server where uuid = %Q", select, bdata(uuid));
@@ -274,6 +274,25 @@ static int Command_start(Command *cmd)
     return exec_server_operations(cmd, run_server, "uuid");
 }
 
+bstring read_pid_file(bstring pid_path)
+{
+    FILE *pid_file = fopen(bdata(pid_path), "r");
+    bstring pid = NULL;
+
+    if(pid_file == NULL) {
+        return NULL;
+    } else {
+        pid = bread((bNread)fread, pid_file);
+        fclose(pid_file); pid_file = NULL;
+    }
+
+    return pid;
+
+error:
+    return NULL;
+
+}
+
 
 static int stop_server(void *param, int cols, char **data, char **names)
 {
@@ -281,12 +300,8 @@ static int stop_server(void *param, int cols, char **data, char **names)
     int rc = 0;
     bstring pid_path = bformat("%s%s", data[0], data[1]);
 
-    FILE *pid_file = fopen(bdata(pid_path), "r");
-    check(pid_file, "Couldn't open pid file: %s", bdata(pid_path));
-
-    bstring pid = bread((bNread)fread, pid_file);
-    check(pid, "Couldn't read the pid from pid file: %s", bdata(pid_path));
-    fclose(pid_file); pid_file = NULL;
+    bstring pid = read_pid_file(pid_path);
+    check(pid, "Couldn't read the PID from %s", bdata(pid_path));
 
     int signal = r->murder ? SIGTERM : SIGINT;
 
@@ -301,7 +316,6 @@ static int stop_server(void *param, int cols, char **data, char **names)
 error:
     bdestroy(pid);
     bdestroy(pid_path);
-    if(pid_file) fclose(pid_file);
     r->ran = 0;
     return -1;
 }
@@ -317,12 +331,8 @@ static int reload_server(void *param, int cols, char **data, char **names)
     int rc = 0;
     bstring pid_path = bformat("%s%s", data[0], data[1]);
 
-    FILE *pid_file = fopen(bdata(pid_path), "r");
-    check(pid_file, "Couldn't open pid file: %s", bdata(pid_path));
-
-    bstring pid = bread((bNread)fread, pid_file);
-    check(pid, "Couldn't read the pid from pid file: %s", bdata(pid_path));
-    fclose(pid_file); pid_file = NULL;
+    bstring pid = read_pid_file(pid_path);
+    check(pid, "Couldn't read the PID from %s", bdata(pid_path));
 
     rc = kill(atoi(bdata(pid)), SIGHUP);
     check(rc == 0, "Failed to reload PID: %s", bdata(pid));
@@ -335,7 +345,6 @@ static int reload_server(void *param, int cols, char **data, char **names)
 error:
     bdestroy(pid);
     bdestroy(pid_path);
-    if(pid_file) fclose(pid_file);
     r->ran = 0;
     return -1;
 }
@@ -352,21 +361,17 @@ static int check_server(void *param, int cols, char **data, char **names)
     int rc = 0;
     bstring pid_path = bformat("%s%s", data[0], data[1]);
 
-    FILE *pid_file = fopen(bdata(pid_path), "r");
+    bstring pid = read_pid_file(pid_path);
 
-    if(pid_file == NULL) {
+    if(pid == NULL) {
         printf("mongrel2 is not running because pid_file %s isn't there.\n", bdata(pid_path));
         bdestroy(pid_path);
         r->ran = 1;
         return 0;
     }
 
-    bstring pid = bread((bNread)fread, pid_file);
-    fclose(pid_file); pid_file = NULL;
-
-    check(pid, "Couldn't read the pid from pid file: %s", bdata(pid_path));
-
     rc = kill(atoi(bdata(pid)), 0);
+
     if(rc != 0) {
         printf("mongrel2 at PID %s is NOT running.\n", bdata(pid));
     } else {
@@ -381,7 +386,6 @@ static int check_server(void *param, int cols, char **data, char **names)
 error:
     bdestroy(pid);
     bdestroy(pid_path);
-    if(pid_file) fclose(pid_file);
     r->ran = 0;
     return -1;
 }
