@@ -8,6 +8,7 @@
 #include <config/db.h>
 #include <sys/types.h>
 #include <signal.h>
+#include <unistd.h>
 
 typedef int (*Command_handler_cb)(Command *cmd);
 
@@ -103,7 +104,7 @@ static inline int simple_query_print(bstring db_file, const char *sql)
     check(rc != -1, "Failed to open database %s", bdata(db_file));
 
     rc = DB_exec(sql, table_print, NULL);
-    check(rc == 0, "Failed to list the hosts in: %s.", bdata(db_file));
+    check(rc == 0, "Query failed: %s.", bdata(db_file));
 
     bdestroy(db_file);
     DB_close();
@@ -180,13 +181,54 @@ error: //fallthrough
 
 static int Command_commit(Command *cmd)
 {
+    bstring who = bfromcstr(getlogin());
+    bstring what = option(cmd, "what", "");
+    bstring why = option(cmd, "why", NULL);
+    bstring where = option(cmd, "where", NULL);
+    bstring how = option(cmd, "how", "m2sh");
+    bstring db_file = option(cmd, "db", "config.sqlite");
+    int rc = 0;
+    char *sql = NULL;
+
+    rc = DB_init(bdata(db_file));
+    check(rc == 0, "Failed to open db: %s", bdata(db_file));
+
+    if(!where) {
+        char name_buf[128] = {0};
+        int rc = gethostname(name_buf, 127);
+        check(rc == 0, "Failed to get your machines hostname, use -where to force it.");
+        where = bfromcstr(name_buf);
+    }
+
+    sql = sqlite3_mprintf("INSERT INTO log (who, what, location, how, why) VALUES (%Q, %Q, %Q, %Q, %Q)",
+            bdata(who), bdata(what), bdata(where), bdata(how), bdata(why));
+
+    rc = DB_exec(sql, NULL, NULL);
+    check(rc == 0, "Failed to add log message, you're flying blind.");
+
+
+    if(biseqcstr(who, "root")) {
+        log_err("You shouldn't be running things as root.  Use a safe user instead.");
+    }
+
+    sqlite3_free(sql);
+    DB_close();
+    return 0;
+
+error:
+    sqlite3_free(sql);
+    DB_close();
     return -1;
 }
 
 
 static int Command_log(Command *cmd)
 {
-    return -1;
+    int rc = 0;
+    bstring db_file = option(cmd, "db", "config.sqlite");
+
+    printf("LOG MESSAGES:\n------\n");
+    return simple_query_print(db_file, "SELECT happened_at, who, location, how, what, why FROM log ORDER BY happened_at");
 }
 
 struct ServerRun {
