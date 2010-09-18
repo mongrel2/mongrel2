@@ -122,7 +122,8 @@ bstring Control_execute(bstring req)
     %% write init;
     %% write exec noend;
 
-    check(p <= pe, "Buffer overflow after parsing.  Tell Zed that you sent something from a handler that went %ld past the end in the parser.", pe - p);
+    check(p <= pe, "Buffer overflow after parsing.  Tell Zed that you sent something from a handler that went %ld past the end in the parser.", 
+        (long int)(pe - p));
 
     if ( cs == %%{ write error; }%% ) {
         check(pe - p > 0, "Major erorr in the parser, tell Zed.");
