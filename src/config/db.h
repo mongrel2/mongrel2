@@ -45,6 +45,8 @@ int DB_exec(const char *query,
         int (*callback)(void*,int,char**,char**),
         void *param);
 
+int DB_lastid();
+
 extern sqlite3 *CONFIG_DB;
 
 #endif

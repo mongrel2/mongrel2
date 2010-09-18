@@ -166,7 +166,6 @@ error:
 
 int cli_params_parse_args(bstring args, Command *cmd)
 {
-	int i = 0;
 	struct params params;
     cmd->error = 0;
 

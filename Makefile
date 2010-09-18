@@ -1,4 +1,4 @@
-CFLAGS=-g -Wall -Isrc $(OPTFLAGS)
+CFLAGS=-g -O2 -Wall -Isrc -DNDEBUG $(OPTFLAGS)
 LIBS=-lzmq -lsqlite3  $(OPTLIBS)
 PREFIX?=/usr/local
 
@@ -11,10 +11,10 @@ LIB_OBJ=$(filter-out src/mongrel2.o,${OBJECTS})
 TEST_SRC=$(wildcard tests/*.c)
 TESTS=$(patsubst %.c,%,${TEST_SRC})
 
-all: bin/mongrel2 tests
+all: bin/mongrel2 tests m2sh
 
-release: CFLAGS=-O2 -Wall -Isrc -DNDEBUG
-release: all
+dev: CFLAGS=-g -Wall -Isrc -Wall -Wextra $(OPTFLAGS)
+dev: all
 
 bin/mongrel2: build/libm2.a src/mongrel2.o
 	$(CC) $(CFLAGS) $(LIBS) src/mongrel2.o -o $@ $<
@@ -30,6 +30,7 @@ build:
 clean:
 	rm -rf build bin lib ${OBJECTS} ${TESTS} tests/config.sqlite
 	find . -name "*.gc*" -exec rm {} \;
+	cd tools/m2sh && make clean
 
 pristine: clean
 	sudo rm -rf examples/python/build examples/python/dist examples/python/m2py.egg-info
@@ -39,6 +40,7 @@ pristine: clean
 	cd examples/kegogi && make clean
 	rm -f logs/*
 	rm -f run/*
+	cd tools/m2sh && make pristine
 
 tests: build/libm2.a tests/config.sqlite ${TESTS}
 	sh ./tests/runtests.sh
@@ -60,14 +62,17 @@ check:
 	@echo Files with potentially dangerous functions.
 	@egrep '[^_.>a-zA-Z0-9](str(n?cpy|n?cat|xfrm|n?dup|str|pbrk|tok|_)|stpn?cpy|a?sn?printf|byte_)' $(filter-out src/bstr/bsafe.c,${SOURCES})
 
-install: all install-bin install-m2py
+m2sh: 
+	cd tools/m2sh && make all
+
+install: all install-bin install-m2sh
 
 install-bin:
-	sudo install -d $(PREFIX)/bin/
-	sudo install bin/mongrel2 $(PREFIX)/bin/
+	install -d $(PREFIX)/bin/
+	install bin/mongrel2 $(PREFIX)/bin/
 
-install-m2py: 
-	cd examples/python && sudo python setup.py install
+install-m2sh:
+	cd tools/m2sh && make install
 
 examples/python/mongrel2/sql/config.sql: src/config/config.sql src/config/mimetypes.sql
 	cat src/config/config.sql src/config/mimetypes.sql > $@

@@ -130,7 +130,6 @@ hash_t *Parse_config_file(const char *path)
 {
     FILE *script;
     bstring buffer = NULL;
-    lnode_t *n = NULL;
     hash_t *settings = NULL;
 
     script = fopen(path, "r");

@@ -105,10 +105,12 @@ void start_terminator()
 Server *load_server(const char *db_file, const char *server_uuid, int reuse_fd)
 {
     int rc = 0;
+    Server *srv =  NULL;
+
     rc = Config_init_db(db_file);
     check(rc == 0, "Failed to load config database at %s", db_file);
-
-    Server *srv = Config_load_server(server_uuid);
+    
+    srv = Config_load_server(server_uuid);
     check(srv, "Failed to load server %s from %s", server_uuid, db_file);
 
     rc = Config_load_mimetypes();

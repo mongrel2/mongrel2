@@ -9,6 +9,7 @@
 #include <sys/types.h>
 #include <signal.h>
 #include <unistd.h>
+#include <assert.h>
 
 typedef int (*Command_handler_cb)(Command *cmd);
 
@@ -19,7 +20,7 @@ typedef struct CommandHandler {
 } CommandHandler;
 
 
-static inline log_action(bstring db_file, bstring what, bstring why, bstring where, bstring how)
+static inline int log_action(bstring db_file, bstring what, bstring why, bstring where, bstring how)
 {
     int rc = 0;
     char *sql = NULL;
@@ -80,9 +81,6 @@ static int Command_load(Command *cmd)
     log_action(db_file, bfromcstr("load"), bfromcstr("command"), NULL, conf_file);
 
     return 0;
-
-error:
-    return -1;
 }
 
 
@@ -117,9 +115,6 @@ static inline int linenoise_runner(int (*callback)(bstring arg))
     }
 
     return 0;
-
-error:
-    return -1;
 }
 
 
@@ -164,7 +159,6 @@ error:
 
 static int Command_servers(Command *cmd)
 {
-    int rc = 0;
     bstring db_file = option(cmd, "db", "config.sqlite");
 
     printf("SERVERS:\n------\n");
@@ -239,7 +233,6 @@ static int Command_commit(Command *cmd)
 
 static int Command_log(Command *cmd)
 {
-    int rc = 0;
     bstring db_file = option(cmd, "db", "config.sqlite");
 
     printf("LOG MESSAGES:\n------\n");
@@ -311,6 +304,7 @@ error:
 
 static int run_server(void *param, int cols, char **data, char **names)
 {
+    assert(cols == 1 && "Wrong number of colums.");
     struct ServerRun *r = (struct ServerRun *)param;
     r->ran = 0;
 
@@ -321,9 +315,6 @@ static int run_server(void *param, int cols, char **data, char **names)
 
     r->ran = 1;
     return 0;
-
-error:
-    return -1;
 }
 
 static int Command_start(Command *cmd)
@@ -344,10 +335,6 @@ bstring read_pid_file(bstring pid_path)
     }
 
     return pid;
-
-error:
-    return NULL;
-
 }
 
 
@@ -362,7 +349,7 @@ static int stop_server(void *param, int cols, char **data, char **names)
 
     int signal = r->murder ? SIGTERM : SIGINT;
 
-    rc = kill(atoi(bdata(pid)), signal);
+    rc = kill(atoi((const char *)pid->data), signal);
     check(rc == 0, "Failed to stop server with PID: %s", bdata(pid));
 
     bdestroy(pid);
@@ -391,7 +378,7 @@ static int reload_server(void *param, int cols, char **data, char **names)
     bstring pid = read_pid_file(pid_path);
     check(pid, "Couldn't read the PID from %s", bdata(pid_path));
 
-    rc = kill(atoi(bdata(pid)), SIGHUP);
+    rc = kill(atoi((const char *)pid->data), SIGHUP);
     check(rc == 0, "Failed to reload PID: %s", bdata(pid));
 
     bdestroy(pid);
@@ -427,7 +414,7 @@ static int check_server(void *param, int cols, char **data, char **names)
         return 0;
     }
 
-    rc = kill(atoi(bdata(pid)), 0);
+    rc = kill(atoi((const char *)pid->data), 0);
 
     if(rc != 0) {
         printf("mongrel2 at PID %s is NOT running.\n", bdata(pid));
@@ -439,12 +426,6 @@ static int check_server(void *param, int cols, char **data, char **names)
     bdestroy(pid_path);
     r->ran = 1;
     return 0;
-
-error:
-    bdestroy(pid);
-    bdestroy(pid_path);
-    r->ran = 0;
-    return -1;
 }
 
 static int Command_running(Command *cmd)
@@ -454,7 +435,8 @@ static int Command_running(Command *cmd)
 
 static int send_recv_control(bstring args)
 {
-    debug("NOT READY YET.");
+    debug("NOT READY YET: %s", bdata(args));
+    return 0;
 }
 
 static int control_server(void *param, int cols, char **data, char **names)
@@ -476,6 +458,8 @@ static int Command_version(Command *cmd)
 #include <version.h>
     printf("%s\n", VERSION);
 #undef VERSION
+
+    return 0;
 }
 
 

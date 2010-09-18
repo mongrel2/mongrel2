@@ -1,4 +1,4 @@
-CFLAGS=-g -I../../src -Isrc # -Wall -Wextra
+CFLAGS=-DNDEBUG -g -I../../src -Isrc -Wall $(OPTFLAGS)
 LIBS=-lzmq -lsqlite3 ../../build/libm2.a
 
 PREFIX?=/usr/local
@@ -11,8 +11,11 @@ LIB_OBJ=$(filter-out src/m2sh.o,${OBJECTS})
 
 all: ../lemon/lemon tests build/m2sh
 
-install: all
-	install build/m2sh ${PREFIX}
+dev: CFLAGS=-g -Wall -Wextra -Isrc -I../../src $(OPTFLAGS)
+dev: all
+
+install: build/m2sh
+	install build/m2sh ${PREFIX}/bin
 
 build/libm2sh.a: ${LIB_OBJ}
 	mkdir -p build
@@ -45,4 +48,4 @@ clean:
 	rm -rf src/*.o build tests/*_tests tests/*.o
 
 pristine: clean
-	rm ../lemon/lemon
+	rm -f ../lemon/lemon

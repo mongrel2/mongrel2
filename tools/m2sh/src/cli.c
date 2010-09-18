@@ -26,7 +26,7 @@
 
 
 
-#line 30 "src/cli.c"
+#line 2 "src/cli.c"
 static const int params_start = 4;
 static const int params_first_final = 4;
 static const int params_error = -1;
@@ -42,7 +42,7 @@ void cli_params_init( struct params *fsm )
     fsm->token_count = 0;
     fsm->curtk = 0;
 	
-#line 46 "src/cli.c"
+#line 2 "src/cli.c"
 	{
 	 fsm->cs = params_start;
 	 fsm->ts = 0;
@@ -61,7 +61,7 @@ void cli_params_execute( struct params *fsm, bstring data)
     Token *temp = NULL;
 
 	
-#line 65 "src/cli.c"
+#line 2 "src/cli.c"
 	{
 	if ( p == pe )
 		goto _test_eof;
@@ -80,7 +80,7 @@ tr7:
 	{ fsm->te = p+1;}
 	goto st4;
 tr13:
-#line 1 "src/cli.rl"
+#line 1 "NONE"
 	{	switch(  fsm->act ) {
 	case 3:
 	{{p = (( fsm->te))-1;} TKSTR(QSTRING); }
@@ -112,14 +112,14 @@ tr24:
 	{ fsm->te = p;p--;{ TK(NUMBER); }}
 	goto st4;
 st4:
-#line 1 "src/cli.rl"
+#line 1 "NONE"
 	{ fsm->ts = 0;}
 	if ( ++p == pe )
 		goto _test_eof4;
 case 4:
-#line 1 "src/cli.rl"
+#line 1 "NONE"
 	{ fsm->ts = p;}
-#line 123 "src/cli.c"
+#line 2 "src/cli.c"
 	switch( (*p) ) {
 		case 32: goto tr7;
 		case 34: goto tr8;
@@ -141,13 +141,13 @@ case 4:
 		goto st15;
 	goto tr6;
 tr6:
-#line 1 "src/cli.rl"
+#line 1 "NONE"
 	{ fsm->te = p+1;}
 #line 41 "src/cli.rl"
 	{ fsm->act = 7;}
 	goto st5;
 tr15:
-#line 1 "src/cli.rl"
+#line 1 "NONE"
 	{ fsm->te = p+1;}
 #line 35 "src/cli.rl"
 	{ fsm->act = 3;}
@@ -156,21 +156,21 @@ st5:
 	if ( ++p == pe )
 		goto _test_eof5;
 case 5:
-#line 160 "src/cli.c"
+#line 2 "src/cli.c"
 	if ( (*p) == 32 )
 		goto tr13;
 	if ( 9 <= (*p) && (*p) <= 13 )
 		goto tr13;
 	goto tr6;
 tr8:
-#line 1 "src/cli.rl"
+#line 1 "NONE"
 	{ fsm->te = p+1;}
 	goto st6;
 st6:
 	if ( ++p == pe )
 		goto _test_eof6;
 case 6:
-#line 174 "src/cli.c"
+#line 2 "src/cli.c"
 	switch( (*p) ) {
 		case 32: goto st0;
 		case 34: goto tr15;
@@ -194,28 +194,28 @@ st1:
 case 1:
 	goto st0;
 tr16:
-#line 1 "src/cli.rl"
+#line 1 "NONE"
 	{ fsm->te = p+1;}
 	goto st7;
 st7:
 	if ( ++p == pe )
 		goto _test_eof7;
 case 7:
-#line 205 "src/cli.c"
+#line 2 "src/cli.c"
 	if ( (*p) == 32 )
 		goto st0;
 	if ( 9 <= (*p) && (*p) <= 13 )
 		goto st0;
 	goto tr8;
 tr9:
-#line 1 "src/cli.rl"
+#line 1 "NONE"
 	{ fsm->te = p+1;}
 	goto st8;
 st8:
 	if ( ++p == pe )
 		goto _test_eof8;
 case 8:
-#line 219 "src/cli.c"
+#line 2 "src/cli.c"
 	switch( (*p) ) {
 		case 32: goto st2;
 		case 39: goto tr15;
@@ -239,14 +239,14 @@ st3:
 case 3:
 	goto st2;
 tr17:
-#line 1 "src/cli.rl"
+#line 1 "NONE"
 	{ fsm->te = p+1;}
 	goto st9;
 st9:
 	if ( ++p == pe )
 		goto _test_eof9;
 case 9:
-#line 250 "src/cli.c"
+#line 2 "src/cli.c"
 	if ( (*p) == 32 )
 		goto st2;
 	if ( 9 <= (*p) && (*p) <= 13 )
@@ -512,7 +512,6 @@ error:
 
 int cli_params_parse_args(bstring args, Command *cmd)
 {
-	int i = 0;
 	struct params params;
     cmd->error = 0;
 

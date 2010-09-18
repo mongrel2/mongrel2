@@ -35,7 +35,7 @@ void Parse(
 
 
 
-#line 39 "src/lexer.c"
+#line 2 "src/lexer.c"
 static const int m2sh_lexer_start = 8;
 static const int m2sh_lexer_first_final = 8;
 static const int m2sh_lexer_error = 0;
@@ -72,7 +72,7 @@ hash_t *Parse_config_string(bstring content)
     char *te = NULL;
 
     
-#line 76 "src/lexer.c"
+#line 2 "src/lexer.c"
 	{
 	cs = m2sh_lexer_start;
 	ts = 0;
@@ -82,7 +82,7 @@ hash_t *Parse_config_string(bstring content)
 
 #line 99 "src/lexer.rl"
     
-#line 86 "src/lexer.c"
+#line 2 "src/lexer.c"
 	{
 	if ( p == pe )
 		goto _test_eof;
@@ -149,7 +149,7 @@ tr25:
 	{te = p;p--;{ TK(NUMBER) }}
 	goto st8;
 tr26:
-#line 1 "src/lexer.rl"
+#line 1 "NONE"
 	{	switch( act ) {
 	case 16:
 	{{p = ((te))-1;} TK(CLASS) }
@@ -165,14 +165,14 @@ tr28:
 	{te = p;p--;{ TK(IDENT) }}
 	goto st8;
 st8:
-#line 1 "src/lexer.rl"
+#line 1 "NONE"
 	{ts = 0;}
 	if ( ++p == pe )
 		goto _test_eof8;
 case 8:
-#line 1 "src/lexer.rl"
+#line 1 "NONE"
 	{ts = p;}
-#line 176 "src/lexer.c"
+#line 2 "src/lexer.c"
 	switch( (*p) ) {
 		case 10: goto tr12;
 		case 32: goto tr10;
@@ -248,13 +248,13 @@ case 9:
 		goto st9;
 	goto tr25;
 tr19:
-#line 1 "src/lexer.rl"
+#line 1 "NONE"
 	{te = p+1;}
 #line 66 "src/lexer.rl"
 	{act = 17;}
 	goto st10;
 tr27:
-#line 1 "src/lexer.rl"
+#line 1 "NONE"
 	{te = p+1;}
 #line 65 "src/lexer.rl"
 	{act = 16;}
@@ -263,7 +263,7 @@ st10:
 	if ( ++p == pe )
 		goto _test_eof10;
 case 10:
-#line 267 "src/lexer.c"
+#line 2 "src/lexer.c"
 	if ( (*p) == 95 )
 		goto st11;
 	if ( (*p) < 65 ) {
@@ -337,14 +337,14 @@ case 7:
         Parse_print_error("SYNTAX ERROR", content, 
                 (int)(ts - bdata(content)), ++state.line_number);
     } else if( cs == 
-#line 341 "src/lexer.c"
+#line 2 "src/lexer.c"
 0
 #line 105 "src/lexer.rl"
  ) {
         Parse_print_error("INVALID CHARACTER", content,
                 (int)(ts - bdata(content)), ++state.line_number);
     } else if( cs >= 
-#line 348 "src/lexer.c"
+#line 2 "src/lexer.c"
 8
 #line 108 "src/lexer.rl"
  ) {
@@ -372,7 +372,6 @@ hash_t *Parse_config_file(const char *path)
 {
     FILE *script;
     bstring buffer = NULL;
-    lnode_t *n = NULL;
     hash_t *settings = NULL;
 
     script = fopen(path, "r");
