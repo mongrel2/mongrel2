@@ -90,7 +90,7 @@ error:
 
 int Settings_load(hash_t *settings, const char *name, Value *val)
 {
-    const char *sql = sqlite3_mprintf(bdata(&SETTING_SQL),
+    char *sql = sqlite3_mprintf(bdata(&SETTING_SQL),
             name, bdata(val->as.string->data));
 
     int rc = DB_exec(sql, NULL, NULL);

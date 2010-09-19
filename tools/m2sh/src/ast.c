@@ -136,7 +136,7 @@ error:
 bstring AST_get_bstr(hash_t *settings, hash_t *fr, const char *name, ValueType type)
 {
     Value *val = AST_get(settings, fr, name, type);
-    check(val != NULL, "Failed resolving %s %s.", name, Value_type_name(type));
+    check(val != NULL, "Variable %s is expected to be a %s but it's not.", name, Value_type_name(type));
 
     return val->as.string->data;
 
