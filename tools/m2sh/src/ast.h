@@ -50,8 +50,8 @@ int AST_walk_hash(hash_t *settings, Value *data, ast_hash_walk_cb cb);
 #define Class_ident(C) ((C)->ident->data)
 #define Class_params(C) ((C)->params)
 
-Value *AST_get(hash_t *fr, const char *name, ValueType type);
-bstring AST_get_bstr(hash_t *fr, const char *name, ValueType type);
-#define AST_str(H, N, T) bdata(AST_get_bstr(H, N, T))
+Value *AST_get(hash_t *settings, hash_t *fr, const char *name, ValueType type);
+bstring AST_get_bstr(hash_t *settings, hash_t *fr, const char *name, ValueType type);
+#define AST_str(H, N, T) bdata(AST_get_bstr(settings, H, N, T))
 
 #endif

@@ -24,7 +24,9 @@ static inline int log_action(bstring db_file, bstring what, bstring why, bstring
 {
     int rc = 0;
     char *sql = NULL;
-    bstring who = bfromcstr(getlogin());
+    char *user = getlogin() == NULL ? getenv("LOGNAME") : getlogin();
+    check(user != NULL, "getlogin failed and no LOGNAME env variable, how'd you do that?");
+    bstring who = bfromcstr(user);
  
     rc = DB_init(bdata(db_file));
     check(rc == 0, "Failed to open db: %s", bdata(db_file));
@@ -44,14 +46,18 @@ static inline int log_action(bstring db_file, bstring what, bstring why, bstring
 
 
     if(biseqcstr(who, "root")) {
-        log_err("You shouldn't be running things as root.  Use a safe user instead.");
+        log_err("You shouldn't be running things as %s.  Use a safe user instead.", bdata(who));
     }
 
+    bdestroy(who);
+    bdestroy(where);
     sqlite3_free(sql);
     DB_close();
     return 0;
 
 error:
+    bdestroy(who);
+    bdestroy(where);
     sqlite3_free(sql);
     DB_close();
     return -1;
@@ -147,12 +153,10 @@ static inline int simple_query_print(bstring db_file, const char *sql)
     rc = DB_exec(sql, table_print, NULL);
     check(rc == 0, "Query failed: %s.", bdata(db_file));
 
-    bdestroy(db_file);
     DB_close();
     return 0;
 
 error:
-    bdestroy(db_file);
     DB_close();
     return -1;
 }
@@ -528,23 +532,36 @@ static int Command_help(Command *cmd)
     return 0;
 }
 
+void Command_destroy(Command *cmd)
+{
+    bdestroy(cmd->progname);
+    bdestroy(cmd->name);
+    list_destroy(cmd->extra);
+    hash_destroy(cmd->options);
+}
+
+
 int Command_run(bstring arguments)
 {
     Command cmd;
     CommandHandler *handler;
+    int rc = 0;
 
     check(cli_params_parse_args(arguments, &cmd) != -1, "Invalid arguments.");
 
     for(handler = COMMAND_MAPPING; handler->name != NULL; handler++)
     {
         if(biseqcstr(cmd.name, handler->name)) {
-            return handler->cb(&cmd);
+            rc = handler->cb(&cmd);
+            Command_destroy(&cmd);
+            return rc;
         }
     }
 
     log_err("INVALID COMMAND. Use m2sh help to find out what's available.");
 
 error:  // fallthrough on purpose
+    Command_destroy(&cmd);
     return -1;
 }
 

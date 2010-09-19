@@ -97,9 +97,11 @@ int Settings_load(hash_t *settings, const char *name, Value *val)
     check(rc == 0, "Failed to add setting: %s=%s",
             name, bdata(val->as.string->data));
 
+    sqlite3_free(sql);
     return 0;
 
 error:
+    sqlite3_free(sql);
     return -1;
 }
 
@@ -154,7 +156,7 @@ int Host_load(hash_t *settings, Value *val)
 
     HOST_ID = DB_lastid();
 
-    Value *routes = AST_get(cls->params, "routes", VAL_HASH);
+    Value *routes = AST_get(settings, cls->params, "routes", VAL_HASH);
     check(routes, "Didn't find any routes for %s", name);
 
     AST_walk_hash(settings, routes, Route_load);
@@ -187,14 +189,15 @@ int Server_load(hash_t *settings, Value *val)
 
     SERVER_ID = DB_lastid();
 
-    Value *hosts = AST_get(cls->params, "hosts", VAL_LIST);
+    Value *hosts = AST_get(settings, cls->params, "hosts", VAL_LIST);
     check(hosts != NULL, "Could not find Server.hosts setting in host %s:%s", 
             AST_str(cls->params, "uuid", VAL_QSTRING),
             AST_str(cls->params, "name", VAL_QSTRING));
 
     AST_walk_list(settings, hosts->as.list, Host_load);
 
-    Value *set = AST_get(settings, "settings", VAL_HASH);
+    Value *set = AST_get(settings, settings, "settings", VAL_HASH);
+
     if(set) {
         rc = AST_walk_hash(settings, set, Settings_load);
         check(rc == 0, "Failed to load the settings. Aborting.");
@@ -203,7 +206,7 @@ int Server_load(hash_t *settings, Value *val)
     rc = Mimetypes_import();
     check(rc == 0, "Failed to import default mimetypes.");
 
-    Value *mime = AST_get(settings, "mimetypes", VAL_HASH);
+    Value *mime = AST_get(settings, settings, "mimetypes", VAL_HASH);
     if(mime) {
         AST_walk_hash(settings, mime, Mimetypes_load);
         check(rc == 0, "Failed to load the mimetypes. Aborting.");
@@ -253,8 +256,11 @@ int Config_load(const char *config_file, const char *db_file)
     rc = Config_commit();
     check(rc == 0, "Failed to commit config db: %s", db_file);
 
+
+    DB_close();
     return 0;
 error:
+    DB_close();
     return -1;
 }
 

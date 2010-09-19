@@ -113,14 +113,19 @@ error:
 }
 
 
-Value *AST_get(hash_t *fr, const char *name, ValueType type)
+Value *AST_get(hash_t *settings, hash_t *fr, const char *name, ValueType type)
 {
     hnode_t *hn = hash_lookup(fr, name);
     check_debug(hn, "Variable %s not found, assuming not given.", name);
 
     Value *val = hnode_get(hn);
-    check(val->type == type, "Invalid type for %s, should be %s not %s",
-            name, Value_type_name(type), Value_type_name(val->type));
+    if(Value_is(val, REF)) {
+        val = Value_resolve(settings, val);
+    } else {
+        check(val->type == type, "Invalid type for %s, should be %s not %s",
+                name, Value_type_name(type), Value_type_name(val->type));
+    }
+
     return val;
 
 error:
@@ -128,9 +133,9 @@ error:
 }
 
 
-bstring AST_get_bstr(hash_t *fr, const char *name, ValueType type)
+bstring AST_get_bstr(hash_t *settings, hash_t *fr, const char *name, ValueType type)
 {
-    Value *val = AST_get(fr, name, type);
+    Value *val = AST_get(settings, fr, name, type);
     check(val != NULL, "Failed resolving %s %s.", name, Value_type_name(type));
 
     return val->as.string->data;
