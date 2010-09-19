@@ -943,12 +943,17 @@
   <a id="x1-150002.2.2" name="x1-150002.2.2"></a>Using Fossil</h4>
   <!--l. 105-->
 
+  <p class="noindent"><span class="pplri7t-">WARNING</span> We are
+  currently rewriting the m2sh utility, so expect weirdness and
+  problems with descriptions in the manual if you get the code with
+  fossil. <!--l. 108-->
+
   <p class="noindent">Mongrel2 is still fairly new, and new
   software has bugs. Hell, old software has bugs. If you want to
   get the latest and greatest, then use fossil to grab the source
   and stay with updates. This isn't required because we try
   to fix bugs fast but if you are living on the edge then
-  here's how to do it: <!--l. 110-->
+  here's how to do it: <!--l. 113-->
 
   <p class="noindent">
 
@@ -965,10 +970,10 @@
     <li class="enumerate" id="x1-15006x3">If you find that your
     version of fossil ends up having problems with mongrel2.org let
     us know since we might need to upgrade.
-  </ol><!--l. 119-->
+  </ol><!--l. 122-->
 
   <p class="noindent">Once you have fossil you can then get the
-  Mongrel2 source and open it up: <!--l. 121-->
+  Mongrel2 source and open it up: <!--l. 124-->
 
   <p class="noindent"><a id="x1-15007r2" name="x1-15007r2"></a>
   <hr class="float">
@@ -979,7 +984,7 @@
       "content"><span class="pplri7t-">Cloning the Mongrel2</span>
       <span class="pplri7t-">Source</span></span>
     </div><!--tex4ht:label?: x1-15007r2 -->
-    <!--l. 122-->
+    <!--l. 125-->
 
     <div class="lstlisting" id="listing-2">
       <span class="label"><a id="x1-15008r1" name=
@@ -1046,7 +1051,7 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 131-->
+  <!--l. 134-->
 
   <p class="noindent">Make sure you do this in order (just like
   with every set of instructions you follow) or else you'll
@@ -1059,19 +1064,19 @@
 
   <h3 class="sectionHead"><span class="titlemark">2.3</span> <a id=
   "x1-160002.3" name="x1-160002.3"></a>Building And Installing</h3>
-  <!--l. 142-->
+  <!--l. 145-->
 
   <p class="noindent">Once you have the source ready to go you can
   build it and then install it with one command: <span class=
-  "pcrro7t-">make all install</span> <!--l. 145-->
+  "pcrro7t-">make all install</span> <!--l. 148-->
 
   <p class="noindent">There is no <span class=
   "pcrro7t-">./configure</span> for Mongrel2 since we avoid too
   many OS specific differences or shield those away with good
-  feature checks in the code. <!--l. 148-->
+  feature checks in the code. <!--l. 151-->
 
   <p class="noindent">The end result of this should be: 
-  <!--l. 150-->
+  <!--l. 153-->
 
   <p class="noindent">
 
@@ -1093,13 +1098,13 @@
 
     <li class="enumerate" id="x1-16011x5">Finally, the mongrel2
     binary gets installed.
-  </ol><!--l. 158-->
+  </ol><!--l. 161-->
 
   <p class="noindent">If any of these stages fail, then you can
   simply try to fix them and then run: <span class=
   "pcrro7t-">make</span> <span class="pcrro7t-">clean all
   install</span> which will do everything all over again. 
-  <!--l. 161-->
+  <!--l. 164-->
 
   <p class="noindent">The most common error is if you didn't
   install pip or distribute and insist on using your own
@@ -1108,19 +1113,19 @@
   Linux's stupidity about versions and how it installs
   Python. If you don't want to use the package system every
   other Python programmer uses, then you're on your own. 
-  <!--l. 168-->
+  <!--l. 171-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">2.4</span> <a id=
   "x1-170002.4" name="x1-170002.4"></a>Testing The
-  Installation</h3><!--l. 170-->
+  Installation</h3><!--l. 173-->
 
   <p class="noindent">When you are done, you probably want to make
   sure that it installed correctly. There's a test
   configuration file in <span class=
   "pcrb7t-">tests/config.sqlite</span> that you can use to try it
-  out: <!--l. 174-->
+  out: <!--l. 177-->
 
   <p class="noindent"><a id="x1-17001r3" name="x1-17001r3"></a>
   <hr class="float">
@@ -1131,7 +1136,7 @@
       "content"><span class="pplri7t-">First Test</span>
       <span class="pplri7t-">Run</span></span>
     </div><!--tex4ht:label?: x1-17001r3 -->
-    <!--l. 175-->
+    <!--l. 178-->
 
     <div class="lstlisting" id="listing-3">
       <span class="label"><a id="x1-17002r1" name=
@@ -1199,14 +1204,14 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 184-->
+  <!--l. 187-->
 
   <p class="noindent">That's it. Just hit CTRL-c for now and
   we'll get into playing with this setup later.
 
   <h3 class="sectionHead"><span class="titlemark">2.5</span> <a id=
   "x1-180002.5" name="x1-180002.5"></a>Upgrading from trunk</h3>
-  <!--l. 188-->
+  <!--l. 191-->
 
   <p class="noindent"><a id="x1-18001r4" name="x1-18001r4"></a>
   <hr class="float">
@@ -1217,7 +1222,7 @@
       "content"><span class="pplri7t-">Update your</span>
       <span class="pplri7t-">checkout</span></span>
     </div><!--tex4ht:label?: x1-18001r4 -->
-    <!--l. 189-->
+    <!--l. 192-->
 
     <div class="lstlisting" id="listing-4">
       <span class="label"><a id="x1-18002r1" name=
@@ -1252,13 +1257,13 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 196-->
+  <!--l. 199-->
 
   <p class="noindent">Don't forget <span class=
   "pcrro7t-">make clean all install</span>.
 
   <h3 class="sectionHead"><span class="titlemark">2.6</span> <a id=
-  "x1-190002.6" name="x1-190002.6"></a>Up Next</h3><!--l. 201-->
+  "x1-190002.6" name="x1-190002.6"></a>Up Next</h3><!--l. 204-->
 
   <p class="noindent">You now should have a working Mongrel2 system
   installed and the m2sh configuration interface ready to go. In
