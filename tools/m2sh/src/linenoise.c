@@ -202,7 +202,7 @@ static int linenoisePrompt(int fd, char *buf, size_t buflen, const char *prompt)
     size_t cols = getColumns();
     int history_index = 0;
 
-    memset(buf, 0, buflen);
+    buf[0] = '\0';
     buflen--; /* Make sure there is always space for the nulterm */
 
     /* The latest history entry is always our current buffer, that
@@ -279,7 +279,7 @@ up_down_arrow:
                     /* Update the current history entry before to
                      * overwrite it with tne next one. */
                     free(history[history_len-1-history_index]);
-                    history[history_len-1-history_index] = strndup(buf, buflen);
+                    history[history_len-1-history_index] = strdup(buf);
                     /* Show the new entry */
                     history_index += (seq[1] == 65) ? 1 : -1;
                     if (history_index < 0) {
@@ -289,7 +289,7 @@ up_down_arrow:
                         history_index = history_len-1;
                         break;
                     }
-                    memcpy(buf,history[history_len-1-history_index],buflen);
+                    strncpy(buf,history[history_len-1-history_index],buflen);
                     buf[buflen] = '\0';
                     len = pos = strlen(buf);
                     refreshLine(fd,prompt,buf,len,pos,cols);
@@ -382,11 +382,11 @@ char *linenoise(const char *prompt) {
             len--;
             buf[len] = '\0';
         }
-        return strndup(buf, len);
+        return strdup(buf);
     } else {
         count = linenoiseRaw(buf,LINENOISE_MAX_LINE,prompt);
         if (count == -1) return NULL;
-        return strndup(buf, LINENOISE_MAX_LINE);
+        return strdup(buf);
     }
 }
 
@@ -400,8 +400,7 @@ int linenoiseHistoryAdd(const char *line) {
         if (history == NULL) return 0;
         memset(history,0,(sizeof(char*)*history_max_len));
     }
-    linecopy = malloc(LINENOISE_MAX_LINE);
-    memcpy(linecopy, line, strlen(line));
+    linecopy = strdup(line);
     if (!linecopy) return 0;
     if (history_len == history_max_len) {
         free(history[0]);

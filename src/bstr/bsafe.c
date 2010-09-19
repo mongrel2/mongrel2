@@ -48,14 +48,14 @@ char * (gets) (char * buf) {
 }
 #endif
 
-char * (strncpy) (char *dst, const char *src, size_t n) {
-	dst = dst;
-	src = src;
-	n = n;
-	fprintf (stderr, "bsafe error: strncpy() is not safe, use bmidstr instead.\n");
-	if (bsafeShouldExit) exit (-1);
-	return NULL;
-}
+// char * (strncpy) (char *dst, const char *src, size_t n) {
+// 	dst = dst;
+// 	src = src;
+// 	n = n;
+// 	fprintf (stderr, "bsafe error: strncpy() is not safe, use bmidstr instead.\n");
+// 	if (bsafeShouldExit) exit (-1);
+// 	return NULL;
+// }
 
 char * (strncat) (char *dst, const char *src, size_t n) {
 	dst = dst;
@@ -74,9 +74,9 @@ char * (strtok) (char *s1, const char *s2) {
 	return NULL;
 }
 
-char * (strdup) (const char *s) {
-	s = s;
-	fprintf (stderr, "bsafe error: strdup() is not safe, use bstrcpy.\n");
-	if (bsafeShouldExit) exit (-1);
-	return NULL;
-}
+// char * (strdup) (const char *s) {
+// 	s = s;
+// 	fprintf (stderr, "bsafe error: strdup() is not safe, use bstrcpy.\n");
+// 	if (bsafeShouldExit) exit (-1);
+// 	return NULL;
+// }
