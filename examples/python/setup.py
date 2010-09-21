@@ -14,7 +14,7 @@ config = {
     'install_requires': ['nose', 'simplejson', 'pyrepl', 'storm'],
     'packages': ['mongrel2', 'mongrel2.config'],
     'package_data': {'mongrel2': ['sql/config.sql']},
-    'scripts': ['bin/m2sh'],
+    'scripts': ['bin/m2shpy'],
     'name': 'm2py'
 }
 

@@ -12,4 +12,3 @@ if len(sys.argv) > 1:
 
 args.parse_and_run_command(sys.argv[1:], commands, default_command="shell")
 
-
