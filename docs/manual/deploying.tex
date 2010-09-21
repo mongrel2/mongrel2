@@ -18,8 +18,7 @@ on in this section:
 \item [Mongrel2] I know, hard to believe, but you actually need to have Mongrel2 installed.
 \item [m2sh] Again, not sure why, but some folks think they don't need this.  Unless you've
     written your own, you need \shell{m2sh}.
-\item [Python] Obviously, if you have \shell{m2sh}, then you have Python, but some systems
-    (like Debian) don't install all of Python.  Make sure your Python setup is good.
+\item [Python] Some systems (like Debian) don't install all of Python.  Make sure your Python setup is good.
 \item [root] You'll need root access on your box.  Either through \shell{sudo} or some other means.
 \item [Basic Python coding] Right now, you should be able to do some basic Python.
 \end{description}
@@ -426,7 +425,7 @@ DEPLOY=/home/YOU/deployment
 SOURCE=/home/YOU/projects/mongrel2
 
 cd $SOURCE/examples/chat
-nohup python -u chat.py 2>&1 > chat.log &
+python -u chat.py 2>&1 > chat.log &
 echo $! > $DEPLOY/profiles/chat/chat.pid
 \end{lstlisting}
 \end{code}

@@ -16,7 +16,7 @@ else for your handlers.
 Currently supported languages are:
 
 \begin{description}
-\item [Python] When you installed the \shell{m2sh} gear, you also got a \ident{mongrel2} Python library.
+\item [Python] The directory \file{examples/python} contain the Mongrel2 Python library \ident{m2py}.
 \item [Ruby] Probably the most extensively supported language, with good Rack support, by \href{http://github.com/perplexes/m2r}{perplexes on github}.
 \item [C++] C++ support by \href{http://github.com/akrennmair/mongrel2-cpp}{akrennmair on github}.
 \item [PHP] PHP support by \href{http://github.com/winks/m2php}{winks on github}.
@@ -804,7 +804,7 @@ addition to the Python code:
 
 
 \begin{description}
-\item [Python] When you installed the \shell{m2sh} gear, you also got a \ident{mongrel2} Python library.
+\item [Python] The \file{examples/python} directory has the basic implementation for you.
 \item [Ruby] Probably the most extensively supported language, with good Rack support, by \href{http://github.com/perplexes/m2r}{perplexes on github}.
 \item [C++] C++ support by \href{http://github.com/akrennmair/mongrel2-cpp}{akrennmair on github}.
 \item [PHP] PHP support by \href{http://github.com/winks/m2php}{winks on github}.
@@ -824,7 +824,7 @@ home and it's easy for them.
 The very last thing I will cover in the section on hacking Mongrel2 is how to
 write your own \shell{m2sh} script in your favorite language.  Obviously, if
 you're doing this you should probably have a good reason\footnote{Like if
-you're a Ruby weenie and Python is banned at your company because they like
+you're a Ruby weenie and C is banned at your company because they like
 dogma more than money.}.  What writing your own, or understanding what
 \shell{m2sh} is doing will do for you, though, is help you when you start to
 think about automating Mongrel2 for your deployments.
@@ -838,16 +838,21 @@ This is why Mongrel2 is designed the way it is, using the MVC model.  It
 lets \emph{you} create your own View like m2sh, web interfaces, automation
 scripts, and anything else you need to make it easier to manage more.
 
-If you want to write your own \shell{m2sh} then first go have a look at
-the Python code in \file{examples/python/config}.  This is where each
-command lives, where the argument parsing is and, most importantly, the
-ORM model that works the raw SQLite database.
+If you want to write your own \shell{m2sh} then first go have a look at the
+Python code in \file{examples/python/config} and the \shell{m2shpy} script that
+installs.  This is where each command lives, where the argument parsing is and,
+most importantly, the ORM model that works the raw SQLite database.
 
 The next thing to do is to make your tool craft databases and compare the
 results to what m2sh does for a similar configuration.  I recommend you make
 a database that's ``correct'' with m2sh, and then dump it via \shell{sqlite3}.
 After that, use your tool to make your own database, dump it, and then use
 \shell{diff} to compare your results to mine.
+
+You can also look at how the C version of m2sh that is installed by default
+is written.  It lives in \file{tools/m2sh} and has a completely different
+design but does nearly the same things.  If you know C then this comparing
+the two is also educational.
 
 Finally, you'll need to look at two base schema files:
 \file{src/config/config.sql} and \file{src/config/mimetypes.sql}, where
@@ -857,3 +862,4 @@ that's the table to put it in.}  Your tool should be able to use this
 SQL to make its database, or at least know what it does.
 
 If you do something cool with all of this, let us know.
+

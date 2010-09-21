@@ -23,28 +23,13 @@ To get everything working you will need the following dependencies:
 \begin{itemize}
 \item GNU make (gmake).
 \item \href{http://zeromq.org}{ZeroMQ 2.0.8} for the messaging.
-\item \href{http://python.org}{Python 2.6} for the m2sh management and examples.
-\item \href{http://www.sqlite.org/}{SQLite3} and make sure \emph{Python} has the ability to access SQLite3.
-\item \href{http://pypi.python.org/pypi/distribute}{distribute} and \href{http://pypi.python.org/pypi/pip/0.7.2}{pip}.
-\item \href{http://github.com/zeromq/pyzmq}{PyZMQ} for the examples.
-\item \href{http://webpy.org/}{web.py} for the examples.
+\item \href{http://www.sqlite.org/}{SQLite3}.
 \end{itemize}
 
 If you install these things in this order, then everything should be good.
-Typically people run into problems if they do this out of order; for example,
-trying to install Mongrel2 before they have distribute and pip installed.
 
 Since every system is different, it is difficult to tell you exactly how to
 install required packages for your OS, but here's how I did it on my computer:
-
-\begin{aside}{Use Virtualenv If You Fear Pip}
-For those who still want to use the package management but want to use pip and
-distribute, I suggest you check out \href{http://pypi.python.org/pypi/virtualenv}{virtualenv}.
-What virtualenv does is create a little ``chroot install'' of just the packages
-you need using pip or distribute.  When you don't want them anymore, you can just
-delete one directory and you're fine.
-\end{aside}
-
 
 \begin{code}{Installing Dependencies on ArchLinux}
 \begin{lstlisting}
@@ -56,31 +41,13 @@ delete one directory and you're fine.
 > make
 > sudo make install
 
-# install python
-> sudo pacman -S python
-
 # install sqlite3
 > sudo pacman -S sqlite3
-
-# install distribute and pip
-> sudo pacman -S python-pip
-> sudo pip install distribute
-
-# install PyZMQ from github
-> sudo pacman -S git
-> git clone http://github.com/zeromq/pyzmq.git
-> cd pyzmq
-> sudo python setup.py install
-
-# web.py
-> sudo pip install web.py
-\end{lstlisting}
 \end{code}
 
 If you run into parts that your OS is missing, which is likely on
 Debian and SuSE systems, then you'll have to go and figure out
 how to install it.
-
 
 \section{Building Mongrel2}
 
@@ -102,13 +69,8 @@ Simply download it and you're done.
 
 \subsection{Using Fossil}
 
-\emph{WARNING} We are currently rewriting the m2sh utility, so expect weirdness
-and problems with descriptions in the manual if you get the code with fossil.
-
-Mongrel2 is still fairly new, and new software has bugs.  Hell, old software has bugs.
-If you want to get the latest and greatest, then use fossil to grab the source and stay
-with updates.  This isn't required because we try to fix bugs fast but if you are
-living on the edge then here's how to do it:
+If you like living on the edge then here's how to follow the development source
+tree while we work on it:
 
 \begin{enumerate}
 \item Go to \href{http://www.fossil-scm.org/download.html}{the fossil download page} and
@@ -153,20 +115,12 @@ The end result of this should be:
 \begin{enumerate}
 \item Mongrel2 builds and compiles without errors.
 \item All the unit tests run.\footnote{Please tell us about failures.}
-\item The Python libraries that m2sh needs get installed.
-\item The m2sh itself gets installed.
-\item Finally, the mongrel2 binary gets installed.
+\item The \shell{m2sh} binary gets installed.
+\item The \shell{mongrel2} binary gets installed.
 \end{enumerate}
 
 If any of these stages fail, then you can simply try to fix them and then
-run:  \shell{make clean all install} which will do everything all over again.
-
-The most common error is if you didn't install pip or distribute and insist
-on using your own system's package management.  Do \emph{not} report bugs about
-your own flavor of Linux's stupidity about versions and how it installs Python.
-If you don't want to use the package system every other Python programmer uses,
-then you're on your own.
-
+run:  \shell{make clean all \&\& sudo make install} which will do everything all over again.
 
 \section{Testing The Installation}
 
@@ -179,7 +133,7 @@ use to try it out:
 > mkdir run
 > mkdir logs
 > mkdir tmp
-> m2sh dump -db tests/config.sqlite
+> m2sh servers -db tests/config.sqlite
 > m2sh start -db tests/config.sqlite -host localhost
 \end{lstlisting}
 \end{code}
@@ -191,12 +145,11 @@ setup later.
 \begin{code}{Update your checkout}
 \begin{lstlisting}
 > cd mongrel2
-> fossil pull http://mongrel2.org
-> fossil update
+> fossil up trunk
 \end{lstlisting}
 \end{code}
 
-Don't forget \shell{make clean all install}.
+Don't forget \shell{make clean all \&\& sudo make install}.
 
 
 \section{Up Next}

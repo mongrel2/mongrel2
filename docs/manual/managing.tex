@@ -54,9 +54,10 @@ gave you the Controller and the Model, then you can craft any \emph{View} you wa
 no better Model than a SQL database like SQLite:  it's embeddable, easily accessed from C or any
 language, portable, small, fast enough and full of all the features you need and then some.
 
-What you are doing when you use m2sh to configure a configuration for Mongrel2, is working with
-a View we've given you to create a Model for the Mongrel2 server to work with.  That's it, and
-you can create your own View if you want.  It could be automated deployment scripts, a web
+What you are doing when you use m2sh (from \file{tools/m2sh}) to configure a
+configuration for Mongrel2, is working with a View we've given you to create a
+Model for the Mongrel2 server to work with.  That's it, and you can create your
+own View if you want.  It could be automated deployment scripts, a web
 interface, monitoring scripts, anything you need.
 
 The point is, if you just want to get Mongrel2 up and running, then use m2sh.  If you want to
@@ -76,7 +77,6 @@ in the unit tests.  Let's try doing a few of the most basic commands with this c
 
 \begin{code}{Sample m2sh Commands}
 \begin{lstlisting}
-> m2sh dump -db tests/config.sqlite
 > m2sh servers -db tests/config.sqlite
 > m2sh hosts -db tests/config.sqlite -host localhost
 > m2sh running -db tests/config.sqlite -host localhost
@@ -84,9 +84,9 @@ in the unit tests.  Let's try doing a few of the most basic commands with this c
 \end{lstlisting}
 \end{code}
 
-At this point you should have seen some raw dumps of the database, lists of servers and hosts,
-seen that mongrel2 is not running, and then started it.  You can find out about all the commands
-and get help for them with \shell{m2sh help} or \shell{ms2h help -for command}.
+At this point you should see lists of servers and hosts, seen that mongrel2 is
+not running, and then started it.  You can find out about all the commands and
+get help for them with \shell{m2sh help} or \shell{ms2h help command}.
 
 You can now try doing some simple starting, stopping and reloading using sudo (make sure you CTRL-c
 to exit from the previous start command):
@@ -140,21 +140,18 @@ files.  You can now try building your own configuration that matches this one or
 
 \section{A Simple Configuration File}
 
-To configure a new config database you'll write a Python file that looks a lot like
-a configuration file.  The advantage of using Python is that you can put actual
-real logic in your configuration file in order to make your configuration smarter.
-A great application of this is when your configuration has to change depending on the
-server it is deployed on, but you want to check the configuration file into a revision
-control system.  With Python you just write your configuration like it's code and
-you're set.
+To configure a new config database you'll write a file that looks a lot like
+a configuration file.  It looks like a Python file, because it comes from the
+first m2sh we wrote in Python (living in \file{examples/python} but now it's
+written in C.  Even though it was rewritten we managed to keep the same format
+and even make it a little easier by making commas optional in most places.
 
-The first thing you need to do is initialize a fresh configuration database to get
-started by using \shell{m2sh init} and then you load your configuration into it using
-\shell{m2sh load}.  For our example, we'll use the example configuration
-from \file{examples/python/tests/sample\_conf.py} to make a simple one:
+First you load your configuration into a fresh database using \shell{m2sh
+load}.  For our example, we'll use the example configuration from
+\file{examples/configs/sample.conf} to make a simple one:
 
 \begin{code}{Simple Little Config Example}
-  \lstinputlisting[language=Python]{../../examples/python/tests/sample_conf.py}
+  \lstinputlisting[language=Python]{../../examples/configs/sample.conf}
 \end{code}
 
 If you aren't familiar with Python then this code might look freaky, but it's really
@@ -163,26 +160,30 @@ we would just do this:
 
 \begin{code}{Loading The Simple Config}
 \begin{lstlisting}
-> m2sh init -db simple.sqlite
-> m2sh load -db simple.sqlite -config examples/python/tests/sample_conf.py
-> m2sh servers -db simple.sqlite
-> m2sh hosts -db simple.sqlite -host localhost
-> m2sh start -db simple.sqlite -host localhost
+> m2sh load -config examples/python/tests/sample_conf.py
+> ls -l config.sqlite
+> m2sh servers
+> m2sh hosts -host localhost
+> m2sh start -host localhost
 \end{lstlisting}
 \end{code}
+
+Notice that we didn't have to tell m2sh that the database was \file{config.sqlite}.
+It assumes that is the default, as well as that \file{mongrel2.conf} is the config
+file you want.  If you use those two files, then you never have to type those
+parameters again.
 
 With this sequence of commands you:
 
 \begin{enumerate}
-\item Create a raw fresh config database name \file{simple.sqlite}
-\item Load the \file{sample\_conf.py} into it.
+\item Create a raw fresh config database name \file{simple.sqlite} and load the \file{sample.conf} into it.
 \item List the servers it has configured.
 \item List the hosts that server has, with what routes it has.
 \item Start this server to try it out.
 \end{enumerate}
 
 By now you should be getting the hang of the pattern here, which is to use
-m2sh and little Python configuration ``script'' to generate .sqlite files
+m2sh and a configuration ``script'' to generate .sqlite files
 that Mongrel2 understands.
 
 \section{How A Config Is Structured}
@@ -293,12 +294,12 @@ more of the settings to control how Dirs work.
 
 \subsection{Proxy}
 
-A Proxy is a Ghetto.  It is used so that you can use Mongrel2 but not have to throw
-out your existing infrastructure.  Mongrel2 goes to great pains to make sure that it
-implements a fast and dead accurate proxy system internally, but no matter how good it
-is it, can't compete with ZeroMQ handlers.  The idea with giving Proxy functionality is
-you can point Mongrel2 at existing servers, and then slowly carve out pieces that
-will work as handlers.
+A proxy is used so that you can use Mongrel2 but not have to throw out your
+existing infrastructure.  Mongrel2 goes to great pains to make sure that it
+implements a fast and dead accurate proxy system internally, but no matter how
+good it is, it can't compete with ZeroMQ handlers.  The idea with giving Proxy
+functionality is you can point Mongrel2 at existing servers, and then slowly
+carve out pieces that will work as handlers.
 
 
 \begin{description}
@@ -353,10 +354,10 @@ the Mongrel2 structure.
 
 All of this knowledge about the Mongrel2 configuration structure can now be used to take a look at
 a more complex example.  We'll take a look at this example and I'll just say what's
-going on, and you try to match what I'm saying to the code.  Here's the file \file{examples/python/tests/mongrel2\_org.py}:
+going on, and you try to match what I'm saying to the code.  Here's the file \file{examples/configs/mongrel2.conf}:
 
 \begin{code}{Mongrel2.org Config Script}
-  \lstinputlisting[language=Python]{../../examples/python/tests/mongrel2_org.py}
+  \lstinputlisting[language=Python]{../../examples/configs/mongrel2.conf}
 \end{code}
 
 If you haven't guessed yet, this configuration is what's used on \url{http://mongrel2.org}
@@ -377,7 +378,7 @@ to configure the main test system.  In it we've got the following things to chec
 \item With all those handler targets, we can now make the \ident{mongrel2} \ident{Host} with all the routes
     assigned once, nice and clean.  However, look how I was lazy and just tossed the mp3stream demo
     right into the routes dict?  You can totally do this and m2sh will figure it out.  Remember also that
-    you can use the \verb|r'blah'| string format to not have to double up on your \verb|\| chars in the patterns.
+    you can use the \verb|'blah'| string format to not have to double up on your \verb|\| chars in the patterns.
 \item We then assign this \ident{mongrel2} variable as the hosts for the \ident{main} server.
 \item There is also a \ident{settings} feature, which is just a dict of global settings you can tweak.  In this case,
     we're upping the number of threads that 0MQ is using for its operations.
@@ -434,7 +435,7 @@ can be used to escape the following character, disabling its special abilities (
 \verb|\\| will match a backslash).
 
 Anything that's not listed here is matched literally.  Remember also that when you write the Python
-code for your scripts you can use the \verb|r'blah'| string syntax to avoid having to double up on your
+code for your scripts you can use the \verb|'blah'| string syntax to avoid having to double up on your
 \verb|\| characters in the string.
 
 \begin{aside}{Sorry, Unicodians, It's All ASCII}
@@ -468,16 +469,16 @@ behavior is completely undefined.
 Here are some example routes you can try to get a feel for the system:
 
 \begin{itemize}
-\item \verb|r"/images/"|  This will just match any path that has /images/ in it without any patterns.
-\item \verb|r"/"| The fastest possible route you can have.
-\item \verb|r"/images/(.*.jpg)"| Match only requests for jpg images in the images directory.  Keep in mind that this
+\item \verb|"/images/"|  This will just match any path that has /images/ in it without any patterns.
+\item \verb|"/"| The fastest possible route you can have.
+\item \verb|"/images/(.*.jpg)"| Match only requests for jpg images in the images directory.  Keep in mind that this
     isn't actually looking in the directory, it's just matching the \ident{(.*.jpg)} pattern.
-\item \verb|r"/images/(\a-\-\d+\.jpg)"| A more complex example that matches a short sequence of 0 or more letters (remember -), then a dash
+\item \verb|"/images/(\a-\-\d+\.jpg)"| A more complex example that matches a short sequence of 0 or more letters (remember -), then a dash
     (\verb|\-| escapes the -), then 1 or long sequence of digits and finally a .jpg) with the \verb|\|. escaping the period.
 \end{itemize}
 
-That should give the idea of how you can use them.  Notice also that I'm using the Python \verb|r"blah"| string syntax which is
-interchangeable with the \verb|r'blah'| syntax so I don't have to double escape everything.
+That should give the idea of how you can use them.  Notice also that I'm using the Python \verb|"blah"| string syntax which is
+interchangeable with the \verb|'blah'| syntax so I don't have to double escape everything.
 
 
 \section{Deployment Logs And Commits}
@@ -508,7 +509,7 @@ Here's an example from mongrel2.org:
 \end{lstlisting}
 \end{code}
 
-The motivation for this feature is the trend that operations store server configurations
+The motivation for this feature is the trend that ops stores server configurations
 in revision control systems like git or etckeeper.  This works great for holding the configuration
 files, but it doesn't tell you what happened on each server.  In many cases, the configuration
 files also need to be reworked or altered for each deployment.  With the m2sh log and commit
@@ -654,14 +655,13 @@ you make a setting and things go crazy, you need to not make that setting.  All
 of these have good defaults so you can leave them alone unless you need to change
 them.
 
-To configure your settings, you just pass them to the \ident{commit} command when
-you setup your configuration. Like this:
+To configure your settings, you set the variable \ident{settings} and you're done:
 
 \begin{code}{Changing Settings}
 \begin{lstlisting}
 settings = {"zeromq.threads": 1, "limits.url_path": 1024}
 
-commit([main], settings=settings)
+servers = [main]
 \end{lstlisting}
 \end{code}
 
@@ -689,4 +689,15 @@ of available settings are:
 \item[zeromq.threads=1] Number of 0MQ IO threads to run.  Careful, we've experienced thread bugs in 0MQ sometimes with high numbers of these.
 \end{description}
 
+
+You can also update your \ident{mimetypes} in the same way, just set a variable with them:
+
+\begin{code}{Changing Settings}
+\begin{lstlisting}
+settings = {"zeromq.threads": 1, "limits.url_path": 1024}
+mimetypes = {".txt": "text/superawesome"}
+
+servers = [main]
+\end{lstlisting}
+\end{code}
 

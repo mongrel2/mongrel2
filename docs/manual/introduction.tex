@@ -98,9 +98,9 @@ that mere mortals can work with, like PHP.  If there's ever a choice, apps win.
 
 The language agnostic philosophy even extends to the configuration system where
 you can use any language you need to configure it and manage it, as long as the
-results are a SQLite3 database Mongrel2 can read and work with to run.  There are
-great tools for managing this database already written in Python, but if you hate
-Python then you can write anything you want.
+results are a SQLite3 database Mongrel2 can read and work with to run.  There
+are great tools for managing this database already written in Python and C, but
+if you hate Python or C then you can write anything you want.
 
 This pattern is established with servers like Postfix, Exim, Sendmail, qmail,
 and others, that convert configuration files to half-assed SQL databases.
@@ -110,15 +110,16 @@ The Model is a SQLite3 database file, which any programming language can access.
 The Controller is a Mongrel2 process that reads this file and sets itself up
 accordingly.
 
-The View is a Python script called m2sh that gives you a command line ``UI'' to
-configure and setup the Mongrel2 sqlite model.  It gives you commands for
-managing it, crafting configurations, looking at them; the works.
+The View is a C binary (with not dependencies other than SQLite3 and ZeroMQ):wa
+called m2sh that gives you a command line ``UI'' to configure and setup the
+Mongrel2 sqlite model.  It gives you commands for managing it, crafting
+configurations, looking at them; the works.
 
 But, most importantly, \emph{you can write your own}.  You don't have to wait
 for a Mongrel2 developer to craft a configuration file parser for your favorite
 language, or use some hack job Nagios Perl junk to automate or scan it.  It's
-SQLite3 with a solid, simple schema and well written Python code showing you how
-it works.
+SQLite3 with a solid, simple schema and even a well written Python and/or C
+code example showing you how it works.
 
 Nothing stops you from automating the hell out of Mongrel2 with that.
 
