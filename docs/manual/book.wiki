@@ -2028,9 +2028,9 @@
   <!--l. 107-->
 
   <p class="noindent">Awesome, right? Using just this one little
-  Python management script, you are able to completely manage a
-  Mongrel2 instance without having to hack on a config file at all.
-  But you probably need to know how this is all working anyway.
+  management tool, you are able to completely manage a Mongrel2
+  instance without having to hack on a config file at all. But you
+  probably need to know how this is all working anyway.
 
   <h4 class="subsectionHead"><span class="titlemark">3.2.1</span>
   <a id="x1-200003.2.1" name="x1-200003.2.1"></a>What The Hell Just
@@ -2102,10 +2102,10 @@
   you'll write a file that looks a lot like a configuration
   file. It looks like a Python file, because it comes from the
   first m2sh we wrote in Python (living in <span class=
-  "pcrb7t-">examples/python</span> but now it's written in C.
-  Even though it was rewritten we managed to keep the same format
-  and even make it a little easier by making commas optional in
-  most places. <!--l. 149-->
+  "pcrb7t-">examples/python</span>) but now it's written in
+  C. Even though it was rewritten we managed to keep the same
+  format and even make it a little easier by making commas optional
+  in most places. <!--l. 149-->
 
   <p class="noindent">First you load your configuration into a
   fresh database using <span class="pcrro7t-">m2sh load</span>. For
@@ -3926,12 +3926,7 @@
   <!--l. 437-->
 
   <p class="noindent">Anything that's not listed here is
-  matched literally. Remember also that when you write the Python
-  code for your scripts you can use the <span class=
-  "obeylines-h verb pcrr7t-">'blah'</span> string syntax to avoid
-  having to double up on your <span class=
-  "obeylines-h verb pcrr7t-">\</span> characters in the string. 
-  <!--l. 441-->
+  matched literally. <!--l. 439-->
 
   <p class="noindent"><a id="x1-31001r3" name="x1-31001r3"></a>
   <hr class="float">
@@ -3945,13 +3940,13 @@
     </div><!--tex4ht:label?: x1-31001r3 -->
 
     <div class="quote">
-      <!--l. 442-->
+      <!--l. 440-->
 
       <p class="indent">Yep, I get it. You think that everyone
       should use UTF-8 or some Unicode encoding for everything. You
       despise the dominance of the `A' in ASCII and
       hate that you can't put your spoken language right in a
-      URL. <!--l. 446-->
+      URL. <!--l. 444-->
 
       <p class="indent">Well, I hate to say it, but tough.
       Protocols are hard enough without having to worry about the
@@ -3961,7 +3956,7 @@
       can't be properly capitalized or lowercased, and
       requires extra translations steps for every operation. With
       ASCII, every computer just knows what it is, and it's
-      the fastest for creating wire protocol formats. <!--l. 454-->
+      the fastest for creating wire protocol formats. <!--l. 452-->
 
       <p class="indent">This is why, on the Internet, you have to
       do things to URLs to make them ASCII, like encoding them with
@@ -3972,7 +3967,7 @@
       fixed set of characters and be done with it. Don't
       blame me or Mongrel2 for this, it's just the way the
       standard is and the way to get a server that is stable and
-      works. <!--l. 462-->
+      works. <!--l. 460-->
 
       <p class="indent">Protocols work better when there's
       less politics in their design. This means you can't put
@@ -3981,7 +3976,7 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 469-->
+  <!--l. 467-->
 
   <p class="noindent">Here are some example routes you can try to
   get a feel for the system:
@@ -4010,7 +4005,7 @@
     long sequence of digits and finally a .jpg) with the
     <span class="obeylines-h verb pcrr7t-">\</span>. escaping the
     period.
-  </ul><!--l. 480-->
+  </ul><!--l. 478-->
 
   <p class="noindent">That should give the idea of how you can use
   them. Notice also that I'm using the Python <span class=
@@ -4021,7 +4016,7 @@
 
   <h3 class="sectionHead"><span class="titlemark">3.7</span> <a id=
   "x1-320003.7" name="x1-320003.7"></a>Deployment Logs And
-  Commits</h3><!--l. 486-->
+  Commits</h3><!--l. 484-->
 
   <p class="noindent">A very nice feature for people doing
   operations work is that m2sh keeps track of all the commands you
@@ -4031,13 +4026,13 @@
   and <span class="pcrro7t-">m2sh load</span> commands so you can
   see what's going on. They track who did something, what
   server they did it on, what time they did it and what they did. 
-  <!--l. 493-->
+  <!--l. 491-->
 
   <p class="noindent">To see the logs for your own tests, just do
   <span class="pcrro7t-">m2sh log -db simple.sqlite</span> and
   then, if you want to add a commit log message, you use the
   <span class="pcrro7t-">m2sh commit</span> command. Here's
-  an example from mongrel2.org: <!--l. 497-->
+  an example from mongrel2.org: <!--l. 495-->
 
   <p class="noindent"><a id="x1-32001r9" name="x1-32001r9"></a>
   <hr class="float">
@@ -4048,7 +4043,7 @@
       "content"><span class="pplri7t-">Example Commit</span>
       <span class="pplri7t-">Log</span></span>
     </div><!--tex4ht:label?: x1-32001r9 -->
-    <!--l. 498-->
+    <!--l. 496-->
 
     <div class="lstlisting" id="listing-7">
       <span class="label"><a id="x1-32002r1" name=
@@ -4058,13 +4053,6 @@
       "pcrr7t-x-x-90">m2sh</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">log</span><span class=
-      "pcrr7t-x-x-90">&nbsp;</span><span class=
-      "pcrr7t-x-x-90">-</span><span class=
-      "pcrr7t-x-x-90">db</span><span class=
-      "pcrr7t-x-x-90">&nbsp;</span><span class=
-      "pcrr7t-x-x-90">config</span><span class=
-      "pcrr7t-x-x-90">.</span><span class=
-      "pcrr7t-x-x-90">sqlite</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
       <span class="label"><a id="x1-32003r2" name=
       "x1-32003r2"></a></span><span class=
@@ -4086,13 +4074,6 @@
       "pcrr7t-x-x-90">m2sh</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">init</span><span class=
-      "pcrr7t-x-x-90">&nbsp;</span><span class=
-      "pcrr7t-x-x-90">-</span><span class=
-      "pcrr7t-x-x-90">db</span><span class=
-      "pcrr7t-x-x-90">&nbsp;</span><span class=
-      "pcrr7t-x-x-90">config</span><span class=
-      "pcrr7t-x-x-90">.</span><span class=
-      "pcrr7t-x-x-90">sqlite</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
       <span class="label"><a id="x1-32004r3" name=
       "x1-32004r3"></a></span><span class=
@@ -4114,26 +4095,6 @@
       "pcrr7t-x-x-90">m2sh</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">load</span><span class=
-      "pcrr7t-x-x-90">&nbsp;</span><span class=
-      "pcrr7t-x-x-90">-</span><span class=
-      "pcrr7t-x-x-90">db</span><span class=
-      "pcrr7t-x-x-90">&nbsp;</span><span class=
-      "pcrr7t-x-x-90">config</span><span class=
-      "pcrr7t-x-x-90">.</span><span class=
-      "pcrr7t-x-x-90">sqlite</span><span class=
-      "pcrr7t-x-x-90">&nbsp;</span><span class=
-      "pcrr7t-x-x-90">-</span><span class=
-      "pcrr7t-x-x-90">config</span><span class=
-      "pcrr7t-x-x-90">&nbsp;</span><span class=
-      "pcrr7t-x-x-90">examples</span><span class=
-      "pcrr7t-x-x-90">/</span><span class=
-      "pcrr7t-x-x-90">python</span><span class=
-      "pcrr7t-x-x-90">/</span><span class=
-      "pcrr7t-x-x-90">tests</span><span class=
-      "pcrr7t-x-x-90">/</span><span class=
-      "pcrr7t-x-x-90">mongrel2_org</span><span class=
-      "pcrr7t-x-x-90">.</span><span class=
-      "pcrr7t-x-x-90">py</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
       <span class="label"><a id="x1-32005r4" name=
       "x1-32005r4"></a></span><span class=
@@ -4155,26 +4116,6 @@
       "pcrr7t-x-x-90">m2sh</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">load</span><span class=
-      "pcrr7t-x-x-90">&nbsp;</span><span class=
-      "pcrr7t-x-x-90">-</span><span class=
-      "pcrr7t-x-x-90">db</span><span class=
-      "pcrr7t-x-x-90">&nbsp;</span><span class=
-      "pcrr7t-x-x-90">config</span><span class=
-      "pcrr7t-x-x-90">.</span><span class=
-      "pcrr7t-x-x-90">sqlite</span><span class=
-      "pcrr7t-x-x-90">&nbsp;</span><span class=
-      "pcrr7t-x-x-90">-</span><span class=
-      "pcrr7t-x-x-90">config</span><span class=
-      "pcrr7t-x-x-90">&nbsp;</span><span class=
-      "pcrr7t-x-x-90">examples</span><span class=
-      "pcrr7t-x-x-90">/</span><span class=
-      "pcrr7t-x-x-90">python</span><span class=
-      "pcrr7t-x-x-90">/</span><span class=
-      "pcrr7t-x-x-90">tests</span><span class=
-      "pcrr7t-x-x-90">/</span><span class=
-      "pcrr7t-x-x-90">mongrel2_org</span><span class=
-      "pcrr7t-x-x-90">.</span><span class=
-      "pcrr7t-x-x-90">py</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
       <span class="label"><a id="x1-32006r5" name=
       "x1-32006r5"></a></span><span class=
@@ -4196,26 +4137,6 @@
       "pcrr7t-x-x-90">m2sh</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">load</span><span class=
-      "pcrr7t-x-x-90">&nbsp;</span><span class=
-      "pcrr7t-x-x-90">-</span><span class=
-      "pcrr7t-x-x-90">db</span><span class=
-      "pcrr7t-x-x-90">&nbsp;</span><span class=
-      "pcrr7t-x-x-90">config</span><span class=
-      "pcrr7t-x-x-90">.</span><span class=
-      "pcrr7t-x-x-90">sqlite</span><span class=
-      "pcrr7t-x-x-90">&nbsp;</span><span class=
-      "pcrr7t-x-x-90">-</span><span class=
-      "pcrr7t-x-x-90">config</span><span class=
-      "pcrr7t-x-x-90">&nbsp;</span><span class=
-      "pcrr7t-x-x-90">examples</span><span class=
-      "pcrr7t-x-x-90">/</span><span class=
-      "pcrr7t-x-x-90">python</span><span class=
-      "pcrr7t-x-x-90">/</span><span class=
-      "pcrr7t-x-x-90">tests</span><span class=
-      "pcrr7t-x-x-90">/</span><span class=
-      "pcrr7t-x-x-90">mongrel2_org</span><span class=
-      "pcrr7t-x-x-90">.</span><span class=
-      "pcrr7t-x-x-90">py</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
       <span class="label"><a id="x1-32007r6" name=
       "x1-32007r6"></a></span><span class=
@@ -4258,26 +4179,6 @@
       "pcrr7t-x-x-90">m2sh</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">load</span><span class=
-      "pcrr7t-x-x-90">&nbsp;</span><span class=
-      "pcrr7t-x-x-90">-</span><span class=
-      "pcrr7t-x-x-90">db</span><span class=
-      "pcrr7t-x-x-90">&nbsp;</span><span class=
-      "pcrr7t-x-x-90">config</span><span class=
-      "pcrr7t-x-x-90">.</span><span class=
-      "pcrr7t-x-x-90">sqlite</span><span class=
-      "pcrr7t-x-x-90">&nbsp;</span><span class=
-      "pcrr7t-x-x-90">-</span><span class=
-      "pcrr7t-x-x-90">config</span><span class=
-      "pcrr7t-x-x-90">&nbsp;</span><span class=
-      "pcrr7t-x-x-90">examples</span><span class=
-      "pcrr7t-x-x-90">/</span><span class=
-      "pcrr7t-x-x-90">python</span><span class=
-      "pcrr7t-x-x-90">/</span><span class=
-      "pcrr7t-x-x-90">tests</span><span class=
-      "pcrr7t-x-x-90">/</span><span class=
-      "pcrr7t-x-x-90">mongrel2_org</span><span class=
-      "pcrr7t-x-x-90">.</span><span class=
-      "pcrr7t-x-x-90">py</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
       <span class="label"><a id="x1-32009r8" name=
       "x1-32009r8"></a></span><span class=
@@ -4299,26 +4200,6 @@
       "pcrr7t-x-x-90">m2sh</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">config</span><span class=
-      "pcrr7t-x-x-90">&nbsp;</span><span class=
-      "pcrr7t-x-x-90">-</span><span class=
-      "pcrr7t-x-x-90">db</span><span class=
-      "pcrr7t-x-x-90">&nbsp;</span><span class=
-      "pcrr7t-x-x-90">config</span><span class=
-      "pcrr7t-x-x-90">.</span><span class=
-      "pcrr7t-x-x-90">sqlite</span><span class=
-      "pcrr7t-x-x-90">&nbsp;</span><span class=
-      "pcrr7t-x-x-90">-</span><span class=
-      "pcrr7t-x-x-90">config</span><span class=
-      "pcrr7t-x-x-90">&nbsp;</span><span class=
-      "pcrr7t-x-x-90">examples</span><span class=
-      "pcrr7t-x-x-90">/</span><span class=
-      "pcrr7t-x-x-90">python</span><span class=
-      "pcrr7t-x-x-90">/</span><span class=
-      "pcrr7t-x-x-90">tests</span><span class=
-      "pcrr7t-x-x-90">/</span><span class=
-      "pcrr7t-x-x-90">mongrel2_org</span><span class=
-      "pcrr7t-x-x-90">.</span><span class=
-      "pcrr7t-x-x-90">py</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
       <span class="label"><a id="x1-32010r9" name=
       "x1-32010r9"></a></span><span class=
@@ -4340,26 +4221,6 @@
       "pcrr7t-x-x-90">m2sh</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">config</span><span class=
-      "pcrr7t-x-x-90">&nbsp;</span><span class=
-      "pcrr7t-x-x-90">-</span><span class=
-      "pcrr7t-x-x-90">db</span><span class=
-      "pcrr7t-x-x-90">&nbsp;</span><span class=
-      "pcrr7t-x-x-90">config</span><span class=
-      "pcrr7t-x-x-90">.</span><span class=
-      "pcrr7t-x-x-90">sqlite</span><span class=
-      "pcrr7t-x-x-90">&nbsp;</span><span class=
-      "pcrr7t-x-x-90">-</span><span class=
-      "pcrr7t-x-x-90">config</span><span class=
-      "pcrr7t-x-x-90">&nbsp;</span><span class=
-      "pcrr7t-x-x-90">examples</span><span class=
-      "pcrr7t-x-x-90">/</span><span class=
-      "pcrr7t-x-x-90">python</span><span class=
-      "pcrr7t-x-x-90">/</span><span class=
-      "pcrr7t-x-x-90">tests</span><span class=
-      "pcrr7t-x-x-90">/</span><span class=
-      "pcrr7t-x-x-90">mongrel2_org</span><span class=
-      "pcrr7t-x-x-90">.</span><span class=
-      "pcrr7t-x-x-90">py</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
       <span class="label"><a id="x1-32011r10" name=
       "x1-32011r10"></a></span><span class=
@@ -4368,13 +4229,6 @@
       "pcrr7t-x-x-90">m2sh</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">commit</span><span class=
-      "pcrr7t-x-x-90">&nbsp;</span><span class=
-      "pcrr7t-x-x-90">-</span><span class=
-      "pcrr7t-x-x-90">db</span><span class=
-      "pcrr7t-x-x-90">&nbsp;</span><span class=
-      "pcrr7t-x-x-90">config</span><span class=
-      "pcrr7t-x-x-90">.</span><span class=
-      "pcrr7t-x-x-90">sqlite</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">-</span><span class=
       "pcrr7t-x-x-90">what</span><span class=
@@ -4396,7 +4250,7 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 512-->
+  <!--l. 510-->
 
   <p class="noindent">The motivation for this feature is the trend
   that ops stores server configurations in revision control systems
@@ -4405,12 +4259,12 @@
   on each server. In many cases, the configuration files also need
   to be reworked or altered for each deployment. With the m2sh log
   and commit system, you can augment your revision control with
-  deployment action tracking. <!--l. 518-->
+  deployment action tracking. <!--l. 516-->
 
   <p class="noindent">Later versions of Mongrel2 will keep small
   amounts of statistics which will link these actions to changes in
   Mongrel2 behavior like frequent crashing, failures, slowness, or
-  other problems. <!--l. 521-->
+  other problems. <!--l. 519-->
 
   <p class="noindent">Basically, there's nowhere to hide.
   Mongrel2 will help operations figure out who needs to get fired
@@ -4418,7 +4272,7 @@
 
   <h3 class="sectionHead"><span class="titlemark">3.8</span> <a id=
   "x1-330003.8" name="x1-330003.8"></a>Control Port</h3>
-  <!--l. 527-->
+  <!--l. 525-->
 
   <p class="noindent">Just before the release of 1.0, we added a
   feature called the &ldquo;Control Port&rdquo;, which lets you
@@ -4428,20 +4282,20 @@
   how long they've been connected, the server's current
   time and kill a connection. Using this control port, you can then
   implement any monitoring and timeout policies you want, and
-  provide better status. <!--l. 535-->
+  provide better status. <!--l. 533-->
 
   <p class="noindent">By default, the control port is in your
   chroot at run/control, but you can set the <span class=
   "pcrro7t-">control</span><span class="pcrro7t-">_port</span>
   setting to change this. You can actually change it to any ZeroMQ
   valid spec you want, although you're advised to use IPC for
-  security. <!--l. 539-->
+  security. <!--l. 537-->
 
   <p class="noindent">Once Mongrel2 starts, you can then use
   <span class="pcrb7t-">m2sh</span> to connect to Mongrel2 and
   control it using the simple command language. Currently, what you
   get back is very raw, but it will improve as we work on the
-  control port and what it does. <!--l. 543-->
+  control port and what it does. <!--l. 541-->
 
   <p class="noindent">The list of commands you can issue are:
 
@@ -4481,10 +4335,10 @@
     <dd class="description">Shuts down the control port permanently
     in case you want to keep it from being accessed for some
     reason.
-  </dl><!--l. 561-->
+  </dl><!--l. 559-->
 
   <p class="noindent">You then use the control port by running
-  <span class="pcrro7t-">m2sh</span>: <!--l. 563-->
+  <span class="pcrro7t-">m2sh</span>: <!--l. 561-->
 
   <p class="noindent">
 
@@ -4517,12 +4371,12 @@
     "pcrr7t-">&nbsp;</span><span class=
     "pcrr7t-">&nbsp;{"time":</span><span class=
     "pcrr7t-">&nbsp;1282980306}</span>
-  </div><!--l. 572-->
+  </div><!--l. 570-->
 
   <p class="noindent">As we work on this feature more, we'll
   have a nicer interface to it. If you wanted to connect on your
   own, here is a simple Python script showing how to do it: 
-  <!--l. 577-->
+  <!--l. 575-->
 
   <p class="noindent"><a id="x1-33013r10" name="x1-33013r10"></a>
   <hr class="float">
@@ -4533,7 +4387,7 @@
       "content"><span class="pplri7t-">Python Control Port</span>
       <span class="pplri7t-">Example</span></span>
     </div><!--tex4ht:label?: x1-33013r10 -->
-    <!--l. 578-->
+    <!--l. 576-->
 
     <div class="lstlisting" id="listing-8">
       <span class="label"><a id="x1-33014r1" name=
@@ -4680,7 +4534,7 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 601-->
+  <!--l. 599-->
 
   <p class="noindent">You obviously don't need to do this,
   but should you want to do something special like a management
@@ -4688,15 +4542,15 @@
 
   <h3 class="sectionHead"><span class="titlemark">3.9</span> <a id=
   "x1-340003.9" name="x1-340003.9"></a>Multiple Servers</h3>
-  <!--l. 607-->
+  <!--l. 605-->
 
   <p class="noindent">A Mongrel2 process itself does not have any
   support for running multiple servers; instead, it takes two
   simple parameters: a sqlite config database and a server uuid
   that names the server to be launched. This is done to keep the
-  mongrel2 code simple and workable. <!--l. 612-->
+  mongrel2 code simple and workable. <!--l. 610-->
 
-  <p class="noindent">However. <!--l. 614-->
+  <p class="noindent">However. <!--l. 612-->
 
   <p class="noindent">Mongrel2's m2sh does support launching
   multiple servers from a single configuration database. By passing
@@ -4707,7 +4561,7 @@
   with <span class="pcrro7t-">-host</span> <span class=
   "pcrro7t-">localhost</span> and your config contains two servers
   which attempt to bind to localhost), m2sh will list the matching
-  servers and ask you to clarify your selection. <!--l. 622-->
+  servers and ask you to clarify your selection. <!--l. 620-->
 
   <p class="noindent">For example:
 
@@ -4848,13 +4702,13 @@
     "pcrr7t-">&nbsp;-db</span><span class=
     "pcrr7t-">&nbsp;config.sqlite</span><span class=
     "pcrr7t-">&nbsp;-every</span>
-  </div><!--l. 649-->
+  </div><!--l. 647-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">3.10</span>
   <a id="x1-350003.10" name="x1-350003.10"></a>Tweakable Expert
-  Settings</h3><!--l. 651-->
+  Settings</h3><!--l. 649-->
 
   <p class="noindent">Many of Mongrel2's internal settings
   are configurable using the settings system. Some of these are
@@ -4863,11 +4717,11 @@
   isn't checked, so if you make a setting and things go
   crazy, you need to not make that setting. All of these have good
   defaults so you can leave them alone unless you need to change
-  them. <!--l. 658-->
+  them. <!--l. 656-->
 
   <p class="noindent">To configure your settings, you set the
   variable <span class="pcrro7t-">settings</span> and you're
-  done: <!--l. 660-->
+  done: <!--l. 658-->
 
   <p class="noindent"><a id="x1-35001r11" name="x1-35001r11"></a>
   <hr class="float">
@@ -4878,7 +4732,7 @@
       "content"><span class="pplri7t-">Changing</span> <span class=
       "pplri7t-">Settings</span></span>
     </div><!--tex4ht:label?: x1-35001r11 -->
-    <!--l. 661-->
+    <!--l. 659-->
 
     <div class="lstlisting" id="listing-9">
       <span class="label"><a id="x1-35002r1" name=
@@ -4918,7 +4772,7 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 668-->
+  <!--l. 666-->
 
   <p class="noindent">Mongrel2 will read these on the fly and write
   INFO log messages telling you what the settings are so you can
@@ -5064,11 +4918,11 @@
     <dd class="description">Number of 0MQ IO threads to run.
     Careful, we've experienced thread bugs in 0MQ sometimes
     with high numbers of these.
-  </dl><!--l. 693-->
+  </dl><!--l. 691-->
 
   <p class="noindent">You can also update your <span class=
   "pcrro7t-">mimetypes</span> in the same way, just set a variable
-  with them: <!--l. 695-->
+  with them: <!--l. 693-->
 
   <p class="noindent"><a id="x1-35005r12" name="x1-35005r12"></a>
   <hr class="float">
@@ -5079,7 +4933,7 @@
       "content"><span class="pplri7t-">Changing</span> <span class=
       "pplri7t-">Settings</span></span>
     </div><!--tex4ht:label?: x1-35005r12 -->
-    <!--l. 696-->
+    <!--l. 694-->
 
     <div class="lstlisting" id="listing-10">
       <span class="label"><a id="x1-35006r1" name=
@@ -12631,33 +12485,10 @@
   "x1-750005.8" name="x1-750005.8"></a>Other Language APIs</h3>
   <!--l. 802-->
 
-  <p class="noindent">As mentioned before, there are currently APIs
-  for Ruby, C++, and PHP in addition to the Python code:
-
-  <dl class="description">
-    <dt class="description"><span class="pplb7t-">Python</span>
-
-    <dd class="description">The <span class=
-    "pcrb7t-">examples/python</span> directory has the basic
-    implementation for you.
-
-    <dt class="description"><span class="pplb7t-">Ruby</span>
-
-    <dd class="description">Probably the most extensively supported
-    language, with good Rack support, by <a href=
-    "http://github.com/perplexes/m2r">perplexes on github</a>.
-
-    <dt class="description"><span class="pplb7t-">C++</span>
-
-    <dd class="description">C++ support by <a href=
-    "http://github.com/akrennmair/mongrel2-cpp">akrennmair on
-    github</a>.
-
-    <dt class="description"><span class="pplb7t-">PHP</span>
-
-    <dd class="description">PHP support by <a href=
-    "http://github.com/winks/m2php">winks on github</a>.
-  </dl><!--l. 814-->
+  <p class="noindent">There's at least 10 langauges available
+  for Mongrel2, so check out the main <a href=
+  "http://mongrel2.org">mongrel2.org site</a> for the full list. 
+  <!--l. 805-->
 
   <p class="noindent">If you want to implement another language, it
   should be fairly trivial. Just base your design on the Python API
@@ -12665,13 +12496,13 @@
   the Python design if it doesn't fit the chosen language;
   creating a direct translation of the Python is fine at first, but
   try to make it idiomatic after that so people who use that
-  language feel at home and it's easy for them. <!--l. 822-->
+  language feel at home and it's easy for them. <!--l. 813-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">5.9</span> <a id=
   "x1-760005.9" name="x1-760005.9"></a>Writing Your Own m2sh</h3>
-  <!--l. 824-->
+  <!--l. 815-->
 
   <p class="noindent">The very last thing I will cover in the
   section on hacking Mongrel2 is how to write your own <span class=
@@ -12683,20 +12514,20 @@
   "x1-76001f4"></a> . What writing your own, or understanding what
   <span class="pcrro7t-">m2sh</span> is doing will do for you,
   though, is help you when you start to think about automating
-  Mongrel2 for your deployments. <!--l. 832-->
+  Mongrel2 for your deployments. <!--l. 823-->
 
   <p class="noindent">Hopefully, I may have motivated you to
   automate, automate, automate. This is why we write software. If I
   wanted to do stuff manually I'd go play guitars or juggle.
   I write software because I want a computer to do things for me,
   and nothing needs this more than managing your systems. 
-  <!--l. 837-->
+  <!--l. 828-->
 
   <p class="noindent">This is why Mongrel2 is designed the way it
   is, using the MVC model. It lets <span class=
   "pplri7t-">you</span> create your own View like m2sh, web
   interfaces, automation scripts, and anything else you need to
-  make it easier to manage more. <!--l. 841-->
+  make it easier to manage more. <!--l. 832-->
 
   <p class="noindent">If you want to write your own <span class=
   "pcrro7t-">m2sh</span> then first go have a look at the Python
@@ -12704,7 +12535,7 @@
   the <span class="pcrro7t-">m2shpy</span> script that installs.
   This is where each command lives, where the argument parsing is
   and, most importantly, the ORM model that works the raw SQLite
-  database. <!--l. 846-->
+  database. <!--l. 837-->
 
   <p class="noindent">The next thing to do is to make your tool
   craft databases and compare the results to what m2sh does for a
@@ -12713,13 +12544,13 @@
   via <span class="pcrro7t-">sqlite3</span>. After that, use your
   tool to make your own database, dump it, and then use
   <span class="pcrro7t-">diff</span> to compare your results to
-  mine. <!--l. 852-->
+  mine. <!--l. 843-->
 
   <p class="noindent">You can also look at how the C version of
   m2sh that is installed by default is written. It lives in
   <span class="pcrb7t-">tools/m2sh</span> and has a completely
   different design but does nearly the same things. If you know C
-  then this comparing the two is also educational. <!--l. 857-->
+  then this comparing the two is also educational. <!--l. 848-->
 
   <p class="noindent">Finally, you'll need to look at two
   base schema files: <span class=
@@ -12730,7 +12561,7 @@
   "book-final10.html#fn5x7"><sup class=
   "textsuperscript">5</sup></a></span><a id="x1-76002f5" name=
   "x1-76002f5"></a> Your tool should be able to use this SQL to
-  make its database, or at least know what it does. <!--l. 864-->
+  make its database, or at least know what it does. <!--l. 855-->
 
   <p class="noindent">If you do something cool with all of this,
   let us know.

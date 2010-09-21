@@ -104,7 +104,7 @@ to exit from the previous start command):
 \end{lstlisting}
 \end{code}
 
-Awesome, right?  Using just this one little Python management script, you
+Awesome, right?  Using just this one little management tool, you
 are able to completely manage a Mongrel2 instance without having to hack
 on a config file at all.  But you probably need to know how this is all
 working anyway.
@@ -142,7 +142,7 @@ files.  You can now try building your own configuration that matches this one or
 
 To configure a new config database you'll write a file that looks a lot like
 a configuration file.  It looks like a Python file, because it comes from the
-first m2sh we wrote in Python (living in \file{examples/python} but now it's
+first m2sh we wrote in Python (living in \file{examples/python}) but now it's
 written in C.  Even though it was rewritten we managed to keep the same format
 and even make it a little easier by making commas optional in most places.
 
@@ -434,9 +434,7 @@ way (i.e., \verb|\A| matches any character that \emph{isn't} a letter). The back
 can be used to escape the following character, disabling its special abilities (i.e.,
 \verb|\\| will match a backslash).
 
-Anything that's not listed here is matched literally.  Remember also that when you write the Python
-code for your scripts you can use the \verb|'blah'| string syntax to avoid having to double up on your
-\verb|\| characters in the string.
+Anything that's not listed here is matched literally.
 
 \begin{aside}{Sorry, Unicodians, It's All ASCII}
 Yep, I get it.  You think that everyone should use UTF-8 or some Unicode encoding for everything.
@@ -496,16 +494,16 @@ Here's an example from mongrel2.org:
 
 \begin{code}{Example Commit Log}
 \begin{lstlisting}
-> m2sh log -db config.sqlite 
-[2010-07-18T04:14:53, mongrel2@zedshaw, init_command] /usr/bin/m2sh init -db config.sqlite
-[2010-07-18T04:15:06, mongrel2@zedshaw, load_command] /usr/bin/m2sh load -db config.sqlite -config examples/python/tests/mongrel2_org.py
-[2010-07-18T04:22:06, mongrel2@zedshaw, load_command] /usr/bin/m2sh load -db config.sqlite -config examples/python/tests/mongrel2_org.py
-[2010-07-18T04:23:32, mongrel2@zedshaw, load_command] /usr/bin/m2sh load -db config.sqlite -config examples/python/tests/mongrel2_org.py
+> m2sh log
+[2010-07-18T04:14:53, mongrel2@zedshaw, init_command] /usr/bin/m2sh init
+[2010-07-18T04:15:06, mongrel2@zedshaw, load_command] /usr/bin/m2sh load
+[2010-07-18T04:22:06, mongrel2@zedshaw, load_command] /usr/bin/m2sh load
+[2010-07-18T04:23:32, mongrel2@zedshaw, load_command] /usr/bin/m2sh load
 [2010-07-18T04:26:16, mongrel2@zedshaw, upgrade] Latest code for Mongrel2.
-[2010-07-18T18:05:59, mongrel2@zedshaw, load_command] /usr/bin/m2sh load -db config.sqlite -config examples/python/tests/mongrel2_org.py
-[2010-07-18T20:09:01, mongrel2@zedshaw, init_command] /usr/bin/m2sh config -db config.sqlite -config examples/python/tests/mongrel2_org.py
-[2010-07-18T20:09:02, mongrel2@zedshaw, load_command] /usr/bin/m2sh config -db config.sqlite -config examples/python/tests/mongrel2_org.py
-> m2sh commit -db config.sqlite -what mongrel2.org -why "Testing things out."
+[2010-07-18T18:05:59, mongrel2@zedshaw, load_command] /usr/bin/m2sh load
+[2010-07-18T20:09:01, mongrel2@zedshaw, init_command] /usr/bin/m2sh config
+[2010-07-18T20:09:02, mongrel2@zedshaw, load_command] /usr/bin/m2sh config
+> m2sh commit -what mongrel2.org -why "Testing things out."
 \end{lstlisting}
 \end{code}
 
