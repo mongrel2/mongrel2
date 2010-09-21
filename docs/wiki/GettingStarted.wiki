@@ -24,24 +24,8 @@ cd zeromq-2.0.8/
 make 
 sudo make install 
  
-# install python 
-sudo pacman -S python 
- 
 # install sqlite3 
 sudo pacman -S sqlite3 
- 
-# install distribute and pip 
-sudo pacman -S python-pip 
-sudo pip install distribute 
- 
-# install PyZMQ from github 
-sudo pacman -S git 
-git clone http://github.com/zeromq/pyzmq.git 
-cd pyzmq
-sudo python setup.py install 
- 
-# web.py 
-sudo pip install web.py
 </pre>
 
 
@@ -73,13 +57,12 @@ update it frequently.</p>
 <p>Now you can try out the simplest config example and get it running:</p>
 
 <pre>
-cp examples/python/tests/sample_conf.py myconfig.py
-m2sh init -db myconfig.sqlite
-m2sh load -db myconfig.sqlite  -config myconfig.py
+cp examples/configs/sample.conf mysite.conf
+m2sh load -config myconfig.py
+ls config.sqlite
 </pre>
 
-<p><b>NOTE:</b>There's also examples/python/tests/mongrel2_org.py which is a more complete example.</p>
-
+<p><b>NOTE:</b>There's also other examples in examples/*.conf.</p>
 
 <h1>Running Mongrel2</h1>
 
@@ -87,7 +70,7 @@ m2sh load -db myconfig.sqlite  -config myconfig.py
 
 <pre>
 mkdir run logs tmp
-m2sh start -db myconfig.sqlite -host localhost
+m2sh start -host localhost
 </pre>
 
 <p>From another window do:</p>
