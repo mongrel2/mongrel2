@@ -191,11 +191,11 @@ deployment > cd profiles/
 deployment/profiles > mkdir chat mp3stream handlertest web mongrel2
 deployment/profiles > cd ..
 
-# setup the mongrel2 database initially
-deployment > m2sh init -db config.sqlite
-
 # copy the mongrel2_conf.py sample from the source to here
 deployment > cp ~/mongrel2/examples/python/tests/mongrel2_org.py config.py
+
+# load the default mongrel2.conf into the config.sqlite
+deployment > m2sh load
 
 # see our end results
 deployment > ls

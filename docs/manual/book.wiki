@@ -4022,11 +4022,10 @@
   operations work is that m2sh keeps track of all the commands you
   run on it while you work, and lets you add little commit logs to
   the log for documentation later. These commit logs are then
-  maintained even across <span class="pcrro7t-">m2sh init</span>
-  and <span class="pcrro7t-">m2sh load</span> commands so you can
-  see what's going on. They track who did something, what
-  server they did it on, what time they did it and what they did. 
-  <!--l. 491-->
+  maintained even across <span class="pcrro7t-">m2sh load</span>
+  commands so you can see what's going on. They track who did
+  something, what server they did it on, what time they did it and
+  what they did. <!--l. 491-->
 
   <p class="noindent">To see the logs for your own tests, just do
   <span class="pcrro7t-">m2sh log -db simple.sqlite</span> and
@@ -5550,26 +5549,9 @@
       "pcrr7t-x-x-90">&nbsp;</span><br>
       <span class="label"><a id="x1-41018r17" name=
       "x1-41018r17"></a></span><span class=
-      "pcrr7t-x-x-90">deployment</span><span class=
-      "pcrr7t-x-x-90">&nbsp;</span><span class=
-      "pcrr7t-x-x-90">&gt;</span><span class=
-      "pcrr7t-x-x-90">&nbsp;</span><span class=
-      "pcrr7t-x-x-90">m2sh</span><span class=
-      "pcrr7t-x-x-90">&nbsp;</span><span class=
-      "pcrr7t-x-x-90">init</span><span class=
-      "pcrr7t-x-x-90">&nbsp;</span><span class=
-      "pcrr7t-x-x-90">-</span><span class=
-      "pcrr7t-x-x-90">db</span><span class=
-      "pcrr7t-x-x-90">&nbsp;</span><span class=
-      "pcrr7t-x-x-90">config</span><span class=
-      "pcrr7t-x-x-90">.</span><span class=
-      "pcrr7t-x-x-90">sqlite</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
       <span class="label"><a id="x1-41019r18" name=
       "x1-41019r18"></a></span><span class=
-      "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-41020r19" name=
-      "x1-41020r19"></a></span><span class=
       "pcrr7t-x-x-90">#</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">copy</span><span class=
@@ -5592,8 +5574,8 @@
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">here</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-41021r20" name=
-      "x1-41021r20"></a></span><span class=
+      <span class="label"><a id="x1-41020r19" name=
+      "x1-41020r19"></a></span><span class=
       "pcrr7t-x-x-90">deployment</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&gt;</span><span class=
@@ -5605,23 +5587,21 @@
       "pcrr7t-x-x-90">/</span><span class=
       "pcrr7t-x-x-90">examples</span><span class=
       "pcrr7t-x-x-90">/</span><span class=
-      "pcrr7t-x-x-90">python</span><span class=
+      "pcrr7t-x-x-90">configs</span><span class=
       "pcrr7t-x-x-90">/</span><span class=
-      "pcrr7t-x-x-90">tests</span><span class=
-      "pcrr7t-x-x-90">/</span><span class=
-      "pcrr7t-x-x-90">mongrel2_org</span><span class=
+      "pcrr7t-x-x-90">mongrel2</span><span class=
       "pcrr7t-x-x-90">.</span><span class=
-      "pcrr7t-x-x-90">py</span><span class=
+      "pcrr7t-x-x-90">conf</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
-      "pcrr7t-x-x-90">config</span><span class=
+      "pcrr7t-x-x-90">mongrel2</span><span class=
       "pcrr7t-x-x-90">.</span><span class=
-      "pcrr7t-x-x-90">py</span><span class=
+      "pcrr7t-x-x-90">conf</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><br>
+      <span class="label"><a id="x1-41021r20" name=
+      "x1-41021r20"></a></span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
       <span class="label"><a id="x1-41022r21" name=
       "x1-41022r21"></a></span><span class=
-      "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-41023r22" name=
-      "x1-41023r22"></a></span><span class=
       "pcrr7t-x-x-90">#</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">see</span><span class=
@@ -5632,19 +5612,19 @@
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">results</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-41024r23" name=
-      "x1-41024r23"></a></span><span class=
+      <span class="label"><a id="x1-41023r22" name=
+      "x1-41023r22"></a></span><span class=
       "pcrr7t-x-x-90">deployment</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&gt;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">ls</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-41025r24" name=
-      "x1-41025r24"></a></span><span class=
-      "pcrr7t-x-x-90">config</span><span class=
+      <span class="label"><a id="x1-41024r23" name=
+      "x1-41024r23"></a></span><span class=
+      "pcrr7t-x-x-90">mongrel2</span><span class=
       "pcrr7t-x-x-90">.</span><span class=
-      "pcrr7t-x-x-90">py</span><span class=
+      "pcrr7t-x-x-90">conf</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">config</span><span class=
@@ -5667,7 +5647,7 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 206-->
+  <!--l. 205-->
 
   <p class="noindent">Hopefully, you're starting to see how
   you could easily automate this so that you don't have to do
@@ -5675,47 +5655,48 @@
   the sausage&rdquo; so that you know where everything goes. Future
   versions of <span class="pcrro7t-">m2sh</span> will most likely
   create deployment directories like this automatically. 
-  <!--l. 211-->
+  <!--l. 210-->
 
   <p class="noindent">What we've done here is the following:
 
   <ol class="enumerate1">
-    <li class="enumerate" id="x1-41029x1">Setup a <span class=
+    <li class="enumerate" id="x1-41028x1">Setup a <span class=
     "pcrb7t-">~/deployment</span> directory we'll put
     everything in.
 
-    <li class="enumerate" id="x1-41031x2">Created <span class=
+    <li class="enumerate" id="x1-41030x2">Created <span class=
     "pcrb7t-">run</span>, <span class="pcrb7t-">tmp</span>,
     <span class="pcrb7t-">logs</span>, and <span class=
     "pcrb7t-">profiles</span> that Mongrel2 and procer need to run.
 
-    <li class="enumerate" id="x1-41033x3">In profiles we started
+    <li class="enumerate" id="x1-41032x3">In profiles we started
     dirs for <span class="pcrb7t-">chat</span>, <span class=
     "pcrb7t-">mp3stream</span>, <span class=
     "pcrb7t-">handlertest</span>, <span class="pcrb7t-">web</span>
     and <span class="pcrb7t-">mongrel2</span>, that procer will
     read files out of to get all our gear up and running.
 
-    <li class="enumerate" id="x1-41035x4">Initialized the
+    <li class="enumerate" id="x1-41034x4">Initialized the
     <span class="pcrb7t-">config.sqlite</span> file we'll be
-    filling in with our modififed config.py.
+    filling in with our modififed mongrel2.conf.
 
-    <li class="enumerate" id="x1-41037x5">Copied the <span class=
-    "pcrb7t-">mongrel2</span><span class="pcrb7t-">_org.py</span>
-    example file over to our deployment so we can modify it.
+    <li class="enumerate" id="x1-41036x5">Copied the <span class=
+    "pcrb7t-">mongrel2.conf</span> example file over to our
+    deployment so we can modify it.
   </ol>
 
   <h3 class="sectionHead"><span class="titlemark">4.4</span> <a id=
   "x1-420004.4" name="x1-420004.4"></a>Step 2: The mongrel2.org
-  Configuration</h3><!--l. 225-->
+  Configuration</h3><!--l. 224-->
 
   <p class="noindent">Now we're ready to get the
   configuration working. Here's the thing, though: you should
   try to alter the configuration yourself. I've already given
   you the file and you are going to have to make the changes to
   meet the requirements for this deployment directory. Here's
-  what you have to change in <span class="pcrb7t-">config.py</span>
-  to make everything work right: <!--l. 230-->
+  what you have to change in <span class=
+  "pcrb7t-">mongrel2.conf</span> to make everything work right: 
+  <!--l. 229-->
 
   <p class="noindent">
 
@@ -5750,18 +5731,17 @@
     <li class="enumerate" id="x1-42012x6">Finally, change any
     mention of &ldquo;mongrel2.org&rdquo; into
     &ldquo;localhost&rdquo; so that you can run it locally.
-  </ol><!--l. 243-->
+  </ol><!--l. 242-->
 
   <p class="noindent">Once you have that all edited, you should be
   able to run <span class="pcrro7t-">m2sh load -db</span>
-  <span class="pcrro7t-">config.sqlite -config config.py</span> and
-  it'll just load it up. Try using <span class=
-  "pcrro7t-">m2sh</span> <span class="pcrro7t-">servers</span> and
-  <span class="pcrro7t-">m2sh hosts</span> to take a peek. 
-  <!--l. 248-->
+  <span class="pcrro7t-">config.sqlite -config mongrel2.conf</span>
+  and it'll just load it up. Try using <span class=
+  "pcrro7t-">m2sh servers</span> and <span class="pcrro7t-">m2sh
+  hosts</span> to take a peek. <!--l. 247-->
 
   <p class="noindent">To test it out at this stage you can just run
-  the config.sqlite that you did with these commands: <!--l. 251-->
+  the config.sqlite that you did with these commands: <!--l. 250-->
 
   <p class="noindent"><a id="x1-42013r15" name="x1-42013r15"></a>
   <hr class="float">
@@ -5772,7 +5752,7 @@
       "content"><span class="pplri7t-">Testing The Initial</span>
       <span class="pplri7t-">Configuration</span></span>
     </div><!--tex4ht:label?: x1-42013r15 -->
-    <!--l. 252-->
+    <!--l. 251-->
 
     <div class="lstlisting" id="listing-13">
       <span class="label"><a id="x1-42014r1" name=
@@ -5860,7 +5840,7 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 261-->
+  <!--l. 260-->
 
   <p class="noindent">That's enough to make sure it runs, but
   you've got nothing running, so it mostly won't work
@@ -5868,7 +5848,7 @@
 
   <h3 class="sectionHead"><span class="titlemark">4.5</span> <a id=
   "x1-430004.5" name="x1-430004.5"></a>Step 3: Setup procer</h3>
-  <!--l. 268-->
+  <!--l. 267-->
 
   <p class="noindent">Now we want to make <span class=
   "pcrro7t-">procer</span> start everything for us and keep it
@@ -5880,11 +5860,11 @@
   main <span class="pcrb7t-">profiles</span> directory and it tries
   to run it. It's dead simple and very easy to automate, so
   we'll do it by hand and then you can do some automation
-  later. <!--l. 276-->
+  later. <!--l. 275-->
 
   <p class="noindent">Let's first setup a basic config that
   gets our skeleton profiles and make sure procer can run
-  everything: <!--l. 279-->
+  everything: <!--l. 278-->
 
   <p class="noindent"><a id="x1-43001r16" name="x1-43001r16"></a>
   <hr class="float">
@@ -5895,7 +5875,7 @@
       "content"><span class="pplri7t-">Skeleton procer</span>
       <span class="pplri7t-">Setup</span></span>
     </div><!--tex4ht:label?: x1-43001r16 -->
-    <!--l. 280-->
+    <!--l. 279-->
 
     <div class="lstlisting" id="listing-14">
       <span class="label"><a id="x1-43002r1" name=
@@ -6226,11 +6206,11 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 304-->
+  <!--l. 303-->
 
   <p class="noindent">With all of that, you can then try to run
   <span class="pcrro7t-">procer</span> to watch it fail but still
-  try to run everything: <!--l. 307-->
+  try to run everything: <!--l. 306-->
 
   <div class="lstlisting" id="listing-15">
     <span class="label"><a id="x1-43022r1" name=
@@ -6257,7 +6237,7 @@
     "pcrr7t-">&nbsp;</span><span class=
     "pcrr7t-">error</span><span class=
     "pcrr7t-">.</span><span class="pcrr7t-">log</span>
-  </div><!--l. 312-->
+  </div><!--l. 311-->
 
   <p class="noindent">This is assuming that you are still in the
   <span class="pcrb7t-">profiles</span> directory. You should see
@@ -6265,12 +6245,12 @@
   probably some messages printed to the screen. Just ignore any
   mention of Mongrel2 since that's probably just cruft from
   the <span class="pcrb7t-">libm2.a</span> we haven't
-  removed. <!--l. 318-->
+  removed. <!--l. 317-->
 
   <p class="noindent">Take a look in the <span class=
   "pcrb7t-">error.log</span> and you'll see it's not
   necessarily errors but information on how things were run. You
-  should see something like this for each profile: <!--l. 322-->
+  should see something like this for each profile: <!--l. 321-->
 
   <p class="noindent"><a id="x1-43024r17" name="x1-43024r17"></a>
   <hr class="float">
@@ -6281,7 +6261,7 @@
       "content"><span class="pplri7t-">First Dummy Run Of</span>
       <span class="pplri7t-">procer</span></span>
     </div><!--tex4ht:label?: x1-43024r17 -->
-    <!--l. 323-->
+    <!--l. 322-->
 
     <div class="lstlisting" id="listing-16">
       <span class="label"><a id="x1-43025r1" name=
@@ -6550,7 +6530,7 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 337-->
+  <!--l. 336-->
 
   <p class="noindent">I've cleaned this up a bit and, again,
   ignore that it's saying &ldquo;Mongrel2&rdquo;;
@@ -6580,10 +6560,10 @@
     <li class="enumerate" id="x1-43046x6">It does this for all of
     them and, since none of them run right, <span class=
     "pcrro7t-">procer</span> exits.
-  </ol><!--l. 351-->
+  </ol><!--l. 350-->
 
   <p class="noindent">Next up, let's get Mongrel2 running
-  inside <span class="pcrro7t-">procer</span>: <!--l. 353-->
+  inside <span class="pcrro7t-">procer</span>: <!--l. 352-->
 
   <p class="noindent"><a id="x1-43047r18" name="x1-43047r18"></a>
   <hr class="float">
@@ -6594,7 +6574,7 @@
       "content"><span class="pplri7t-">procer Config For</span>
       <span class="pplri7t-">Mongrel2</span></span>
     </div><!--tex4ht:label?: x1-43047r18 -->
-    <!--l. 354-->
+    <!--l. 353-->
 
     <div class="lstlisting" id="listing-17">
       <span class="label"><a id="x1-43048r1" name=
@@ -6859,17 +6839,17 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 375-->
+  <!--l. 374-->
 
   <p class="noindent">Obviously, you don't have to use a
   series of <span class="pcrro7t-">echo</span> commands to make
   these scripts. You can edit them just fine, we're just
   doing it this way so that you can follow along easier. 
-  <!--l. 379-->
+  <!--l. 378-->
 
   <p class="noindent">Now, make sure you don't have any other
   Mongrel2 processes running, and then start procer again to see if
-  it starts this configuration correctly. <!--l. 384-->
+  it starts this configuration correctly. <!--l. 383-->
 
   <p class="noindent"><a id="x1-43065r19" name="x1-43065r19"></a>
   <hr class="float">
@@ -6880,7 +6860,7 @@
       "content"><span class="pplri7t-">Using procer To Run</span>
       <span class="pplri7t-">Mongrel2</span></span>
     </div><!--tex4ht:label?: x1-43065r19 -->
-    <!--l. 385-->
+    <!--l. 384-->
 
     <div class="lstlisting" id="listing-18">
       <span class="label"><a id="x1-43066r1" name=
@@ -7102,7 +7082,7 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 404-->
+  <!--l. 403-->
 
   <p class="noindent">To watch <span class="pcrro7t-">procer</span>
   in action, try doing <span class="pcrro7t-">m2sh stop -db
@@ -7113,7 +7093,7 @@
 
   <h4 class="subsectionHead"><span class="titlemark">4.5.1</span>
   <a id="x1-440004.5.1" name="x1-440004.5.1"></a>The Python
-  Examples</h4><!--l. 411-->
+  Examples</h4><!--l. 410-->
 
   <p class="noindent">We've got a good setup of <span class=
   "pcrro7t-">procer</span> going and it keeps Mongrel2 running, so
@@ -7125,7 +7105,7 @@
   mongrel2 source is in <span class=
   "pcrb7t-">~/projects/mongrel2</span>, you will change
   <span class="pcrb7t-">profiles/chat/run</span> to be like this: 
-  <!--l. 419-->
+  <!--l. 418-->
 
   <p class="noindent"><a id="x1-44001r20" name="x1-44001r20"></a>
   <hr class="float">
@@ -7136,7 +7116,7 @@
       "content"><span class="pplri7t-">Run Script For Chat</span>
       <span class="pplri7t-">Demo</span></span>
     </div><!--tex4ht:label?: x1-44001r20 -->
-    <!--l. 420-->
+    <!--l. 419-->
 
     <div class="lstlisting" id="listing-19">
       <span class="label"><a id="x1-44002r1" name=
@@ -7236,7 +7216,7 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 433-->
+  <!--l. 432-->
 
   <p class="noindent">This little script uses some funky features
   you might not be familiar with, but which are nice to learn, so
@@ -7265,10 +7245,10 @@
     "obeylines-h verb pcrr7t-">$!</span> (the PID of the last
     process started in the background) to the <span class=
     "pcrb7t-">chat.pid</span> file in the profile directory.
-  </ol><!--l. 451-->
+  </ol><!--l. 450-->
 
   <p class="noindent">When you run this manually, you should see
-  something like this: <!--l. 453-->
+  something like this: <!--l. 452-->
 
   <div class="lstlisting" id="listing-20">
     <span class="label"><a id="x1-44019r1" name=
@@ -7336,11 +7316,11 @@
     "pcrr7t-">&nbsp;</span><span class=
     "pcrr7t-">-</span><span class="pcrr7t-">TERM</span><span class=
     "pcrr7t-">&nbsp;</span><span class="pcrr7t-">19305</span>
-  </div><!--l. 463-->
+  </div><!--l. 462-->
 
   <p class="noindent">After all that, you can then try out
   <span class="pcrro7t-">procer</span> again to see if it properly
-  runs the chat demo as well as mongrel2: <!--l. 466-->
+  runs the chat demo as well as mongrel2: <!--l. 465-->
 
   <p class="noindent"><a id="x1-44026r21" name="x1-44026r21"></a>
   <hr class="float">
@@ -7351,7 +7331,7 @@
       "content"><span class="pplri7t-">Running procer With
       Chat</span> <span class="pplri7t-">Demo</span></span>
     </div><!--tex4ht:label?: x1-44026r21 -->
-    <!--l. 467-->
+    <!--l. 466-->
 
     <div class="lstlisting" id="listing-21">
       <span class="label"><a id="x1-44027r1" name=
@@ -7668,18 +7648,18 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 489-->
+  <!--l. 488-->
 
   <p class="noindent">If you go look at <span class=
   "pcrb7t-">profiles/error.log</span>, you'll see that
   <span class="pcrro7t-">procer</span> is also running each of them
   as the right user, with chat being run as you, but Mongrel2 being
   run as root so it can chroot/drop privileges properly. 
-  <!--l. 493-->
+  <!--l. 492-->
 
   <p class="noindent">Rather than give you a walk through each of
   these setups, here's the run scripts for the remaining
-  files: <!--l. 496-->
+  files: <!--l. 495-->
 
   <p class="noindent"><a id="x1-44045r22" name="x1-44045r22"></a>
   <hr class="float">
@@ -7691,7 +7671,7 @@
       <span class="pplri7t-">Scripts</span></span>
     </div><!--tex4ht:label?: x1-44045r22 -->
     <span class=
-    "pcrb7t-x-x-90">profiles/handlertest/run</span>_________________________________________<!--l. 500-->
+    "pcrb7t-x-x-90">profiles/handlertest/run</span>_________________________________________<!--l. 499-->
 
     <div class="lstlisting" id="listing-22">
       <span class="label"><a id="x1-44046r1" name=
@@ -7790,10 +7770,10 @@
       "pcrr7t-x-x-90">handlertest</span><span class=
       "pcrr7t-x-x-90">.</span><span class=
       "pcrr7t-x-x-90">pid</span>
-    </div><!--l. 512-->
+    </div><!--l. 511-->
 
     <p class="noindent"><span class=
-    "pcrb7t-x-x-90">profiles/mp3stream/run</span>__________________________________________<!--l. 515-->
+    "pcrb7t-x-x-90">profiles/mp3stream/run</span>__________________________________________<!--l. 514-->
 
     <div class="lstlisting" id="listing-23">
       <span class="label"><a id="x1-44055r1" name=
@@ -7892,10 +7872,10 @@
       "pcrr7t-x-x-90">mp3stream</span><span class=
       "pcrr7t-x-x-90">.</span><span class=
       "pcrr7t-x-x-90">pid</span>
-    </div><!--l. 528-->
+    </div><!--l. 527-->
 
     <p class="noindent"><span class=
-    "pcrb7t-x-x-90">profiles/web/run</span>________________________________________________<!--l. 530-->
+    "pcrb7t-x-x-90">profiles/web/run</span>________________________________________________<!--l. 529-->
 
     <div class="lstlisting" id="listing-24">
       <span class="label"><a id="x1-44064r1" name=
@@ -8000,12 +7980,12 @@
 
   <h4 class="subsectionHead"><span class="titlemark">4.5.2</span>
   <a id="x1-450004.5.2" name="x1-450004.5.2"></a>Testing The New
-  Setup</h4><!--l. 547-->
+  Setup</h4><!--l. 546-->
 
   <p class="noindent">Once everything is running and <span class=
   "pcrro7t-">procer</span> is maintaining it, you just need to see
   if things work. Here's some curl commands to try: 
-  <!--l. 550-->
+  <!--l. 549-->
 
   <p class="noindent"><a id="x1-45001r23" name="x1-45001r23"></a>
   <hr class="float">
@@ -8016,7 +7996,7 @@
       "content"><span class="pplri7t-">Testing With</span>
       <span class="pplri7t-">Curl</span></span>
     </div><!--tex4ht:label?: x1-45001r23 -->
-    <!--l. 551-->
+    <!--l. 550-->
 
     <div class="lstlisting" id="listing-25">
       <span class="label"><a id="x1-45002r1" name=
@@ -8059,7 +8039,7 @@
 
   <h4 class="subsectionHead"><span class="titlemark">4.5.3</span>
   <a id="x1-460004.5.3" name="x1-460004.5.3"></a>Nice Features of
-  Procer</h4><!--l. 562-->
+  Procer</h4><!--l. 561-->
 
   <p class="noindent">There's some nice subtle features you
   get from using <span class="pcrro7t-">procer</span> to run your
@@ -8100,21 +8080,21 @@
     stuff it needs, then goes back to supervising. This means you
     can change the configs for procer then just kick it over and
     it'll do the right thing.
-  </dl><!--l. 582-->
+  </dl><!--l. 581-->
 
   <p class="noindent">The key thing, though, is that you now have
   the whole application for the mongrel2.org demo up and running,
   including automated process management, configuration, and
-  managing everything. <!--l. 586-->
+  managing everything. <!--l. 585-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">4.6</span> <a id=
   "x1-470004.6" name="x1-470004.6"></a>Step 4: Static Content</h3>
-  <!--l. 588-->
+  <!--l. 587-->
 
   <p class="noindent">The final thing we have to do is get the
-  static content we need to try out the chat demo: <!--l. 591-->
+  static content we need to try out the chat demo: <!--l. 590-->
 
   <p class="noindent"><a id="x1-47001r24" name="x1-47001r24"></a>
   <hr class="float">
@@ -8125,7 +8105,7 @@
       "content"><span class="pplri7t-">Setting Up Static</span>
       <span class="pplri7t-">Content</span></span>
     </div><!--tex4ht:label?: x1-47001r24 -->
-    <!--l. 592-->
+    <!--l. 591-->
 
     <div class="lstlisting" id="listing-26">
       <span class="label"><a id="x1-47002r1" name=
@@ -8193,7 +8173,7 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 599-->
+  <!--l. 598-->
 
   <p class="noindent">If you get a good response then you should be
   able to go to <a href="http://localhost:6767/chatdemo/" class=
@@ -8206,11 +8186,11 @@
 
   <h3 class="sectionHead"><span class="titlemark">4.7</span> <a id=
   "x1-480004.7" name="x1-480004.7"></a>Step 5: Testing And
-  Troubleshooting</h3><!--l. 607-->
+  Troubleshooting</h3><!--l. 606-->
 
   <p class="noindent">You should have been testing the
   configuration as you went, but the main things to test are: 
-  <!--l. 610-->
+  <!--l. 609-->
 
   <p class="noindent">
 
@@ -8241,41 +8221,41 @@
     <li class="enumerate" id="x1-48012x6">Stop <span class=
     "pcrro7t-">procer</span> and then start it again to see if it
     properly doesn't step on things.
-  </ol><!--l. 625-->
+  </ol><!--l. 624-->
 
   <p class="noindent">If you run into problems, make sure that you
   can run each little piece and that the files you were supposed to
   make are correct. The best tool to use is <span class=
-  "pcrro7t-">diff</span>. <!--l. 629-->
+  "pcrro7t-">diff</span>. <!--l. 628-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">4.8</span> <a id=
   "x1-490004.8" name="x1-490004.8"></a>Further Improvements</h3>
-  <!--l. 631-->
+  <!--l. 630-->
 
   <p class="noindent">That ends this chapter, and at this point you
   should know how to setup nearly everything Mongrel2 has to offer
   right now. You should have a good idea of how <span class=
   "pcrro7t-">procer</span> will work or not for your real
   deployments, and how it's used by me for my own
-  deployments. <!--l. 636-->
+  deployments. <!--l. 635-->
 
   <p class="noindent">A <span class="pplri7t-">major</span>
   improvement that we may eventually make is automating setup of
   <span class="pcrro7t-">procer</span> profiles, and just better
   overall management of the profiles with <span class=
   "pcrro7t-">m2sh</span>. If you feel like hacking on that, just go
-  ahead and try and let us know. <!--l. 641-->
+  ahead and try and let us know. <!--l. 640-->
 
   <p class="noindent">Other than that, automate, automate,
-  automate. <!--l. 643-->
+  automate. <!--l. 642-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">4.9</span> <a id=
   "x1-500004.9" name="x1-500004.9"></a>Deployment Tips</h3>
-  <!--l. 645-->
+  <!--l. 644-->
 
   <p class="noindent">Mongrel2 enforces the correct behavior when
   you run as root, which is to drop priv and chroot. This makes the
@@ -8284,7 +8264,7 @@
   need to rsync that chroot directory, or put it into a git or hg
   repo, and you're set. You're literally forced to make
   your deployments portable to different directories and systems. 
-  <!--l. 651-->
+  <!--l. 650-->
 
   <p class="noindent">As of the 1.0 push for Mongrel2, we
   haven't done much work on how you deploy all the different
@@ -8292,11 +8272,11 @@
   is to expand that out in the 2.0 version so that deployment is
   very well documented for all the different languages we support.
   That means you'll probably run into some snags and things
-  we didn't anticipate. <!--l. 657-->
+  we didn't anticipate. <!--l. 656-->
 
   <p class="noindent">The following are some general points
   we've come up with while deploying our own apps, with more
-  to come as we work on the 2.0 version: <!--l. 660-->
+  to come as we work on the 2.0 version: <!--l. 659-->
 
   <p class="noindent">
 
@@ -8347,12 +8327,12 @@
     isn't accessible outside your content directories.
     Mongrel2 helps you get this right by not allowing certain Dir
     configurations that would expose your chroot to the world.
-  </ol><!--l. 693-->
+  </ol><!--l. 692-->
 
   <p class="noindent">There's a few additional tips for
   people who want to use alternative process supervision like
   daemontools, runit, or init.d setups. No matter what you use, you
-  should probably follow this advice: <!--l. 697-->
+  should probably follow this advice: <!--l. 696-->
 
   <p class="noindent">
 
@@ -8389,7 +8369,7 @@
     forever&rdquo;, everything has bugs and stupid people tend to
     kill things they don't get. If taking one process down
     nukes your whole server, then that's a bad design.
-  </ol><!--l. 723-->
+  </ol><!--l. 722-->
 
   <p class="noindent">As we work on the next phase of Mongrel2
   development, this will improve, so watch for news about
