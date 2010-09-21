@@ -44,7 +44,7 @@ wget http://mongrel2.org/static/downloads/mongrel2-1.1.tar.bz2
 
 <pre>
 tar -xjvf mongrel2-1.1.tar.bz2
-cd mongrel2_2010-08-17_011326_58fb817f8e/
+cd mongrel2-1.1/
 make clean all install
 </pre>
 

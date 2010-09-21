@@ -55,9 +55,9 @@ technologies.</p>
 
 <ul>
     <li><a href="/static/downloads/mongrel2-1.1.tar.bz2">mongrel2-1.1.tar.bz2</a> 
-    MD5: </li>
+    MD5: 62ae9294840d7c5e026c70c9efd4032</li>
     <li><a href="/static/downloads/mongrel2-1.1.zip">mongrel2-1.1.zip</a>
-    MD5: </li>
+    MD5: eb5f5a6b5ee76a0ac0cc1abbea2ed4b9</li>
 </ul>
 
 
