@@ -10,6 +10,8 @@
 #include <signal.h>
 #include <unistd.h>
 #include <assert.h>
+#include <task/task.h>
+#include <register.h>
 
 typedef int (*Command_handler_cb)(Command *cmd);
 
@@ -90,7 +92,7 @@ static int Command_load(Command *cmd)
 }
 
 
-static inline int linenoise_runner(int (*callback)(bstring arg))
+static inline int linenoise_runner(const char *prompt, int (*callback)(bstring arg, void *data), void *data)
 {
     char *line = NULL;
     bstring args = NULL;
@@ -105,10 +107,10 @@ static inline int linenoise_runner(int (*callback)(bstring arg))
         hist_file = NULL;
     }
 
-    while((line = linenoise("m2> ")) != NULL) {
+    while((line = linenoise(prompt)) != NULL) {
         if (line[0] != '\0') {
-            args = bformat("%s %s", "m2sh", line);
-            callback(args);
+            args = bformat("%s", line);
+            callback(args, data);
             bdestroy(args);
 
             if(hist_file) {
@@ -124,9 +126,19 @@ static inline int linenoise_runner(int (*callback)(bstring arg))
 }
 
 
+static int run_command(bstring line, void *ignored)
+{
+    bstring args = bformat("m2sh %s", bdata(line));
+    int rc = Command_run(args);
+
+    bdestroy(args);
+    return rc;
+}
+
+
 static int Command_shell(Command *cmd)
 {
-    return linenoise_runner(Command_run);
+    return linenoise_runner("mongrel2> ", run_command, NULL);
 }
 
 
@@ -437,24 +449,91 @@ static int Command_running(Command *cmd)
     return exec_server_operations(cmd, check_server, "chroot, pid_file");
 }
 
-static int send_recv_control(bstring args)
+
+static void bstring_free(void *data, void *hint)
 {
-    debug("NOT READY YET: %s", bdata(args));
+    bdestroy((bstring)hint);
+}
+
+
+static int send_recv_control(bstring args, void *socket)
+{
+    int rc = 0;
+    bstring msg_buf = bstrcpy(args);
+    check_mem(msg_buf);
+    zmq_msg_t *outmsg = NULL;
+    zmq_msg_t *inmsg = NULL;
+
+    outmsg = calloc(sizeof(zmq_msg_t), 1);
+    check_mem(outmsg);
+    inmsg = calloc(sizeof(zmq_msg_t), 1);
+    check_mem(inmsg);
+    
+    rc = zmq_msg_init(outmsg);
+    check(rc == 0, "Failed to initialize outgoing message.");
+    rc = zmq_msg_init(inmsg);
+    check(rc == 0, "Failed to initialize incoming message.");
+
+    // send the message
+    rc = zmq_msg_init_data(outmsg, bdata(msg_buf), blength(msg_buf)+1, bstring_free, msg_buf);
+    check(rc == 0, "Failed to init outgoing message.");
+
+    rc = mqsend(socket, outmsg, 0);
+    check(rc == 0, "Failed to send message to control port.");
+    free(outmsg);
+
+    // recv the response
+    rc = mqrecv(socket, inmsg, 0);
+    check(rc == 0, "Failed to recev message from control port.");
+
+    printf("%.*s\n", (int)zmq_msg_size(inmsg), (const char *)zmq_msg_data(inmsg));
+    fflush(stdout);
+    free(inmsg);
+
     return 0;
+
+error:
+    if(outmsg) free(outmsg);
+    if(inmsg) free(inmsg);
+    return -1;
 }
 
 static int control_server(void *param, int cols, char **data, char **names)
 {
-    // build the ipc path from the chroot
-    // start 0mq and connect to the control port
-    // loop a REQ socket on a linenoise repl
-    
-    return linenoise_runner(send_recv_control);
+    int rc = 0;
+    void *socket = NULL;
+    struct ServerRun *r = (struct ServerRun *)param;
+    r->ran = 1;
+    bstring prompt = bformat("m2 [%s]> ", data[0]);
+    bstring control = bformat("ipc://%s/run/control", data[1]);
+    log_info("Connecting to control port %s", bdata(control));
+
+    mqinit(1);
+    Register_init();
+
+    socket = mqsocket(ZMQ_REQ);
+    check(socket != NULL, "Failed to create REQ socket.");
+
+    rc = zmq_connect(socket, bdata(control));
+    check(rc == 0, "Failed to connect to control port.");
+
+    rc = linenoise_runner(bdata(prompt), send_recv_control, socket);
+
+    bdestroy(prompt);
+    bdestroy(control);
+    zmq_close(socket);
+    return rc;
+
+error:
+    bdestroy(prompt);
+    bdestroy(control);
+    if(socket) zmq_close(socket);
+    return -1;
 }
 
 static int Command_control(Command *cmd)
 {
-    return exec_server_operations(cmd, control_server, "chroot");
+    return exec_server_operations(cmd, control_server, "name, chroot");
 }
 
 static int Command_version(Command *cmd)
@@ -536,8 +615,8 @@ void Command_destroy(Command *cmd)
 {
     bdestroy(cmd->progname);
     bdestroy(cmd->name);
-    list_destroy(cmd->extra);
-    hash_destroy(cmd->options);
+    //list_destroy(cmd->extra);
+    //hash_destroy(cmd->options);
 }
 
 
