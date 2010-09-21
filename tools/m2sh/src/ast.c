@@ -65,6 +65,8 @@ int AST_walk_list(hash_t *settings, list_t *data, ast_walk_cb cb)
 
     for(n = list_first(data); n != NULL; n = list_next(data, n)) {
         Value *ref = lnode_get(n);
+        check(ref, "List got a NULL value in it. Huh?");
+
         Value *found = Value_resolve(settings, ref);
 
         check(found, "Invalid reference: %s", bdata(ref->as.ref->data));
@@ -121,10 +123,10 @@ Value *AST_get(hash_t *settings, hash_t *fr, const char *name, ValueType type)
     Value *val = hnode_get(hn);
     if(Value_is(val, REF)) {
         val = Value_resolve(settings, val);
-    } else {
-        check(val->type == type, "Invalid type for %s, should be %s not %s",
-                name, Value_type_name(type), Value_type_name(val->type));
     }
+
+    check(val->type == type, "Invalid type for %s, should be %s not %s",
+            name, Value_type_name(type), Value_type_name(val->type));
 
     return val;
 
