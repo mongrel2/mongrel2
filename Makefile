@@ -30,17 +30,17 @@ build:
 clean:
 	rm -rf build bin lib ${OBJECTS} ${TESTS} tests/config.sqlite
 	find . -name "*.gc*" -exec rm {} \;
-	cd tools/m2sh && make clean
+	make -C tools/m2sh clean
 
 pristine: clean
 	sudo rm -rf examples/python/build examples/python/dist examples/python/m2py.egg-info
 	sudo find . -name "*.pyc" -exec rm {} \;
-	cd docs/manual && make clean
+	make -C docs/manual clean
 	cd docs/ && make clean
-	cd examples/kegogi && make clean
+	make -C examples/kegogi clean
 	rm -f logs/*
 	rm -f run/*
-	cd tools/m2sh && make pristine
+	make -C tools/m2sh pristine
 
 tests: build/libm2.a tests/config.sqlite ${TESTS}
 	sh ./tests/runtests.sh
@@ -63,7 +63,7 @@ check:
 	@egrep '[^_.>a-zA-Z0-9](str(n?cpy|n?cat|xfrm|n?dup|str|pbrk|tok|_)|stpn?cpy|a?sn?printf|byte_)' $(filter-out src/bstr/bsafe.c,${SOURCES})
 
 m2sh: 
-	cd tools/m2sh && make all
+	make -C tools/m2sh all
 
 install: all install-bin install-m2sh
 
@@ -72,7 +72,7 @@ install-bin:
 	install bin/mongrel2 $(PREFIX)/bin/
 
 install-m2sh:
-	cd tools/m2sh && make install
+	make -C tools/m2sh install
 
 examples/python/mongrel2/sql/config.sql: src/config/config.sql src/config/mimetypes.sql
 	cat src/config/config.sql src/config/mimetypes.sql > $@
