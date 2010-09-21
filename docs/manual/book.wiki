@@ -2129,24 +2129,6 @@
       "pcrr7t-x-x-90">&nbsp;</span><br>
       <span class="label"><a id="x1-21003r1" name=
       "x1-21003r1"></a></span><span class=
-      "pcrb7t-x-x-90">from</span><span class=
-      "pcrr7t-x-x-90">&nbsp;</span><span class=
-      "pcrr7t-x-x-90">mongrel2</span><span class=
-      "pcrr7t-x-x-90">.</span><span class=
-      "pcrr7t-x-x-90">config</span><span class=
-      "pcrr7t-x-x-90">&nbsp;</span><span class=
-      "pcrb7t-x-x-90">import</span><span class=
-      "pcrr7t-x-x-90">&nbsp;</span><span class=
-      "pcrr7t-x-x-90">&#8902;</span><span class=
-      "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-21004r2" name=
-      "x1-21004r2"></a></span><span class=
-      "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-21005r3" name=
-      "x1-21005r3"></a></span><span class=
-      "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-21006r4" name=
-      "x1-21006r4"></a></span><span class=
       "pcrr7t-x-x-90">main</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">=</span><span class=
@@ -2154,8 +2136,8 @@
       "pcrr7t-x-x-90">Server</span><span class=
       "pcrr7t-x-x-90">(</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-21007r5" name=
-      "x1-21007r5"></a></span><span class=
+      <span class="label"><a id="x1-21004r2" name=
+      "x1-21004r2"></a></span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
@@ -2171,8 +2153,8 @@
       "pcrr7t-x-x-90">"</span><span class=
       "pcrr7t-x-x-90">,</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-21008r6" name=
-      "x1-21008r6"></a></span><span class=
+      <span class="label"><a id="x1-21005r3" name=
+      "x1-21005r3"></a></span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
@@ -2189,8 +2171,8 @@
       "pcrr7t-x-x-90">"</span><span class=
       "pcrr7t-x-x-90">,</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-21009r7" name=
-      "x1-21009r7"></a></span><span class=
+      <span class="label"><a id="x1-21006r4" name=
+      "x1-21006r4"></a></span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
@@ -2207,8 +2189,8 @@
       "pcrr7t-x-x-90">"</span><span class=
       "pcrr7t-x-x-90">,</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-21010r8" name=
-      "x1-21010r8"></a></span><span class=
+      <span class="label"><a id="x1-21007r5" name=
+      "x1-21007r5"></a></span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
@@ -2220,8 +2202,8 @@
       "pcrr7t-x-x-90">"</span><span class=
       "pcrr7t-x-x-90">,</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-21011r9" name=
-      "x1-21011r9"></a></span><span class=
+      <span class="label"><a id="x1-21008r6" name=
+      "x1-21008r6"></a></span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
@@ -2233,8 +2215,8 @@
       "pcrr7t-x-x-90">"</span><span class=
       "pcrr7t-x-x-90">,</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-21012r10" name=
-      "x1-21012r10"></a></span><span class=
+      <span class="label"><a id="x1-21009r7" name=
+      "x1-21009r7"></a></span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
@@ -2246,8 +2228,8 @@
       "pcrr7t-x-x-90">"</span><span class=
       "pcrr7t-x-x-90">,</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-21013r11" name=
-      "x1-21013r11"></a></span><span class=
+      <span class="label"><a id="x1-21010r8" name=
+      "x1-21010r8"></a></span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
@@ -2264,8 +2246,8 @@
       "pcrr7t-x-x-90">"</span><span class=
       "pcrr7t-x-x-90">,</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-21014r12" name=
-      "x1-21014r12"></a></span><span class=
+      <span class="label"><a id="x1-21011r9" name=
+      "x1-21011r9"></a></span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
@@ -2273,8 +2255,8 @@
       "pcrr7t-x-x-90">port</span><span class=
       "pcrr7t-x-x-90">=6767,</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-21015r13" name=
-      "x1-21015r13"></a></span><span class=
+      <span class="label"><a id="x1-21012r10" name=
+      "x1-21012r10"></a></span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
@@ -2285,8 +2267,8 @@
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&#91;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-21016r14" name=
-      "x1-21016r14"></a></span><span class=
+      <span class="label"><a id="x1-21013r11" name=
+      "x1-21013r11"></a></span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
@@ -2307,8 +2289,8 @@
       "pcrr7t-x-x-90">routes</span><span class=
       "pcrr7t-x-x-90">={</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-21017r15" name=
-      "x1-21017r15"></a></span><span class=
+      <span class="label"><a id="x1-21014r12" name=
+      "x1-21014r12"></a></span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
@@ -2347,8 +2329,8 @@
       "pcrr8c-x-x-90">'</span><span class=
       "pcrr7t-x-x-90">,</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-21018r16" name=
-      "x1-21018r16"></a></span><span class=
+      <span class="label"><a id="x1-21015r13" name=
+      "x1-21015r13"></a></span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
@@ -2387,8 +2369,8 @@
       "pcrr8c-x-x-90">'</span><span class=
       "pcrr7t-x-x-90">)</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-21019r17" name=
-      "x1-21019r17"></a></span><span class=
+      <span class="label"><a id="x1-21016r14" name=
+      "x1-21016r14"></a></span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
@@ -2399,23 +2381,23 @@
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">})</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-21020r18" name=
-      "x1-21020r18"></a></span><span class=
+      <span class="label"><a id="x1-21017r15" name=
+      "x1-21017r15"></a></span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">&#93;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-21021r19" name=
-      "x1-21021r19"></a></span><span class=
+      <span class="label"><a id="x1-21018r16" name=
+      "x1-21018r16"></a></span><span class=
       "pcrr7t-x-x-90">)</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-21022r20" name=
-      "x1-21022r20"></a></span><span class=
+      <span class="label"><a id="x1-21019r17" name=
+      "x1-21019r17"></a></span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-21023r21" name=
-      "x1-21023r21"></a></span><span class=
+      <span class="label"><a id="x1-21020r18" name=
+      "x1-21020r18"></a></span><span class=
       "pcrr7t-x-x-90">servers</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">=</span><span class=
@@ -2433,7 +2415,7 @@
   We'll get into how its structured in a second, but to load
   this file we would just do this: <!--l. 161-->
 
-  <p class="noindent"><a id="x1-21027r7" name="x1-21027r7"></a>
+  <p class="noindent"><a id="x1-21024r7" name="x1-21024r7"></a>
   <hr class="float">
 
   <div class="float">
@@ -2441,12 +2423,12 @@
       <span class="id">Source 7:</span> <span class=
       "content"><span class="pplri7t-">Loading The Simple</span>
       <span class="pplri7t-">Config</span></span>
-    </div><!--tex4ht:label?: x1-21027r7 -->
+    </div><!--tex4ht:label?: x1-21024r7 -->
     <!--l. 162-->
 
     <div class="lstlisting" id="listing-6">
-      <span class="label"><a id="x1-21028r1" name=
-      "x1-21028r1"></a></span><span class=
+      <span class="label"><a id="x1-21025r1" name=
+      "x1-21025r1"></a></span><span class=
       "pcrr7t-x-x-90">&gt;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">m2sh</span><span class=
@@ -2466,8 +2448,8 @@
       "pcrr7t-x-x-90">.</span><span class=
       "pcrr7t-x-x-90">py</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-21029r2" name=
-      "x1-21029r2"></a></span><span class=
+      <span class="label"><a id="x1-21026r2" name=
+      "x1-21026r2"></a></span><span class=
       "pcrr7t-x-x-90">&gt;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">ls</span><span class=
@@ -2479,16 +2461,16 @@
       "pcrr7t-x-x-90">.</span><span class=
       "pcrr7t-x-x-90">sqlite</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-21030r3" name=
-      "x1-21030r3"></a></span><span class=
+      <span class="label"><a id="x1-21027r3" name=
+      "x1-21027r3"></a></span><span class=
       "pcrr7t-x-x-90">&gt;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">m2sh</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">servers</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-21031r4" name=
-      "x1-21031r4"></a></span><span class=
+      <span class="label"><a id="x1-21028r4" name=
+      "x1-21028r4"></a></span><span class=
       "pcrr7t-x-x-90">&gt;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">m2sh</span><span class=
@@ -2500,8 +2482,8 @@
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">localhost</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
-      <span class="label"><a id="x1-21032r5" name=
-      "x1-21032r5"></a></span><span class=
+      <span class="label"><a id="x1-21029r5" name=
+      "x1-21029r5"></a></span><span class=
       "pcrr7t-x-x-90">&gt;</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">m2sh</span><span class=
@@ -2527,17 +2509,17 @@
   <p class="noindent">With this sequence of commands you:
 
   <ol class="enumerate1">
-    <li class="enumerate" id="x1-21034x1">Create a raw fresh config
+    <li class="enumerate" id="x1-21031x1">Create a raw fresh config
     database name <span class="pcrb7t-">simple.sqlite</span> and
     load the <span class="pcrb7t-">sample.conf</span> into it.
 
-    <li class="enumerate" id="x1-21036x2">List the servers it has
+    <li class="enumerate" id="x1-21033x2">List the servers it has
     configured.
 
-    <li class="enumerate" id="x1-21038x3">List the hosts that
+    <li class="enumerate" id="x1-21035x3">List the hosts that
     server has, with what routes it has.
 
-    <li class="enumerate" id="x1-21040x4">Start this server to try
+    <li class="enumerate" id="x1-21037x4">Start this server to try
     it out.
   </ol><!--l. 185-->
 
