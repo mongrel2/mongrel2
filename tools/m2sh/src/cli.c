@@ -503,7 +503,8 @@ static inline int Command_parse(struct params *p, Command *cmd)
         cmd->progname = match(p, next);
         check(cmd->progname, "No program name given in command.");
     } else {
-        sentinel("Expected the name of the program you're running.");
+        sentinel("Expected the name of the program you're running not: %s",
+                bdata(match(p, next)));
     }
 
     cmd->name = match(p, TKIDENT);
@@ -526,6 +527,8 @@ error:
     return -1;
 }
 
+struct tagbstring DEFAULT_COMMAND = bsStatic("shell");
+
 int cli_params_parse_args(bstring args, Command *cmd)
 {
 	struct params params;
@@ -539,7 +542,10 @@ int cli_params_parse_args(bstring args, Command *cmd)
     int rc = cli_params_finish(&params);
     check(rc == 1, "error processing arguments: %d", rc);
 
-    check(params.token_count >= 2, "No command given.");
+    if(params.token_count < 2) {
+        params.tokens[params.token_count++] =  Token_create(
+                TKIDENT, bdata(&DEFAULT_COMMAND), blength(&DEFAULT_COMMAND));
+    }
 
     return Command_parse(&params, cmd);
 
