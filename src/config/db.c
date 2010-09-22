@@ -70,6 +70,7 @@ int DB_exec(const char *query,
     return 0;
 
 error:
+    if(zErrMsg) sqlite3_free(zErrMsg);
     return -1;
 }
 

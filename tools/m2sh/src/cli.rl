@@ -70,7 +70,7 @@ int cli_params_finish( struct params *fsm )
 	return 0;
 }
 
-static inline bstring match(struct params *p, int type)
+static inline bstring match_release(struct params *p, int type, int release)
 {
     check(p->curtk < p->token_count, "Expecting %d but nothing left.", type);
     Token *tk = p->tokens[p->curtk++];
@@ -78,12 +78,20 @@ static inline bstring match(struct params *p, int type)
     check(tk->type == type, "Expecting %d but got %d.", type, tk->type);
 
     bstring val = tk->data;
-    tk->data = NULL;  // that when it's freed we don't try again
+
+    if(release) {
+        tk->data = NULL;  // that when it's freed we don't try again
+    }
 
     return val;
 
 error:
     return NULL;
+}
+
+static inline bstring match(struct params *p, int type)
+{
+    return match_release(p, type, 1);
 }
 
 
@@ -98,7 +106,7 @@ static inline int peek(struct params *p)
 
 static inline void Command_option(Command *cmd, struct params *p)
 {
-    bstring key = match(p, TKOPTION);
+    bstring key = match_release(p, TKOPTION, 0);
     check(key, "Should have matched an option.");
 
     bstring value = NULL;
@@ -113,7 +121,6 @@ static inline void Command_option(Command *cmd, struct params *p)
     }
 
     hash_alloc_insert(cmd->options, bdata(key), value);
-    bdestroy(key);
     return;
 
 error:
@@ -123,7 +130,7 @@ error:
 
 static inline void Command_extra(Command *cmd, int next, struct params *p)
 {
-    bstring extra = match(p, next);
+    bstring extra = match_release(p, next, 0);
     list_append(cmd->extra, lnode_create(extra));
 }
 
