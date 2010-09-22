@@ -131,6 +131,7 @@ static inline int linenoise_runner(const char *prompt, int (*callback)(bstring a
         free(line);
     }
 
+    bdestroy(hist_file);
     return 0;
 }
 
@@ -338,6 +339,8 @@ static int run_server(void *param, int cols, char **data, char **names)
 
     system(bdata(command));
 
+    bdestroy(command);
+
     r->ran = 1;
     return 0;
 }
@@ -531,6 +534,7 @@ static int control_server(void *param, int cols, char **data, char **names)
     bdestroy(prompt);
     bdestroy(control);
     zmq_close(socket);
+    zmq_term(ZMQ_CTX);
     return rc;
 
 error:
