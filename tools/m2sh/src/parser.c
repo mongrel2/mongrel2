@@ -836,13 +836,13 @@ static void yy_reduce(
         break;
       case 13: /* parameters ::= parameters COMMA assignment */
 #line 72 "src/parser.y"
-{ yygotominor.yy50 = yymsp[-2].minor.yy50; hash_alloc_insert(yygotominor.yy50, bdata(yymsp[0].minor.yy35->key->data), yymsp[0].minor.yy35->value);   yy_destructor(yypParser,10,&yymsp[-1].minor);
+{ yygotominor.yy50 = yymsp[-2].minor.yy50; hash_alloc_insert(yygotominor.yy50, bdata(yymsp[0].minor.yy35->key->data), yymsp[0].minor.yy35->value); free(yymsp[0].minor.yy35);   yy_destructor(yypParser,10,&yymsp[-1].minor);
 }
 #line 842 "src/parser.c"
         break;
       case 14: /* parameters ::= parameters assignment */
 #line 75 "src/parser.y"
-{ yygotominor.yy50 = yymsp[-1].minor.yy50; hash_alloc_insert(yygotominor.yy50, bdata(yymsp[0].minor.yy35->key->data), yymsp[0].minor.yy35->value); }
+{ yygotominor.yy50 = yymsp[-1].minor.yy50; hash_alloc_insert(yygotominor.yy50, bdata(yymsp[0].minor.yy35->key->data), yymsp[0].minor.yy35->value); free(yymsp[0].minor.yy35); }
 #line 847 "src/parser.c"
         break;
       case 15: /* parameters ::= */
@@ -883,13 +883,13 @@ static void yy_reduce(
         break;
       case 21: /* hash_elements ::= hash_elements COMMA hash_pair */
 #line 100 "src/parser.y"
-{ yygotominor.yy50 = yymsp[-2].minor.yy50; hash_alloc_insert(yygotominor.yy50, bdata(yymsp[0].minor.yy27->key->data), yymsp[0].minor.yy27->value);   yy_destructor(yypParser,10,&yymsp[-1].minor);
+{ yygotominor.yy50 = yymsp[-2].minor.yy50; hash_alloc_insert(yygotominor.yy50, bdata(yymsp[0].minor.yy27->key->data), yymsp[0].minor.yy27->value); free(yymsp[0].minor.yy27);   yy_destructor(yypParser,10,&yymsp[-1].minor);
 }
 #line 889 "src/parser.c"
         break;
       case 22: /* hash_elements ::= hash_elements hash_pair */
 #line 103 "src/parser.y"
-{ yygotominor.yy50 = yymsp[-1].minor.yy50; hash_alloc_insert(yygotominor.yy50, bdata(yymsp[0].minor.yy27->key->data), yymsp[0].minor.yy27->value); }
+{ yygotominor.yy50 = yymsp[-1].minor.yy50; hash_alloc_insert(yygotominor.yy50, bdata(yymsp[0].minor.yy27->key->data), yymsp[0].minor.yy27->value); free(yymsp[0].minor.yy27); }
 #line 894 "src/parser.c"
         break;
       case 24: /* hash_pair ::= QSTRING COLON expr */

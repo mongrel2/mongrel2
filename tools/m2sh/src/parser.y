@@ -69,10 +69,10 @@ class(C) ::= CLASS(I) LPAREN parameters(P) RPAREN.
 %type parameters { hash_t *}
 %destructor parameters { AST_destroy($$); }
 parameters(P) ::= parameters(O) COMMA assignment(A). 
-    { P = O; hash_alloc_insert(P, bdata(A->key->data), A->value); }
+    { P = O; hash_alloc_insert(P, bdata(A->key->data), A->value); free(A); }
 
 parameters(P) ::= parameters(O) assignment(A). 
-    { P = O; hash_alloc_insert(P, bdata(A->key->data), A->value); }
+    { P = O; hash_alloc_insert(P, bdata(A->key->data), A->value); free(A); }
 
 parameters(P) ::= .  
     { P = hash_create(HASHCOUNT_T_MAX, NULL, NULL); }
@@ -97,10 +97,10 @@ hash(H) ::= LBRACKET hash_elements(E) RBRACKET.  { H = E; }
 
 %type hash_elements { hash_t * }
 hash_elements(H) ::= hash_elements(E) COMMA hash_pair(P).
-    { H = E; hash_alloc_insert(H, bdata(P->key->data), P->value); }
+    { H = E; hash_alloc_insert(H, bdata(P->key->data), P->value); free(P); }
 
 hash_elements(H) ::= hash_elements(E) hash_pair(P).
-    { H = E; hash_alloc_insert(H, bdata(P->key->data), P->value); }
+    { H = E; hash_alloc_insert(H, bdata(P->key->data), P->value); free(P); }
 
 hash_elements(H) ::= . 
     { H = hash_create(HASHCOUNT_T_MAX, NULL, NULL); }
