@@ -78,8 +78,8 @@ in the unit tests.  Let's try doing a few of the most basic commands with this c
 \begin{code}{Sample m2sh Commands}
 \begin{lstlisting}
 > m2sh servers -db tests/config.sqlite
-> m2sh hosts -db tests/config.sqlite -host localhost
-> m2sh running -db tests/config.sqlite -host localhost
+> m2sh hosts -db tests/config.sqlite -server test
+> m2sh running -db tests/config.sqlite -name test
 > m2sh start -db tests/config.sqlite -host localhost
 \end{lstlisting}
 \end{code}
@@ -163,8 +163,8 @@ we would just do this:
 > m2sh load -config examples/config/sample.conf
 > ls -l config.sqlite
 > m2sh servers
-> m2sh hosts -host localhost
-> m2sh start -host localhost
+> m2sh hosts -server test
+> m2sh start -server test
 \end{lstlisting}
 \end{code}
 
