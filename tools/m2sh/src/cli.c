@@ -530,6 +530,7 @@ int cli_params_parse_args(bstring args, Command *cmd)
 {
 	struct params params;
     cmd->error = 0;
+    cmd->token_count = 0;
 
 	cli_params_init(&params);
 

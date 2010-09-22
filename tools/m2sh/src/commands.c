@@ -626,10 +626,15 @@ void Command_destroy(Command *cmd)
 
     bdestroy(cmd->progname);
     bdestroy(cmd->name);
-    list_destroy_nodes(cmd->extra);
-    list_destroy(cmd->extra);
-    hash_free_nodes(cmd->options);
-    hash_destroy(cmd->options);
+    if(cmd->extra) {
+        list_destroy_nodes(cmd->extra);
+         list_destroy(cmd->extra);
+    }
+
+    if(cmd->options) {
+        hash_free_nodes(cmd->options);
+        hash_destroy(cmd->options);
+    }
 
     // finally, we are really actually done with the tokens
     for(i = 0; i < cmd->token_count; i++) {
