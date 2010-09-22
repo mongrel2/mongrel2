@@ -29,12 +29,17 @@ config ::= vars(V).  { state->settings = V; }
 
 %type vars { hash_t * }
 vars(V) ::= vars(O) assignment(A). 
-    { V = O;  hash_alloc_insert(V, bdata(A.key->data), A.value); }
+    { 
+        V = O;
+        hash_alloc_insert(V, bdata(A->key->data), A->value);
+        free(A);
+    }
 
 vars(V) ::= assignment(A). 
     {
-    V = hash_create(HASHCOUNT_T_MAX, NULL, NULL);
-    hash_alloc_insert(V, bdata(A.key->data), A.value); 
+        V = hash_create(HASHCOUNT_T_MAX, NULL, NULL);
+        hash_alloc_insert(V, bdata(A->key->data), A->value);
+        free(A);
     }
 
 vars(V) ::= vars(A) EOF. { V = A; }
@@ -50,8 +55,11 @@ expr(E) ::= hash(A). { E = Value_create(VAL_HASH, A); }
 expr(E) ::= IDENT(A). { E = Value_create(VAL_REF, A); }
 
 
-%type assignment { Pair }
-assignment(A) ::= IDENT(I) EQ expr(E).  { A.key = I; A.value = E; }
+%type assignment { Pair * }
+%destructor assignment { free($$); }
+assignment(A) ::= IDENT(I) EQ expr(E).  { 
+        A = malloc(sizeof(Pair)); A->key = I; A->value = E; 
+    }
 
 
 %type class { Class *}
@@ -61,10 +69,10 @@ class(C) ::= CLASS(I) LPAREN parameters(P) RPAREN.
 %type parameters { hash_t *}
 %destructor parameters { AST_destroy($$); }
 parameters(P) ::= parameters(O) COMMA assignment(A). 
-    { P = O; hash_alloc_insert(P, bdata(A.key->data), A.value); }
+    { P = O; hash_alloc_insert(P, bdata(A->key->data), A->value); }
 
 parameters(P) ::= parameters(O) assignment(A). 
-    { P = O; hash_alloc_insert(P, bdata(A.key->data), A.value); }
+    { P = O; hash_alloc_insert(P, bdata(A->key->data), A->value); }
 
 parameters(P) ::= .  
     { P = hash_create(HASHCOUNT_T_MAX, NULL, NULL); }
@@ -89,17 +97,22 @@ hash(H) ::= LBRACKET hash_elements(E) RBRACKET.  { H = E; }
 
 %type hash_elements { hash_t * }
 hash_elements(H) ::= hash_elements(E) COMMA hash_pair(P).
-    { H = E; hash_alloc_insert(H, bdata(P.key->data), P.value); }
+    { H = E; hash_alloc_insert(H, bdata(P->key->data), P->value); }
 
 hash_elements(H) ::= hash_elements(E) hash_pair(P).
-    { H = E; hash_alloc_insert(H, bdata(P.key->data), P.value); }
+    { H = E; hash_alloc_insert(H, bdata(P->key->data), P->value); }
 
 hash_elements(H) ::= . 
     { H = hash_create(HASHCOUNT_T_MAX, NULL, NULL); }
 
 
-%type hash_pair { Pair }
-hash_pair(P) ::= QSTRING(A) COLON expr(B).  { P.key = A; P.value = B; }
-hash_pair(P) ::= PATTERN(A) COLON expr(B).  { P.key = A; P.value = B; }
+%type hash_pair { Pair* }
+%destructor hash_pair { free($$); }
+hash_pair(P) ::= QSTRING(A) COLON expr(B).  { 
+        P = malloc(sizeof(Pair)); P->key = A; P->value = B; 
+    }
+hash_pair(P) ::= PATTERN(A) COLON expr(B).  {
+        P = malloc(sizeof(Pair)); P->key = A; P->value = B; 
+    }
 
 
