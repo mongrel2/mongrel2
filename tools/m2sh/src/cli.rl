@@ -113,6 +113,7 @@ static inline void Command_option(Command *cmd, struct params *p)
     }
 
     hash_alloc_insert(cmd->options, bdata(key), value);
+    bdestroy(key);
     return;
 
 error:
