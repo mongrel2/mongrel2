@@ -72,11 +72,14 @@ static inline bstring option(Command *cmd, const char *name, const char *def)
     hnode_t *val = hash_lookup(cmd->options, name);
 
     if(def != NULL) {
-        // add it so it gets cleaned up later when the hash is destroyed
-
-        bstring result = bfromcstr(def);
-        hash_alloc_insert(cmd->options, name, result);
-        return result;
+        if(val == NULL) {
+            // add it so it gets cleaned up later when the hash is destroyed
+            bstring result = bfromcstr(def);
+            hash_alloc_insert(cmd->options, name, result);
+            return result;
+        } else {
+            return hnode_get(val);
+        }
     } else {
         return val == NULL ? NULL : hnode_get(val);
     }
