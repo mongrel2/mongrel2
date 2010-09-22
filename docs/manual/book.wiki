@@ -2440,13 +2440,11 @@
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">examples</span><span class=
       "pcrr7t-x-x-90">/</span><span class=
-      "pcrr7t-x-x-90">python</span><span class=
+      "pcrr7t-x-x-90">config</span><span class=
       "pcrr7t-x-x-90">/</span><span class=
-      "pcrr7t-x-x-90">tests</span><span class=
-      "pcrr7t-x-x-90">/</span><span class=
-      "pcrr7t-x-x-90">sample_conf</span><span class=
+      "pcrr7t-x-x-90">sample</span><span class=
       "pcrr7t-x-x-90">.</span><span class=
-      "pcrr7t-x-x-90">py</span><span class=
+      "pcrr7t-x-x-90">conf</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
       <span class="label"><a id="x1-21026r2" name=
       "x1-21026r2"></a></span><span class=
