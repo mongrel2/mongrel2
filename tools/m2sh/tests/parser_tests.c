@@ -23,6 +23,7 @@ char *test_parser()
     mu_assert(settings, "Error parsing.");
 
     AST_walk(settings, check_callback);
+    AST_destroy(settings);
 
     return NULL;
 }

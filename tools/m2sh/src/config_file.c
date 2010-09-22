@@ -4,6 +4,7 @@
 #include "config_file.h"
 #include "ast.h"
 #include <dbg.h>
+#include <stdlib.h>
 
 
 #define CONFIRM_TYPE(N) check(Value_is(val, CLASS), "Not a class.");\
@@ -16,7 +17,9 @@ int Dir_load(hash_t *settings, hash_t *params)
 {
     const char *base = AST_str(params, "base", VAL_QSTRING);
 
-    const char *sql = sqlite3_mprintf(bdata(&DIR_SQL),
+    char *sql = NULL;
+    
+    sql = sqlite3_mprintf(bdata(&DIR_SQL),
             base,
             AST_str(params, "index_file", VAL_QSTRING),
             AST_str(params, "default_ctype", VAL_QSTRING));
@@ -24,17 +27,20 @@ int Dir_load(hash_t *settings, hash_t *params)
     int rc = DB_exec(sql, NULL, NULL);
     check(rc == 0, "Failed to load Dir: %s", base);
 
+    sqlite3_free(sql);
     return DB_lastid();
 
 error:
+    if(sql) sqlite3_free(sql);
     return -1;
 }
 
 int Handler_load(hash_t *settings, hash_t *params)
 {
     const char *send_spec = AST_str(params, "send_spec", VAL_QSTRING);
-
-    const char *sql = sqlite3_mprintf(bdata(&HANDLER_SQL),
+    char *sql = NULL;
+    
+    sql = sqlite3_mprintf(bdata(&HANDLER_SQL),
             send_spec,
             AST_str(params, "send_ident", VAL_QSTRING),
             AST_str(params, "recv_spec", VAL_QSTRING),
@@ -43,10 +49,12 @@ int Handler_load(hash_t *settings, hash_t *params)
     int rc = DB_exec(sql, NULL, NULL);
     check(rc == 0, "Failed to load Handler: %s", send_spec);
 
+    sqlite3_free(sql);
     return DB_lastid();
 
 error:
 
+    if(sql) sqlite3_free(sql);
     return -1;
 }
 
@@ -56,15 +64,19 @@ int Proxy_load(hash_t *settings, hash_t *params)
     const char *addr = AST_str(params, "addr", VAL_QSTRING);
     const char *port = AST_str(params, "port", VAL_NUMBER);
 
-    const char *sql = sqlite3_mprintf(bdata(&PROXY_SQL),
+    char *sql = NULL;
+    
+    sql = sqlite3_mprintf(bdata(&PROXY_SQL),
             addr, port);
 
     int rc = DB_exec(sql, NULL, NULL);
     check(rc == 0, "Failed to load Proxy: %s:%s", addr, port);
     
+    sqlite3_free(sql);
     return DB_lastid();
 
 error:
+    if(sql) sqlite3_free(sql);
     return -1;
 }
 
@@ -75,22 +87,28 @@ int Mimetypes_import()
 
 int Mimetypes_load(hash_t *settings, const char *ext, Value *val)
 {
-    const char *sql = sqlite3_mprintf(bdata(&MIMETYPE_SQL),
+    char *sql = NULL;
+    
+    sql = sqlite3_mprintf(bdata(&MIMETYPE_SQL),
             ext, ext, bdata(val->as.string->data));
 
     int rc = DB_exec(sql, NULL, NULL);
     check(rc == 0, "Failed to add mimetype: %s=%s", 
             ext, bdata(val->as.string->data));
 
+    sqlite3_free(sql);
     return 0;
 
 error:
+    if(sql) sqlite3_free(sql);
     return -1;
 }
 
 int Settings_load(hash_t *settings, const char *name, Value *val)
 {
-    char *sql = sqlite3_mprintf(bdata(&SETTING_SQL),
+    char *sql = NULL;
+    
+    sql = sqlite3_mprintf(bdata(&SETTING_SQL),
             name, bdata(val->as.string->data));
 
     int rc = DB_exec(sql, NULL, NULL);
@@ -101,7 +119,7 @@ int Settings_load(hash_t *settings, const char *name, Value *val)
     return 0;
 
 error:
-    sqlite3_free(sql);
+    if(sql) sqlite3_free(sql);
     return -1;
 }
 
@@ -110,6 +128,7 @@ int Route_load(hash_t *settings, const char *name, Value *val)
 {
     check(Value_is(val, CLASS), "Expected a Class but got a %s instead.", Value_type_name(val->type));
     Class *cls = val->as.cls;
+    char *sql = NULL;
 
     int rc = 0;
     bstring type = bstrcpy(Class_ident(cls));
@@ -127,16 +146,17 @@ int Route_load(hash_t *settings, const char *name, Value *val)
 
     check(rc != -1, "Failed to create target for route %s", name);
 
-    const char *sql = sqlite3_mprintf(bdata(&ROUTE_SQL),
-            name, HOST_ID, rc, bdata(type));
+    sql = sqlite3_mprintf(bdata(&ROUTE_SQL), name, HOST_ID, rc, bdata(type));
 
     rc = DB_exec(sql, NULL, NULL);
     check(rc == 0, "Failed to intialize route.");
 
+    sqlite3_free(sql);
     bdestroy(type);
     return 0;
 
 error:
+    if(sql) sqlite3_free(sql);
     bdestroy(type);
     return -1;
 }
@@ -145,11 +165,12 @@ int Host_load(hash_t *settings, Value *val)
 {
     CONFIRM_TYPE("Host");
     Class *cls = val->as.cls;
+    char *sql = NULL;
 
     const char *name = AST_str(cls->params, "name", VAL_QSTRING);
     check(name, "No name set for Host.");
 
-    const char *sql = sqlite3_mprintf(bdata(&HOST_SQL), SERVER_ID, name, name);
+    sql = sqlite3_mprintf(bdata(&HOST_SQL), SERVER_ID, name, name);
     
     int rc = DB_exec(sql, NULL, NULL);
     check(rc == 0, "Failed to store Host: %s", name);
@@ -161,9 +182,11 @@ int Host_load(hash_t *settings, Value *val)
 
     AST_walk_hash(settings, routes, Route_load);
 
+    sqlite3_free(sql);
     return 0;
 
 error:
+    if(sql) sqlite3_free(sql);
     return -1;
 }
 
@@ -173,8 +196,9 @@ int Server_load(hash_t *settings, Value *val)
     CONFIRM_TYPE("Server");
     Class *cls = val->as.cls;
     int rc = 0;
+    char *sql = NULL;
 
-    const char *sql = sqlite3_mprintf(bdata(&SERVER_SQL),
+    sql = sqlite3_mprintf(bdata(&SERVER_SQL),
             AST_str(cls->params, "uuid", VAL_QSTRING),
             AST_str(cls->params, "access_log", VAL_QSTRING),
             AST_str(cls->params, "error_log", VAL_QSTRING),
@@ -212,9 +236,11 @@ int Server_load(hash_t *settings, Value *val)
         check(rc == 0, "Failed to load the mimetypes. Aborting.");
     }
 
+    sqlite3_free(sql);
     return 0;
 
 error:
+    if(sql) sqlite3_free(sql);
     return -1;
 }
 
@@ -243,8 +269,9 @@ static inline int Config_commit()
 int Config_load(const char *config_file, const char *db_file)
 {
     int rc = 0;
-    hash_t *settings = Parse_config_file(config_file);
-
+    hash_t *settings = NULL;
+    
+    settings = Parse_config_file(config_file);
     check(settings != NULL, "Error parsing config file: %s.", config_file);
 
     rc = Config_setup(db_file);
@@ -257,11 +284,14 @@ int Config_load(const char *config_file, const char *db_file)
     check(rc == 0, "Failed to commit config db: %s", db_file);
 
 
+    AST_destroy(settings);
     DB_close();
     return 0;
 error:
+    AST_destroy(settings);
     DB_close();
     return -1;
 }
+
 
 

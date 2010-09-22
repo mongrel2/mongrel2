@@ -18,10 +18,7 @@ void Parse(
   ParserState *state
 );
 
-// TODO: don't make the blk2bstr on simple 1 char things
-#define TKBASE(N, S, E) temp = calloc(sizeof(Token), 1);\
-    temp->type = TK##N;\
-    temp->data = blk2bstr(S, (int)(E - S));\
+#define TKBASE(N, S, E) temp = Token_create(TK##N, S, (int)(E - S));\
     Parse(parser, TK##N, temp, &state);\
     if(state.error) goto error;
 

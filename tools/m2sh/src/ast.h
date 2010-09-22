@@ -54,4 +54,5 @@ Value *AST_get(hash_t *settings, hash_t *fr, const char *name, ValueType type);
 bstring AST_get_bstr(hash_t *settings, hash_t *fr, const char *name, ValueType type);
 #define AST_str(H, N, T) bdata(AST_get_bstr(settings, H, N, T))
 
+void AST_destroy(hash_t *settings);
 #endif

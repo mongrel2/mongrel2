@@ -5,7 +5,7 @@
 
 
 Value *Value_create(ValueType type, void *data) {
-    Value *val = calloc(sizeof(Value), 1);
+    Value *val = malloc(sizeof(Value));
     val->type = type;
     switch(val->type) {
         case VAL_QSTRING: val->as.string = data;
@@ -33,6 +33,8 @@ Value *Value_create(ValueType type, void *data) {
 error:
     return val;
 }
+
+
 
 const char *VALUE_NAMES[] = {
     "QSTRING", "PATTERN", "NUMBER", "CLASS", "LIST", "HASH", 
@@ -145,4 +147,74 @@ bstring AST_get_bstr(hash_t *settings, hash_t *fr, const char *name, ValueType t
 error:
     return NULL;
 }
+
+
+static void Class_destroy(hash_t *settings, Class *cls)
+{
+    Token_destroy(cls->ident);
+    AST_destroy(cls->params);
+    free(cls);
+}
+
+
+static int AST_destroy_cb(hash_t *settings, Value *val);
+
+static int AST_destroy_list(hash_t *settings, list_t *data)
+{
+    lnode_t *n = NULL;
+
+    for(n = list_first(data); n != NULL; n = list_next(data, n)) {
+        Value *ref = lnode_get(n);
+        AST_destroy_cb(settings, ref);
+    }
+
+    list_destroy_nodes(data);
+    list_destroy(data);
+    return 0;
+}
+
+static int AST_destroy_cb(hash_t *settings, Value *val)
+{
+    switch(val->type) {
+        case VAL_QSTRING: Token_destroy(val->as.string);
+            break;
+        case VAL_PATTERN: Token_destroy(val->as.pattern);
+            break;
+        case VAL_NUMBER: Token_destroy(val->as.number);
+            break;
+        case VAL_CLASS: Class_destroy(settings, val->as.cls);
+            break;
+        case VAL_LIST: AST_destroy_list(settings, val->as.list);
+            break;
+        case VAL_HASH: AST_destroy(val->as.hash);
+            break;
+        case VAL_IDENT: Token_destroy(val->as.ident);
+            break;
+        case VAL_REF: Token_destroy(val->as.ref);
+            break;
+        default:
+            log_err("Unknown value type: %d", val->type);
+    }
+
+    free(val);
+
+    return 0;
+}
+
+void AST_destroy(hash_t *settings)
+{
+    hscan_t s;
+    hnode_t *n = NULL;
+    hash_scan_begin(&s, settings);
+    Value *val = NULL;
+
+    while((n = hash_scan_next(&s)) != NULL) {
+        val = hnode_get(n);
+        AST_destroy_cb(settings, val);
+        hash_scan_delfree(settings, n);
+    }
+    
+    hash_destroy(settings);
+}
+
 

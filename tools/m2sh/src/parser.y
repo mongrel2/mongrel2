@@ -59,6 +59,7 @@ class(C) ::= CLASS(I) LPAREN parameters(P) RPAREN.
       { C = calloc(sizeof(Class), 1); C->ident = I; C->params = P; }
 
 %type parameters { hash_t *}
+%destructor parameters { AST_destroy($$); }
 parameters(P) ::= parameters(O) COMMA assignment(A). 
     { P = O; hash_alloc_insert(P, bdata(A.key->data), A.value); }
 

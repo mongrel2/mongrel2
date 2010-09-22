@@ -20,10 +20,7 @@ void Parse(
   ParserState *state
 );
 
-// TODO: don't make the blk2bstr on simple 1 char things
-#define TKBASE(N, S, E) temp = calloc(sizeof(Token), 1);\
-    temp->type = TK##N;\
-    temp->data = blk2bstr(S, (int)(E - S));\
+#define TKBASE(N, S, E) temp = Token_create(TK##N, S, (int)(E - S));\
     Parse(parser, TK##N, temp, &state);\
     if(state.error) goto error;
 
@@ -31,11 +28,11 @@ void Parse(
 #define TKSTR(N) TKBASE(N, ts+1, te-3)
 
 
-#line 68 "src/lexer.rl"
+#line 65 "src/lexer.rl"
 
 
 
-#line 2 "src/lexer.c"
+#line 36 "src/lexer.c"
 static const int m2sh_lexer_start = 8;
 static const int m2sh_lexer_first_final = 8;
 static const int m2sh_lexer_error = 0;
@@ -43,7 +40,7 @@ static const int m2sh_lexer_error = 0;
 static const int m2sh_lexer_en_main = 8;
 
 
-#line 71 "src/lexer.rl"
+#line 68 "src/lexer.rl"
 
 void Parse_print_error(const char *message, bstring content, int at, int line_number)
 {
@@ -72,7 +69,7 @@ hash_t *Parse_config_string(bstring content)
     char *te = NULL;
 
     
-#line 2 "src/lexer.c"
+#line 73 "src/lexer.c"
 	{
 	cs = m2sh_lexer_start;
 	ts = 0;
@@ -80,76 +77,76 @@ hash_t *Parse_config_string(bstring content)
 	act = 0;
 	}
 
-#line 99 "src/lexer.rl"
+#line 96 "src/lexer.rl"
     
-#line 2 "src/lexer.c"
+#line 83 "src/lexer.c"
 	{
 	if ( p == pe )
 		goto _test_eof;
 	switch ( cs )
 	{
 tr1:
-#line 47 "src/lexer.rl"
+#line 44 "src/lexer.rl"
 	{te = p+1;{ TKSTR(QSTRING) }}
 	goto st8;
 tr4:
-#line 62 "src/lexer.rl"
+#line 59 "src/lexer.rl"
 	{te = p+1;}
 	goto st8;
 tr9:
-#line 48 "src/lexer.rl"
+#line 45 "src/lexer.rl"
 	{te = p+1;{ TKSTR(PATTERN) }}
 	goto st8;
 tr10:
-#line 60 "src/lexer.rl"
+#line 57 "src/lexer.rl"
 	{te = p+1;}
 	goto st8;
 tr12:
-#line 59 "src/lexer.rl"
+#line 56 "src/lexer.rl"
 	{te = p+1;{ state.line_number++; }}
 	goto st8;
 tr13:
-#line 54 "src/lexer.rl"
+#line 51 "src/lexer.rl"
 	{te = p+1;{ TK(LPAREN) }}
 	goto st8;
 tr14:
-#line 55 "src/lexer.rl"
+#line 52 "src/lexer.rl"
 	{te = p+1;{ TK(RPAREN) }}
 	goto st8;
 tr15:
-#line 56 "src/lexer.rl"
+#line 53 "src/lexer.rl"
 	{te = p+1;{ TK(COMMA) }}
 	goto st8;
 tr17:
-#line 57 "src/lexer.rl"
+#line 54 "src/lexer.rl"
 	{te = p+1;{ TK(COLON) }}
 	goto st8;
 tr18:
-#line 49 "src/lexer.rl"
+#line 46 "src/lexer.rl"
 	{te = p+1;{ TK(EQ) }}
 	goto st8;
 tr20:
-#line 52 "src/lexer.rl"
+#line 49 "src/lexer.rl"
 	{te = p+1;{ TK(LBRACE) }}
 	goto st8;
 tr21:
-#line 53 "src/lexer.rl"
+#line 50 "src/lexer.rl"
 	{te = p+1;{ TK(RBRACE) }}
 	goto st8;
 tr23:
-#line 50 "src/lexer.rl"
+#line 47 "src/lexer.rl"
 	{te = p+1;{ TK(LBRACKET) }}
 	goto st8;
 tr24:
-#line 51 "src/lexer.rl"
+#line 48 "src/lexer.rl"
 	{te = p+1;{ TK(RBRACKET) }}
 	goto st8;
 tr25:
-#line 64 "src/lexer.rl"
+#line 61 "src/lexer.rl"
 	{te = p;p--;{ TK(NUMBER) }}
 	goto st8;
 tr26:
-#line 1 "NONE"
+#line 1 "src/lexer.rl"
 	{	switch( act ) {
 	case 16:
 	{{p = ((te))-1;} TK(CLASS) }
@@ -161,18 +158,18 @@ tr26:
 	}
 	goto st8;
 tr28:
-#line 66 "src/lexer.rl"
+#line 63 "src/lexer.rl"
 	{te = p;p--;{ TK(IDENT) }}
 	goto st8;
 st8:
-#line 1 "NONE"
+#line 1 "src/lexer.rl"
 	{ts = 0;}
 	if ( ++p == pe )
 		goto _test_eof8;
 case 8:
-#line 1 "NONE"
+#line 1 "src/lexer.rl"
 	{ts = p;}
-#line 2 "src/lexer.c"
+#line 173 "src/lexer.c"
 	switch( (*p) ) {
 		case 10: goto tr12;
 		case 32: goto tr10;
@@ -248,22 +245,22 @@ case 9:
 		goto st9;
 	goto tr25;
 tr19:
-#line 1 "NONE"
+#line 1 "src/lexer.rl"
 	{te = p+1;}
-#line 66 "src/lexer.rl"
+#line 63 "src/lexer.rl"
 	{act = 17;}
 	goto st10;
 tr27:
-#line 1 "NONE"
+#line 1 "src/lexer.rl"
 	{te = p+1;}
-#line 65 "src/lexer.rl"
+#line 62 "src/lexer.rl"
 	{act = 16;}
 	goto st10;
 st10:
 	if ( ++p == pe )
 		goto _test_eof10;
 case 10:
-#line 2 "src/lexer.c"
+#line 264 "src/lexer.c"
 	if ( (*p) == 95 )
 		goto st11;
 	if ( (*p) < 65 ) {
@@ -330,23 +327,23 @@ case 7:
 	_out: {}
 	}
 
-#line 100 "src/lexer.rl"
+#line 97 "src/lexer.rl"
 
 
     if(state.error) {
         Parse_print_error("SYNTAX ERROR", content, 
                 (int)(ts - bdata(content)), ++state.line_number);
     } else if( cs == 
-#line 2 "src/lexer.c"
+#line 338 "src/lexer.c"
 0
-#line 105 "src/lexer.rl"
+#line 102 "src/lexer.rl"
  ) {
         Parse_print_error("INVALID CHARACTER", content,
                 (int)(ts - bdata(content)), ++state.line_number);
     } else if( cs >= 
-#line 2 "src/lexer.c"
+#line 345 "src/lexer.c"
 8
-#line 108 "src/lexer.rl"
+#line 105 "src/lexer.rl"
  ) {
         Parse(parser, TKEOF, NULL, &state);
     } else {

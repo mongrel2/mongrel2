@@ -10,9 +10,7 @@
 #include "ast.h"
 #include <stdlib.h>
 
-#define TKBASE(N, S, E) temp = calloc(sizeof(Token), 1);\
-    temp->type = TK##N;\
-    temp->data = blk2bstr(S, (int)(E - S));\
+#define TKBASE(N, S, E) temp = Token_create(TK##N, S, (int)(E - S));\
     fsm->tokens[fsm->token_count++] = temp;
 
 #define TK(N) TKBASE(N, fsm->ts, fsm->te)
@@ -79,7 +77,10 @@ static inline bstring match(struct params *p, int type)
 
     check(tk->type == type, "Expecting %d but got %d.", type, tk->type);
 
-    return tk->data;
+    bstring val = tk->data;
+    tk->data = NULL;  // that when it's freed we don't try again
+
+    return val;
 
 error:
     return NULL;
@@ -125,13 +126,28 @@ static inline void Command_extra(Command *cmd, int next, struct params *p)
     list_append(cmd->extra, lnode_create(extra));
 }
 
+hnode_t *cmd_hnode_alloc(void *ignored)
+{
+    return calloc(sizeof(hnode_t), 1);
+}
+
+void cmd_hnode_free(hnode_t *h, void *ignored)
+{
+    bdestroy(hnode_get(h));
+    hnode_destroy(h);
+}
 
 static inline int Command_parse(struct params *p, Command *cmd)
 {
     int next = 0;
 
+    // TODO: refactor this, but for now command takes over the tokens until it's done
+    memcpy(cmd->tokens, p->tokens, MAX_TOKENS);
+    cmd->token_count = p->token_count;
+
     cmd->options = hash_create(HASHCOUNT_T_MAX, 0, 0);
     check_mem(cmd->options);
+    hash_set_allocator(cmd->options, cmd_hnode_alloc, cmd_hnode_free, NULL);
 
     cmd->extra = list_create(LISTCOUNT_T_MAX);
     check_mem(cmd->extra);

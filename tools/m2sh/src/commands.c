@@ -72,7 +72,11 @@ static inline bstring option(Command *cmd, const char *name, const char *def)
     hnode_t *val = hash_lookup(cmd->options, name);
 
     if(def != NULL) {
-        return val == NULL ? bfromcstr(def) : hnode_get(val);
+        // add it so it gets cleaned up later when the hash is destroyed
+
+        bstring result = bfromcstr(def);
+        hash_alloc_insert(cmd->options, name, result);
+        return result;
     } else {
         return val == NULL ? NULL : hnode_get(val);
     }
@@ -83,10 +87,15 @@ static int Command_load(Command *cmd)
     bstring db_file = option(cmd, "db", "config.sqlite");
     bstring conf_file = option(cmd, "config", "mongrel2.conf");
 
-
     Config_load(bdata(conf_file), bdata(db_file));
 
-    log_action(db_file, bfromcstr("load"), bfromcstr("command"), NULL, conf_file);
+    bstring what = bfromcstr("load");
+    bstring why = bfromcstr("command");
+
+    log_action(db_file, what, why, NULL, conf_file);
+
+    bdestroy(what);
+    bdestroy(why);
 
     return 0;
 }
@@ -613,10 +622,19 @@ static int Command_help(Command *cmd)
 
 void Command_destroy(Command *cmd)
 {
+    int i = 0;
+
     bdestroy(cmd->progname);
     bdestroy(cmd->name);
-    //list_destroy(cmd->extra);
-    //hash_destroy(cmd->options);
+    list_destroy_nodes(cmd->extra);
+    list_destroy(cmd->extra);
+    hash_free_nodes(cmd->options);
+    hash_destroy(cmd->options);
+
+    // finally, we are really actually done with the tokens
+    for(i = 0; i < cmd->token_count; i++) {
+        Token_destroy(cmd->tokens[i]);
+    }
 }
 
 

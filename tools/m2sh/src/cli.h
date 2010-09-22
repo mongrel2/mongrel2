@@ -3,20 +3,12 @@
 
 #include <bstring.h>
 #include "ast.h"
+#include "commands.h"
 
-#define MAX_TOKENS 100
 enum CLITokens {
     TKBLOB = TKCOLON + 100,
     TKOPTION
 };
-
-typedef struct Command {
-    bstring progname;
-    bstring name;
-    hash_t *options;
-    list_t *extra;
-    int error;
-} Command;
 
 struct params
 {
