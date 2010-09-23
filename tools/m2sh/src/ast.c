@@ -220,7 +220,11 @@ static void AST_destroy_value(Value *val)
 
 static void AST_destroy_cb(void *value, void *data)
 {
-    AST_destroy_value(Pair_value((Pair *)value));
+    Pair *pair = (Pair *)value;
+
+    AST_destroy_value(Pair_value(pair));
+    Token_destroy(pair->key);
+    free(pair);
 }
 
 void AST_destroy(tst_t *settings)
