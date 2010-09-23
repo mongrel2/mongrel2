@@ -34,8 +34,6 @@ error:
     return val;
 }
 
-
-
 const char *VALUE_NAMES[] = {
     "QSTRING", "PATTERN", "NUMBER", "CLASS", "LIST", "HASH", 
     "IDENT", "REF"
@@ -132,10 +130,12 @@ Value *AST_get(tst_t *settings, tst_t *fr, bstring name, ValueType type)
 {
     Pair *pair = tst_search(fr, bdata(name), blength(name));
     check(pair, "Variable %s not found, assuming not given.", bdata(name));
-
     Value *val = Pair_value(pair);
+
     if(Value_is(val, REF)) {
         val = Value_resolve(settings, val);
+        check(val, "Couldn't find variable %s of type %s",
+            bdata(name), Value_type_name(type));
     }
 
     check(val->type == type, "Invalid type for %s, should be %s not %s",

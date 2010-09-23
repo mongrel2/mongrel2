@@ -89,6 +89,7 @@ int Mimetypes_load(tst_t *settings, Pair *pair)
 {
     const char *ext = bdata(Pair_key(pair));
     Value *val = Pair_value(pair);
+    check(val, "Error loading Mimetype %s", bdata(Pair_key(pair)));
 
     char *sql = NULL;
     
@@ -111,6 +112,7 @@ int Settings_load(tst_t *settings, Pair *pair)
 {
     const char *name = bdata(Pair_key(pair));
     Value *val = Pair_value(pair);
+    check(val, "Error loading Setting %s", bdata(Pair_key(pair)));
 
     char *sql = NULL;
     
@@ -137,7 +139,9 @@ int Route_load(tst_t *settings, Pair *pair)
     Value *val = Pair_value(pair);
     bstring type = NULL;
 
-    check(Value_is(val, CLASS), "Expected a Class but got a %s instead.", Value_type_name(val->type));
+    check(val, "Error loading route: %s", bdata(Pair_key(pair)));
+    check(Value_is(val, CLASS), "Expected a Class but got a %s instead.",
+            Value_type_name(val->type));
     Class *cls = val->as.cls;
 
     int rc = 0;
