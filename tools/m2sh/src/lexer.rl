@@ -71,10 +71,17 @@ void Parse_print_error(const char *message, bstring content, int at, int line_nu
     int prev_nl = bstrrchrp(content, '\n', at);
     int next_nl = bstrchrp(content, '\n', at);
 
-    log_err("%s AT '%c' on line %d:%.*s\n%*s", message,
-            bchar(content, at), line_number, 
-            next_nl - prev_nl, bdataofs(content, prev_nl),
-            at - prev_nl, "^");
+    if(prev_nl < 0) {
+        log_err("%s AT '%c' on line %d:\n%.*s\n%*s", message,
+                bchar(content, at), line_number-1, 
+                next_nl, bdata(content),
+                at, "^");
+    } else {
+        log_err("%s AT '%c' on line %d:%.*s\n%*s", message,
+                bchar(content, at), line_number, 
+                next_nl - prev_nl, bdataofs(content, prev_nl),
+                at - prev_nl, "^");
+    }
 }
 
 tst_t *Parse_config_string(bstring content) 

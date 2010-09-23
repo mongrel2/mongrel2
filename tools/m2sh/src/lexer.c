@@ -47,10 +47,17 @@ void Parse_print_error(const char *message, bstring content, int at, int line_nu
     int prev_nl = bstrrchrp(content, '\n', at);
     int next_nl = bstrchrp(content, '\n', at);
 
-    log_err("%s AT '%c' on line %d:%.*s\n%*s", message,
-            bchar(content, at), line_number, 
-            next_nl - prev_nl, bdataofs(content, prev_nl),
-            at - prev_nl, "^");
+    if(prev_nl < 0) {
+        log_err("%s AT '%c' on line %d:\n%.*s\n%*s", message,
+                bchar(content, at), line_number-1, 
+                next_nl, bdata(content),
+                at, "^");
+    } else {
+        log_err("%s AT '%c' on line %d:%.*s\n%*s", message,
+                bchar(content, at), line_number, 
+                next_nl - prev_nl, bdataofs(content, prev_nl),
+                at - prev_nl, "^");
+    }
 }
 
 tst_t *Parse_config_string(bstring content) 
@@ -69,7 +76,7 @@ tst_t *Parse_config_string(bstring content)
     char *te = NULL;
 
     
-#line 73 "src/lexer.c"
+#line 80 "src/lexer.c"
 	{
 	cs = m2sh_lexer_start;
 	ts = 0;
@@ -77,9 +84,9 @@ tst_t *Parse_config_string(bstring content)
 	act = 0;
 	}
 
-#line 96 "src/lexer.rl"
+#line 103 "src/lexer.rl"
     
-#line 83 "src/lexer.c"
+#line 90 "src/lexer.c"
 	{
 	if ( p == pe )
 		goto _test_eof;
@@ -169,7 +176,7 @@ st8:
 case 8:
 #line 1 "src/lexer.rl"
 	{ts = p;}
-#line 173 "src/lexer.c"
+#line 180 "src/lexer.c"
 	switch( (*p) ) {
 		case 10: goto tr12;
 		case 32: goto tr10;
@@ -260,7 +267,7 @@ st10:
 	if ( ++p == pe )
 		goto _test_eof10;
 case 10:
-#line 264 "src/lexer.c"
+#line 271 "src/lexer.c"
 	if ( (*p) == 95 )
 		goto st11;
 	if ( (*p) < 65 ) {
@@ -327,23 +334,23 @@ case 7:
 	_out: {}
 	}
 
-#line 97 "src/lexer.rl"
+#line 104 "src/lexer.rl"
 
 
     if(state.error) {
         Parse_print_error("SYNTAX ERROR", content, 
                 (int)(ts - bdata(content)), ++state.line_number);
     } else if( cs == 
-#line 338 "src/lexer.c"
+#line 345 "src/lexer.c"
 0
-#line 102 "src/lexer.rl"
+#line 109 "src/lexer.rl"
  ) {
         Parse_print_error("INVALID CHARACTER", content,
                 (int)(ts - bdata(content)), ++state.line_number);
     } else if( cs >= 
-#line 345 "src/lexer.c"
+#line 352 "src/lexer.c"
 8
-#line 105 "src/lexer.rl"
+#line 112 "src/lexer.rl"
  ) {
         Parse(parser, TKEOF, NULL, &state);
     } else {
