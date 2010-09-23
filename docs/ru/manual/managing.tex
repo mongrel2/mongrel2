@@ -85,8 +85,8 @@ m2sh (доступная из \file{tools/m2sh}) --- это \emph{вид}, ин�
 \begin{code}{m2sh в действии}
 \begin{lstlisting}
 > m2sh servers -db tests/config.sqlite
-> m2sh hosts -db tests/config.sqlite -host localhost
-> m2sh running -db tests/config.sqlite -host localhost
+> m2sh hosts -db tests/config.sqlite -server test
+> m2sh running -db tests/config.sqlite -name test
 > m2sh start -db tests/config.sqlite -host localhost
 \end{lstlisting}
 \end{code}
@@ -177,8 +177,8 @@ help} или \shell{m2sh help command}.
 m2sh load -config examples/configs/sample.conf
 ls -l config.sqlite
 m2sh servers
-m2sh hosts -host localhost
-m2sh start -host localhost
+m2sh hosts -server test
+m2sh start -server test
 \end{lstlisting}
 \end{code}
 
