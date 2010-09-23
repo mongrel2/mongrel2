@@ -2,35 +2,35 @@
 #define _m2sh_config_file_h
 
 #include <bstring.h>
-#include <adt/hash.h>
+#include <adt/tst.h>
 #include "token.h"
 
+tst_t *Parse_config_string(bstring content);
 
-hash_t *Parse_config_string(bstring content);
-
-hash_t *Parse_config_file(const char *path);
+tst_t *Parse_config_file(const char *path);
 
 typedef struct ParserState {
-    hash_t *settings;
+    tst_t *settings;
     int line_number;
     int error;
 } ParserState;
 
+struct Pair;
 struct Value;
 
-int Dir_load(hash_t *settings, hash_t *params);
+int Dir_load(tst_t *settings, tst_t *params);
 
-int Handler_load(hash_t *settings, hash_t *params);
+int Handler_load(tst_t *settings, tst_t *params);
 
-int Proxy_load(hash_t *settings, hash_t *params);
+int Proxy_load(tst_t *settings, tst_t *params);
 
-int Settings_load(hash_t *settings, const char *name, struct Value *val);
+int Settings_load(tst_t *settings, struct Pair *pair);
 
-int Route_load(hash_t *settings, const char *name, struct Value *val);
+int Route_load(tst_t *settings, struct Pair *pair);
 
-int Host_load(hash_t *settings, struct Value *val);
+int Host_load(tst_t *settings, struct Value *val);
 
-int Server_load(hash_t *settings, struct Value *val);
+int Server_load(tst_t *settings, struct Value *val);
 
 int Config_load(const char *config_file, const char *db_file);
 

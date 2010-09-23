@@ -9,7 +9,7 @@
 FILE *LOG_FILE = NULL;
 int CB_FIRED = 0;
 
-int check_callback(hash_t *parent, Value *val)
+int check_callback(tst_t *parent, Value *val)
 {
     assert(parent && "Should get a parent.");
     assert(val && "Should get a val.");
@@ -19,7 +19,7 @@ int check_callback(hash_t *parent, Value *val)
 
 char *test_parser() 
 {
-    hash_t *settings = Parse_config_file("tests/sample.conf");
+    tst_t *settings = Parse_config_file("tests/sample.conf");
     mu_assert(settings, "Error parsing.");
 
     AST_walk(settings, check_callback);

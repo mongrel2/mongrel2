@@ -13,16 +13,16 @@
 int SERVER_ID = 0;
 int HOST_ID = 0;
 
-int Dir_load(hash_t *settings, hash_t *params)
+int Dir_load(tst_t *settings, tst_t *params)
 {
-    const char *base = AST_str(params, "base", VAL_QSTRING);
+    const char *base = AST_str(settings, params, "base", VAL_QSTRING);
 
     char *sql = NULL;
     
     sql = sqlite3_mprintf(bdata(&DIR_SQL),
             base,
-            AST_str(params, "index_file", VAL_QSTRING),
-            AST_str(params, "default_ctype", VAL_QSTRING));
+            AST_str(settings, params, "index_file", VAL_QSTRING),
+            AST_str(settings, params, "default_ctype", VAL_QSTRING));
 
     int rc = DB_exec(sql, NULL, NULL);
     check(rc == 0, "Failed to load Dir: %s", base);
@@ -35,16 +35,16 @@ error:
     return -1;
 }
 
-int Handler_load(hash_t *settings, hash_t *params)
+int Handler_load(tst_t *settings, tst_t *params)
 {
-    const char *send_spec = AST_str(params, "send_spec", VAL_QSTRING);
+    const char *send_spec = AST_str(settings, params, "send_spec", VAL_QSTRING);
     char *sql = NULL;
     
     sql = sqlite3_mprintf(bdata(&HANDLER_SQL),
             send_spec,
-            AST_str(params, "send_ident", VAL_QSTRING),
-            AST_str(params, "recv_spec", VAL_QSTRING),
-            AST_str(params, "recv_ident", VAL_QSTRING));
+            AST_str(settings, params, "send_ident", VAL_QSTRING),
+            AST_str(settings, params, "recv_spec", VAL_QSTRING),
+            AST_str(settings, params, "recv_ident", VAL_QSTRING));
 
     int rc = DB_exec(sql, NULL, NULL);
     check(rc == 0, "Failed to load Handler: %s", send_spec);
@@ -59,10 +59,10 @@ error:
 }
 
 
-int Proxy_load(hash_t *settings, hash_t *params)
+int Proxy_load(tst_t *settings, tst_t *params)
 {
-    const char *addr = AST_str(params, "addr", VAL_QSTRING);
-    const char *port = AST_str(params, "port", VAL_NUMBER);
+    const char *addr = AST_str(settings, params, "addr", VAL_QSTRING);
+    const char *port = AST_str(settings, params, "port", VAL_NUMBER);
 
     char *sql = NULL;
     
@@ -85,8 +85,11 @@ int Mimetypes_import()
     return DB_exec(bdata(&MIMETYPES_DEFAULT_SQL), NULL, NULL);
 }
 
-int Mimetypes_load(hash_t *settings, const char *ext, Value *val)
+int Mimetypes_load(tst_t *settings, Pair *pair)
 {
+    const char *ext = bdata(Pair_key(pair));
+    Value *val = Pair_value(pair);
+
     char *sql = NULL;
     
     sql = sqlite3_mprintf(bdata(&MIMETYPE_SQL),
@@ -104,8 +107,11 @@ error:
     return -1;
 }
 
-int Settings_load(hash_t *settings, const char *name, Value *val)
+int Settings_load(tst_t *settings, Pair *pair)
 {
+    const char *name = bdata(Pair_key(pair));
+    Value *val = Pair_value(pair);
+
     char *sql = NULL;
     
     sql = sqlite3_mprintf(bdata(&SETTING_SQL),
@@ -124,14 +130,18 @@ error:
 }
 
 
-int Route_load(hash_t *settings, const char *name, Value *val)
+int Route_load(tst_t *settings, Pair *pair)
 {
+    const char *name = bdata(Pair_key(pair));
+    char *sql = NULL;
+    Value *val = Pair_value(pair);
+    bstring type = NULL;
+
     check(Value_is(val, CLASS), "Expected a Class but got a %s instead.", Value_type_name(val->type));
     Class *cls = val->as.cls;
-    char *sql = NULL;
 
     int rc = 0;
-    bstring type = bstrcpy(Class_ident(cls));
+    type = bstrcpy(Class_ident(cls));
     btolower(type);
 
     if(biseqcstr(type, "dir")) {
@@ -161,13 +171,14 @@ error:
     return -1;
 }
 
-int Host_load(hash_t *settings, Value *val)
+int Host_load(tst_t *settings, Value *val)
 {
     CONFIRM_TYPE("Host");
     Class *cls = val->as.cls;
     char *sql = NULL;
+    struct tagbstring ROUTES_VAR = bsStatic("routes");
 
-    const char *name = AST_str(cls->params, "name", VAL_QSTRING);
+    const char *name = AST_str(settings, cls->params, "name", VAL_QSTRING);
     check(name, "No name set for Host.");
 
     sql = sqlite3_mprintf(bdata(&HOST_SQL), SERVER_ID, name, name);
@@ -177,7 +188,7 @@ int Host_load(hash_t *settings, Value *val)
 
     HOST_ID = DB_lastid();
 
-    Value *routes = AST_get(settings, cls->params, "routes", VAL_HASH);
+    Value *routes = AST_get(settings, cls->params, &ROUTES_VAR, VAL_HASH);
     check(routes, "Didn't find any routes for %s", name);
 
     AST_walk_hash(settings, routes, Route_load);
@@ -191,36 +202,39 @@ error:
 }
 
 
-int Server_load(hash_t *settings, Value *val)
+int Server_load(tst_t *settings, Value *val)
 {
     CONFIRM_TYPE("Server");
     Class *cls = val->as.cls;
     int rc = 0;
     char *sql = NULL;
+    struct tagbstring HOSTS_VAR = bsStatic("hosts");
+    struct tagbstring SETTINGS_VAR = bsStatic("settings");
+    struct tagbstring MIMETYPES_VAR = bsStatic("mimetypes");
 
     sql = sqlite3_mprintf(bdata(&SERVER_SQL),
-            AST_str(cls->params, "uuid", VAL_QSTRING),
-            AST_str(cls->params, "access_log", VAL_QSTRING),
-            AST_str(cls->params, "error_log", VAL_QSTRING),
-            AST_str(cls->params, "pid_file", VAL_QSTRING),
-            AST_str(cls->params, "chroot", VAL_QSTRING),
-            AST_str(cls->params, "default_host", VAL_QSTRING),
-            AST_str(cls->params, "name", VAL_QSTRING),
-            AST_str(cls->params, "port", VAL_NUMBER));
+            AST_str(settings, cls->params, "uuid", VAL_QSTRING),
+            AST_str(settings, cls->params, "access_log", VAL_QSTRING),
+            AST_str(settings, cls->params, "error_log", VAL_QSTRING),
+            AST_str(settings, cls->params, "pid_file", VAL_QSTRING),
+            AST_str(settings, cls->params, "chroot", VAL_QSTRING),
+            AST_str(settings, cls->params, "default_host", VAL_QSTRING),
+            AST_str(settings, cls->params, "name", VAL_QSTRING),
+            AST_str(settings, cls->params, "port", VAL_NUMBER));
 
     rc = DB_exec(sql, NULL, NULL);
     check(rc == 0, "Failed to exec SQL: %s", sql);
 
     SERVER_ID = DB_lastid();
 
-    Value *hosts = AST_get(settings, cls->params, "hosts", VAL_LIST);
+    Value *hosts = AST_get(settings, cls->params, &HOSTS_VAR, VAL_LIST);
     check(hosts != NULL, "Could not find Server.hosts setting in host %s:%s", 
-            AST_str(cls->params, "uuid", VAL_QSTRING),
-            AST_str(cls->params, "name", VAL_QSTRING));
+            AST_str(settings, cls->params, "uuid", VAL_QSTRING),
+            AST_str(settings, cls->params, "name", VAL_QSTRING));
 
     AST_walk_list(settings, hosts->as.list, Host_load);
 
-    Value *set = AST_get(settings, settings, "settings", VAL_HASH);
+    Value *set = AST_get(settings, settings, &SETTINGS_VAR, VAL_HASH);
 
     if(set) {
         rc = AST_walk_hash(settings, set, Settings_load);
@@ -230,7 +244,7 @@ int Server_load(hash_t *settings, Value *val)
     rc = Mimetypes_import();
     check(rc == 0, "Failed to import default mimetypes.");
 
-    Value *mime = AST_get(settings, settings, "mimetypes", VAL_HASH);
+    Value *mime = AST_get(settings, settings, &MIMETYPES_VAR, VAL_HASH);
     if(mime) {
         AST_walk_hash(settings, mime, Mimetypes_load);
         check(rc == 0, "Failed to load the mimetypes. Aborting.");
@@ -269,7 +283,7 @@ static inline int Config_commit()
 int Config_load(const char *config_file, const char *db_file)
 {
     int rc = 0;
-    hash_t *settings = NULL;
+    tst_t *settings = NULL;
     
     settings = Parse_config_file(config_file);
     check(settings != NULL, "Error parsing config file: %s.", config_file);

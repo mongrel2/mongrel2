@@ -27,19 +27,15 @@
 
 config ::= vars(V).  { state->settings = V; } 
 
-%type vars { hash_t * }
+%type vars { tst_t * }
 vars(V) ::= vars(O) assignment(A). 
     { 
-        V = O;
-        hash_alloc_insert(V, bdata(A->key->data), A->value);
-        free(A);
+        V = tst_insert(O, bdata(A->key->data), blength(A->key->data), A);
     }
 
 vars(V) ::= assignment(A). 
     {
-        V = hash_create(HASHCOUNT_T_MAX, NULL, NULL);
-        hash_alloc_insert(V, bdata(A->key->data), A->value);
-        free(A);
+        V = tst_insert(V, bdata(A->key->data), blength(A->key->data), A);
     }
 
 vars(V) ::= vars(A) EOF. { V = A; }
@@ -66,16 +62,16 @@ assignment(A) ::= IDENT(I) EQ expr(E).  {
 class(C) ::= CLASS(I) LPAREN parameters(P) RPAREN. 
       { C = calloc(sizeof(Class), 1); C->ident = I; C->params = P; }
 
-%type parameters { hash_t *}
+%type parameters { tst_t *}
 %destructor parameters { AST_destroy($$); }
 parameters(P) ::= parameters(O) COMMA assignment(A). 
-    { P = O; hash_alloc_insert(P, bdata(A->key->data), A->value); free(A); }
+    { P = tst_insert(O, bdata(A->key->data), blength(A->key->data), A); }
 
 parameters(P) ::= parameters(O) assignment(A). 
-    { P = O; hash_alloc_insert(P, bdata(A->key->data), A->value); free(A); }
+    { P = tst_insert(O, bdata(A->key->data), blength(A->key->data), A); }
 
 parameters(P) ::= .  
-    { P = hash_create(HASHCOUNT_T_MAX, NULL, NULL); }
+    { P = NULL; }
 
 
 %type list { list_t *}
@@ -92,18 +88,18 @@ list_elements(L) ::= .
     { L = list_create(LISTCOUNT_T_MAX); }
 
 
-%type hash { hash_t *}
+%type hash { tst_t *}
 hash(H) ::= LBRACKET hash_elements(E) RBRACKET.  { H = E; }
 
-%type hash_elements { hash_t * }
+%type hash_elements { tst_t * }
 hash_elements(H) ::= hash_elements(E) COMMA hash_pair(P).
-    { H = E; hash_alloc_insert(H, bdata(P->key->data), P->value); free(P); }
+    { H = tst_insert(E, bdata(P->key->data), blength(P->key->data), P); }
 
 hash_elements(H) ::= hash_elements(E) hash_pair(P).
-    { H = E; hash_alloc_insert(H, bdata(P->key->data), P->value); free(P); }
+    { H = tst_insert(E, bdata(P->key->data), blength(P->key->data), P); }
 
 hash_elements(H) ::= . 
-    { H = hash_create(HASHCOUNT_T_MAX, NULL, NULL); }
+    { H = NULL; }
 
 
 %type hash_pair { Pair* }

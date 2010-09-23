@@ -53,7 +53,7 @@ void Parse_print_error(const char *message, bstring content, int at, int line_nu
             at - prev_nl, "^");
 }
 
-hash_t *Parse_config_string(bstring content) 
+tst_t *Parse_config_string(bstring content) 
 {
     Token *temp = NULL;
     void *parser = ParseAlloc(malloc);
@@ -365,11 +365,11 @@ error:
 }
 
 
-hash_t *Parse_config_file(const char *path)
+tst_t *Parse_config_file(const char *path)
 {
     FILE *script;
     bstring buffer = NULL;
-    hash_t *settings = NULL;
+    tst_t *settings = NULL;
 
     script = fopen(path, "r");
     check(script, "Failed to open file: %s", path);

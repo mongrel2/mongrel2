@@ -46,12 +46,12 @@ const char *Value_type_name(ValueType type)
     return VALUE_NAMES[type];
 }
 
-Value *Value_resolve(hash_t *settings, Value *val)
+Value *Value_resolve(tst_t *settings, Value *val)
 {
     if(Value_is(val, REF)) {
-        hnode_t *n = hash_lookup(settings, bdata(val->as.ref->data));
-        check(n != NULL, "Couldn't find variable named: %s", bdata(val->as.ref->data));
-        return hnode_get(n);
+        Pair *pair = tst_search(settings, bdata(val->as.ref->data), blength(val->as.ref->data));
+        check(pair != NULL, "Couldn't find variable named: %s", bdata(val->as.ref->data));
+        return Pair_value(pair);
     } else {
         return val;
     }
@@ -60,7 +60,7 @@ error:
     return NULL;
 }
 
-int AST_walk_list(hash_t *settings, list_t *data, ast_walk_cb cb)
+int AST_walk_list(tst_t *settings, list_t *data, ast_walk_cb cb)
 {
     lnode_t *n = NULL;
     int rc = 0;
@@ -82,12 +82,15 @@ error:
     return -1;
 }
 
-int AST_walk(hash_t *settings, ast_walk_cb cb)
-{
-    hnode_t *n = hash_lookup(settings, "servers");
-    check(n, "You didn't set a servers variable to say what servers you want.");
+struct tagbstring DEFAULT_ROOT = bsStatic("servers");
 
-    Value *val = hnode_get(n);
+int AST_walk(tst_t *settings, ast_walk_cb cb)
+{
+    Pair *n = tst_search(settings, bdata(&DEFAULT_ROOT), blength(&DEFAULT_ROOT));
+    check(n, "You didn't set a %s variable to say what servers you want.", 
+            bdata(&DEFAULT_ROOT));
+
+    Value *val = Pair_value(n);
     check(val->type == VAL_LIST, "servers variable should be a list of server configs to load.");
 
     return AST_walk_list(settings, val->as.list, cb);
@@ -96,39 +99,47 @@ error:
     return -1;
 }
 
-int AST_walk_hash(hash_t *settings, Value *data, ast_hash_walk_cb cb)
-{
-    hscan_t s;
-    hnode_t *n = NULL;
-    hash_scan_begin(&s, data->as.hash);
-    Value *val = NULL;
-    int rc = 0;
+struct ASTScanData {
+    tst_t *settings;
+    ast_hash_walk_cb cb;
+    int error;
+};
 
-    while((n = hash_scan_next(&s)) != NULL) {
-        val = hnode_get(n);
-        rc = cb(settings, hnode_getkey(n), Value_resolve(settings, val));
-        check_debug(rc == 0, "Failed processing config file. Aborting.");
+void ast_hash_traverse_cb(void *value, void *data)
+{
+    // we want to *copy* this pair so that we can resolve it on the fly
+    Pair pair = *((Pair *)value);
+    struct ASTScanData *scan = data;
+
+    // then we temporarily just swap it out for this callback if we resolve
+    if(Value_is(pair.value, REF)) {
+        pair.value = Value_resolve(scan->settings, pair.value);
     }
 
-    return 0;
+    int rc = scan->cb(scan->settings, &pair);
+    scan->error = scan->error == 0 ? rc : scan->error;
+}
 
-error:
-    return -1;
+int AST_walk_hash(tst_t *settings, Value *data, ast_hash_walk_cb cb)
+{
+    struct ASTScanData scan = {.settings = settings, .cb = cb, .error = 0};
+    tst_traverse(data->as.hash, ast_hash_traverse_cb, &scan);
+    return scan.error;
 }
 
 
-Value *AST_get(hash_t *settings, hash_t *fr, const char *name, ValueType type)
+Value *AST_get(tst_t *settings, tst_t *fr, bstring name, ValueType type)
 {
-    hnode_t *hn = hash_lookup(fr, name);
-    check_debug(hn, "Variable %s not found, assuming not given.", name);
+    Pair *pair = tst_search(fr, bdata(name), blength(name));
+    check(pair, "Variable %s not found, assuming not given.", bdata(name));
 
-    Value *val = hnode_get(hn);
+    Value *val = Pair_value(pair);
     if(Value_is(val, REF)) {
         val = Value_resolve(settings, val);
     }
 
     check(val->type == type, "Invalid type for %s, should be %s not %s",
-            name, Value_type_name(type), Value_type_name(val->type));
+            bdata(name), Value_type_name(type), Value_type_name(val->type));
 
     return val;
 
@@ -137,10 +148,12 @@ error:
 }
 
 
-bstring AST_get_bstr(hash_t *settings, hash_t *fr, const char *name, ValueType type)
+bstring AST_get_bstr(tst_t *settings, tst_t *fr, bstring name, ValueType type)
 {
     Value *val = AST_get(settings, fr, name, type);
-    check(val != NULL, "Variable %s is expected to be a %s but it's not.", name, Value_type_name(type));
+
+    check(val != NULL, "Variable %s is expected to be a %s but it's not.", 
+            bdata(name), Value_type_name(type));
 
     return val->as.string->data;
 
@@ -148,8 +161,15 @@ error:
     return NULL;
 }
 
+const char *AST_str(tst_t *settings, tst_t *fr, const char *name, TokenType type)
+{
+    bstring key = bfromcstr(name);
+    bstring val = AST_get_bstr(settings, fr, key, type);
+    bdestroy(key);
+    return bdata(val);
+}
 
-static void Class_destroy(hash_t *settings, Class *cls)
+static void Class_destroy(Class *cls)
 {
     Token_destroy(cls->ident);
     AST_destroy(cls->params);
@@ -157,15 +177,14 @@ static void Class_destroy(hash_t *settings, Class *cls)
 }
 
 
-static int AST_destroy_cb(hash_t *settings, Value *val);
+static void AST_destroy_value(Value *val);
 
-static int AST_destroy_list(hash_t *settings, list_t *data)
+static int AST_destroy_list(list_t *data)
 {
     lnode_t *n = NULL;
 
     for(n = list_first(data); n != NULL; n = list_next(data, n)) {
-        Value *ref = lnode_get(n);
-        AST_destroy_cb(settings, ref);
+        AST_destroy_value((Value *)lnode_get(n));
     }
 
     list_destroy_nodes(data);
@@ -173,7 +192,7 @@ static int AST_destroy_list(hash_t *settings, list_t *data)
     return 0;
 }
 
-static int AST_destroy_cb(hash_t *settings, Value *val)
+static void AST_destroy_value(Value *val)
 {
     switch(val->type) {
         case VAL_QSTRING: Token_destroy(val->as.string);
@@ -182,9 +201,9 @@ static int AST_destroy_cb(hash_t *settings, Value *val)
             break;
         case VAL_NUMBER: Token_destroy(val->as.number);
             break;
-        case VAL_CLASS: Class_destroy(settings, val->as.cls);
+        case VAL_CLASS: Class_destroy(val->as.cls);
             break;
-        case VAL_LIST: AST_destroy_list(settings, val->as.list);
+        case VAL_LIST: AST_destroy_list(val->as.list);
             break;
         case VAL_HASH: AST_destroy(val->as.hash);
             break;
@@ -193,28 +212,21 @@ static int AST_destroy_cb(hash_t *settings, Value *val)
         case VAL_REF: Token_destroy(val->as.ref);
             break;
         default:
-            log_err("Unknown value type: %d", val->type);
+            log_err("Unknown value type ID: %d. Tell Zed.", val->type);
     }
 
     free(val);
-
-    return 0;
 }
 
-void AST_destroy(hash_t *settings)
+static void AST_destroy_cb(void *value, void *data)
 {
-    hscan_t s;
-    hnode_t *n = NULL;
-    hash_scan_begin(&s, settings);
-    Value *val = NULL;
+    AST_destroy_value(Pair_value((Pair *)value));
+}
 
-    while((n = hash_scan_next(&s)) != NULL) {
-        val = hnode_get(n);
-        AST_destroy_cb(settings, val);
-        hash_scan_delfree(settings, n);
-    }
-    
-    hash_destroy(settings);
+void AST_destroy(tst_t *settings)
+{
+    tst_traverse(settings, AST_destroy_cb, NULL);
+    tst_destroy(settings);
 }
 
 
