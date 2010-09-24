@@ -51,7 +51,7 @@ technologies.</p>
 
 <h2><a name="download">Download</a></h2>
 
-<p>Mongrel2 is now 1.0 as of Sep 1 2010:</p>
+<p>Mongrel2 is now 1.2 as of Sep 24 2010:</p>
 
 <ul>
     <li><a href="/static/downloads/mongrel2-1.2.tar.bz2">mongrel2-1.2.tar.bz2</a> 
