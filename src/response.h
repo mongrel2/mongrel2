@@ -47,7 +47,6 @@ extern struct tagbstring HTTP_413;
 extern struct tagbstring HTTP_500;
 extern struct tagbstring HTTP_501;
 extern struct tagbstring HTTP_502;
-extern struct tagbstring HTTP_205;
 
 extern struct tagbstring FLASH_RESPONSE;
 
