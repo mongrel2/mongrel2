@@ -61,6 +61,7 @@ typedef struct Connection {
     char *proxy_buf;
     struct httpclient_parser *client;
     char remote[IPADDR_SIZE+1];
+    int close;
 
     ssize_t (*send)(struct Connection *, char *buffer, int len);
     ssize_t (*recv)(struct Connection *, char *buffer, int len);

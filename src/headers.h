@@ -59,5 +59,6 @@ extern struct tagbstring HTTP_PUT;
 extern struct tagbstring HTTP_OPTIONS;
 extern struct tagbstring HTTP_PATTERN;
 extern struct tagbstring HTTP_USER_AGENT;
+extern struct tagbstring HTTP_CONNECTION;
 
 #endif

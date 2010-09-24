@@ -336,7 +336,12 @@ int connection_http_to_directory(int event, void *data)
 
     Log_request(conn, conn->req->status_code, conn->req->response_size);
 
-    return RESP_SENT;
+    if(conn->close) {
+        debug("Closing connection after sending file.");
+        return CLOSE;
+    } else {
+        return RESP_SENT;
+    }
 
 error:
     return CLOSE;
@@ -864,6 +869,20 @@ int Connection_read_header(Connection *conn, Request *req)
     // add the x-forwarded-for header
     dict_alloc_insert(conn->req->headers, bfromcstr("X-Forwarded-For"),
             blk2bstr(conn->remote, IPADDR_SIZE));
+
+    // TODO: this should be right but double check
+    if(conn->req->version && biseqcstr(conn->req->version, "1.0")) {
+        debug("HTTP 1.0 request coming in from %s", conn->remote);
+        conn->close = 1;
+    } else {
+        bstring conn_close = Request_get(conn->req, &HTTP_CONNECTION);
+
+        if(conn_close && biseqcstrcaseless(conn_close, "close")) {
+            conn->close = 1;
+        } else {
+            conn->close = 0;
+        }
+    }
 
     return conn->nread; 
 
