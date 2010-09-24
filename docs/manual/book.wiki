@@ -1762,7 +1762,13 @@
   <p class="noindent">To give this configuration system a try you
   just need to run the test configuration used in the unit tests.
   Let's try doing a few of the most basic commands with this
-  configuration: <!--l. 78-->
+  configuration. <!--l. 78-->
+
+  <p class="noindent">First, make sure you are in the mongrel2
+  source and you've ran the build so that you get the
+  <span class="pcrb7t-">tests/config.sqlite</span> file primed.
+  This is our base test case that we use in unit testing. After you
+  have that, do this: <!--l. 82-->
 
   <p class="noindent"><a id="x1-19001r4" name="x1-19001r4"></a>
   <hr class="float">
@@ -1773,7 +1779,7 @@
       "content"><span class="pplri7t-">Sample m2sh</span>
       <span class="pplri7t-">Commands</span></span>
     </div><!--tex4ht:label?: x1-19001r4 -->
-    <!--l. 79-->
+    <!--l. 83-->
 
     <div class="lstlisting" id="listing-4">
       <span class="label"><a id="x1-19002r1" name=
@@ -1861,17 +1867,17 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 87-->
+  <!--l. 91-->
 
   <p class="noindent">At this point you should see lists of servers
   and hosts, seen that mongrel2 is not running, and then started
   it. You can find out about all the commands and get help for them
   with <span class="pcrro7t-">m2sh help</span> or <span class=
-  "pcrro7t-">ms2h help command</span>. <!--l. 91-->
+  "pcrro7t-">ms2h help command</span>. <!--l. 95-->
 
   <p class="noindent">You can now try doing some simple starting,
   stopping and reloading using sudo (make sure you CTRL-c to exit
-  from the previous start command): <!--l. 94-->
+  from the previous start command): <!--l. 98-->
 
   <p class="noindent"><a id="x1-19006r5" name="x1-19006r5"></a>
   <hr class="float">
@@ -1882,7 +1888,7 @@
       "content"><span class="pplri7t-">Starting, Stopping,</span>
       <span class="pplri7t-">Reloading</span></span>
     </div><!--tex4ht:label?: x1-19006r5 -->
-    <!--l. 95-->
+    <!--l. 99-->
 
     <div class="lstlisting" id="listing-5">
       <span class="label"><a id="x1-19007r1" name=
@@ -2025,7 +2031,7 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 107-->
+  <!--l. 111-->
 
   <p class="noindent">Awesome, right? Using just this one little
   management tool, you are able to completely manage a Mongrel2
@@ -2034,12 +2040,12 @@
 
   <h4 class="subsectionHead"><span class="titlemark">3.2.1</span>
   <a id="x1-200003.2.1" name="x1-200003.2.1"></a>What The Hell Just
-  Happened?</h4><!--l. 115-->
+  Happened?</h4><!--l. 119-->
 
   <p class="noindent">You now have done nearly everything you can
   to a configuration, but you might not know exactly what's
   going on. Here's an explanation of what's going on
-  behind the scenes: <!--l. 118-->
+  behind the scenes: <!--l. 122-->
 
   <p class="noindent">
 
@@ -2084,19 +2090,19 @@
     <li class="enumerate" id="x1-20014x7">Finally, you tell
     mongrel2 to stop, and since it dropped privileges to be owned
     by you, you can do that without having to use sudo.
-  </ol><!--l. 137-->
+  </ol><!--l. 141-->
 
   <p class="noindent">All of this is happening by reading the
   <span class="pcrb7t-">tests/config.sqlite</span> file and not
   reading any configuration files. You can now try building your
   own configuration that matches this one or some others. 
-  <!--l. 141-->
+  <!--l. 145-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">3.3</span> <a id=
   "x1-210003.3" name="x1-210003.3"></a>A Simple Configuration
-  File</h3><!--l. 143-->
+  File</h3><!--l. 147-->
 
   <p class="noindent">To configure a new config database
   you'll write a file that looks a lot like a configuration
@@ -2105,13 +2111,13 @@
   "pcrb7t-">examples/python</span>) but now it's written in
   C. Even though it was rewritten we managed to keep the same
   format and even make it a little easier by making commas optional
-  in most places. <!--l. 149-->
+  in most places. <!--l. 153-->
 
   <p class="noindent">First you load your configuration into a
   fresh database using <span class="pcrro7t-">m2sh load</span>. For
   our example, we'll use the example configuration from
   <span class="pcrb7t-">examples/configs/sample.conf</span> to make
-  a simple one: <!--l. 153-->
+  a simple one: <!--l. 157-->
 
   <p class="noindent"><a id="x1-21001r6" name="x1-21001r6"></a>
   <hr class="float">
@@ -2122,7 +2128,7 @@
       "content"><span class="pplri7t-">Simple Little Config</span>
       <span class="pplri7t-">Example</span></span>
     </div><!--tex4ht:label?: x1-21001r6 -->
-    <!--l. 154-->
+    <!--l. 158-->
 
     <div class="lstinputlisting">
       <a id="x1-21002" name="x1-21002"></a> <span class=
@@ -2408,12 +2414,12 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 157-->
+  <!--l. 161-->
 
   <p class="noindent">If you aren't familiar with Python then
   this code might look freaky, but it's really simple.
   We'll get into how its structured in a second, but to load
-  this file we would just do this: <!--l. 161-->
+  this file we would just do this: <!--l. 165-->
 
   <p class="noindent"><a id="x1-21024r7" name="x1-21024r7"></a>
   <hr class="float">
@@ -2424,7 +2430,7 @@
       "content"><span class="pplri7t-">Loading The Simple</span>
       <span class="pplri7t-">Config</span></span>
     </div><!--tex4ht:label?: x1-21024r7 -->
-    <!--l. 162-->
+    <!--l. 166-->
 
     <div class="lstlisting" id="listing-6">
       <span class="label"><a id="x1-21025r1" name=
@@ -2495,14 +2501,14 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 171-->
+  <!--l. 175-->
 
   <p class="noindent">Notice that we didn't have to tell m2sh
   that the database was <span class="pcrb7t-">config.sqlite</span>.
   It assumes that is the default, as well as that <span class=
   "pcrb7t-">mongrel2.conf</span> is the config file you want. If
   you use those two files, then you never have to type those
-  parameters again. <!--l. 176-->
+  parameters again. <!--l. 180-->
 
   <p class="noindent">With this sequence of commands you:
 
@@ -2519,7 +2525,7 @@
 
     <li class="enumerate" id="x1-21037x4">Start this server to try
     it out.
-  </ol><!--l. 185-->
+  </ol><!--l. 189-->
 
   <p class="noindent">By now you should be getting the hang of the
   pattern here, which is to use m2sh and a configuration
@@ -2528,7 +2534,7 @@
 
   <h3 class="sectionHead"><span class="titlemark">3.4</span> <a id=
   "x1-220003.4" name="x1-220003.4"></a>How A Config Is
-  Structured</h3><!--l. 191-->
+  Structured</h3><!--l. 195-->
 
   <p class="noindent">The base structure of a Mongrel2
   configuration is:
@@ -2589,17 +2595,17 @@
               </dl>
             </dl>
         </dl>
-    </dl><!--l. 215-->
+    </dl><!--l. 219-->
 
   <p class="noindent">Each of these nested &ldquo;objects&rdquo;
   then has a set of attributes you can use to configure them, and
-  most of them have reasonable defaults. <!--l. 219-->
+  most of them have reasonable defaults. <!--l. 223-->
 
   <p class="noindent">
 
   <h4 class="subsectionHead"><span class="titlemark">3.4.1</span>
   <a id="x1-230003.4.1" name="x1-230003.4.1"></a>Server</h4>
-  <!--l. 221-->
+  <!--l. 225-->
 
   <p class="noindent">The server is all about telling Mongrel2
   where to listen on its port, where to chroot, and general server
@@ -2650,13 +2656,13 @@
 
     <dd class="description">The port the server should listen on
     for new connections.
-  </dl><!--l. 238-->
+  </dl><!--l. 242-->
 
   <p class="noindent">
 
   <h4 class="subsectionHead"><span class="titlemark">3.4.2</span>
   <a id="x1-240003.4.2" name="x1-240003.4.2"></a>Host</h4>
-  <!--l. 240-->
+  <!--l. 244-->
 
   <p class="noindent">A host is matched using a kind of
   <span class="pplri7t-">inverse route</span> that matches the
@@ -2694,13 +2700,13 @@
 
     <dd class="description">This is a dict (hashmap) of the URL
     patterns mapped to the targets that should be run.
-  </dl><!--l. 255-->
+  </dl><!--l. 259-->
 
   <p class="noindent">
 
   <h4 class="subsectionHead"><span class="titlemark">3.4.3</span>
   <a id="x1-250003.4.3" name="x1-250003.4.3"></a>Route</h4>
-  <!--l. 257-->
+  <!--l. 261-->
 
   <p class="noindent">The <span class="pcrro7t-">Route</span> is
   the workhorse of the whole system. It uses some very fancy but
@@ -2736,7 +2742,7 @@
     the request, either a <span class="pcrro7t-">Dir</span>,
     <span class="pcrro7t-">Handler</span> or <span class=
     "pcrro7t-">Proxy</span>.
-  </dl><!--l. 270-->
+  </dl><!--l. 274-->
 
   <p class="noindent">Later on, you'll learn about the
   pattern matching that's used, but it's basically a
@@ -2748,13 +2754,13 @@
   after it is considered a pattern to match. When a request comes
   in, Mongrel2 quickly finds the longest prefix that matches the
   URL, and then tests its pattern if there is one. If the pattern
-  is valid, the request goes through. If not, 404. <!--l. 278-->
+  is valid, the request goes through. If not, 404. <!--l. 282-->
 
   <p class="noindent">
 
   <h4 class="subsectionHead"><span class="titlemark">3.4.4</span>
   <a id="x1-260003.4.4" name="x1-260003.4.4"></a>Dir</h4>
-  <!--l. 280-->
+  <!--l. 284-->
 
   <p class="noindent">A <span class="pcrro7t-">Dir</span> is a
   simple directory-serving route target that serves files out of a
@@ -2784,18 +2790,18 @@
 
     <dd class="description">The default Content-Type to use if none
     matches the MIMEType table.
-  </dl><!--l. 292-->
+  </dl><!--l. 296-->
 
   <p class="noindent">Currently, we don't offer more
   parameters for configuration, but eventually you'll be able
   to tweak more and more of the settings to control how Dirs work. 
-  <!--l. 295-->
+  <!--l. 299-->
 
   <p class="noindent">
 
   <h4 class="subsectionHead"><span class="titlemark">3.4.5</span>
   <a id="x1-270003.4.5" name="x1-270003.4.5"></a>Proxy</h4>
-  <!--l. 297-->
+  <!--l. 301-->
 
   <p class="noindent">A proxy is used so that you can use Mongrel2
   but not have to throw out your existing infrastructure. Mongrel2
@@ -2814,19 +2820,19 @@
     <dt class="description"><span class="pplb7t-">port</span>
 
     <dd class="description">The port to connect to.
-  </dl><!--l. 310-->
+  </dl><!--l. 314-->
 
   <p class="noindent">Requests that match a Proxy route are still
   parsed by Mongrel2's incredibly accurate HTTP parser, so
   that your backend servers should not be receiving badly formatted
   HTTP requests. Responses from a Proxy server, however, are sent
-  unaltered to the browser directly. <!--l. 316-->
+  unaltered to the browser directly. <!--l. 320-->
 
   <p class="noindent">
 
   <h4 class="subsectionHead"><span class="titlemark">3.4.6</span>
   <a id="x1-280003.4.6" name="x1-280003.4.6"></a>Handler</h4>
-  <!--l. 318-->
+  <!--l. 322-->
 
   <p class="noindent">Now we get to the best part: the ZeroMQ
   <span class="pcrro7t-">Handlers</span> that will receive
@@ -2870,7 +2876,7 @@
     mention the send_ident on all returned messages, so you should
     either set this to nothing and don't subscribe, or set it
     to the same as send_ident.
-  </dl><!--l. 337-->
+  </dl><!--l. 341-->
 
   <p class="noindent">The interesting thing about the <span class=
   "pcrro7t-">Handler</span> configuration is you don't have
@@ -2882,26 +2888,26 @@
   doesn't actively connect to backends; they connect to
   Mongrel2. This means, if you want to fire up 10 more handlers,
   you just start them; no need to restart or reconfigure Mongrel2
-  to make them active. <!--l. 345-->
+  to make them active. <!--l. 349-->
 
   <p class="noindent">
 
   <h4 class="subsectionHead"><span class="titlemark">3.4.7</span>
   <a id="x1-290003.4.7" name="x1-290003.4.7"></a>Others</h4>
-  <!--l. 347-->
+  <!--l. 351-->
 
   <p class="noindent">There's also <span class=
   "pcrro7t-">Log</span>, <span class="pcrro7t-">MIMEType</span>,
   and <span class="pcrro7t-">Setting</span> objects/tables you can
   work with, but we'll get into those later since you
   don't need to know about them to understand the Mongrel2
-  structure. <!--l. 353-->
+  structure. <!--l. 357-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">3.5</span> <a id=
   "x1-300003.5" name="x1-300003.5"></a>A More Complex Example</h3>
-  <!--l. 355-->
+  <!--l. 359-->
 
   <p class="noindent">All of this knowledge about the Mongrel2
   configuration structure can now be used to take a look at a more
@@ -2909,7 +2915,7 @@
   I'll just say what's going on, and you try to match
   what I'm saying to the code. Here's the file
   <span class="pcrb7t-">examples/configs/mongrel2.conf</span>: 
-  <!--l. 359-->
+  <!--l. 363-->
 
   <p class="noindent"><a id="x1-30001r8" name="x1-30001r8"></a>
   <hr class="float">
@@ -2920,7 +2926,7 @@
       "content"><span class="pplri7t-">Mongrel2.org Config</span>
       <span class="pplri7t-">Script</span></span>
     </div><!--tex4ht:label?: x1-30001r8 -->
-    <!--l. 360-->
+    <!--l. 364-->
 
     <div class="lstinputlisting">
       <a id="x1-30002" name="x1-30002"></a> <span class=
@@ -3725,7 +3731,7 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 363-->
+  <!--l. 367-->
 
   <p class="noindent">If you haven't guessed yet, this
   configuration is what's used on <a href=
@@ -3793,14 +3799,14 @@
     <li class="enumerate" id="x1-30077x11">Finally, we commit the
     whole thing to the database by passing in the servers to save
     and the settings to use.
-  </ol><!--l. 389-->
+  </ol><!--l. 393-->
 
   <p class="noindent">And that, my friends, is the most complex
   configuration we have so far.
 
   <h3 class="sectionHead"><span class="titlemark">3.6</span> <a id=
   "x1-310003.6" name="x1-310003.6"></a>Routing And Host
-  Patterns</h3><!--l. 394-->
+  Patterns</h3><!--l. 398-->
 
   <p class="noindent">The pattern code was taken from <a href=
   "http://www.lua.org/">Lua</a> and is some of the simplest code
@@ -3812,14 +3818,14 @@
   find the longest matching prefix and then tests the pattern. If
   the pattern matches, then the route works. If the route
   doesn't have a pattern, then it's assumed to match,
-  and you're done. <!--l. 403-->
+  and you're done. <!--l. 407-->
 
   <p class="noindent">The only caveat is you have to wrap your
   pattern parts in parenthesis, but these don't mean anything
   other than to delimit where a pattern starts. So instead of
   <span class="pcrro7t-">/images/.&#8902;.jpg</span>, write
   <span class="pcrro7t-">/images/(.&#8902;.jpg)</span> for it to
-  work. <!--l. 407-->
+  work. <!--l. 411-->
 
   <p class="noindent">Here's the list of characters you can
   use in your patterns:
@@ -3894,7 +3900,7 @@
 
     <li class="itemize"><span class=
     "obeylines-h verb pcrr7t-">$</span> End of the string.
-  </ul><!--l. 432-->
+  </ul><!--l. 436-->
 
   <p class="noindent">Using the uppercase version of an escaped
   character makes it work the opposite way (i.e., <span class=
@@ -3903,10 +3909,10 @@
   backslash can be used to escape the following character,
   disabling its special abilities (i.e., <span class=
   "obeylines-h verb pcrr7t-">\\</span> will match a backslash). 
-  <!--l. 437-->
+  <!--l. 441-->
 
   <p class="noindent">Anything that's not listed here is
-  matched literally. <!--l. 439-->
+  matched literally. <!--l. 443-->
 
   <p class="noindent"><a id="x1-31001r3" name="x1-31001r3"></a>
   <hr class="float">
@@ -3920,13 +3926,13 @@
     </div><!--tex4ht:label?: x1-31001r3 -->
 
     <div class="quote">
-      <!--l. 440-->
+      <!--l. 444-->
 
       <p class="indent">Yep, I get it. You think that everyone
       should use UTF-8 or some Unicode encoding for everything. You
       despise the dominance of the `A' in ASCII and
       hate that you can't put your spoken language right in a
-      URL. <!--l. 444-->
+      URL. <!--l. 448-->
 
       <p class="indent">Well, I hate to say it, but tough.
       Protocols are hard enough without having to worry about the
@@ -3936,7 +3942,7 @@
       can't be properly capitalized or lowercased, and
       requires extra translations steps for every operation. With
       ASCII, every computer just knows what it is, and it's
-      the fastest for creating wire protocol formats. <!--l. 452-->
+      the fastest for creating wire protocol formats. <!--l. 456-->
 
       <p class="indent">This is why, on the Internet, you have to
       do things to URLs to make them ASCII, like encoding them with
@@ -3947,7 +3953,7 @@
       fixed set of characters and be done with it. Don't
       blame me or Mongrel2 for this, it's just the way the
       standard is and the way to get a server that is stable and
-      works. <!--l. 460-->
+      works. <!--l. 464-->
 
       <p class="indent">Protocols work better when there's
       less politics in their design. This means you can't put
@@ -3956,7 +3962,7 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 467-->
+  <!--l. 471-->
 
   <p class="noindent">Here are some example routes you can try to
   get a feel for the system:
@@ -3985,7 +3991,7 @@
     long sequence of digits and finally a .jpg) with the
     <span class="obeylines-h verb pcrr7t-">\</span>. escaping the
     period.
-  </ul><!--l. 478-->
+  </ul><!--l. 482-->
 
   <p class="noindent">That should give the idea of how you can use
   them. Notice also that I'm using the Python <span class=
@@ -3996,7 +4002,7 @@
 
   <h3 class="sectionHead"><span class="titlemark">3.7</span> <a id=
   "x1-320003.7" name="x1-320003.7"></a>Deployment Logs And
-  Commits</h3><!--l. 484-->
+  Commits</h3><!--l. 488-->
 
   <p class="noindent">A very nice feature for people doing
   operations work is that m2sh keeps track of all the commands you
@@ -4005,13 +4011,13 @@
   maintained even across <span class="pcrro7t-">m2sh load</span>
   commands so you can see what's going on. They track who did
   something, what server they did it on, what time they did it and
-  what they did. <!--l. 491-->
+  what they did. <!--l. 495-->
 
   <p class="noindent">To see the logs for your own tests, just do
   <span class="pcrro7t-">m2sh log -db simple.sqlite</span> and
   then, if you want to add a commit log message, you use the
   <span class="pcrro7t-">m2sh commit</span> command. Here's
-  an example from mongrel2.org: <!--l. 495-->
+  an example from mongrel2.org: <!--l. 499-->
 
   <p class="noindent"><a id="x1-32001r9" name="x1-32001r9"></a>
   <hr class="float">
@@ -4022,7 +4028,7 @@
       "content"><span class="pplri7t-">Example Commit</span>
       <span class="pplri7t-">Log</span></span>
     </div><!--tex4ht:label?: x1-32001r9 -->
-    <!--l. 496-->
+    <!--l. 500-->
 
     <div class="lstlisting" id="listing-7">
       <span class="label"><a id="x1-32002r1" name=
@@ -4229,7 +4235,7 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 510-->
+  <!--l. 514-->
 
   <p class="noindent">The motivation for this feature is the trend
   that ops stores server configurations in revision control systems
@@ -4238,12 +4244,12 @@
   on each server. In many cases, the configuration files also need
   to be reworked or altered for each deployment. With the m2sh log
   and commit system, you can augment your revision control with
-  deployment action tracking. <!--l. 516-->
+  deployment action tracking. <!--l. 520-->
 
   <p class="noindent">Later versions of Mongrel2 will keep small
   amounts of statistics which will link these actions to changes in
   Mongrel2 behavior like frequent crashing, failures, slowness, or
-  other problems. <!--l. 519-->
+  other problems. <!--l. 523-->
 
   <p class="noindent">Basically, there's nowhere to hide.
   Mongrel2 will help operations figure out who needs to get fired
@@ -4251,7 +4257,7 @@
 
   <h3 class="sectionHead"><span class="titlemark">3.8</span> <a id=
   "x1-330003.8" name="x1-330003.8"></a>Control Port</h3>
-  <!--l. 525-->
+  <!--l. 529-->
 
   <p class="noindent">Just before the release of 1.0, we added a
   feature called the &ldquo;Control Port&rdquo;, which lets you
@@ -4261,20 +4267,20 @@
   how long they've been connected, the server's current
   time and kill a connection. Using this control port, you can then
   implement any monitoring and timeout policies you want, and
-  provide better status. <!--l. 533-->
+  provide better status. <!--l. 537-->
 
   <p class="noindent">By default, the control port is in your
   chroot at run/control, but you can set the <span class=
   "pcrro7t-">control</span><span class="pcrro7t-">_port</span>
   setting to change this. You can actually change it to any ZeroMQ
   valid spec you want, although you're advised to use IPC for
-  security. <!--l. 537-->
+  security. <!--l. 541-->
 
   <p class="noindent">Once Mongrel2 starts, you can then use
   <span class="pcrb7t-">m2sh</span> to connect to Mongrel2 and
   control it using the simple command language. Currently, what you
   get back is very raw, but it will improve as we work on the
-  control port and what it does. <!--l. 541-->
+  control port and what it does. <!--l. 545-->
 
   <p class="noindent">The list of commands you can issue are:
 
@@ -4314,10 +4320,10 @@
     <dd class="description">Shuts down the control port permanently
     in case you want to keep it from being accessed for some
     reason.
-  </dl><!--l. 559-->
+  </dl><!--l. 563-->
 
   <p class="noindent">You then use the control port by running
-  <span class="pcrro7t-">m2sh</span>: <!--l. 561-->
+  <span class="pcrro7t-">m2sh</span>: <!--l. 565-->
 
   <p class="noindent">
 
@@ -4350,12 +4356,12 @@
     "pcrr7t-">&nbsp;</span><span class=
     "pcrr7t-">&nbsp;{"time":</span><span class=
     "pcrr7t-">&nbsp;1282980306}</span>
-  </div><!--l. 570-->
+  </div><!--l. 574-->
 
   <p class="noindent">As we work on this feature more, we'll
   have a nicer interface to it. If you wanted to connect on your
   own, here is a simple Python script showing how to do it: 
-  <!--l. 575-->
+  <!--l. 579-->
 
   <p class="noindent"><a id="x1-33013r10" name="x1-33013r10"></a>
   <hr class="float">
@@ -4366,7 +4372,7 @@
       "content"><span class="pplri7t-">Python Control Port</span>
       <span class="pplri7t-">Example</span></span>
     </div><!--tex4ht:label?: x1-33013r10 -->
-    <!--l. 576-->
+    <!--l. 580-->
 
     <div class="lstlisting" id="listing-8">
       <span class="label"><a id="x1-33014r1" name=
@@ -4513,7 +4519,7 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 599-->
+  <!--l. 603-->
 
   <p class="noindent">You obviously don't need to do this,
   but should you want to do something special like a management
@@ -4521,15 +4527,15 @@
 
   <h3 class="sectionHead"><span class="titlemark">3.9</span> <a id=
   "x1-340003.9" name="x1-340003.9"></a>Multiple Servers</h3>
-  <!--l. 605-->
+  <!--l. 609-->
 
   <p class="noindent">A Mongrel2 process itself does not have any
   support for running multiple servers; instead, it takes two
   simple parameters: a sqlite config database and a server uuid
   that names the server to be launched. This is done to keep the
-  mongrel2 code simple and workable. <!--l. 610-->
+  mongrel2 code simple and workable. <!--l. 614-->
 
-  <p class="noindent">However. <!--l. 612-->
+  <p class="noindent">However. <!--l. 616-->
 
   <p class="noindent">Mongrel2's m2sh does support launching
   multiple servers from a single configuration database. By passing
@@ -4540,7 +4546,7 @@
   with <span class="pcrro7t-">-host</span> <span class=
   "pcrro7t-">localhost</span> and your config contains two servers
   which attempt to bind to localhost), m2sh will list the matching
-  servers and ask you to clarify your selection. <!--l. 620-->
+  servers and ask you to clarify your selection. <!--l. 624-->
 
   <p class="noindent">For example:
 
@@ -4681,13 +4687,13 @@
     "pcrr7t-">&nbsp;-db</span><span class=
     "pcrr7t-">&nbsp;config.sqlite</span><span class=
     "pcrr7t-">&nbsp;-every</span>
-  </div><!--l. 647-->
+  </div><!--l. 651-->
 
   <p class="noindent">
 
   <h3 class="sectionHead"><span class="titlemark">3.10</span>
   <a id="x1-350003.10" name="x1-350003.10"></a>Tweakable Expert
-  Settings</h3><!--l. 649-->
+  Settings</h3><!--l. 653-->
 
   <p class="noindent">Many of Mongrel2's internal settings
   are configurable using the settings system. Some of these are
@@ -4696,11 +4702,11 @@
   isn't checked, so if you make a setting and things go
   crazy, you need to not make that setting. All of these have good
   defaults so you can leave them alone unless you need to change
-  them. <!--l. 656-->
+  them. <!--l. 660-->
 
   <p class="noindent">To configure your settings, you set the
   variable <span class="pcrro7t-">settings</span> and you're
-  done: <!--l. 658-->
+  done: <!--l. 662-->
 
   <p class="noindent"><a id="x1-35001r11" name="x1-35001r11"></a>
   <hr class="float">
@@ -4711,7 +4717,7 @@
       "content"><span class="pplri7t-">Changing</span> <span class=
       "pplri7t-">Settings</span></span>
     </div><!--tex4ht:label?: x1-35001r11 -->
-    <!--l. 659-->
+    <!--l. 663-->
 
     <div class="lstlisting" id="listing-9">
       <span class="label"><a id="x1-35002r1" name=
@@ -4751,7 +4757,7 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 666-->
+  <!--l. 670-->
 
   <p class="noindent">Mongrel2 will read these on the fly and write
   INFO log messages telling you what the settings are so you can
@@ -4897,11 +4903,11 @@
     <dd class="description">Number of 0MQ IO threads to run.
     Careful, we've experienced thread bugs in 0MQ sometimes
     with high numbers of these.
-  </dl><!--l. 691-->
+  </dl><!--l. 695-->
 
   <p class="noindent">You can also update your <span class=
   "pcrro7t-">mimetypes</span> in the same way, just set a variable
-  with them: <!--l. 693-->
+  with them: <!--l. 697-->
 
   <p class="noindent"><a id="x1-35005r12" name="x1-35005r12"></a>
   <hr class="float">
@@ -4912,7 +4918,7 @@
       "content"><span class="pplri7t-">Changing</span> <span class=
       "pplri7t-">Settings</span></span>
     </div><!--tex4ht:label?: x1-35005r12 -->
-    <!--l. 694-->
+    <!--l. 698-->
 
     <div class="lstlisting" id="listing-10">
       <span class="label"><a id="x1-35006r1" name=
