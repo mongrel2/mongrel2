@@ -54,10 +54,10 @@ technologies.</p>
 <p>Mongrel2 is now 1.0 as of Sep 1 2010:</p>
 
 <ul>
-    <li><a href="/static/downloads/mongrel2-1.1.tar.bz2">mongrel2-1.1.tar.bz2</a> 
-    MD5: 62ae9294840d7c5e026c70c9efd40324</li>
-    <li><a href="/static/downloads/mongrel2-1.1.zip">mongrel2-1.1.zip</a>
-    MD5: eb5f5a6b5ee76a0ac0cc1abbea2ed4b9</li>
+    <li><a href="/static/downloads/mongrel2-1.2.tar.bz2">mongrel2-1.2.tar.bz2</a> 
+    MD5: </li>
+    <li><a href="/static/downloads/mongrel2-1.2.zip">mongrel2-1.2.zip</a>
+    MD5: </li>
 </ul>
 
 
