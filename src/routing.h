@@ -43,6 +43,7 @@
 typedef struct Route {
     bstring pattern;
     void *data;
+    int has_pattern;
 } Route;
 
 struct RouteMap;
