@@ -861,6 +861,10 @@ int Connection_read_header(Connection *conn, Request *req)
             "Error in parsing: %d, bytes: %d, value: %.*s, parsed: %d", 
             finished, conn->nread, conn->nread, conn->buf, (int)conn->nparsed);
 
+    // add the x-forwarded-for header
+    dict_alloc_insert(conn->req->headers, bfromcstr("X-Forwarded-For"),
+            blk2bstr(conn->remote, IPADDR_SIZE));
+
     return conn->nread; 
 
 error:
