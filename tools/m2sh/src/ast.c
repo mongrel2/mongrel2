@@ -129,7 +129,8 @@ int AST_walk_hash(tst_t *settings, Value *data, ast_hash_walk_cb cb)
 Value *AST_get(tst_t *settings, tst_t *fr, bstring name, ValueType type)
 {
     Pair *pair = tst_search(fr, bdata(name), blength(name));
-    check(pair, "Variable %s not found, assuming not given.", bdata(name));
+    check(pair, "Couldn't find variable %s of type %s", bdata(name), Value_type_name(type));
+
     Value *val = Pair_value(pair);
 
     if(Value_is(val, REF)) {

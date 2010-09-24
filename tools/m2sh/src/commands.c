@@ -656,7 +656,7 @@ int Command_run(bstring arguments)
     CommandHandler *handler;
     int rc = 0;
 
-    check(cli_params_parse_args(arguments, &cmd) != -1, "Invalid arguments.");
+    check(cli_params_parse_args(arguments, &cmd) != -1, "USAGE: m2sh <command> [options] (extras) with options being --foo bar or -foo bar.");
 
     for(handler = COMMAND_MAPPING; handler->name != NULL; handler++)
     {

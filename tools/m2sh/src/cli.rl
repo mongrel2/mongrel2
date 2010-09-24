@@ -72,10 +72,10 @@ int cli_params_finish( struct params *fsm )
 
 static inline bstring match_release(struct params *p, int type, int release)
 {
-    check(p->curtk < p->token_count, "Expecting %d but nothing left.", type);
+    check(p->curtk < p->token_count, "Expecting more options, but nothing left.");
     Token *tk = p->tokens[p->curtk++];
 
-    check(tk->type == type, "Expecting %d but got %d.", type, tk->type);
+    check_debug(tk->type == type, "Expecting %d but got %d.", type, tk->type);
 
     bstring val = tk->data;
 
@@ -170,7 +170,7 @@ static inline int Command_parse(struct params *p, Command *cmd)
     }
 
     cmd->name = match(p, TKIDENT);
-    check(cmd->name, "No command name given.");
+    check(cmd->name, "No command name given.  Use m2sh help to figure out what's available.");
 
     for(next = peek(p); next != -1 && !cmd->error; next = peek(p)) {
         if(next == TKOPTION) {
@@ -180,7 +180,7 @@ static inline int Command_parse(struct params *p, Command *cmd)
         }
     }
 
-    check(p->curtk == p->token_count, "Didn't parse it all, only: %d of %d", p->curtk, p->token_count);
+    check(p->curtk == p->token_count, "Didn't parse the whole command line, only: %d of %d", p->curtk, p->token_count);
 
     return 0;
 
@@ -215,3 +215,5 @@ error:
     cmd->error = 1;
     return -1;
 }
+
+

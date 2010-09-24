@@ -24,7 +24,7 @@
 
 
 
-#line 28 "src/cli.c"
+#line 2 "src/cli.c"
 static const int params_start = 4;
 static const int params_first_final = 4;
 static const int params_error = -1;
@@ -40,7 +40,7 @@ void cli_params_init( struct params *fsm )
     fsm->token_count = 0;
     fsm->curtk = 0;
 	
-#line 44 "src/cli.c"
+#line 2 "src/cli.c"
 	{
 	 fsm->cs = params_start;
 	 fsm->ts = 0;
@@ -59,7 +59,7 @@ void cli_params_execute( struct params *fsm, bstring data)
     Token *temp = NULL;
 
 	
-#line 63 "src/cli.c"
+#line 2 "src/cli.c"
 	{
 	if ( p == pe )
 		goto _test_eof;
@@ -78,7 +78,7 @@ tr7:
 	{ fsm->te = p+1;}
 	goto st4;
 tr13:
-#line 1 "src/cli.rl"
+#line 1 "NONE"
 	{	switch(  fsm->act ) {
 	case 3:
 	{{p = (( fsm->te))-1;} TKSTR(QSTRING); }
@@ -110,14 +110,14 @@ tr24:
 	{ fsm->te = p;p--;{ TK(NUMBER); }}
 	goto st4;
 st4:
-#line 1 "src/cli.rl"
+#line 1 "NONE"
 	{ fsm->ts = 0;}
 	if ( ++p == pe )
 		goto _test_eof4;
 case 4:
-#line 1 "src/cli.rl"
+#line 1 "NONE"
 	{ fsm->ts = p;}
-#line 121 "src/cli.c"
+#line 2 "src/cli.c"
 	switch( (*p) ) {
 		case 32: goto tr7;
 		case 34: goto tr8;
@@ -139,13 +139,13 @@ case 4:
 		goto st15;
 	goto tr6;
 tr6:
-#line 1 "src/cli.rl"
+#line 1 "NONE"
 	{ fsm->te = p+1;}
 #line 39 "src/cli.rl"
 	{ fsm->act = 7;}
 	goto st5;
 tr15:
-#line 1 "src/cli.rl"
+#line 1 "NONE"
 	{ fsm->te = p+1;}
 #line 33 "src/cli.rl"
 	{ fsm->act = 3;}
@@ -154,21 +154,21 @@ st5:
 	if ( ++p == pe )
 		goto _test_eof5;
 case 5:
-#line 158 "src/cli.c"
+#line 2 "src/cli.c"
 	if ( (*p) == 32 )
 		goto tr13;
 	if ( 9 <= (*p) && (*p) <= 13 )
 		goto tr13;
 	goto tr6;
 tr8:
-#line 1 "src/cli.rl"
+#line 1 "NONE"
 	{ fsm->te = p+1;}
 	goto st6;
 st6:
 	if ( ++p == pe )
 		goto _test_eof6;
 case 6:
-#line 172 "src/cli.c"
+#line 2 "src/cli.c"
 	switch( (*p) ) {
 		case 32: goto st0;
 		case 34: goto tr15;
@@ -192,28 +192,28 @@ st1:
 case 1:
 	goto st0;
 tr16:
-#line 1 "src/cli.rl"
+#line 1 "NONE"
 	{ fsm->te = p+1;}
 	goto st7;
 st7:
 	if ( ++p == pe )
 		goto _test_eof7;
 case 7:
-#line 203 "src/cli.c"
+#line 2 "src/cli.c"
 	if ( (*p) == 32 )
 		goto st0;
 	if ( 9 <= (*p) && (*p) <= 13 )
 		goto st0;
 	goto tr8;
 tr9:
-#line 1 "src/cli.rl"
+#line 1 "NONE"
 	{ fsm->te = p+1;}
 	goto st8;
 st8:
 	if ( ++p == pe )
 		goto _test_eof8;
 case 8:
-#line 217 "src/cli.c"
+#line 2 "src/cli.c"
 	switch( (*p) ) {
 		case 32: goto st2;
 		case 39: goto tr15;
@@ -237,14 +237,14 @@ st3:
 case 3:
 	goto st2;
 tr17:
-#line 1 "src/cli.rl"
+#line 1 "NONE"
 	{ fsm->te = p+1;}
 	goto st9;
 st9:
 	if ( ++p == pe )
 		goto _test_eof9;
 case 9:
-#line 248 "src/cli.c"
+#line 2 "src/cli.c"
 	if ( (*p) == 32 )
 		goto st2;
 	if ( 9 <= (*p) && (*p) <= 13 )
@@ -418,10 +418,10 @@ int cli_params_finish( struct params *fsm )
 
 static inline bstring match_release(struct params *p, int type, int release)
 {
-    check(p->curtk < p->token_count, "Expecting %d but nothing left.", type);
+    check(p->curtk < p->token_count, "Expecting more options, but nothing left.");
     Token *tk = p->tokens[p->curtk++];
 
-    check(tk->type == type, "Expecting %d but got %d.", type, tk->type);
+    check_debug(tk->type == type, "Expecting %d but got %d.", type, tk->type);
 
     bstring val = tk->data;
 
@@ -516,7 +516,7 @@ static inline int Command_parse(struct params *p, Command *cmd)
     }
 
     cmd->name = match(p, TKIDENT);
-    check(cmd->name, "No command name given.");
+    check(cmd->name, "No command name given.  Use m2sh help to figure out what's available.");
 
     for(next = peek(p); next != -1 && !cmd->error; next = peek(p)) {
         if(next == TKOPTION) {
@@ -526,7 +526,7 @@ static inline int Command_parse(struct params *p, Command *cmd)
         }
     }
 
-    check(p->curtk == p->token_count, "Didn't parse it all, only: %d of %d", p->curtk, p->token_count);
+    check(p->curtk == p->token_count, "Didn't parse the whole command line, only: %d of %d", p->curtk, p->token_count);
 
     return 0;
 
@@ -561,3 +561,5 @@ error:
     cmd->error = 1;
     return -1;
 }
+
+
