@@ -21,7 +21,7 @@ typedef struct CommandHandler {
     Command_handler_cb cb;
 } CommandHandler;
 
-#define check_file(S, N, P) check(access((const char *)(S)->data, (P)) == 0, "Can't access " #N " %s properly.", bdata((S)))
+#define check_file(S, N, P) check(access((const char *)(S)->data, (P)) == 0, "Can't access %s '%s' properly.", N, bdata((S)))
 #define check_no_extra(C) check(list_count((C)->extra) == 0, "Commands only take --option style arguments, you have %d extra.", (int)list_count((C)->extra))
 
 static inline int log_action(bstring db_file, bstring what, bstring why, bstring where, bstring how)
@@ -101,7 +101,6 @@ static int Command_load(Command *cmd)
     bstring what = NULL;
     bstring why = NULL;
 
-    check_file(db_file, "config database", R_OK | W_OK);
     check_file(conf_file, "config file", R_OK);
 
     Config_load(bdata(conf_file), bdata(db_file));
