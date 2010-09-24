@@ -22,7 +22,7 @@ typedef struct CommandHandler {
 } CommandHandler;
 
 #define check_file(S, N, P) check(access((const char *)(S)->data, (P)) == 0, "Can't access " #N " %s properly.", bdata((S)))
-#define check_no_extra(C) check(list_count((C)->extra) == 0, "Commands only take --option style arguments, you have %d extra.", list_count((C)->extra))
+#define check_no_extra(C) check(list_count((C)->extra) == 0, "Commands only take --option style arguments, you have %d extra.", (int)list_count((C)->extra))
 
 static inline int log_action(bstring db_file, bstring what, bstring why, bstring where, bstring how)
 {
@@ -55,7 +55,7 @@ static inline int log_action(bstring db_file, bstring what, bstring why, bstring
 
 
     if(biseqcstr(who, "root")) {
-        log_err("You shouldn't be running things as %s.  Use a safe user instead.", bdata(who));
+        log_warn("You shouldn't be running things as %s.  Use a safe user instead.", bdata(who));
     }
 
     bdestroy(who);
@@ -81,7 +81,7 @@ static inline bstring option(Command *cmd, const char *name, const char *def)
     if(def != NULL) {
         if(val == NULL) {
             // add it so it gets cleaned up later when the hash is destroyed
-            log_info("No option --%s given, using \"%s\" as the default.", name, def);
+            log_warn("No option --%s given, using \"%s\" as the default.", name, def);
 
             bstring result = bfromcstr(def);
             hash_alloc_insert(cmd->options, name, result);
@@ -129,7 +129,7 @@ static inline int linenoise_runner(const char *prompt, int (*callback)(bstring a
         hist_file = bformat("%s/.m2sh", home_dir);
         linenoiseHistoryLoad(bdata(hist_file));
     } else {
-        log_err("You don't have a HOME environment variable. Oh well, no history.");
+        log_warn("You don't have a HOME environment variable. Oh well, no history.");
         hist_file = NULL;
     }
 
@@ -665,6 +665,7 @@ void Command_destroy(Command *cmd)
 
     bdestroy(cmd->progname);
     bdestroy(cmd->name);
+
     if(cmd->extra) {
         list_destroy_nodes(cmd->extra);
          list_destroy(cmd->extra);

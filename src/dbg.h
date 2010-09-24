@@ -53,13 +53,23 @@ extern FILE *LOG_FILE;
 // check.  MKAY?
 #define check_debug(A, M, ...) if(!(A)) { debug(M, ##__VA_ARGS__); errno=0; goto error; }
 
-#define log_err(M, ...) fprintf(LOG_FILE, "ERROR (%s:%d: errno: %s) " M "\n", __FILE__, __LINE__, strerror(errno), ##__VA_ARGS__)
+#define clean_errno() (errno == 0 ? "None" : strerror(errno))
+
+#ifdef NDEBUG
+// versions that don't feature line numbers
+#define log_err(M, ...) fprintf(LOG_FILE, "ERROR (errno: %s) " M "\n", clean_errno(), ##__VA_ARGS__)
+#define log_warn(M, ...) fprintf(LOG_FILE, "WARN (errno: %s) " M "\n", clean_errno(), ##__VA_ARGS__)
+#define log_info(M, ...) fprintf(LOG_FILE, "INFO " M "\n", ##__VA_ARGS__)
+#else
+#define log_err(M, ...) fprintf(LOG_FILE, "ERROR (%s:%d: errno: %s) " M "\n", __FILE__, __LINE__, clean_errno(), ##__VA_ARGS__)
+#define log_warn(M, ...) fprintf(LOG_FILE, "WARN (%s:%d: errno: %s) " M "\n", __FILE__, __LINE__, clean_errno(), ##__VA_ARGS__)
+#define log_info(M, ...) fprintf(LOG_FILE, "INFO (%s:%d) " M "\n", __FILE__, __LINE__, ##__VA_ARGS__)
+#endif
 
 #define check(A, M, ...) if(!(A)) { log_err(M, ##__VA_ARGS__); errno=0; goto error; }
 
 #define sentinel(M, ...)  { log_err(M, ##__VA_ARGS__); errno=0; goto error; }
 
-#define log_info(M, ...) fprintf(LOG_FILE, "INFO (%s:%d) " M "\n", __FILE__, __LINE__, ##__VA_ARGS__)
 
 #define check_mem(A) check((A), "Out of memory.")
 
