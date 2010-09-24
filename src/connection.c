@@ -836,6 +836,24 @@ error:
 }
 
 
+static inline void check_should_close(Connection *conn, Request *req)
+{
+    // TODO: this should be right but double check
+    if(req->version && biseqcstr(req->version, "HTTP/1.0")) {
+        debug("HTTP 1.0 request coming in from %s", conn->remote);
+        conn->close = 1;
+    } else {
+        bstring conn_close = Request_get(req, &HTTP_CONNECTION);
+
+        if(conn_close && biseqcstrcaseless(conn_close, "close")) {
+            conn->close = 1;
+        } else {
+            conn->close = 0;
+        }
+    }
+}
+
+
 int Connection_read_header(Connection *conn, Request *req)
 {
     int finished = 0;
@@ -870,20 +888,7 @@ int Connection_read_header(Connection *conn, Request *req)
     dict_alloc_insert(conn->req->headers, bfromcstr("X-Forwarded-For"),
             blk2bstr(conn->remote, IPADDR_SIZE));
 
-    // TODO: this should be right but double check
-    if(conn->req->version && biseqcstr(conn->req->version, "1.0")) {
-        debug("HTTP 1.0 request coming in from %s", conn->remote);
-        conn->close = 1;
-    } else {
-        bstring conn_close = Request_get(conn->req, &HTTP_CONNECTION);
-
-        if(conn_close && biseqcstrcaseless(conn_close, "close")) {
-            conn->close = 1;
-        } else {
-            conn->close = 0;
-        }
-    }
-
+    check_should_close(conn, conn->req);
     return conn->nread; 
 
 error:
