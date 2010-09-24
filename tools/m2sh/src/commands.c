@@ -21,6 +21,8 @@ typedef struct CommandHandler {
     Command_handler_cb cb;
 } CommandHandler;
 
+#define check_file(S, N, P) check(access((const char *)(S)->data, (P)) == 0, "Can't access " #N " %s properly.", bdata((S)))
+#define check_no_extra(C) check(list_count((C)->extra) == 0, "Commands only take --option style arguments, you have %d extra.", list_count((C)->extra))
 
 static inline int log_action(bstring db_file, bstring what, bstring why, bstring where, bstring how)
 {
@@ -29,6 +31,11 @@ static inline int log_action(bstring db_file, bstring what, bstring why, bstring
     char *user = getlogin() == NULL ? getenv("LOGNAME") : getlogin();
     check(user != NULL, "getlogin failed and no LOGNAME env variable, how'd you do that?");
     bstring who = bfromcstr(user);
+
+    if(access((const char *)db_file->data, R_OK | W_OK) != 0) {
+        // don't log if there's no file available
+        return 0;
+    }
  
     rc = DB_init(bdata(db_file));
     check(rc == 0, "Failed to open db: %s", bdata(db_file));
@@ -74,6 +81,8 @@ static inline bstring option(Command *cmd, const char *name, const char *def)
     if(def != NULL) {
         if(val == NULL) {
             // add it so it gets cleaned up later when the hash is destroyed
+            log_info("No option --%s given, using \"%s\" as the default.", name, def);
+
             bstring result = bfromcstr(def);
             hash_alloc_insert(cmd->options, name, result);
             return result;
@@ -89,17 +98,22 @@ static int Command_load(Command *cmd)
 {
     bstring db_file = option(cmd, "db", "config.sqlite");
     bstring conf_file = option(cmd, "config", "mongrel2.conf");
+    bstring what = NULL;
+    bstring why = NULL;
+
+    check_file(db_file, "config database", R_OK | W_OK);
+    check_file(conf_file, "config file", R_OK);
 
     Config_load(bdata(conf_file), bdata(db_file));
 
-    bstring what = bfromcstr("load");
-    bstring why = bfromcstr("command");
+    what = bfromcstr("load");
+    why = bfromcstr("command");
 
     log_action(db_file, what, why, NULL, conf_file);
 
+error: // fallthrough
     bdestroy(what);
     bdestroy(why);
-
     return 0;
 }
 
@@ -190,8 +204,13 @@ static int Command_servers(Command *cmd)
 {
     bstring db_file = option(cmd, "db", "config.sqlite");
 
+    check_file(db_file, "config database", R_OK | W_OK);
+
     printf("SERVERS:\n------\n");
     return simple_query_print(db_file, "SELECT name, default_host, uuid from server");
+
+error:
+    return -1;
 }
 
 
@@ -203,6 +222,7 @@ static int Command_hosts(Command *cmd)
     char *sql = NULL;
     int rc = 0;
 
+    check_file(db_file, "config database", R_OK | W_OK);
     check(server, "You need to give a -server of the server to list hosts from.");
 
     sql = sqlite3_mprintf("SELECT id, name from host where server_id = (select id from server where name = %Q)", bdata(server));
@@ -225,6 +245,7 @@ static int Command_routes(Command *cmd)
     char *sql = NULL;
     int rc = 0;
 
+    check_file(db_file, "config database", R_OK | W_OK);
 
     if(host_id) {
         printf("ROUTES in host id %s\n-----\n", bdata(host_id));
@@ -256,16 +277,25 @@ static int Command_commit(Command *cmd)
     bstring how = option(cmd, "how", "m2sh");
     bstring db_file = option(cmd, "db", "config.sqlite");
 
+    check_file(db_file, "config database", R_OK | W_OK);
+
     return log_action(db_file, what, why, where, how);
+
+error:
+    return -1;
 }
 
 
 static int Command_log(Command *cmd)
 {
     bstring db_file = option(cmd, "db", "config.sqlite");
+    check_file(db_file, "config database", R_OK | W_OK);
 
     printf("LOG MESSAGES:\n------\n");
     return simple_query_print(db_file, "SELECT happened_at, who, location, how, what, why FROM log ORDER BY happened_at");
+
+error:
+    return -1;
 }
 
 struct ServerRun {
@@ -283,6 +313,8 @@ static inline int exec_server_operations(Command *cmd,
     char *sql = NULL;
 
     bstring db_file = option(cmd, "db", "config.sqlite");
+    check_file(db_file, "config database", R_OK | W_OK);
+
     struct ServerRun run = {.ran = 0, .db_file = db_file, .sudo = "", .murder = 0};
 
     bstring name = option(cmd, "name", NULL);
@@ -657,6 +689,7 @@ int Command_run(bstring arguments)
     int rc = 0;
 
     check(cli_params_parse_args(arguments, &cmd) != -1, "USAGE: m2sh <command> [options] (extras) with options being --foo bar or -foo bar.");
+    check_no_extra(&cmd);
 
     for(handler = COMMAND_MAPPING; handler->name != NULL; handler++)
     {

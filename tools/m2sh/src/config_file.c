@@ -288,7 +288,7 @@ int Config_load(const char *config_file, const char *db_file)
 {
     int rc = 0;
     tst_t *settings = NULL;
-    
+
     settings = Parse_config_file(config_file);
     check(settings != NULL, "Error parsing config file: %s.", config_file);
 
