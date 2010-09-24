@@ -332,8 +332,9 @@ char *run_test(int nr, int threads, int gens, int hot, char *fail_msg)
     fprintf(perf, "%ld %ld.%06ld ", nr_token_passes, etv.tv_sec, (long int)etv.tv_usec);
 
 	usecs = etv.tv_usec + etv.tv_sec * 1000000LL;
+    if(usecs == 0) usecs++; // avoid divide-by-zero on some computers
 	passes_per_sec = nr_token_passes * 1000000LL * 100;
-	passes_per_sec /= usecs;
+	passes_per_sec /= usecs ;
 
     fprintf(perf, "%Ld.%02Ld\n", passes_per_sec / 100, passes_per_sec % 100);
 
