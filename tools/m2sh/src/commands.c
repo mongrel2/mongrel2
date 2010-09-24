@@ -689,7 +689,7 @@ int Command_run(bstring arguments)
     CommandHandler *handler;
     int rc = 0;
 
-    check(cli_params_parse_args(arguments, &cmd) != -1, "USAGE: m2sh <command> [options] (extras) with options being --foo bar or -foo bar.");
+    check(cli_params_parse_args(arguments, &cmd) != -1, "USAGE: m2sh <command> [options]");
     check_no_extra(&cmd);
 
     for(handler = COMMAND_MAPPING; handler->name != NULL; handler++)
