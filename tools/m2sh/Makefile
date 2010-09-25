@@ -1,4 +1,4 @@
-CFLAGS=-DNDEBUG -g -I../../src -Isrc -Wall $(OPTFLAGS)
+CFLAGS=-DNDEBUG -DNO_LINENOS -g -I../../src -Isrc -Wall $(OPTFLAGS)
 LIBS=-lzmq -lsqlite3 ../../build/libm2.a
 
 PREFIX?=/usr/local

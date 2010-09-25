@@ -55,7 +55,7 @@ extern FILE *LOG_FILE;
 
 #define clean_errno() (errno == 0 ? "None" : strerror(errno))
 
-#ifdef NDEBUG
+#ifdef NO_LINENOS
 // versions that don't feature line numbers
 #define log_err(M, ...) fprintf(LOG_FILE, "[ERROR] (errno: %s) " M "\n", clean_errno(), ##__VA_ARGS__)
 #define log_warn(M, ...) fprintf(LOG_FILE, "[WARN] (errno: %s) " M "\n", clean_errno(), ##__VA_ARGS__)
