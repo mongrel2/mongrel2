@@ -135,9 +135,9 @@ totally from scratch as if you hadn't even build Mongrel2 yet:
 \begin{code}{Install procer}
 \begin{lstlisting}
 > cd projects/mongrel2
-> make clean all install
+> make clean all && sudo make install
 > cd examples/procer
-> make clean all install
+> make clean all && sudo make install
 \end{lstlisting}
 \end{code}
 
@@ -190,10 +190,12 @@ deployment > cd profiles/
 deployment/profiles > mkdir chat mp3stream handlertest web mongrel2
 deployment/profiles > cd ..
 
-# setup the mongrel2 database initially
 
 # copy the mongrel2_conf.py sample from the source to here
 deployment > cp ~/mongrel2/examples/configs/mongrel2.conf mongrel2.conf
+
+# setup the mongrel2 database initially
+deployment > m2sh load
 
 # see our end results
 deployment > ls
@@ -214,8 +216,8 @@ What we've done here is the following:
   \item Created \file{run}, \file{tmp}, \file{logs}, and \file{profiles} that Mongrel2 and procer need to run.
   \item In profiles we started dirs for \file{chat}, \file{mp3stream}, \file{handlertest}, \file{web} and \file{mongrel2},
     that procer will read files out of to get all our gear up and running.
-  \item Initialized the \file{config.sqlite} file we'll be filling in with our modififed mongrel2.conf.
   \item Copied the \file{mongrel2.conf} example file over to our deployment so we can modify it.
+  \item Initialized the \file{config.sqlite} file we'll be filling in with our modififed mongrel2.conf.
 \end{enumerate}
 
 
