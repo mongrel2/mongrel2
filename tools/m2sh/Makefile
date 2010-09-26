@@ -1,5 +1,5 @@
 CFLAGS=-DNDEBUG -DNO_LINENOS -g -I../../src -Isrc -Wall $(OPTFLAGS)
-LIBS=-lzmq -lsqlite3 ../../build/libm2.a -luuid
+LIBS=-lzmq -lsqlite3 ../../build/libm2.a
 
 PREFIX?=/usr/local
 SOURCES=$(wildcard src/*.c)
@@ -30,7 +30,7 @@ build/m2sh: ../lemon/lemon ../../build/libm2.a build/libm2sh.a src/m2sh.o
 	$(CC) -O2 ../lemon/lemon.c -o ../lemon/lemon
 
 tests: build/libm2sh.a ${TESTS}
-	sh ./tests/runtests.sh
+	bash ./tests/runtests.sh
 
 %.c: %.y
 	../lemon/lemon -s $< 

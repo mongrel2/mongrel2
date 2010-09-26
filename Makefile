@@ -43,7 +43,7 @@ pristine: clean
 	make -C tools/m2sh pristine
 
 tests: build/libm2.a tests/config.sqlite ${TESTS}
-	sh ./tests/runtests.sh
+	bash ./tests/runtests.sh
 
 tests/config.sqlite: src/config/config.sql src/config/example.sql src/config/mimetypes.sql
 	sqlite3 $@ < src/config/config.sql

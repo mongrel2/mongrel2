@@ -12,7 +12,6 @@
 #include <assert.h>
 #include <task/task.h>
 #include <register.h>
-#include <uuid/uuid.h>
 
 typedef int (*Command_handler_cb)(Command *cmd);
 
@@ -595,12 +594,7 @@ static int Command_version(Command *cmd)
 
 static int Command_uuid(Command *cmd)
 {
-    uuid_t uuid;
-    char uuid_buf[37] = {0};
-    uuid_generate(uuid);
-    uuid_unparse(uuid, uuid_buf);
-    printf("%s\n", uuid_buf);
-    return 0;
+    return system("uuidgen");
 }
 
 
