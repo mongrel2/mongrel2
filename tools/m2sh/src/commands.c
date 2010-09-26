@@ -12,6 +12,7 @@
 #include <assert.h>
 #include <task/task.h>
 #include <register.h>
+#include <uuid/uuid.h>
 
 typedef int (*Command_handler_cb)(Command *cmd);
 
@@ -592,6 +593,16 @@ static int Command_version(Command *cmd)
     return 0;
 }
 
+static int Command_uuid(Command *cmd)
+{
+    uuid_t uuid;
+    char uuid_buf[37] = {0};
+    uuid_generate(uuid);
+    uuid_unparse(uuid, uuid_buf);
+    printf("%s\n", uuid_buf);
+    return 0;
+}
+
 
 static int Command_help(Command *cmd);
 
@@ -626,6 +637,8 @@ static CommandHandler COMMAND_MAPPING[] = {
         .help = "Prints the Mongrel2 and m2sh version." },
     {.name = "help", .cb = Command_help,
         .help = "Get help, lists commands." },
+    {.name = "uuid", .cb = Command_uuid,
+        .help = "Prints out a randomly generated UUID." },
     {.name = NULL, .cb = NULL, .help = NULL}
 };
 
