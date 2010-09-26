@@ -58,7 +58,7 @@ update it frequently.</p>
 
 <pre>
 cp examples/configs/sample.conf mysite.conf
-m2sh load -config myconfig.py
+m2sh load -config mysite.conf
 ls config.sqlite
 </pre>
 
