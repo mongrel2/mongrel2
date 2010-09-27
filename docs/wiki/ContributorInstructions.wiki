@@ -7,11 +7,16 @@ rules but more guidelines to follow.</p>
 
 <h2>I want to hack on Mongrel2.  How do I join?</h2>
 
-<p>As our famous tagline says, "This isn't a hippie commune like Github."  We love 
-patches and contributions from people, but we love quality more, and since Mongrel2 is
-a very specific kind of C code project we have to keep the contributor list small and
-awesome.  That doesn't mean you're not awesome if you don't get in, it just means we
-make it a little harder than your average github project to contribute.</p>
+<p>
+As our famous tagline says, "This isn't a hippie commune like Github."
+
+We love patches and contributions from people, but Mongrel2 is a very specific
+kind of C code project we have to keep the contributor list small and awesome.
+That means we can't just let anyone in, we have to make you earn it.
+
+That doesn't mean you're not awesome if you don't get in, it just means we
+make it a little harder to join than your average github project does.
+</p>
 
 <p>To get in on Mongrel2 you have to prove you can write code by writing some
 code doing this:</p>
@@ -153,12 +158,6 @@ else, and turning autosync off is like constantly talking out of turn.  With aut
 on you are forced to keep your repository up to date before you commit, thus avoiding
 a lot of merge problems, bad code, and hurt feelings.</p>
 
-
-
-<h2>I really like just putting my code on github whenever I want. Why are you crushing my creative vibe man?</h2>
-
-<p>You probably shouldn't work on Mongrel2 then.  We only want hungry awesome hard core engineers working
-on the project, not fanbois.</p>
 
 
 <h2>If I become a contributor how do I get mentioned?</h2>
