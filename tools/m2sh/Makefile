@@ -52,9 +52,9 @@ pristine: clean
 
 netbsd: OPTFLAGS=-I/usr/local/include -I/usr/pkg/include
 netbsd: OPTLIBS=-L/usr/local/lib -L/usr/pkg/lib
-netbsd: all
+netbsd: dev
 
 freebsd: OPTFLAGS=-I/usr/local/include
 freebsd: OPTLIBS=-L/usr/local/lib
-freebsd: all
+freebsd: dev
 
