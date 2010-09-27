@@ -289,6 +289,7 @@ void PollResult_clean(PollResult *result)
 static inline int SuperPoll_arm_idle_fd(SuperPoll *sp)
 {
     assert(0 && "Should not get called.");
+    return -1;
 }
 
 static inline int SuperPoll_setup_idle(SuperPoll *sp, int total_open_fd)

@@ -32,15 +32,15 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#if defined(__APPLE__) || defined(__FreeBSD__)
-
 #include <stddef.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/uio.h>
 #include <task/task.h>
-
 #include <dbg.h>
+
+
+#if defined(__APPLE__) || defined(__FreeBSD__)
 
 /**
  * BSD version of sendfile, which is OSX and FreeBSD mostly.
@@ -67,6 +67,14 @@ int bsd_sendfile(int out_fd, int in_fd, off_t *offset, size_t count) {
 
 error:
     return -1;
+}
+
+#else
+
+/** For the BSDs without sendfile like open and net.**/
+
+int bsd_sendfile(int out_fd, int in_fd, off_t *offset, size_t count) {
+   return -1;
 }
 
 #endif

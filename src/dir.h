@@ -37,7 +37,7 @@
 
 #include <stdlib.h>
 
-#if defined(__APPLE__) || defined(__FreeBSD__)
+#if defined(__APPLE__) || defined(__FreeBSD__) || defined(__NetBSD__)
 #include "bsd_specific.h"
 #else
 #include <sys/sendfile.h>
@@ -92,7 +92,7 @@ FileRecord *Dir_resolve_file(Dir *dir, bstring pattern, bstring path);
 void FileRecord_release(FileRecord *file);
 void FileRecord_destroy(FileRecord *file);
 
-#if defined(__APPLE__) || defined(__FreeBSD__)
+#if defined(__APPLE__) || defined(__FreeBSD__) || defined(__NetBSD__)
 #define Dir_send bsd_sendfile
 #else
 #define Dir_send sendfile
