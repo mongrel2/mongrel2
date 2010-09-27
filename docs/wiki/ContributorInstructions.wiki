@@ -35,7 +35,7 @@ good understanding of the project before you continue.</p>
 
 <h2>How do I get the source code?</h2>
 
-<p>To get the source, first you need to go to <a href="http://www.fossil-scm.org/download.html">fossil downloads</a> and download a static binary for your platform.<b>DO NOT INSTALL THE foossil PACKAGE FROM YOUR OS AS IT IS PROBABLY WRONG. DEBIAN ESPECIALLY!!!!!</b></p>
+<p>To get the source, first you need to go to <a href="http://www.fossil-scm.org/download.html">fossil downloads</a> and download a static binary for your platform.<b>DO NOT INSTALL THE fossil PACKAGE FROM YOUR OS AS IT IS PROBABLY WRONG. DEBIAN ESPECIALLY!!!!!</b></p>
 
 <p>Next do this:</p>
 
@@ -174,7 +174,7 @@ registered as a core contributor.</p>
 
 <h2>How do you prioritize what to work on?</h2>
 
-<p>We usually have a discussion on the <a href="mongrel2@librelist.com">mongrel2@librelist.com mailing list</a>
+<p>We usually have a discussion on the <a href="mailto:mongrel2@librelist.com">mongrel2@librelist.com mailing list</a>
 to figure out what to do next.  Then we fill in the <a href="http://mongrel2.org/reportlist">tickets</a>
 with the stuff to do.  Then we do that stuff.</p>
 
