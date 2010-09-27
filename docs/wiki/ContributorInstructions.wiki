@@ -1,6 +1,41 @@
-<p>These are rough, so join the #mongrel2 channel on irc.freenode.org for more direct help.</p>
+<h1>Hacking On Mongrel2</h1>
 
-<p>To get the source, first you need to go to <a href="http://www.fossil-scm.org/download.html">fossil downloads</a> and download a static binary for your platform.</p>
+<p>This is organized more like a FAQ than a guide, but it gives all the information
+you probably need to hack on the Mongrel2 source code.  It talks about getting the
+code, doing your first patch, coding guidelines, etc.  These aren't meant to be strict
+rules but more guidelines to follow.</p>
+
+<h2>I want to hack on Mongrel2.  How do I join?</h2>
+
+<p>As our famous tagline says, "This isn't a hippie commune like Github."  We love 
+patches and contributions from people, but we love quality more, and since Mongrel2 is
+a very specific kind of C code project we have to keep the contributor list small and
+awesome.  That doesn't mean you're not awesome if you don't get in, it just means we
+make it a little harder than your average github project to contribute.</p>
+
+<p>To get in on Mongrel2 you have to prove you can write code by writing some
+code by doing this:</p>
+
+<ol>
+<li>Follow the instructions in this document and get your source from
+fossil and turn <b>off</b> autosync.</li>
+<li>Commit your changes to your repository when you think they're good.</li>
+<li>Then go find <a href="http://mongrel2.org/rptview?rn=2">a ticket to
+do</a> and write code to fix it.</li>
+<li>Join the <a href="mailto:mongrel2@librelist.com">mongrel2@librelist.com</a>
+mailing list or join #mongrel2 on irc.freenode.org.</li>
+<li>Put your mongrel2.fossil repository on a server and do a <b>fossil serve mongrel2.fossil</b> so we can
+pull from it.</li>
+<li>Finally, one of us will check out your changes and see if they're good to pull.  If they are, and
+you want to get into the project, then just fix a few more bugs and we'll let you in.</li>
+</ol>
+
+<p>Each of these steps is documented in this document, so just read it real quick and get a
+good understanding of the project before you continue.</p>
+
+<h2>How do I get the source code?</h2>
+
+<p>To get the source, first you need to go to <a href="http://www.fossil-scm.org/download.html">fossil downloads</a> and download a static binary for your platform.<b>DO NOT INSTALL THE foossil PACKAGE FROM YOUR OS AS IT IS PROBABLY WRONG. DEBIAN ESPECIALLY!!!!!</b></p>
 
 <p>Next do this:</p>
 
@@ -10,12 +45,172 @@ fossil clone http://mongrel2.org:44445/ ~/fossils/mongrel2.fossil
 mkdir -p ~/projects/mongrel2
 cd ~/projects/mongrel2
 fossil open ~/fossils/mongrel2.fossil
+fossil set autosync off
 </pre>
 
-<p>If you are registered as a committer then your clone line is actually:</p>
+
+<h2>How do I find things to do?</h2>
+
+<p>We have a tickets system built into the fossil DVCS that you can access.  You can get <a href="http://mongrel2.org/rptview?rn=2">a ticket to
+do</a> and write code to fix it.  Obviously, you'll have to probably <a href="http://mongrel2.org/login">anonymous login</a> first
+if you want to do very much.</a></p>
+
+<h2>Why can't I just access everything without logging in?</h2>
+
+<p>
+We want to avoid spam and bots trolling our system and thrashing it or leaving junk around, so we
+have a simple <a href="http://mongrel2.org/login">anonymous login</a> captcha you can use.  It's a
+minor inconvenience that helps us out a lot.  It also weeds out people who aren't smart enough or motivated
+enough to actually help.
+</p>
+
+
+<h2>How do I make a change?</h2>
+
+<p>fossil works like most version control systems in that you make your changes
+and "commit" them.  With <b>fossil set autosync off</b> it means you're working
+more like git or hg and are decentralized.  With autosync on it's more like
+subversion and you have to have network access and it makes sure you have the
+latest before you can commit.</p>
+
+<p>Since you are probably not a committer yet, you just have to do this:</p>
+
+<ol>
+<li>Edit the files you need and write a test if you can.</li>
+<li>Use <b>fossil st</b> to make sure you are only changing what you think you are changing.</li>
+<li>Use <b>fossil up</b> to make sure you're on the latest.</li>
+<li>Then <b>fossil commit -m "SOME MESSAGE ABOUT WHY."</b> and you're done.</li>
+</ol>
+
+<p>After you do this you just have to serve your repository to a core contributor and
+they can pull your changes.</p>
+
+<h2>How do I serve my repository</h2>
+
+<p>It's pretty easy since fossil has a built-in full web server that will serve
+your changes.  You just do this:</p>
 
 <pre>
-fossil clone http://YOU@mongrel2.org:44445/ ~/fossils/mongrel2.fossil
+rsync -azv ~/fossils/mongrel2.fossil YOU@yourserver.com:
+ssh YOU@yourserver.com
+fossil serve mongrel2.fossil
 </pre>
 
-<p>After that you can check out [GettingStarted] or <a href="/doc/tip/docs/manual/book.wiki">The Manual</a> to do more.</p>
+<p>Fossil should now be running at <b>http://yourserver.com:8080/</b> or a 
+similar port (if it doesn't tell you the port number then it's 8080).  You can
+go to it with your browser and make sure that it's good.</p>
+
+<p>If you're in your source directory on that remote server, then you can just
+type <b>fossil serve</b> and you're done.</p>
+
+<h2>Can I push to my own repository that I just served?</h2>
+
+<p>Definitely.  If you want to do that, it'll make your life a lot easier.
+All you do is from <b>your</b> local machine:</p>
+
+<pre>
+fossil set autosync on
+fossil remote-url http://YOU@yourserver.com:8080/
+</pre>
+
+<p>It will then prompt you for a password which you should have setup when
+you were given your account.</p>
+
+<p>This tells your local fossil to use your remote fossil as the place
+to commit changes. Incidentally, that's the same thing you do for
+getting changes into mongrel2.org.</p>
+
+
+<h2>I forgot my password, how do I set it?</h2>
+
+<p>Use <b>fossil user YOU password</b> and it'll ask you for a new one.</p>
+
+
+<h2>I just became a committer, how do I setup to make changes to mongrel2.org?</h2>
+
+<p>We use autosync in fossil in order to keep everyone straight with
+the source and reduce management overhead.  Once you get your account
+on mongrel2.org you just need to flip your repository into "contributor
+mode" by turning on autosync and setting the remote-url:
+
+<pre>
+cd ~/projects/mongrel2
+fossil set autosync on
+fossil remote-url http://YOU@mongrel2.org:44445/
+</pre>
+
+<p>It will then prompt you for a password which you should have setup when
+you were given your account.</p>
+
+
+<h2>Why do committers need to keep autosync on?</h2>
+
+<p>I don't think of source control as a "code backup system", but rather as a 
+"code chat system".  When you commit you are sharing your code with everyone 
+else, and turning autosync off is like constantly talking out of turn.  With autosync
+on you are forced to keep your repository up to date before you commit, thus avoiding
+a lot of merge problems, bad code, and hurt feelings.</p>
+
+
+
+<h2>I really like just putting my code on github whenever I want. Why are you crushing my creative vibe man?</h2>
+
+<p>You probably shouldn't work on Mongrel2 then.  We only want hungry awesome hard core engineers working
+on the project, not fanbois.</p>
+
+
+<h2>If I become a contributor how do I get mentioned?</h2>
+
+<p>Everyone who submits a change using this method will have their username mentioned
+in the <a href="http://mongrel2.org/timeline">timeline</a> even if you're not
+registered as a core contributor.</p>
+
+<p>Core contributors get mentioned on the <a href="http://mongrel2.org/home">home</a> page.</p>
+
+<p>After you become a contributor you then are thrown bags of money and caviar.</p>
+
+
+<h2>How do you prioritize what to work on?</h2>
+
+<p>We usually have a discussion on the <a href="mongrel2@librelist.com">mongrel2@librelist.com mailing list</a>
+to figure out what to do next.  Then we fill in the <a href="http://mongrel2.org/reportlist">tickets</a>
+with the stuff to do.  Then we do that stuff.</p>
+
+
+<h2>Who comes up with the vision and direction?</h2>
+
+<p>Usually it's Zed, who wrote the majority of the content for this site.</p>
+
+
+<h2>What will get my contribution rejected?</h2>
+
+<p>Generally if your change adds too much code, is poorly written, doesn't work
+on multiple platforms, or doesn't have testing when it needs it.  Don't worry
+though, we'll tell you how to clean it up and make it nice so that you learn
+good style.  As a starting point, here's what we consider our style guide: </p>
+
+<h2>What is your style guide?</h2>
+
+<ol>
+<li>Keep your code clean and "flatter" with good use of white space for readability.</li>
+<li>Refactor common blocks of code or complex branches into functions, probably "static inline" is good.</li>
+<li>Aim for lines around 80 characters if possible.</li>
+<li>Check for errors from <b>EVERY</b> function using the check() macro from <b>dbg.h</b>.</li>
+<li>Check for memory allocation working with the check_mem() macro from <b>dbg.h</b>.</li>
+<li>Every if-elseif-else should have an else clause, and if that else shouldn't happen use the sentinel() macro to give an error.</li>
+<li>Same thing for case-switch, always have a default with sentinel() if that default should not happen.</li>
+<li>When in doubt, read and re-read the man page for function calls to make sure you got the error returns and parameters right.</li>
+<li>Don't use the C string functions, use bstring from <b>bstring.h</b> to do string operations.</li>
+<li>Try to write a test for your code, which is hard sometimes in C, but attempt it at least.</li>
+</ol>
+
+<p>In general the theme for Mongrel2 source is, "Don't code like an asshole."  If you write a piece of
+code and you didn't consider how another person will use it, or just didn't care, then it'll probably
+get rejected.</p>
+
+
+<h2>How do I learn more about Mongrel2?</h2>
+
+<p>Check out <a href="/wiki?name=GettingStarted">GettingStarted</a> or <a href="/doc/tip/docs/manual/book.wiki">The Manual</a> for more.</p>
+
+
