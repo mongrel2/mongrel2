@@ -32,7 +32,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef __APPLE__
+#if defined(__APPLE__) || defined(__FreeBSD__)
 
 #include <stddef.h>
 #include <sys/types.h>
@@ -51,7 +51,11 @@ int mac_sendfile(int out_fd, int in_fd, off_t *offset, size_t count) {
     // temporarily unavailable (per bug e8eddb51a8)
     do {
         fdwait(out_fd, 'w');
+#if defined(__APPLE__)
         rc = sendfile(in_fd, out_fd, *offset, &my_count, NULL, 0);
+#elif defined(__FreeBSD__)
+        rc = sendfile(in_fd, out_fd, *offset, count, NULL, NULL, 0);
+#endif
     } while(rc != 0 && errno == 35);
 
     check(rc == 0, "OS X sendfile wrapper failed");
