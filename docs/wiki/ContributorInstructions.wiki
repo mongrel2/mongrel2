@@ -14,7 +14,7 @@ awesome.  That doesn't mean you're not awesome if you don't get in, it just mean
 make it a little harder than your average github project to contribute.</p>
 
 <p>To get in on Mongrel2 you have to prove you can write code by writing some
-code by doing this:</p>
+code doing this:</p>
 
 <ol>
 <li>Follow the instructions in this document and get your source from
