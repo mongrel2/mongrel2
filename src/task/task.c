@@ -314,7 +314,11 @@ taskgetinfo(void)
 
 static int taskargc;
 static char **taskargv;
+#if defined(__FreeBSD__)
+int MAINSTACKSIZE = 96 * 1024;
+#else
 int MAINSTACKSIZE = 32 * 1024;
+#endif
 
 static void
 taskmainstart(void *v)
