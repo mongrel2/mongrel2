@@ -32,10 +32,41 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _MAC_SPECIFIC_H
-#define _MAC_SPECIFIC_H
-#include <sys/types.h>
+#if defined(__APPLE__) || defined(__FreeBSD__)
 
-int mac_sendfile(int out_fd, int in_fd, off_t *offset, size_t count);
+#include <stddef.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/uio.h>
+#include <task/task.h>
+
+#include <dbg.h>
+
+/**
+ * BSD version of sendfile, which is OSX and FreeBSD mostly.
+ */
+int bsd_sendfile(int out_fd, int in_fd, off_t *offset, size_t count) {
+    off_t my_count = count;
+    int rc;
+
+    // We have to do this loop nastiness, because mac os x fails with resource
+    // temporarily unavailable (per bug e8eddb51a8)
+    do {
+        fdwait(out_fd, 'w');
+#if defined(__APPLE__)
+        rc = sendfile(in_fd, out_fd, *offset, &my_count, NULL, 0);
+#elif defined(__FreeBSD__)
+        rc = sendfile(in_fd, out_fd, *offset, count, NULL, NULL, 0);
+#endif
+    } while(rc != 0 && errno == 35);
+
+    check(rc == 0, "OS X sendfile wrapper failed");
+
+    *offset += my_count;
+    return my_count;
+
+error:
+    return -1;
+}
 
 #endif
