@@ -72,7 +72,7 @@ install-bin:
 	install bin/mongrel2 $(PREFIX)/bin/
 
 install-m2sh:
-	${MAKE} -C tools/m2sh install
+	${MAKE} OPTFLAGS=${OPTFLAGS} OPTLIBS=${OPTLIBS} -C tools/m2sh install
 
 examples/python/mongrel2/sql/config.sql: src/config/config.sql src/config/mimetypes.sql
 	cat src/config/config.sql src/config/mimetypes.sql > $@
