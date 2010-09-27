@@ -216,3 +216,17 @@ get rejected.</p>
 <p>Check out <a href="/wiki?name=GettingStarted">GettingStarted</a> or <a href="/doc/tip/docs/manual/book.wiki">The Manual</a> for more.</p>
 
 
+<h2>How do I see what's been changed on a file or view a diff?</h2>
+
+<p>After you log in you can use the <a href="/timeline?n=20&y=ci">timeline checkins only</a> to see the list of changes.  Then you pick one and there's various diffing
+options.</p>
+
+<p>To see how a file changed, browse for the file in <a href="/dir">in Files</a> and 
+find the one you want to look at.  You can then do advanced change logging and diffing
+of that file.</p>
+
+<p>The general way fossil works is that you get a lot of features from the command line,
+but complex operations like analyzing diffs is better done in the Web GUI.  You can get
+to your own web GUI any time by doing <b>fossil ui</b> or <b>fossil serve</b>.
+</p>
+
