@@ -7,7 +7,7 @@ do
     then
         if ./$i 2>&1 > /tmp/mongrel2-test.log
         then
-            echo -n "."
+	    # figure out what echo -n is on bsd sh
         else
             echo "ERROR in test $i:"
             cat /tmp/mongrel2-test.log

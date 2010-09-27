@@ -1,5 +1,5 @@
 CFLAGS=-DNDEBUG -DNO_LINENOS -g -I../../src -Isrc -Wall $(OPTFLAGS)
-LIBS=-lzmq -lsqlite3 ../../build/libm2.a
+LIBS=-lzmq -lsqlite3 ../../build/libm2.a $(OPTLIBS)
 
 PREFIX?=/usr/local
 SOURCES=$(wildcard src/*.c)
@@ -30,7 +30,7 @@ build/m2sh: ../lemon/lemon ../../build/libm2.a build/libm2sh.a src/m2sh.o
 	$(CC) -O2 ../lemon/lemon.c -o ../lemon/lemon
 
 tests: build/libm2sh.a ${TESTS}
-	bash ./tests/runtests.sh
+	sh ./tests/runtests.sh
 
 %.c: %.y
 	../lemon/lemon -s $< 
@@ -49,3 +49,12 @@ clean:
 
 pristine: clean
 	rm -f ../lemon/lemon
+
+netbsd: OPTFLAGS=-I/usr/local/include -I/usr/pkg/include
+netbsd: OPTLIBS=-L/usr/local/lib -L/usr/pkg/lib
+netbsd: all
+
+freebsd: OPTFLAGS=-I/usr/local/include
+freebsd: OPTLIBS=-L/usr/local/lib
+freebsd: all
+
