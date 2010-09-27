@@ -56,7 +56,7 @@ int bsd_sendfile(int out_fd, int in_fd, off_t *offset, size_t count) {
 #if defined(__APPLE__)
         rc = sendfile(in_fd, out_fd, *offset, &my_count, NULL, 0);
 #elif defined(__FreeBSD__)
-        rc = sendfile(in_fd, out_fd, *offset, count, NULL, NULL, 0);
+        rc = sendfile(in_fd, out_fd, *offset, count, NULL, &my_count, 0);
 #endif
     } while(rc != 0 && errno == 35);
 
