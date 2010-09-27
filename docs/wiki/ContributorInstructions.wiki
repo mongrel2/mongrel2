@@ -114,7 +114,8 @@ fossil remote-url http://YOU@yourserver.com:8080/
 </pre>
 
 <p>It will then prompt you for a password which you should have setup when
-you were given your account.</p>
+you cloned your fossil repository.  If you forgot you can change it on the
+remote machine with </b>fossil user -R mongrel2.fossil YOU password</b>.</p>
 
 <p>This tells your local fossil to use your remote fossil as the place
 to commit changes. Incidentally, that's the same thing you do for
@@ -123,7 +124,8 @@ getting changes into mongrel2.org.</p>
 
 <h2>I forgot my password, how do I set it?</h2>
 
-<p>Use <b>fossil user YOU password</b> and it'll ask you for a new one.</p>
+<p>Use <b>fossil user -R mongrel2.fossil YOU password</b> and it'll ask you for
+a new one.  You don't need the -R if you are in your source directory.</p>
 
 
 <h2>I just became a committer, how do I setup to make changes to mongrel2.org?</h2>
