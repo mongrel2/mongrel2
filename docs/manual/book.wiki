@@ -479,8 +479,8 @@
   process that reads this file and sets itself up accordingly. 
   <!--l. 113-->
 
-  <p class="noindent">The View is a C binary (with not dependencies
-  other than SQLite3 and ZeroMQ):wa called m2sh that gives you a
+  <p class="noindent">The View is a C binary (with no dependencies
+  other than SQLite3 and ZeroMQ) called m2sh that gives you a
   command line &ldquo;UI&rdquo; to configure and setup the Mongrel2
   sqlite model. It gives you commands for managing it, crafting
   configurations, looking at them; the works. <!--l. 118-->
