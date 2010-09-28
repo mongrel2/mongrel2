@@ -1,7 +1,9 @@
 <h1>Getting Started With Mongrel2</h1>
 
 <p>Translations: <a href="/doc/tip/docs/ru/wiki/GettingStarted.wiki">.ru</a> <a href="/doc/tip/docs/de/wiki/GettingStarted.wiki">.de</a>
-<a href="/doc/tip/docs/es/wiki/GettingStarted.wiki">.es</a></p>
+<a href="/doc/tip/docs/es/wiki/GettingStarted.wiki">.es</a>
+<a href="/doc/tip/docs/fr/wiki/GettingStarted.wiki">.fr</a>
+</p>
 
 <p>This is the fastest way to get started with Mongrel2.  Nothing is really
 explained, just all the stuff you need is setup and you get to run a few commands.
