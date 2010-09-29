@@ -109,5 +109,5 @@ netbsd: dev
 
 
 freebsd: OPTFLAGS=-I/usr/local/include
-freebsd: OPTLIBS=-L/usr/local/lib
-freebsd: dev
+freebsd: OPTLIBS=-L/usr/local/lib -pthread
+freebsd: all
