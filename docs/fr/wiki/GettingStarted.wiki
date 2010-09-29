@@ -1,45 +1,54 @@
-﻿<h1>Voici la manière la plus rapide pour commencer avec Mongrel2.</h1>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.x3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html>
+<head>
+<title>mongrel2: Documentation</title>
+<link rel="alternate" type="application/rss+xml" title="RSS Feed"
+      href="http://catwell.info:8086/timeline.rss">
+<link rel="stylesheet" href="http://catwell.info:8086/style.css" type="text/css"
+      media="screen">
+</head>
+<body>
+<div class="header">
+  <div class="title"><a href='http://catwell.info:8086/home'>Mongrel2<br/><span class="subtitle">The Language Agnostic Web Server</span></a></div>
+  <div class="status"><nobr>Not logged in</nobr></div>
+</div>
+<div class="mainmenu"><a href='http://catwell.info:8086/home'>Home</a><a href='http://catwell.info:8086/leaves'>Leaves</a><a href='http://catwell.info:8086/timeline'>Timeline</a><a href='http://catwell.info:8086/brlist'>Branches</a><a href='http://catwell.info:8086/taglist'>Tags</a><a href='http://catwell.info:8086/reportlist'>Tickets</a><a href='http://catwell.info:8086/wiki'>Wiki</a><a href='http://catwell.info:8086/login'>Login</a></div>
+<div class="sidefloat">
+<form action="https://www.paypal.com/cgi-bin/webscr" method="post">
+<input type="hidden" name="cmd" value="_s-xclick">
+<input type="hidden" name="encrypted" value="-----BEGIN PKCS7-----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-----END PKCS7-----
+">
+<input type="image" src="https://www.paypal.com/en_US/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+<img alt="" border="0" src="https://www.paypal.com/en_US/i/scr/pixel.gif" width="1" height="1">
+</form>
+<a href="http://mongrel2.org/wiki?name=Donate">Why donate?</a>
+</div>
+<div class="content">
+<h1>Débuter avec Mongrel2</h1>
 
-<p>Rien n'est vraiment expliqué, tout ce dont vous avez besoin de faire c'est de configurer et lancer quelques commandes. Si vous voulez de plus amples explications, lisez <a href="/doc/tip/docs/manual/book.wiki">le manuel complet</a> qui couvre tout de comment commencer à comment écrire vos premiers handlers.</p>
+<p>Voici la manière la plus rapide pour débuter avec Mongrel2. Rien n'est vraiment expliqué, tout dont vous avez besoin est pré-configuré et vous n'avez qu'à lancer quelques commandes. Si vous voulez de plus amples explications, lisez <a href="/doc/tip/docs/manual/book.wiki">le manuel complet</a> qui couvre tout, de comment commencer à comment écrire vos premiers handlers.</p>
 
-<p>Ce document suppose que vous savez ce que vous faites, et que vous connaissez comment lancer des commandes sur un système Unix.</p>
+<p>Ce document suppose que vous savez ce que vous faites et que vous êtes en mesure de lancer des commandes sur un système Unix.</p>
 
-<h1>Installer les dépendances.</h1>
+<h1>Installer les dépendances</h1>
 
-<p>Voilà comment je ferais sur ArchLinux:</p>
+<p>Voilà comment je ferais sur Arch Linux :</p>
 
 <pre>
-# install ZeroMQ 
+# installer ZeroMQ 
 wget http://www.zeromq.org/local--files/area:download/zeromq-2.0.8.tar.gz 
 tar -xzvf zeromq-2.0.8.tar.gz 
 cd zeromq-2.0.8/ 
 ./configure 
 make 
 sudo make install 
- 
-# install python 
-sudo pacman -S python 
- 
-# install sqlite3 
-sudo pacman -S sqlite3 
- 
-# install distribute and pip 
-sudo pacman -S python-pip 
-sudo pip install distribute 
- 
-# install PyZMQ from github 
-sudo pacman -S git 
-git clone http://github.com/zeromq/pyzmq.git 
-cd pyzmq
-sudo python setup.py install 
- 
-# web.py 
-sudo pip install web.py
-</pre>
+
+<p># installer sqlite3 
+sudo pacman -S sqlite3
+</p></pre>
 
 <h1>Récupérer les sources</h1>
 
-<p>La manière la plus rapide est de récupérer le fichier tar.bz2</p>
+<p>Le plus rapide est de récupérer l'archive tar.bz2 :</p>
 
 <pre>
 wget http://mongrel2.org/static/downloads/mongrel2-1.3.tar.bz2
@@ -47,7 +56,7 @@ wget http://mongrel2.org/static/downloads/mongrel2-1.3.tar.bz2
 
 <h1>Installer Mongrel2</h1>
 
-<p>Vous allez maintenant installer Mongrel2</p>
+<p>Vous allez maintenant installer Mongrel2 :</p>
 
 <pre>
 tar -xjvf mongrel2-1.3.tar.bz2
@@ -59,26 +68,26 @@ make clean all install
 
 <h1>La première configuration</h1>
 
-<p>Vous pouvez maintenant tester la configuration la plus simple et lancer mongrel2</p>
+<p>Vous pouvez maintenant tester la configuration la plus simple et lancer mongrel2 :</p>
 
 <pre>
-cp examples/python/tests/sample_conf.py myconfig.py
-m2sh init -db myconfig.sqlite
-m2sh load -db myconfig.sqlite  -config myconfig.py
+cp examples/configs/sample.conf mysite.conf
+m2sh load -config mysite.conf
+ls config.sqlite
 </pre>
 
-<p><b>NOTE:</b>Il y a aussi examples/python/tests/mongrel2_org.py qui est un exemple plus complet.</p>
+<p><b>NOTE :</b> Vous trouverez d'autres examples dans example/*.conf.</p>
 
 <h1>Lancer Mongrel2</h1>
 
-<p>Vous pouvez maintenant lancer Mongrel2 et l'essayer. Vérifier que vous êtes toujours dans le répertoire de source de mongrel2:</p>
+<p>Vous pouvez maintenant lancer Mongrel2 et l'essayer. Vérifiez que vous êtes toujours dans le répertoire des sources de Mongrel2 puis tapez :</p>
 
 <pre>
 mkdir run logs tmp
-m2sh start -db myconfig.sqlite -host localhost
+m2sh start -host localhost
 </pre>
 
-<p>Dans une autre fenêtre taper:</p>
+<p>Dans une autre fenêtre, tapez :</p>
 
 <pre>
 curl http://localhost:6767/tests/sample.html
@@ -87,8 +96,15 @@ hi there
 
 <h1>Quitter Mongrel2</h1>
 
-<p>Taper: CTRL+C et Mongrel2 quittera. m2sh a plein d'autre commandes, certaines arrêtent ou redémarrent des choses. Pour plus de détails, taper: <b>m2sh help</b>.</p>
+<p>La combinaison de touches ctrl+c quitte Mongrel2. m2sh a plein d'autre commandes, certaines arrêtent ou redémarrent des choses. Pour plus de détails, tapez <b>m2sh help</b>.</p>
 
 <h1>Pour en savoir plus, consultez le Manuel</h1>
 
-<p>Ceci est une sorte de cours intensif pour avoir Mongrel2 en route le plus rapidement possible . Vous devriez maintenant aller lire <a href="/doc/tip/docs/manual/book.wiki">le manuel Mongrel2 (HTML)</a> sur lequel nous avons passé plus de temps, et fait en sorte qu'il soit abouti.</p>
+<p>Ceci est une sorte de cours intensif dont le but est de mettre Mongrel2 en route le plus rapidement possible. Vous devriez maintenant aller lire <a href="/doc/tip/docs/manual/book.wiki">le manuel de Mongrel2 (HTML)</a> que nous avons passé bien plus de temps à écrire et à rendre agréable et utile.</p>
+
+
+</div><br clear="both"/>
+<div class="footer">
+Copyright 2010 Zed A. Shaw.  All rights reserved.  <a href="http://mongrel2.org/wiki?name=License">BSD Licensed.</a> Mongrel2 is Trademark by Zed A. Shaw. Hosting by <a href="http://cramerdev.com">Cramerdev</a>.
+</div>
+</body></html>
