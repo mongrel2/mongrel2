@@ -448,9 +448,9 @@ int connection_proxy_reply_parse(int event, void *data)
         rc = Proxy_stream_response(conn, client->body_start + client->content_len, nread);
         check(rc != -1, "Failed streaming non-chunked response.");
 
-    } else if(client->content_len == -1) {
-        debug("No chunked encoding and no content-length header, we'll read until close: %s",
-               conn->proxy_buf);
+    } else if(client->close || client->content_len == -1) {
+        debug("Response requested a read until close.");
+        client->close = 1;
 
         do {
             rc = conn->send(conn, conn->proxy_buf, nread);
@@ -461,7 +461,12 @@ int connection_proxy_reply_parse(int event, void *data)
     }
 
     Log_request(conn, client->status, client->content_len);
-    return REQ_RECV;
+
+    if(client->close) {
+        return CLOSE;
+    } else {
+        return REQ_RECV;
+    }
 
 error:
     return FAILED;

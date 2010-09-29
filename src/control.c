@@ -70,7 +70,7 @@ static int CONTROL_RUNNING = 1;
 
 
 
-#line 2 "src/control.c"
+#line 74 "src/control.c"
 static const int ControlParser_start = 1;
 static const int ControlParser_first_final = 34;
 static const int ControlParser_error = 0;
@@ -91,14 +91,14 @@ bstring Control_execute(bstring req)
     debug("RECEIVED CONTROL COMMAND: %s", bdata(req));
 
     
-#line 2 "src/control.c"
+#line 95 "src/control.c"
 	{
 	cs = ControlParser_start;
 	}
 
 #line 123 "src/control.rl"
     
-#line 2 "src/control.c"
+#line 102 "src/control.c"
 	{
 	switch ( cs )
 	{
@@ -203,7 +203,7 @@ tr37:
 st34:
 	p += 1;
 case 34:
-#line 2 "src/control.c"
+#line 207 "src/control.c"
 	goto st0;
 st13:
 	p += 1;
@@ -289,7 +289,7 @@ tr38:
 st35:
 	p += 1;
 case 35:
-#line 2 "src/control.c"
+#line 293 "src/control.c"
 	if ( 48 <= (*p) && (*p) <= 57 )
 		goto tr38;
 	goto st0;
@@ -407,7 +407,7 @@ case 33:
         (long int)(pe - p));
 
     if ( cs == 
-#line 2 "src/control.c"
+#line 411 "src/control.c"
 0
 #line 128 "src/control.rl"
  ) {

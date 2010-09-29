@@ -63,6 +63,10 @@
         parser->content_len = strtol(PTR_TO(mark), NULL, 10);
     }
 
+    action write_connection_close {
+        parser->close = 1;
+    }
+
     action write_value { 
         if(parser->http_field != NULL) {
             parser->http_field(parser->data, PTR_TO(field_start), parser->field_len, PTR_TO(mark), LEN(mark, fpc));
@@ -132,10 +136,12 @@
     content_length = (/Content-Length/i >start_field %write_field ":" space *
             digit+ >start_value %write_content_len %write_value) CRLF;
 
+    conn_close = (/Connection/i ":" space* /close/i) CRLF %write_connection_close;
+
     transfer_encoding_chunked = (/Transfer-Encoding/i >start_field %write_field
             ":" space* /chunked/i >start_value %write_value) CRLF @trans_chunked;
 
-    message_header = (fields | transfer_encoding_chunked | content_length);
+    message_header = transfer_encoding_chunked | conn_close | content_length | fields;
 
     Response = 	Status_Line (message_header)* (CRLF @done);
 
@@ -165,6 +171,7 @@ int httpclient_parser_init(httpclient_parser *parser)  {
     parser->nread = 0;
     parser->field_len = 0;
     parser->field_start = 0;    
+    parser->close = 0;
 
     return(1);
 }

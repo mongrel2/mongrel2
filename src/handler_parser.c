@@ -49,7 +49,7 @@
 
 /** Data **/
 
-#line 2 "src/handler_parser.c"
+#line 53 "src/handler_parser.c"
 static const int HandlerParser_start = 1;
 static const int HandlerParser_first_final = 9;
 static const int HandlerParser_error = 0;
@@ -73,14 +73,14 @@ int HandlerParser_execute(HandlerParser *parser, const char *buffer, size_t len)
     parser->uuid = NULL;
 
     
-#line 2 "src/handler_parser.c"
+#line 77 "src/handler_parser.c"
 	{
 	cs = HandlerParser_start;
 	}
 
 #line 105 "src/handler_parser.rl"
     
-#line 2 "src/handler_parser.c"
+#line 84 "src/handler_parser.c"
 	{
 	switch ( cs )
 	{
@@ -106,7 +106,7 @@ tr0:
 st2:
 	p += 1;
 case 2:
-#line 2 "src/handler_parser.c"
+#line 110 "src/handler_parser.c"
 	switch( (*p) ) {
 		case 32: goto tr2;
 		case 45: goto st2;
@@ -129,7 +129,7 @@ tr2:
 st3:
 	p += 1;
 case 3:
-#line 2 "src/handler_parser.c"
+#line 133 "src/handler_parser.c"
 	if ( 48 <= (*p) && (*p) <= 57 )
 		goto tr4;
 	goto st0;
@@ -140,7 +140,7 @@ tr4:
 st4:
 	p += 1;
 case 4:
-#line 2 "src/handler_parser.c"
+#line 144 "src/handler_parser.c"
 	if ( (*p) == 58 )
 		goto tr6;
 	if ( 48 <= (*p) && (*p) <= 57 )
@@ -157,7 +157,7 @@ tr6:
 st5:
 	p += 1;
 case 5:
-#line 2 "src/handler_parser.c"
+#line 161 "src/handler_parser.c"
 	if ( (*p) == 44 )
 		goto tr7;
 	if ( 48 <= (*p) && (*p) <= 57 )
@@ -191,7 +191,7 @@ tr11:
 st6:
 	p += 1;
 case 6:
-#line 2 "src/handler_parser.c"
+#line 195 "src/handler_parser.c"
 	if ( (*p) == 32 )
 		goto tr9;
 	goto st0;
@@ -202,7 +202,7 @@ tr9:
 st9:
 	p += 1;
 case 9:
-#line 2 "src/handler_parser.c"
+#line 206 "src/handler_parser.c"
 	goto st0;
 tr8:
 #line 65 "src/handler_parser.rl"
@@ -224,7 +224,7 @@ tr13:
 st7:
 	p += 1;
 case 7:
-#line 2 "src/handler_parser.c"
+#line 228 "src/handler_parser.c"
 	switch( (*p) ) {
 		case 32: goto st8;
 		case 44: goto tr11;
@@ -254,13 +254,13 @@ case 8:
     parser->body_length = pe - p;
 
     if ( cs == 
-#line 2 "src/handler_parser.c"
+#line 258 "src/handler_parser.c"
 0
 #line 113 "src/handler_parser.rl"
  ) {
         return -1;
     } else if ( cs >= 
-#line 2 "src/handler_parser.c"
+#line 264 "src/handler_parser.c"
 9
 #line 115 "src/handler_parser.rl"
  ) {
