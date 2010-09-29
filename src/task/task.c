@@ -74,7 +74,7 @@ taskalloc(void (*fn)(void*), void *arg, uint stack)
 
     /* call makecontext to do the real work. */
     /* leave a few words open on both ends */
-    t->context.uc.uc_stack.ss_sp = t->stk+8;
+    t->context.uc.uc_stack.ss_sp = (char *)t->stk+8;
     t->context.uc.uc_stack.ss_size = t->stksize-64;
 #if defined(__sun__) && !defined(__MAKECONTEXT_V2_SOURCE)        /* sigh */
 #warning "doing sun thing"
