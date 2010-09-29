@@ -703,27 +703,27 @@ error:
 static ssize_t ssl_recv(Connection *conn, char *buffer, int len)
 {
     check(conn->ssl != NULL, "Cannot ssl_recv on a connection without ssl");
-    char *pread;
+    unsigned char **pread = NULL;
     int nread;
 
     // If we didn't read all of what we recieved last time
     if(conn->ssl_buff != NULL) {
         if(conn->ssl_buff_len < len) {
             nread = conn->ssl_buff_len;
-            pread = conn->ssl_buff;
+            *pread = (unsigned char *)conn->ssl_buff;
             conn->ssl_buff_len = 0;
             conn->ssl_buff = NULL;
         }
         else {
             nread = len;
-            pread = conn->ssl_buff;
+            *pread = (unsigned char *)conn->ssl_buff;
             conn->ssl_buff += nread;
             conn->ssl_buff_len -= nread;
         }
     }
     else {
         do {
-            nread = ssl_read(conn->ssl, (unsigned char **) &pread);
+            nread = ssl_read(conn->ssl, pread);
         } while(nread == SSL_OK);
 
         // If we got more than they asked for, we should stash it for
@@ -737,9 +737,9 @@ static ssize_t ssl_recv(Connection *conn, char *buffer, int len)
     if(nread < 0) 
         return nread;
 
-    check(pread != NULL, "Got a NULL from ssl_read despite no error code");
+    check(*pread != NULL, "Got a NULL from ssl_read despite no error code");
     
-    memcpy(buffer, pread, nread);
+    memcpy(buffer, *pread, nread);
     return nread;
 
 error:
