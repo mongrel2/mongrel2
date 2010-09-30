@@ -76,6 +76,8 @@ char *test_parser_thrashing()
         delta = 0;
 
         while(nparsed < blength(data)) {
+            debug("json PARSING: %d of %d at %s", nparsed, blength(data), bdataofs(data, nparsed));
+
             delta = http_parser_execute(&p, bdata(data), blength(data), nparsed);
             execs_run++;
 
@@ -89,10 +91,11 @@ char *test_parser_thrashing()
 
             if(http_parser_has_error(&p)) {
                 errors++;
-                debug("TEST %s results: delta %d, has_error: %d, is_finished: %d",
-                        test_files.gl_pathv[i],
-                        nparsed, http_parser_has_error(&p), http_parser_is_finished(&p));
             }
+
+            debug("TEST %s results: delta %d, has_error: %d, is_finished: %d",
+                    test_files.gl_pathv[i],
+                    nparsed, http_parser_has_error(&p), http_parser_is_finished(&p));
 
             http_parser_init(&p);  // reset for the next try
         }

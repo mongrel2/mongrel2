@@ -189,7 +189,7 @@ int httpclient_parser_execute(httpclient_parser *parser, const char *buffer, siz
     pe = buffer+len;
 
     assert(*pe == '\0' && "pointer does not end on NUL");
-    assert(pe - p == len - off && "pointers aren't same distance");
+    assert(pe - p == (int)len - (int)off && "pointers aren't same distance");
 
 
     %% write exec;

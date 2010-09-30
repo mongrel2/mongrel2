@@ -161,7 +161,8 @@
   Request = Request_Line ( message_header )* ( CRLF @done );
 
   SocketStart = "<policy-file-request/>\0" @socket @done;
-  SocketJSON = ("@" rel_path ) >mark %request_path " {" any** "\0" @json @done;
+  SocketData = [{<] any* [}>] :>> "\0";
+  SocketJSON = ("@" rel_path ) >mark %request_path " " SocketData @json @done;
   SocketRequest = SocketStart | SocketJSON;
 
 main := Request | SocketRequest;
@@ -201,7 +202,7 @@ size_t http_parser_execute(http_parser *parser, const char *buffer, size_t len, 
   p = buffer+off;
   pe = buffer+len;
 
-  assert(pe - p == len - off && "pointers aren't same distance");
+  assert(pe - p == (int)len - (int)off && "pointers aren't same distance");
 
   %% write exec;
 
