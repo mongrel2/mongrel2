@@ -239,7 +239,7 @@ int Request_get_date(Request *req, bstring field, const char *format)
 }
 
 
-#define B(K, V) if((V) != NULL) bformata(headers, ",\"%s\":\"%s\"", bdata(K), bdata(V))
+#define B(K, V) if((V) != NULL) { vstr = json_escape(V); bformata(headers, ",\"%s\":\"%s\"", bdata(K), bdata(vstr)); bdestroy(vstr); }
 
 static struct tagbstring QUOTE_CHAR = bsStatic("\"");
 static struct tagbstring QUOTE_REPLACE = bsStatic("\\\"");
@@ -247,6 +247,19 @@ static struct tagbstring QUOTE_REPLACE = bsStatic("\\\"");
 static struct tagbstring BSLASH_CHAR = bsStatic("\\");
 static struct tagbstring BSLASH_REPLACE = bsStatic("\\\\");
 
+static inline bstring json_escape(bstring in)
+{
+    if(in == NULL) return NULL;
+
+    // TODO: this isn't efficient at all, make it better
+    bstring vstr = bstrcpy(in);
+
+    // MUST GO IN THIS ORDER
+    bfindreplace(vstr, &BSLASH_CHAR, &BSLASH_REPLACE, 0);
+    bfindreplace(vstr, &QUOTE_CHAR, &QUOTE_REPLACE, 0);
+
+    return vstr;
+}
 
 bstring Request_to_payload(Request *req, bstring uuid, int fd, const char *buf, size_t len)
 {
@@ -254,6 +267,7 @@ bstring Request_to_payload(Request *req, bstring uuid, int fd, const char *buf, 
     bstring result = NULL;
     dnode_t *i = NULL;
     int id = Register_id_for_fd(fd);
+    bstring vstr = NULL; // used in the B macro
 
     check(id != -1, "Asked to generate a paylod for an fd that doesn't exist: %d", fd);
 
@@ -271,15 +285,7 @@ bstring Request_to_payload(Request *req, bstring uuid, int fd, const char *buf, 
 
     for(i = dict_first(req->headers); i != NULL; i = dict_next(req->headers, i))
     {
-        // TODO: this isn't efficient at all, make it better
-        bstring vstr = bstrcpy((bstring)dnode_get(i));
-
-        // MUST GO IN THIS ORDER
-        bfindreplace(vstr, &BSLASH_CHAR, &BSLASH_REPLACE, 0);
-        bfindreplace(vstr, &QUOTE_CHAR, &QUOTE_REPLACE, 0);
-
-        B((bstring)dnode_getkey(i), vstr);
-        bdestroy(vstr);
+        B((bstring)dnode_getkey(i), (bstring)dnode_get(i));
     }
 
     bconchar(headers, '}');
