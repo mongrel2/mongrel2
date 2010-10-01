@@ -135,3 +135,16 @@ class Connection(object):
         self.deliver(uuid, idents, http_response(body, code, status, headers or {}))
 
 
+    def close(self, req):
+        """
+        Tells mongrel2 to explicitly close the HTTP connection.
+        """
+        self.reply(self, req, "")
+
+
+    def deliver_close(self, uuid, idents):
+        """
+        Same as close but does it to a whole bunch of idents at a time.
+        """
+        self.deliver(uuid, idents, "")
+
