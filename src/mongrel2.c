@@ -270,7 +270,7 @@ void taskmain(int argc, char **argv)
     LOG_FILE = stderr;
     int rc = 0;
 
-    check(argc == 3, "usage: server config.sqlite default_host");
+    check(argc == 3, "usage: mongrel2 config.sqlite server_uuid");
 
 
     SERVER = load_server(argv[1], argv[2], -1);
