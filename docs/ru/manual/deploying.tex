@@ -1,180 +1,181 @@
-\chapter{Deploying}
+\chapter{Развёртывание}
 
-I am now going to try to get you to setup a small, tiny, little version of a good
-deployment that matches the configuration of the site at \url{http://mongrel2.org}, with
-all the examples running.  This configuration will give you all the tools you
-need to make automated and managed deployments, but it is using small scale tools.
-The idea is that you learn what is involved in a nice, easy-to-manage setup, using simple
-things first, then you can extrapolate that out into your own setup or something
-better.
+Сейчас я покажу как разворачивать сервер на примере конфигурации с сайта
+\url{http://mongrel2.org}. Вы узнаете обо всех инструментах, необходимых для
+автоматизации этого процесса. Пример небольшой, но получив нужные знания вы
+можете легко их применить для более сложной инфраструктуры.
 
+\section{Требования}
 
-\section{Mongrel2 Deployment Requirements}
-
-It may seem obvious, but I'll go over the things you need in order to continue
-on in this section:
+Может показаться очевидным, но я всё же пробегусь по всем необходимым
+реквизитам:
 
 \begin{description}
-\item [Mongrel2] I know, hard to believe, but you actually need to have Mongrel2 installed.
-\item [m2sh] Again, not sure why, but some folks think they don't need this.  Unless you've
-    written your own, you need \shell{m2sh}.
-\item [Python] Obviously, if you have \shell{m2sh}, then you have Python, but some systems
-    (like Debian) don't install all of Python.  Make sure your Python setup is good.
-\item [root] You'll need root access on your box.  Either through \shell{sudo} or some other means.
-\item [Basic Python coding] Right now, you should be able to do some basic Python.
+\item [Mongrel2] Невероятно, но для всего этого нужен установленный Mongrel2 :-)
+\item [m2sh] Не понимаю, почему многие думают, что эта утилита не нужна. Если у
+    вас нет другой аналогичной, то без неё не обойтись.
+\item [Питон] На некоторых системах (таких как Debian) Питон не полностью
+    установлен. Если это так, то нужно доставить.
+\item [root] Нужен рутовый доступ. Либо через \shell{sudo}, либо иным способом.
+\item [Базовые знания Питона] К этому моменту понадобятся базовые навыки в
+Питоне.
 \end{description}
 
-That will get you going at first and, as we go, we'll do various other setups to
-get our application working.
+Для начала этого достаточно. По мере необходимости мы будем вносить изменения в
+систему.
 
-\begin{aside}{Learning Python}
-Why should you learn programming?  The trend is that if you are a system administrator
-who can't code, you are on your way out.  Eventually, you'll be in charge of automating
-systems; not manually managing them, and if you don't believe me then what do you think all
-those managed service companies are doing?  Alright, so you need to learn to code, but
-most of the books suck for really learning if you know nothing.
+\begin{aside}{Изучаем Питон}
+Зачем изучать программирование? Тенденция такова, что, если вы системный
+администратор, который не умеет кодить, то вы рискуете остаться не у дел. Рано
+или поздно вам придётся автоматизировать системы, а не управлять ими вручную.
+Если не верите мне, то посмотрите на компании, которые строят бизнес только на
+том, что автоматизируют системы. Итак, вам нужно научиться писать код. Проблема
+в том, чтоб большинствой книг по этой теме --- полный отстой.
 
-This is why I started my own book: \href{http://learnpythonthehardway.org}{Learn
-Python The Hard Way}, for people who know nothing about programming but need or
-want to learn.  It teaches Python, but it mostly teaches all the things
-programmers actually learn before they learn programming.  When you're done
-with my book, you'll have your ``programming brown belt".  That means you can
-then move onto one of many other free online books and \emph{really} learn
-programming, and have a higher chance of actually learning it.
+Вот почему я начал писать свою книгу
+\href{http://learnpythonthehardway.org}{Learn Python The Hard Way} (к сожалению
+пока только на английском). Она предназначена для тех, кто мало знает о
+программировании, но хочет научиться. Эта книга обучает Питону, но помимо этого,
+она учит всем тем вещам, которые программисты осваивают прежде чем начинают
+программировать. Когда вы осилите эту книгу, у вас будет ``коричневый пояс по
+программированию''. Это значит, что ваши шансы освоить другие более серьезные
+книги значительно увеличиваются.
 
-If you can't code Python then you can probably muddle through this and you may
-learn something, but learning Python will be important later.
-
-But \emph{don't} read ``Dive Into Python". It is a horrible introduction.
+Только \emph{не читайте} ``Dive Into Python'' --- это ужасное введение в язык.
 \end{aside}
 
-\subsection{Introducing procer}
+\subsection{Введение в procer}
 
-When I started working on this little manual, I wanted to get you into setting up
-a well-managed and automated deployment system.  The \shell{m2sh} program does
-much of the automation you need, but Mongrel2 also has to talk to quite a few
-separate little pieces that run as separate processes.  Trying to juggle all these
-processes without a tool to help is a nightmare.  You end up writing init scripts
-and merging them into your boot process and all sorts of crazy antics just so you
-can run a stupid hello world demo.
+Одна из целей этого небольшого мануала --- научить читателя создавать
+инфраструктуру для автоматизации работы сервера. С помощью \shell{m2sh} можно
+управлять сервером, но этой утилиты недостаточно. Mongrel2 общается с различными
+компонентами, которые запущены в отдельных процессах. И попытка управлять этими
+процессами без специального инструмента зачастую оборачивается большой головной
+болью: приходится писать скрипты, встривать их в процесс загрузки и т.п.; и всё
+это лишь для того, чтобу запустить простую демку типа "Hello world".
 
-What I needed was a ``user space process manager".  These are programs that run other
-programs, but, more importantly, try to keep those other programs running without much
-human intervention.  When you need to deploy a ton of processes that all have to
-be running, these USPMs are fantastic.  They usually read some startup profile describing
-what needs to start and what they depend on, and then it kicks everything into gear
-and watches them.  If any of the processes crash, they try to restart them.  Very simple.
+Мне нужен был некий менеджер процессов в пользовательском пространстве. Это
+пргорамма, которая запускает другие программы, но, что более важно, поддерживает
+их в запущенном состоянии. Когда вам нужно развернуть кучу процессов, такой
+менеджер просто незаменим. Сценарий работы стандартен --- менеджер считывает
+конфигурационный файл с описанием процессов и их зависимостей, стартует все эти
+процессы и наблюдает за ними. Если какой-то из них рушится, он его
+перезапускает. Всё просто.
 
-There's just one catch: all of them suck.  There's \href{http://cr.yp.to/daemontools.html}{daemontools},
-which barely builds (if at all) and then assumes that daemons don't fork.  Stupid.  There's
-\href{http://www.fefe.de/minit/}{minit}, which bafflingly required dietlibc to even compile
-and assumed it was going to be the one true init (not user space at all).  There's
-\href{http://www.nico.schottelius.org/software/cinit/}{cinit}, which got through a compile,
-then barfed on its documentation, and the end result is some huge number of weird
-shell scripts to make it work, and, again, it wants to be the one true init.  Finally ,
-\href{http://smarden.org/runit/}{runit} is some of the worst C code I've seen in years and
-has the same weird design as daemontools.
+Но есть один момент: все из них --- полный отстой. Есть
+\href{http://cr.yp.to/daemontools.html}{daemontools}, который компилируется со
+скрипом, а потом предполагает, что процесс не может плодить потомков с помощью
+fork. Тупо. Есть \href{http://www.fefe.de/minit}{minit}, который вообще не
+компилируется без библиотеки dietlibc, а потом предполагает, что он единственный
+init-процесс во всей системе (не подходит для пользовательского пространства).
+Есть \href{http://www.nico.schottelius.org/software/cinit}{cinit}, который
+компилируется, но создаёт кучу скриптов и, опять же, полгает, что он ---
+единственный init-скрипт. Ну и, наконец, есть
+\href{http://smarden.org/runit}{runit}. Внутри самый ужасный Си код, который я
+когда-либо видел. Более того, у него такой же странный дизайн как и у
+daemontools.
 
-After trying every single one, I just gave up.  Either they didn't build, were too complex,
-expected to be the one true init, poorly documented, not maintained, and definitely not
-going to work for this manual.  My only choice was to shave a yak and write my own.
+После многократных попыток я сдался. Программа либо не компилировалась, либо
+была слишком сложной, либо плохо задокументирована, либо не поддерживалась.
+Одним словом --- не подходила. Единственным выбором было написать свою. Что я и
+сделал.
 
-The end result is \shell{procer}, which lives in \file{examples/procer} and does
-most of what you need in a USPM.  It works a lot like daemontools or minit, but
-is much simpler, with these differences:
+В результате --- \shell{procer}. Вы можете найти эту утилиту в
+\file{examples/procer}. Она делает всё что нам нужно и работает подобно
+daemontools или minit, но гораздо проще по своему дизайну. Вот список отличий от
+всех приведённых выше аналогов:
 
 \begin{enumerate}
-\item It is much simpler, with only a single command to start all your stuff and
-    keep it running.
-\item It will build anywhere Mongrel2 builds, because it reuses the \file{libm2.a}
-    library from the Mongrel2 project.
-\item It doesn't want to be the one true init, or even expect to be running constantly.
-    You can start it and stop it and it will only run what's not already running.
-\item It assumes that programs will always daemonize and create a PID file.  This turns
-    out to be way easier to manage than what daemontools does, so I'm sort of baffled why
-    daemontools is how it is.
-\item It has dependency management so that you can have processes start only after others
-    have finished.
-\item It still uses simple files to configure itself that are in separate directories.
-\item It can be run as root and, like Mongrel2, it will drop privileges to the owner
-    of the profile directory before it runs the command.  This is incredibly useful because
-    it lets you setup scripts that run as other users without much configuration or fuss.
-\item It is dinky, tiny and well written so you can understand it, even though it's written
-    in C.
-\item Best of all, I can use it in this book and you won't go insane trying to install it
-    or use it like the others.
+\item Гораздо проще и компилируется в один выполняемый файл.
+\item Компилируется везде, где компилируется Mongrel2, потому что использует
+    библиотеку \file{libm2.a}.
+\item Не пытается стать единственным системным init-процессом и не настаивает на
+    том, чтобы быть всегда запущенной. Её можно запускать и останавливать и она в
+    свою очередь будет стартовать те процессы, которые ещё не запущены.
+\item Предполагает, что процессы всегда создают PID файл, что очень удобно
+    для управления. Это отличает её от daemontools и я сильно удивлён, что
+    daemontools работает так, как он работает.
+\item Управляет зависимостями, т.е. может запускать процессы в определённой
+    последовательности.
+\item Использует довольно простой формат конфигурационных файлов, которые
+    расположены в разных директориях (у каждого процесса она своя).
+\item Может быть запущена под рутом. Как и Mongrel2 назначет владельцем процесса
+    того пользователя, который владеет директорией профайлов.
+\item Она очень маленькая; написана так, что код легко понять, несмотря на то,
+    что это Си.
+\item И самое лучшее --- я могу использовать её в этом руководстве и у вас не
+    пойдёт голова кругом, когда вы будете устанавливать или использовать.
 \end{enumerate}
 
-Of course, if you have something else you like then, please, use it.  Anything that automates
-process management will be your friend.  In this manual, to keep things simple and easily
-understood, I'll be using \shell{procer} to tell you how to setup everything.
+Конечно же, если у вас есть другая утилита и вы с ней знакомы --- используйте
+её. Подойдёт всё, что может управлять процессами. В этом мануале я буду
+использовать \shell{procer}.
 
-\begin{aside}{Alternatives to procer}
-I wrote procer mostly for this book, but I also use it for my Mongrel2 deployments.
-It works for me but you can try other solutions.  By default, Mongrel2 will work with
-either daemontools/runit style, or init.d style launchers.  If Mongrel2 runs as a
-regular user, it assumes that you want runit style (don't fork, write to stdout/stderr).
-If you run as root, it assumes you want init.d style like what procer uses (fork, drop priv, 
-chroot, etc.).
+\begin{aside}{Альтернативы для утилиты procer}
+Я написал procer исключительно для этой книги, но я также использую его для
+развёртывания сервера. Утилита работает для меня, но вы можете попробовать
+другие решения. Mongrel2 поддерживает любой режим запуска: под обычным
+пользователем (как работает daemontools/runit), либо под рутом (как init.d
+скрипты). 
 
-You should check out \href{http://github.com/peterkeen/proclaunch}{proclaunch} as another
-alternative that is similar to procer, and inspired by procer, but written in Perl with a
-few more features.
+Возможно, вы захотите проверить ещё одну альтернативу --
+\href{http://github.com/peterkeen/proclaunch}{proclaunch}. Это скрипт на Перле,
+который взял procer за основу и добавил некоторые фичи.
 
-Either way, Mongrel2 is practical, and does generally the right thing with today's tools.
-Want to use daemontools?  Fine, just run it \verb|mongrel2 config.sqlite server_uuid| and it'll
-work right.  Want to put it in init.d or use procer or similar?  Fine, run it as root.
+Так или иначе, Mongrel2 практичен --- выполняет то, что нужно теми инструментами,
+которые есть в наличии. Нравится daemontools? Отлично, запустите \verb|mongrel2 config.sqlite server_uuid|
+и всё будет в порядке. Хотите стартовать сервер с
+помощью init.d или использовать другой альтернативный скрипт? Без проблем,
+запускайте под рутом.
 \end{aside}
 
 
-\subsection{Installing procer}
+\subsection{Устанавливаем procer}
 
-Installing procer is very easy.  It's a single little binary and it lives in
-\file{examples/procer} in the Mongrel2 source.  Here's how you'd install it
-totally from scratch as if you hadn't even build Mongrel2 yet:
+Установка очень простая. На выходе --- один бинарный файл. Исходники лежат в
+\file{examples/procer}. Чтобы установить с нуля, выполните все команды по
+списку:
 
 \begin{code}{Install procer}
 \begin{lstlisting}
 > cd projects/mongrel2
-> make clean all install
+> make clean all && sudo make install
 > cd examples/procer
-> make clean all install
+> make clean all && sudo make install
 \end{lstlisting}
 \end{code}
 
-That's the entire install process, and now procer is in \file{/usr/local/bin}
-so you can use it.  In the rest of this chapter you'll learn how to use \shell{procer}
-by just setting up the Mongrel2 demo completely and messing around with it.
+После завершения процесса, файл procer будет лежать в папке
+\file{/usr/local/bin}. Используйте и наслаждайтесь! Остаток главы посвящён
+детальному рассмотрению процесса развёртывания веб-сервера Mongrel2.
 
+\section{План}
 
-
-\section{The Plan}
-
-We need to plan this deployment to make sure we get the end result correct:
+Любое хорошее дело начинается с плана. Давайте распланируем действия по
+развёртыванию сервера:
 
 \begin{enumerate}
-\item Create a deployment area where everything will live.
-\item Create a config.sqlite that will work with the demos in \shell{examples}.
-\item Setup procer to run Mongrel2 and the three demo Python scripts for chat, handlertest, and mp3stream,
-    and have it run the fake backend web.py project so we have something to proxy to.
-\item Get all the static file content working.
-\item Test out that procer is keeping things running and play with taking things down and up and using
-    \shell{m2sh} to work with the deployment.
+\item Создать рабочее пространство --- иерархию директорий и файлов необходимых
+    для нашей задачи.
+\item Создать файл настроек config.sqlite, который будет работать с демками в
+    \shell{examples}
+\item Настроить procer для запуска сервера и трёх примеров на Питоне: chat,
+    handlertest, и mp3stream, а также бэкенда на web.py, чтобы показать пример
+    проксирования.
+\item Настроить статический контент.
+\item Убедиться, что procer поддерживает все подсистемы в запущенном состоянии.
 \end{enumerate}
 
-Once you have this setup working, you can then start to make your own
-deployments and tweak things as you need for your own applications.  Remember
-that the goal is to get you to \emph{automate} everything as much as possible,
-so you can go further than this then do it.
+Как только эта инфраструктура заработает, вы сможете создавать более сложные
+конфигурации для своих приложений. Запомните, цель --- добиться максимальной
+\emph{автоматизации}.
 
-\section{Step 1: The Deployment Area}
+\section{Шаг 1: Готовим рабочее пространство}
 
-We'll need a place to put all this stuff and run it so that Mongrel2 can chroot
-there, procer knows where its profiles are, and its all nice and clean.  For these
-instructions, we're just going to make some directories in your home directory,
-but feel free to change this up later if you find a better way.
+Нужно создать директорию, которую Mongrel2 во время запуска сделает рутовой.
+Затем в этой директории создать все необходимые профайлы.
 
-\begin{code}{Make Deployment Directories}
+\begin{code}{Создаём рутовую директорию и профайлы}
 \begin{lstlisting}
 # go home first
 > cd ~/
@@ -192,64 +193,63 @@ deployment/profiles > mkdir chat mp3stream handlertest web mongrel2
 deployment/profiles > cd ..
 
 # copy the mongrel2_conf.py sample from the source to here
-deployment > cp ~/mongrel2/examples/python/tests/mongrel2_org.py config.py
+deployment > cp ~/mongrel2/examples/python/tests/mongrel2.conf mongrel2.conf
 
 # load the default mongrel2.conf into the config.sqlite
 deployment > m2sh load
 
 # see our end results
 deployment > ls
-config.py  config.sqlite  logs  profiles  run  static tmp
+mongrel2.conf  config.sqlite  logs  profiles  run  static tmp
 
 \end{lstlisting}
 \end{code}
 
-Hopefully, you're starting to see how you could easily automate this so that you don't
-have to do this all the time.  I'm just showing you how to ``make the sausage'' so that
-you know where everything goes.  Future versions of \shell{m2sh} will most likely
-create deployment directories like this automatically.
+Надеюсь, вы уже видите возможность автоматизировать даже этот процесс. Я же
+делаю это вручную, чтобы показать, где зарыта собака. Вполне возможно, что со
+временем m2sh будет поддерживать команды для создания профайлов.
 
-What we've done here is the following:
+Мы только что сделали следующее:
 
 \begin{enumerate}
-  \item Setup a \file{\~{}/deployment} directory we'll put everything in.
-  \item Created \file{run}, \file{tmp}, \file{logs}, and \file{profiles} that Mongrel2 and procer need to run.
-  \item In profiles we started dirs for \file{chat}, \file{mp3stream}, \file{handlertest}, \file{web} and \file{mongrel2},
-    that procer will read files out of to get all our gear up and running.
-  \item Initialized the \file{config.sqlite} file we'll be filling in with our modififed config.py.
-  \item Copied the \file{mongrel2\_org.py} example file over to our deployment so we can modify it.
+  \item Создали директорию \file{\~{}/deployment} где будут лежать все файлы.
+  \item Создали поддиректории \file{run}, \file{tmp}, \file{logs}, и
+    \file{profiles}, которые Mongrel2 и procer будут использовать во время работы.
+  \item Для каждого проекта создали профайл (изначально просто директория). Итого
+    пять профайлов: \file{chat}, \file{mp3stream}, \file{handlertest}, \file{web},
+    \file{mongrel2}.
+  \item Скопировали пример конфигурационного файла mongrel2.conf из примеров.
+  \item Инициализировали базу настроек \file{config.sqlite} из этого конфигурационного файла.
 \end{enumerate}
 
 
-\section{Step 2: The mongrel2.org Configuration}
+\section{Шаг 2: Конфигурация mongrel2.org}
 
-Now we're ready to get the configuration working.  Here's the thing, though: you should
-try to alter the configuration yourself.  I've already given you the file and you are
-going to have to make the changes to meet the requirements for this deployment directory.
-Here's what you have to change in \file{config.py} to make everything work right:
+Теперь мы готовы внести изменения в настройки. Но вы должны попробовать это
+сделать самостоятельно. Ведь я уже дал вам готовый файл \file{mongrel2.conf};
+нужно только слегка его подкорректировать. Вот что нужно сделать:
 
 \begin{enumerate}
-\item Get rid of the \ident{test\_directory} handler, since we won't need it, and
-    any routes that mention it.
-\item Change the \ident{base} of \ident{chat\_demo\_dir} to \file{'static/chatdemo/'}, which we'll setup at the end.
-\item Modify the server \ident{chroot} so that it's \file{/home/YOU/deployment/}.
-\item Use the \shell{m2sh uuid} command to make some new UUIDs for all the
-    existing ones.  This is optional, but probably a good idea to get in the
-    habit now.
-\item Change the \ident{port} for \ident{web\_app\_proxy} so it points to 8080 instead of 80.
-\item Finally, change any mention of ``mongrel2.org'' into ``localhost'' so that you
-    can run it locally.
+\item Избавьтесь от обработчика \ident{test\_directory} --- нам он не нужен.
+\item Смените \ident{base} в маршруте \ident{chat\_demo\_dir} на
+    \file{static/chatdemo}. Мы настроим этот маршрут в конце.
+\item Измените рутовую директорию \ident{chroot} в сервере на
+    \file{/home/YOU/deployment/}
+\item Измените один или несколько UUID: вы можете воспользоваться командой
+    \shell{m2sh uuid}, чтобы сгенерировать идентификаторы. Этот шаг
+    опционален; я хочу, чтобы вы знали, что есть такая команда.
+\item Измените \ident{port} у \ident{web\_app\_proxy} --- 8080 вместо 80.
+\item Наконец, замените ``mongrel2.org'' на ``localhost'', чтобы запускать сервер локально.
 \end{enumerate}
 
-Once you have that all edited, you should be able to run \shell{m2sh load -db
-config.sqlite -config config.py} and it'll just load it up.  Try using
-\shell{m2sh servers} and \shell{m2sh hosts} to take a peek.
+После внесения всех правок команда \shell{m2sh load -db config.sqlite -config
+mongrel2.conf} считает конфигурационный файл и внесет все изменения в базу
+настроек. Поиграйтесь с ней с помощью команд \shell{m2sh servers} и \shell{m2sh
+hosts}.
 
+Можно протестировать сервер на данном этапе, запустив серию команд:
 
-To test it out at this stage you can just run the config.sqlite that you
-did with these commands:
-
-\begin{code}{Testing The Initial Configuration}
+\begin{code}{Тестируем первоначальную конфигурацию}
 \begin{lstlisting}
 > m2sh start -db config.sqlite -host localhost
 ^C
@@ -259,25 +259,23 @@ did with these commands:
 \end{lstlisting}
 \end{code}
 
-That's enough to make sure it runs, but you've got nothing running,
-so it mostly won't work at all.  Just start up and then kill it
-right after.
+Этого достаточно, чтобы убедиться, что сервер запускается. Но он не
+функционален, поскольку другие компоненты ещё не запущены.
 
 
-\section{Step 3: Setup procer}
+\section{Шаг 3: Настраиваем procer}
 
-Now we want to make \shell{procer} start everything for us and keep
-it running.  How \shell{procer} works is you put a few special
-files into a directory in \file{profiles}.  This directory (say \file{chat})
-is the profile for that app.  When you start \shell{procer}, you
-point it at the main \file{profiles} directory and it tries to run it.
-It's dead simple and very easy to automate, so we'll do it by hand
-and then you can do some automation later.
+Нам нужно, чтобы \shell{procer} запускал всё, что нам нужно, и поддерживал в
+запущенном состояни. Для этого нужно положить определённые файлы в директорию
+\file{profiles}. Для каждой подсистемы должна быть своя директория, например
+\file{chat} для демо-чата. Когда \shell{procer} стартует, он пытается загрузить
+профайлы из папки; в нашем случае это \file{profiles}. Мы будем делать всё
+вручную, но такую инфраструктуру очень и очень легко автоматизировать.
 
-Let's first setup a basic config that gets our skeleton profiles
-and make sure procer can run everything:
+Итак, для начала накидаем скелет, а потом будем наполнять его, параллельно
+запуская \shell{procer} и анализируя результат:
 
-\begin{code}{Skeleton procer Setup}
+\begin{code}{Скелет конфигурации}
 \begin{lstlisting}
 deployment > cd profiles/
 deployment/profiles > ls
@@ -302,25 +300,20 @@ deployment/profiles > ls -lR
 \end{lstlisting}
 \end{code}
 
-With all of that, you can then try to run \shell{procer} to watch
-it fail but still try to run everything:
+Теперь можно запустить \shell{procer} --- он попытается активировать профайлы,
+но не сможет, поскольку система не до конца настроена. Тем не менее, посмотрим,
+что он нам говорит: 
 
 \begin{lstlisting}
 > sudo procer $PWD $PWD/../run/procer.pid
 > less error.log
 \end{lstlisting}
 
-This is assuming that you are still in the \file{profiles} directory.
-You should see the file \file{error.log} get created and
-probably some messages printed to the screen.  Just ignore any
-mention of Mongrel2 since that's probably just cruft from the \file{libm2.a}
-we haven't removed.
+Предполагается, что вы находитесь в директории \file{profiles}. Там должен
+появиться файл \file{error.log}. Взгляните на него --- туда пишутся не только
+ошибки, но и попытки запустить процессы. 
 
-Take a look in the \file{error.log} and you'll see it's not necessarily
-errors but information on how things were run.  You should
-see something like this for each profile:
-
-\begin{code}{First Dummy Run Of procer}
+\begin{code}{Первый запуск}
 \begin{lstlisting}
 DEBUG procer.c:232: Loading 5 actions.
 DEBUG procer.c:83: STARTED chat
@@ -335,23 +328,22 @@ ERROR chat didn't make pidfile /home/zedshaw/deployment/profiles/chat/chat.pid.
 \end{lstlisting}
 \end{code}
 
-I've cleaned this up a bit and, again, ignore that it's saying ``Mongrel2";
-that's just cruft from the library since it was originally designed
-for Mongrel2.  What you can see here is the following:
+Эти строки говорят нам о следующем:
 
 \begin{enumerate}
-\item It starts up and says it found 5 profiles.
-\item It starts chat, and says there's no PID file so it's good to continue.
-\item It reports what ACTION it's running, so you can see the config.
-\item It spawns off your \file{run} script, \emph{drops privilege}
-     and says it's WAITING for your script to exit.
-\item After your script runs, it looks for the PID file you gave in \file{pid\_file} and, if it's not there, it exits that action.
-\item It does this for all of them and, since none of them run right, \shell{procer} exits.
+\item \shell{procer} стартует и обнаруживает 5 профайлов.
+\item Запускает чат, сообщает, что PID файл не найден, так что можно продолжать.
+\item Уведомляет какое действие он выполняет (посредством ACTION).
+\item Запускает скрипт \file{run}, меняет привелегии и ждёт (WAITING), пока
+    скрипт завершит работу.
+\item После запуска, скрипт ищет PID-файл, но не находит его и завершает работу.
+\item \shell{procer} повторяет эти действия для всех профайлов. Поскольку ни один из них не
+работает, он завершает работу.
 \end{enumerate}
 
-Next up, let's get Mongrel2 running inside \shell{procer}:
+Теперь давайте автоматизируем запуск Mongrel2:
 
-\begin{code}{procer Config For Mongrel2}
+\begin{code}{procer и Mongrel2}
 \begin{lstlisting}
 > cd ~/deployment
 # make mongrel2 run as root
@@ -373,16 +365,12 @@ m2sh start -db config.sqlite -host localhost
 \end{lstlisting}
 \end{code}
 
-Obviously, you don't have to use a series of \shell{echo} commands to
-make these scripts.  You can edit them just fine, we're just doing it
-this way so that you can follow along easier.
+Очевидно, вам не надо добавлять команды с помощью \shell{echo} --- можно просто
+отредактировать файлы. Я так сделал, чтобы вам было удобнее изучать пример.
 
-Now, make sure you don't have any other Mongrel2 processes running,
-and then start procer again to see if it starts this configuration
-correctly.
+Теперь... убедитесь, что Mongrel2 не запущен и снова запустите procer.
 
-
-\begin{code}{Using procer To Run Mongrel2}
+\begin{code}{Запускаем Mongrel2}
 \begin{lstlisting}
 > cd ~/deployment
 # clear out the error.log for testing
@@ -402,22 +390,20 @@ deployment > ps ax | grep mongrel2
 \end{lstlisting}
 \end{code}
 
-To watch \shell{procer} in action, try doing \shell{m2sh stop -db config.sqlite
--host localhost -murder} and then look at \file{profiles/error.log} and watch
-Mongrel2 come right back.
+Чтобы увидеть \shell{procer} в действии, остановите сервер (\shell{m2sh stop -db
+config.sqlite -host localhost -murder}) и взгляните на \file{profiles/error.log}
+--- вы увидте, что Mongrel2 снова запущен.
 
+\subsection{Примеры на Питоне}
 
-\subsection{The Python Examples}
+Мы смогли добиться того, что procer запускает Mongrel2 и следит за ним. Теперь
+давайте проделаем то же самое для наших небольших демо-скриптов на Питоне. Для
+этого нам надо выполнить немного больше работы --- запустить скрипты в фоновом
+режиме и создать PID-файлы. Начнём с демо-чата. Предполагая, что исходники
+веб-сервера лежат в \file{\~{}/projects/mongrel2}, меняем файл
+\file{profiles/chat/run} следующим образом:
 
-We've got a good setup of \shell{procer} going and it keeps Mongrel2
-running, so let's setup a similar thing for each of our little
-Python demos that we'll need.  In order to do this, though, we sort
-of have to ``hack in'' making them daemonize and create PID files with
-a little shell script help.  Let's start with the \ident{chat} demo
-and, assuming your mongrel2 source is in \file{\~{}/projects/mongrel2},
-you will change \file{profiles/chat/run} to be like this:
-
-\begin{code}{Run Script For Chat Demo}
+\begin{code}{run-скрипт для демо-чата}
 \begin{lstlisting}[language=sh]
 #!/bin/sh
 set -e
@@ -431,25 +417,22 @@ echo $! > $DEPLOY/profiles/chat/chat.pid
 \end{lstlisting}
 \end{code}
 
-This little script uses some funky features you might not be familiar
-with, but which are nice to learn, so let's take a look:
-
+Этот скрипт использует некоторые фишечки, о которых вы, может быть, не знаете,
+но они очень удобны:
 
 \begin{enumerate}
-\item The first trick is \shell{set -e}, which tells bash to bail if there's
-    any errors in your script.  This is a \emph{huge} life saver in system
-    scripts.
-\item Next, you point some variables at where the deployment and Mongrel2 source
-    live, remembering to not type YOU but your username.
-\item After that, you run the \file{chat.py} using a program called \shell{nohup}.
-    This basically daemonizes your script by redirecting output and
-    preventing the program from exiting, and then you background it with \verb|&|.
-\item The final thing we do is echo the magic variable \verb|$!| (the PID of the
-  last process started in the background) to the \file{chat.pid} file in the
-  profile directory.
+\item Первый трюк --- это \shell{set -e} --- указывает системе немедленно
+    прекратить выполнение скрипта, если какая-либо команда вернула ошибку. Любой
+    шелл-скрипт должен начинаться с этой команды.
+\item Далее записываются пути, где лежат все необходимые файлы. Незабывайте,
+    вместо YOU вы подставляете фактическое имя пользователя.
+\item После этого запускается \file{chat.py} с помощью \shell{nohup}. В этой
+    строчке скрипт переводится в фоновый режим с перенаправлением вывода.
+\item В конце --- вывод магической переменной \verb|$!| (PID последнего
+    запущенного процесса) в файл \file{chat.pid}.
 \end{enumerate}
 
-When you run this manually, you should see something like this:
+Если запустить этот скрипт вручную, то должно получиться что-то вроде этого:
 
 \begin{lstlisting}
 deployment > ./profiles/chat/run
@@ -461,10 +444,10 @@ deployment > ps ax | grep chat
 deployment > kill -TERM 19305
 \end{lstlisting}
 
-After all that, you can then try out \shell{procer} again to see if it
-properly runs the chat demo as well as mongrel2:
+Теперь можно перезапустить \shell{procer}, чтобы убедиться, что демо-чат также
+автоматически запускается наряду с веб-сервером.
 
-\begin{code}{Running procer With Chat Demo}
+\begin{code}{Запуск демо-чата}
 \begin{lstlisting}
 # run procer to get stuff started
 deployment > sudo procer $PWD/profiles $PWD/run/procer.pid
@@ -487,14 +470,14 @@ deployment > ps ax | grep chat
 \end{lstlisting}
 \end{code}
 
-If you go look at \file{profiles/error.log}, you'll see that \shell{procer}
-is also running each of them as the right user, with chat being run
-as you, but Mongrel2 being run as root so it can chroot/drop privileges properly.
+Если вы посмотрите на \file{profiles/error.log}, то увидите, что \shell{procer}
+запускает каждый процесс под нужным пользователем: чат --- под текущим
+пользователем, веб-сервер --- под рутом.
 
-Rather than give you a walk through each of these setups, here's the
-run scripts for the remaining files:
+Остальные скрипты очень сильно похожи на первый, поэтому лишь приведу их
+содержимое:
 
-\begin{code}{Remaining Run Scripts}
+\begin{code}{Остальные скрипты}
   \file{profiles/handlertest/run}
 \hrule
 
@@ -543,12 +526,11 @@ echo $! > $DEPLOY/profiles/web/web.pid
 \end{code}
 
 
-\subsection{Testing The New Setup}
+\subsection{Тестируем}
 
-Once everything is running and \shell{procer} is maintaining it, you
-just need to see if things work.  Here's some curl commands to try:
+Как только все скрипты готовы, запускаем \shell{procer} и тестируем с помощью curl.
 
-\begin{code}{Testing With Curl}
+\begin{code}{Тестируем с помощью curl}
 \begin{lstlisting}
 > curl http://localhost:6767/
 Hello, World!
@@ -558,38 +540,39 @@ Hello, World!
 \end{code}
 
 
-\subsection{Nice Features of Procer}
+\subsection{Procer и его плоды}
 
-There's some nice subtle features you get from using \shell{procer}
-to run your stuff:
+В результате использования \shell{procer} вы получаете следующее:
 
 \begin{description}
-\item [Faster Development]  A great thing about \shell{procer} is once you get all of this setup,
-    it cuts down on a lot of your setup time and development time because
-    it will \emph{properly} restart things for you.  This means you can
-    simply make changes to code or configs, and then just kill the process and
-    procer will kick it back over automatically.
-\item [Easy Automation]  You should start to see how you could automate creating
-    profiles for new processes since the setup is consistent.
-  \item [\file{profiles/run.log}]  All your commands will have their output sent to
-    this file so you can see how they might be blowing up in your scripts.
-\item [Restart State Maintained]  Since procer is just tracking PID files and
-    processes, if you shut it down, it won't kill the world.  When you start
-    it back up, it just starts new stuff or stuff it needs, then goes back to
-    supervising.  This means you can change the configs for procer then just
-    kick it over and it'll do the right thing.
+\item [Быстрая разработка] Как только вы настроили скрипты, ваш цикл
+    разработка-перезапуск-отладка сильно сокращается, потому что \shell{procer}
+    наблюдает за вашими процессами и рестартует их \emph{надлежащим образом} в случае
+    необходимости: вы вносите изменения в свой код, убиваете процесс и
+    \shell{procer} автоматически перезапускает процесс.
+\item [Простая автоматизация] Как вы заметили, для автоматизации процесса нужно
+    добавить профайл, который представляет собой несколько директорий и несколько
+    файлов.
+\item [\file{profiles/run.log}] Все команды посылают диагностический вывод в
+    этот файл и вы можете видеть, если что-то пойдет не так.
+\item [Устойчивость] Procer отслеживает PID-файлы и процессы и даже если вы
+    убьёте его, конца света не настанет. Всё будет по-прежнему работать. Когда вы
+    снова запускаете procer, он просто сверяет файлы с процессами и запускает что
+    нужно. Т.е. вы можете смело конфигурировать procer на лету, убивать,
+    перезапускать его, а ваша система будет работать как часы.
 \end{description}
 
-The key thing, though, is that you now have the whole application for
-the mongrel2.org demo up and running, including automated process management,
-configuration, and managing everything.
+Ключевой момент в этой истории --- ваше приложение работает стабильно и без
+сбоев, даже если вы обновляете и перегружаете компоненты.
 
-\section{Step 4: Static Content}
+\section{Шаг 4: Статический контент}
 
-The final thing we have to do is get the static content we need to try
-out the chat demo:
+Вот мы и добрались до статического контента. Как только мы настроим выдачу
+файлов, можно пробовать демо-чат.
 
-\begin{code}{Setting Up Static Content}
+Итак:
+
+\begin{code}{Настраиваем статический контент}
 \begin{lstlisting}
 > cp -r ~/projects/mongrel2/examples/chat/static static/chatdemo
 > m2sh stop -db config.sqlite -host localhost -murder
@@ -597,129 +580,130 @@ out the chat demo:
 \end{lstlisting}
 \end{code}
 
-If you get a good response then you should be able to go to
-\url{http://localhost:6767/chatdemo/} and the chat should work.  Notice
-also that you just killed mongrel2 with \shell{m2sh} and it came back
-because of \shell{procer}.  If you do your curl check too fast,
-you might miss it, so just wait a bit.
+Если curl возвращает то что нужно, то можно в браузере открыть
+\url{http://localhost:6767/chatdemo/} и чат должен работать. Обратите внимание
+--- вы только что остановили Mongrel2, но он снова запустился: \shell{procer} не
+дремлет.
 
-\section{Step 5: Testing And Troubleshooting}
+\section{Шаг 5: Тестируем}
 
-You should have been testing the configuration as you went, but the
-main things to test are:
+По ходу выполнения предыдущих шагов вы уже, наверное, тестировали и я отмечу
+основные моменты, на которые стоит обратить внимание:
 
 \begin{enumerate}
-\item The /chatdemo/ works and you can send messages. Try a few different
-    browsers.
-\item You can get a simple message from the /handlertest/ and that's about it.
-\item See if you can get the mp3streamer to stream some mp3s.  Put a few
-    in its directory, then kill it so \shell{procer} brings it back.  Then,
-    point \shell{mplayer} at \url{http://localhost:6767/mp3stream} and
-    it should work.
-\item Check that you can make the proxy go to the web.py app you start
-    in the chat demo's directory.
-\item See if you can stop things and have \shell{procer} bring them back.
-\item Stop \shell{procer} and then start it again to see if it properly
-    doesn't step on things.
+\item /chatdemo/ работает и вы можете посылать сообщения. Попробуйте в разных
+    браузерах.
+\item /handlertest/ открывается и выводит небольшое сообщение.
+\item Убедитесь, что mp3streamer выдаёт потоковое аудио. Положите несколько mp3
+    файлов в его рабочую директорию, потом убейте обработчик, чтобы \shell{procer}
+    его перезапустил. Затем откройте \shell{mplayer} и укажите на
+    \url{http://localhost:6767/mp3stream} --- должно заработать.
+\item Проверьте, что прокси перенаправляет запросы на web.py приложение.
+\item Остановите те или иные процессы из профайлов и посмотрите, перезапускает
+    ли их \shell{procer}.
+\item Остановите и запустите \shell{procer} --- убедитесь, что всё по-прежнему
+    работает.
 \end{enumerate}
 
-If you run into problems, make sure that you can run each little
-piece and that the files you were supposed to make are correct.
-The best tool to use is \shell{diff}.
+Если возникнут проблемы, попробуйте пробежаться по каждому профайлу по
+отдельности --- проверьте содержимое профайлов, вручную запустите и т.п. В таких
+случаях лучший инструмент --- \shell{diff}.
 
-\section{Further Improvements}
+\section{Улучшения}
 
-That ends this chapter, and at this point you should know how to setup
-nearly everything Mongrel2 has to offer right now.  You should have a good
-idea of how \shell{procer} will work or not for your real deployments, and
-how it's used by me for my own deployments.
+Мы подходим к концу этой главы. К этому моменты вы уже знаете практически всё,
+на что способен Mongrel2; а также --- подойдёт ли \shell{procer} к вашим нуждам
+или нет и то как использую его я в своей работе.
 
-A \emph{major} improvement that we may eventually make is automating
-setup of \shell{procer} profiles, and just better overall management
-of the profiles with \shell{m2sh}.  If you feel like hacking on that,
-just go ahead and try and let us know.
+Самое \emph{большое} улучшение, которое мы может быть реализуем в ближайшем
+будущем --- автоматизация создания профайлов и управление ими с помощью
+\shell{m2sh}. Если вы чувствуете в себе силы, можете попробовать сделать это
+сами и поделиться с сообществом.
 
-Other than that, automate, automate, automate.
+А в целом: автоматизируйте, автоматизируйте, автоматизируйте.
 
-\section{Deployment Tips}
+\section{Советы}
 
-Mongrel2 enforces the correct behavior when you run as root, which is to drop priv and
-chroot.  This makes the server more secure, and it also simplifies your deployments.
-Since everything you do always runs in a chroot, you now just need to rsync that chroot
-directory, or put it into a git or hg repo, and you're set.  You're literally forced to
-make your deployments portable to different directories and systems.
+Когда вы запускаете Mongrel2 под рутом, он ведёт себя как и подобает нормальному
+серверу: назначает привилегии текущего пользователя и делает заданную директорию
+рутовой. Это повышает безопасность и упрощает развёртывание. Кроме того,
+поскольку всё находится в одной папке, очень легко синхронизировать настройки
+между машинами --- достаточно положить их в репозиторий git или hg. Вы буквально
+обречены делать портируемые конфигурации.
 
-As of the 1.0 push for Mongrel2, we haven't done much work on how you deploy all
-the different languages.  They sort of sprung up during development and our plan is
-to expand that out in the 2.0 version so that deployment is very well documented
-for all the different languages we support.  That means you'll probably run into
-some snags and things we didn't anticipate.
+В текущей версии мы не приложили много усилий для автоматизации процесса
+развёртывания \shell{пользовательских приложений}. Так что пока с этим могут
+возникнуть некоторые неудобства. Но, однозначно, в версии 2.0 будут улучшения в
+эту сторону.
 
-The following are some general points we've come up with while deploying our
-own apps, with more to come as we work on the 2.0 version:
-
-\begin{enumerate}
-\item Don't run things as root if you can.  It's bad habit that everyone tries to
-do their sysadmin completely as root, so Mongrel2 is designed to be run very easily
-as under a regular user account.  The only time you really should be running as root
-is when you do a quick -sudo to m2sh to start \file{mongrel2} up so it can chroot.
-
-\item Use the chroot to keep your deployment simpler.  I literally do all my work
-locally and then just rsync my changes up to my remote staging server.  Everything
-has to live in the chroot anyway, and the chroot enforces that it is completely self-contained.
-
-\item Use Python's virtualenv or anything similar to get yourself a totally local environment.
-Too many systems, such as OSX, have very outdated packages and will change versions on you
-without telling you.  The best way to make sure your software keeps working (and works as
-one cohesive deployment) is to use a virtualenv inside your chroot.  It should even work
-cross-platform if you don't have compiled packages in there.
-
-\item Create a user for your application and live in there.  I don't have any root
-access on my stuff.  \emph{Everything} is run as a user named after the website, and
-is deployed right in the /home/USER directory.  I login as that user, manage as that user,
-and I don't give them sudo access.  For the times when I need to sudo to restart or run
-Mongrel2, I then use a separate login that I have open (with screen) and do it there.  This
-reduces your risk of hacks, but also just simplifies things.  It's no problem for me to
-move my configuration over to new machines with this setup, or deploy clusters.  I know that as
-long as there's the right user on the target, I'm set.
-
-\item Use \href{http://www.gnu.org/software/screen/}{GNU screen} or die.
-
-\item Keep your config.sqlite and the .py file in your chroot, and keep your content and
-everything else under that.  This makes sure that the config isn't accessible outside your
-content directories.  Mongrel2 helps you get this right by not allowing certain Dir
-configurations that would expose your chroot to the world.
-\end{enumerate}
-
-There's a few additional tips for people who want to use alternative process supervision
-like daemontools, runit, or init.d setups.  No matter what you use, you should probably
-follow this advice:
+Ниже приведены основные выводы, к которым мы пришли в процессе работы над первой
+версией сервера:
 
 \begin{enumerate}
-\item Whatever you use for process management, make sure it can run stuff as \emph{not} root
-and can do chroot for you.  If you're running your Mongrel2 as root, you're doing it wrong.
-Actually, if you're running any services as root that don't absolutely need to be, you're doing
-it wrong.
 
-\item Mongrel2 is happy to run as a regular user, and assumes that if you do not run as root,
-then you probably want to run under daemontools or similar.  It won't chroot or drop priv and
-logs to stdout/stderr.
+\item Не запускайте ничего под рутом --- это очень плохая привычка. Mongrel2
+спроектирован таким образом, чтобы корректно работать под обычным пользователем.
+Суперпользователь нужен только один раз --- чтобы запустить Mongrel2 с помощью
+m2sh и ключа -sudo.
 
-\item If you need to bind to port 80 but run under daemontools as a regular user, then use
-\href{http://manpages.ubuntu.com/manpages/lucid/man1/privbind.1.html}{privbind} to do it.
-This tool will run any command, like \file{mongrel2} but it does it in a way that lets the
-executable grab ports below 1024.  This restriction on ports is actually really stupid so
-don't worry about doing this.
+\item Храните всё в одной директории. Это упрощает процесс развёртывания.  Я,
+например, делаю всё локально, а потом с помощью \shell{rsync} загружаю на
+удалённый сервер.
 
-\item Make sure your process monitor is not a single point of failure.  Some of
-them out there will take your whole world down if they crash.  Try doing a
-harsh \ident{kill} on your process manager and see how it behaves.  As much as
-they like to tell you not to worry about this because they "run forever",
-everything has bugs and stupid people tend to kill things they don't get.
-If taking one process down nukes your whole server, then that's a bad
-design.
+\item Если вы пишите на Питоне, используйте virtualenv или аналогичный софт для
+создания изолированной виртуальной среды. Многие системы, такие как OSX,
+используют устаревшие пакеты и обновляют их на своё усмотрение. Из-за этого
+могут возникнуть проблемы совместимости. Лучший способ гарантировать
+работоспособность приложения в любой системной конфигурации --- использовать
+virtualenv.
+
+\item Создайте пользователя для своего приложения и всегда используйте только
+его. Я никогда не работаю под рутом. \emph{Абсолютно всё} работает под обычным
+пользователем и хранится в домашней папке /home/USER. Я захожу под ним и
+управляю сервером. Если мне надо перегрузить сервер (что может делать только
+суперпользователь), я делаю это в отдельной сессии (открытой с помощью screen).
+
+\item Используйте \href{http://www.gnu.org/software/screen/}{GNU screen}.
+
+\item Храните config.sqlite и .conf файл в chroot-директории, как и весь
+остальной контент. Также убедитесь, что конфигурационные файлы недоступны из
+контент-директорий. Mongrel2 помогает в этом отношении, запрещая создавать
+Dir-обработчики, которые могут открыть доступ к этим файлам из браузера.
 
 \end{enumerate}
 
-As we work on the next phase of Mongrel2 development, this will improve, so watch for
-news about deployment and real applications.
+И ещё немного советов для тех, кто хочет воспользоваться альтернативным
+менеджером процессов, таким как daemontools, runit, или init.d-скриптом.
+Неважно, что вы выберите, следующие практики помогут предотвратить некоторые
+проблемы:
+
+\begin{enumerate}
+
+\item Что бы вы ни выбрали, убедитесь, что ваша программа может запускать
+процессы под \emph{обычным} пользователем и выполнять chroot в заданную
+директорию.  Если вы запускаете Mongrel2 под суперпользователем --- это неверно.
+На самом деле, если вы запускаете любой сервис под рутом, когда сервис этого не
+требует, то это в корне неверно.
+
+\item Mongrel2 комфортно себя чувствует, если запущен под обычным пользователем.
+Более того, в этом случае он полагает, что запущен из-под менеджера процессов и
+не записывает логи в stdout/stderr.
+
+\item Если вы хотите, чтобы веб-сервер слушал 80-й порт и запускался из-под
+daemontools и под обычным пользователем --- используйте
+\href{http://manpages.ubuntu.com/manpages/lucid/man1/privbind.1.html}{privbind}.
+Эта утилита запускает любую команду, такую как \file{mongrel2}, и позволяет ей
+связываться с любым портом ниже 1024.
+
+\item Убедитесь, что менеджер процессов не является самым слабым звеном в
+системе. Иными словами, если вы убьёте его, убедитесь, что он не тянет
+за собой все процессы, которые мониторит. Не слушайте, если автор говорит вам,
+что менеджер "неубиваем и всегда будет в запущенном состоянии". В любой
+программе есть баги и люди иногда останавливают процессы по незнанию. Так что
+если такая ситуация имеет место быть --- это очень плохой дизайн и с этим надо
+что-то делать.
+
+\end{enumerate}
+
+По мере развития проекта мы будем улучшать эту область --- автоматизацию и
+р
