@@ -21,24 +21,8 @@ cd zeromq-2.0.8/
 make 
 sudo make install 
  
-# Python installieren
-sudo pacman -S python 
- 
 # sqlite3 installieren
 sudo pacman -S sqlite3 
- 
-# distribute und pip installieren
-sudo pacman -S python-pip 
-sudo pip install distribute 
- 
-# PyZMQ via github installieren
-sudo pacman -S git 
-git clone http://github.com/zeromq/pyzmq.git 
-cd pyzmq
-sudo python setup.py install 
- 
-# web.py installieren
-sudo pip install web.py
 </pre>
 
 
@@ -70,9 +54,8 @@ häufig neue Versionen veröffentlichen.</p>
 <p>Jetzt kannst du das einfachste Config-Beispiel ausprobieren und zum Laufen bekommen:</p>
 
 <pre>
-cp examples/python/tests/sample_conf.py myconfig.py
-m2sh init -db myconfig.sqlite
-m2sh load -db myconfig.sqlite  -config myconfig.py
+cp examples/configs/sample.conf mysite.conf
+m2sh load -db myconfig.sqlite  -config mysite.conf
 </pre>
 
 <p><b>HINWEIS:</b> Ein ausführlicheres Beispiel findest du unter examples/python/tests/mongrel2_org.py.</p>

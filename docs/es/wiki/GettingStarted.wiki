@@ -26,19 +26,6 @@ sudo pacman -S python
  
 # instalar sqlite3 
 sudo pacman -S sqlite3 
- 
-# instalar distribute and pip 
-sudo pacman -S python-pip 
-sudo pip install distribute 
- 
-# instalar PyZMQ from github 
-sudo pacman -S git 
-git clone http://github.com/zeromq/pyzmq.git 
-cd pyzmq
-sudo python setup.py install 
- 
-# web.py 
-sudo pip install web.py
 </pre>
 
 
@@ -69,9 +56,8 @@ actualizamos frecuentemente</p>
 <p>Ahora podés probar la configuracion mas simple y hacer que arranque:</p>
 
 <pre>
-cp examples/python/tests/sample_conf.py myconfig.py
-m2sh init -db myconfig.sqlite
-m2sh load -db myconfig.sqlite  -config myconfig.py
+cp examples/configs/sample.conf mysite.conf
+m2sh load -db myconfig.sqlite  -config mysite.conf
 </pre>
 
 <p><b>NOTA:</b>Tambien hay un examples/python/tests/mongrel2_org.py que es un ejemplo mas completo.</p>

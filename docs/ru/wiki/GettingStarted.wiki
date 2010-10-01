@@ -20,24 +20,8 @@ cd zeromq-2.0.8/
 ./configure 
 make 
 sudo make install 
- 
-# установка питона
-sudo pacman -S python 
- 
-# установка sqlite3 
-sudo pacman -S sqlite3 
- 
-# устанока пакетов distribute и pip 
-sudo pacman -S python-pip 
-sudo pip install distribute 
- 
-# установка PyZMQ c github'а
-sudo pacman -S git 
-git clone http://github.com/zeromq/pyzmq.git 
-sudo python setup.py install 
- 
-# web.py 
-sudo pip install web.py
+
+sudo pacman -S sqlite3
 </pre>
 
 
@@ -56,7 +40,7 @@ wget http://mongrel2.org/static/downloads/mongrel2-1.3.tar.bz2
 
 <pre>
 tar -xjvf mongrel2-1.3.tar.bz2
-cd mongrel2_2010-08-17_011326_58fb817f8e/
+cd mongrel2-1.3/
 make clean all install
 </pre>
 
@@ -68,9 +52,8 @@ make clean all install
 <p>Вы можете воспользоваться файлом настроек из примеров:</p>
 
 <pre>
-cp examples/python/tests/sample_conf.py myconfig.py
-m2sh init -db myconfig.sqlite
-m2sh load -db myconfig.sqlite  -config myconfig.py
+cp examples/configs/sample.conf mysite.conf
+m2sh load -db myconfig.sqlite  -config mysite.conf
 </pre>
 
 <p><b>ЗАМЕТКА:</b> В исходниках есть файл examples/python/tests/mongrel2_org.py как пример более продвинутой конфигурации.</p>
