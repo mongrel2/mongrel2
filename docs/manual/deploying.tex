@@ -191,7 +191,7 @@ deployment/profiles > mkdir chat mp3stream handlertest web mongrel2
 deployment/profiles > cd ..
 
 
-# copy the mongrel2_conf.py sample from the source to here
+# copy the mongrel2.conf sample from the source to here
 deployment > cp ~/mongrel2/examples/configs/mongrel2.conf mongrel2.conf
 
 # setup the mongrel2 database initially
@@ -685,7 +685,7 @@ long as there's the right user on the target, I'm set.
 
 \item Use \href{http://www.gnu.org/software/screen/}{GNU screen} or die.
 
-\item Keep your config.sqlite and the .py file in your chroot, and keep your content and
+\item Keep your config.sqlite and the .conf file in your chroot, and keep your content and
 everything else under that.  This makes sure that the config isn't accessible outside your
 content directories.  Mongrel2 helps you get this right by not allowing certain Dir
 configurations that would expose your chroot to the world.
