@@ -58,8 +58,32 @@ static tst_t *LOADED_HANDLERS = NULL;
 static tst_t *LOADED_PROXIES = NULL;
 static tst_t *LOADED_DIRS = NULL;
 
+static int Config_load_raw_payload_cb(void *param, int cols, char **data, char **names)
+{
+    arity(2);
+    Handler *handler = (Handler *)param;
+
+    if(data[1][0] == '1') {
+        handler->raw = 1;
+    } else if(data[1][0] == '0') {
+        handler->raw = 0;
+    } else {
+        log_warn("Handler with id=%s has a weird raw_payload setting of %s, assuming you want raw. It should be 0 or 1.",
+                data[0], data[1]);
+        handler->raw = 1;
+    }
+
+    return 0;
+
+error:
+    return 1;
+}
+
 static int Config_load_handler_cb(void *param, int cols, char **data, char **names)
 {
+    int rc = 0;
+    char *sql = NULL;
+
     arity(5);
 
     Handler *handler = Handler_create(data[1], data[2], data[3], data[4]);
@@ -67,11 +91,22 @@ static int Config_load_handler_cb(void *param, int cols, char **data, char **nam
 
     log_info("Loaded handler %s with send_spec=%s send_ident=%s recv_spec=%s recv_ident=%s", data[0], data[1], data[2], data[3], data[4]);
 
+    sql = sqlite3_mprintf("SELECT id, raw_payload FROM handler WHERE id=%q", data[0]);
+    check_mem(sql);
+
+    rc = DB_exec(sql, Config_load_raw_payload_cb, handler);
+
+    if(rc != 0) {
+        log_warn("Couldn't get the Handler.raw_payload setting, you might need to rebuild your db.");
+    }
+
     LOADED_HANDLERS = tst_insert(LOADED_HANDLERS, data[0], strlen(data[0]), handler);
 
+    sqlite3_free(sql);
     return 0;
 
 error:
+    if(sql) sqlite3_free(sql);
     return -1;
 }
 

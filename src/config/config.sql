@@ -30,7 +30,8 @@ CREATE TABLE handler (id INTEGER PRIMARY KEY,
     send_spec TEXT, 
     send_ident TEXT,
     recv_spec TEXT,
-    recv_ident TEXT);
+    recv_ident TEXT,
+    raw_payload INTEGER DEFAULT 0);
 
 CREATE TABLE proxy (id INTEGER PRIMARY KEY,
     addr TEXT,

@@ -31,7 +31,8 @@ struct tagbstring CONFIG_SCHEMA = bsStatic(
 "    send_spec TEXT, \n"
 "    send_ident TEXT,\n"
 "    recv_spec TEXT,\n"
-"    recv_ident TEXT);\n"
+"    recv_ident TEXT,\n"
+"   raw_payload INTEGER DEFAULT 0);\n"
 "\n"
 "CREATE TABLE proxy (id INTEGER PRIMARY KEY,\n"
 "    addr TEXT,\n"
@@ -88,6 +89,8 @@ struct tagbstring PROXY_SQL = bsStatic("INSERT INTO proxy (addr, port) VALUES (%
 struct tagbstring HANDLER_SQL = bsStatic("INSERT INTO handler (send_spec, send_ident, recv_spec, recv_ident) VALUES (%Q, %Q, %Q, %Q);");
 
 struct tagbstring ROUTE_SQL = bsStatic("INSERT INTO route (path, host_id, target_id, target_type) VALUES (%Q, %d, %d, %Q);");
+
+struct tagbstring HANDLER_RAW_SQL = bsStatic("UPDATE handler SET raw_payload=1 WHERE id=last_insert_rowid();");
 
 // gotta love some evil :-)
 #include "mimetypes.csql"

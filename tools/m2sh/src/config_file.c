@@ -49,6 +49,11 @@ int Handler_load(tst_t *settings, tst_t *params)
     int rc = DB_exec(sql, NULL, NULL);
     check(rc == 0, "Failed to load Handler: %s", send_spec);
 
+    const char *raw_payload = AST_str(settings, params, "raw_payload", VAL_NUMBER);
+    if(raw_payload && raw_payload[0] == '1') {
+        DB_exec(bdata(&HANDLER_RAW_SQL), NULL, NULL);
+    }
+
     sqlite3_free(sql);
     return DB_lastid();
 

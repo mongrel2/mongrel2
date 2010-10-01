@@ -12,5 +12,6 @@ extern struct tagbstring PROXY_SQL;
 extern struct tagbstring HANDLER_SQL;
 extern struct tagbstring ROUTE_SQL;
 extern struct tagbstring MIMETYPES_DEFAULT_SQL;
+extern struct tagbstring HANDLER_RAW_SQL;
 
 #endif

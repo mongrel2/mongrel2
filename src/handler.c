@@ -130,7 +130,6 @@ static inline void handler_process_request(Handler *handler, int id,
     bstring payload = NULL;
     int rc = 0;
 
-    // TODO: 0 length message will mean close connection
     if(!conn_type) {
         log_err("Ident %d (fd %d) is no longer connected.", id, fd);
         Handler_notify_leave(handler, id);
@@ -140,7 +139,10 @@ static inline void handler_process_request(Handler *handler, int id,
             check(rc != -1, "Register disconnect failed for: %d", fd);
         } else {
             payload = blk2bstr(body_start, body_length);
-            rc = deliver_payload(conn_type != CONN_TYPE_MSG, fd, payload);
+
+            int raw = conn_type != CONN_TYPE_MSG || handler->raw;
+
+            rc = deliver_payload(raw, fd, payload);
             check(rc != -1, "Failed to deliver to connection %d on socket %d", id, fd);
         }
     }
@@ -328,6 +330,7 @@ Handler *Handler_create(const char *send_spec, const char *send_ident,
     handler->recv_spec = bfromcstr(recv_spec);
     handler->send_spec = bfromcstr(send_spec);
     handler->running = 0;
+    handler->raw = 0;
 
     return handler;
 error:

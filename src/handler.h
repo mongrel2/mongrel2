@@ -50,6 +50,7 @@ typedef struct Handler {
     bstring send_spec;
     Task *task;
     int running;
+    int raw;
 } Handler;
 
 void Handler_task(void *v);
