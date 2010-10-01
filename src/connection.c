@@ -169,8 +169,7 @@ int connection_msg_to_handler(int event, void *data)
         Log_request(conn, 200, 0);
         Register_ping(conn->fd);
     } else {
-        // TODO: Get ragel to do this, not us.
-        int header_len = blength(Request_path(conn->req)) + 1;
+        int header_len = Request_header_length(conn->req);
         check(conn->nread - header_len - 1 >= 0, "Header length calculation is wrong.");
 
         Log_request(conn, 200, conn->nread - header_len - 1);
@@ -573,6 +572,8 @@ int connection_error(int event, void *data)
 }
 
 
+struct tagbstring POLICY_XML_REQUEST = bsStatic("<policy-file-request");
+
 static inline int ident_and_register(int event, void *data, int reg_too)
 {
     Connection *conn = (Connection *)data;
@@ -594,10 +595,18 @@ static inline int ident_and_register(int event, void *data, int reg_too)
     }
 #endif
 
-    if(Request_is_socket(conn->req)) {
-        conn_type = CONN_TYPE_SOCKET;
-        taskname("SOCKET");
-        next = SOCKET_REQ;
+    if(Request_is_xml(conn->req)) {
+        if(biseq(Request_path(conn->req), &POLICY_XML_REQUEST)) {
+            debug("XML POLICY FILE: %s", conn->buf + conn->req->parser.body_start);
+            conn_type = CONN_TYPE_SOCKET;
+            taskname("SOCKET");
+            next = SOCKET_REQ;
+        } else {
+            debug("XML REQUEST: %s", conn->buf + conn->req->parser.body_start);
+            conn_type = CONN_TYPE_MSG;
+            taskname("MSG");
+            next = MSG_REQ;
+        }
     } else if(Request_is_json(conn->req)) {
         conn_type = CONN_TYPE_MSG;
         taskname("MSG");

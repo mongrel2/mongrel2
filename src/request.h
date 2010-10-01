@@ -80,9 +80,9 @@ int Request_get_date(Request *req, bstring field, const char *format);
 
 #define Request_is_json(R) ((R)->parser.json_sent == 1)
 
-#define Request_is_socket(R) ((R)->parser.socket_started == 1)
+#define Request_is_xml(R) ((R)->parser.xml_sent == 1)
 
-#define Request_is_http(R) (!(Request_is_json(R) || Request_is_socket(R)))
+#define Request_is_http(R) (!(Request_is_json(R) || Request_is_xml(R)))
 
 #define Request_get_action(R, T) ((R)->action ? (R)->action->target.T : NULL)
 

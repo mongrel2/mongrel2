@@ -44,6 +44,7 @@ struct tagbstring HTTP_QUERY = bsStatic("QUERY");
 struct tagbstring HTTP_FRAGMENT = bsStatic("FRAGMENT");
 struct tagbstring HTTP_BODY = bsStatic("BODY");
 struct tagbstring JSON_METHOD = bsStatic("JSON");
+struct tagbstring XML_METHOD = bsStatic("XML");
 
 struct tagbstring HTTP_IF_MATCH = bsStatic("If-Match");
 struct tagbstring HTTP_IF_NONE_MATCH = bsStatic("If-None-Match");

@@ -47,6 +47,7 @@ extern struct tagbstring HTTP_QUERY;
 extern struct tagbstring HTTP_FRAGMENT;
 extern struct tagbstring HTTP_BODY;
 extern struct tagbstring JSON_METHOD;
+extern struct tagbstring XML_METHOD;
 extern struct tagbstring HTTP_IF_MATCH;
 extern struct tagbstring HTTP_IF_NONE_MATCH;
 extern struct tagbstring HTTP_IF_MODIFIED_SINCE;

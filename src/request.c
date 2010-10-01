@@ -102,8 +102,6 @@ static void header_done_cb(void *data, const char *at, size_t length)
     if(req->host) {
         req->host_name = colon > 0 ? bHead(req->host, colon) : bstrcpy(req->host);
     }
-    
-    // TODO: do something else here like verify the request or call filters
 }
 
 static void uri_cb(void *data, const char *at, size_t length)
@@ -273,6 +271,8 @@ bstring Request_to_payload(Request *req, bstring uuid, int fd, const char *buf, 
 
     if(Request_is_json(req)) {
         B(&HTTP_METHOD, &JSON_METHOD);
+    } else if(Request_is_xml(req)) {
+        B(&HTTP_METHOD, &XML_METHOD);
     } else {
         B(&HTTP_METHOD, req->request_method);
     }

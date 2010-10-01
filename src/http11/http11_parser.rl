@@ -97,15 +97,22 @@
       parser->request_path(parser->data, PTR_TO(mark), LEN(mark,fpc));
   }
 
-  action done { 
-    parser->body_start = fpc - buffer + 1; 
-    if(parser->header_done != NULL)
-      parser->header_done(parser->data, fpc + 1, pe - fpc - 1);
+  action done {
+      if(parser->xml_sent) {
+        parser->body_start = 0;
+      } else if(parser->json_sent) {
+        parser->body_start = PTR_TO(mark) - buffer;
+      } else {
+        parser->body_start = fpc - buffer + 1; 
+
+        if(parser->header_done != NULL)
+          parser->header_done(parser->data, fpc + 1, pe - fpc - 1);
+      }
     fbreak;
   }
 
-  action socket {
-      parser->socket_started = 1;
+  action xml {
+      parser->xml_sent = 1;
   }
 
   action json {
@@ -160,10 +167,15 @@
 
   Request = Request_Line ( message_header )* ( CRLF @done );
 
-  SocketStart = "<policy-file-request/>\0" @socket @done;
-  SocketData = [{<] any* [}>] :>> "\0";
-  SocketJSON = ("@" rel_path ) >mark %request_path " " SocketData @json @done;
-  SocketRequest = SocketStart | SocketJSON;
+  SocketJSONStart = ("@" rel_path);
+  SocketJSONData = "{" any* "}" :>> "\0";
+
+  SocketXMLData = ("<" [a-z0-9A-Z\-.]+) >mark %request_path any* ">" :>> "\0";
+
+  SocketJSON = SocketJSONStart >mark %request_path " " SocketJSONData >mark @json;
+  SocketXML = SocketXMLData @xml;
+
+  SocketRequest = (SocketXML | SocketJSON) @done;
 
 main := Request | SocketRequest;
 
@@ -182,7 +194,7 @@ int http_parser_init(http_parser *parser) {
   parser->nread = 0;
   parser->field_len = 0;
   parser->field_start = 0;
-  parser->socket_started = 0;
+  parser->xml_sent = 0;
   parser->json_sent = 0;
 
   return(1);
