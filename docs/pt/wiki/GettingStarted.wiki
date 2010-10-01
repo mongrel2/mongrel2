@@ -1,0 +1,91 @@
+<h1>Começando com o Mongrel2</h1>
+
+<p>Traduções: <a href="/doc/tip/docs/ru/wiki/GettingStarted.wiki">.ru</a> <a href="/doc/tip/docs/de/wiki/GettingStarted.wiki">.de</a>
+<a href="/doc/tip/docs/es/wiki/GettingStarted.wiki">.es</a>
+<a href="/doc/tip/docs/fr/wiki/GettingStarted.wiki">.fr</a>
+<a href="/doc/tip/docs/pt/wiki/GettingStarted.wiki">.pt</a>
+</p>
+
+<p>Esta é a maneira mais rápida de começar a usar o Mongrel2. Não explica todos os recursos, somente as dependências e os comandos necessários para configurar.
+Se quiser uma ótima explicação de tudo, leia
+<a href="/doc/tip/docs/manual/book.wiki">O Manual do Mongrel2 (HTML)</a> um manual completo que explica tudo, desde o começo até a criação dos primeiros handlers.</p>
+
+<p>Este guia assume que você sabe executar comandos no Unix.</p>
+
+<h1>Compilando as Dependências</h1>
+
+<p>Um exemplo usando o ArchLinux:</p>
+
+<pre>
+# instalar o ZeroMQ 
+wget http://www.zeromq.org/local--files/area:download/zeromq-2.0.8.tar.gz 
+tar -xzvf zeromq-2.0.8.tar.gz 
+cd zeromq-2.0.8/ 
+./configure 
+make 
+sudo make install 
+ 
+# instalar o sqlite3 
+sudo pacman -S sqlite3 
+</pre>
+
+
+<h1>Conseguindo o código fonte</h1>
+
+<p>A forma mais rápida é baixar o arquivo tar.bz2.</p>
+
+<pre>
+wget http://mongrel2.org/static/downloads/mongrel2-1.3.tar.bz2
+</pre>
+
+
+<h1>Compilando o Mongrel2</h1>
+
+<p>Agora, você precisa compilar o mongrel2:</p>
+
+<pre>
+tar -xjvf mongrel2-1.3.tar.bz2
+cd mongrel2-1.3/
+make clean all install
+</pre>
+
+<p>O número de versão da sua pasta pode ser diferente porque a gente atualiza com frequência.</p>
+
+<h1>Configurando pela primeira vez</h1>
+
+<p>Agora, vamos usar a configuração mais simples para fazer rodar:</p>
+
+<pre>
+cp examples/configs/sample.conf mysite.conf
+m2sh load -config mysite.conf
+ls config.sqlite
+</pre>
+
+<p><b>NOTA:</b>Existem outros exemplos na pasta examples/*.conf.</p>
+
+<h1>Executando o Mongrel2</h1>
+
+<p>Agora, você pode executar. Assegurar que você está na pasta das fontes do mongrel2:<p>
+
+<pre>
+mkdir run logs tmp
+m2sh start -host localhost
+</pre>
+
+<p>Usando uma nova janela execute:</p>
+
+<pre>
+curl http://localhost:6767/tests/sample.html
+hi there
+</pre>
+
+
+<h1>Finalizando o servidor</h1>
+
+<p>Teclando CTRL-C fechará o servidor. <b>m2sh</b> tem vários outros comandos inclusive uns que finalizam e reiniciam serviços. Execute <b>m2sh help</b> para conhecer todos.</p>
+
+
+<h1>Conhecer mais no manual</h1>
+
+<p>Esta é a maneira mais rápida possível para começar a usar o Mongrel2. Agora, você deveria ler <a href="/doc/tip/docs/manual/book.wiki">O Manual do Mongrel2
+ (HTML)</a> que demorou mais tempo a escrever e explica todas os recursos disponíveis.
