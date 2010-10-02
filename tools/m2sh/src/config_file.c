@@ -35,6 +35,8 @@ error:
     return -1;
 }
 
+struct tagbstring RAW_PAYLOAD = bsStatic("raw_payload");
+
 int Handler_load(tst_t *settings, tst_t *params)
 {
     const char *send_spec = AST_str(settings, params, "send_spec", VAL_QSTRING);
@@ -49,9 +51,11 @@ int Handler_load(tst_t *settings, tst_t *params)
     int rc = DB_exec(sql, NULL, NULL);
     check(rc == 0, "Failed to load Handler: %s", send_spec);
 
-    const char *raw_payload = AST_str(settings, params, "raw_payload", VAL_NUMBER);
-    if(raw_payload && raw_payload[0] == '1') {
-        DB_exec(bdata(&HANDLER_RAW_SQL), NULL, NULL);
+    if(tst_search(params, bdata(&RAW_PAYLOAD), blength(&RAW_PAYLOAD))) {
+        const char *raw_payload = AST_str(settings, params, "raw_payload", VAL_NUMBER);
+        if(raw_payload && raw_payload[0] == '1') {
+            DB_exec(bdata(&HANDLER_RAW_SQL), NULL, NULL);
+        }
     }
 
     sqlite3_free(sql);
