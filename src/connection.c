@@ -170,7 +170,7 @@ int connection_msg_to_handler(int event, void *data)
         Register_ping(conn->fd);
     } else {
         int header_len = Request_header_length(conn->req);
-        check(conn->nparsed - header_len - 1 >= 0, "Header length calculation is wrong.");
+        check((int)conn->nparsed - header_len - 1 >= 0, "Header length calculation is wrong.");
 
         Log_request(conn, 200, conn->nparsed - header_len - 1);
 
@@ -189,14 +189,13 @@ int connection_msg_to_handler(int event, void *data)
     debug("MSG nread: %d, nparsed: %d", conn->nread, conn->nparsed);
 
     // TODO: redesign how the buffers are dealt with so we don't do this memmove crap
-    conn->nread -= conn->nparsed;
 
-    if(conn->nread > 0) {
+    if(conn->nread - (int)conn->nparsed >= 0) {
         memmove(conn->buf, conn->buf + conn->nparsed, conn->nread - conn->nparsed);
         debug("NEW MSG: %s", conn->buf);
+        conn->nread -= conn->nparsed;
     } else {
-        debug("OUT OF DATA");
-        conn->nread = 0;
+        debug("OUT OF DATA: %d of %d", conn->nread, conn->nparsed);
     }
 
     return REQ_SENT;
