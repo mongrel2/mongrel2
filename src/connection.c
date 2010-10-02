@@ -170,32 +170,19 @@ int connection_msg_to_handler(int event, void *data)
         Register_ping(conn->fd);
     } else {
         int header_len = Request_header_length(conn->req);
-        check((int)conn->nparsed - header_len - 1 >= 0, "Header length calculation is wrong.");
+        check(conn->nread - header_len - 1 >= 0, "Header length calculation is wrong.");
 
-        Log_request(conn, 200, conn->nparsed - header_len - 1);
+        Log_request(conn, 200, conn->nread - header_len - 1);
 
         bstring payload = Request_to_payload(conn->req, handler->send_ident,
-                conn->fd, conn->buf + header_len, conn->nparsed - header_len - 1);
+                conn->fd, conn->buf + header_len, conn->nread - header_len - 1);
 
-        debug("MSG TO HANDLER: %s of LENGTH: %d", bdata(payload), blength(payload));
+        debug("MSG TO HANDLER: %s", bdata(payload));
 
         rc = Handler_deliver(handler->send_socket, bdata(payload), blength(payload));
         bdestroy(payload);
     
         check(rc == 0, "Failed to deliver to handler: %s", bdata(Request_path(conn->req)));
-    }
-
-
-    debug("MSG nread: %d, nparsed: %d", conn->nread, conn->nparsed);
-
-    // TODO: redesign how the buffers are dealt with so we don't do this memmove crap
-
-    if(conn->nread - (int)conn->nparsed >= 0) {
-        memmove(conn->buf, conn->buf + conn->nparsed, conn->nread - conn->nparsed);
-        debug("NEW MSG: %s", conn->buf);
-        conn->nread -= conn->nparsed;
-    } else {
-        debug("OUT OF DATA: %d of %d", conn->nread, conn->nparsed);
     }
 
     return REQ_SENT;
@@ -621,7 +608,6 @@ static inline int ident_and_register(int event, void *data, int reg_too)
             next = MSG_REQ;
         }
     } else if(Request_is_json(conn->req)) {
-        debug("JSON REQUEST: %s", conn->buf + conn->req->parser.body_start);
         conn_type = CONN_TYPE_MSG;
         taskname("MSG");
         next = MSG_REQ;
@@ -659,6 +645,7 @@ int connection_identify_request(int event, void *data)
 int connection_parse(int event, void *data)
 {
     Connection *conn = (Connection *)data;
+    conn->nread = 0;
 
     if(Connection_read_header(conn, conn->req) > 0) {
         return REQ_RECV;
@@ -886,7 +873,7 @@ int Connection_read_header(Connection *conn, Request *req)
     int finished = 0;
     int n = 0;
     conn->nparsed = 0;
-    int remaining = BUFFER_SIZE - 1 - conn->nread;
+    int remaining = BUFFER_SIZE - 1;
     char *cur_buf = conn->buf;
 
     Request_start(req);
@@ -894,12 +881,10 @@ int Connection_read_header(Connection *conn, Request *req)
     conn->buf[BUFFER_SIZE] = '\0';  // always cap it off
 
     while(finished != 1 && remaining >= 0) {
-        if(conn->nread == 0) {
-            n = conn->recv(conn, cur_buf, remaining);
-            check_debug(n > 0, "Failed to read from socket after %d read: %d parsed.",
-                        conn->nread, (int)conn->nparsed);
-            conn->nread += n;
-        }
+        n = conn->recv(conn, cur_buf, remaining);
+        check_debug(n > 0, "Failed to read from socket after %d read: %d parsed.",
+                    conn->nread, (int)conn->nparsed);
+        conn->nread += n;
 
         check(conn->buf[BUFFER_SIZE] == '\0', "Trailing \\0 was clobbered, buffer overflow potentially.");
 
