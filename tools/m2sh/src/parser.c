@@ -825,7 +825,7 @@ static void yy_reduce(
         break;
       case 12: /* class ::= CLASS LPAREN parameters RPAREN */
 #line 63 "src/parser.y"
-{ yygotominor.yy29 = calloc(sizeof(Class), 1); yygotominor.yy29->ident = yymsp[-3].minor.yy0; yygotominor.yy29->params = yymsp[-1].minor.yy9;   yy_destructor(yypParser,8,&yymsp[-2].minor);
+{ yygotominor.yy29 = calloc(sizeof(Class), 1); yygotominor.yy29->id = -1; yygotominor.yy29->ident = yymsp[-3].minor.yy0; yygotominor.yy29->params = yymsp[-1].minor.yy9;   yy_destructor(yypParser,8,&yymsp[-2].minor);
   yy_destructor(yypParser,9,&yymsp[0].minor);
 }
 #line 832 "src/parser.c"

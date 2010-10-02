@@ -193,6 +193,7 @@ static int Config_load_route_cb(void *param, int cols, char **data, char **names
     void *target = NULL;
     BackendType type = 0;
 
+    check(data[3] != NULL, "Route type is NULL but shouldn't be for route id=%s", data[0]);
 
     if(strcmp("handler", data[3]) == 0)
     {

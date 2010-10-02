@@ -19,6 +19,7 @@ typedef struct Pair {
 typedef struct Class {
     Token *ident;
     tst_t *params;
+    int id;
 } Class;
 
 typedef enum ValueType {

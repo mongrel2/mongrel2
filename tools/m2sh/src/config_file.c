@@ -143,29 +143,31 @@ int Route_load(tst_t *settings, Pair *pair)
     char *sql = NULL;
     Value *val = Pair_value(pair);
     bstring type = NULL;
+    int rc = 0;
 
     check(val, "Error loading route: %s", bdata(Pair_key(pair)));
     check(Value_is(val, CLASS), "Expected a Class but got a %s instead.",
             Value_type_name(val->type));
     Class *cls = val->as.cls;
-
-    int rc = 0;
     type = bstrcpy(Class_ident(cls));
     btolower(type);
 
-    if(biseqcstr(type, "dir")) {
-        rc = Dir_load(settings, cls->params);
-    } else if(biseqcstr(type, "proxy")) {
-        rc = Proxy_load(settings, cls->params);
-    } else if(biseqcstr(type, "handler")) {
-        rc = Handler_load(settings, cls->params);
-    } else {
-        sentinel("Invalid type of route target: %s", bdata(Class_ident(cls)));
+    if(cls->id == -1) {
+        if(biseqcstr(type, "dir")) {
+            rc = Dir_load(settings, cls->params);
+        } else if(biseqcstr(type, "proxy")) {
+            rc = Proxy_load(settings, cls->params);
+        } else if(biseqcstr(type, "handler")) {
+            rc = Handler_load(settings, cls->params);
+        } else {
+            sentinel("Invalid type of route target: %s", bdata(Class_ident(cls)));
+        }
+
+        check(rc != -1, "Failed to create target for route %s", name);
+        cls->id = rc;
     }
 
-    check(rc != -1, "Failed to create target for route %s", name);
-
-    sql = sqlite3_mprintf(bdata(&ROUTE_SQL), name, HOST_ID, rc, bdata(type));
+    sql = sqlite3_mprintf(bdata(&ROUTE_SQL), name, HOST_ID, cls->id, bdata(type));
 
     rc = DB_exec(sql, NULL, NULL);
     check(rc == 0, "Failed to intialize route.");
@@ -195,7 +197,7 @@ int Host_load(tst_t *settings, Value *val)
     int rc = DB_exec(sql, NULL, NULL);
     check(rc == 0, "Failed to store Host: %s", name);
 
-    HOST_ID = DB_lastid();
+    cls->id = HOST_ID = DB_lastid();
 
     Value *routes = AST_get(settings, cls->params, &ROUTES_VAR, VAL_HASH);
     check(routes, "Didn't find any routes for %s", name);
@@ -232,7 +234,7 @@ int Server_load(tst_t *settings, Value *val)
     rc = DB_exec(sql, NULL, NULL);
     check(rc == 0, "Failed to exec SQL: %s", sql);
 
-    SERVER_ID = DB_lastid();
+    cls->id = SERVER_ID = DB_lastid();
 
     Value *hosts = AST_get(settings, cls->params, &HOSTS_VAR, VAL_LIST);
     check(hosts != NULL, "Could not find Server.hosts setting in host %s:%s", 
