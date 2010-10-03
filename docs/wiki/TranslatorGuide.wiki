@@ -30,7 +30,7 @@
 <ol>
 <li>Email it to the <a href="mailto:mongrel2@librelist.com">mongrel2@librelist.com</a> mailing list as an <b>attachment</b> and one of us will put it in.  This is the best if you just do one wiki page and don't plan on doing lots of translations.</li>
 <li>Put your fossil repository online using <b>fossil serve</a> as described in <a href="http://mongrel2.org/wiki?name=ContributorInstructions">ContributorInstructions</a> and ask one of us to pull from it.  This is best if you want to do many translations, or maybe the manual.  If you show active involvement we'll give you contributor access to the main repository.</li>
-<ol>
+</ol>
 
 <p>As usual, if you have questions then join the <a href="mailto:mongrel2@librelist.com">mongrel2@librelist.com</a> mailing list and we'll help out.</p>
 
