@@ -1,0 +1,95 @@
+<h1>Pradžia su Mongrel2</h1>
+
+<p>Vertimai: <a href="/doc/tip/docs/ru/wiki/GettingStarted.wiki">.ru</a> <a href="/doc/tip/docs/de/wiki/GettingStarted.wiki">.de</a>
+<a href="/doc/tip/docs/es/wiki/GettingStarted.wiki">.es</a>
+<a href="/doc/tip/docs/fr/wiki/GettingStarted.wiki">.fr</a>
+<a href="/doc/tip/docs/pt/wiki/GettingStarted.wiki">.pt</a>
+<a href="/doc/tip/docs/cn/wiki/GettingStarted.wiki">.cn</a>
+</p>
+<p>Tai greičiausias būdas pradėti dirbti su Mongrel2. Čia niekas nepaaiškinta, 
+tiesiog pradžia ir keletas komandų. Jeigu jums reikia nuoseklaus paaiškinimo viskam, 
+ką čia ketinate daryti, geriau perskaitykite 
+<a href="/doc/tip/docs/manual/book.wiki">Mongrel2 vadovėlį</a>. Ten viskas aprašyta nuo Mongrel2 derinimo iki savo valdiklių (handlers) rašymo.</p>
+
+<p>Yra numanoma, kad jūs žinote, ką darote, paleisdami kiekvieną komanda Unix aplinkoje.</p>
+
+
+<h1>Priklausomybių tvarkymas</h1>
+
+<p>Štai kaip tai galima atlikti ArchLinux aplinkoje:</p>
+
+<pre>
+# ZeroMQ diegimas 
+wget http://www.zeromq.org/local--files/area:download/zeromq-2.0.8.tar.gz 
+tar -xzvf zeromq-2.0.8.tar.gz 
+cd zeromq-2.0.8/ 
+./configure 
+make 
+sudo make install 
+ 
+# sqlite3 diegimas
+sudo pacman -S sqlite3 
+</pre>
+
+
+<h1>Kodo parsisiuntimas</h1>
+
+<p>Greičiausias būdas - parsisiųsti tar.bz2 bylą:</p>
+
+<pre>
+wget http://mongrel2.org/static/downloads/mongrel2-1.3.tar.bz2
+</pre>
+
+
+<h1>Mongrel2 kompiliavimas</h1>
+
+<p>Dabar galite sukompiliuoti mongrel2:</p>
+
+<pre>
+tar -xjvf mongrel2-1.3.tar.bz2
+cd mongrel2-1.3/
+make clean all install
+</pre>
+
+<p>Versijos numeris katalogo pavadinime gali skirtis, kadangi mes dažnai atnaujiname kodą.</p>
+
+
+<h1>Pirminis konfigūravimas</h1>
+
+<p>Dabar jūs galite išbandyti paprasčiausią konfigūraciją ją užkraudami:</p>
+
+<pre>
+cp examples/configs/sample.conf mysite.conf
+m2sh load -config mysite.conf
+ls config.sqlite
+</pre>
+
+<p><b>PASTABA:</b>Yra ir kitų pavyzdžių tarp examples/*.conf bylų.</p>
+
+<h1>Mongrel2 paleidimas</h1>
+
+<p>Dabar jūs galite paleisti ir išbandyti tai. Įsitikinkite, kad jūs vis dar esate mongrel2 kodo kataloge:</p>
+
+<pre>
+mkdir run logs tmp
+m2sh start -host localhost
+</pre>
+
+<p>Kitame terminale:</p>
+
+<pre>
+curl http://localhost:6767/tests/sample.html
+hi there
+</pre>
+
+
+<h1>Išjungimas</h1>
+
+<p>Tiesiog paspauskite CTRL-C ir viskas išsijungs. <b>m2sh</b> turi begale kitų komandų ir kai kurios iš jų 
+išjungia arba perkrauna mongrel2. Paleskite <b>m2sh help</b> kad sužinotumėte apie tai daugiau.</p>
+
+<h1>Daugiau mokykitės iš vadovėlio</h1>
+
+<p>Tai yra greičiausias būdas Mongrel2 paleidimui. 
+Dabar jūs turėtumėte perskaityti <a href="/doc/tip/docs/manual/book.wiki">Mongrel2 vadovėlį (HTML)</a>, 
+kuriam mes skyrėme žymiai daugiau laiko rašydami ir tobulindami.</p>

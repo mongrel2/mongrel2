@@ -1,0 +1,138 @@
+﻿
+<h1>About Mongrel2</h1>
+
+<p style="font-size: 1.2em;">Mongrel2 is an <em>application</em>,
+<em>language</em>, and <em>network architecture</em> <b>agnostic</b> web
+server that focuses on web <b>applications</b> using <em>modern</em> browser
+technologies.</p>
+
+<div class="donors">
+<img src="http://mongrel2.org/static/logo.png" align="right"><br/>
+
+<h3>Thanks To</h3>
+<ul class="donors">
+<li><a href="http://websterclay.com/">Webster Clay</a></li>
+<li><a href="http://cramerdev.com">Cramerdev</a></li>
+<li><a href="http://ThinkCode.TV">ThinkCode.TV</a></li>
+<li><a href="http://envato.com/">Envato</a></li>
+<li><a href="http://highgroove.com/">Highgroove Studios</a></li>
+<li><a href="http://infinitelybeta.com">Infinitely Beta</a></li>
+<li><a href="http://pragmaticbadger.com/">Pragmatic Badger</a></li>
+<li><a href="http://mongrel2.org/wiki?name=Donors">.. and Friends.</a></li>
+</ul>
+</div>
+
+<h2><a name="features">Features</a></h2>
+
+<ul>
+    <li><b>Language Agnostic</b> with a simple backend protocol supporting <a href="http://github.com/perplexes/m2r">Ruby</a>,
+    <a href="http://github.com/berry/Mongrel2-WSGI-Handler">Python</a>,
+    <a href="http://github.com/akrennmair/mongrel2-cpp">C++</a>,
+    <a href="http://github.com/winks/m2php">PHP</a>,
+    <a href="http://github.com/cmoore/web-mongrel2">Haskell</a>,
+    <a href="http://github.com/vseloved/cl-mongrel2">Common Lisp</a>,
+    <a href="http://github.com/lestrrat/Plack-Handler-Mongrel2">Perl</a>,
+    <a href="http://github.com/AustinWise/m2net">.NET</a>,
+    <a href="http://github.com/mikejs/ring/tree/master/ring-mongrel2-adapter/">Clojure</a>,
+    and <a href="http://github.com/jsimmons/mongrel2-lua/">Lua</a> all written by Mongrel2 fans.</li>
+    <li><b>Modern Browser Friendly</b> designed to handle HTTP, Flash XMLSockets, or WebSockets, Long Polling on the same socket transparently.</li>
+    <li><b><a href="http://zeromq.org">ZeroMQ</a> Enabled</b> as well as HTTP proxy support so it works with what you have already while giving you new super powers.</li>
+    <li><b>Network Architecture Agnostic</b> so you can carve your operations up anyway that reduces costs.</li>
+    <li><b>N:M Messaging Patterns</b> means you can have any N handlers answer to any M browsers arbitrarily, but still easy to do plain request/response.</li>
+    <li><b>Automation Loving Configs</b> that are easily accessible via any programming language with an Model-View-Controller design.</li>
+    <li><b>Modern Internal Design</b> using the Mongrel 1 HTTP parser powering many big companies with a proven security track record, event based I/O, fast coroutines
+    to handle that I/O, and smart reasonable defaults with zero configuration needed usually.</li>
+    <li><b>Documented, Documented, Documented</b> We <a href="/doc/tip/docs/manual/book.wiki">document everything</a> in a well written manual that
+    shows you how to use every feature.</li>
+    <li><b>BSD Licensed</b> and all with a <a href="/wiki?name=License">BSD 3-clause license</a>.</li>
+</ul>
+
+
+
+<h2><a name="download">Download</a></h2>
+
+<p>Mongrel2 is now 1.3 as of Sep 29 2010:</p>
+
+<ul>
+    <li><a href="/static/downloads/mongrel2-1.3.tar.bz2">mongrel2-1.3.tar.bz2</a> 
+    MD5: dfc19b26e93d707c68fcff2d72a0d03f</li>
+    <li><a href="/static/downloads/mongrel2-1.3.zip">mongrel2-1.3.zip</a>
+    MD5: 900f362384cc972e5d049f40725e8994</li>
+</ul>
+
+
+<h2><a name="docs">Documentation</a></h2>
+
+<p>Mongrel2 is a very well documented piece of software, as we think great docs will make you
+more productive and get you running.  The documentation is written to be easy to read, pack a lot
+of information in a small space, and cover everything you need without going crazy on minute details.
+Currently we have:<p>
+
+<ul>
+    <li><a href="/wiki?name=GettingStarted">GettingStarted</a> a crash course in getting up and running.</li>
+    <li><a href="/doc/tip/docs/manual/book.wiki">The Mongrel2 Manual (HTML)</a> is a complete manual covering everything from getting started, to writing your first handlers.</li>
+    <li><a href="/static/book-final.pdf">The Mongrel2 Manual (PDF)</a> grab this if you want better formatting.</li>
+    <li><a href="/wiki?name=DesignCriticisms">DesignCriticisms</a></li>
+    <li><a href="/wiki?name=ContributorInstructions">ContributorInstructions</a> for if you want to make a patch.</li>
+    <li><a href="/wiki?name=TranslatorGuide">TranslatorGuide</a> for if you want to make a translation to another language.</li>
+</ul>
+
+<h2><a name="translations">Translations</a></h2>
+
+<p>We've started translating the manual into Russian as well, for now you can read the 
+<a href="/wiki?name=GettingStarted">GettingStarted</a> document in
+<a href="/doc/tip/docs/ru/wiki/GettingStarted.wiki">Russian</a>,
+<a href="/doc/tip/docs/es/wiki/GettingStarted.wiki">Spanish</a>,
+<a href="/doc/tip/docs/de/wiki/GettingStarted.wiki">German</a> and
+<a href="/doc/tip/docs/fr/wiki/GettingStarted.wiki">French</a>
+with more to come.</p>
+
+
+<h2><a name="languages">Languages</a></h2>
+
+<p>Mongrel2 fans have written quite a few handlers already:</p>
+
+<ul>
+    <li><a href="http://github.com/perplexes/m2r">Ruby (with Rack support)</a></li>
+    <li><a href="http://github.com/berry/Mongrel2-WSGI-Handler">Python (with WSGI)</a></li>
+    <li><a href="http://github.com/akrennmair/mongrel2-cpp">C++</a></li>
+    <li><a href="http://github.com/winks/m2php">PHP</a></li>
+    <li><a href="http://github.com/cmoore/web-mongrel2">Haskell</a></li>
+    <li><a href="http://github.com/vseloved/cl-mongrel2">Common Lisp</a></li>
+    <li><a href="http://github.com/lestrrat/Plack-Handler-Mongrel2">Perl (with Plack)</a></li>
+    <li><a href="http://github.com/AustinWise/m2net">.NET (Windows <b>and</b> Linux with ASP.NET)</a></li>
+    <li><a href="http://github.com/mikejs/ring/tree/master/ring-mongrel2-adapter/">Clojure</a></li>
+    <li><a href="http://github.com/jsimmons/mongrel2-lua/">Lua</a></li>
+</ul>
+
+<p>It is very easy to create a handler, you should read the <a href="http://mongrel2.org/doc/tip/docs/manual/book.wiki#x1-590005.2">manual about handlers</a> for 
+information on writing one for your language.</p>
+
+
+
+
+<h2><a name="lists">IRC and Mailing Lists</a></h2>
+
+<ul>
+    <li>You can join the <a href="http://librelist.com">Librelist</a> mailing list by emailing <a href="mailto:mongrel2@librelist.com">mongrel2@librelist.com</a>.</li>
+    <li>There is an IRC channel #mongrel2 on irc.freenode.org</li>
+</ul>
+
+<p>I reserve the right to boot anyone I want off these for being obnoxious, and I arbitrarily define "obnoxious" however I want.</p>
+
+
+<h2><a name="contributors">Contributors</a></h2>
+
+<p>Here's the current list of contributors of people hacking on Mongrel2:</p>
+
+<ul>
+    <li><a href="http://twitter.com/alexgartrell"><b>agartrell</b></a> works on core Mongrel2 like directory serving and the kegogi testing tool.</li>
+    <li><a href="http://twitter.com/joshrsimmons"><b>jsimmons</b></a> wrote the Lua binding and hacks on the core Mongrel2.</li>
+    <li><b>pbastov</b> works on translating things to Russian.</li>
+    <li><b>phred</b> hacks on procer and some of the core Mongrel2.</li>
+    <li><a href="http://twitter.com/tordek"><b>tordek</b></a> finds bugs in Mongrel2 and edited <a href="/doc/tip/docs/manual/book.wiki">the manual</a>.</li>
+    <li><a href="http://twitter.com/anderiasch"><b>wink</b></a> wrote the PHP stuff and hacks on Mongrel2.</li>
+    <li><a href="http://twitter.com/zedshaw"><b>zedshaw</b></a> started it all.</li>
+</ul>
+
+

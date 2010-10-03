@@ -1,0 +1,57 @@
+<h1>Donating To Mongrel2</h1>
+
+<p>The Mongrel2 Project is volunteer run and mostly written by me, <a
+href="http://zedshaw.com">Zed A. Shaw</a>.  If you believe in the project's
+goal of a truly programming language agnostic practical bad ass web server,
+then please donate.  You can also see a list of <a
+href="/wiki?name=Donors">Donors</a> so far.  Donations
+go to me as a way to fund my work on Mongrel2.</p>
+
+<h2>Donate With Paypal</h2>
+
+<p><a href="http://paypal.com">Paypal</a> is the preferred way to donate and works for anyone no matter where they are from.</a>
+
+<form action="https://www.paypal.com/cgi-bin/webscr" method="post">
+<input type="hidden" name="cmd" value="_s-xclick">
+<input type="hidden" name="encrypted" value="-----BEGIN PKCS7-----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-----END PKCS7-----
+">
+<input type="image" src="https://www.paypal.com/en_US/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+<img alt="" border="0" src="https://www.paypal.com/en_US/i/scr/pixel.gif" width="1" height="1">
+</form>
+
+
+<h2>Donate With Amazon (US Only)</h2>
+
+<p>
+I used to accept donations from Amazon, but they decided to hold money early on pending a review.  I now don't use them, and don't recommend
+them to anyone else.  If you want to use Amazon, then you can give me a gift certificate if you like.  Send it to <a href="mailto:zedshaw@zedshaw.com">zedshaw@zedshaw.com</a>
+and I'll be happy to use it.  I buy stuff from Amazon all the time.
+</p>
+
+
+<h2>Advertising Sponsor</h2>
+
+<p>If you want a more prominent display then I'll be putting a small number of
+small logos representing companies who agree to sponsor Mongrel2.  If you're
+interested in sponsoring Mongrel2 then contact <a href="mailto:zedshaw@zedshaw.com">zedshaw@zedshaw.com</a> and let me know what
+you'd like to give and who you are.</p>
+
+<p>Keep in mind though that I don't do backroom deals, so even if you donate I will still try to keep the project focused on what
+people are doing with it and what fits my vision for the project.  Donating money gets you focus on your company, not say in my project.
+</p>
+
+<h2>Other Ways To Help</h2>
+
+<p>If you can't donate money but still want to help then there's plenty of things you can do to help the project:</p>
+
+<ul>
+<li>Try running actual projects on Mongrel2 and report bugs in the <a href="/tktnew">Tickets</a> section so we can fix them.</li>
+<li>Writing a blog post about Mongrel2, good or bad, helps, but make sure we know about it so we can read it.</li>
+<li>Offering to write documentation for your particular operating system flavor.</li>
+<li>Fixing things and sending in patches.</li>
+<li>Creating handler implementations in other languages, the more the better.</li>
+<li>Writing new configuration interfaces to compliment the existing Python based m2sh.</li>
+<li>Thinking up crazy features so we can maybe implement them, and probably tell you to do it as a handler.</li>
+<li>If you're in SF and are using Mongrel2 then I (Zed) will gladly come check out what you are doing.  It's like free consulting!</li>
+</ul>
+
