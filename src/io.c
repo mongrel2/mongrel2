@@ -160,12 +160,16 @@ static inline void IOBuf_compact(IOBuf *buf)
  */
 char *IOBuf_read(IOBuf *buf, int need, int *out_len)
 {
+    debug("Asked to read %d from buffer with %d avail and %d len", 
+            need, buf->avail, buf->len);
+
     int rc = 0;
     assert(buf->cur + buf->avail <= buf->len && 
             "Buffer math off, cur+avail can't be more than > len.");
     assert(buf->cur >= 0 && "Buffer cur can't be < 0");
     assert(buf->avail >= 0 && "Buffer avail can't be < 0");
     assert(need <= buf->len && "Request for more than possible in the buffer.");
+    assert(!IOBuf_closed(buf) && "Attempt to read from closed buffer.");
 
     if(buf->avail < need) {
         debug("need to fill the buffer with more, attempt a read");
@@ -177,7 +181,8 @@ char *IOBuf_read(IOBuf *buf, int need, int *out_len)
                 IOBuf_remaining(buf), buf->avail);
         rc = buf->recv(buf, IOBuf_read_point(buf), IOBuf_remaining(buf));
 
-        if(rc < 0) {
+        // TODO: determine if this should be <=
+        if(rc <= 0) {
             debug("Socket was closed, will return only what's available: %d", buf->avail);
             buf->closed = 1;
         }
@@ -247,12 +252,16 @@ int IOBuf_send(IOBuf *buf, char *data, int len)
  */
 char *IOBuf_read_all(IOBuf *buf, int len, int retries)
 {
+    debug("Asked to read ALL %d from buffer with %d avail and %d len", 
+            len, buf->avail, buf->len);
+
     int nread = 0;
-    assert(len < buf->len && "Cannot read more than the buffer length.");
+    assert(len <= buf->len && "Cannot read more than the buffer length.");
 
     char *data = IOBuf_read(buf, len, &nread);
+    check(!IOBuf_closed(buf), "Closed when attempting to read from buffer.");
 
-    while(retries > 0) {
+    while(nread < len && retries > 0) {
         data = IOBuf_read(buf, len, &nread);
         check(data, "Read error from socket.");
         assert(nread <= len && "Invalid nread size (too much) on IOBuf read.");

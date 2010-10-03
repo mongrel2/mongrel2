@@ -254,7 +254,6 @@ int connection_http_to_handler(int event, void *data)
     Connection *conn = (Connection *)data;
     int content_len = Request_content_length(conn->req);
     int header_len = Request_header_length(conn->req);
-    int total = header_len + content_len;
     int rc = 0;
     char *body = NULL;
     bstring result = NULL;
@@ -272,10 +271,13 @@ int connection_http_to_handler(int event, void *data)
         content_len = 0;
         check(upload_store != NULL, "Failed to upload file.");
     } else {
-        total = 0;
-        sentinel("REWRITE NEEDED");
-        // no matter what, the body will need to go here
-        // body = conn->buf + header_len;
+        if(content_len > conn->iob->len) {
+            // temporarily grow the buffer
+            // TODO: also consider sizing it back down when not needed
+            IOBuf_resize(conn->iob, content_len);
+        }
+
+        body = IOBuf_read_all(conn->iob, content_len, 5);
     }
 
     Log_request(conn, 200, content_len);
@@ -759,6 +761,7 @@ int Connection_read_header(Connection *conn, Request *req)
         rc = Request_parse(req, data, avail, &nparsed);
     }
 
+    IOBuf_read_commit(conn->iob, (int)nparsed);
     error_unless(rc == 1, conn, 400, "Error in parsing.");
 
     // add the x-forwarded-for header
