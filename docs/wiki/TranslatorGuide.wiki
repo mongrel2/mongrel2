@@ -1,0 +1,37 @@
+<h1>Translator Guide</h1>
+
+<p>If you would like to translate any part of the <a href="http://mongrel2.org/wcontent">wiki</a> or the <a href="http://mongrel2.org/doc/tip/docs/manual/book.wiki">manual</a> to another language then there are just a few things you need to do.  First let's cover some things to consider before starting:
+</p>
+
+<ol>
+<li>Make sure that the there isn't a translation already.  Usually the top of the page lists the translations available.</li>
+<li>You have to agree to keep any nationalistic, racist, or ethnocentric concerns out of your language choice.  This means that if your language choice is controversial because of war, genocide, oppression, or similar concerns then I'll remove it.</li>
+<li>The most popular document to translate is the <a href="http://mongrel2.org/wiki?name=GettingStarted">GettingStarted</a> wiki page.  I would recommend starting with that.</li>
+<li>You can also translate any of the other wiki pages, as most of them are short and easy to do.</li>
+<li>There are also people interested in translating the full <a href="http://mongrel2.org/doc/tip/docs/manual/book.wiki">manual</a> but this is a big task. If you want to do the manual, consider taking it slow and taking your time.</li>
+<li>Translating wiki pages means you need to know HTML.</li>
+<li>Translating the manual requires knowing TeX and having a Full <a href="http://tug.org/texlive/">TexLive</a> install, which can take a while.</li>
+</ol>
+
+<p>If you understand all of the above then here's how I recommend you do your first translation:</p>
+
+<ol>
+<li>Go through the <a href="http://mongrel2.org/wiki?name=GettingStarted">GettingStarted</a> wiki page and make sure you can follow it.</li>
+<li>Follow the <a href="http://mongrel2.org/wiki?name=ContributorInstructions">ContributorInstructions</a> and get the Mongrel2 source checked out with <a href="http://fossil-scm.org">fossil</a>.</li>
+<li><b>DO NOT INSTALL FOSSIL WITH YOUR OPERATING SYSTEM'S PACKAGE MANAGER.</b> The ContributorInstructions already tell you this, but this is the #1 mistake people make.</li>
+<li>Once you have your own copy of the latest Mongrel2 code, go into the <b>docs</b> directory and create a directory with your language's closest <a href="http://en.wikipedia.org/wiki/Top-level_domain">TLD</a>. Look at the other directories to see how it would work.</li>
+<li>Now make a <b>wiki</b> directory there.  For example, if I wanted to make a translation for German id make <b>docs/de/wiki</b>.
+<li>Take the existing English wiki page from <b>docs/wiki</b> and copy it to your new wiki directory.</li>
+<li>Do the translation.</li>
+<ol>
+
+<p>Once you have your translation, you just have to submit it to the project.  There's two ways to do this:</p>
+
+<ol>
+<li>Email it to the <a href="mailto:mongrel2@librelist.com">mongrel2@librelist.com</a> mailing list as an <b>attachment</b> and one of us will put it in.  This is the best if you just do one wiki page and don't plan on doing lots of translations.</li>
+<li>Put your fossil repository online using <b>fossil serve</a> as described in <a href="http://mongrel2.org/wiki?name=ContributorInstructions">ContributorInstructions</a> and ask one of us to pull from it.  This is best if you want to do many translations, or maybe the manual.  If you show active involvement we'll give you contributor access to the main repository.</li>
+<ol>
+
+<p>As usual, if you have questions then join the <a href="mailto:mongrel2@librelist.com">mongrel2@librelist.com</a> mailing list and we'll help out.</p>
+
+

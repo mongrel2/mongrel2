@@ -74,6 +74,7 @@ Currently we have:<p>
     <li><a href="/static/book-final.pdf">The Mongrel2 Manual (PDF)</a> grab this if you want better formatting.</li>
     <li><a href="/wiki?name=DesignCriticisms">DesignCriticisms</a></li>
     <li><a href="/wiki?name=ContributorInstructions">ContributorInstructions</a> for if you want to make a patch.</li>
+    <li><a href="/wiki?name=TranslatorGuide">TranslatorGuide</a> for if you want to make a translation to another language.</li>
 </ul>
 
 <h2><a name="translations">Translations</a></h2>
