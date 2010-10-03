@@ -752,10 +752,13 @@ int Connection_read_header(Connection *conn, Request *req)
 
     Request_start(req);
 
-    data = IOBuf_read_some(conn->iob, &avail);
-    check(!IOBuf_closed(conn->iob), "Client closed during read.");
+    while(rc == 0) {
+        data = IOBuf_read_some(conn->iob, &avail);
+        check(!IOBuf_closed(conn->iob), "Client closed during read.");
 
-    rc = Request_parse(req, data, avail, &nparsed);
+        rc = Request_parse(req, data, avail, &nparsed);
+    }
+
     error_unless(rc == 1, conn, 400, "Error in parsing.");
 
     // add the x-forwarded-for header
