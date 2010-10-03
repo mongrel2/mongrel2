@@ -138,7 +138,7 @@ error:
 
 static inline int Dir_send_header(FileRecord *file, Connection *conn)
 {
-    return conn->send(conn, bdata(file->header), blength(file->header)) == blength(file->header);
+    return IOBuf_send(conn->iob, bdata(file->header), blength(file->header));
 }
 
 int Dir_stream_file(FileRecord *file, Connection *conn)
@@ -150,41 +150,12 @@ int Dir_stream_file(FileRecord *file, Connection *conn)
 
     // For the non-sendfile slowpath
     char *file_buffer = NULL;
-    int nread = 0;
-    int amt = 0;
     int tempfd = -1;
 
     int rc = Dir_send_header(file, conn);
     check_debug(rc, "Failed to write header to socket.");
 
-    if(conn->ssl == NULL) {
-        for(total = 0; fdwait(conn->fd, 'w') == 0 && total < file->sb.st_size;
-            total += sent) {
-            sent = Dir_send(conn->fd, file->fd, &offset, block_size);
-            check_debug(sent > 0, "Failed to sendfile on socket: %d from "
-                        "file %d", conn->fd, file->fd);
-        }
-    }
-    else {
-        // We have to reopen the file, so we don't get ourselves into seek
-        // position trouble
-        int tempfd = open((const char *)(file->full_path->data), O_RDONLY);
-        check(tempfd >= 0, "Could not reopen open file");
-
-        file_buffer = malloc(MAX_SEND_BUFFER);
-        check_mem(file_buffer);
-
-        while((nread = fdread(tempfd, file_buffer, MAX_SEND_BUFFER)) > 0) {
-            for(amt = 0, sent = 0; sent < nread; sent += amt) {
-                amt = conn->send(conn, file_buffer + sent, nread - sent);
-                check_debug(amt > 0, "Failed to send on socket: %d from "
-                            "file %d", conn->fd, tempfd);
-            }
-            total += nread;
-        }
-        free(file_buffer);
-        close(tempfd); tempfd = -1;
-    }
+    sentinel("REWRITE NEEDED");
     
     check(total <= file->sb.st_size, 
             "Wrote way too much, wrote %d but size was %d",

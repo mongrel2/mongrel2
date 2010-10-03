@@ -82,8 +82,7 @@ char *test_Dir_serve_file()
     Dir *test = Dir_create("tests/", "sample.html", "test/plain");
 
     Connection conn = {0};
-    conn.fd = 1;
-    conn.send = my_send;
+    sentinel("REWRITE NEEDED");
 
     req = fake_req("GET", "/sample.json");
     rc = Dir_serve_file(test, req, &conn);
@@ -98,6 +97,8 @@ char *test_Dir_serve_file()
     mu_assert(rc == -1, "Should fail to write since it's not a socket.");
 
     return NULL;
+error:
+    return "REWRITE NEEDED";
 }
 
 char * all_tests() {

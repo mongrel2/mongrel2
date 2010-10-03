@@ -122,9 +122,11 @@ error:
 
 void IOBuf_destroy(IOBuf *buf)
 {
-    fdclose(buf->fd);
-    if(buf->ssl) ssl_free(buf->ssl);
-    h_free(buf);
+    if(buf) {
+        fdclose(buf->fd);
+        if(buf->ssl) ssl_free(buf->ssl);
+        h_free(buf);
+    }
 }
 
 void IOBuf_resize(IOBuf *buf, size_t new_size)
@@ -141,6 +143,21 @@ static inline void IOBuf_compact(IOBuf *buf)
     buf->cur = 0;
 }
 
+/**
+ * Does a non-blocking read and either reads in the amount you requested
+ * with "need" or less so you can try again.  It sets out_len to what is
+ * available (<= need) so you can decide after that.  You can keep attempting
+ * to read more and more (up to buf->len) and you'll get the same start point
+ * each time.
+ *
+ * Once you're done with the data you've been trying to read, you use IOBuf_read_commit
+ * to commit the "need" amount and then start doing new reads.
+ *
+ * Internally this works like a "half open ring buffer" and it tries to greedily
+ * read as much as possible without blocking or copying.
+ *
+ * To just get as much as possible, use the IOBuf_read_some macro.
+ */
 char *IOBuf_read(IOBuf *buf, int need, int *out_len)
 {
     int rc = 0;
@@ -148,7 +165,7 @@ char *IOBuf_read(IOBuf *buf, int need, int *out_len)
             "Buffer math off, cur+avail can't be more than > len.");
     assert(buf->cur >= 0 && "Buffer cur can't be < 0");
     assert(buf->avail >= 0 && "Buffer avail can't be < 0");
-    assert(need < buf->len && "Request for more than possible in the buffer.");
+    assert(need <= buf->len && "Request for more than possible in the buffer.");
 
     if(buf->avail < need) {
         debug("need to fill the buffer with more, attempt a read");
@@ -176,7 +193,7 @@ char *IOBuf_read(IOBuf *buf, int need, int *out_len)
             *out_len = need;
         }
     } else {
-        debug("we have enough to satisfy the request to return it");
+        debug("We have enough to satisfy the request so return it.");
         *out_len = need;
     }
 
@@ -187,7 +204,12 @@ char *IOBuf_read(IOBuf *buf, int need, int *out_len)
     return IOBuf_start(buf);
 }
 
-
+/**
+ * Commits the amount given by need to the buffer, moving the internal
+ * counters around so that the next read starts after the need point.
+ * You use this after you're done working with the data and want to
+ * do the next read.
+ */
 void IOBuf_read_commit(IOBuf *buf, int need)
 {
     buf->avail -= need;
@@ -203,18 +225,81 @@ void IOBuf_read_commit(IOBuf *buf, int need)
     }
 }
 
-
-int IOBuf_send(IOBuf *buf, char *data, int len, int *out_state)
+/**
+ * Wraps the usual send, so not much to it other than it'll avoid doing
+ * any calls if the socket is already closed.
+ */
+int IOBuf_send(IOBuf *buf, char *data, int len)
 {
     int rc = 0;
 
-    if(buf->closed) {
-        rc = -1;
-    } else {
-        rc = buf->send(buf, data, len);
-    }
+    if(buf->closed) return -1;
 
-    *out_state = buf->closed = rc == -1;
+    rc = buf->send(buf, data, len);
+
+    if(rc < 0) buf->closed = 1;
+
     return rc;
 }
 
+/**
+ * Reads the entire amount requested into the IOBuf (as long as there's
+ * space to hold it) and then commits that read in one shot.
+ */
+char *IOBuf_read_all(IOBuf *buf, int len, int retries)
+{
+    int nread = 0;
+    assert(len < buf->len && "Cannot read more than the buffer length.");
+
+    char *data = IOBuf_read(buf, len, &nread);
+
+    while(retries > 0) {
+        data = IOBuf_read(buf, len, &nread);
+        check(data, "Read error from socket.");
+        assert(nread <= len && "Invalid nread size (too much) on IOBuf read.");
+
+        if(nread == len) {
+            break;
+        } else {
+            retries--;
+            fdwait(buf->fd, 'r');
+        }
+    }
+
+    check(retries > 0, "Too many retries (%d) while reading.", retries);
+    IOBuf_read_commit(buf, len);
+    return data;
+
+error:
+    return NULL;
+}
+
+
+/**
+ * Streams data out of the from IOBuf and into the to IOBuf
+ * until it's moved total bytes between them.
+ */
+int IOBuf_stream(IOBuf *from, IOBuf *to, int total)
+{
+    int need = total <= from->len ? total : from->len;
+    int remain = total;
+    int avail = 0;
+    int rc = 0;
+    char *data = NULL;
+
+    while(remain > 0) {
+        data = IOBuf_read(from, need, &avail);
+        check_debug(data != NULL, "Read error on the from buffer.");
+
+        rc = IOBuf_send(to, data, avail);
+        check_debug(rc != -1, "Failed to send on the to buffer.");
+
+        IOBuf_read_commit(from, rc);
+        remain -= rc;
+    }
+
+    return total - remain;
+
+error:
+    return -1;
+}

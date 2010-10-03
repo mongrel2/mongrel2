@@ -11,26 +11,14 @@ static ssize_t my_send(Connection *conn, char *buff, int len)
 
 char *test_Response_send_status() 
 {
-    Connection conn = {0};
-    conn.fd = 2;
-    conn.send = my_send;
 
-    int rc = Response_send_status(&conn, &HTTP_304);
-    mu_assert(rc == -1, "This SHOULD fail.");
-
-    return NULL;
+    return "REWRITE NEEDED";
 }
 
 char *test_Response_send_socket_policy()
 {
-    Connection conn = {0};
-    conn.fd = 2;
-    conn.send = my_send;
 
-    int rc = Response_send_socket_policy(&conn);
-    mu_assert(rc == -1, "This SHOULD fail.");
-
-    return NULL;
+    return "REWRITE NEEDED";
 }
 
 

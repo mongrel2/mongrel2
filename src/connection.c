@@ -1,3 +1,5 @@
+#undef NDEBUG
+
 /**
  *
  * Copyright (c) 2010, Zed A. Shaw and Mongrel2 Project Contributors.
@@ -165,17 +167,17 @@ int connection_msg_to_handler(int event, void *data)
             bdata(Request_path(conn->req)));
 
 
-    if(pattern_match(conn->buf, conn->nparsed, bdata(&PING_PATTERN))) {
+    if(pattern_match(IOBuf_start(conn->iob), IOBuf_mark(conn->iob), bdata(&PING_PATTERN))) {
         Log_request(conn, 200, 0);
-        Register_ping(conn->fd);
+        Register_ping(IOBuf_fd(conn->iob));
     } else {
         int header_len = Request_header_length(conn->req);
-        check(conn->nread - header_len - 1 >= 0, "Header length calculation is wrong.");
-
-        Log_request(conn, 200, conn->nread - header_len - 1);
+        int body_len = IOBuf_mark(conn->iob) - header_len - 1;
+        check(body_len >= 0, "Parsing error, body length ended up being: %d", body_len);
 
         bstring payload = Request_to_payload(conn->req, handler->send_ident,
-                conn->fd, conn->buf + header_len, conn->nread - header_len - 1);
+                IOBuf_fd(conn->iob), IOBuf_start(conn->iob) + header_len,
+                body_len);
 
         debug("MSG TO HANDLER: %s", bdata(payload));
 
@@ -214,30 +216,16 @@ static inline bstring connection_upload_file(Connection *conn, Handler *handler,
     // send the initial headers we have so they can kill it if they want
     dict_alloc_insert(conn->req->headers, bfromcstr("X-Mongrel2-Upload-Start"), upload_store);
 
-    result = Request_to_payload(conn->req, handler->send_ident, conn->fd, "", 0);
+    result = Request_to_payload(conn->req, handler->send_ident,
+            IOBuf_fd(conn->iob), "", 0);
     check(result, "Failed to create initial payload for upload attempt.");
 
     rc = Handler_deliver(handler->send_socket, bdata(result), blength(result));
     check(rc != -1, "Failed to deliver upload attempt to handler.");
 
     // all good so start streaming chunks into the temp file in the moby dir
-    if(conn->nread - header_len > 0) {
-        rc = fdwrite(tmpfd, conn->buf + header_len, conn->nread - header_len);
-        check(rc == conn->nread - header_len, "Failed to write initial chunk to upload file: %s", bdata(upload_store));
-    }
 
-    conn->nread = 0;
-
-    for(content_len -= rc; content_len > 0; content_len -= rc)
-    {
-        int nread = content_len < BUFFER_SIZE ? content_len : BUFFER_SIZE;
-
-        nread = conn->recv(conn, conn->buf, nread);
-        check(nread > 0, "Failed to read from socket on upload.");
-
-        rc = fdwrite(tmpfd, conn->buf, nread);
-        check(rc > 0, "Failed to write to %s upload tempfile.", bdata(upload_store));
-    }
+    sentinel("REWRITE NEEDED HERE");
 
     check(content_len == 0, "Bad math on writing out the upload tmpfile: %s, it's %d", bdata(upload_store), content_len);
 
@@ -284,27 +272,16 @@ int connection_http_to_handler(int event, void *data)
         content_len = 0;
         check(upload_store != NULL, "Failed to upload file.");
     } else {
-        if(total > BUFFER_SIZE) conn->buf = h_realloc(conn->buf, total);
-
-        if(conn->nread < total) {
-            // start at the tail of what we've got so far
-            body = conn->buf + conn->nread; 
-
-            int remaining = 0;
-            for(remaining = content_len; remaining > 0; remaining -= rc, body += rc) {
-                rc = conn->recv(conn, body, remaining);
-                check_debug(rc > 0, "Read error from MSG listener %d", conn->fd);
-            }
-            check(remaining == 0, "Bad math on reading request < MAX_CONTENT_LENGTH: %d", remaining);
-        }
-
+        total = 0;
+        sentinel("REWRITE NEEDED");
         // no matter what, the body will need to go here
-        body = conn->buf + header_len;
+        // body = conn->buf + header_len;
     }
 
     Log_request(conn, 200, content_len);
 
-    result = Request_to_payload(conn->req, handler->send_ident, conn->fd, body, content_len);
+    result = Request_to_payload(conn->req, handler->send_ident, 
+            IOBuf_fd(conn->iob), body, content_len);
     check(result, "Failed to create payload for request.");
 
     debug("HTTP TO HANDLER: %.*s", blength(result) - content_len, bdata(result));
@@ -356,14 +333,13 @@ int connection_http_to_proxy(int event, void *data)
     Proxy *proxy = Request_get_action(conn->req, proxy);
     check(proxy != NULL, "Should have a proxy backend.");
 
-    conn->proxy_fd = netdial(1, bdata(proxy->server), proxy->port);
-    check(conn->proxy_fd != -1, "Failed to connect to proxy backend %s:%d",
+    int proxy_fd = netdial(1, bdata(proxy->server), proxy->port);
+    check(proxy_fd != -1, "Failed to connect to proxy backend %s:%d",
             bdata(proxy->server), proxy->port);
 
-    if(!conn->proxy_buf) {
-        conn->proxy_buf = h_calloc(sizeof(char), BUFFER_SIZE+1);
-        check_mem(conn->proxy_buf);
-        hattach(conn->proxy_buf, conn);
+    if(!conn->proxy_iob) {
+        conn->proxy_iob = IOBuf_create(BUFFER_SIZE, proxy_fd, IOBUF_SOCKET);
+        check_mem(conn->proxy_iob);
     }
 
     if(!conn->client) {
@@ -385,38 +361,15 @@ int connection_proxy_deliver(int event, void *data)
     TRACE(proxy_deliver);
     Connection *conn = (Connection *)data;
     int rc = 0;
+    const int max_retries = 10;
 
     int total_len = Request_header_length(conn->req) + Request_content_length(conn->req);
 
-    if(total_len < conn->nread) {
-        rc = fdsend(conn->proxy_fd, conn->buf, total_len);
-        check_debug(rc > 0, "Failed to write request to proxy.");
+    char *buf = IOBuf_read_all(conn->iob, total_len, max_retries);
+    check(buf != NULL, "Failed to read from the client socket to proxy.");
 
-        // setting up for the next request to be read
-        conn->nread -= total_len;
-        memmove(conn->buf, conn->buf + total_len, conn->nread);
-    } else if (total_len > conn->nread) {
-        // we haven't read everything, need to do some streaming
-        do {
-            // TODO: look at sendfile or splice to do this instead
-            rc = fdsend(conn->proxy_fd, conn->buf, conn->nread);
-            check_debug(rc == conn->nread, "Failed to write full request to proxy after %d read.", conn->nread);
-
-            total_len -= rc;
-
-            if(total_len > 0) {
-                conn->nread = conn->recv(conn, conn->buf, BUFFER_SIZE);
-                check_debug(conn->nread > 0, "Failed to read from client more data with %d left.", total_len);
-            } else {
-                conn->nread = 0;
-            }
-        } while(total_len > 0);
-    } else {
-        // not > and not < means ==, so we just write this and try again
-        rc = fdsend(conn->proxy_fd, conn->buf, total_len);
-        check_debug(rc == total_len, "Failed to write complete request to proxy, wrote only: %d", rc);
-        conn->nread = 0;
-    }
+    rc = IOBuf_send(conn->proxy_iob, IOBuf_start(conn->iob), total_len);
+    check(rc > 0, "Failed to send to proxy.");
 
     return REQ_SENT;
 
@@ -444,17 +397,15 @@ int connection_proxy_reply_parse(int event, void *data)
         check(rc != -1, "Failed to stream chunked encoding to client.");
 
     } else if(client->content_len >= 0) {
-        rc = Proxy_stream_response(conn, client->body_start + client->content_len, nread);
+        int total = client->body_start + client->content_len;
+        rc = IOBuf_stream(conn->iob, conn->proxy_iob, total);
         check(rc != -1, "Failed streaming non-chunked response.");
 
     } else if(client->close || client->content_len == -1) {
         debug("Response requested a read until close.");
         client->close = 1;
 
-        do {
-            rc = conn->send(conn, conn->proxy_buf, nread);
-            check(rc == nread, "Failed to send all of the request: %d length.", nread);
-        } while((nread = fdrecv(conn->proxy_fd, conn->proxy_buf, BUFFER_SIZE)) > 0);
+        sentinel("REWRITE NEEDED");
     } else {
         sentinel("Should not reach this code, Tell Zed.");
     }
@@ -535,8 +486,7 @@ int connection_proxy_close(int event, void *data)
     TRACE(proxy_close);
 
     Connection *conn = (Connection *)data;
-    fdclose(conn->proxy_fd);
-    conn->proxy_fd = 0;
+    IOBuf_destroy(conn->proxy_iob);
 
     return CLOSE;
 }
@@ -545,11 +495,10 @@ static inline int close_or_error(int event, void *data, int next)
 {
     Connection *conn = (Connection *)data;
 
-    if(conn->proxy_fd) {
-        connection_proxy_close(event, data);
-    }
+    IOBuf_destroy(conn->proxy_iob);
 
-    check(Register_disconnect(conn->fd) != -1, "Register disconnect didn't work for %d", conn->fd);
+    check(Register_disconnect(IOBuf_fd(conn->iob)) != -1,
+            "Register disconnect didn't work for %d", IOBuf_fd(conn->iob));
 
 error:
     // fallthrough on purpose
@@ -597,12 +546,10 @@ static inline int ident_and_register(int event, void *data, int reg_too)
 
     if(Request_is_xml(conn->req)) {
         if(biseq(Request_path(conn->req), &POLICY_XML_REQUEST)) {
-            debug("XML POLICY FILE: %s", conn->buf + conn->req->parser.body_start);
             conn_type = CONN_TYPE_SOCKET;
             taskname("SOCKET");
             next = SOCKET_REQ;
         } else {
-            debug("XML REQUEST: %s", conn->buf + conn->req->parser.body_start);
             conn_type = CONN_TYPE_MSG;
             taskname("MSG");
             next = MSG_REQ;
@@ -619,7 +566,7 @@ static inline int ident_and_register(int event, void *data, int reg_too)
         error_response(conn, 500, "Invalid code branch, tell Zed.");
     }
 
-    if(reg_too) Register_connect(conn->fd, conn_type);
+    if(reg_too) Register_connect(IOBuf_fd(conn->iob), conn_type);
     return next;
 
 error:
@@ -645,7 +592,6 @@ int connection_identify_request(int event, void *data)
 int connection_parse(int event, void *data)
 {
     Connection *conn = (Connection *)data;
-    conn->nread = 0;
 
     if(Connection_read_header(conn, conn->req) > 0) {
         return REQ_RECV;
@@ -683,77 +629,12 @@ void Connection_destroy(Connection *conn)
     if(conn) {
         Request_destroy(conn->req);
         conn->req = NULL;
-        if(conn->ssl) 
-            ssl_free(conn->ssl);
+        IOBuf_destroy(conn->iob);
+        IOBuf_destroy(conn->proxy_iob);
         h_free(conn);
     }
 }
 
-static ssize_t plaintext_send(Connection *conn, char *buffer, int len)
-{
-    return fdsend(conn->fd, buffer, len);
-}
-
-static ssize_t plaintext_recv(Connection *conn, char *buffer, int len)
-{
-    return fdrecv(conn->fd, buffer, len);
-}
-
-static ssize_t ssl_send(Connection *conn, char *buffer, int len)
-{
-    check(conn->ssl != NULL, "Cannot ssl_send on a connection without ssl");
-    
-    return ssl_write(conn->ssl, (const unsigned char*) buffer, len);
-
-error:
-    return -1;
-}
-
-static ssize_t ssl_recv(Connection *conn, char *buffer, int len)
-{
-    check(conn->ssl != NULL, "Cannot ssl_recv on a connection without ssl");
-    unsigned char **pread = NULL;
-    int nread;
-
-    // If we didn't read all of what we recieved last time
-    if(conn->ssl_buff != NULL) {
-        if(conn->ssl_buff_len < len) {
-            nread = conn->ssl_buff_len;
-            *pread = (unsigned char *)conn->ssl_buff;
-            conn->ssl_buff_len = 0;
-            conn->ssl_buff = NULL;
-        }
-        else {
-            nread = len;
-            *pread = (unsigned char *)conn->ssl_buff;
-            conn->ssl_buff += nread;
-            conn->ssl_buff_len -= nread;
-        }
-    }
-    else {
-        do {
-            nread = ssl_read(conn->ssl, pread);
-        } while(nread == SSL_OK);
-
-        // If we got more than they asked for, we should stash it for
-        // successive calls.
-        if(nread > len) {
-            conn->ssl_buff = buffer + len;
-            conn->ssl_buff_len = nread - len;
-            nread = len;
-        }
-    }
-    if(nread < 0) 
-        return nread;
-
-    check(*pread != NULL, "Got a NULL from ssl_read despite no error code");
-    
-    memcpy(buffer, *pread, nread);
-    return nread;
-
-error:
-    return -1;
-}
 
 Connection *Connection_create(Server *srv, int fd, int rport, 
                               const char *remote, SSL_CTX *ssl_ctx)
@@ -762,7 +643,6 @@ Connection *Connection_create(Server *srv, int fd, int rport,
     check_mem(conn);
 
     conn->server = srv;
-    conn->fd = fd;
 
     conn->rport = rport;
     memcpy(conn->remote, remote, IPADDR_SIZE);
@@ -771,25 +651,16 @@ Connection *Connection_create(Server *srv, int fd, int rport,
     conn->req = Request_create();
     check_mem(conn->req);
 
-    conn->buf = h_calloc(sizeof(char), BUFFER_SIZE + 1);
-    check_mem(conn->buf);
-    hattach(conn->buf, conn);
-
-    conn->ssl_buff = 0;
-    conn->ssl_buff_len = 0;
-    conn->ssl = NULL;
     if(ssl_ctx != NULL)
     {
-        conn->ssl = ssl_server_new(ssl_ctx, conn->fd);
-        check(conn->ssl != NULL, "Failed to create new ssl for connection");
-        conn->send = ssl_send;
-        conn->recv = ssl_recv;
+        conn->iob = IOBuf_create(BUFFER_SIZE, fd, IOBUF_SSL);
+        check(conn->iob != NULL, "Failed to create the SSL IOBuf.");
+        conn->iob->ssl = ssl_server_new(ssl_ctx, IOBuf_fd(conn->iob));
+        check(conn->iob->ssl != NULL, "Failed to create new ssl for connection");
     }
     else
     {
-        conn->ssl = NULL;
-        conn->send = plaintext_send;
-        conn->recv = plaintext_recv;
+        conn->iob = IOBuf_create(BUFFER_SIZE, fd, IOBUF_SOCKET);
     }
     return conn;
 
@@ -871,39 +742,22 @@ static inline void check_should_close(Connection *conn, Request *req)
 int Connection_read_header(Connection *conn, Request *req)
 {
     int finished = 0;
-    int n = 0;
-    conn->nparsed = 0;
-    int remaining = BUFFER_SIZE - 1;
-    char *cur_buf = conn->buf;
 
     Request_start(req);
 
-    conn->buf[BUFFER_SIZE] = '\0';  // always cap it off
 
-    while(finished != 1 && remaining >= 0) {
-        n = conn->recv(conn, cur_buf, remaining);
-        check_debug(n > 0, "Failed to read from socket after %d read: %d parsed.",
-                    conn->nread, (int)conn->nparsed);
-        conn->nread += n;
+    sentinel("REWRITE NEEDED");
 
-        check(conn->buf[BUFFER_SIZE] == '\0', "Trailing \\0 was clobbered, buffer overflow potentially.");
-
-        finished = Request_parse(req, conn->buf, conn->nread, &conn->nparsed);
-
-        remaining = BUFFER_SIZE - 1 - conn->nread;
-        cur_buf = conn->buf + conn->nread; 
-    }
-
-    error_unless(finished == 1, conn, 400, 
-            "Error in parsing: %d, bytes: %d, value: %.*s, parsed: %d", 
-            finished, conn->nread, conn->nread, conn->buf, (int)conn->nparsed);
+    error_unless(finished == 1, conn, 400, "Error in parsing.");
 
     // add the x-forwarded-for header
     dict_alloc_insert(conn->req->headers, bfromcstr("X-Forwarded-For"),
             blk2bstr(conn->remote, IPADDR_SIZE));
 
     check_should_close(conn, conn->req);
-    return conn->nread; 
+
+    // REWRITE: this should return nparsed
+    return -1;
 
 error:
     return -1;

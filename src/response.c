@@ -124,14 +124,14 @@ struct tagbstring FLASH_RESPONSE = bsStatic("<?xml version=\"1.0\"?>"
 
 int Response_send_status(Connection *conn, bstring error)
 {
-    return conn->send(conn, bdata(error), blength(error));
+    return IOBuf_send(conn->iob, bdata(error), blength(error));
 }
 
 
 int Response_send_socket_policy(Connection *conn)
 {
     // must have +1 to include the \0 that xml sockets expect
-    return conn->send(conn, bdata(&FLASH_RESPONSE),
+    return IOBuf_send(conn->iob, bdata(&FLASH_RESPONSE),
                       blength(&FLASH_RESPONSE) + 1);
 
 }

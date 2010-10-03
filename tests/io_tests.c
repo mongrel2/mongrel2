@@ -70,6 +70,15 @@ char *test_IOBuf_read_operations()
     debug("We've got %d avail after the last read.", buf->avail);
     mu_assert(buf->avail == 10, "Should have 11 still in the queue.");
 
+    data = IOBuf_read_all(buf, 30, 1);
+    mu_assert(data != NULL, "Failed to read all.");
+    mu_assert(buf->avail == 1, "Should have 1 in the queue.");
+
+    data = IOBuf_read_some(buf, &avail);
+    mu_assert(data != NULL, "Failed to read some.");
+    mu_assert(buf->avail == 31, "Should be full.");
+    mu_assert(avail == 31, "And we should get the full amount.");
+
     IOBuf_destroy(buf);
 
     return NULL;
@@ -80,18 +89,44 @@ char *test_IOBuf_send_operations()
     int null_fd = open("/dev/null", O_WRONLY);
     IOBuf *buf = IOBuf_create(10 * 1024, null_fd, IOBUF_FILE);
     mu_assert(buf != NULL, "Failed to allocate buf.");
-    int closed = 0;
 
-    int rc = IOBuf_send(buf, "012345789", 10, &closed);
-    mu_assert(!closed, "Should not be closed.");
+    int rc = IOBuf_send(buf, "012345789", 10);
+    mu_assert(!IOBuf_closed(buf), "Should not be closed.");
     mu_assert(rc == 10, "Should have sent 10 bytes.");
 
     fdclose(buf->fd);
-    rc = IOBuf_send(buf, "012345789", 10, &closed);
-    mu_assert(closed, "Should be closed.");
+    rc = IOBuf_send(buf, "012345789", 10);
+    mu_assert(IOBuf_closed(buf), "Should be closed.");
     mu_assert(rc == -1, "Should send nothing.");
 
     IOBuf_destroy(buf);
+
+    return NULL;
+}
+
+
+char *test_IOBuf_streaming()
+{
+    // test streaming from /dev/zero to /dev/null
+    int zero_fd = open("/dev/zero", O_RDONLY);
+    IOBuf *from = IOBuf_create(1024, zero_fd, IOBUF_FILE);
+
+    int null_fd = open("/dev/null", O_WRONLY);
+    IOBuf *to = IOBuf_create(1024, null_fd, IOBUF_FILE);
+
+    int rc = IOBuf_stream(from, to, 500);
+    mu_assert(rc == 500, "Didn't stream the right amount on small test.");
+
+    rc = IOBuf_stream(from, to, 10 * 1024);
+    mu_assert(rc == 10 * 1024, "Didn't stream oversized amount.");
+
+    fdclose(null_fd);
+    rc = IOBuf_stream(from, to, 10 * 1024);
+    mu_assert(rc == -1, "Should fail if send side is closed.");
+
+    fdclose(zero_fd);
+    rc = IOBuf_stream(from, to, 10 * 1024);
+    mu_assert(rc == -1, "Should fail if recv side is closed.");
 
     return NULL;
 }
@@ -101,6 +136,7 @@ char * all_tests() {
 
     mu_run_test(test_IOBuf_read_operations);
     mu_run_test(test_IOBuf_send_operations);
+    mu_run_test(test_IOBuf_streaming);
 
     return NULL;
 }
