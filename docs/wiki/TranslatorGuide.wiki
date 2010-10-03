@@ -25,6 +25,58 @@
 <li>Do the translation.</li>
 </ol>
 
+<p>If you are ready to translate the whole manual here are some tips to help you get started quickly:</p>
+
+<ol>
+
+<li>Create a directory for your translation like <b>docs/de/manual</b> (you
+replace <b>de</b> with your language) and copy all the files from
+<b>docs/manual</b> to this directory.</li>
+
+<li>As you see the manual is split into a set of <b>.tex</b> files. To get the
+<b>.pdf</b> file you have to instruct TeX to put them all together, build and
+output the guide in PDF format. To do that just issue <b>make book-final.pdf</b>
+in the command line.</li>
+
+<li>At this stage it will complain about not being able to find some files. This
+is normal. The thing is that the manual refers some source code files and the
+paths to these files are relative to the location of the manual. Since you have
+copied the manual one level deeper in the filesystem (docs/manual to
+docs/de/manual) the paths are now broken. To fix them you have to prepend
+../ For now you can ignore the warnings by hitting Enter. But as soon as you
+build often and it gets really annoying just fix them up once and for all.</li>
+
+<li>It <i>might</i> fail to build due to the incompatibility of the typeface
+with your language. This is individual for each language so the only practical
+advice is to search the internet on how to make TeX be nice with it.</li>
+
+<li>To build <i>and</i> open run <b>make view</b>. Though you need to have
+<a href="projects.gnome.org/evince/">evince</a> installed.</li>
+
+<li>Once you have it open two things will grab your attention: the margins are
+much wider compared to the ones you see in the original manual you have
+downloaded from the site; and there is no table of contents.</li>
+
+<li>There is lots of whitespace because by default the manual is optimized for
+print, not for the screen. To change this uncomment the line
+<b>%\usepackage{savetrees}</b> in the <b>preamble.tex</b>.</li>
+
+<li>To generate the TOC you have to build it <i>twice</i>. Here is how you do
+it: <b>make book-final.pdf</b>, then <b>rm book-final.dvi book-final.pdf</b> and
+<b>make book-final.pdf</b> again. Yep, sounds strange. But once you have an idea
+about how TeX works it's not that surprising. During the first run TeX does not
+yet know which page every title will end up on. So it only reserves some space
+for the TOC (you will see a blank page) and writes nothing to it.  During the
+second run the titles are all anchored and filling out this blank page is a
+snap.</li>
+
+<li>Finally, repeat this cycle: translate a subsection, generate the .pdf file,
+open it and proofread the translated snippet, correct if necessary. When you
+have a .tex file translated, commit it / send via email (below) and move on to
+the next one.</li>
+
+</ol>
+
 <p>Once you have your translation, you just have to submit it to the project.  There's two ways to do this:</p>
 
 <ol>
