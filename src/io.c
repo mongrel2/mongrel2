@@ -198,7 +198,6 @@ char *IOBuf_read(IOBuf *buf, int need, int *out_len)
     }
 
     debug("Out length: %d", *out_len);
-    assert(buf->avail >= need && "Don't have enough even after trying to fill.");
 
     // now everything should be good to go from cur point
     return IOBuf_start(buf);
@@ -289,9 +288,9 @@ int IOBuf_stream(IOBuf *from, IOBuf *to, int total)
 
     while(remain > 0) {
         data = IOBuf_read(from, need, &avail);
-        check_debug(data != NULL, "Read error on the from buffer.");
+        rc = IOBuf_send(to, IOBuf_start(from), avail);
 
-        rc = IOBuf_send(to, data, avail);
+        check_debug(data != NULL, "Read error on the from buffer.");
         check_debug(rc != -1, "Failed to send on the to buffer.");
 
         IOBuf_read_commit(from, rc);
@@ -303,3 +302,5 @@ int IOBuf_stream(IOBuf *from, IOBuf *to, int total)
 error:
     return -1;
 }
+
+

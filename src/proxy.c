@@ -97,29 +97,35 @@ error:
     return -1;
 }
 
-int Proxy_read_and_parse(Connection *conn, int start)
+int Proxy_read_and_parse(Connection *conn)
 {
-    httpclient_parser *client = conn->client;
-    int nread = 0;
+    int avail = 0;
     int nparsed = 0;
+    char *data = NULL;
 
-    assert(client && "httpclient_parser not configured.");
-    httpclient_parser_init(client);
+    assert(conn->client && "httpclient_parser not configured.");
+    assert(conn->proxy_iob && "conn->proxy_iob not configured.");
 
-    sentinel("REWRITE NEEDED");
+    httpclient_parser_init(conn->client);
 
-    nparsed = httpclient_parser_execute(client, IOBuf_start(conn->proxy_iob), nread, 0);
+    data = IOBuf_read_some(conn->proxy_iob, &avail);
+    check(data != NULL, "Failed to read from proxy.");
 
-    check(!httpclient_parser_has_error(client), "Parsing error from server.");
-    check(httpclient_parser_finish(client), "Parser didn't get a full response.");
+    nparsed = httpclient_parser_execute(conn->client, data, avail, 0);
 
-    return nread;
+    check(!httpclient_parser_has_error(conn->client), "Parsing error from server.");
+    check(httpclient_parser_finish(conn->client), "Parser didn't get a full response.");
+
+    IOBuf_read_commit(conn->proxy_iob, nparsed);
+
+    return nparsed;
+
 error:
     return -1;
 }
 
 
-int Proxy_stream_chunks(Connection *conn, int nread)
+int Proxy_stream_chunks(Connection *conn)
 {
     int rc = 0;
     int end = 0;

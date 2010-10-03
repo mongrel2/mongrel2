@@ -382,30 +382,34 @@ error:
 int connection_proxy_reply_parse(int event, void *data)
 {
     TRACE(proxy_reply_parse);
-    int nread = 0;
     int rc = 0;
+    int total = 0;
     Connection *conn = (Connection *)data;
     Proxy *proxy = Request_get_action(conn->req, proxy);
     httpclient_parser *client = conn->client;
 
-    nread = Proxy_read_and_parse(conn, 0);
-    check(nread != -1, "Failed to read from proxy server: %s:%d", 
+    rc = Proxy_read_and_parse(conn);
+    check(rc != -1, "Failed to read from proxy server: %s:%d", 
             bdata(proxy->server), proxy->port);
 
     if(client->chunked) {
-        rc = Proxy_stream_chunks(conn, nread);
+        rc = Proxy_stream_chunks(conn);
         check(rc != -1, "Failed to stream chunked encoding to client.");
 
     } else if(client->content_len >= 0) {
-        int total = client->body_start + client->content_len;
+        total = client->body_start + client->content_len;
         rc = IOBuf_stream(conn->iob, conn->proxy_iob, total);
         check(rc != -1, "Failed streaming non-chunked response.");
 
     } else if(client->close || client->content_len == -1) {
         debug("Response requested a read until close.");
         client->close = 1;
+        total = conn->iob->len <= conn->proxy_iob->len ? 
+            conn->iob->len : conn->proxy_iob->len;
 
-        sentinel("REWRITE NEEDED");
+        for(rc = 0; rc != -1;) {
+            rc = IOBuf_stream(conn->iob, conn->proxy_iob, total);
+        }
     } else {
         sentinel("Should not reach this code, Tell Zed.");
     }
@@ -741,14 +745,18 @@ static inline void check_should_close(Connection *conn, Request *req)
 
 int Connection_read_header(Connection *conn, Request *req)
 {
-    int finished = 0;
+    char *data = NULL;
+    int avail = 0;
+    int rc = 0;
+    size_t nparsed = 0;
 
     Request_start(req);
 
+    data = IOBuf_read_some(conn->iob, &avail);
+    check(!IOBuf_closed(conn->iob), "Client closed during read.");
 
-    sentinel("REWRITE NEEDED");
-
-    error_unless(finished == 1, conn, 400, "Error in parsing.");
+    rc = Request_parse(req, data, avail, &nparsed);
+    error_unless(rc == 1, conn, 400, "Error in parsing.");
 
     // add the x-forwarded-for header
     dict_alloc_insert(conn->req->headers, bfromcstr("X-Forwarded-For"),
@@ -756,8 +764,7 @@ int Connection_read_header(Connection *conn, Request *req)
 
     check_should_close(conn, conn->req);
 
-    // REWRITE: this should return nparsed
-    return -1;
+    return nparsed;
 
 error:
     return -1;
