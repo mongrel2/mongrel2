@@ -194,12 +194,13 @@ error:
 }
 
 
-static inline bstring connection_upload_file(Connection *conn, Handler *handler,
-        int header_len, int content_len)
+static inline bstring connection_upload_file(Connection *conn,
+        Handler *handler, int content_len)
 {
     int rc = 0;
     int tmpfd = 0;
     bstring result = NULL;
+    char *data = NULL;
 
     // need a setting for the moby store where large uploads should go
     bstring upload_store = Setting_get_str("upload.temp_store", NULL);
@@ -224,8 +225,17 @@ static inline bstring connection_upload_file(Connection *conn, Handler *handler,
     check(rc != -1, "Failed to deliver upload attempt to handler.");
 
     // all good so start streaming chunks into the temp file in the moby dir
+    IOBuf_resize(conn->iob, MAX_CONTENT_LENGTH); // give us a good buffer size
 
-    sentinel("REWRITE NEEDED HERE");
+    while(content_len > 0) {
+        data = IOBuf_read_some(conn->iob, &rc);
+        check(!IOBuf_closed(conn->iob), "Closed while reading from IOBuf.");
+        content_len -= rc;
+
+        check(write(tmpfd, data, rc) == rc, "Failed to write requested amount to tempfile: %d", rc);
+
+        IOBuf_read_commit(conn->iob, rc);
+    }
 
     check(content_len == 0, "Bad math on writing out the upload tmpfile: %s, it's %d", bdata(upload_store), content_len);
 
@@ -253,7 +263,6 @@ int connection_http_to_handler(int event, void *data)
     TRACE(http_to_handler);
     Connection *conn = (Connection *)data;
     int content_len = Request_content_length(conn->req);
-    int header_len = Request_header_length(conn->req);
     int rc = 0;
     char *body = NULL;
     bstring result = NULL;
@@ -261,11 +270,15 @@ int connection_http_to_handler(int event, void *data)
     Handler *handler = Request_get_action(conn->req, handler);
     error_unless(handler, conn, 404, "No action for request: %s", bdata(Request_path(conn->req)));
 
+    // we don't need the header anymore, so commit the buffer and deal with the body
+    IOBuf_read_commit(conn->iob, Request_header_length(conn->req));
+
+    debug("MAX CONTENT LENGTH: %d and content_len: %d", MAX_CONTENT_LENGTH, content_len);
 
     if(content_len == 0) {
         body = "";
     } else if(content_len > MAX_CONTENT_LENGTH) {
-        bstring upload_store = connection_upload_file(conn, handler, header_len, content_len);
+        bstring upload_store = connection_upload_file(conn, handler, content_len);
 
         body = "";
         content_len = 0;
@@ -761,7 +774,6 @@ int Connection_read_header(Connection *conn, Request *req)
         rc = Request_parse(req, data, avail, &nparsed);
     }
 
-    IOBuf_read_commit(conn->iob, (int)nparsed);
     error_unless(rc == 1, conn, 400, "Error in parsing.");
 
     // add the x-forwarded-for header
