@@ -23,7 +23,7 @@
 <li>Now make a <b>wiki</b> directory there.  For example, if I wanted to make a translation for German id make <b>docs/de/wiki</b>.
 <li>Take the existing English wiki page from <b>docs/wiki</b> and copy it to your new wiki directory.</li>
 <li>Do the translation.</li>
-<ol>
+</ol>
 
 <p>Once you have your translation, you just have to submit it to the project.  There's two ways to do this:</p>
 
