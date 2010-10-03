@@ -1,0 +1,94 @@
+<h1>与Mongrel2的第一次亲密接触</h1>
+
+<p>翻译: <a href="/doc/tip/docs/ru/wiki/GettingStarted.wiki">.ru</a> <a href="/doc/tip/docs/de/wiki/GettingStarted.wiki">.de</a>
+<a href="/doc/tip/docs/es/wiki/GettingStarted.wiki">.es</a>
+<a href="/doc/tip/docs/fr/wiki/GettingStarted.wiki">.fr</a>
+<a href="/doc/tip/docs/pt/wiki/GettingStarted.wiki">.pt</a>
+<a href="/doc/tip/docs/cn/wiki/GettingStarted.wiki">.cn</a>
+</p>
+
+<p>本教程可以让你以最快的速度搭建起Mongrel2服务器。其中并没有解释什么深奥原理，只是你所需要的一些安装和运行指令。如果你想要了解更多关于Mongrel2的消息，请阅读
+<a href="/doc/tip/docs/manual/book.wiki">Mongrel2手册(网页版)</a>，这是一个完整的用户手册，从开始使用Mongrel2到如何编写第一个语言处理程序应有尽有。</p>
+
+<p>我们认为你清楚自己所干的事，并且会在Unix下运行命令。</p>
+
+
+<h1>安装依赖软件</h1>
+
+<p>在我的Arch Linux上，我可能会这样做：</p>
+
+<pre>
+# 安装 ZeroMQ 
+wget http://www.zeromq.org/local--files/area:download/zeromq-2.0.8.tar.gz 
+tar -xzvf zeromq-2.0.8.tar.gz 
+cd zeromq-2.0.8/ 
+./configure 
+make 
+sudo make install 
+ 
+# 安装 sqlite3 
+sudo pacman -S sqlite3 
+</pre>
+
+
+<h1>取得源码</h1>
+
+<p>最快的方式是直接下载tar.gz文件：</p>
+
+<pre>
+wget http://mongrel2.org/static/downloads/mongrel2-1.3.tar.bz2
+</pre>
+
+
+<h1>安装Mongrel2</h1>
+
+<p>现在你需要编译Mongrel2：</p>
+
+<pre>
+tar -xjvf mongrel2-1.3.tar.bz2
+cd mongrel2-1.3/
+make clean all install
+</pre>
+
+<p>由于升级的频繁性，你所见到的版本号或许与之上指令有所不同。</p>
+
+
+<h1>第一次配置Mongrel2</h1>
+
+<p>现在你就可以用最简单的配置文件来运行Mongrel2了:</p>
+
+<pre>
+cp examples/configs/sample.conf mysite.conf
+m2sh load -config mysite.conf
+ls config.sqlite
+</pre>
+
+<p><b>注意：</b>在examples/*.conf下还有另外一个例子。</p>
+
+<h1>运行Mongrel2</h1>
+
+<p>现在你就可以尝试Mongrel2了。确保你现在还处于Mongrel2源码目录下: </p>
+
+<pre>
+mkdir run logs tmp
+m2sh start -host localhost
+</pre>
+
+<p>在另一个窗口输入:</p>
+
+<pre>
+curl http://localhost:6767/tests/sample.html
+hi there
+</pre>
+
+
+<h1>退出Mongrel2</h1>
+
+<p>按下Ctrl-C既可退出Mongrel2。  <b>m2sh</b> 有许多其它命令，一部分可以关闭或重启服务器，试着运行 <b>m2sh help</b> 来查看更多指令。
+</p>
+
+
+<h1>更多信息，尽在手册</h1>
+
+<p>本教程只是成功运行Mongrel2最快的速成班而己。你现在应当去读一读 <a href="/doc/tip/docs/manual/book.wiki">Mongrel2用户手册(网页版)</a>，我们花了很多时间来编写并使其变得美观。</p>
+
