@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include "setting.h"
+#include <signal.h>
 
 
 void bstring_free(void *data, void *hint)
@@ -99,12 +100,64 @@ static int CONTROL_RUNNING = 1;
         fbreak;
     }
 
+    action reload {
+        int rc = raise(SIGHUP);
+        if (0 == rc) {
+            reply = bfromcstr("{\"msg\": \"the server will be reloaded\"}");
+        } else {
+            reply = bfromcstr("{\"error\": \"failed to reload the server\"}");
+        }
+        fbreak;
+    }
+
+    action stop {
+        // TODO: probably report back the number of waiting tasks
+        int rc = raise(SIGINT);
+        if (0 == rc) {
+            reply = bfromcstr("{\"msg\": \"the server will be stopped\"}");
+        } else {
+            reply = bfromcstr("{\"error\": \"failed to stop the server\"}");
+        }
+        fbreak;
+    }
+
+    action terminate {
+        // TODO: the server might have been terminated before
+        // the reply is sent back. If this scenario is crucial (if possible at all)
+        // find a workaround, otherwise, forget about it and remove this comment.
+        int rc = raise(SIGTERM);
+        if (0 == rc) {
+            reply = bfromcstr("{\"msg\": \"the server will be terminated\"}");
+        } else {
+            reply = bfromcstr("{\"error\": \"failed to terminate the server\"}");
+        }
+        fbreak;
+    }
+
+    action help {
+        reply = bfromcstr("{\"command_list\":[");
+        bcatcstr(reply, "{\"name\": \"control stop\", \"description\": \"Close the control port.\"}\n");
+        bcatcstr(reply, "{\"name\": \"kill <id>\", \"description\": \"Kill a connection in a violent way.\"}\n");
+        bcatcstr(reply, "{\"name\": \"reload\", \"description\": \"Reload the server. Same as `kill -SIGHUP <server_pid>`.\"}\n");
+        bcatcstr(reply, "{\"name\": \"status net\", \"description\": \"Return a list of active connections.\"}\n");
+        bcatcstr(reply, "{\"name\": \"status tasks\", \"description\": \"Return a list of active tasks.\"}\n");
+        bcatcstr(reply, "{\"name\": \"stop\", \"description\": \"Gracefully shut down the server. Same as `kill -SIGINT <server_pid>`.\"}\n");
+        bcatcstr(reply, "{\"name\": \"terminate\", \"description\": \"Unconditionally terminate the server. Same as `kill -SIGTERM <server_pid>.\"}\n");
+        bcatcstr(reply, "{\"name\": \"time\", \"description\": \"Return server timestamp.\"}\n");
+        bcatcstr(reply, "]}\n");
+        fbreak;
+    }
+
     Status = "status" space+ ("tasks" @status_tasks | "net" @status_net);
     Control = "control stop" @control_stop;
     Time = "time" @time;
     Kill = "kill" space+ digit+ >mark @kill;
+    Reload = "reload" @reload;
+    Stop = "stop" @stop;
+    Terminate = "terminate" @terminate;
+    Help = "help" @help;
 
-    main := Status | Control | Time | Kill;
+    main := Status | Control | Time | Kill | Reload | Stop | Terminate | Help;
 }%%
 
 %% write data;

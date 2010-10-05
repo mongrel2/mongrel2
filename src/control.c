@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include "setting.h"
+#include <signal.h>
 
 
 void bstring_free(void *data, void *hint)
@@ -66,19 +67,19 @@ error:
 static int CONTROL_RUNNING = 1;
 
 
-#line 108 "src/control.rl"
+#line 161 "src/control.rl"
 
 
 
-#line 74 "src/control.c"
+#line 75 "src/control.c"
 static const int ControlParser_start = 1;
-static const int ControlParser_first_final = 34;
+static const int ControlParser_first_final = 50;
 static const int ControlParser_error = 0;
 
 static const int ControlParser_en_main = 1;
 
 
-#line 111 "src/control.rl"
+#line 164 "src/control.rl"
 
 bstring Control_execute(bstring req)
 {
@@ -91,23 +92,25 @@ bstring Control_execute(bstring req)
     debug("RECEIVED CONTROL COMMAND: %s", bdata(req));
 
     
-#line 95 "src/control.c"
+#line 96 "src/control.c"
 	{
 	cs = ControlParser_start;
 	}
 
-#line 123 "src/control.rl"
+#line 176 "src/control.rl"
     
-#line 102 "src/control.c"
+#line 103 "src/control.c"
 	{
 	switch ( cs )
 	{
 case 1:
 	switch( (*p) ) {
 		case 99: goto st2;
-		case 107: goto st13;
-		case 115: goto st18;
-		case 116: goto st31;
+		case 104: goto st13;
+		case 107: goto st16;
+		case 114: goto st21;
+		case 115: goto st26;
+		case 116: goto st40;
 	}
 	goto st0;
 st0:
@@ -177,38 +180,94 @@ st12:
 	p += 1;
 case 12:
 	if ( (*p) == 112 )
-		goto tr15;
+		goto tr17;
 	goto st0;
-tr15:
-#line 74 "src/control.rl"
+tr17:
+#line 75 "src/control.rl"
 	{
         reply = bfromcstr("{\"msg\": \"stopping control port\"}");
-        CONTROL_RUNNING = 0; {p++; cs = 34; goto _out;}
+        CONTROL_RUNNING = 0; {p++; cs = 50; goto _out;}
     }
-	goto st34;
-tr30:
-#line 72 "src/control.rl"
-	{ reply = Register_info(); {p++; cs = 34; goto _out;} }
-	goto st34;
-tr34:
-#line 71 "src/control.rl"
-	{ reply = taskgetinfo(); {p++; cs = 34; goto _out;} }
-	goto st34;
-tr37:
-#line 79 "src/control.rl"
+	goto st50;
+tr20:
+#line 137 "src/control.rl"
 	{
-        reply = bformat("{\"time\": %d}", (int)time(NULL)); {p++; cs = 34; goto _out;}
+        reply = bfromcstr("{\"command_list\":[");
+        bcatcstr(reply, "{\"name\": \"control stop\", \"description\": \"Close the control port.\"}\n");
+        bcatcstr(reply, "{\"name\": \"kill <id>\", \"description\": \"Kill a connection in a violent way.\"}\n");
+        bcatcstr(reply, "{\"name\": \"reload\", \"description\": \"Reload the server. Same as `kill -SIGHUP <server_pid>`.\"}\n");
+        bcatcstr(reply, "{\"name\": \"status net\", \"description\": \"Return a list of active connections.\"}\n");
+        bcatcstr(reply, "{\"name\": \"status tasks\", \"description\": \"Return a list of active tasks.\"}\n");
+        bcatcstr(reply, "{\"name\": \"stop\", \"description\": \"Gracefully shut down the server. Same as `kill -SIGINT <server_pid>`.\"}\n");
+        bcatcstr(reply, "{\"name\": \"terminate\", \"description\": \"Unconditionally terminate the server. Same as `kill -SIGTERM <server_pid>.\"}\n");
+        bcatcstr(reply, "{\"name\": \"time\", \"description\": \"Return server timestamp.\"}\n");
+        bcatcstr(reply, "]}\n");
+        {p++; cs = 50; goto _out;}
     }
-	goto st34;
-st34:
+	goto st50;
+tr30:
+#line 103 "src/control.rl"
+	{
+        int rc = raise(SIGHUP);
+        if (0 == rc) {
+            reply = bfromcstr("{\"msg\": \"the server will be reloaded\"}");
+        } else {
+            reply = bfromcstr("{\"error\": \"failed to reload the server\"}");
+        }
+        {p++; cs = 50; goto _out;}
+    }
+	goto st50;
+tr41:
+#line 73 "src/control.rl"
+	{ reply = Register_info(); {p++; cs = 50; goto _out;} }
+	goto st50;
+tr45:
+#line 72 "src/control.rl"
+	{ reply = taskgetinfo(); {p++; cs = 50; goto _out;} }
+	goto st50;
+tr46:
+#line 113 "src/control.rl"
+	{
+        // TODO: probably report back the number of waiting tasks
+        int rc = raise(SIGINT);
+        if (0 == rc) {
+            reply = bfromcstr("{\"msg\": \"the server will be stopped\"}");
+        } else {
+            reply = bfromcstr("{\"error\": \"failed to stop the server\"}");
+        }
+        {p++; cs = 50; goto _out;}
+    }
+	goto st50;
+tr55:
+#line 124 "src/control.rl"
+	{
+        // TODO: the server might have been terminated before
+        // the reply is sent back. If this scenario is crucial (if possible at all)
+        // find a workaround, otherwise, forget about it and remove this comment.
+        int rc = raise(SIGTERM);
+        if (0 == rc) {
+            reply = bfromcstr("{\"msg\": \"the server will be terminated\"}");
+        } else {
+            reply = bfromcstr("{\"error\": \"failed to terminate the server\"}");
+        }
+        {p++; cs = 50; goto _out;}
+    }
+	goto st50;
+tr57:
+#line 80 "src/control.rl"
+	{
+        reply = bformat("{\"time\": %d}", (int)time(NULL)); {p++; cs = 50; goto _out;}
+    }
+	goto st50;
+st50:
 	p += 1;
-case 34:
-#line 207 "src/control.c"
+case 50:
+#line 266 "src/control.c"
 	goto st0;
 st13:
 	p += 1;
 case 13:
-	if ( (*p) == 105 )
+	if ( (*p) == 101 )
 		goto st14;
 	goto st0;
 st14:
@@ -220,196 +279,296 @@ case 14:
 st15:
 	p += 1;
 case 15:
-	if ( (*p) == 108 )
-		goto st16;
+	if ( (*p) == 112 )
+		goto tr20;
 	goto st0;
 st16:
 	p += 1;
 case 16:
-	if ( (*p) == 32 )
-		goto st17;
-	if ( 9 <= (*p) && (*p) <= 13 )
+	if ( (*p) == 105 )
 		goto st17;
 	goto st0;
 st17:
 	p += 1;
 case 17:
-	if ( (*p) == 32 )
-		goto st17;
-	if ( (*p) > 13 ) {
-		if ( 48 <= (*p) && (*p) <= 57 )
-			goto tr20;
-	} else if ( (*p) >= 9 )
-		goto st17;
-	goto st0;
-tr20:
-#line 69 "src/control.rl"
-	{ mark = p; }
-#line 83 "src/control.rl"
-	{
-        int id = atoi(p);
-
-        if(id < 0 || id > MAX_REGISTERED_FDS) {
-            reply = bformat("{\"error\": \"invalid id: %d\"}", id);
-        } else {
-            int fd = Register_fd_for_id(id);
-
-            if(fd > 0) {
-                fdclose(fd);
-                reply = bformat("{\"result\": \"killed %d\"}", id);
-            } else {
-                reply = bformat("{\"error\": \"does not exist: %d\"}", id);
-            }
-        }
-
-        {p++; cs = 35; goto _out;}
-    }
-	goto st35;
-tr38:
-#line 83 "src/control.rl"
-	{
-        int id = atoi(p);
-
-        if(id < 0 || id > MAX_REGISTERED_FDS) {
-            reply = bformat("{\"error\": \"invalid id: %d\"}", id);
-        } else {
-            int fd = Register_fd_for_id(id);
-
-            if(fd > 0) {
-                fdclose(fd);
-                reply = bformat("{\"result\": \"killed %d\"}", id);
-            } else {
-                reply = bformat("{\"error\": \"does not exist: %d\"}", id);
-            }
-        }
-
-        {p++; cs = 35; goto _out;}
-    }
-	goto st35;
-st35:
-	p += 1;
-case 35:
-#line 293 "src/control.c"
-	if ( 48 <= (*p) && (*p) <= 57 )
-		goto tr38;
+	if ( (*p) == 108 )
+		goto st18;
 	goto st0;
 st18:
 	p += 1;
 case 18:
-	if ( (*p) == 116 )
+	if ( (*p) == 108 )
 		goto st19;
 	goto st0;
 st19:
 	p += 1;
 case 19:
-	if ( (*p) == 97 )
+	if ( (*p) == 32 )
+		goto st20;
+	if ( 9 <= (*p) && (*p) <= 13 )
 		goto st20;
 	goto st0;
 st20:
 	p += 1;
 case 20:
-	if ( (*p) == 116 )
-		goto st21;
+	if ( (*p) == 32 )
+		goto st20;
+	if ( (*p) > 13 ) {
+		if ( 48 <= (*p) && (*p) <= 57 )
+			goto tr25;
+	} else if ( (*p) >= 9 )
+		goto st20;
+	goto st0;
+tr25:
+#line 70 "src/control.rl"
+	{ mark = p; }
+#line 84 "src/control.rl"
+	{
+        int id = atoi(p);
+
+        if(id < 0 || id > MAX_REGISTERED_FDS) {
+            reply = bformat("{\"error\": \"invalid id: %d\"}", id);
+        } else {
+            int fd = Register_fd_for_id(id);
+
+            if(fd > 0) {
+                fdclose(fd);
+                reply = bformat("{\"result\": \"killed %d\"}", id);
+            } else {
+                reply = bformat("{\"error\": \"does not exist: %d\"}", id);
+            }
+        }
+
+        {p++; cs = 51; goto _out;}
+    }
+	goto st51;
+tr58:
+#line 84 "src/control.rl"
+	{
+        int id = atoi(p);
+
+        if(id < 0 || id > MAX_REGISTERED_FDS) {
+            reply = bformat("{\"error\": \"invalid id: %d\"}", id);
+        } else {
+            int fd = Register_fd_for_id(id);
+
+            if(fd > 0) {
+                fdclose(fd);
+                reply = bformat("{\"result\": \"killed %d\"}", id);
+            } else {
+                reply = bformat("{\"error\": \"does not exist: %d\"}", id);
+            }
+        }
+
+        {p++; cs = 51; goto _out;}
+    }
+	goto st51;
+st51:
+	p += 1;
+case 51:
+#line 370 "src/control.c"
+	if ( 48 <= (*p) && (*p) <= 57 )
+		goto tr58;
 	goto st0;
 st21:
 	p += 1;
 case 21:
-	if ( (*p) == 117 )
+	if ( (*p) == 101 )
 		goto st22;
 	goto st0;
 st22:
 	p += 1;
 case 22:
-	if ( (*p) == 115 )
+	if ( (*p) == 108 )
 		goto st23;
 	goto st0;
 st23:
 	p += 1;
 case 23:
-	if ( (*p) == 32 )
-		goto st24;
-	if ( 9 <= (*p) && (*p) <= 13 )
+	if ( (*p) == 111 )
 		goto st24;
 	goto st0;
 st24:
 	p += 1;
 case 24:
-	switch( (*p) ) {
-		case 32: goto st24;
-		case 110: goto st25;
-		case 116: goto st27;
-	}
-	if ( 9 <= (*p) && (*p) <= 13 )
-		goto st24;
+	if ( (*p) == 97 )
+		goto st25;
 	goto st0;
 st25:
 	p += 1;
 case 25:
-	if ( (*p) == 101 )
-		goto st26;
+	if ( (*p) == 100 )
+		goto tr30;
 	goto st0;
 st26:
 	p += 1;
 case 26:
 	if ( (*p) == 116 )
-		goto tr30;
+		goto st27;
 	goto st0;
 st27:
 	p += 1;
 case 27:
-	if ( (*p) == 97 )
-		goto st28;
+	switch( (*p) ) {
+		case 97: goto st28;
+		case 111: goto st39;
+	}
 	goto st0;
 st28:
 	p += 1;
 case 28:
-	if ( (*p) == 115 )
+	if ( (*p) == 116 )
 		goto st29;
 	goto st0;
 st29:
 	p += 1;
 case 29:
-	if ( (*p) == 107 )
+	if ( (*p) == 117 )
 		goto st30;
 	goto st0;
 st30:
 	p += 1;
 case 30:
 	if ( (*p) == 115 )
-		goto tr34;
+		goto st31;
 	goto st0;
 st31:
 	p += 1;
 case 31:
-	if ( (*p) == 105 )
+	if ( (*p) == 32 )
+		goto st32;
+	if ( 9 <= (*p) && (*p) <= 13 )
 		goto st32;
 	goto st0;
 st32:
 	p += 1;
 case 32:
-	if ( (*p) == 109 )
-		goto st33;
+	switch( (*p) ) {
+		case 32: goto st32;
+		case 110: goto st33;
+		case 116: goto st35;
+	}
+	if ( 9 <= (*p) && (*p) <= 13 )
+		goto st32;
 	goto st0;
 st33:
 	p += 1;
 case 33:
 	if ( (*p) == 101 )
-		goto tr37;
+		goto st34;
+	goto st0;
+st34:
+	p += 1;
+case 34:
+	if ( (*p) == 116 )
+		goto tr41;
+	goto st0;
+st35:
+	p += 1;
+case 35:
+	if ( (*p) == 97 )
+		goto st36;
+	goto st0;
+st36:
+	p += 1;
+case 36:
+	if ( (*p) == 115 )
+		goto st37;
+	goto st0;
+st37:
+	p += 1;
+case 37:
+	if ( (*p) == 107 )
+		goto st38;
+	goto st0;
+st38:
+	p += 1;
+case 38:
+	if ( (*p) == 115 )
+		goto tr45;
+	goto st0;
+st39:
+	p += 1;
+case 39:
+	if ( (*p) == 112 )
+		goto tr46;
+	goto st0;
+st40:
+	p += 1;
+case 40:
+	switch( (*p) ) {
+		case 101: goto st41;
+		case 105: goto st48;
+	}
+	goto st0;
+st41:
+	p += 1;
+case 41:
+	if ( (*p) == 114 )
+		goto st42;
+	goto st0;
+st42:
+	p += 1;
+case 42:
+	if ( (*p) == 109 )
+		goto st43;
+	goto st0;
+st43:
+	p += 1;
+case 43:
+	if ( (*p) == 105 )
+		goto st44;
+	goto st0;
+st44:
+	p += 1;
+case 44:
+	if ( (*p) == 110 )
+		goto st45;
+	goto st0;
+st45:
+	p += 1;
+case 45:
+	if ( (*p) == 97 )
+		goto st46;
+	goto st0;
+st46:
+	p += 1;
+case 46:
+	if ( (*p) == 116 )
+		goto st47;
+	goto st0;
+st47:
+	p += 1;
+case 47:
+	if ( (*p) == 101 )
+		goto tr55;
+	goto st0;
+st48:
+	p += 1;
+case 48:
+	if ( (*p) == 109 )
+		goto st49;
+	goto st0;
+st49:
+	p += 1;
+case 49:
+	if ( (*p) == 101 )
+		goto tr57;
 	goto st0;
 	}
 
 	_out: {}
 	}
 
-#line 124 "src/control.rl"
+#line 177 "src/control.rl"
 
     check(p <= pe, "Buffer overflow after parsing.  Tell Zed that you sent something from a handler that went %ld past the end in the parser.", 
         (long int)(pe - p));
 
     if ( cs == 
-#line 411 "src/control.c"
+#line 570 "src/control.c"
 0
-#line 128 "src/control.rl"
+#line 181 "src/control.rl"
  ) {
         check(pe - p > 0, "Major erorr in the parser, tell Zed.");
         return bformat("{\"error\": \"parsing error at: ...%s\"}", bdata(req) + (pe - p));
