@@ -162,23 +162,22 @@ int connection_msg_to_handler(int event, void *data)
     Connection *conn = (Connection *)data;
     Handler *handler = Request_get_action(conn->req, handler);
     int rc = 0;
-    int content_len = Request_content_length(conn->req);
+    int header_len = Request_header_length(conn->req);
+    // body_len will include \0
+    int body_len = Request_content_length(conn->req);
 
     check(handler, "JSON request doesn't match any handler: %s", 
             bdata(Request_path(conn->req)));
 
-
-    if(pattern_match(IOBuf_start(conn->iob), content_len, bdata(&PING_PATTERN))) {
+    if(pattern_match(IOBuf_start(conn->iob), header_len + body_len, bdata(&PING_PATTERN))) {
         Log_request(conn, 200, 0);
         Register_ping(IOBuf_fd(conn->iob));
     } else {
-        int header_len = Request_header_length(conn->req);
-        int body_len = Request_content_length(conn->req);
         check(body_len >= 0, "Parsing error, body length ended up being: %d", body_len);
 
         bstring payload = Request_to_payload(conn->req, handler->send_ident,
                 IOBuf_fd(conn->iob), IOBuf_start(conn->iob) + header_len,
-                body_len);
+                body_len - 1);  // drop \0 on payloads
 
         debug("MSG TO HANDLER: %s", bdata(payload));
 
@@ -187,6 +186,9 @@ int connection_msg_to_handler(int event, void *data)
     
         check(rc == 0, "Failed to deliver to handler: %s", bdata(Request_path(conn->req)));
     }
+
+    // consume \0 from body_len
+    IOBuf_read_commit(conn->iob, header_len + body_len);
 
     return REQ_SENT;
 
@@ -325,6 +327,9 @@ int connection_http_to_directory(int event, void *data)
 
     int rc = Dir_serve_file(dir, conn->req, conn);
     check_debug(rc == 0, "Failed to serve file: %s", bdata(Request_path(conn->req)));
+
+    IOBuf_read_commit(conn->iob,
+            Request_header_length(conn->req) + Request_content_length(conn->req));
 
     Log_request(conn, conn->req->status_code, conn->req->response_size);
 
@@ -784,6 +789,7 @@ int Connection_read_header(Connection *conn, Request *req)
         data = IOBuf_read_some(conn->iob, &avail);
         check(!IOBuf_closed(conn->iob), "Client closed during read.");
 
+        debug("PARSING: %.*s", 100,  data+1);
         rc = Request_parse(req, data, avail, &nparsed);
     }
 

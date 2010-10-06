@@ -154,8 +154,10 @@ int Dir_stream_file(FileRecord *file, Connection *conn)
 
     for(total = 0; fdwait(conn_fd, 'w') == 0 && total < file->sb.st_size;
         total += sent) {
+
         sent = Dir_send(conn_fd, file->fd, &offset, block_size);
-        check_debug(sent > 0, "Failed to sendfile on socket: %d from "
+        debug("TOTAL: %d", total, offset);
+        check_debug(sent > 0, "Client closed probably during sendfile on socket: %d from "
                     "file %d", conn_fd, file->fd);
     }
     

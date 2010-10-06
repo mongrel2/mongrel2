@@ -102,7 +102,8 @@
   action done {
       if(parser->xml_sent || parser->json_sent) {
         parser->body_start = PTR_TO(mark) - buffer;
-        parser->content_len = fpc - buffer - parser->body_start;
+        // +1 includes the \0
+        parser->content_len = fpc - buffer - parser->body_start + 1;
       } else {
         parser->body_start = fpc - buffer + 1;
 

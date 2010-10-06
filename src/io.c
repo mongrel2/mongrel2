@@ -241,7 +241,7 @@ int IOBuf_send(IOBuf *buf, char *data, int len)
 {
     int rc = 0;
 
-    if(buf->closed) return -1;
+    assert(!buf->closed && "CLOSED SEND!");
 
     rc = buf->send(buf, data, len);
 
