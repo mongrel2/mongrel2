@@ -50,6 +50,8 @@ void IOBuf_read_commit(IOBuf *buf, int need);
 
 int IOBuf_send(IOBuf *buf, char *data, int len);
 
+int IOBuf_send_all(IOBuf *buf, char *data, int len);
+
 char *IOBuf_read_all(IOBuf *buf, int len, int retries);
 
 int IOBuf_stream(IOBuf *from, IOBuf *to, int total);

@@ -1,3 +1,4 @@
+#undef NDEBUG
 /**
  *
  * Copyright (c) 2010, Zed A. Shaw and Mongrel2 Project Contributors.
@@ -70,33 +71,6 @@ error:
     return NULL;
 }
 
-
-static inline int scan_chunks(Connection *conn, httpclient_parser *client, int nread, int from)
-{
-    int end = from;
-    int rc = 0;
-
-    sentinel("REWRITE NEEDED");
-
-    do {
-        // find all the possible chunks we've got so far
-        httpclient_parser_init(client);
-        // rc = httpclient_parser_execute(client, conn->proxy_buf, nread, end);
-        check(!httpclient_parser_has_error(client), "Parsing error from server.");
-
-        if(!client->chunked) {
-            return end;
-        } else {
-            end = client->body_start + client->content_len + 2; // +2 for the crlf
-        }
-    } while(!client->chunks_done && client->content_len > 0 && end < nread - 1);
-
-    return end;
-
-error:
-    return -1;
-}
-
 int Proxy_read_and_parse(Connection *conn)
 {
     int avail = 0;
@@ -111,12 +85,13 @@ int Proxy_read_and_parse(Connection *conn)
     data = IOBuf_read_some(conn->proxy_iob, &avail);
     check(data != NULL, "Failed to read from proxy.");
 
+    data[avail] = '\0';
     nparsed = httpclient_parser_execute(conn->client, data, avail, 0);
+    debug("nparsed: %d, avail: %d, body_start: %d", nparsed, conn->client->body_start, avail);
 
     check(!httpclient_parser_has_error(conn->client), "Parsing error from server.");
     check(httpclient_parser_finish(conn->client), "Parser didn't get a full response.");
-
-    IOBuf_read_commit(conn->proxy_iob, nparsed);
+    check(conn->client->body_start <= avail, "Read too much.");
 
     return nparsed;
 
@@ -125,17 +100,50 @@ error:
 }
 
 
+static inline int parse_chunks(char *data, httpclient_parser *client, int avail)
+{
+    // parse for the header
+    data[avail] = '\0';
+    httpclient_parser_init(client);
+    int rc = httpclient_parser_execute(client, data, avail, 0);
+    check(!httpclient_parser_has_error(client), "Parsing error from server.");
+    check(httpclient_parser_finish(client), "Parser didn't get a full response.");
+
+    return rc;
+error:
+    return -1;
+}
+
+
 int Proxy_stream_chunks(Connection *conn)
 {
     int rc = 0;
-    int end = 0;
+    IOBuf *proxy_iob = conn->proxy_iob;
+    assert(proxy_iob && "proxy IOBuf not configured.");
+
+    int avail = IOBuf_avail(proxy_iob);
+    char *data = NULL;
     httpclient_parser *client = conn->client;
+
     assert(client && "httpclient_parser not configured.");
+    assert(client->chunked && "parser should indicate it has chunks.");
+    assert(!client->chunks_done && "parser should not be in chunks done state.");
+    assert(avail >= 0 && "Can't have a < 0 avail.");
 
-    sentinel("REWRITE NEEDED");
+    data = avail == 0 ? IOBuf_read_some(proxy_iob, &avail) : IOBuf_start(proxy_iob);
 
-    return 1;
+    // at this point we have something to work with and it's ready to parse
+    rc = parse_chunks(data, client, avail);
+    check_debug(rc != -1, "Failed to parse chunked encoding from client.");
+
+    // remember the +2 is for the crlf at the end of the chunk body
+    rc = IOBuf_stream(proxy_iob, conn->iob, client->body_start + client->content_len + 2);
+    check_debug(rc != -1, "Failed to stream content to client.");
+
+    return client->chunks_done;
 
 error:
     return -1;
 }
+
+

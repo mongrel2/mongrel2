@@ -408,8 +408,18 @@ int connection_proxy_reply_parse(int event, void *data)
             bdata(proxy->server), proxy->port);
 
     if(client->chunked) {
-        rc = Proxy_stream_chunks(conn);
-        check(rc != -1, "Failed to stream chunked encoding to client.");
+        debug("SENDING HEADER: %d", client->body_start);
+        // send the http header we have so far
+        rc = IOBuf_stream(conn->proxy_iob, conn->iob, client->body_start);
+        check_debug(rc != -1, "Failed streaming header to client.");
+
+        // then just stream out the chunks we've got, as long as 
+        // Proxy_stream_chunks return 0 it means we've got more to send
+        do {
+            debug("STREAM CHUNK");
+            rc = Proxy_stream_chunks(conn);
+            check(rc != -1, "Failed to stream chunked encoding to client.");
+        } while(rc == 0);
 
     } else if(client->content_len >= 0) {
         total = client->body_start + client->content_len;
@@ -506,6 +516,7 @@ int connection_proxy_close(int event, void *data)
 
     Connection *conn = (Connection *)data;
     IOBuf_destroy(conn->proxy_iob);
+    conn->proxy_iob = NULL;
 
     return CLOSE;
 }
@@ -515,6 +526,7 @@ static inline int close_or_error(int event, void *data, int next)
     Connection *conn = (Connection *)data;
 
     IOBuf_destroy(conn->proxy_iob);
+    conn->proxy_iob = NULL;
 
     check(Register_disconnect(IOBuf_fd(conn->iob)) != -1,
             "Register disconnect didn't work for %d", IOBuf_fd(conn->iob));
@@ -799,4 +811,5 @@ void Connection_init()
     log_info("MAX limits.content_length=%d, limits.buffer_size=%d, limits.connection_stack_size=%d",
             MAX_CONTENT_LENGTH, BUFFER_SIZE, CONNECTION_STACK);
 }
+
 

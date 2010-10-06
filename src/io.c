@@ -93,7 +93,7 @@ IOBuf *IOBuf_create(size_t len, int fd, IOBufType type)
     buf->fd = fd;
     buf->len = len;
 
-    buf->buf = h_malloc(len);
+    buf->buf = h_malloc(len + 1);
     check_mem(buf->buf);
 
     hattach(buf->buf, buf);
@@ -169,9 +169,10 @@ char *IOBuf_read(IOBuf *buf, int need, int *out_len)
     assert(buf->cur >= 0 && "Buffer cur can't be < 0");
     assert(buf->avail >= 0 && "Buffer avail can't be < 0");
     assert(need <= buf->len && "Request for more than possible in the buffer.");
-    assert(!IOBuf_closed(buf) && "Attempt to read from closed buffer.");
 
-    if(buf->avail < need) {
+    if(IOBuf_closed(buf) && buf->avail > 0) {
+        *out_len = buf->avail;
+    } else if(buf->avail < need) {
         debug("need to fill the buffer with more, attempt a read");
         if(buf->cur > 0 && IOBuf_compact_needed(buf, need)) {
             IOBuf_compact(buf);
@@ -197,9 +198,11 @@ char *IOBuf_read(IOBuf *buf, int need, int *out_len)
             // more than expected
             *out_len = need;
         }
-    } else {
+    } else if(buf->avail >= need) {
         debug("We have enough to satisfy the request so return it.");
         *out_len = need;
+    } else {
+        assert(0 && "Invalid branch processing buffer, Tell Zed.");
     }
 
     debug("Out length: %d", *out_len);
@@ -216,6 +219,7 @@ char *IOBuf_read(IOBuf *buf, int need, int *out_len)
  */
 void IOBuf_read_commit(IOBuf *buf, int need)
 {
+    debug("COMMIT: %d", need);
     buf->avail -= need;
     assert(buf->avail >= 0 && "Buffer commit reduced avail to < 0.");
 
@@ -289,22 +293,34 @@ error:
  */
 int IOBuf_stream(IOBuf *from, IOBuf *to, int total)
 {
-    int need = total <= from->len ? total : from->len;
+    int need = 0;
     int remain = total;
     int avail = 0;
     int rc = 0;
     char *data = NULL;
 
+    debug("SENDING: %d total", total);
+
+    if(from->len > to->len) IOBuf_resize(to, from->len);
+
     while(remain > 0) {
+        need = remain <= from->len ? remain : from->len;
+        debug("REMAIN: %d", remain);
+
         data = IOBuf_read(from, need, &avail);
-        rc = IOBuf_send(to, IOBuf_start(from), avail);
+        check_debug(avail > 0, "Nothing in read buffer.");
 
-        check_debug(data != NULL, "Read error on the from buffer.");
-        check_debug(rc != -1, "Failed to send on the to buffer.");
+        rc = IOBuf_send_all(to, IOBuf_start(from), avail);
+        check_debug(rc == avail, "Failed to send all of the data: %d of %d", rc, avail)
 
+        // commit whatever we just did
         IOBuf_read_commit(from, rc);
+
+        // reduce it by the given amount
         remain -= rc;
     }
+
+    assert(remain == 0 && "Buffer math is wrong.");
 
     return total - remain;
 
@@ -313,3 +329,21 @@ error:
 }
 
 
+
+int IOBuf_send_all(IOBuf *buf, char *data, int len)
+{
+    int rc = 0;
+    int total = len;
+    do {
+        rc = IOBuf_send(buf, data, total);
+        check(rc > 0, "Write error when sending all.");
+        total -= rc;
+    } while(total > 0);
+
+    assert(total == 0 && "Math error sending all from buffer.");
+
+    return len;
+
+error:
+    return -1;
+}
