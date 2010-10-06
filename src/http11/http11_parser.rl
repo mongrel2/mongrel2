@@ -1,3 +1,5 @@
+#undef NDEBUG
+
 /**
  *
  * Copyright (c) 2010, Zed A. Shaw and Mongrel2 Project Contributors.
@@ -105,8 +107,9 @@
       } else {
         parser->body_start = fpc - buffer + 1; 
 
-        if(parser->header_done != NULL)
+        if(parser->header_done != NULL) {
           parser->header_done(parser->data, fpc + 1, pe - fpc - 1);
+        }
       }
     fbreak;
   }
@@ -165,7 +168,7 @@
 
   message_header = field_name ":" " "* field_value :> CRLF;
 
-  Request = Request_Line ( message_header )* ( CRLF @done );
+  Request = Request_Line ( message_header )* ( CRLF );
 
   SocketJSONStart = ("@" rel_path);
   SocketJSONData = "{" any* "}" :>> "\0";
@@ -175,9 +178,9 @@
   SocketJSON = SocketJSONStart >mark %request_path " " SocketJSONData >mark @json;
   SocketXML = SocketXMLData @xml;
 
-  SocketRequest = (SocketXML | SocketJSON) @done;
+  SocketRequest = (SocketXML | SocketJSON);
 
-main := Request | SocketRequest;
+main := (Request | SocketRequest) @done;
 
 }%%
 

@@ -49,8 +49,8 @@ void Proxy_destroy(Proxy *proxy);
 struct Connection;
 int Proxy_stream_response(struct Connection *conn, int total, int nread);
 
-int Proxy_stream_chunks(struct Connection *conn, int nread);
+int Proxy_stream_chunks(struct Connection *conn);
 
-int Proxy_read_and_parse(struct Connection *conn, int start);
+int Proxy_read_and_parse(struct Connection *conn);
 
 #endif

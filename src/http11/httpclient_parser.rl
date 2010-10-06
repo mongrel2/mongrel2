@@ -1,3 +1,4 @@
+#undef NDEBUG
 /**
  *
  * Copyright (c) 2010, Zed A. Shaw and Mongrel2 Project Contributors.
@@ -143,15 +144,15 @@
 
     message_header = transfer_encoding_chunked | conn_close | content_length | fields;
 
-    Response = 	Status_Line (message_header)* (CRLF @done);
+    Response = 	Status_Line (message_header)* CRLF;
 
     chunk_ext_val = token+;
     chunk_ext_name = token+;
     chunk_extension = (";" chunk_ext_name >start_field %write_field %start_value ("=" chunk_ext_val >start_value)? %write_value )*;
     chunk_size = xdigit+;
-    Chunked_Header = chunk_size >mark %chunk_size chunk_extension :> (CRLF @done);
+    Chunked_Header = chunk_size >mark %chunk_size chunk_extension :> CRLF;
 
-main := Response | Chunked_Header;
+main := (Response | Chunked_Header) @done;
 }%%
 
 /** Data **/

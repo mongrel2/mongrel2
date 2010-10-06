@@ -35,11 +35,11 @@
 #ifndef _listener_h
 #define _listener_h
 
-#include <server.h>
-#include <request.h>
-#include <state.h>
-#include <proxy.h>
-#include <ssl/ssl.h>
+#include "server.h"
+#include "request.h"
+#include "state.h"
+#include "proxy.h"
+#include "io.h"
 
 extern int CONNECTION_STACK;
 extern int BUFFER_SIZE;
@@ -48,27 +48,18 @@ extern int MAX_CONTENT_LENGTH;
 
 typedef struct Connection {
     Server *server;
-    int fd;
-    int proxy_fd;
     Request *req;
-    int nread;
-    size_t nparsed;
+
+    IOBuf *iob;
+    IOBuf *proxy_iob;
+
     int finished;
     int registered;
     int rport;
     State state;
-    char *buf;
-    char *proxy_buf;
     struct httpclient_parser *client;
     char remote[IPADDR_SIZE+1];
     int close;
-
-    ssize_t (*send)(struct Connection *, char *buffer, int len);
-    ssize_t (*recv)(struct Connection *, char *buffer, int len);
-
-    SSL *ssl;
-    char *ssl_buff;
-    int ssl_buff_len;
 } Connection;
 
 void Connection_destroy(Connection *conn);
