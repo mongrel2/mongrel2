@@ -100,12 +100,11 @@
   }
 
   action done {
-      if(parser->xml_sent) {
-        parser->body_start = 0;
-      } else if(parser->json_sent) {
+      if(parser->xml_sent || parser->json_sent) {
         parser->body_start = PTR_TO(mark) - buffer;
+        parser->content_len = fpc - buffer - parser->body_start;
       } else {
-        parser->body_start = fpc - buffer + 1; 
+        parser->body_start = fpc - buffer + 1;
 
         if(parser->header_done != NULL) {
           parser->header_done(parser->data, fpc + 1, pe - fpc - 1);

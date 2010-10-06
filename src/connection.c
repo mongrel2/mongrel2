@@ -162,17 +162,18 @@ int connection_msg_to_handler(int event, void *data)
     Connection *conn = (Connection *)data;
     Handler *handler = Request_get_action(conn->req, handler);
     int rc = 0;
+    int content_len = Request_content_length(conn->req);
 
     check(handler, "JSON request doesn't match any handler: %s", 
             bdata(Request_path(conn->req)));
 
 
-    if(pattern_match(IOBuf_start(conn->iob), IOBuf_mark(conn->iob), bdata(&PING_PATTERN))) {
+    if(pattern_match(IOBuf_start(conn->iob), content_len, bdata(&PING_PATTERN))) {
         Log_request(conn, 200, 0);
         Register_ping(IOBuf_fd(conn->iob));
     } else {
         int header_len = Request_header_length(conn->req);
-        int body_len = IOBuf_mark(conn->iob) - header_len - 1;
+        int body_len = Request_content_length(conn->req);
         check(body_len >= 0, "Parsing error, body length ended up being: %d", body_len);
 
         bstring payload = Request_to_payload(conn->req, handler->send_ident,
