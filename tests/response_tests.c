@@ -11,14 +11,27 @@ static ssize_t my_send(Connection *conn, char *buff, int len)
 
 char *test_Response_send_status() 
 {
+    int zero_fd = open("/dev/zero", O_WRONLY);
+    IOBuf *buf = IOBuf_create(1024, zero_fd, IOBUF_FILE);
+    Connection conn = {.iob = buf};
 
-    return "REWRITE NEEDED";
+    int rc = Response_send_status(&conn, &HTTP_405);
+    mu_assert(rc != -1, "Failed to send 405 status.");
+
+
+    return NULL;
 }
 
 char *test_Response_send_socket_policy()
 {
+    int zero_fd = open("/dev/zero", O_WRONLY);
+    IOBuf *buf = IOBuf_create(1024, zero_fd, IOBUF_FILE);
+    Connection conn = {.iob = buf};
 
-    return "REWRITE NEEDED";
+    int rc = Response_send_socket_policy(&conn);
+    mu_assert(rc != -1, "Failed to send the flash socket policy.");
+
+    return NULL;
 }
 
 

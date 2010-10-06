@@ -98,8 +98,6 @@ char *test_Dir_serve_file()
     mu_assert(rc == -1, "POST should pass through but send an error.");
 
     return NULL;
-error:
-    return "REWRITE NEEDED";
 }
 
 char * all_tests() {
