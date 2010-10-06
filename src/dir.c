@@ -147,15 +147,17 @@ int Dir_stream_file(FileRecord *file, Connection *conn)
     size_t total = 0;
     off_t offset = 0;
     size_t block_size = MAX_SEND_BUFFER;
-
-    // For the non-sendfile slowpath
-    char *file_buffer = NULL;
-    int tempfd = -1;
+    int conn_fd = IOBuf_fd(conn->iob);
 
     int rc = Dir_send_header(file, conn);
     check_debug(rc, "Failed to write header to socket.");
 
-    sentinel("REWRITE NEEDED");
+    for(total = 0; fdwait(conn_fd, 'w') == 0 && total < file->sb.st_size;
+        total += sent) {
+        sent = Dir_send(conn_fd, file->fd, &offset, block_size);
+        check_debug(sent > 0, "Failed to sendfile on socket: %d from "
+                    "file %d", conn_fd, file->fd);
+    }
     
     check(total <= file->sb.st_size, 
             "Wrote way too much, wrote %d but size was %d",
@@ -168,8 +170,6 @@ int Dir_stream_file(FileRecord *file, Connection *conn)
     return total;
 
 error:
-    if(file_buffer) free(file_buffer);
-    if(tempfd >= 0) close(tempfd);
     return -1;
 }
 
