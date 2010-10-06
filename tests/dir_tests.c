@@ -82,19 +82,20 @@ char *test_Dir_serve_file()
     Dir *test = Dir_create("tests/", "sample.html", "test/plain");
 
     Connection conn = {0};
-    sentinel("REWRITE NEEDED");
+    int zero_fd = open("/dev/zero", O_WRONLY);
+    conn.iob = IOBuf_create(1024, zero_fd, IOBUF_FILE);
 
     req = fake_req("GET", "/sample.json");
     rc = Dir_serve_file(test, req, &conn);
-    mu_assert(rc == -1, "Should fail to write since it's not a socket.");
+    mu_assert(rc == 0, "Should serve the /sample.json");
 
     req = fake_req("HEAD", "/sample.json");
     rc = Dir_serve_file(test, req, &conn);
-    mu_assert(rc == -1, "Should fail to write since it's not a socket.");
+    mu_assert(rc == 0, "Should serve the HEAD of /sample.json");
 
     req = fake_req("POST", "/sample.json");
     rc = Dir_serve_file(test, req, &conn);
-    mu_assert(rc == -1, "Should fail to write since it's not a socket.");
+    mu_assert(rc == -1, "POST should pass through but send an error.");
 
     return NULL;
 error:
