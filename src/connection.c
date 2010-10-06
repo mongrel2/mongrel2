@@ -1,3 +1,4 @@
+#undef NDEBUG
 
 /**
  *
@@ -178,7 +179,6 @@ int connection_msg_to_handler(int event, void *data)
                 IOBuf_fd(conn->iob), IOBuf_start(conn->iob) + header_len,
                 body_len - 1);  // drop \0 on payloads
 
-        debug("MSG TO HANDLER: %s", bdata(payload));
 
         rc = Handler_deliver(handler->send_socket, bdata(payload), blength(payload));
         bdestroy(payload);
@@ -275,8 +275,6 @@ int connection_http_to_handler(int event, void *data)
     // we don't need the header anymore, so commit the buffer and deal with the body
     IOBuf_read_commit(conn->iob, Request_header_length(conn->req));
 
-    debug("MAX CONTENT LENGTH: %d and content_len: %d", MAX_CONTENT_LENGTH, content_len);
-
     if(content_len == 0) {
         body = "";
     } else if(content_len > MAX_CONTENT_LENGTH) {
@@ -333,7 +331,6 @@ int connection_http_to_directory(int event, void *data)
     Log_request(conn, conn->req->status_code, conn->req->response_size);
 
     if(conn->close) {
-        debug("Closing connection after sending file.");
         return CLOSE;
     } else {
         return RESP_SENT;
@@ -426,9 +423,8 @@ int connection_proxy_reply_parse(int event, void *data)
 
     } else if(client->content_len >= 0) {
         total = client->body_start + client->content_len;
-        rc = IOBuf_stream(conn->iob, conn->proxy_iob, total);
+        rc = IOBuf_stream(conn->proxy_iob, conn->iob, total);
         check(rc != -1, "Failed streaming non-chunked response.");
-
     } else if(client->close || client->content_len == -1) {
         debug("Response requested a read until close.");
         client->close = 1;

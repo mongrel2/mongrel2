@@ -1,3 +1,4 @@
+#undef NDEBUG
 
 #include "io.h"
 #include "mem/halloc.h"
@@ -137,7 +138,6 @@ void IOBuf_resize(IOBuf *buf, size_t new_size)
 
 static inline void IOBuf_compact(IOBuf *buf)
 {
-    debug("Compacting buffer down.");
     memmove(buf->buf, IOBuf_start(buf), buf->avail);
     buf->cur = 0;
 }
@@ -159,9 +159,6 @@ static inline void IOBuf_compact(IOBuf *buf)
  */
 char *IOBuf_read(IOBuf *buf, int need, int *out_len)
 {
-    debug("Asked to read %d from buffer with %d avail and %d len", 
-            need, buf->avail, buf->len);
-
     int rc = 0;
     assert(buf->cur + buf->avail <= buf->len && 
             "Buffer math off, cur+avail can't be more than > len.");
@@ -172,23 +169,18 @@ char *IOBuf_read(IOBuf *buf, int need, int *out_len)
     if(IOBuf_closed(buf) && buf->avail > 0) {
         *out_len = buf->avail;
     } else if(buf->avail < need) {
-        debug("need to fill the buffer with more, attempt a read");
         if(buf->cur > 0 && IOBuf_compact_needed(buf, need)) {
             IOBuf_compact(buf);
         }
 
-        debug("Attempting to read as much as possible: remain: %d, avail: %d", 
-                IOBuf_remaining(buf), buf->avail);
         rc = buf->recv(buf, IOBuf_read_point(buf), IOBuf_remaining(buf));
 
-        // TODO: determine if this should be <=
         if(rc <= 0) {
             debug("Socket was closed, will return only what's available: %d", buf->avail);
             buf->closed = 1;
         }
 
         buf->avail = buf->avail + rc;
-        debug("New available: %d", buf->avail);
 
         if(buf->avail < need) {
             // less than expected
@@ -198,15 +190,11 @@ char *IOBuf_read(IOBuf *buf, int need, int *out_len)
             *out_len = need;
         }
     } else if(buf->avail >= need) {
-        debug("We have enough to satisfy the request so return it.");
         *out_len = need;
     } else {
         assert(0 && "Invalid branch processing buffer, Tell Zed.");
     }
 
-    debug("Out length: %d", *out_len);
-
-    // now everything should be good to go from cur point
     return IOBuf_start(buf);
 }
 
@@ -218,7 +206,6 @@ char *IOBuf_read(IOBuf *buf, int need, int *out_len)
  */
 void IOBuf_read_commit(IOBuf *buf, int need)
 {
-    debug("COMMIT: %d", need);
     buf->avail -= need;
     assert(buf->avail >= 0 && "Buffer commit reduced avail to < 0.");
 
@@ -240,8 +227,6 @@ int IOBuf_send(IOBuf *buf, char *data, int len)
 {
     int rc = 0;
 
-    assert(!buf->closed && "CLOSED SEND!");
-
     rc = buf->send(buf, data, len);
 
     if(rc < 0) buf->closed = 1;
@@ -255,18 +240,15 @@ int IOBuf_send(IOBuf *buf, char *data, int len)
  */
 char *IOBuf_read_all(IOBuf *buf, int len, int retries)
 {
-    debug("Asked to read ALL %d from buffer with %d avail and %d len", 
-            len, buf->avail, buf->len);
-
     int nread = 0;
     assert(len <= buf->len && "Cannot read more than the buffer length.");
 
     char *data = IOBuf_read(buf, len, &nread);
-    check(!IOBuf_closed(buf), "Closed when attempting to read from buffer.");
+    check_debug(!IOBuf_closed(buf), "Closed when attempting to read from buffer.");
 
     while(nread < len && retries > 0) {
         data = IOBuf_read(buf, len, &nread);
-        check(data, "Read error from socket.");
+        check_debug(data, "Read error from socket.");
         assert(nread <= len && "Invalid nread size (too much) on IOBuf read.");
 
         if(nread == len) {
@@ -298,13 +280,10 @@ int IOBuf_stream(IOBuf *from, IOBuf *to, int total)
     int rc = 0;
     char *data = NULL;
 
-    debug("SENDING: %d total", total);
-
     if(from->len > to->len) IOBuf_resize(to, from->len);
 
     while(remain > 0) {
         need = remain <= from->len ? remain : from->len;
-        debug("REMAIN: %d", remain);
 
         data = IOBuf_read(from, need, &avail);
         check_debug(avail > 0, "Nothing in read buffer.");
@@ -333,6 +312,7 @@ int IOBuf_send_all(IOBuf *buf, char *data, int len)
 {
     int rc = 0;
     int total = len;
+
     do {
         rc = IOBuf_send(buf, data, total);
         check(rc > 0, "Write error when sending all.");

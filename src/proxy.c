@@ -86,7 +86,6 @@ int Proxy_read_and_parse(Connection *conn)
 
     data[avail] = '\0';
     nparsed = httpclient_parser_execute(conn->client, data, avail, 0);
-    debug("nparsed: %d, avail: %d, body_start: %d", nparsed, conn->client->body_start, avail);
 
     check(!httpclient_parser_has_error(conn->client), "Parsing error from server.");
     check(httpclient_parser_finish(conn->client), "Parser didn't get a full response.");
