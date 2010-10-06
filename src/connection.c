@@ -1,4 +1,3 @@
-#undef NDEBUG
 
 /**
  *
@@ -414,7 +413,6 @@ int connection_proxy_reply_parse(int event, void *data)
             bdata(proxy->server), proxy->port);
 
     if(client->chunked) {
-        debug("SENDING HEADER: %d", client->body_start);
         // send the http header we have so far
         rc = IOBuf_stream(conn->proxy_iob, conn->iob, client->body_start);
         check_debug(rc != -1, "Failed streaming header to client.");
@@ -422,7 +420,6 @@ int connection_proxy_reply_parse(int event, void *data)
         // then just stream out the chunks we've got, as long as 
         // Proxy_stream_chunks return 0 it means we've got more to send
         do {
-            debug("STREAM CHUNK");
             rc = Proxy_stream_chunks(conn);
             check(rc != -1, "Failed to stream chunked encoding to client.");
         } while(rc == 0);
@@ -778,20 +775,28 @@ static inline void check_should_close(Connection *conn, Request *req)
 
 int Connection_read_header(Connection *conn, Request *req)
 {
-    char *data = NULL;
-    int avail = 0;
+    char *data = IOBuf_start(conn->iob);
+    int avail = IOBuf_avail(conn->iob);
     int rc = 0;
     size_t nparsed = 0;
+    int tries = 0;
 
     Request_start(req);
 
-    while(rc == 0) {
-        data = IOBuf_read_some(conn->iob, &avail);
-        check(!IOBuf_closed(conn->iob), "Client closed during read.");
-        rc = Request_parse(req, data, avail, &nparsed);
+    // TODO: this is really not optimal, redo this so it doesn't forever loop
+    for(tries = 0; rc == 0 && tries < 5; tries++) {
+        if(avail > 0) {
+            rc = Request_parse(req, data, avail, &nparsed);
+        }
+
+        if(rc == 0) {
+            data = IOBuf_read_some(conn->iob, &avail);
+            check_debug(!IOBuf_closed(conn->iob), "Client closed during read.");
+        }
     }
 
-    error_unless(rc == 1, conn, 400, "Error in parsing.");
+    error_unless(tries < 5, conn, 400, "Too many small packet read attempts.");
+    error_unless(rc == 1, conn, 400, "Error parsing request.");
 
     // add the x-forwarded-for header
     dict_alloc_insert(conn->req->headers, bfromcstr("X-Forwarded-For"),

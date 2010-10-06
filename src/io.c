@@ -1,4 +1,3 @@
-#undef NDEBUG
 
 #include "io.h"
 #include "mem/halloc.h"
