@@ -788,8 +788,6 @@ int Connection_read_header(Connection *conn, Request *req)
     while(rc == 0) {
         data = IOBuf_read_some(conn->iob, &avail);
         check(!IOBuf_closed(conn->iob), "Client closed during read.");
-
-        debug("PARSING: %.*s", 100,  data+1);
         rc = Request_parse(req, data, avail, &nparsed);
     }
 
