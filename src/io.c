@@ -41,7 +41,8 @@ error:
 static ssize_t ssl_recv(IOBuf *iob, char *buffer, int len)
 {
     check(iob->ssl != NULL, "Cannot ssl_recv on a iobection without ssl");
-    unsigned char **pread = NULL;
+    unsigned char *read = NULL;
+    unsigned char **pread = &read;
     int nread;
 
     // If we didn't read all of what we recieved last time
