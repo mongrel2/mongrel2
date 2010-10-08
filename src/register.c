@@ -49,7 +49,7 @@ static uint16_t REG_ID_TO_FD[MAX_REGISTERED_FDS];
 void Register_init()
 {
     memset(REGISTRATIONS, 0, sizeof(REGISTRATIONS));
-    memset(REG_ID_TO_FD, 0, sizeof(REG_ID_TO_FD));
+    memset(REG_ID_TO_FD, -1, sizeof(REG_ID_TO_FD));
 }
 
 static inline void Register_clear(Registration *reg)
@@ -90,7 +90,7 @@ error:
 int Register_disconnect(int fd)
 {
     assert(fd < MAX_REGISTERED_FDS && "FD given to register is greater than max.");
-    check(fd >= 0, "Invalid FD given for disconnect: %d", fd);
+    assert(fd >= 0 && "Invalid FD given for disconnect.");
 
     Registration *reg = &REGISTRATIONS[fd];
     check(reg->conn_type != 0, "Attempt to unregister FD %d which is already gone.", fd);
@@ -154,8 +154,8 @@ bstring Register_info()
 
     for(i = 0; i < MAX_REGISTERED_FDS; i++) {
         if(REGISTRATIONS[i].conn_type) {
-            bformata(result, "\"%d\":%d,", REGISTRATIONS[i].id,
-                    now - REGISTRATIONS[i].last_ping);
+            bformata(result, "\"%d\":[%d,%d],", REGISTRATIONS[i].id,
+                    i, now - REGISTRATIONS[i].last_ping);
             total++;
         }
     }

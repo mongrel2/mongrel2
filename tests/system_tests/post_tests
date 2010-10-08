@@ -3,6 +3,6 @@
 curl http://localhost:6767/handlertest
 curl -X POST -d @src/superpoll.c http://localhost:6767/handlertest
 curl -X POST -d @Makefile http://localhost:6767/handlertest
-curl -X POST "HI" http://localhost:6767/handlertest
-curl -X POST "" http://localhost:6767/handlertest
+curl -X POST -d "HI" http://localhost:6767/handlertest
+curl -X POST -d "" http://localhost:6767/handlertest
 
