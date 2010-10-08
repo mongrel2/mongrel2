@@ -331,7 +331,7 @@ tr25:
         } else {
             int fd = Register_fd_for_id(id);
 
-            if(fd > 0) {
+            if(fd >= 0) {
                 fdclose(fd);
                 reply = bformat("{\"result\": \"killed %d\"}", id);
             } else {
@@ -352,7 +352,7 @@ tr58:
         } else {
             int fd = Register_fd_for_id(id);
 
-            if(fd > 0) {
+            if(fd >= 0) {
                 fdclose(fd);
                 reply = bformat("{\"result\": \"killed %d\"}", id);
             } else {
