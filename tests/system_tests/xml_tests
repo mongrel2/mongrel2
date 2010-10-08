@@ -21,30 +21,14 @@ print "Connecting..."
 CONN = socket.socket()
 CONN.connect(('localhost', 6767))
 
-def read_msg():
-    reply = ""
-
-    ch = CONN.recv(1)
-    while ch != '\0':
-        reply += ch
-        ch = CONN.recv(1)
-
-    return json.loads(b64decode(reply))
-
-def join_feed(user):
-    CONN.send('@chat {"type": "join", "user": "%s"}\x00' % user)
 
 def post_msg(user, data):
-    msg = '@chat {"type": "msg", "user": "%s", "msg": "%s"}\x00' % (user, data)
-    print "Sending events:", msg
-
+    msg = '<chat><user>%s</user><msg>%s</msg></chat>\0' % (user, data)
     CONN.send(msg)
-
     print "SENT!"
 
 user = getpass.getuser()
 
-join_feed(user)
-post_msg(user, "HI!")
-print read_msg()
+for i in range(0, 100):
+    post_msg(user, "MSG %d" % i)
 

@@ -1,5 +1,9 @@
 from mongrel2 import handler
-import json
+try:
+    import json
+except:
+    import simplejson as json
+
 import hashlib
 
 sender_id = "82209006-86FF-4982-B5EA-D1E29E55D481"
