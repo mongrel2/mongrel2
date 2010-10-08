@@ -178,6 +178,9 @@ static inline int handler_recv_parse(Handler *handler, HandlerParser *parser)
     rc = HandlerParser_execute(parser, zmq_msg_data(inmsg), zmq_msg_size(inmsg));
     check(rc == 1, "Failed to parse message from handler.");
 
+    check(parser->target_count > 0, "Message sent had 0 targets: %.*s",
+            zmq_msg_size(inmsg), (char *)zmq_msg_data(inmsg));
+
     debug("Parsed message with %d targets, uuid: %s, and body: %d",
             (int)parser->target_count, bdata(parser->uuid), (int)parser->body_length);
 

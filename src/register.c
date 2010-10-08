@@ -56,7 +56,7 @@ static inline void Register_clear(Registration *reg)
 {
     reg->conn_type = 0;
     reg->last_ping = 0;
-    REG_ID_TO_FD[reg->id] = 0;
+    REG_ID_TO_FD[reg->id] = -1;
 }
 
 int Register_connect(int fd, int conn_type)
@@ -108,6 +108,7 @@ error:
 int Register_ping(int fd)
 {
     assert(fd < MAX_REGISTERED_FDS && "FD given to register is greater than max.");
+    check(fd >= 0, "Invalid FD given for disconnect: %d", fd);
     Registration *reg = &REGISTRATIONS[fd];
 
     check(reg->conn_type != 0, "Attemp to ping an FD that isn't registered: %d", fd);
@@ -123,8 +124,11 @@ error:
 int Register_fd_exists(int fd)
 {
     assert(fd < MAX_REGISTERED_FDS && "FD given to register is greater than max.");
+    check(fd >= 0, "Invalid FD given for disconnect: %d", fd);
 
     return REGISTRATIONS[fd].conn_type;
+error:
+    return 0;
 }
 
 

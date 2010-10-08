@@ -290,7 +290,9 @@ int connection_http_to_handler(int event, void *data)
             IOBuf_resize(conn->iob, content_len);
         }
 
+        debug("ATTEMPTING READ ALL OF: %d", content_len);
         body = IOBuf_read_all(conn->iob, content_len, 5);
+        check(body != NULL, "Client closed the connection during upload.");
     }
 
     Log_request(conn, 200, content_len);
@@ -461,7 +463,9 @@ int connection_proxy_req_parse(int event, void *data)
     Host *target_host = conn->req->target_host;
     Backend *req_action = conn->req->action;
 
-    // unlike other places, we keep the nread rather than reset
+
+    check_debug(!IOBuf_closed(conn->iob), "Client closed, goodbye.");
+
     rc = Connection_read_header(conn, conn->req);
     check_debug(rc > 0, "Failed to read another header.");
     error_unless(Request_is_http(conn->req), conn, 400,

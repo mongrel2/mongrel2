@@ -265,6 +265,7 @@ char *IOBuf_read_all(IOBuf *buf, int len, int retries)
     return data;
 
 error:
+    buf->closed = 1;
     return NULL;
 }
 
