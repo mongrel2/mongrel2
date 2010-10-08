@@ -12,7 +12,7 @@ try:
     import json
 except:
     import simplejson as json
-
+import random
 import getpass
 import os
 from threading import Thread, Condition
@@ -29,6 +29,6 @@ def post_msg(user, data):
 
 user = getpass.getuser()
 
-for i in range(0, 100):
+for i in range(0, random.randint(0, 100)):
     post_msg(user, "MSG %d" % i)
 
