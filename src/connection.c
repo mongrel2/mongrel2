@@ -348,44 +348,31 @@ error:
 int connection_proxy_req_parse(Connection *conn)
 {
     int rc = 0;
-    bstring host = NULL;
     Host *target_host = conn->req->target_host;
     Backend *req_action = conn->req->action;
-
 
     check_debug(!IOBuf_closed(conn->iob), "Client closed, goodbye.");
 
     rc = Connection_read_header(conn, conn->req);
+
     check_debug(rc > 0, "Failed to read another header.");
     error_unless(Request_is_http(conn->req), conn, 400,
             "Someone tried to change the protocol on us from HTTP.");
 
-    host = bstrcpy(conn->req->host);
-    // do a light find of this request compared to the last one
-    if(!biseq(host, conn->req->host)) {
-        bdestroy(host);
-        return PROXY;
+    Backend *found = Host_match_backend(target_host, Request_path(conn->req), NULL);
+    error_unless(found, conn, 404, 
+            "Handler not found: %s", bdata(Request_path(conn->req)));
+
+    // break out of PROXY if the actions don't match
+    if(found != req_action) {
+        Request_set_action(conn->req, found);
+        return Connection_backend_event(found, conn);
     } else {
-        bdestroy(host);
-
-        // query up the path to see if it gets the current request action
-        Backend *found = Host_match_backend(target_host, Request_path(conn->req), NULL);
-        error_unless(found, conn, 404, 
-                "Handler not found: %s", bdata(Request_path(conn->req)));
-
-        if(found != req_action) {
-            Request_set_action(conn->req, found);
-            return Connection_backend_event(found, conn);
-        } else {
-            // TODO: since we found it already, keep it set and reuse
-            return HTTP_REQ;
-        }
+        return HTTP_REQ;
     }
 
     error_response(conn, 500, "Invalid code branch, tell Zed.");
 error:
-
-    bdestroy(host);
     return REMOTE_CLOSE;
 }
 
