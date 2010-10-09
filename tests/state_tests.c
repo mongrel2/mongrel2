@@ -16,7 +16,6 @@ int test_action_cb(int event, void *data)
 StateActions test_actions = {
     .open = test_action_cb,
     .error = test_action_cb,
-    .finish = test_action_cb,
     .close = test_action_cb,
     .parse = test_action_cb,
     .identify_request = test_action_cb,
@@ -47,11 +46,11 @@ int run_events(State *state, const char *name, int *events)
 
     for(i = 0; events[i] != 0; i++) {
         rc = State_exec(state, events[i], (void *)(intptr_t)i);
-        check(State_finish(state) != -1, "Failed on processing %d event.", events[i]);
+        check(State_invariant(state) != -1, "Failed on processing %d event.", events[i]);
     }
 
-    debug("<<< FINAL RESULT: %d, finished: %d", rc, State_finish(state));
-    return State_finish(state);
+    debug("<<< FINAL RESULT: %d, finished: %d", rc, State_invariant(state));
+    return State_invariant(state);
 
 error:
     return 0;

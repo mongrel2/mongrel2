@@ -50,7 +50,6 @@
 ### actions
     action open { CALL(open, fc); }
     action error { CALL(error, fc); }
-    action finish { CALL(finish, fc); }
     action close { CALL(close, fc); }
     action parse { CALL(parse, fc); }
     action register_request { CALL(register_request, fc); }
@@ -97,7 +96,7 @@ int State_init(State *state, StateActions *actions)
     return 1;
 }
 
-static inline int State_invariant(State *state, int event)
+int State_invariant(State *state)
 {
     if ( state->cs == %%{ write error; }%% ) {
         return -1;
@@ -123,11 +122,6 @@ int State_exec(State *state, int event, void *data)
     %% write exec;
 
     return next;
-}
-
-int State_finish(State *state)
-{
-    return State_invariant(state, 0);
 }
 
 

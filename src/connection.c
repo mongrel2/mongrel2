@@ -638,7 +638,6 @@ int connection_parse(int event, void *data)
 StateActions CONN_ACTIONS = {
     .open = connection_open,
     .error = connection_error,
-    .finish = connection_finish,
     .close = connection_close,
     .parse = connection_parse,
     .register_request = connection_register_request,

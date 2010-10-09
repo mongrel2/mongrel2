@@ -42,7 +42,6 @@ typedef int (*state_action_cb)(int event, void *data);
 typedef struct StateActions {
     state_action_cb open;
     state_action_cb error;
-    state_action_cb finish;
     state_action_cb close;
     state_action_cb parse;
     state_action_cb register_request;
@@ -67,7 +66,7 @@ typedef struct State {
 } State;
 
 int State_exec(State *state, int event, void *data);
-int State_finish(State *state);
+int State_invariant(State *state);
 int State_init(State *state, StateActions *actions);
 
 const char *State_event_name(int event);

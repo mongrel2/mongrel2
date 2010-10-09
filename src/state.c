@@ -44,7 +44,7 @@
 #define CALL(A, C) if(state->actions && state->actions->A) next = state->actions->A(C, data)
 
 
-#line 88 "src/state.rl"
+#line 87 "src/state.rl"
 
 
 
@@ -59,7 +59,7 @@ static const int StateActions_en_main_Connection_Idle = 6;
 static const int StateActions_en_main_Connection_HTTPRouting = 4;
 
 
-#line 91 "src/state.rl"
+#line 90 "src/state.rl"
 
 int State_init(State *state, StateActions *actions)
 {
@@ -71,16 +71,16 @@ int State_init(State *state, StateActions *actions)
 	 state->cs = StateActions_start;
 	}
 
-#line 97 "src/state.rl"
+#line 96 "src/state.rl"
     return 1;
 }
 
-static inline int State_invariant(State *state, int event)
+int State_invariant(State *state)
 {
     if ( state->cs == 
 #line 82 "src/state.c"
 0
-#line 102 "src/state.rl"
+#line 101 "src/state.rl"
  ) {
         return -1;
     }
@@ -88,7 +88,7 @@ static inline int State_invariant(State *state, int event)
     if ( state->cs >= 
 #line 90 "src/state.c"
 17
-#line 106 "src/state.rl"
+#line 105 "src/state.rl"
  ) {
         return 1;
     }
@@ -138,7 +138,7 @@ case 1:
 		goto tr1;
 	goto tr0;
 tr1:
-#line 55 "src/state.rl"
+#line 54 "src/state.rl"
 	{ CALL(parse, (*p)); }
 	goto st2;
 st2:
@@ -152,7 +152,7 @@ case 2:
 	}
 	goto tr0;
 tr2:
-#line 54 "src/state.rl"
+#line 53 "src/state.rl"
 	{ CALL(close, (*p)); }
 	goto st18;
 st18:
@@ -164,7 +164,7 @@ case 18:
 		goto tr21;
 	goto tr0;
 tr3:
-#line 56 "src/state.rl"
+#line 55 "src/state.rl"
 	{ CALL(register_request, (*p)); }
 	goto st3;
 st3:
@@ -180,7 +180,7 @@ case 3:
 	}
 	goto tr0;
 tr4:
-#line 59 "src/state.rl"
+#line 58 "src/state.rl"
 	{ CALL(route_request, (*p)); }
 	goto st4;
 st4:
@@ -196,11 +196,11 @@ case 4:
 	}
 	goto tr0;
 tr6:
-#line 58 "src/state.rl"
+#line 57 "src/state.rl"
 	{ CALL(send_socket_response, (*p)); }
 	goto st5;
 tr7:
-#line 64 "src/state.rl"
+#line 63 "src/state.rl"
 	{ CALL(http_to_directory, (*p)); }
 	goto st5;
 st5:
@@ -214,7 +214,7 @@ case 5:
 	}
 	goto tr0;
 tr10:
-#line 55 "src/state.rl"
+#line 54 "src/state.rl"
 	{ CALL(parse, (*p)); }
 	goto st6;
 st6:
@@ -228,7 +228,7 @@ case 6:
 	}
 	goto tr0;
 tr11:
-#line 57 "src/state.rl"
+#line 56 "src/state.rl"
 	{ CALL(identify_request, (*p)); }
 	goto st7;
 st7:
@@ -243,7 +243,7 @@ case 7:
 	}
 	goto tr0;
 tr5:
-#line 59 "src/state.rl"
+#line 58 "src/state.rl"
 	{ CALL(route_request, (*p)); }
 	goto st8;
 st8:
@@ -255,11 +255,11 @@ case 8:
 		goto tr12;
 	goto tr0;
 tr8:
-#line 62 "src/state.rl"
+#line 61 "src/state.rl"
 	{ CALL(http_to_handler, (*p)); }
 	goto st9;
 tr12:
-#line 60 "src/state.rl"
+#line 59 "src/state.rl"
 	{ CALL(msg_to_handler, (*p)); }
 	goto st9;
 st9:
@@ -271,7 +271,7 @@ case 9:
 		goto tr10;
 	goto tr0;
 tr9:
-#line 63 "src/state.rl"
+#line 62 "src/state.rl"
 	{ CALL(http_to_proxy, (*p)); {goto st11;} }
 	goto st10;
 st10:
@@ -290,7 +290,7 @@ case 11:
 	}
 	goto st0;
 tr13:
-#line 67 "src/state.rl"
+#line 66 "src/state.rl"
 	{ CALL(proxy_deliver, (*p)); }
 	goto st12;
 st12:
@@ -304,11 +304,11 @@ case 12:
 	}
 	goto tr0;
 tr15:
-#line 68 "src/state.rl"
+#line 67 "src/state.rl"
 	{ CALL(proxy_failed, (*p)); }
 	goto st13;
 tr16:
-#line 73 "src/state.rl"
+#line 72 "src/state.rl"
 	{ CALL(proxy_close, (*p)); }
 	goto st13;
 st13:
@@ -320,14 +320,14 @@ case 13:
 		goto tr18;
 	goto tr0;
 tr18:
-#line 77 "src/state.rl"
+#line 76 "src/state.rl"
 	{
         p--;
         {goto st6;} 
     }
 	goto st14;
 tr20:
-#line 81 "src/state.rl"
+#line 80 "src/state.rl"
 	{
         CALL(proxy_close, (*p));
         p--;
@@ -341,7 +341,7 @@ case 14:
 #line 342 "src/state.c"
 	goto tr0;
 tr17:
-#line 71 "src/state.rl"
+#line 70 "src/state.rl"
 	{ CALL(proxy_reply_parse, (*p)); }
 	goto st15;
 st15:
@@ -355,7 +355,7 @@ case 15:
 	}
 	goto tr0;
 tr19:
-#line 72 "src/state.rl"
+#line 71 "src/state.rl"
 	{ CALL(proxy_req_parse, (*p)); }
 	goto st16;
 st16:
@@ -412,25 +412,16 @@ case 16:
 #line 52 "src/state.rl"
 	{ CALL(error, (*p)); }
 	break;
-	case 18: 
-#line 53 "src/state.rl"
-	{ CALL(finish, (*p)); }
-	break;
-#line 420 "src/state.c"
+#line 416 "src/state.c"
 	}
 	}
 
 	_out: {}
 	}
 
-#line 124 "src/state.rl"
+#line 123 "src/state.rl"
 
     return next;
-}
-
-int State_finish(State *state)
-{
-    return State_invariant(state, 0);
 }
 
 
