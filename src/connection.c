@@ -84,13 +84,11 @@ error:
 
 int connection_send_socket_response(Connection *conn)
 {
-    int rc = Response_send_socket_policy(conn);
-    check_debug(rc > 0, "Failed to write Flash socket response.");
-
-    return RESP_SENT;
-
-error:
-    return CLOSE;
+    if(Response_send_socket_policy(conn) > 0) {
+        return RESP_SENT;
+    } else {
+        return CLOSE;
+    }
 }
 
 
@@ -106,6 +104,7 @@ int connection_route_request(Connection *conn)
     } else {
         host = conn->server->default_host;
     }
+
     error_unless(host, conn, 404, "Request for a host we don't have registered: %s", bdata(conn->req->host_name));
 
     Backend *found = Host_match_backend(host, path, &route);
@@ -137,7 +136,6 @@ int connection_msg_to_handler(Connection *conn)
             bdata(Request_path(conn->req)));
 
     if(pattern_match(IOBuf_start(conn->iob), header_len + body_len, bdata(&PING_PATTERN))) {
-        Log_request(conn, 200, 0);
         Register_ping(IOBuf_fd(conn->iob));
     } else {
         check(body_len >= 0, "Parsing error, body length ended up being: %d", body_len);
@@ -163,40 +161,10 @@ error:
 }
 
 
-
-int connection_http_to_handler(Connection *conn)
+int Connection_send_to_handler(Connection *conn, Handler *handler, char *body, int content_len)
 {
-    int content_len = Request_content_length(conn->req);
     int rc = 0;
-    char *body = NULL;
     bstring result = NULL;
-
-    Handler *handler = Request_get_action(conn->req, handler);
-    error_unless(handler, conn, 404, "No action for request: %s", bdata(Request_path(conn->req)));
-
-    // we don't need the header anymore, so commit the buffer and deal with the body
-    IOBuf_read_commit(conn->iob, Request_header_length(conn->req));
-
-    if(content_len == 0) {
-        body = "";
-    } else if(content_len > MAX_CONTENT_LENGTH) {
-        bstring upload_store = Upload_file(conn, handler, content_len);
-
-        body = "";
-        content_len = 0;
-        check(upload_store != NULL, "Failed to upload file.");
-    } else {
-        if(content_len > conn->iob->len) {
-            // temporarily grow the buffer
-            // TODO: also consider sizing it back down when not needed
-            IOBuf_resize(conn->iob, content_len);
-        }
-
-        body = IOBuf_read_all(conn->iob, content_len, 5);
-        check(body != NULL, "Client closed the connection during upload.");
-    }
-
-    Log_request(conn, 200, content_len);
 
     result = Request_to_payload(conn->req, handler->send_ident, 
             IOBuf_fd(conn->iob), body, content_len);
@@ -209,10 +177,52 @@ int connection_http_to_handler(Connection *conn)
             bdata(Request_path(conn->req)));
 
     bdestroy(result);
-    return REQ_SENT;
+    return 0;
 
 error:
     bdestroy(result);
+    return -1;
+}
+
+
+int connection_http_to_handler(Connection *conn)
+{
+    int content_len = Request_content_length(conn->req);
+    int rc = 0;
+    char *body = NULL;
+
+    Handler *handler = Request_get_action(conn->req, handler);
+    error_unless(handler, conn, 404, "No action for request: %s", bdata(Request_path(conn->req)));
+
+    // we don't need the header anymore, so commit the buffer and deal with the body
+    IOBuf_read_commit(conn->iob, Request_header_length(conn->req));
+
+    if(content_len == 0) {
+        body = "";
+    } else if(content_len > MAX_CONTENT_LENGTH) {
+        body = "";
+        content_len = 0;
+        rc = Upload_file(conn, handler, content_len);
+        check(rc == 0, "Failed to upload file.");
+    } else {
+        if(content_len > conn->iob->len) {
+            // temporarily grow the buffer
+            // TODO: also consider sizing it back down when not needed
+            IOBuf_resize(conn->iob, content_len);
+        }
+
+        body = IOBuf_read_all(conn->iob, content_len, 5);
+        check(body != NULL, "Client closed the connection during upload.");
+    }
+
+    rc = Connection_send_to_handler(conn, handler, body, content_len);
+    check_debug(rc == 0, "Failed to deliver to the handler.");
+
+    Log_request(conn, 200, content_len);
+
+    return REQ_SENT;
+
+error:
     return CLOSE;
 }
 

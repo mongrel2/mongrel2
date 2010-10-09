@@ -69,6 +69,8 @@ void Connection_accept(Connection *conn);
 
 void Connection_task(void *v);
 
+struct Handler;
+int Connection_send_to_handler(Connection *conn, Handler *handler, char *body, int content_len);
 
 int Connection_deliver_raw(int to_fd, bstring buf);
 

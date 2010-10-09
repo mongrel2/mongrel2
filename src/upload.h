@@ -3,8 +3,8 @@
 
 #include "connection.h"
 #include "handler.h"
-#include "bstring.h"
 
-bstring Upload_file(Connection *conn, Handler *handler, int content_len);
+int Upload_file(Connection *conn, Handler *handler, int content_len);
+int Upload_notify(Connection *conn, Handler *handler, const char *stage, bstring tmp_name);
 
 #endif

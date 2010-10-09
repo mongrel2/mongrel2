@@ -3,67 +3,82 @@
 #include "setting.h"
 #include "response.h"
 
+bstring UPLOAD_STORE = NULL;
 
 
-bstring Upload_file(Connection *conn, Handler *handler, int content_len)
+static inline int stream_to_disk(IOBuf *iob, int content_len, int tmpfd)
+{
+    char *data = NULL;
+    int avail = 0;
+
+    IOBuf_resize(iob, MAX_CONTENT_LENGTH); // give us a good buffer size
+
+    while(content_len > 0) {
+        data = IOBuf_read_some(iob, &avail);
+        check(!IOBuf_closed(iob), "Closed while reading from IOBuf.");
+        content_len -= avail;
+
+        check(write(tmpfd, data, avail) == avail, "Failed to write requested amount to tempfile: %d", avail);
+
+        IOBuf_read_commit(iob, avail);
+    }
+
+    check(content_len == 0, "Failed to write everything to the large upload tmpfile.");
+
+    return 0;
+
+error:
+    return -1;
+}
+
+
+int Upload_notify(Connection *conn, Handler *handler, const char *stage, bstring tmp_name)
+{
+    bstring key = bformat("X-Mongrel2-Upload-%s", stage);
+    dict_alloc_insert(conn->req->headers, key, tmp_name);
+
+    return Connection_send_to_handler(conn, handler, "", 0);
+}
+
+int Upload_file(Connection *conn, Handler *handler, int content_len)
 {
     int rc = 0;
     int tmpfd = 0;
+    bstring tmp_name = NULL;
     bstring result = NULL;
-    char *data = NULL;
 
-    // need a setting for the moby store where large uploads should go
-    bstring upload_store = Setting_get_str("upload.temp_store", NULL);
-    error_unless(upload_store, conn, 413, "Request entity is too large: %d, and no upload.temp_store setting for where to put the big files.", content_len);
-
-    upload_store = bstrcpy(upload_store); // Setting owns the original
-
-    // TODO: handler should be set to allow large uploads, otherwise error
-
-    tmpfd = mkstemp((char *)upload_store->data);
-    check(tmpfd != -1, "Failed to create secure tempfile, did you end it with XXXXXX?");
-    log_info("Writing tempfile %s for large upload.", bdata(upload_store));
-
-    // send the initial headers we have so they can kill it if they want
-    dict_alloc_insert(conn->req->headers, bfromcstr("X-Mongrel2-Upload-Start"), upload_store);
-
-    result = Request_to_payload(conn->req, handler->send_ident,
-            IOBuf_fd(conn->iob), "", 0);
-    check(result, "Failed to create initial payload for upload attempt.");
-
-    rc = Handler_deliver(handler->send_socket, bdata(result), blength(result));
-    check(rc != -1, "Failed to deliver upload attempt to handler.");
-
-    // all good so start streaming chunks into the temp file in the moby dir
-    IOBuf_resize(conn->iob, MAX_CONTENT_LENGTH); // give us a good buffer size
-
-    while(content_len > 0) {
-        data = IOBuf_read_some(conn->iob, &rc);
-        check(!IOBuf_closed(conn->iob), "Closed while reading from IOBuf.");
-        content_len -= rc;
-
-        check(write(tmpfd, data, rc) == rc, "Failed to write requested amount to tempfile: %d", rc);
-
-        IOBuf_read_commit(conn->iob, rc);
+    if(UPLOAD_STORE == NULL) {
+        UPLOAD_STORE = Setting_get_str("upload.temp_store", NULL);
+        error_unless(UPLOAD_STORE, conn, 413, "Request entity is too large: %d, and no upload.temp_store setting for where to put the big files.", content_len);
     }
 
-    check(content_len == 0, "Bad math on writing out the upload tmpfile: %s, it's %d", bdata(upload_store), content_len);
+    tmp_name = bstrcpy(UPLOAD_STORE);
 
-    // moby dir write is done, add a header to the request that indicates where to get it
-    dict_alloc_insert(conn->req->headers, bfromcstr("X-Mongrel2-Upload-Done"), upload_store);
+    tmpfd = mkstemp((char *)tmp_name->data);
+    check(tmpfd != -1, "Failed to create secure tempfile, did you end it with XXXXXX?");
+    log_info("Writing tempfile %s for large upload.", bdata(tmp_name));
+
+    rc = Upload_notify(conn, handler, "Start", tmp_name);
+    check(rc == 0, "Failed to notify of the start of upload.");
+
+    rc = stream_to_disk(conn->iob, content_len, tmpfd);
+    check(rc == 0, "Failed to stream to disk.");
+
+    rc = Upload_notify(conn, handler, "Done", tmp_name);
+    check(rc == 0, "Failed to notify the end of the upload.");
 
     bdestroy(result);
     fdclose(tmpfd);
-    return upload_store;
+    return 0;
 
 error:
     bdestroy(result);
     fdclose(tmpfd);
 
-    if(upload_store) {
-        unlink((char *)upload_store->data);
-        bdestroy(upload_store);
+    if(tmp_name) {
+        unlink((char *)tmp_name->data);
+        bdestroy(tmp_name);
     }
 
-    return NULL;
+    return -1;
 }
