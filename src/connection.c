@@ -1,5 +1,3 @@
-#undef NDEBUG
-
 /**
  *
  * Copyright (c) 2010, Zed A. Shaw and Mongrel2 Project Contributors.
@@ -84,10 +82,8 @@ error:
 
 
 
-int connection_send_socket_response(int event, Connection *conn)
+int connection_send_socket_response(Connection *conn)
 {
-    TRACE(socket_req);
-
     int rc = Response_send_socket_policy(conn);
     check_debug(rc > 0, "Failed to write Flash socket response.");
 
@@ -98,9 +94,8 @@ error:
 }
 
 
-int connection_route_request(int event, Connection *conn)
+int connection_route_request(Connection *conn)
 {
-    TRACE(route);
     Host *host = NULL;
     Route *route = NULL;
 
@@ -130,9 +125,8 @@ error:
 
 
 
-int connection_msg_to_handler(int event, Connection *conn)
+int connection_msg_to_handler(Connection *conn)
 {
-    TRACE(msg_to_handler);
     Handler *handler = Request_get_action(conn->req, handler);
     int rc = 0;
     int header_len = Request_header_length(conn->req);
@@ -170,9 +164,8 @@ error:
 
 
 
-int connection_http_to_handler(int event, Connection *conn)
+int connection_http_to_handler(Connection *conn)
 {
-    TRACE(http_to_handler);
     int content_len = Request_content_length(conn->req);
     int rc = 0;
     char *body = NULL;
@@ -225,10 +218,8 @@ error:
 
 
 
-int connection_http_to_directory(int event, Connection *conn)
+int connection_http_to_directory(Connection *conn)
 {
-    TRACE(http_to_directory);
-
     Dir *dir = Request_get_action(conn->req, dir);
 
     int rc = Dir_serve_file(dir, conn->req, conn);
@@ -252,9 +243,8 @@ error:
 
 
 
-int connection_http_to_proxy(int event, Connection *conn)
+int connection_http_to_proxy(Connection *conn)
 {
-    TRACE(http_to_proxy);
     Proxy *proxy = Request_get_action(conn->req, proxy);
     check(proxy != NULL, "Should have a proxy backend.");
 
@@ -281,9 +271,8 @@ error:
 
 
 
-int connection_proxy_deliver(int event, Connection *conn)
+int connection_proxy_deliver(Connection *conn)
 {
-    TRACE(proxy_deliver);
     int rc = 0;
     const int max_retries = 10;
 
@@ -303,9 +292,8 @@ error:
 
 
 
-int connection_proxy_reply_parse(int event, Connection *conn)
+int connection_proxy_reply_parse(Connection *conn)
 {
-    TRACE(proxy_reply_parse);
     int rc = 0;
     int total = 0;
     Proxy *proxy = Request_get_action(conn->req, proxy);
@@ -357,10 +345,8 @@ error:
 }
 
 
-int connection_proxy_req_parse(int event, Connection *conn)
+int connection_proxy_req_parse(Connection *conn)
 {
-    TRACE(proxy_req_parse);
-
     int rc = 0;
     bstring host = NULL;
     Host *target_host = conn->req->target_host;
@@ -405,27 +391,23 @@ error:
 
 
 
-int connection_proxy_failed(int event, Connection *conn)
+int connection_proxy_failed(Connection *conn)
 {
-    TRACE(proxy_failed);
-
     Response_send_status(conn, &HTTP_502);
 
     return CLOSE;
 }
 
 
-int connection_proxy_close(int event, Connection *conn)
+int connection_proxy_close(Connection *conn)
 {
-    TRACE(proxy_close);
-
     IOBuf_destroy(conn->proxy_iob);
     conn->proxy_iob = NULL;
 
     return CLOSE;
 }
 
-static inline int close_or_error(int event, Connection *conn, int next)
+static inline int close_or_error(Connection *conn, int next)
 {
 
     IOBuf_destroy(conn->proxy_iob);
@@ -440,46 +422,28 @@ error:
 }
 
 
-int connection_close(int event, Connection *conn)
+int connection_close(Connection *conn)
 {
-    TRACE(close);
-    return close_or_error(event, conn, 0);
+    return close_or_error(conn, 0);
 }
 
 
 
-int connection_error(int event, Connection *conn)
+int connection_error(Connection *conn)
 {
-    TRACE(error);
-    int rc = close_or_error(event, conn, CLOSE);
-    return rc;
+    return close_or_error(conn, CLOSE);
 }
 
 
-static inline int ident_and_register(int event, Connection *conn, int reg_too)
+static inline int ident_and_register(Connection *conn, int reg_too)
 {
     int conn_type = 0;
     int next = CLOSE;
 
-#ifndef NDEBUG
-    bstring user_agent = Request_get(conn->req, &HTTP_USER_AGENT);
-
-    if(user_agent) {
-        debug("Got a user-agent: %s", bdata(user_agent));
-        if(pattern_match(bdata(user_agent), blength(user_agent), "httperf.*")) {
-            log_err("\n\n\n\n\n------\nWHAT!? WHY ARE YOU PERFORMANCE TESTING WITH DEBUGGING ON?!\nAt least you're using httperf.\n\n\n\n");
-        } else if(pattern_match(bdata(user_agent), blength(user_agent), "ApacheBench.*")) {
-            log_err("\n\n\n\n\n------\nWHAT!? WHY ARE YOU PERFORMANCE TESTING WITH DEBUGGING ON?!\nAB is a giant piece of crap that uses HTTP/1.0.\n\n\n\n");
-        } else if(pattern_match(bdata(user_agent), blength(user_agent), ".*Siege.*")) {
-            log_err("\n\n\n\n\n------\nWHAT!? WHY ARE YOU PERFORMANCE TESTING WITH DEBUGGING ON?!\nSiege is junk, there's no such measurable concept as 'user'. Snakeoil.\n\n\n\n");
-        }
-    }
-#endif
-
     if(Request_is_xml(conn->req)) {
         if(biseq(Request_path(conn->req), &POLICY_XML_REQUEST)) {
             conn_type = CONN_TYPE_SOCKET;
-            taskname("SOCKET");
+            taskname("XML");
             next = SOCKET_REQ;
         } else {
             conn_type = CONN_TYPE_MSG;
@@ -506,19 +470,18 @@ error:
 
 }
 
-int connection_register_request(int event, Connection *conn)
+
+int connection_register_request(Connection *conn)
 {
-    TRACE(register_request);
-    return ident_and_register(event, conn, 1);
+    return ident_and_register(conn, 1);
 }
 
-int connection_identify_request(int event, Connection *conn)
+int connection_identify_request(Connection *conn)
 {
-    TRACE(identify_request);
-    return ident_and_register(event, conn, 0);
+    return ident_and_register(conn, 0);
 }
 
-int connection_parse(int event, Connection *conn)
+int connection_parse(Connection *conn)
 {
     if(Connection_read_header(conn, conn->req) > 0) {
         return REQ_RECV;
@@ -551,7 +514,6 @@ StateActions CONN_ACTIONS = {
 void Connection_destroy(Connection *conn)
 {
     if(conn) {
-        debug("CONNECTION DESTROYED");
         Request_destroy(conn->req);
         conn->req = NULL;
         IOBuf_destroy(conn->iob);
@@ -646,7 +608,6 @@ error:
 
 static inline void check_should_close(Connection *conn, Request *req)
 {
-    // TODO: this should be right but double check
     if(req->version && biseqcstr(req->version, "HTTP/1.0")) {
         debug("HTTP 1.0 request coming in from %s", conn->remote);
         conn->close = 1;

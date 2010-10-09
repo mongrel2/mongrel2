@@ -41,7 +41,7 @@
 #include <events.h>
 #include <assert.h>
 
-#define CALL(A, C) if(state->actions && state->actions->A) next = state->actions->A(C, conn)
+#define CALL(A, C) TRACE(A,C); if(state->actions && state->actions->A) next = state->actions->A(conn)
 
 
 #line 86 "src/state.rl"

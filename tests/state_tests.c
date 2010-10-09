@@ -6,11 +6,8 @@
 
 FILE *LOG_FILE = NULL;
 
-int test_action_cb(int event, Connection *data)
+int test_action_cb(Connection *data)
 {
-    int i = (int)(intptr_t)data;
-
-    debug("EVENT[%d]: %s:%d", i, State_event_name(event), event);
     return 1;
 }
 

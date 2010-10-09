@@ -38,7 +38,7 @@
 struct State;
 struct Connection;
 
-typedef int (*state_action_cb)(int event, struct Connection *conn);
+typedef int (*state_action_cb)(struct Connection *conn);
 
 typedef struct StateActions {
     state_action_cb error;
