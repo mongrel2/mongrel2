@@ -9,7 +9,7 @@ struct IOBuf;
 typedef ssize_t (*io_cb)(struct IOBuf *, char *data, int len);
 
 typedef enum IOBufType {
-    IOBUF_SSL, IOBUF_SOCKET, IOBUF_FILE
+    IOBUF_SSL, IOBUF_SOCKET, IOBUF_FILE, IOBUF_NULL
 } IOBufType;
 
 typedef struct IOBuf {

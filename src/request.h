@@ -53,9 +53,10 @@ typedef struct Request {
     bstring path;
     bstring query_string;
     bstring fragment;
-    bstring host;
+    bstring host; // not owned by us
     bstring host_name;
-    bstring pattern;
+    bstring pattern; // not owned by us
+    bstring prefix; // not owned by us
     struct Host *target_host;
     dict_t *headers;
     struct Backend *action;

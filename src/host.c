@@ -117,7 +117,7 @@ error:
 }
 
 
-Backend *Host_match_backend(Host *host, bstring target, bstring *out_pattern)
+Backend *Host_match_backend(Host *host, bstring target, Route **out_route)
 {
     Route *found = NULL;
 
@@ -126,10 +126,10 @@ Backend *Host_match_backend(Host *host, bstring target, bstring *out_pattern)
     if(found) {
         debug("Found backend at %s", bdata(found->pattern));
         assert(found->data && "Invalid value for stored route.");
-        if(out_pattern) *out_pattern = found->pattern;
+        if(out_route) *out_route = found;
         return found->data;
     } else {
-        if(out_pattern) *out_pattern = NULL;
+        if(out_route) *out_route = found;
         return NULL;
     }
 }

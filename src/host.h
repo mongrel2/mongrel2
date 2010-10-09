@@ -71,6 +71,6 @@ void Host_destroy(Host *host);
 int Host_add_backend(Host *host, const char *path, size_t path_len, BackendType type, void *target);
 
 
-Backend *Host_match_backend(Host *host, bstring target, bstring *out_pattern);
+Backend *Host_match_backend(Host *host, bstring target, Route **out_route);
 
 #endif

@@ -170,8 +170,13 @@ static inline void Request_nuke_parts(Request *req)
     bdestroy(req->path); req->path = NULL;
     bdestroy(req->query_string); req->query_string = NULL;
     bdestroy(req->fragment); req->fragment = NULL;
-    // we don't own the host header
     bdestroy(req->host_name); req->host_name = NULL;
+
+    // not owned by us: host, pattern, prefix
+    req->pattern = NULL;
+    req->prefix = NULL;
+    req->host = NULL;
+
     req->status_code = 0;
     req->response_size = 0;
 }

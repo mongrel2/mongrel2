@@ -49,7 +49,7 @@ char *test_Dir_resolve_file()
 
 const char *REQ_PATTERN = "%s %s HTTP/1.1\r\n\r\n";
 
-Request *fake_req(const char *method, const char *path)
+Request *fake_req(const char *method, const char *prefix, const char *path)
 {
     int rc = 0;
     size_t nparsed = 0;
@@ -60,6 +60,9 @@ Request *fake_req(const char *method, const char *path)
     bstring rp = bformat(REQ_PATTERN, method, bdata(p));
 
     rc = Request_parse(req, bdata(rp), blength(rp), &nparsed);
+    req->prefix = bfromcstr(prefix);
+    req->pattern = bfromcstr(prefix);
+
     check(rc != 0, "Failed to parse request.");
     check(nparsed == blength(rp), "Failed to parse all of request.");
 
@@ -82,18 +85,18 @@ char *test_Dir_serve_file()
     Dir *test = Dir_create("tests/", "sample.html", "test/plain");
 
     Connection conn = {0};
-    int zero_fd = open("/dev/zero", O_WRONLY);
-    conn.iob = IOBuf_create(1024, zero_fd, IOBUF_FILE);
+    int zero_fd = open("/dev/null", O_WRONLY);
+    conn.iob = IOBuf_create(1024, zero_fd, IOBUF_NULL);
 
-    req = fake_req("GET", "/sample.json");
+    req = fake_req("GET", "/", "/sample.json");
     rc = Dir_serve_file(test, req, &conn);
-    mu_assert(rc == 0, "Should serve the /sample.json");
+    mu_assert(req->response_size == -1, "Should serve the /sample.json");
 
-    req = fake_req("HEAD", "/sample.json");
+    req = fake_req("HEAD", "/", "/sample.json");
     rc = Dir_serve_file(test, req, &conn);
     mu_assert(rc == 0, "Should serve the HEAD of /sample.json");
 
-    req = fake_req("POST", "/sample.json");
+    req = fake_req("POST", "/", "/sample.json");
     rc = Dir_serve_file(test, req, &conn);
     mu_assert(rc == -1, "POST should pass through but send an error.");
 

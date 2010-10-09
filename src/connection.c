@@ -130,7 +130,7 @@ int connection_route_request(int event, void *data)
     TRACE(route);
     Connection *conn = (Connection *)data;
     Host *host = NULL;
-    bstring pattern = NULL;
+    Route *route = NULL;
 
     bstring path = Request_path(conn->req);
 
@@ -141,12 +141,14 @@ int connection_route_request(int event, void *data)
     }
     error_unless(host, conn, 404, "Request for a host we don't have registered: %s", bdata(conn->req->host_name));
 
-    Backend *found = Host_match_backend(host, path, &pattern);
+    Backend *found = Host_match_backend(host, path, &route);
     error_unless(found, conn, 404, "Handler not found: %s", bdata(path));
 
     Request_set_action(conn->req, found);
+
     conn->req->target_host = host;
-    conn->req->pattern = pattern;
+    conn->req->pattern = route->pattern;
+    conn->req->prefix = route->prefix;
 
     return Connection_backend_event(found, conn);
 

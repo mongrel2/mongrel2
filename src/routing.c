@@ -86,6 +86,9 @@ Route *RouteMap_insert_base(RouteMap *map, bstring prefix, bstring pattern)
     route->pattern = pattern;
     check(route->pattern, "Pattern is required.");
 
+    route->prefix = prefix;
+    check(route->prefix, "Prefix is required.");
+
     debug("ADDING prefix: %s, pattern: %s", bdata(prefix), bdata(pattern));
 
     map->routes = tst_insert(map->routes, bdata(prefix), blength(prefix), route);
@@ -120,7 +123,6 @@ int RouteMap_insert(RouteMap *map, bstring pattern, void *data)
 
     // TODO: figure out whether we can hattach the data too
     route->has_pattern = first_paren >= 0;
-    route->prefix = prefix;
     route->data = data;
 
     return 0;

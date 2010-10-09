@@ -310,11 +310,10 @@ FileRecord *FileRecord_cache_check(Dir *dir, bstring path)
 }
 
 
-FileRecord *Dir_resolve_file(Dir *dir, bstring pattern, bstring path)
+FileRecord *Dir_resolve_file(Dir *dir, bstring prefix, bstring path)
 {
     FileRecord *file = NULL;
     bstring target = NULL;
-    bstring prefix = NULL;
 
     check(Dir_lazy_normalize_base(dir) == 0, "Failed to normalize base path when requesting %s",
             bdata(path));
@@ -327,15 +326,11 @@ FileRecord *Dir_resolve_file(Dir *dir, bstring pattern, bstring path)
         return file;
     }
     
-    int paren = bstrchr(pattern, '(');
-    prefix = (paren > 0) ? bHead(pattern, paren) : bstrcpy(pattern);
-
-    check(bchar(prefix, 0) == '/', "Route '%s' pointing to directory must have pattern with leading '/'", bdata(pattern));
+    check(bchar(prefix, 0) == '/', "Route '%s' pointing to directory must have prefix with leading '/'", bdata(prefix));
     check(blength(prefix) < MAX_DIR_PATH, "Prefix is too long, must be less than %d", MAX_DIR_PATH);
 
-    debug("Building target from base: %s pattern: %s prefix: %s path: %s index_file: %s", 
+    debug("Building target from base: %s prefix: %s path: %s index_file: %s", 
             bdata(dir->normalized_base),
-            bdata(pattern),
             bdata(prefix),
             bdata(path),
             bdata(dir->index_file));
@@ -469,7 +464,9 @@ int Dir_serve_file(Dir *dir, Request *req, Connection *conn)
     FileRecord *file = NULL;
     bstring resp = NULL;
     bstring path = Request_path(req);
-    bstring pattern = req->pattern;
+    bstring prefix = req->prefix;
+    check(prefix != NULL, "Request without a prefix hit.");
+
     int rc = 0;
     int is_get = biseq(req->request_method, &HTTP_GET);
     int is_head = is_get ? 0 : biseq(req->request_method, &HTTP_HEAD);
@@ -483,7 +480,7 @@ int Dir_serve_file(Dir *dir, Request *req, Connection *conn)
         check_debug(rc == blength(&HTTP_405), "Failed to send 405 to client.");
         return -1;
     } else {
-        file = Dir_resolve_file(dir, pattern, path);
+        file = Dir_resolve_file(dir, prefix, path);
         resp = Dir_calculate_response(req, file);
 
         if(resp) {

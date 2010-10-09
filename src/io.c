@@ -4,6 +4,15 @@
 #include <stdlib.h>
 #include <assert.h>
 
+static ssize_t null_send(IOBuf *iob, char *buffer, int len)
+{
+    return len;
+}
+
+static ssize_t null_recv(IOBuf *iob, char *buffer, int len)
+{
+    return len;
+}
 
 static ssize_t plaintext_send(IOBuf *iob, char *buffer, int len)
 {
@@ -102,6 +111,9 @@ IOBuf *IOBuf_create(size_t len, int fd, IOBufType type)
     if(type == IOBUF_SSL) {
         buf->send = ssl_send;
         buf->recv = ssl_recv;
+    } else if(type == IOBUF_NULL) {
+        buf->send = null_send;
+        buf->recv = null_recv;
     } else if(type == IOBUF_FILE) {
         buf->send = file_send;
         buf->recv = file_recv;
