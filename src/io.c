@@ -134,8 +134,8 @@ error:
 void IOBuf_destroy(IOBuf *buf)
 {
     if(buf) {
-        fdclose(buf->fd);
         if(buf->ssl) ssl_free(buf->ssl);
+        fdclose(buf->fd);
         h_free(buf);
     }
 }
