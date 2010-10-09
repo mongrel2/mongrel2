@@ -250,19 +250,18 @@ case 8:
     check(p <= pe, "Buffer overflow after parsing.  Tell Zed that you sent something from a handler that went %ld past the end in the parser.", 
             (long int)(pe - p));
 
-    parser->body_start = p;
-    parser->body_length = pe - p;
+    parser->body = blk2bstr(p, pe - p);
 
     if ( cs == 
-#line 258 "src/handler_parser.c"
+#line 257 "src/handler_parser.c"
 0
-#line 113 "src/handler_parser.rl"
+#line 112 "src/handler_parser.rl"
  ) {
         return -1;
     } else if ( cs >= 
-#line 264 "src/handler_parser.c"
+#line 263 "src/handler_parser.c"
 9
-#line 115 "src/handler_parser.rl"
+#line 114 "src/handler_parser.rl"
  ) {
         return 1;
     } else {
@@ -295,6 +294,11 @@ void HandlerParser_reset(HandlerParser *parser)
     if(parser->uuid) {
         bdestroy(parser->uuid);
         parser->uuid = NULL;
+    }
+
+    if(parser->body) {
+        bdestroy(parser->body);
+        parser->body = NULL;
     }
 }
 

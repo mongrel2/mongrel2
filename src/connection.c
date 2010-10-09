@@ -103,8 +103,6 @@ int connection_finish(int event, void *data)
 {
     TRACE(finish);
 
-    Connection_destroy((Connection *)data);
-
     return CLOSE;
 }
 
@@ -292,7 +290,6 @@ int connection_http_to_handler(int event, void *data)
             IOBuf_resize(conn->iob, content_len);
         }
 
-        debug("ATTEMPTING READ ALL OF: %d", content_len);
         body = IOBuf_read_all(conn->iob, content_len, 5);
         check(body != NULL, "Client closed the connection during upload.");
     }
@@ -554,7 +551,6 @@ int connection_error(int event, void *data)
 {
     TRACE(error);
     int rc = close_or_error(event, data, CLOSE);
-    Connection_destroy((Connection *)data);
     return rc;
 }
 
@@ -732,6 +728,7 @@ void Connection_task(void *v)
 
 error: // fallthrough
     State_exec(&conn->state, CLOSE, (void *)conn);
+    Connection_destroy(conn);
     return;
 }
 

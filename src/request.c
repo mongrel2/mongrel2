@@ -113,6 +113,7 @@ static void uri_cb(void *data, const char *at, size_t length)
 static void path_cb(void *data, const char *at, size_t length)
 {
     Request *req = (Request *)data;
+    assert(req->path == NULL && "This should not happen, Tell Zed.");
     req->path = blk2bstr(at, length);
 }
 

@@ -255,19 +255,23 @@ void FileRecord_destroy(FileRecord *file)
 static inline int normalize_path(bstring target)
 {
     ballocmin(target, PATH_MAX);
-    char *path_buf = calloc(PATH_MAX+1, 1);
+    static char *path_buf = NULL;
+    
+    if(path_buf == NULL) {
+        path_buf = calloc(PATH_MAX+1, 1);
+        check_mem(path_buf);
+    }
 
     // Some platforms (OSX!) don't allocate for you, so we have to
     char *normalized = realpath((const char *)target->data, path_buf);
     check(normalized, "Failed to normalize path: %s", bdata(target));
 
     bassigncstr(target, normalized);
-    free(path_buf);
 
     return 0;
 
 error:
-    return 1;
+    return -1;
 }
 
 static inline int Dir_lazy_normalize_base(Dir *dir)
@@ -348,7 +352,7 @@ FileRecord *Dir_resolve_file(Dir *dir, bstring prefix, bstring path)
         target = bformat("%s%s", bdata(dir->normalized_base), path->data + blength(prefix) - 1);
     }
 
-    check(target, "Couldn't construct target path for %s", bdata(path));
+    check_mem(target);
 
     check_debug(normalize_path(target) == 0,
             "Failed to normalize target path: %s", bdata(target));
@@ -365,7 +369,6 @@ FileRecord *Dir_resolve_file(Dir *dir, bstring prefix, bstring path)
     file->users++;
     file->request_path = bstrcpy(path);
     Cache_add(dir->fr_cache, file);
-
 
     return file;
 

@@ -124,22 +124,18 @@ error:
 }
 
 static inline void handler_process_request(Handler *handler, int id,
-        int fd, int conn_type,
-        const char *body_start, size_t body_length)
+        int fd, int conn_type, bstring payload)
 {
-    bstring payload = NULL;
     int rc = 0;
 
     if(!conn_type) {
         log_err("Ident %d (fd %d) is no longer connected.", id, fd);
         Handler_notify_leave(handler, id);
     } else {
-        if(body_length == 0) {
+        if(blength(payload) == 0) {
             rc = Register_disconnect(fd);
             check(rc != -1, "Register disconnect failed for: %d", fd);
         } else {
-            payload = blk2bstr(body_start, body_length);
-
             int raw = conn_type != CONN_TYPE_MSG || handler->raw;
 
             rc = deliver_payload(raw, fd, payload);
@@ -147,11 +143,9 @@ static inline void handler_process_request(Handler *handler, int id,
         }
     }
 
-    bdestroy(payload);
     return;
 
 error:
-    bdestroy(payload);
     Register_disconnect(fd);  // return ignored
     return;
 }
@@ -182,12 +176,14 @@ static inline int handler_recv_parse(Handler *handler, HandlerParser *parser)
             zmq_msg_size(inmsg), (char *)zmq_msg_data(inmsg));
 
     debug("Parsed message with %d targets, first: %d, uuid: %s, and body: %d",
-            (int)parser->target_count, parser->targets[0], bdata(parser->uuid), (int)parser->body_length);
+            (int)parser->target_count, parser->targets[0],
+            bdata(parser->uuid), blength(parser->body));
 
+    zmq_msg_close(inmsg);
     return 0;
 
 error:
-    // it can leak the inmsg but only in severe error states, otherwise it's owned by zmq
+    zmq_msg_close(inmsg);
     return -1;
 }
 
@@ -214,13 +210,12 @@ void Handler_task(void *v)
             continue;
         }
 
-        for(i = 0; i < parser->target_count; i++) {
+        for(i = 0; i < (int)parser->target_count; i++) {
             int id = (int)parser->targets[i];
             int fd = Register_fd_for_id(id);
             int conn_type = Register_fd_exists(fd);
 
-            handler_process_request(handler, id, fd,
-                    conn_type, parser->body_start, parser->body_length);
+            handler_process_request(handler, id, fd, conn_type, parser->body);
         }
 
         HandlerParser_reset(parser);

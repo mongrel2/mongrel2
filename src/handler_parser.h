@@ -5,8 +5,7 @@
 #include <bstring.h>
 
 typedef struct HandlerParser {
-    const char *body_start;
-    size_t body_length;
+    bstring body;
     bstring uuid;
 
     size_t target_count;

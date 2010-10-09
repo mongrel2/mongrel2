@@ -107,8 +107,7 @@ int HandlerParser_execute(HandlerParser *parser, const char *buffer, size_t len)
     check(p <= pe, "Buffer overflow after parsing.  Tell Zed that you sent something from a handler that went %ld past the end in the parser.", 
             (long int)(pe - p));
 
-    parser->body_start = p;
-    parser->body_length = pe - p;
+    parser->body = blk2bstr(p, pe - p);
 
     if ( cs == %%{ write error; }%% ) {
         return -1;
@@ -144,6 +143,11 @@ void HandlerParser_reset(HandlerParser *parser)
     if(parser->uuid) {
         bdestroy(parser->uuid);
         parser->uuid = NULL;
+    }
+
+    if(parser->body) {
+        bdestroy(parser->body);
+        parser->body = NULL;
     }
 }
 
