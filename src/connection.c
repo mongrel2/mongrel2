@@ -1,3 +1,5 @@
+#undef NDEBUG
+
 /**
  *
  * Copyright (c) 2010, Zed A. Shaw and Mongrel2 Project Contributors.
@@ -441,7 +443,7 @@ int connection_proxy_reply_parse(int event, void *data)
     Log_request(conn, client->status, client->content_len);
 
     if(client->close) {
-        return CLOSE;
+        return REMOTE_CLOSE;
     } else {
         return REQ_RECV;
     }
@@ -549,7 +551,9 @@ int connection_close(int event, void *data)
 int connection_error(int event, void *data)
 {
     TRACE(error);
-    return close_or_error(event, data, CLOSE);
+    int rc = close_or_error(event, data, CLOSE);
+    Connection_destroy((Connection *)data);
+    return rc;
 }
 
 
@@ -659,6 +663,7 @@ StateActions CONN_ACTIONS = {
 void Connection_destroy(Connection *conn)
 {
     if(conn) {
+        debug("CONNECTION DESTROYED");
         Request_destroy(conn->req);
         conn->req = NULL;
         IOBuf_destroy(conn->iob);
@@ -723,10 +728,7 @@ void Connection_task(void *v)
                 "!!! Invalid next event[%d]: %d, Tell ZED!", i, next);
     }
 
-    State_exec(&conn->state, CLOSE, (void *)conn);
-    return;
-
-error:
+error: // fallthrough
     State_exec(&conn->state, CLOSE, (void *)conn);
     return;
 }
@@ -781,7 +783,6 @@ int Connection_read_header(Connection *conn, Request *req)
 
     Request_start(req);
 
-    // TODO: this is really not optimal, redo this so it doesn't forever loop
     for(tries = 0; rc == 0 && tries < 5; tries++) {
         if(avail > 0) {
             rc = Request_parse(req, data, avail, &nparsed);

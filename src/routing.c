@@ -66,6 +66,7 @@ void RouteMap_cleanup(void *value, void *data)
     }
 
     bdestroy(route->pattern);
+    bdestroy(route->prefix);
 }
 
 void RouteMap_destroy(RouteMap *map)
@@ -119,13 +120,12 @@ int RouteMap_insert(RouteMap *map, bstring pattern, void *data)
 
     // TODO: figure out whether we can hattach the data too
     route->has_pattern = first_paren >= 0;
+    route->prefix = prefix;
     route->data = data;
 
-    bdestroy(prefix);
     return 0;
 
 error:
-    bdestroy(prefix);
     return -1;
 }
 
@@ -150,13 +150,12 @@ int RouteMap_insert_reversed(RouteMap *map, bstring pattern, void *data)
     check(route, "Failed to add host.");
 
     route->has_pattern = last_paren >= 0;
+    route->prefix = reversed_prefix;
     route->data = data;
 
-    bdestroy(reversed_prefix);
     return 0;
   
 error:
-    bdestroy(reversed_prefix);
     return -1;
 }
 
