@@ -39,7 +39,7 @@
 #include <events.h>
 #include <assert.h>
 
-#define CALL(A, C) if(state->actions && state->actions->A) next = state->actions->A(C, data)
+#define CALL(A, C) if(state->actions && state->actions->A) next = state->actions->A(C, conn)
 
 %%{
     machine StateActions;
@@ -48,7 +48,6 @@
     access state->;
 
 ### actions
-    action open { CALL(open, fc); }
     action error { CALL(error, fc); }
     action close { CALL(close, fc); }
     action parse { CALL(parse, fc); }
@@ -109,7 +108,7 @@ int State_invariant(State *state)
     return 0;
 }
 
-int State_exec(State *state, int event, Connection *conn)
+int State_exec(State *state, int event, struct Connection *conn)
 {
     int event_queue[2] = {0};
     event_queue[0] = event;
@@ -127,8 +126,6 @@ int State_exec(State *state, int event, Connection *conn)
 
 /* Do not access these directly or alter their order EVER.  */
 const char *EVENT_NAMES[] = {
-    "FINISHED",
-    "ACCEPT",
     "CLOSE",
     "CONNECT",
     "DIRECTORY",
@@ -147,9 +144,9 @@ const char *EVENT_NAMES[] = {
 
 const char *State_event_name(int event)
 {
-    if(event == 0) event = FINISHED;
+    if(event == 0) event = CLOSE;
 
-    assert(event >= FINISHED && event < EVENT_END && "Event is outside range.");
+    assert(event >= CLOSE && event < EVENT_END && "Event is outside range.");
 
-    return EVENT_NAMES[event - FINISHED];
+    return EVENT_NAMES[event - CLOSE];
 }

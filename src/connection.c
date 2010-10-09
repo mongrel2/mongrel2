@@ -83,27 +83,6 @@ error:
 }
 
 
-int connection_open(int event, Connection *conn)
-{
-    TRACE(open);
-
-    if(!conn->registered) {
-        conn->registered = 1;
-    }
-
-    return ACCEPT;
-}
-
-
-
-int connection_finish(int event, Connection *conn)
-{
-    TRACE(finish);
-
-    return CLOSE;
-}
-
-
 
 int connection_send_socket_response(int event, Connection *conn)
 {
@@ -549,7 +528,6 @@ int connection_parse(int event, Connection *conn)
 }
 
 StateActions CONN_ACTIONS = {
-    .open = connection_open,
     .error = connection_error,
     .close = connection_close,
     .parse = connection_parse,
@@ -634,7 +612,7 @@ void Connection_task(void *v)
 
     for(i = 0, next = OPEN; next != CLOSE; i++) {
         next = State_exec(&conn->state, next, (void *)conn);
-        error_unless(next >= FINISHED && next < EVENT_END, conn, 500, 
+        error_unless(next >= CLOSE && next < EVENT_END, conn, 500, 
                 "!!! Invalid next event[%d]: %d, Tell ZED!", i, next);
     }
 

@@ -15,7 +15,6 @@ int test_action_cb(int event, Connection *data)
 }
 
 StateActions test_actions = {
-    .open = test_action_cb,
     .error = test_action_cb,
     .close = test_action_cb,
     .parse = test_action_cb,
@@ -76,15 +75,15 @@ char *test_State_msg()
 
     // Simulates the most basic MSG message request for a handler.
     RUN(msg_handler, 
-            OPEN, ACCEPT, 
+            OPEN,  
             REQ_RECV, MSG_REQ, HANDLER, REQ_SENT, CLOSE);
 
     // Simulates a basic socket request start
-    RUN(socket_start, OPEN, ACCEPT, REQ_RECV, SOCKET_REQ, RESP_SENT, CLOSE);
+    RUN(socket_start, OPEN,  REQ_RECV, SOCKET_REQ, RESP_SENT, CLOSE);
 
     // simulates two requests then a close
     RUN(msg_handler_2_req, 
-            OPEN, ACCEPT, 
+            OPEN,  
             REQ_RECV, MSG_REQ, HANDLER, REQ_SENT,
             REQ_RECV, MSG_REQ, HANDLER, REQ_SENT,
             CLOSE);
@@ -100,19 +99,19 @@ char *test_State_http()
 
     // Simulates doing a basic HTTP request then closing the connection.
     RUN(http_dir,
-            OPEN, ACCEPT,
+            OPEN, 
             REQ_RECV, HTTP_REQ, DIRECTORY, RESP_SENT, CLOSE);
 
     // Simulates two keep-alive handler requests then a close.
     RUN(http_handler,
-            OPEN, ACCEPT,
+            OPEN, 
             REQ_RECV, HTTP_REQ, HANDLER, REQ_SENT,
             REQ_RECV, HTTP_REQ, HANDLER, REQ_SENT, CLOSE);
 
     // Simulates two requests over a proxy connection followed by
     // the remote closing the connection so we have to shutdown.
     RUN(http_proxy,
-            OPEN, ACCEPT,
+            OPEN, 
             REQ_RECV, HTTP_REQ, PROXY, CONNECT, 
             REQ_SENT, REQ_RECV, HTTP_REQ, REQ_SENT, REQ_RECV, REMOTE_CLOSE,
             CLOSE);
@@ -120,7 +119,7 @@ char *test_State_http()
     // Simulates a proxy connect that needs to exit after a 
     // handler request was issued and there's a bit of data left.
     RUN(http_proxy_handler,
-            OPEN, ACCEPT,
+            OPEN, 
             REQ_RECV, HTTP_REQ, PROXY, CONNECT, 
             REQ_SENT, REQ_RECV,
             HANDLER, REQ_SENT, CLOSE);
@@ -133,12 +132,9 @@ char *test_State_exec_error()
 {
     State state;
 
-    // Basic client opens, then closes right away
-    FAILS(failed_connect, OPEN, CLOSE);
-
     // Proxy error where client closed connection mid-connect
     FAILS(failed_proxy, 
-            OPEN, ACCEPT, 
+            OPEN,  
             REQ_RECV, HTTP_REQ, PROXY, CONNECT, CLOSE);
 
     return NULL;

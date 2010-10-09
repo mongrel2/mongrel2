@@ -53,8 +53,6 @@ typedef struct Connection {
     IOBuf *iob;
     IOBuf *proxy_iob;
 
-    int finished;
-    int registered;
     int rport;
     State state;
     struct httpclient_parser *client;

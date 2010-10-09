@@ -41,7 +41,6 @@ struct Connection;
 typedef int (*state_action_cb)(int event, struct Connection *conn);
 
 typedef struct StateActions {
-    state_action_cb open;
     state_action_cb error;
     state_action_cb close;
     state_action_cb parse;
@@ -66,7 +65,7 @@ typedef struct State {
     StateActions *actions;
 } State;
 
-int State_exec(State *state, int event, void *data);
+int State_exec(State *state, int event, struct Connection *conn);
 int State_invariant(State *state);
 int State_init(State *state, StateActions *actions);
 

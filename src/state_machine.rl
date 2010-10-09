@@ -69,9 +69,7 @@ Proxy := (
 
 
 Connection = (
-        start: ( OPEN @open -> Accepting ),
-
-        Accepting: ( ACCEPT @parse -> Identifying ),
+        start: ( OPEN @parse -> Identifying ),
 
         Identifying: (
             REQ_RECV @register_request -> Registered |
