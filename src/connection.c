@@ -63,6 +63,8 @@ struct tagbstring PING_PATTERN = bsStatic("@[a-z/]- {\"type\":\\s*\"ping\"}");
 #define error_unless(T, F, C, M, ...) if(!(T)) error_response(F, C, M, ##__VA_ARGS__)
 
 
+struct tagbstring POLICY_XML_REQUEST = bsStatic("<policy-file-request");
+
 int MAX_CONTENT_LENGTH = 20 * 1024;
 int BUFFER_SIZE = 4 * 1024;
 int CONNECTION_STACK = 32 * 1024;
@@ -186,7 +188,7 @@ int connection_msg_to_handler(int event, void *data)
         check(rc == 0, "Failed to deliver to handler: %s", bdata(Request_path(conn->req)));
     }
 
-    // consume \0 from body_len
+    // consumes \0 from body_len
     IOBuf_read_commit(conn->iob, header_len + body_len);
 
     return REQ_SENT;
@@ -554,8 +556,6 @@ int connection_error(int event, void *data)
     return rc;
 }
 
-
-struct tagbstring POLICY_XML_REQUEST = bsStatic("<policy-file-request");
 
 static inline int ident_and_register(int event, void *data, int reg_too)
 {
