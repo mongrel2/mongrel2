@@ -54,20 +54,16 @@
 #include "mem/halloc.h"
 #include "setting.h"
 #include "log.h"
+#include "upload.h"
 
 struct tagbstring PING_PATTERN = bsStatic("@[a-z/]- {\"type\":\\s*\"ping\"}");
-
-#define TRACE(C) debug("--> %s(%s:%d) %s:%d ", "" #C, State_event_name(event), event, __FUNCTION__, __LINE__)
-
-#define error_response(F, C, M, ...)  {Response_send_status(F, &HTTP_##C); sentinel(M, ##__VA_ARGS__);}
-#define error_unless(T, F, C, M, ...) if(!(T)) error_response(F, C, M, ##__VA_ARGS__)
-
 
 struct tagbstring POLICY_XML_REQUEST = bsStatic("<policy-file-request");
 
 int MAX_CONTENT_LENGTH = 20 * 1024;
 int BUFFER_SIZE = 4 * 1024;
 int CONNECTION_STACK = 32 * 1024;
+
 
 static inline int Connection_backend_event(Backend *found, Connection *conn)
 {
@@ -87,10 +83,9 @@ error:
 }
 
 
-int connection_open(int event, void *data)
+int connection_open(int event, Connection *conn)
 {
     TRACE(open);
-    Connection *conn = (Connection *)data;
 
     if(!conn->registered) {
         conn->registered = 1;
@@ -101,7 +96,7 @@ int connection_open(int event, void *data)
 
 
 
-int connection_finish(int event, void *data)
+int connection_finish(int event, Connection *conn)
 {
     TRACE(finish);
 
@@ -110,10 +105,9 @@ int connection_finish(int event, void *data)
 
 
 
-int connection_send_socket_response(int event, void *data)
+int connection_send_socket_response(int event, Connection *conn)
 {
     TRACE(socket_req);
-    Connection *conn = (Connection *)data;
 
     int rc = Response_send_socket_policy(conn);
     check_debug(rc > 0, "Failed to write Flash socket response.");
@@ -125,10 +119,9 @@ error:
 }
 
 
-int connection_route_request(int event, void *data)
+int connection_route_request(int event, Connection *conn)
 {
     TRACE(route);
-    Connection *conn = (Connection *)data;
     Host *host = NULL;
     Route *route = NULL;
 
@@ -158,10 +151,9 @@ error:
 
 
 
-int connection_msg_to_handler(int event, void *data)
+int connection_msg_to_handler(int event, Connection *conn)
 {
     TRACE(msg_to_handler);
-    Connection *conn = (Connection *)data;
     Handler *handler = Request_get_action(conn->req, handler);
     int rc = 0;
     int header_len = Request_header_length(conn->req);
@@ -198,74 +190,10 @@ error:
 }
 
 
-static inline bstring connection_upload_file(Connection *conn,
-        Handler *handler, int content_len)
-{
-    int rc = 0;
-    int tmpfd = 0;
-    bstring result = NULL;
-    char *data = NULL;
 
-    // need a setting for the moby store where large uploads should go
-    bstring upload_store = Setting_get_str("upload.temp_store", NULL);
-    error_unless(upload_store, conn, 413, "Request entity is too large: %d, and no upload.temp_store setting for where to put the big files.", content_len);
-
-    upload_store = bstrcpy(upload_store); // Setting owns the original
-
-    // TODO: handler should be set to allow large uploads, otherwise error
-
-    tmpfd = mkstemp((char *)upload_store->data);
-    check(tmpfd != -1, "Failed to create secure tempfile, did you end it with XXXXXX?");
-    log_info("Writing tempfile %s for large upload.", bdata(upload_store));
-
-    // send the initial headers we have so they can kill it if they want
-    dict_alloc_insert(conn->req->headers, bfromcstr("X-Mongrel2-Upload-Start"), upload_store);
-
-    result = Request_to_payload(conn->req, handler->send_ident,
-            IOBuf_fd(conn->iob), "", 0);
-    check(result, "Failed to create initial payload for upload attempt.");
-
-    rc = Handler_deliver(handler->send_socket, bdata(result), blength(result));
-    check(rc != -1, "Failed to deliver upload attempt to handler.");
-
-    // all good so start streaming chunks into the temp file in the moby dir
-    IOBuf_resize(conn->iob, MAX_CONTENT_LENGTH); // give us a good buffer size
-
-    while(content_len > 0) {
-        data = IOBuf_read_some(conn->iob, &rc);
-        check(!IOBuf_closed(conn->iob), "Closed while reading from IOBuf.");
-        content_len -= rc;
-
-        check(write(tmpfd, data, rc) == rc, "Failed to write requested amount to tempfile: %d", rc);
-
-        IOBuf_read_commit(conn->iob, rc);
-    }
-
-    check(content_len == 0, "Bad math on writing out the upload tmpfile: %s, it's %d", bdata(upload_store), content_len);
-
-    // moby dir write is done, add a header to the request that indicates where to get it
-    dict_alloc_insert(conn->req->headers, bfromcstr("X-Mongrel2-Upload-Done"), upload_store);
-
-    bdestroy(result);
-    fdclose(tmpfd);
-    return upload_store;
-
-error:
-    bdestroy(result);
-    fdclose(tmpfd);
-
-    if(upload_store) {
-        unlink((char *)upload_store->data);
-        bdestroy(upload_store);
-    }
-
-    return NULL;
-}
-
-int connection_http_to_handler(int event, void *data)
+int connection_http_to_handler(int event, Connection *conn)
 {
     TRACE(http_to_handler);
-    Connection *conn = (Connection *)data;
     int content_len = Request_content_length(conn->req);
     int rc = 0;
     char *body = NULL;
@@ -280,7 +208,7 @@ int connection_http_to_handler(int event, void *data)
     if(content_len == 0) {
         body = "";
     } else if(content_len > MAX_CONTENT_LENGTH) {
-        bstring upload_store = connection_upload_file(conn, handler, content_len);
+        bstring upload_store = Upload_file(conn, handler, content_len);
 
         body = "";
         content_len = 0;
@@ -318,10 +246,9 @@ error:
 
 
 
-int connection_http_to_directory(int event, void *data)
+int connection_http_to_directory(int event, Connection *conn)
 {
     TRACE(http_to_directory);
-    Connection *conn = (Connection *)data;
 
     Dir *dir = Request_get_action(conn->req, dir);
 
@@ -346,10 +273,9 @@ error:
 
 
 
-int connection_http_to_proxy(int event, void *data)
+int connection_http_to_proxy(int event, Connection *conn)
 {
     TRACE(http_to_proxy);
-    Connection *conn = (Connection *)data;
     Proxy *proxy = Request_get_action(conn->req, proxy);
     check(proxy != NULL, "Should have a proxy backend.");
 
@@ -376,10 +302,9 @@ error:
 
 
 
-int connection_proxy_deliver(int event, void *data)
+int connection_proxy_deliver(int event, Connection *conn)
 {
     TRACE(proxy_deliver);
-    Connection *conn = (Connection *)data;
     int rc = 0;
     const int max_retries = 10;
 
@@ -399,12 +324,11 @@ error:
 
 
 
-int connection_proxy_reply_parse(int event, void *data)
+int connection_proxy_reply_parse(int event, Connection *conn)
 {
     TRACE(proxy_reply_parse);
     int rc = 0;
     int total = 0;
-    Connection *conn = (Connection *)data;
     Proxy *proxy = Request_get_action(conn->req, proxy);
     httpclient_parser *client = conn->client;
 
@@ -454,12 +378,11 @@ error:
 }
 
 
-int connection_proxy_req_parse(int event, void *data)
+int connection_proxy_req_parse(int event, Connection *conn)
 {
     TRACE(proxy_req_parse);
 
     int rc = 0;
-    Connection *conn = (Connection *)data;
     bstring host = NULL;
     Host *target_host = conn->req->target_host;
     Backend *req_action = conn->req->action;
@@ -503,10 +426,9 @@ error:
 
 
 
-int connection_proxy_failed(int event, void *data)
+int connection_proxy_failed(int event, Connection *conn)
 {
     TRACE(proxy_failed);
-    Connection *conn = (Connection *)data;
 
     Response_send_status(conn, &HTTP_502);
 
@@ -514,20 +436,18 @@ int connection_proxy_failed(int event, void *data)
 }
 
 
-int connection_proxy_close(int event, void *data)
+int connection_proxy_close(int event, Connection *conn)
 {
     TRACE(proxy_close);
 
-    Connection *conn = (Connection *)data;
     IOBuf_destroy(conn->proxy_iob);
     conn->proxy_iob = NULL;
 
     return CLOSE;
 }
 
-static inline int close_or_error(int event, void *data, int next)
+static inline int close_or_error(int event, Connection *conn, int next)
 {
-    Connection *conn = (Connection *)data;
 
     IOBuf_destroy(conn->proxy_iob);
     conn->proxy_iob = NULL;
@@ -541,25 +461,24 @@ error:
 }
 
 
-int connection_close(int event, void *data)
+int connection_close(int event, Connection *conn)
 {
     TRACE(close);
-    return close_or_error(event, data, 0);
+    return close_or_error(event, conn, 0);
 }
 
 
 
-int connection_error(int event, void *data)
+int connection_error(int event, Connection *conn)
 {
     TRACE(error);
-    int rc = close_or_error(event, data, CLOSE);
+    int rc = close_or_error(event, conn, CLOSE);
     return rc;
 }
 
 
-static inline int ident_and_register(int event, void *data, int reg_too)
+static inline int ident_and_register(int event, Connection *conn, int reg_too)
 {
-    Connection *conn = (Connection *)data;
     int conn_type = 0;
     int next = CLOSE;
 
@@ -608,32 +527,26 @@ error:
 
 }
 
-int connection_register_request(int event, void *data)
+int connection_register_request(int event, Connection *conn)
 {
     TRACE(register_request);
-    return ident_and_register(event, data, 1);
+    return ident_and_register(event, conn, 1);
 }
 
-
-int connection_identify_request(int event, void *data)
+int connection_identify_request(int event, Connection *conn)
 {
     TRACE(identify_request);
-    return ident_and_register(event, data, 0);
+    return ident_and_register(event, conn, 0);
 }
 
-
-
-int connection_parse(int event, void *data)
+int connection_parse(int event, Connection *conn)
 {
-    Connection *conn = (Connection *)data;
-
     if(Connection_read_header(conn, conn->req) > 0) {
         return REQ_RECV;
     } else {
         return CLOSE;
     }
 }
-
 
 StateActions CONN_ACTIONS = {
     .open = connection_open,

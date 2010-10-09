@@ -2,10 +2,11 @@
 #include <state.h>
 #include <events.h>
 #include <stdint.h>
+#include "connection.h"
 
 FILE *LOG_FILE = NULL;
 
-int test_action_cb(int event, void *data)
+int test_action_cb(int event, Connection *data)
 {
     int i = (int)(intptr_t)data;
 

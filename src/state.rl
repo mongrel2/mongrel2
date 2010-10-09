@@ -109,7 +109,7 @@ int State_invariant(State *state)
     return 0;
 }
 
-int State_exec(State *state, int event, void *data)
+int State_exec(State *state, int event, Connection *conn)
 {
     int event_queue[2] = {0};
     event_queue[0] = event;

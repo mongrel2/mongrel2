@@ -70,7 +70,13 @@ extern FILE *LOG_FILE;
 
 #define sentinel(M, ...)  { log_err(M, ##__VA_ARGS__); errno=0; goto error; }
 
-
 #define check_mem(A) check((A), "Out of memory.")
+
+#define TRACE(C) debug("--> %s(%s:%d) %s:%d ", "" #C, State_event_name(event), event, __FUNCTION__, __LINE__)
+
+#define error_response(F, C, M, ...)  {Response_send_status(F, &HTTP_##C); sentinel(M, ##__VA_ARGS__);}
+
+#define error_unless(T, F, C, M, ...) if(!(T)) error_response(F, C, M, ##__VA_ARGS__)
+
 
 #endif
