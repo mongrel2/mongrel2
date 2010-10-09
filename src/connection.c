@@ -207,7 +207,6 @@ int connection_http_to_handler(Connection *conn)
     } else {
         if(content_len > conn->iob->len) {
             // temporarily grow the buffer
-            // TODO: also consider sizing it back down when not needed
             IOBuf_resize(conn->iob, content_len);
         }
 

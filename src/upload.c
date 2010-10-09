@@ -64,7 +64,7 @@ int Upload_file(Connection *conn, Handler *handler, int content_len)
     rc = stream_to_disk(conn->iob, content_len, tmpfd);
     check(rc == 0, "Failed to stream to disk.");
 
-    rc = Upload_notify(conn, handler, "Done", tmp_name);
+    rc = Upload_notify(conn, handler, "Done", bstrcpy(tmp_name));
     check(rc == 0, "Failed to notify the end of the upload.");
 
     bdestroy(result);
