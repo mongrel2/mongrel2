@@ -171,7 +171,7 @@
   SocketJSONStart = ("@" rel_path);
   SocketJSONData = "{" any* "}" :>> "\0";
 
-  SocketXMLData = ("<" [a-z0-9A-Z\-.]+) >mark %request_path "/"? ">" any* ">" :>> "\0";
+  SocketXMLData = ("<" [a-z0-9A-Z\-.]+) >mark %request_path ("/" | space | ">") any* ">" :>> "\0";
 
   SocketJSON = SocketJSONStart >mark %request_path " " SocketJSONData >mark @json;
   SocketXML = SocketXMLData @xml;

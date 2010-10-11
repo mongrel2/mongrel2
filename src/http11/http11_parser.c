@@ -56,7 +56,7 @@
 
 #line 58 "src/http11/http11_parser.c"
 static const int http_parser_start = 1;
-static const int http_parser_first_final = 79;
+static const int http_parser_first_final = 78;
 static const int http_parser_error = 0;
 
 static const int http_parser_en_main = 1;
@@ -384,10 +384,10 @@ tr21:
           parser->header_done(parser->data, p + 1, pe - p - 1);
         }
       }
-    {p++; cs = 79; goto _out;}
+    {p++; cs = 78; goto _out;}
   }
-	goto st79;
-tr90:
+	goto st78;
+tr89:
 #line 115 "src/http11/http11_parser.rl"
 	{
       parser->xml_sent = 1;
@@ -405,10 +405,10 @@ tr90:
           parser->header_done(parser->data, p + 1, pe - p - 1);
         }
       }
-    {p++; cs = 79; goto _out;}
+    {p++; cs = 78; goto _out;}
   }
-	goto st79;
-tr99:
+	goto st78;
+tr98:
 #line 119 "src/http11/http11_parser.rl"
 	{
       parser->json_sent = 1;
@@ -426,13 +426,13 @@ tr99:
           parser->header_done(parser->data, p + 1, pe - p - 1);
         }
       }
-    {p++; cs = 79; goto _out;}
+    {p++; cs = 78; goto _out;}
   }
-	goto st79;
-st79:
+	goto st78;
+st78:
 	if ( ++p == pe )
-		goto _test_eof79;
-case 79:
+		goto _test_eof78;
+case 78:
 #line 437 "src/http11/http11_parser.c"
 	goto st0;
 st15:
@@ -1267,14 +1267,18 @@ st61:
 		goto _test_eof61;
 case 61:
 	switch( (*p) ) {
+		case 32: goto tr86;
 		case 47: goto tr86;
-		case 62: goto tr87;
+		case 62: goto tr86;
 	}
-	if ( (*p) < 65 ) {
-		if ( 45 <= (*p) && (*p) <= 57 )
-			goto st61;
-	} else if ( (*p) > 90 ) {
-		if ( 97 <= (*p) && (*p) <= 122 )
+	if ( (*p) < 45 ) {
+		if ( 9 <= (*p) && (*p) <= 13 )
+			goto tr86;
+	} else if ( (*p) > 57 ) {
+		if ( (*p) > 90 ) {
+			if ( 97 <= (*p) && (*p) <= 122 )
+				goto st61;
+		} else if ( (*p) >= 65 )
 			goto st61;
 	} else
 		goto st61;
@@ -1290,51 +1294,55 @@ st62:
 	if ( ++p == pe )
 		goto _test_eof62;
 case 62:
-#line 1294 "src/http11/http11_parser.c"
+#line 1298 "src/http11/http11_parser.c"
 	if ( (*p) == 62 )
 		goto st63;
-	goto st0;
-tr87:
-#line 95 "src/http11/http11_parser.rl"
-	{
-    if(parser->request_path != NULL)
-      parser->request_path(parser->data, PTR_TO(mark), LEN(mark,p));
-  }
-	goto st63;
+	goto st62;
 st63:
 	if ( ++p == pe )
 		goto _test_eof63;
 case 63:
-#line 1309 "src/http11/http11_parser.c"
-	if ( (*p) == 62 )
-		goto st64;
-	goto st63;
+	switch( (*p) ) {
+		case 0: goto tr89;
+		case 62: goto st63;
+	}
+	goto st62;
+tr3:
+#line 53 "src/http11/http11_parser.rl"
+	{MARK(mark, p); }
+	goto st64;
 st64:
 	if ( ++p == pe )
 		goto _test_eof64;
 case 64:
+#line 1319 "src/http11/http11_parser.c"
 	switch( (*p) ) {
-		case 0: goto tr90;
-		case 62: goto st64;
+		case 32: goto tr91;
+		case 37: goto st69;
+		case 47: goto st0;
+		case 59: goto tr93;
+		case 60: goto st0;
+		case 62: goto st0;
+		case 63: goto tr94;
+		case 127: goto st0;
 	}
-	goto st63;
-tr3:
-#line 53 "src/http11/http11_parser.rl"
-	{MARK(mark, p); }
+	if ( (*p) > 31 ) {
+		if ( 34 <= (*p) && (*p) <= 35 )
+			goto st0;
+	} else if ( (*p) >= 0 )
+		goto st0;
 	goto st65;
 st65:
 	if ( ++p == pe )
 		goto _test_eof65;
 case 65:
-#line 1330 "src/http11/http11_parser.c"
 	switch( (*p) ) {
-		case 32: goto tr92;
-		case 37: goto st70;
-		case 47: goto st0;
-		case 59: goto tr94;
+		case 32: goto tr91;
+		case 37: goto st69;
+		case 59: goto tr93;
 		case 60: goto st0;
 		case 62: goto st0;
-		case 63: goto tr95;
+		case 63: goto tr94;
 		case 127: goto st0;
 	}
 	if ( (*p) > 31 ) {
@@ -1342,34 +1350,15 @@ case 65:
 			goto st0;
 	} else if ( (*p) >= 0 )
 		goto st0;
-	goto st66;
-st66:
-	if ( ++p == pe )
-		goto _test_eof66;
-case 66:
-	switch( (*p) ) {
-		case 32: goto tr92;
-		case 37: goto st70;
-		case 59: goto tr94;
-		case 60: goto st0;
-		case 62: goto st0;
-		case 63: goto tr95;
-		case 127: goto st0;
-	}
-	if ( (*p) > 31 ) {
-		if ( 34 <= (*p) && (*p) <= 35 )
-			goto st0;
-	} else if ( (*p) >= 0 )
-		goto st0;
-	goto st66;
-tr92:
+	goto st65;
+tr91:
 #line 95 "src/http11/http11_parser.rl"
 	{
     if(parser->request_path != NULL)
       parser->request_path(parser->data, PTR_TO(mark), LEN(mark,p));
   }
-	goto st67;
-tr106:
+	goto st66;
+tr105:
 #line 84 "src/http11/http11_parser.rl"
 	{MARK(query_start, p); }
 #line 85 "src/http11/http11_parser.rl"
@@ -1382,8 +1371,8 @@ tr106:
     if(parser->request_path != NULL)
       parser->request_path(parser->data, PTR_TO(mark), LEN(mark,p));
   }
-	goto st67;
-tr109:
+	goto st66;
+tr108:
 #line 85 "src/http11/http11_parser.rl"
 	{ 
     if(parser->query_string != NULL)
@@ -1394,40 +1383,105 @@ tr109:
     if(parser->request_path != NULL)
       parser->request_path(parser->data, PTR_TO(mark), LEN(mark,p));
   }
+	goto st66;
+st66:
+	if ( ++p == pe )
+		goto _test_eof66;
+case 66:
+#line 1392 "src/http11/http11_parser.c"
+	if ( (*p) == 123 )
+		goto tr95;
+	goto st0;
+tr95:
+#line 53 "src/http11/http11_parser.rl"
+	{MARK(mark, p); }
 	goto st67;
 st67:
 	if ( ++p == pe )
 		goto _test_eof67;
 case 67:
-#line 1403 "src/http11/http11_parser.c"
-	if ( (*p) == 123 )
-		goto tr96;
-	goto st0;
-tr96:
-#line 53 "src/http11/http11_parser.rl"
-	{MARK(mark, p); }
-	goto st68;
+#line 1404 "src/http11/http11_parser.c"
+	if ( (*p) == 125 )
+		goto st68;
+	goto st67;
 st68:
 	if ( ++p == pe )
 		goto _test_eof68;
 case 68:
-#line 1415 "src/http11/http11_parser.c"
-	if ( (*p) == 125 )
-		goto st69;
-	goto st68;
+	switch( (*p) ) {
+		case 0: goto tr98;
+		case 125: goto st68;
+	}
+	goto st67;
 st69:
 	if ( ++p == pe )
 		goto _test_eof69;
 case 69:
-	switch( (*p) ) {
-		case 0: goto tr99;
-		case 125: goto st69;
-	}
-	goto st68;
+	if ( (*p) < 65 ) {
+		if ( 48 <= (*p) && (*p) <= 57 )
+			goto st70;
+	} else if ( (*p) > 70 ) {
+		if ( 97 <= (*p) && (*p) <= 102 )
+			goto st70;
+	} else
+		goto st70;
+	goto st0;
 st70:
 	if ( ++p == pe )
 		goto _test_eof70;
 case 70:
+	if ( (*p) < 65 ) {
+		if ( 48 <= (*p) && (*p) <= 57 )
+			goto st65;
+	} else if ( (*p) > 70 ) {
+		if ( 97 <= (*p) && (*p) <= 102 )
+			goto st65;
+	} else
+		goto st65;
+	goto st0;
+tr93:
+#line 95 "src/http11/http11_parser.rl"
+	{
+    if(parser->request_path != NULL)
+      parser->request_path(parser->data, PTR_TO(mark), LEN(mark,p));
+  }
+	goto st71;
+st71:
+	if ( ++p == pe )
+		goto _test_eof71;
+case 71:
+#line 1454 "src/http11/http11_parser.c"
+	switch( (*p) ) {
+		case 32: goto tr91;
+		case 37: goto st72;
+		case 60: goto st0;
+		case 62: goto st0;
+		case 63: goto st74;
+		case 127: goto st0;
+	}
+	if ( (*p) > 31 ) {
+		if ( 34 <= (*p) && (*p) <= 35 )
+			goto st0;
+	} else if ( (*p) >= 0 )
+		goto st0;
+	goto st71;
+st72:
+	if ( ++p == pe )
+		goto _test_eof72;
+case 72:
+	if ( (*p) < 65 ) {
+		if ( 48 <= (*p) && (*p) <= 57 )
+			goto st73;
+	} else if ( (*p) > 70 ) {
+		if ( 97 <= (*p) && (*p) <= 102 )
+			goto st73;
+	} else
+		goto st73;
+	goto st0;
+st73:
+	if ( ++p == pe )
+		goto _test_eof73;
+case 73:
 	if ( (*p) < 65 ) {
 		if ( 48 <= (*p) && (*p) <= 57 )
 			goto st71;
@@ -1437,37 +1491,23 @@ case 70:
 	} else
 		goto st71;
 	goto st0;
-st71:
-	if ( ++p == pe )
-		goto _test_eof71;
-case 71:
-	if ( (*p) < 65 ) {
-		if ( 48 <= (*p) && (*p) <= 57 )
-			goto st66;
-	} else if ( (*p) > 70 ) {
-		if ( 97 <= (*p) && (*p) <= 102 )
-			goto st66;
-	} else
-		goto st66;
-	goto st0;
 tr94:
 #line 95 "src/http11/http11_parser.rl"
 	{
     if(parser->request_path != NULL)
       parser->request_path(parser->data, PTR_TO(mark), LEN(mark,p));
   }
-	goto st72;
-st72:
+	goto st74;
+st74:
 	if ( ++p == pe )
-		goto _test_eof72;
-case 72:
-#line 1465 "src/http11/http11_parser.c"
+		goto _test_eof74;
+case 74:
+#line 1506 "src/http11/http11_parser.c"
 	switch( (*p) ) {
-		case 32: goto tr92;
-		case 37: goto st73;
+		case 32: goto tr105;
+		case 37: goto tr106;
 		case 60: goto st0;
 		case 62: goto st0;
-		case 63: goto st75;
 		case 127: goto st0;
 	}
 	if ( (*p) > 31 ) {
@@ -1475,48 +1515,19 @@ case 72:
 			goto st0;
 	} else if ( (*p) >= 0 )
 		goto st0;
-	goto st72;
-st73:
-	if ( ++p == pe )
-		goto _test_eof73;
-case 73:
-	if ( (*p) < 65 ) {
-		if ( 48 <= (*p) && (*p) <= 57 )
-			goto st74;
-	} else if ( (*p) > 70 ) {
-		if ( 97 <= (*p) && (*p) <= 102 )
-			goto st74;
-	} else
-		goto st74;
-	goto st0;
-st74:
-	if ( ++p == pe )
-		goto _test_eof74;
-case 74:
-	if ( (*p) < 65 ) {
-		if ( 48 <= (*p) && (*p) <= 57 )
-			goto st72;
-	} else if ( (*p) > 70 ) {
-		if ( 97 <= (*p) && (*p) <= 102 )
-			goto st72;
-	} else
-		goto st72;
-	goto st0;
-tr95:
-#line 95 "src/http11/http11_parser.rl"
-	{
-    if(parser->request_path != NULL)
-      parser->request_path(parser->data, PTR_TO(mark), LEN(mark,p));
-  }
+	goto tr104;
+tr104:
+#line 84 "src/http11/http11_parser.rl"
+	{MARK(query_start, p); }
 	goto st75;
 st75:
 	if ( ++p == pe )
 		goto _test_eof75;
 case 75:
-#line 1517 "src/http11/http11_parser.c"
+#line 1528 "src/http11/http11_parser.c"
 	switch( (*p) ) {
-		case 32: goto tr106;
-		case 37: goto tr107;
+		case 32: goto tr108;
+		case 37: goto st76;
 		case 60: goto st0;
 		case 62: goto st0;
 		case 127: goto st0;
@@ -1526,8 +1537,8 @@ case 75:
 			goto st0;
 	} else if ( (*p) >= 0 )
 		goto st0;
-	goto tr105;
-tr105:
+	goto st75;
+tr106:
 #line 84 "src/http11/http11_parser.rl"
 	{MARK(query_start, p); }
 	goto st76;
@@ -1535,50 +1546,28 @@ st76:
 	if ( ++p == pe )
 		goto _test_eof76;
 case 76:
-#line 1539 "src/http11/http11_parser.c"
-	switch( (*p) ) {
-		case 32: goto tr109;
-		case 37: goto st77;
-		case 60: goto st0;
-		case 62: goto st0;
-		case 127: goto st0;
-	}
-	if ( (*p) > 31 ) {
-		if ( 34 <= (*p) && (*p) <= 35 )
-			goto st0;
-	} else if ( (*p) >= 0 )
-		goto st0;
-	goto st76;
-tr107:
-#line 84 "src/http11/http11_parser.rl"
-	{MARK(query_start, p); }
-	goto st77;
+#line 1550 "src/http11/http11_parser.c"
+	if ( (*p) < 65 ) {
+		if ( 48 <= (*p) && (*p) <= 57 )
+			goto st77;
+	} else if ( (*p) > 70 ) {
+		if ( 97 <= (*p) && (*p) <= 102 )
+			goto st77;
+	} else
+		goto st77;
+	goto st0;
 st77:
 	if ( ++p == pe )
 		goto _test_eof77;
 case 77:
-#line 1561 "src/http11/http11_parser.c"
 	if ( (*p) < 65 ) {
 		if ( 48 <= (*p) && (*p) <= 57 )
-			goto st78;
+			goto st75;
 	} else if ( (*p) > 70 ) {
 		if ( 97 <= (*p) && (*p) <= 102 )
-			goto st78;
+			goto st75;
 	} else
-		goto st78;
-	goto st0;
-st78:
-	if ( ++p == pe )
-		goto _test_eof78;
-case 78:
-	if ( (*p) < 65 ) {
-		if ( 48 <= (*p) && (*p) <= 57 )
-			goto st76;
-	} else if ( (*p) > 70 ) {
-		if ( 97 <= (*p) && (*p) <= 102 )
-			goto st76;
-	} else
-		goto st76;
+		goto st75;
 	goto st0;
 	}
 	_test_eof2: cs = 2; goto _test_eof; 
@@ -1594,7 +1583,7 @@ case 78:
 	_test_eof12: cs = 12; goto _test_eof; 
 	_test_eof13: cs = 13; goto _test_eof; 
 	_test_eof14: cs = 14; goto _test_eof; 
-	_test_eof79: cs = 79; goto _test_eof; 
+	_test_eof78: cs = 78; goto _test_eof; 
 	_test_eof15: cs = 15; goto _test_eof; 
 	_test_eof16: cs = 16; goto _test_eof; 
 	_test_eof17: cs = 17; goto _test_eof; 
@@ -1658,7 +1647,6 @@ case 78:
 	_test_eof75: cs = 75; goto _test_eof; 
 	_test_eof76: cs = 76; goto _test_eof; 
 	_test_eof77: cs = 77; goto _test_eof; 
-	_test_eof78: cs = 78; goto _test_eof; 
 
 	_test_eof: {}
 	_out: {}
