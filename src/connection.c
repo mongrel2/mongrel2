@@ -36,18 +36,12 @@
 #include <sys/socket.h>
 
 #include "connection.h"
-#include "host.h"
-#include "http11/http11_parser.h"
 #include "http11/httpclient_parser.h"
-#include "bstring.h"
 #include "dbg.h"
-#include "task/task.h"
 #include "events.h"
 #include "register.h"
-#include "handler.h"
 #include "pattern.h"
 #include "dir.h"
-#include "proxy.h"
 #include "response.h"
 #include "mem/halloc.h"
 #include "setting.h"
@@ -438,19 +432,23 @@ static inline int ident_and_register(Connection *conn, int reg_too)
 
     if(Request_is_xml(conn->req)) {
         if(biseq(Request_path(conn->req), &POLICY_XML_REQUEST)) {
+            debug("XML POLICY CONNECTION");
             conn_type = CONN_TYPE_SOCKET;
             taskname("XML");
             next = SOCKET_REQ;
         } else {
+            debug("XML MESSAGE");
             conn_type = CONN_TYPE_MSG;
             taskname("MSG");
             next = MSG_REQ;
         }
     } else if(Request_is_json(conn->req)) {
+        debug("JSON SOCKET MESSAGE");
         conn_type = CONN_TYPE_MSG;
         taskname("MSG");
         next = MSG_REQ;
     } else if(Request_is_http(conn->req)) {
+        debug("HTTP MESSAGE");
         conn_type = CONN_TYPE_HTTP;
         taskname("HTTP");
         next = HTTP_REQ;
@@ -631,6 +629,7 @@ int Connection_read_header(Connection *conn, Request *req)
 
     for(tries = 0; rc == 0 && tries < 5; tries++) {
         if(avail > 0) {
+            debug("PARSING: %.*s", avail, data);
             rc = Request_parse(req, data, avail, &nparsed);
         }
 
