@@ -42,7 +42,8 @@
 #include <ssl/ssl.h>
 
 enum {
-    IPADDR_SIZE = 16
+     /* IPv6 addr can be up to 40 chars long */
+    IPADDR_SIZE = 40
 };
 
 typedef struct Server {
