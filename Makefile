@@ -30,7 +30,7 @@ build:
 clean:
 	rm -rf build bin lib ${OBJECTS} ${TESTS} tests/config.sqlite
 	find . -name "*.gc*" -exec rm {} \;
-	${MAKE} -C tools/m2sh clean
+	${MAKE} -C tools/m2sh OPTLIB=${OPTLIB} clean
 
 pristine: clean
 	sudo rm -rf examples/python/build examples/python/dist examples/python/m2py.egg-info
@@ -63,7 +63,7 @@ check:
 	@egrep '[^_.>a-zA-Z0-9](str(n?cpy|n?cat|xfrm|n?dup|str|pbrk|tok|_)|stpn?cpy|a?sn?printf|byte_)' $(filter-out src/bstr/bsafe.c,${SOURCES})
 
 m2sh: 
-	${MAKE} -C tools/m2sh all
+	${MAKE} OPTFLAGS="${OPTFLAGS}" OPTLIBS="${OPTLIBS}" -C tools/m2sh all
 
 install: all install-bin install-m2sh
 
@@ -72,7 +72,7 @@ install-bin:
 	install bin/mongrel2 $(PREFIX)/bin/
 
 install-m2sh:
-	${MAKE} OPTFLAGS=${OPTFLAGS} OPTLIBS=${OPTLIBS} -C tools/m2sh install
+	${MAKE} -C tools/m2sh install
 
 examples/python/mongrel2/sql/config.sql: src/config/config.sql src/config/mimetypes.sql
 	cat src/config/config.sql src/config/mimetypes.sql > $@
