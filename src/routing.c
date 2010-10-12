@@ -123,6 +123,7 @@ int RouteMap_insert(RouteMap *map, bstring pattern, void *data)
 
     // TODO: figure out whether we can hattach the data too
     route->has_pattern = first_paren >= 0;
+    route->first_paren = first_paren;
     route->data = data;
 
     return 0;
@@ -168,7 +169,9 @@ int RouteMap_collect_match(void *value, const char *key, size_t len)
     Route *route = (Route *)value;
 
     if(route->has_pattern) {
-        return pattern_match(key, len, bdata(route->pattern)) != NULL;
+        return pattern_match(key + route->first_paren,
+                len - route->first_paren,
+                bdataofs(route->pattern, route->first_paren)) != NULL;
     } else {
         return 1;
     }
@@ -180,6 +183,15 @@ list_t *RouteMap_match(RouteMap *map, bstring path)
             blength(path), RouteMap_collect_match);
 }
 
+static inline Route *match_route_pattern(bstring target, Route *route)
+{
+    const char *source = bdataofs(target, blength(route->prefix));
+    int source_length = blength(target) - blength(route->prefix);
+    const char *pattern = bdataofs(route->pattern, route->first_paren);
+
+    return pattern_match(source, source_length, pattern) ? route : NULL;
+}
+
 Route *RouteMap_match_suffix(RouteMap *map, bstring target)
 {
     Route *route = tst_search_suffix(map->routes, bdata(target), blength(target));
@@ -188,7 +200,7 @@ Route *RouteMap_match_suffix(RouteMap *map, bstring target)
         debug("Found simple suffix: %s", bdata(route->pattern));
 
         if(route->has_pattern) {
-            return bstring_match(target, route->pattern) ? route : NULL;
+            return match_route_pattern(target, route);
         } else {
             return route;
         }
@@ -206,7 +218,7 @@ Route *RouteMap_simple_prefix_match(RouteMap *map, bstring target)
         debug("Found simple prefix: %s", bdata(route->pattern));
 
         if(route->has_pattern) {
-            return bstring_match(target, route->pattern) ? route : NULL;
+            return match_route_pattern(target, route);
         } else {
             return route;
         }

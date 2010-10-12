@@ -45,6 +45,7 @@ typedef struct Route {
     bstring prefix;
     void *data;
     int has_pattern;
+    int first_paren;
 } Route;
 
 struct RouteMap;

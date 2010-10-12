@@ -31,7 +31,7 @@ char *test_routing_match()
     bstring route1 = bfromcstr("/users/([0-9]+)");
     bstring route2 = bfromcstr("/users");
     bstring route3 = bfromcstr("/users/people/([0-9]+))$");
-    bstring route4 = bfromcstr("/cars/([a-z]-)$");
+    bstring route4 = bfromcstr("/cars-fast/([a-z]-)$");
 
     Route *route = NULL;
 
@@ -42,7 +42,7 @@ char *test_routing_match()
 
     bstring path1 = bfromcstr("/users/1234/testing");
     bstring path2 = bfromcstr("/users");
-    bstring path3 = bfromcstr("/cars/cadillac");
+    bstring path3 = bfromcstr("/cars-fast/cadillac");
     bstring path4 = bfromcstr("/users/people/1234"); 
     bstring path5 = bfromcstr("/users/1234");
 
