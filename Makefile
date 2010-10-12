@@ -111,3 +111,10 @@ netbsd: dev
 freebsd: OPTFLAGS=-I/usr/local/include
 freebsd: OPTLIBS=-L/usr/local/lib -pthread
 freebsd: all
+
+solaris: OPTFLAGS=-I/usr/local/include
+solaris: OPTLIBS=-L/usr/local/lib -R/usr/local/lib -lsocket -lnsl -lsendfile
+solaris: all
+
+
+
