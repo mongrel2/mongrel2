@@ -629,7 +629,6 @@ int Connection_read_header(Connection *conn, Request *req)
 
     for(tries = 0; rc == 0 && tries < 5; tries++) {
         if(avail > 0) {
-            debug("PARSING: %.*s", avail, data);
             rc = Request_parse(req, data, avail, &nparsed);
         }
 

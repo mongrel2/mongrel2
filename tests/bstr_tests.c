@@ -3772,7 +3772,7 @@ static int test46 (void) {
     return ret;
 }
 
-int main (int argc, char * argv[]) 
+int taskmain (int argc, char * argv[]) 
 {
     LOG_FILE = fopen("tests/tests.log", "a+");
     setbuf(LOG_FILE, NULL);
