@@ -1,0 +1,12 @@
+#!/bin/bash
+
+wget -O - http://localhost:6767/
+
+wget -O - http://localhost:6767/handlertest
+
+wget -O - http://localhost:6767/chatdemo/
+
+wget -O - http://localhost:6767/tests/sample.json
+
+wget -O - http://localhost:6767/tests/crap
+

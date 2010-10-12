@@ -3,6 +3,12 @@ do
     echo "CURL TESTS"
     ./tests/system_tests/curl_tests >> curl_tests.log 
 
+    echo "TNFTP TESTS"
+    ./tests/system_tests/tnftp_tests >> tnftp_tests.log 
+
+    echo "WGET TESTS"
+    ./tests/system_tests/wget_tests >> wget_tests.log 
+
     echo "POST TESTS"
     ./tests/system_tests/post_tests >> post_tests.log 
 
