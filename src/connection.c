@@ -1,3 +1,5 @@
+#undef NDEBUG
+
 /**
  *
  * Copyright (c) 2010, Zed A. Shaw and Mongrel2 Project Contributors.
@@ -55,6 +57,7 @@ struct tagbstring POLICY_XML_REQUEST = bsStatic("<policy-file-request");
 int MAX_CONTENT_LENGTH = 20 * 1024;
 int BUFFER_SIZE = 4 * 1024;
 int CONNECTION_STACK = 32 * 1024;
+const int CLIENT_READ_RETRIES = 5;
 
 
 static inline int Connection_backend_event(Backend *found, Connection *conn)
@@ -204,7 +207,7 @@ int connection_http_to_handler(Connection *conn)
             IOBuf_resize(conn->iob, content_len);
         }
 
-        body = IOBuf_read_all(conn->iob, content_len, 5);
+        body = IOBuf_read_all(conn->iob, content_len, CLIENT_READ_RETRIES);
         check(body != NULL, "Client closed the connection during upload.");
     }
 
@@ -277,11 +280,9 @@ error:
 int connection_proxy_deliver(Connection *conn)
 {
     int rc = 0;
-    const int max_retries = 10;
-
     int total_len = Request_header_length(conn->req) + Request_content_length(conn->req);
 
-    char *buf = IOBuf_read_all(conn->iob, total_len, max_retries);
+    char *buf = IOBuf_read_all(conn->iob, total_len, CLIENT_READ_RETRIES);
     check(buf != NULL, "Failed to read from the client socket to proxy.");
 
     rc = IOBuf_send(conn->proxy_iob, IOBuf_start(conn->iob), total_len);
@@ -328,8 +329,14 @@ int connection_proxy_reply_parse(Connection *conn)
         total = conn->iob->len <= conn->proxy_iob->len ? 
             conn->iob->len : conn->proxy_iob->len;
 
+        rc = IOBuf_send_all(conn->iob, IOBuf_start(conn->proxy_iob),
+                IOBuf_avail(conn->proxy_iob));
+        check_debug(rc != -1, "Failed sending to the client what we had initially.");
+
+        IOBuf_read_commit(conn->proxy_iob, IOBuf_avail(conn->proxy_iob));
+
         for(rc = 0; rc != -1;) {
-            rc = IOBuf_stream(conn->iob, conn->proxy_iob, total);
+            rc = IOBuf_stream(conn->proxy_iob, conn->iob, total);
         }
     } else {
         sentinel("Should not reach this code, Tell Zed.");

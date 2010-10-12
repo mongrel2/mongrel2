@@ -1,3 +1,5 @@
+#undef NDEBUG
+
 /**
  *
  * Copyright (c) 2010, Zed A. Shaw and Mongrel2 Project Contributors.
@@ -70,26 +72,43 @@ error:
     return NULL;
 }
 
+const int PROXY_READ_RETRIES = 100;
+const int PROXY_READ_RETRY_WARN = 10;
+
 int Proxy_read_and_parse(Connection *conn)
 {
     int avail = 0;
     int nparsed = 0;
     char *data = NULL;
+    int tries = 0;
 
     assert(conn->client && "httpclient_parser not configured.");
     assert(conn->proxy_iob && "conn->proxy_iob not configured.");
 
     httpclient_parser_init(conn->client);
 
-    data = IOBuf_read_some(conn->proxy_iob, &avail);
-    check(data != NULL, "Failed to read from proxy.");
+    for(tries = 0; tries < PROXY_READ_RETRIES; tries++) {
+        data = IOBuf_read_some(conn->proxy_iob, &avail);
+        check(data != NULL, "Failed to read from proxy.");
 
-    data[avail] = '\0';
-    nparsed = httpclient_parser_execute(conn->client, data, avail, 0);
+        data[avail] = '\0';
+        nparsed = httpclient_parser_execute(conn->client, data, avail, nparsed);
+        check(!httpclient_parser_has_error(conn->client), "Parsing error from server.");
 
-    check(!httpclient_parser_has_error(conn->client), "Parsing error from server.");
-    check(httpclient_parser_finish(conn->client), "Parser didn't get a full response.");
+        if(httpclient_parser_finish(conn->client) == 0) {
+            fdwait(conn->proxy_iob->fd, 'r');
+        } else {
+            break;
+        }
+    }
+
+    if(tries > PROXY_READ_RETRY_WARN) {
+        log_warn("The proxy backend has a bad I/O pattern that required %d reads before a header was completed. You should worry about its performance.", tries);
+    }
+
+    check(tries < PROXY_READ_RETRIES, "Backend proxy sends too many small packets, tried %d times to read from it.", tries);
     check(conn->client->body_start <= avail, "Read too much.");
+
 
     return nparsed;
 
