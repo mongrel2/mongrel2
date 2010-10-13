@@ -186,12 +186,19 @@ void Request_set(Request *req, bstring key, bstring val, int replace)
         hash_alloc_insert(req->headers, key, val_list);
     } else {
         val_list = hnode_get(n);
-        check(val_list->qty < MAX_DUPE_HEADERS, 
-                "Header %s duplicated more than %d times allowed.", 
-                bdata(key), MAX_DUPE_HEADERS);
-
-        val_list->entry[val_list->qty++] = val;
         bdestroy(key); // don't need the key anymore since we already have it
+
+        if(replace) {
+            // destroy the old one and put this in its place
+            bdestroy(val_list->entry[0]);
+            val_list->entry[0] = val;
+        } else {
+            check(val_list->qty < MAX_DUPE_HEADERS, 
+                    "Header %s duplicated more than %d times allowed.", 
+                    bdata(key), MAX_DUPE_HEADERS);
+
+            val_list->entry[val_list->qty++] = val;
+        }
     }
 
 error: return;
