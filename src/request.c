@@ -1,5 +1,3 @@
-#undef NDEBUG
-
 /**
  *
  * Copyright (c) 2010, Zed A. Shaw and Mongrel2 Project Contributors.
@@ -175,6 +173,7 @@ void Request_set(Request *req, bstring key, bstring val, int replace)
     hnode_t *n = hash_lookup(req->headers, key);
     struct bstrList *val_list = NULL;
     int rc = 0;
+    int i = 0;
 
     if(n == NULL) {
         // make a new bstring list to use as our storage
@@ -182,16 +181,21 @@ void Request_set(Request *req, bstring key, bstring val, int replace)
         rc = bstrListAlloc(val_list, MAX_DUPE_HEADERS);
         check(rc == BSTR_OK, "Couldn't allocate space for header values.");
 
-        val_list->entry[val_list->qty++] = val;
+        val_list->entry[0] = val;
+        val_list->qty = 1;
         hash_alloc_insert(req->headers, key, val_list);
     } else {
         val_list = hnode_get(n);
         bdestroy(key); // don't need the key anymore since we already have it
 
         if(replace) {
-            // destroy the old one and put this in its place
-            bdestroy(val_list->entry[0]);
+            // destroy ALL old ones and put this in their place
+            for(i = 0; i < val_list->qty; i++) {
+                bdestroy(val_list->entry[i]);
+            }
+
             val_list->entry[0] = val;
+            val_list->qty = 1;
         } else {
             check(val_list->qty < MAX_DUPE_HEADERS, 
                     "Header %s duplicated more than %d times allowed.", 
