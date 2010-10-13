@@ -72,10 +72,6 @@ error:
     return NULL;
 }
 
-static ssize_t my_send(Connection *conn, char *buffer, int len)
-{
-    return -1;
-}
 
 char *test_Dir_serve_file()
 {

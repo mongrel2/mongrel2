@@ -4,7 +4,7 @@
 #include "server.h"
 #include "connection.h"
 
-int Log_init();
+int Log_init(bstring access_log, bstring log_spec);
 
 int Log_bind(const char *endpoint);
 

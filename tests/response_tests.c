@@ -4,10 +4,6 @@
 
 FILE *LOG_FILE = NULL;
 
-static ssize_t my_send(Connection *conn, char *buff, int len)
-{
-    return -1;
-}
 
 char *test_Response_send_status() 
 {

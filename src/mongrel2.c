@@ -204,8 +204,10 @@ error:
 void final_setup()
 {
     start_terminator();
-    Log_init(SERVER); // ignored for now depending on if this should be an error
     Server_init();
+    bstring log = bformat("%s%s", bdata(SERVER->chroot), bdata(SERVER->access_log));
+    bstring end_point = bfromcstr("inproc://access_log");
+    Log_init(log, end_point);
 }
 
 
