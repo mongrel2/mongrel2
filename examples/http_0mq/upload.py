@@ -19,9 +19,9 @@ while True:
         print "DISCONNECT"
         continue
 
-    elif req.headers.get('X-Mongrel2-Upload-Done', None):
-        expected = req.headers.get('X-Mongrel2-Upload-Start', "BAD")
-        upload = req.headers.get('X-Mongrel2-Upload-Done', None)
+    elif req.headers.get('x-mongrel2-upload-done', None):
+        expected = req.headers.get('x-mongrel2-upload-start', "BAD")
+        upload = req.headers.get('x-mongrel2-upload-done', None)
 
         if expected != upload:
             print "GOT THE WRONG TARGET FILE: ", expected, upload
@@ -33,9 +33,9 @@ while True:
 
         response = "UPLOAD GOOD: %s" % hashlib.md5(body).hexdigest()
 
-    elif req.headers.get('X-Mongrel2-Upload-Start', None):
+    elif req.headers.get('x-mongrel2-upload-start', None):
         print "UPLOAD starting, don't reply yet."
-        print "Will read file from %s." % req.headers.get('X-Mongrel2-Upload-Start', None)
+        print "Will read file from %s." % req.headers.get('x-mongrel2-upload-start', None)
         continue
 
     else:

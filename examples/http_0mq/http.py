@@ -14,7 +14,7 @@ while True:
         print "DISCONNECT"
         continue
 
-    if req.headers.get("KILLME", None):
+    if req.headers.get("killme", None):
         print "They want to be killed."
         response = ""
     else:
