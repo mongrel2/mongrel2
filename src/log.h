@@ -4,8 +4,14 @@
 #include "server.h"
 #include "connection.h"
 
-int Log_init(Server *server);
+int Log_init();
+
+int Log_bind(const char *endpoint);
+
+int Log_poison_workers();
 
 int Log_request(Connection *conn, int status, int size);
+
+int Log_term();
 
 #endif
