@@ -52,7 +52,13 @@ static void *Log_internal_thread(void *spec)
        check(rc == 0, "Message close failed.");
     }
 
-error: return NULL;
+    rc = zmq_close(socket);
+    check(rc == 0, "Could not close socket");
+
+error: 
+    zmq_msg_close(&msg);
+    zmq_close(socket);
+    return NULL;
 }
 
 int Log_init(bstring access_log, bstring log_spec)
@@ -69,6 +75,7 @@ int Log_init(bstring access_log, bstring log_spec)
         } 
         else 
         {
+            // Who owns this, and who should be killing it -josh
             struct LoggingConfig *config = malloc(sizeof(struct LoggingConfig));
             config->log_spec = log_spec;
             config->file_name = access_log;
@@ -108,11 +115,6 @@ error:
     return -1;
 }
 
-static void free_log_msg(void *data, void *hint)
-{
-    bdestroy(data);
-}
-
 static inline bstring make_log_message(Request *req, const char *remote_addr, 
         int remote_port, int status, int size)
 {
@@ -139,6 +141,11 @@ static inline bstring make_log_message(Request *req, const char *remote_addr,
             size);
 
     return log_data;
+}
+
+static void free_log_msg(void *data, void *hint)
+{
+    bdestroy(data);
 }
 
 int Log_request(Connection *conn, int status, int size)
