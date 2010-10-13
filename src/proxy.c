@@ -1,5 +1,3 @@
-#undef NDEBUG
-
 /**
  *
  * Copyright (c) 2010, Zed A. Shaw and Mongrel2 Project Contributors.
@@ -93,6 +91,7 @@ int Proxy_read_and_parse(Connection *conn)
 
         data[avail] = '\0';
         nparsed = httpclient_parser_execute(conn->client, data, avail, nparsed);
+        check(nparsed != -1, "Major parsing failure from proxy backend, Tell Zed.");
         check(!httpclient_parser_has_error(conn->client), "Parsing error from server.");
 
         if(httpclient_parser_finish(conn->client) == 0) {
@@ -123,6 +122,7 @@ static inline int parse_chunks(char *data, httpclient_parser *client, int avail)
     data[avail] = '\0';
     httpclient_parser_init(client);
     int rc = httpclient_parser_execute(client, data, avail, 0);
+    check(rc != -1, "Fatal parsing error from proxy, Tell Zed.");
     check(!httpclient_parser_has_error(client), "Parsing error from server.");
     check(httpclient_parser_finish(client), "Parser didn't get a full response.");
 
