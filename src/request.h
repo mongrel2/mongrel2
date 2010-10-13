@@ -36,7 +36,7 @@
 #define _request_h
 
 #include <http11/http11_parser.h>
-#include <adt/dict.h>
+#include <adt/hash.h>
 #include <bstring.h>
 #include <handler.h>
 #include <headers.h>
@@ -58,7 +58,7 @@ typedef struct Request {
     bstring pattern; // not owned by us
     bstring prefix; // not owned by us
     struct Host *target_host;
-    dict_t *headers;
+    hash_t *headers;
     struct Backend *action;
     int status_code;
     int response_size;
@@ -74,6 +74,8 @@ void Request_start(Request *req);
 void Request_destroy(Request *req);
 
 bstring Request_get(Request *req, bstring field);
+
+void Request_set(Request *req, bstring key, bstring val, int replace);
 
 int Request_get_date(Request *req, bstring field, const char *format);
 

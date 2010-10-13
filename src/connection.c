@@ -647,8 +647,8 @@ int Connection_read_header(Connection *conn, Request *req)
     error_unless(rc == 1, conn, 400, "Error parsing request.");
 
     // add the x-forwarded-for header
-    dict_alloc_insert(conn->req->headers, bfromcstr("X-Forwarded-For"),
-            blk2bstr(conn->remote, IPADDR_SIZE));
+    Request_set(conn->req, bstrcpy(&HTTP_X_FORWARDED_FOR),
+            blk2bstr(conn->remote, IPADDR_SIZE), 1);
 
     check_should_close(conn, conn->req);
 

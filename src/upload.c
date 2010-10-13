@@ -34,8 +34,8 @@ error:
 
 int Upload_notify(Connection *conn, Handler *handler, const char *stage, bstring tmp_name)
 {
-    bstring key = bformat("X-Mongrel2-Upload-%s", stage);
-    dict_alloc_insert(conn->req->headers, key, tmp_name);
+    bstring key = bformat("x-mongrel2-upload-%s", stage);
+    Request_set(conn->req, key, tmp_name, 1);
 
     return Connection_send_to_handler(conn, handler, "", 0);
 }

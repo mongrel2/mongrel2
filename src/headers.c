@@ -34,8 +34,6 @@
 
 #include <headers.h>
 
-struct tagbstring HTTP_CONTENT_LENGTH = bsStatic("Content-Length");
-struct tagbstring HTTP_HOST = bsStatic("Host");
 struct tagbstring HTTP_METHOD = bsStatic("METHOD");
 struct tagbstring HTTP_VERSION = bsStatic("VERSION");
 struct tagbstring HTTP_URI = bsStatic("URI");
@@ -46,10 +44,6 @@ struct tagbstring HTTP_BODY = bsStatic("BODY");
 struct tagbstring JSON_METHOD = bsStatic("JSON");
 struct tagbstring XML_METHOD = bsStatic("XML");
 
-struct tagbstring HTTP_IF_MATCH = bsStatic("If-Match");
-struct tagbstring HTTP_IF_NONE_MATCH = bsStatic("If-None-Match");
-struct tagbstring HTTP_IF_MODIFIED_SINCE = bsStatic("If-Modified-Since");
-struct tagbstring HTTP_IF_UNMODIFIED_SINCE = bsStatic("If-Unmodified-Since");
 
 struct tagbstring HTTP_POST = bsStatic("POST");
 struct tagbstring HTTP_GET = bsStatic("GET");
@@ -58,5 +52,15 @@ struct tagbstring HTTP_DELETE = bsStatic("DELETE");
 struct tagbstring HTTP_PUT = bsStatic("PUT");
 struct tagbstring HTTP_OPTIONS = bsStatic("OPTIONS");
 struct tagbstring HTTP_PATTERN = bsStatic("PATTERN");
-struct tagbstring HTTP_USER_AGENT = bsStatic("User-Agent");
-struct tagbstring HTTP_CONNECTION = bsStatic("Connection");
+
+
+struct tagbstring HTTP_CONTENT_LENGTH = bsStatic("content-length");
+struct tagbstring HTTP_HOST = bsStatic("host");
+struct tagbstring HTTP_IF_MATCH = bsStatic("if-match");
+struct tagbstring HTTP_IF_NONE_MATCH = bsStatic("if-none-match");
+struct tagbstring HTTP_IF_MODIFIED_SINCE = bsStatic("if-modified-since");
+struct tagbstring HTTP_IF_UNMODIFIED_SINCE = bsStatic("if-unmodified-since");
+struct tagbstring HTTP_USER_AGENT = bsStatic("user-agent");
+struct tagbstring HTTP_CONNECTION = bsStatic("connection");
+
+struct tagbstring HTTP_X_FORWARDED_FOR = bsStatic("x-forwarded-for");

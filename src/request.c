@@ -1,3 +1,5 @@
+#undef NDEBUG
+
 /**
  *
  * Copyright (c) 2010, Zed A. Shaw and Mongrel2 Project Contributors.
@@ -42,12 +44,38 @@
 #include "setting.h"
 #include "register.h"
 #include "headers.h"
-#include "adt/dict.h"
+#include "adt/hash.h"
 #include "dbg.h"
 #include "request.h"
 
 int MAX_HEADER_COUNT=0;
+int MAX_DUPE_HEADERS=5;
 
+// just copied from hash.c but applied to bstrings
+static hash_val_t bstr_hash_fun(const void *kv)
+{
+    bstring key = (bstring)kv;
+
+    static unsigned long randbox[] = {
+	0x49848f1bU, 0xe6255dbaU, 0x36da5bdcU, 0x47bf94e9U,
+	0x8cbcce22U, 0x559fc06aU, 0xd268f536U, 0xe10af79aU,
+	0xc1af4d69U, 0x1d2917b5U, 0xec4c304dU, 0x9ee5016cU,
+	0x69232f74U, 0xfead7bb3U, 0xe9089ab6U, 0xf012f6aeU,
+    };
+
+    const unsigned char *str = (const unsigned char *)bdata(key);
+    hash_val_t acc = 0;
+
+    while (*str) {
+	acc ^= randbox[(*str + acc) & 0xf];
+	acc = (acc << 1) | (acc >> 31);
+	acc &= 0xffffffffU;
+	acc ^= randbox[((*str++ >> 4) + acc) & 0xf];
+	acc = (acc << 2) | (acc >> 30);
+	acc &= 0xffffffffU;
+    }
+    return acc;
+}
 
 void Request_init()
 {
@@ -56,15 +84,15 @@ void Request_init()
 }
 
 
-static dnode_t *req_alloc_dict(void *notused)
+static hnode_t *req_alloc_hash(void *notused)
 {
-    return (dnode_t *)calloc(sizeof(dnode_t), 1);
+    return (hnode_t *)malloc(sizeof(hnode_t));
 }
 
-static void req_free_dict(dnode_t *node, void *notused)
+static void req_free_hash(hnode_t *node, void *notused)
 {
-    bdestroy((bstring)dnode_get(node));
-    bdestroy((bstring)dnode_getkey(node));
+    bstrListDestroy((struct bstrList *)hnode_get(node));
+    bdestroy((bstring)hnode_getkey(node));
     free(node);
 }
 
@@ -128,11 +156,46 @@ static void header_field_cb(void *data, const char *field, size_t flen,
         const char *value, size_t vlen)
 {
     Request *req = (Request *)data;
-    bstring vstr = blk2bstr(value, vlen);
 
-    dict_alloc_insert(req->headers, blk2bstr(field, flen), vstr);
+    if(hash_isfull(req->headers)) {
+        log_err("Request had more than %d headers allowed by limits.header_count.",
+                MAX_HEADER_COUNT);
+    } else {
+        bstring vstr = blk2bstr(value, vlen);
+        bstring fstr = blk2bstr(field, flen);
+        btolower(fstr);
+
+        Request_set(req, fstr, vstr, 0);
+    }
 }
 
+
+void Request_set(Request *req, bstring key, bstring val, int replace)
+{
+    hnode_t *n = hash_lookup(req->headers, key);
+    struct bstrList *val_list = NULL;
+    int rc = 0;
+
+    if(n == NULL) {
+        // make a new bstring list to use as our storage
+        val_list = bstrListCreate();
+        rc = bstrListAlloc(val_list, MAX_DUPE_HEADERS);
+        check(rc == BSTR_OK, "Couldn't allocate space for header values.");
+
+        val_list->entry[val_list->qty++] = val;
+        hash_alloc_insert(req->headers, key, val_list);
+    } else {
+        val_list = hnode_get(n);
+        check(val_list->qty < MAX_DUPE_HEADERS, 
+                "Header %s duplicated more than %d times allowed.", 
+                bdata(key), MAX_DUPE_HEADERS);
+
+        val_list->entry[val_list->qty++] = val;
+        bdestroy(key); // don't need the key anymore since we already have it
+    }
+
+error: return;
+}
 
 Request *Request_create()
 {
@@ -148,11 +211,9 @@ Request *Request_create()
     req->parser.http_version = http_version_cb;
     req->parser.header_done = header_done_cb;
 
-    req->headers = dict_create(MAX_HEADER_COUNT, (dict_comp_t)bstricmp);
+    req->headers = hash_create(MAX_HEADER_COUNT, (hash_comp_t)bstrcmp, bstr_hash_fun);
     check_mem(req->headers);
-
-    dict_set_allocator(req->headers, req_alloc_dict, req_free_dict, NULL);
-    dict_allow_dupes(req->headers);
+    hash_set_allocator(req->headers, req_alloc_hash, req_free_hash, NULL);
 
     req->parser.data = req;  // for the http callbacks
 
@@ -186,8 +247,8 @@ void Request_destroy(Request *req)
 {
     if(req) {
         Request_nuke_parts(req);
-        dict_free_nodes(req->headers);
-        dict_destroy(req->headers);
+        hash_free_nodes(req->headers);
+        hash_destroy(req->headers);
         free(req);
     }
 }
@@ -201,7 +262,7 @@ void Request_start(Request *req)
     Request_nuke_parts(req);
 
     if(req->headers) {
-        dict_free_nodes(req->headers);
+        hash_free_nodes(req->headers);
     }
 }
 
@@ -219,9 +280,15 @@ int Request_parse(Request *req, char *buf, size_t nread, size_t *out_nparsed)
 
 bstring Request_get(Request *req, bstring field)
 {
-    dnode_t *node = dict_lookup(req->headers, field);
+    hnode_t *node = hash_lookup(req->headers, field);
+    struct bstrList *vals = NULL;
 
-    return node == NULL ? NULL : (bstring)dnode_get(node);
+    if(node == NULL) {
+        return NULL;
+    } else {
+        vals = hnode_get(node);
+        return vals->entry[0];
+    }
 }
 
 
@@ -265,15 +332,40 @@ static inline bstring json_escape(bstring in)
     return vstr;
 }
 
+struct tagbstring LISTSEP = bsStatic(",");
+
 bstring Request_to_payload(Request *req, bstring uuid, int fd, const char *buf, size_t len)
 {
     bstring headers = bformat("{\"%s\":\"%s\"", bdata(&HTTP_PATH), bdata(req->path));
     bstring result = NULL;
-    dnode_t *i = NULL;
     int id = Register_id_for_fd(fd);
     bstring vstr = NULL; // used in the B macro
+    bstring key = NULL;
+    hnode_t *i = NULL;
+    hscan_t scan;
+    struct bstrList *val_list = NULL;
 
     check(id != -1, "Asked to generate a paylod for an fd that doesn't exist: %d", fd);
+
+    hash_scan_begin(&scan, req->headers);
+    for(i = hash_scan_next(&scan); i != NULL; i = hash_scan_next(&scan)) {
+        val_list = hnode_get(i);
+        key = (bstring)hnode_getkey(i);
+
+        if(val_list->qty > 1) {
+            // first just hook up the key into the output
+            bformata(headers, ",\"%s\":[", bdata(key));
+            bstring list = bjoin(val_list, &LISTSEP);
+            bconcat(headers, list);
+            bconchar(headers, ']');
+            bdestroy(list);
+        } else {
+            B(key, val_list->entry[0]);
+        }
+    }
+
+    // these come after so that if anyone attempts to hijack these somehow, most
+    // hash algorithms languages have will replace the browser ones with ours
 
     if(Request_is_json(req)) {
         B(&HTTP_METHOD, &JSON_METHOD);
@@ -288,11 +380,6 @@ bstring Request_to_payload(Request *req, bstring uuid, int fd, const char *buf, 
     B(&HTTP_QUERY, req->query_string);
     B(&HTTP_FRAGMENT, req->fragment);
     B(&HTTP_PATTERN, req->pattern);
-
-    for(i = dict_first(req->headers); i != NULL; i = dict_next(req->headers, i))
-    {
-        B((bstring)dnode_getkey(i), (bstring)dnode_get(i));
-    }
 
     bconchar(headers, '}');
 
@@ -310,5 +397,6 @@ bstring Request_to_payload(Request *req, bstring uuid, int fd, const char *buf, 
 
 error:
     bdestroy(headers);
+    bdestroy(result);
     return NULL;
 }
