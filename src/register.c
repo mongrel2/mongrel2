@@ -93,7 +93,7 @@ int Register_disconnect(int fd)
     assert(fd >= 0 && "Invalid FD given for disconnect.");
 
     Registration *reg = &REGISTRATIONS[fd];
-    check(reg->conn_type != 0, "Attempt to unregister FD %d which is already gone.", fd);
+    check_debug(reg->conn_type != 0, "Attempt to unregister FD %d which is already gone.", fd);
 
     Register_clear(reg);
     fdclose(fd);
@@ -111,7 +111,7 @@ int Register_ping(int fd)
     check(fd >= 0, "Invalid FD given for disconnect: %d", fd);
     Registration *reg = &REGISTRATIONS[fd];
 
-    check(reg->conn_type != 0, "Attemp to ping an FD that isn't registered: %d", fd);
+    check_debug(reg->conn_type != 0, "Attemp to ping an FD that isn't registered: %d", fd);
 
     reg->last_ping = time(NULL);
     return reg->last_ping;

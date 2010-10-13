@@ -129,7 +129,7 @@ static inline void handler_process_request(Handler *handler, int id,
     int rc = 0;
 
     if(!conn_type) {
-        log_err("Ident %d (fd %d) is no longer connected.", id, fd);
+        debug("Ident %d (fd %d) is no longer connected.", id, fd);
         Handler_notify_leave(handler, id);
     } else {
         if(blength(payload) == 0) {
