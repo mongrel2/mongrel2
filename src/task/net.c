@@ -69,7 +69,6 @@ static int
 cb_connect(int fd, int istcp, struct sockaddr *psa, socklen_t sn) 
 {
     int n;
-    char str[IPADDR_SIZE+1];
 
     /* for udp */
     if(!istcp){
@@ -114,7 +113,6 @@ netgetsocket(int istcp, char *server, int port,
     int error = 0;
     int fd = -1;
     int proto = 0;
-    int result = 0;
     char str[IPADDR_SIZE+1];
     struct addrinfo hints;
     struct addrinfo *res = nil, *ressave = nil;
@@ -217,7 +215,6 @@ netaccept(int fd, char *server, int *port)
 {
     int cfd, one;
     struct sockaddr_in6 sa;
-    uchar *ip;
     socklen_t len;
     
     if(fdwait(fd, 'r') == -1) {
