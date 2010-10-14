@@ -154,54 +154,59 @@ int taskwaiting()
 }
 
 
-uint
-taskdelay(uint ms)
+uint taskdelay(uint ms)
 {
-    uvlong when, now;
-    Task *t;
+    uvlong when = 0L;
+    uvlong now = 0L;
+    Task *t = NULL;
    
     startfdtask();
 
     now = nsec();
-    when = now+(uvlong)ms*1000000;
-    for(t=sleeping.head; t!=NULL && t->alarmtime < when; t=t->next)
+    when = now + (uvlong)ms * 1000000;
+    for(t=sleeping.head; t != NULL && t->alarmtime < when; t=t->next)
         ;
 
-    if(t){
+    if(t) {
         taskrunning->prev = t->prev;
         taskrunning->next = t;
-    }else{
+    } else {
         taskrunning->prev = sleeping.tail;
         taskrunning->next = NULL;
     }
     
     t = taskrunning;
     t->alarmtime = when;
-    if(t->prev)
-        t->prev->next = t;
-    else
-        sleeping.head = t;
-    if(t->next)
-        t->next->prev = t;
-    else
-        sleeping.tail = t;
 
-    if(!t->system && sleepingcounted++ == 0)
+    if(t->prev) {
+        t->prev->next = t;
+    } else {
+        sleeping.head = t;
+    }
+
+    if(t->next) {
+        t->next->prev = t;
+    } else {
+        sleeping.tail = t;
+    }
+
+    if(!t->system && sleepingcounted++ == 0) {
         taskcount++;
+    }
+
     taskswitch();
 
-    return (nsec() - now)/1000000;
+    return (nsec() - now) / 1000000;
 }
 
-int
-_wait(void *socket, int fd, int rw)
+int _wait(void *socket, int fd, int rw)
 {
     startfdtask();
+
     int max = 0;
     int hot_add = SuperPoll_active_hot(POLL) < SuperPoll_max_hot(POLL);
     
-    taskstate("wait %d:%s", socket ? (int)(intptr_t)socket : fd, 
-            rw=='r' ? "read" : rw=='w' ? "write" : "error");
+    taskstate(rw == 'r' ? "read wait" : "write wait");
 
     max = SuperPoll_add(POLL, (void *)taskrunning, socket, fd, rw, hot_add);
     check(max != -1, "Error adding fd %d to task wait list.", fd);
@@ -249,8 +254,7 @@ int mqsend(void *socket, zmq_msg_t *msg, int flags)
 
 
 /* Like fdread but always calls fdwait before reading. */
-int
-fdread1(int fd, void *buf, int n)
+int fdread1(int fd, void *buf, int n)
 {
     int m;
     
@@ -263,8 +267,7 @@ fdread1(int fd, void *buf, int n)
     return m;
 }
 
-int
-fdrecv1(int fd, void *buf, int n)
+int fdrecv1(int fd, void *buf, int n)
 {
     int m;
     
@@ -277,8 +280,7 @@ fdrecv1(int fd, void *buf, int n)
     return m;
 }
 
-int
-fdread(int fd, void *buf, int n)
+int fdread(int fd, void *buf, int n)
 {
     int m;
 
@@ -290,8 +292,7 @@ fdread(int fd, void *buf, int n)
     return m;
 }
 
-int
-fdrecv(int fd, void *buf, int n)
+int fdrecv(int fd, void *buf, int n)
 {
     int m;
 
@@ -303,10 +304,10 @@ fdrecv(int fd, void *buf, int n)
     return m;
 }
 
-int
-fdwrite(int fd, void *buf, int n)
+int fdwrite(int fd, void *buf, int n)
 {
-    int m, tot;
+    int m = 0;
+    int tot = 0;
     
     for(tot = 0; tot < n; tot += m){
         while((m=write(fd, (char*)buf+tot, n-tot)) < 0 && errno == EAGAIN) {
@@ -318,13 +319,14 @@ fdwrite(int fd, void *buf, int n)
         if(m < 0) return m;
         if(m == 0) break;
     }
+
     return tot;
 }
 
-int
-fdsend(int fd, void *buf, int n)
+int fdsend(int fd, void *buf, int n)
 {
-    int m, tot;
+    int m = 0;
+    int tot = 0;
     
     for(tot = 0; tot < n; tot += m){
         while((m=send(fd, (char*)buf+tot, n-tot, MSG_NOSIGNAL)) < 0 && errno == EAGAIN) {
@@ -339,8 +341,7 @@ fdsend(int fd, void *buf, int n)
     return tot;
 }
 
-int
-fdnoblock(int fd)
+int fdnoblock(int fd)
 {
 #ifdef SO_NOSIGPIPE
     int set = 1;
@@ -350,13 +351,14 @@ fdnoblock(int fd)
     return fcntl(fd, F_SETFL, fcntl(fd, F_GETFL)|O_NONBLOCK);
 }
 
-static uvlong
-nsec(void)
+static uvlong nsec(void)
 {
     struct timeval tv;
 
-    if(gettimeofday(&tv, 0) < 0)
+    if(gettimeofday(&tv, 0) < 0) {
         return -1;
+    }
+
     return (uvlong)tv.tv_sec*1000*1000*1000 + tv.tv_usec*1000;
 }
 

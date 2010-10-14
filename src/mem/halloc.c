@@ -53,7 +53,10 @@ realloc_t halloc_allocator = NULL;
 static void _set_allocator(void);
 static void * _realloc(void * ptr, size_t n);
 
+#ifndef NDEBUG
 static int  _relate(hblock_t * b, hblock_t * p);
+#endif
+
 static void _free_children(hblock_t * p);
 
 /*
@@ -215,6 +218,7 @@ static void * _realloc(void * ptr, size_t n)
 	return NULL;
 }
 
+#ifndef NDEBUG
 static int _relate(hblock_t * b, hblock_t * p)
 {
 	hlist_item_t * i;
@@ -235,6 +239,7 @@ static int _relate(hblock_t * b, hblock_t * p)
 	}
 	return 0;
 }
+#endif
 
 static void _free_children(hblock_t * p)
 {

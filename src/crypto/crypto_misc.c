@@ -165,7 +165,9 @@ EXP_FUNC void STDCALL get_random(int num_rand_bytes, uint8_t *rand_data)
 {   
 #if !defined(WIN32) && defined(CONFIG_USE_DEV_URANDOM)
     /* use the Linux default */
-    read(rng_fd, rand_data, num_rand_bytes);    /* read from /dev/urandom */
+    int rc = read(rng_fd, rand_data, num_rand_bytes);    /* read from /dev/urandom */
+    if(rc == -1) abort();
+
 #elif defined(WIN32) && defined(CONFIG_WIN32_USE_CRYPTO_LIB)
     /* use Microsoft Crypto Libraries */
     CryptGenRandom(gCryptProv, num_rand_bytes, rand_data);

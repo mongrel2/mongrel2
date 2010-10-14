@@ -3,6 +3,7 @@
 #include "taskimpl.h"
 #include <fcntl.h>
 #include <stdio.h>
+#include "dbg.h"
 
 int    taskcount;
 int    tasknswitch;
@@ -43,18 +44,16 @@ static int taskidgen;
 static Task*
 taskalloc(void (*fn)(void*), void *arg, uint stack)
 {
-    Task *t;
+    Task *t = NULL;
     sigset_t zero;
-    uint x, y;
-    ulong z;
+    uint x = 0;
+    uint y = 0;
+    ulong z = 0L;
 
     /* allocate the task and stack together */
     t = calloc(sizeof *t+stack, 1);
-    if(t == NULL){
-        fprint(2, "taskalloc malloc: %r\n");
-        abort();
-    }
-    memset(t, 0, sizeof *t);
+    check_mem(t);
+
     t->stk = (uchar*)(t+1);
     t->stksize = stack;
     t->id = ++taskidgen;
@@ -67,15 +66,13 @@ taskalloc(void (*fn)(void*), void *arg, uint stack)
     sigprocmask(SIG_BLOCK, &zero, &t->context.uc.uc_sigmask);
 
     /* must initialize with current context */
-    if(getcontext(&t->context.uc) < 0){
-        fprint(2, "getcontext: %r\n");
-        abort();
-    }
+    check(getcontext(&t->context.uc) >= 0, "getcontext failed.");
 
     /* call makecontext to do the real work. */
     /* leave a few words open on both ends */
     t->context.uc.uc_stack.ss_sp = (char *)t->stk+8;
     t->context.uc.uc_stack.ss_size = t->stksize-64;
+
 #if defined(__sun__) && !defined(__MAKECONTEXT_V2_SOURCE)        /* sigh */
 #warning "doing sun thing"
     /* can avoid this with __MAKECONTEXT_V2_SOURCE but only on SunOS 5.9 */
@@ -83,6 +80,7 @@ taskalloc(void (*fn)(void*), void *arg, uint stack)
         (char*)t->context.uc.uc_stack.ss_sp
         +t->context.uc.uc_stack.ss_size;
 #endif
+
     /*
      * All this magic is because you have to pass makecontext a
      * function that takes some number of word-sized variables,
@@ -92,31 +90,38 @@ taskalloc(void (*fn)(void*), void *arg, uint stack)
     y = z;
     z >>= 16;    /* hide undefined 32-bit shift from 32-bit compilers */
     x = z>>16;
+
     makecontext(&t->context.uc, (void(*)())taskstart, 2, y, x);
 
     return t;
+
+error:
+    abort();
 }
 
 int
 taskcreate(void (*fn)(void*), void *arg, uint stack)
 {
-    int id;
-    Task *t;
+    int id = 0;
+    Task *t  = NULL;
 
     t = taskalloc(fn, arg, stack);
     taskcount++;
     id = t->id;
+
     if(nalltask % TASK_LIST_GROWTH == 0){
         alltask = realloc(alltask, (nalltask + TASK_LIST_GROWTH)*sizeof(alltask[0]));
-        if(alltask == NULL){
-            fprint(2, "out of memory\n");
-            abort();
-        }
+        check_mem(alltask);
     }
+
     t->alltaskslot = nalltask;
     alltask[nalltask++] = t;
     taskready(t);
+
     return id;
+
+error:
+    return -1;
 }
 
 void
@@ -178,44 +183,51 @@ static void
 contextswitch(Context *from, Context *to)
 {
     if(swapcontext(&from->uc, &to->uc) < 0){
-        fprint(2, "swapcontext failed: %r\n");
-        assert(0);
+        log_err("swapcontext failed.");
+        abort();
     }
 }
 
 static void
 taskscheduler(void)
 {
-    int i;
-    Task *t;
+    int i = 0;
+    Task *t = NULL;
 
     for(;;){
-        if(taskcount == 0)
+        if(taskcount == 0) {
             exit(taskexitval);
-        t = taskrunqueue.head;
-        if(t == NULL){
-            fprint(2, "no runnable tasks! %d tasks stalled\n", taskcount);
-            exit(1);
         }
+
+        t = taskrunqueue.head;
+
+        check(t != NULL, "No runnable tasks, %d tasks stalled", taskcount);
+
         deltask(&taskrunqueue, t);
         t->ready = 0;
         taskrunning = t;
         tasknswitch++;
+
         contextswitch(&taskschedcontext, &t->context);
         taskrunning = NULL;
+
         if(t->exiting){
-            if(!t->system)
+            if(!t->system) {
                 taskcount--;
+            }
+
             i = t->alltaskslot;
             alltask[i] = alltask[--nalltask];
             alltask[i]->alltaskslot = i;
             free(t);
         }
     }
+
+error:
+    abort();
 }
 
-void**
-taskdata(void)
+void** taskdata(void)
 {
     return &taskrunning->udata;
 }
@@ -223,16 +235,9 @@ taskdata(void)
 /*
  * debugging
  */
-void
-taskname(char *fmt, ...)
+void taskname(char *name)
 {
-    va_list arg;
-    Task *t;
-
-    t = taskrunning;
-    va_start(arg, fmt);
-    vsnprint(t->name, sizeof t->name, fmt, arg);
-    va_end(arg);
+    memcpy(taskrunning->name, name, strlen(name)); 
 }
 
 char*
@@ -242,15 +247,9 @@ taskgetname(void)
 }
 
 void
-taskstate(char *fmt, ...)
+taskstate(char *state)
 {
-    va_list arg;
-    Task *t;
-
-    t = taskrunning;
-    va_start(arg, fmt);
-    vsnprint(t->state, sizeof t->name, fmt, arg);
-    va_end(arg);
+    memcpy(taskrunning->state, state, strlen(state)); 
 }
 
 char*
@@ -267,9 +266,8 @@ needstack(int n)
     t = taskrunning;
 
     if((char*)&t <= (char*)t->stk
-    || (char*)&t - (char*)t->stk < 256+n){
-        fprint(2, "task stack overflow: &t=%p tstk=%p n=%d\n", &t, t->stk, 256+n);
-        abort();
+    || (char*)&t - (char*)t->stk < 256+n) {
+        fprintf(stderr, "task stack overflow: &t=%p tstk=%p n=%d\n", &t, t->stk, 256+n);
     }
 }
 
@@ -337,7 +335,7 @@ main(int argc, char **argv)
     taskcreate(taskmainstart, NULL, MAINSTACKSIZE);
     taskscheduler();
 
-    fprint(2, "taskscheduler returned in main!\n");
+    log_err("taskscheduler returned in main!\n");
     abort();
     return 0;
 }
