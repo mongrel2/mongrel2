@@ -40,8 +40,8 @@ static inline bstring read_message(void *sock)
 
 error:
     if(inmsg) {
-        free(inmsg);
         zmq_msg_close(inmsg);
+        free(inmsg);
     }
 
     return NULL;
