@@ -24,7 +24,7 @@ _taskwakeup(Rendez *r, int all)
     for(i=0;; i++){
         if(i==1 && !all)
             break;
-        if((t = r->waiting.head) == nil)
+        if((t = r->waiting.head) == NULL)
             break;
         deltask(&r->waiting, t);
         taskready(t);

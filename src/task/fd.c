@@ -43,7 +43,7 @@ static inline int next_task_sleeptime(int min)
     uvlong now = 0;
     int ms = 0;
 
-    if((t=sleeping.head) == nil)
+    if((t=sleeping.head) == NULL)
         ms = -1;
     else{
         now = nsec();
@@ -164,7 +164,7 @@ taskdelay(uint ms)
 
     now = nsec();
     when = now+(uvlong)ms*1000000;
-    for(t=sleeping.head; t!=nil && t->alarmtime < when; t=t->next)
+    for(t=sleeping.head; t!=NULL && t->alarmtime < when; t=t->next)
         ;
 
     if(t){
@@ -172,7 +172,7 @@ taskdelay(uint ms)
         taskrunning->next = t;
     }else{
         taskrunning->prev = sleeping.tail;
-        taskrunning->next = nil;
+        taskrunning->next = NULL;
     }
     
     t = taskrunning;

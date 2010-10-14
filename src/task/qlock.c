@@ -6,7 +6,7 @@
 static int
 _qlock(QLock *l, int block)
 {
-    if(l->owner == nil){
+    if(l->owner == NULL){
         l->owner = taskrunning;
         return 1;
     }
@@ -43,7 +43,7 @@ qunlock(QLock *l)
         fprint(2, "qunlock: owner=0\n");
         abort();
     }
-    if((l->owner = ready = l->waiting.head) != nil){
+    if((l->owner = ready = l->waiting.head) != NULL){
         deltask(&l->waiting, ready);
         taskready(ready);
     }
@@ -52,7 +52,7 @@ qunlock(QLock *l)
 static int
 _rlock(RWLock *l, int block)
 {
-    if(l->writer == nil && l->wwaiting.head == nil){
+    if(l->writer == NULL && l->wwaiting.head == NULL){
         l->readers++;
         return 1;
     }
@@ -79,7 +79,7 @@ canrlock(RWLock *l)
 static int
 _wlock(RWLock *l, int block)
 {
-    if(l->writer == nil && l->readers == 0){
+    if(l->writer == NULL && l->readers == 0){
         l->writer = taskrunning;
         return 1;
     }
@@ -108,7 +108,7 @@ runlock(RWLock *l)
 {
     Task *t;
 
-    if(--l->readers == 0 && (t = l->wwaiting.head) != nil){
+    if(--l->readers == 0 && (t = l->wwaiting.head) != NULL){
         deltask(&l->wwaiting, t);
         l->writer = t;
         taskready(t);
@@ -120,21 +120,21 @@ wunlock(RWLock *l)
 {
     Task *t;
     
-    if(l->writer == nil){
+    if(l->writer == NULL){
         fprint(2, "wunlock: not locked\n");
         abort();
     }
-    l->writer = nil;
+    l->writer = NULL;
     if(l->readers != 0){
         fprint(2, "wunlock: readers\n");
         abort();
     }
-    while((t = l->rwaiting.head) != nil){
+    while((t = l->rwaiting.head) != NULL){
         deltask(&l->rwaiting, t);
         l->readers++;
         taskready(t);
     }
-    if(l->readers == 0 && (t = l->wwaiting.head) != nil){
+    if(l->readers == 0 && (t = l->wwaiting.head) != NULL){
         deltask(&l->wwaiting, t);
         l->writer = t;
         taskready(t);

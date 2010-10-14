@@ -26,9 +26,14 @@ enum {
   CB_CONNECT 
 };
 
-static void addr_ntop(void *sinx, char *target, int size) {
+int MAX_LISTEN_BACKLOG = 16;
+int SET_NODELAY = 1;
+
+static void addr_ntop(void *sinx, char *target, int size) 
+{
   struct sockaddr_in6 *sin6 = sinx;
   struct sockaddr_in *sin = sinx;
+
   if(sin6->sin6_family == AF_INET6) {
     inet_ntop(AF_INET6, &sin6->sin6_addr, target, size);
   } else {
@@ -36,218 +41,233 @@ static void addr_ntop(void *sinx, char *target, int size) {
   }
 }
 
-static int 
-cb_bind(int fd, int istcp, struct sockaddr *psa, size_t sz) 
+static int cb_bind(int fd, int istcp, struct sockaddr *psa, size_t sz) 
 {
     int n = 0;
-    socklen_t sn;
+    socklen_t sn = sizeof(n);
     char str[IPADDR_SIZE+1];
-    /* set reuse flag for tcp */
+    int rc = 0;
+
     addr_ntop(psa, str, IPADDR_SIZE);
     debug("Binding to %s:%d!", str, ntohs(((struct sockaddr_in6*)psa)->sin6_port));
-    sn = sizeof(n);
+
+    /* set reuse flag for tcp */
     if(istcp && getsockopt(fd, SOL_SOCKET, SO_TYPE, (void*)&n, &sn) >= 0){
         n = 1;
-        setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (char*)&n, sizeof n);
+        rc = setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (char*)&n, sizeof n);
+        check(rc != -1, "Failed to set bind socket to SO_REUSEADDR, that's messed up.");
     }
 
+    rc = bind(fd, psa, sz);
+    check(rc != -1, "Failed to bind to address.");
 
-    if(bind(fd, psa, sz) < 0){
-        taskstate("bind failed");
-        fdclose(fd);
-	log_err("Bind failed");
-        return -1;
+    if(istcp) {
+        rc = listen(fd, MAX_LISTEN_BACKLOG);
+        check(rc != -1, "Failed to listen with %d backlog", MAX_LISTEN_BACKLOG);
     }
 
-    if(istcp)
-        listen(fd, 16);
-    debug("Is TCP: %d", istcp);
     return fd;
+
+error:
+    taskstate("bind failed");
+    fdclose(fd);
+    return -1;
 }
 
-static int 
-cb_connect(int fd, int istcp, struct sockaddr *psa, socklen_t sn) 
+static int cb_connect(int fd, int istcp, struct sockaddr *psa, socklen_t sn) 
 {
-    int n;
+    int n = 0;
+    int rc = 0;
 
     /* for udp */
-    if(!istcp){
+    if(!istcp) {
         n = 1;
-        setsockopt(fd, SOL_SOCKET, SO_BROADCAST, &n, sizeof n);
+        rc = setsockopt(fd, SOL_SOCKET, SO_BROADCAST, &n, sizeof n);
+        check(rc != -1, "Failed to set SO_BROADCAST on UDP socket.");
     }
+
     /* start connecting */
-    if(connect(fd, psa, sn) < 0 && errno != EINPROGRESS){
-        taskstate("connect failed");
-        log_err("Connect failed in cb_connect!");
-        fdclose(fd);
-        return -1;
-    }
+    rc = connect(fd, psa, sn);
+    check(rc != -1 || errno == EINPROGRESS, "Connect failed.");
 
     /* wait for finish */    
-    if(fdwait(fd, 'w') == -1) return -1;
+    rc = fdwait(fd, 'w');
+    check(rc != -1, "Failed waiting on non-blocking connect.");
 
     sn = sizeof *psa;
-    if(getpeername(fd, psa, &sn) >= 0){
-        taskstate("connect succeeded");
-        return fd;
-    }
-    
+    rc = getpeername(fd, psa, &sn);
+    check(rc != -1, "Connection failed, either port isn't open or peername isn't available.");
+
+    return fd;
+
+
+error:
     /* report error */
     sn = sizeof n;
     getsockopt(fd, SOL_SOCKET, SO_ERROR, (void*)&n, &sn);
-    if(n == 0)
-        n = ECONNREFUSED;
+    errno = n == 0 ? ECONNREFUSED : n;
+
     fdclose(fd);
-    errno = n;
     taskstate("connect failed");
-    errno = n;
+
     return -1;
 }
 
 /* Get a bound or connected socket */
-static int
-netgetsocket(int istcp, char *server, int port, 
+static int netgetsocket(int istcp, char *server, int port, 
              struct sockaddr_in6 *psa,
              int is_active_open)
 {
-    int error = 0;
+    int rc = 0;
     int fd = -1;
     int proto = 0;
     char str[IPADDR_SIZE+1];
     struct addrinfo hints;
-    struct addrinfo *res = nil, *ressave = nil;
+    struct addrinfo *res = NULL, *ressave = NULL;
     struct addrinfo synt_res;
-    struct sockaddr_in6 *psin6 = nil;
-
+    struct sockaddr_in6 *psin6 = NULL;
     char service[6]; /* 1..65535 + terminator */
 
-    if((port <= 0) || (port >= 65535)) {
-        log_err("Port %d outside of range", port);
-        return -1;
-    }
+    check(port >= 0 && port <= 65535, "Port %d is outsid allowed range.", port);
+
     debug("Attempting netgetsocket: %d, %s:%d, active: %d", 
-				istcp, server, port, 
+                                istcp, server, port, 
                                 is_active_open);
+
     memset(psa, 0, sizeof(*psa));
     memset(service, 0, sizeof(service));
     memset(&hints, 0, sizeof(hints));
     proto = istcp ? SOCK_STREAM : SOCK_DGRAM;
     memset(&hints, 0, sizeof(struct addrinfo));
     hints.ai_socktype = proto;
+
     /* BUG: the lookup is blocking. */
-    if((server != nil) && (strcmp(server, "*") != 0)) {
+    if((server != NULL) && (strcmp(server, "*") != 0)) {
         snprintf(service, sizeof(service), "%d", port);
-        error = getaddrinfo(server, service, &hints, &res);
-        if(error != 0) {
-            taskstate("getaddrinfo failed");
-            log_err("Getaddrinfo failed");
-            return -1;
-        }
+
+        rc = getaddrinfo(server, service, &hints, &res);
+        check(rc != -1, "Get addrinfo failed for server: %s.", server);
+
         ressave = res;
     } else {
         synt_res.ai_family = AF_INET6;
         synt_res.ai_protocol = 0;
         synt_res.ai_addrlen = sizeof(struct sockaddr_in6);
-        synt_res.ai_addr = psa;
-        synt_res.ai_next = nil;
+        synt_res.ai_addr = (struct sockaddr *)psa;
+        synt_res.ai_next = NULL;
         psin6 = psa;
+
         memset(psa, 0, sizeof(*psa));
         psin6->sin6_port = htons(port);
         psin6->sin6_family = AF_INET6;
         res = &synt_res;
-        // Set ressave to nil so we do not try to free it later
-        ressave = nil;
+
+        // Set ressave to NULL so we do not try to free it later
+        ressave = NULL;
     }
+
     debug("Enumerating targets...");
     for(; res; res = res->ai_next) {
         addr_ntop(res->ai_addr, str, IPADDR_SIZE);
         debug("Trying target: %s:%d, af %d, prot %d", str, 
                   ntohs(((struct sockaddr_in6*)(res->ai_addr))->sin6_port), res->ai_family,
                   res->ai_protocol);
+        
         fd = socket(res->ai_family,
                     proto,
                     res->ai_protocol);
-	if(fd < 0) {
-	    switch errno {
-		case EAFNOSUPPORT:
-		case EPROTONOSUPPORT:
-		    /* Address family not supported, keep trying */
-		    debug("Family %d not supported", res->ai_family);
-		    continue;
-		default:
-		    taskstate("socket failed");
-		    break;
-	    }
-	} else {
-	    fdnoblock(fd);
-	    debug("Trying callback");
-            if(is_active_open) {
-	        fd = cb_connect(fd, istcp, (void*)res->ai_addr, res->ai_addrlen);
-            } else {
-	        fd = cb_bind(fd, istcp, (void*) res->ai_addr, res->ai_addrlen);
+
+        if(fd < 0) {
+            switch errno {
+                case EAFNOSUPPORT:
+                    continue;
+                case EPROTONOSUPPORT:
+                    /* Address family not supported, keep trying */
+                    debug("Family %d not supported", res->ai_family);
+                    continue;
+                default:
+                    sentinel("Socket failure enumerating possible addresses.");
             }
-	    if(fd >= 0) {
-		break;
-	    }
-	}
+        } else {
+            fdnoblock(fd);
+
+            // TODO: this actually tries connecting to :::1 ipv6 addresses first in many
+            // cases, which is stupid since ipv4 is more likely.
+            if(is_active_open) {
+                fd = cb_connect(fd, istcp, (void*)res->ai_addr, res->ai_addrlen);
+            } else {
+                fd = cb_bind(fd, istcp, (void*) res->ai_addr, res->ai_addrlen);
+            }
+
+            if(fd >= 0) {
+                break;
+            }
+        }
     }
-    if(ressave) 
+
+    if(ressave) {
         freeaddrinfo(ressave);
-    return fd;
-}
-
-int
-netannounce(int istcp, char *server, int port)
-{
-    int fd = 0;
-    struct sockaddr_in6 sa;
-
-    taskstate("netannounce");
-    fd = netgetsocket(istcp, server, port, &sa, CB_BIND);
-
-    taskstate("netannounce succeeded");
-    debug("Starting server on port %d, fd = %d\n", port, fd);
-    return fd;
-}
-
-int
-netaccept(int fd, char *server, int *port)
-{
-    int cfd, one;
-    struct sockaddr_in6 sa;
-    socklen_t len;
-    
-    if(fdwait(fd, 'r') == -1) {
-        return -1;
     }
+
+    return fd;
+
+error:
+    if(ressave) {
+        freeaddrinfo(ressave);
+    }
+    return -1;
+}
+
+int netannounce(int istcp, char *server, int port)
+{
+    struct sockaddr_in6 sa;
+
+    return netgetsocket(istcp, server, port, &sa, CB_BIND);
+}
+
+int netaccept(int fd, char *server, int *port)
+{
+    int cfd = 0;
+    int one = 0;
+    struct sockaddr_in6 sa;
+    socklen_t len = sizeof sa;
+    int rc = 0;
+   
+    rc = fdwait(fd, 'r');
+    check(rc != -1, "Failed waiting on non-block accept.");
 
     taskstate("netaccept");
-    len = sizeof sa;
-    if((cfd = accept(fd, (void*)&sa, &len)) < 0){
-        taskstate("accept failed");
-        return -1;
+    cfd = accept(fd, (void*)&sa, &len);
+    check(cfd != -1, "Failed calling accept on socket that was ready.");
+
+    if(server) {
+        check(inet_ntop(sa.sin6_family, &sa.sin6_addr, server, IPADDR_SIZE) != NULL,
+                "Major failure, cannot ntop ipaddresses.");
     }
-    if(server){
-	inet_ntop(sa.sin6_family, &sa.sin6_addr, server, IPADDR_SIZE);
-    }
-    if(port)
+
+    if(port) {
         *port = ntohs(sa.sin6_port);
+    }
+
     fdnoblock(cfd);
-    one = 1;
-    setsockopt(cfd, IPPROTO_TCP, TCP_NODELAY, (char*)&one, sizeof one);
+
+    if(SET_NODELAY) {
+        one = 1;
+        setsockopt(cfd, IPPROTO_TCP, TCP_NODELAY, (char*)&one, sizeof one);
+    }
+
     taskstate("netaccept succeeded");
     return cfd;
+
+error:
+    taskstate("accept failed");
+    return -1;
 }
 
 
-int
-netdial(int istcp, char *server, int port)
+int netdial(int istcp, char *server, int port)
 {
-    int fd;
     struct sockaddr_in6 sa;
-
-    fd = netgetsocket(istcp, server, port, &sa, CB_CONNECT);
-    
-    return fd;
+    return netgetsocket(istcp, server, port, &sa, CB_CONNECT);
 }
 

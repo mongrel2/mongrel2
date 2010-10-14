@@ -42,7 +42,6 @@
 #include <inttypes.h>
 #include "task.h"
 
-#define nil ((void*)0)
 #define nelem(x) (sizeof(x)/sizeof((x)[0]))
 
 #define ulong task_ulong

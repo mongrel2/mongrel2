@@ -50,7 +50,7 @@ taskalloc(void (*fn)(void*), void *arg, uint stack)
 
     /* allocate the task and stack together */
     t = calloc(sizeof *t+stack, 1);
-    if(t == nil){
+    if(t == NULL){
         fprint(2, "taskalloc malloc: %r\n");
         abort();
     }
@@ -108,7 +108,7 @@ taskcreate(void (*fn)(void*), void *arg, uint stack)
     id = t->id;
     if(nalltask % TASK_LIST_GROWTH == 0){
         alltask = realloc(alltask, (nalltask + TASK_LIST_GROWTH)*sizeof(alltask[0]));
-        if(alltask == nil){
+        if(alltask == NULL){
             fprint(2, "out of memory\n");
             abort();
         }
@@ -157,7 +157,7 @@ taskyield(void)
 int
 anyready(void)
 {
-    return taskrunqueue.head != nil;
+    return taskrunqueue.head != NULL;
 }
 
 void
@@ -193,7 +193,7 @@ taskscheduler(void)
         if(taskcount == 0)
             exit(taskexitval);
         t = taskrunqueue.head;
-        if(t == nil){
+        if(t == NULL){
             fprint(2, "no runnable tasks! %d tasks stalled\n", taskcount);
             exit(1);
         }
@@ -202,7 +202,7 @@ taskscheduler(void)
         taskrunning = t;
         tasknswitch++;
         contextswitch(&taskschedcontext, &t->context);
-        taskrunning = nil;
+        taskrunning = NULL;
         if(t->exiting){
             if(!t->system)
                 taskcount--;
@@ -334,7 +334,7 @@ main(int argc, char **argv)
     taskargc = argc;
     taskargv = argv;
 
-    taskcreate(taskmainstart, nil, MAINSTACKSIZE);
+    taskcreate(taskmainstart, NULL, MAINSTACKSIZE);
     taskscheduler();
 
     fprint(2, "taskscheduler returned in main!\n");
@@ -353,10 +353,10 @@ addtask(Tasklist *l, Task *t)
         t->prev = l->tail;
     }else{
         l->head = t;
-        t->prev = nil;
+        t->prev = NULL;
     }
     l->tail = t;
-    t->next = nil;
+    t->next = NULL;
 }
 
 void
