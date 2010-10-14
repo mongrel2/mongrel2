@@ -62,7 +62,7 @@ int IOBuf_stream(IOBuf *from, IOBuf *to, int total);
 
 #define IOBuf_compact_needed(I,N) ((I)->cur + (N) > (I)->len)
 
-#define IOBuf_remaining(I) ((I)->len - (I)->avail)
+#define IOBuf_remaining(I) ((I)->len - (I)->avail - (I)->cur)
 #define IOBuf_read_point(I) ((I)->buf + (I)->cur + (I)->avail)
 #define IOBuf_start(I) ((I)->buf + (I)->cur)
 
