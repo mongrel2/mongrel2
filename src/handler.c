@@ -210,16 +210,17 @@ void Handler_task(void *v)
         taskstate("delivering");
 
         rc = handler_recv_parse(handler, parser);
-        if(rc == -1 || parser->target_count == 0) {
-            continue;
-        }
 
-        for(i = 0; i < (int)parser->target_count; i++) {
-            int id = (int)parser->targets[i];
-            int fd = Register_fd_for_id(id);
-            int conn_type = Register_fd_exists(fd);
+        if(rc != -1 && parser->target_count > 0) {
+            for(i = 0; i < (int)parser->target_count; i++) {
+                int id = (int)parser->targets[i];
+                int fd = Register_fd_for_id(id);
+                int conn_type = Register_fd_exists(fd);
 
-            handler_process_request(handler, id, fd, conn_type, parser->body);
+                handler_process_request(handler, id, fd, conn_type, parser->body);
+            }
+        } else {
+            debug("Skipped invalid message from handler: %s", bdata(handler->send_spec));
         }
 
         HandlerParser_reset(parser);

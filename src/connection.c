@@ -323,21 +323,7 @@ int connection_proxy_reply_parse(Connection *conn)
         check(rc != -1, "Failed streaming non-chunked response.");
     } else if(client->close || client->content_len == -1) {
         debug("Response requested a read until close.");
-        client->close = 1;
-
-        total = conn->iob->len <= conn->proxy_iob->len ? 
-            conn->iob->len : conn->proxy_iob->len;
-
-        rc = IOBuf_send_all(conn->iob, IOBuf_start(conn->proxy_iob),
-                IOBuf_avail(conn->proxy_iob));
-
-        check_debug(rc != -1, "Failed sending to the client what we had initially.");
-
-        IOBuf_read_commit(conn->proxy_iob, IOBuf_avail(conn->proxy_iob));
-
-        for(rc = 0; rc != -1;) {
-            rc = IOBuf_stream(conn->proxy_iob, conn->iob, total);
-        }
+        Proxy_stream_to_close(conn);
     } else {
         sentinel("Should not reach this code, Tell Zed.");
     }
