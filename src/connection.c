@@ -408,7 +408,7 @@ static inline int close_or_error(Connection *conn, int next)
     IOBuf_destroy(conn->proxy_iob);
     conn->proxy_iob = NULL;
 
-    check(Register_disconnect(IOBuf_fd(conn->iob)) != -1,
+    check_debug(Register_disconnect(IOBuf_fd(conn->iob)) != -1,
             "Register disconnect didn't work for %d", IOBuf_fd(conn->iob));
 
 error:

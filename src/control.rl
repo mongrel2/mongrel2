@@ -24,7 +24,6 @@ static inline bstring read_message(void *sock)
     int rc = 0;
 
     zmq_msg_t *inmsg = calloc(sizeof(zmq_msg_t), 1);
-    check_mem(inmsg);
     rc = zmq_msg_init(inmsg);
     check(rc == 0, "init failed.");
 
@@ -35,20 +34,23 @@ static inline bstring read_message(void *sock)
     check(req, "Failed to create the request string.");
 
     zmq_msg_close(inmsg);
+    free(inmsg);
 
     return req;
 
 error:
+    if(inmsg) {
+        free(inmsg);
+        zmq_msg_close(inmsg);
+    }
+
     return NULL;
 }
 
 static inline void send_reply(void *sock, bstring rep)
 {
     int rc = 0;
-    zmq_msg_t *outmsg = NULL;
-
-    outmsg = calloc(sizeof(zmq_msg_t), 1);
-    check_mem(outmsg);
+    zmq_msg_t *outmsg = calloc(sizeof(zmq_msg_t), 1);
     rc = zmq_msg_init(outmsg);
     check(rc == 0, "init failed.");
 
@@ -59,6 +61,7 @@ static inline void send_reply(void *sock, bstring rep)
     check(rc == 0, "Failed to deliver 0mq message to requestor.");
 
 error:
+    free(outmsg);
     return;
 }
 

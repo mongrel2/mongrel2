@@ -44,7 +44,7 @@ cb_bind(int fd, int istcp, struct sockaddr *psa, size_t sz)
     char str[IPADDR_SIZE+1];
     /* set reuse flag for tcp */
     addr_ntop(psa, str, IPADDR_SIZE);
-    log_info("Binding to %s:%d!", str, ntohs(((struct sockaddr_in6*)psa)->sin6_port));
+    debug("Binding to %s:%d!", str, ntohs(((struct sockaddr_in6*)psa)->sin6_port));
     sn = sizeof(n);
     if(istcp && getsockopt(fd, SOL_SOCKET, SO_TYPE, (void*)&n, &sn) >= 0){
         n = 1;
@@ -61,7 +61,7 @@ cb_bind(int fd, int istcp, struct sockaddr *psa, size_t sz)
 
     if(istcp)
         listen(fd, 16);
-    log_info("Is TCP: %d", istcp);
+    debug("Is TCP: %d", istcp);
     return fd;
 }
 
@@ -127,7 +127,7 @@ netgetsocket(int istcp, char *server, int port,
         log_err("Port %d outside of range", port);
         return -1;
     }
-    log_info("Attempting netgetsocket: %d, %s:%d, active: %d", 
+    debug("Attempting netgetsocket: %d, %s:%d, active: %d", 
 				istcp, server, port, 
                                 is_active_open);
     memset(psa, 0, sizeof(*psa));
@@ -160,10 +160,10 @@ netgetsocket(int istcp, char *server, int port,
         // Set ressave to nil so we do not try to free it later
         ressave = nil;
     }
-    log_info("Enumerating targets...");
+    debug("Enumerating targets...");
     for(; res; res = res->ai_next) {
         addr_ntop(res->ai_addr, str, IPADDR_SIZE);
-        log_info("Trying target: %s:%d, af %d, prot %d", str, 
+        debug("Trying target: %s:%d, af %d, prot %d", str, 
                   ntohs(((struct sockaddr_in6*)(res->ai_addr))->sin6_port), res->ai_family,
                   res->ai_protocol);
         fd = socket(res->ai_family,
@@ -174,7 +174,7 @@ netgetsocket(int istcp, char *server, int port,
 		case EAFNOSUPPORT:
 		case EPROTONOSUPPORT:
 		    /* Address family not supported, keep trying */
-		    log_info("Family %d not supported", res->ai_family);
+		    debug("Family %d not supported", res->ai_family);
 		    continue;
 		default:
 		    taskstate("socket failed");
@@ -182,7 +182,7 @@ netgetsocket(int istcp, char *server, int port,
 	    }
 	} else {
 	    fdnoblock(fd);
-	    log_info("Trying callback");
+	    debug("Trying callback");
             if(is_active_open) {
 	        fd = cb_connect(fd, istcp, (void*)res->ai_addr, res->ai_addrlen);
             } else {
@@ -208,7 +208,7 @@ netannounce(int istcp, char *server, int port)
     fd = netgetsocket(istcp, server, port, &sa, CB_BIND);
 
     taskstate("netannounce succeeded");
-    log_info("Starting server on port %d, fd = %d\n", port, fd);
+    debug("Starting server on port %d, fd = %d\n", port, fd);
     return fd;
 }
 

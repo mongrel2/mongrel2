@@ -2,8 +2,6 @@
 
 tnftp -o - http://localhost:6767/
 
-tnftp -o - http://localhost:6767/handlertest
-
 tnftp -o - http://localhost:6767/chatdemo/
 
 tnftp -o - http://localhost:6767/tests/sample.json

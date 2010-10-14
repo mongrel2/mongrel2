@@ -139,7 +139,7 @@ class Connection(object):
         """
         Tells mongrel2 to explicitly close the HTTP connection.
         """
-        self.reply(self, req, "")
+        self.reply(req, "")
 
 
     def deliver_close(self, uuid, idents):

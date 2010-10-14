@@ -180,10 +180,14 @@ static inline int handler_recv_parse(Handler *handler, HandlerParser *parser)
             bdata(parser->uuid), blength(parser->body));
 
     zmq_msg_close(inmsg);
+    free(inmsg);
     return 0;
 
 error:
-    zmq_msg_close(inmsg);
+    if(inmsg) {
+        zmq_msg_close(inmsg);
+        free(inmsg);
+    }
     return -1;
 }
 
@@ -235,13 +239,8 @@ error:
 int Handler_deliver(void *handler_socket, char *buffer, size_t len)
 {
     int rc = 0;
-    zmq_msg_t *msg = NULL;
-    bstring msg_buf;
-
-    msg = calloc(sizeof(zmq_msg_t), 1);
-    msg_buf = NULL;
-
-    check_mem(msg);
+    zmq_msg_t *msg = calloc(sizeof(zmq_msg_t), 1);
+    bstring msg_buf = NULL;
 
     rc = zmq_msg_init(msg);
     check(rc == 0, "Failed to initialize 0mq message to send.");

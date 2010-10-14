@@ -55,9 +55,10 @@ static void *Log_internal_thread(void *spec)
     rc = zmq_close(socket);
     check(rc == 0, "Could not close socket");
 
+    return NULL;
+
 error: 
-    zmq_msg_close(&msg);
-    zmq_close(socket);
+    // could leak the socket and the msg but not much we can do
     return NULL;
 }
 
@@ -145,7 +146,7 @@ static inline bstring make_log_message(Request *req, const char *remote_addr,
 
 static void free_log_msg(void *data, void *hint)
 {
-    bdestroy(data);
+    bdestroy((bstring)hint);
 }
 
 int Log_request(Connection *conn, int status, int size)
@@ -158,7 +159,8 @@ int Log_request(Connection *conn, int status, int size)
     bstring log_data = make_log_message(conn->req, conn->remote, conn->rport, status, size);
     check_mem(log_data);
 
-    int rc = zmq_msg_init_data(&msg, bdata(log_data), blength(log_data), free_log_msg, NULL);
+    int rc = zmq_msg_init_data(&msg, bdata(log_data), blength(log_data),
+            free_log_msg, log_data);
     check(rc == 0, "Could not craft message for log message '%s'.", bdata(log_data));
     
     rc = zmq_send(LOG_SOCKET, &msg, 0);

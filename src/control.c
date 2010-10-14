@@ -26,7 +26,6 @@ static inline bstring read_message(void *sock)
     int rc = 0;
 
     zmq_msg_t *inmsg = calloc(sizeof(zmq_msg_t), 1);
-    check_mem(inmsg);
     rc = zmq_msg_init(inmsg);
     check(rc == 0, "init failed.");
 
@@ -37,20 +36,23 @@ static inline bstring read_message(void *sock)
     check(req, "Failed to create the request string.");
 
     zmq_msg_close(inmsg);
+    free(inmsg);
 
     return req;
 
 error:
+    if(inmsg) {
+        free(inmsg);
+        zmq_msg_close(inmsg);
+    }
+
     return NULL;
 }
 
 static inline void send_reply(void *sock, bstring rep)
 {
     int rc = 0;
-    zmq_msg_t *outmsg = NULL;
-
-    outmsg = calloc(sizeof(zmq_msg_t), 1);
-    check_mem(outmsg);
+    zmq_msg_t *outmsg = calloc(sizeof(zmq_msg_t), 1);
     rc = zmq_msg_init(outmsg);
     check(rc == 0, "init failed.");
 
@@ -61,17 +63,18 @@ static inline void send_reply(void *sock, bstring rep)
     check(rc == 0, "Failed to deliver 0mq message to requestor.");
 
 error:
+    free(outmsg);
     return;
 }
 
 static int CONTROL_RUNNING = 1;
 
 
-#line 161 "src/control.rl"
+#line 164 "src/control.rl"
 
 
 
-#line 75 "src/control.c"
+#line 78 "src/control.c"
 static const int ControlParser_start = 1;
 static const int ControlParser_first_final = 50;
 static const int ControlParser_error = 0;
@@ -79,7 +82,7 @@ static const int ControlParser_error = 0;
 static const int ControlParser_en_main = 1;
 
 
-#line 164 "src/control.rl"
+#line 167 "src/control.rl"
 
 bstring Control_execute(bstring req)
 {
@@ -92,14 +95,14 @@ bstring Control_execute(bstring req)
     debug("RECEIVED CONTROL COMMAND: %s", bdata(req));
 
     
-#line 96 "src/control.c"
+#line 99 "src/control.c"
 	{
 	cs = ControlParser_start;
 	}
 
-#line 176 "src/control.rl"
+#line 179 "src/control.rl"
     
-#line 103 "src/control.c"
+#line 106 "src/control.c"
 	{
 	switch ( cs )
 	{
@@ -183,14 +186,14 @@ case 12:
 		goto tr17;
 	goto st0;
 tr17:
-#line 75 "src/control.rl"
+#line 78 "src/control.rl"
 	{
         reply = bfromcstr("{\"msg\": \"stopping control port\"}");
         CONTROL_RUNNING = 0; {p++; cs = 50; goto _out;}
     }
 	goto st50;
 tr20:
-#line 137 "src/control.rl"
+#line 140 "src/control.rl"
 	{
         reply = bfromcstr("{\"command_list\":[");
         bcatcstr(reply, "{\"name\": \"control stop\", \"description\": \"Close the control port.\"}\n");
@@ -206,7 +209,7 @@ tr20:
     }
 	goto st50;
 tr30:
-#line 103 "src/control.rl"
+#line 106 "src/control.rl"
 	{
         int rc = raise(SIGHUP);
         if (0 == rc) {
@@ -218,15 +221,15 @@ tr30:
     }
 	goto st50;
 tr41:
-#line 73 "src/control.rl"
+#line 76 "src/control.rl"
 	{ reply = Register_info(); {p++; cs = 50; goto _out;} }
 	goto st50;
 tr45:
-#line 72 "src/control.rl"
+#line 75 "src/control.rl"
 	{ reply = taskgetinfo(); {p++; cs = 50; goto _out;} }
 	goto st50;
 tr46:
-#line 113 "src/control.rl"
+#line 116 "src/control.rl"
 	{
         // TODO: probably report back the number of waiting tasks
         int rc = raise(SIGINT);
@@ -239,7 +242,7 @@ tr46:
     }
 	goto st50;
 tr55:
-#line 124 "src/control.rl"
+#line 127 "src/control.rl"
 	{
         // TODO: the server might have been terminated before
         // the reply is sent back. If this scenario is crucial (if possible at all)
@@ -254,7 +257,7 @@ tr55:
     }
 	goto st50;
 tr57:
-#line 80 "src/control.rl"
+#line 83 "src/control.rl"
 	{
         reply = bformat("{\"time\": %d}", (int)time(NULL)); {p++; cs = 50; goto _out;}
     }
@@ -262,7 +265,7 @@ tr57:
 st50:
 	p += 1;
 case 50:
-#line 266 "src/control.c"
+#line 269 "src/control.c"
 	goto st0;
 st13:
 	p += 1;
@@ -320,9 +323,9 @@ case 20:
 		goto st20;
 	goto st0;
 tr25:
-#line 70 "src/control.rl"
+#line 73 "src/control.rl"
 	{ mark = p; }
-#line 84 "src/control.rl"
+#line 87 "src/control.rl"
 	{
         int id = atoi(p);
 
@@ -343,7 +346,7 @@ tr25:
     }
 	goto st51;
 tr58:
-#line 84 "src/control.rl"
+#line 87 "src/control.rl"
 	{
         int id = atoi(p);
 
@@ -366,7 +369,7 @@ tr58:
 st51:
 	p += 1;
 case 51:
-#line 370 "src/control.c"
+#line 373 "src/control.c"
 	if ( 48 <= (*p) && (*p) <= 57 )
 		goto tr58;
 	goto st0;
@@ -560,15 +563,15 @@ case 49:
 	_out: {}
 	}
 
-#line 177 "src/control.rl"
+#line 180 "src/control.rl"
 
     check(p <= pe, "Buffer overflow after parsing.  Tell Zed that you sent something from a handler that went %ld past the end in the parser.", 
         (long int)(pe - p));
 
     if ( cs == 
-#line 570 "src/control.c"
+#line 573 "src/control.c"
 0
-#line 181 "src/control.rl"
+#line 184 "src/control.rl"
  ) {
         check(pe - p > 0, "Major erorr in the parser, tell Zed.");
         return bformat("{\"error\": \"parsing error at: ...%s\"}", bdata(req) + (pe - p));
