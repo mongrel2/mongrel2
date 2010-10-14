@@ -86,7 +86,7 @@ char *test_Dir_serve_file()
 
     req = fake_req("GET", "/", "/sample.json");
     rc = Dir_serve_file(test, req, &conn);
-    mu_assert(req->response_size == -1, "Should serve the /sample.json");
+    mu_assert(req->response_size > -1, "Should serve the /sample.json");
 
     req = fake_req("HEAD", "/", "/sample.json");
     rc = Dir_serve_file(test, req, &conn);
