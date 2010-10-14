@@ -4,6 +4,73 @@
 #include <stdlib.h>
 #include <assert.h>
 
+
+void debug_dump(void *addr, int len)
+{
+#ifdef NDEBUG
+  return;
+#endif
+
+  char tohex[] = "0123456789ABCDEF";
+  int i = 0;
+  unsigned char *pc = addr;
+
+  char buf0[32] = {0};                // offset
+  char buf1[64] = {0};                // hex
+  char buf2[64] = {0};                // literal
+
+  char *pc1 = NULL;
+  char *pc2 = NULL;
+
+  
+
+  while(--len >= 0) {
+
+    if(i % 16 == 0) {
+      sprintf(buf0, "%08x", i);
+      buf1[0] = 0;
+      buf2[0] = 0;
+      pc1 = buf1;
+      pc2 = buf2;
+    }
+
+    *pc1++ = tohex[*pc >> 4];
+    *pc1++ = tohex[*pc & 15];
+    *pc1++ = ' ';
+
+    if(*pc >= 32 && *pc < 127) {
+      *pc2++ = *pc;
+    } else {
+      *pc2++ = '.';
+    }
+
+    i++;
+    pc++;
+
+    if(i % 16 == 0) {
+      *pc1 = 0;
+      *pc2 = 0;
+      debug("%s:   %s  %s", buf0, buf1, buf2);
+    }
+
+  }
+
+  if(i % 16 != 0) {
+    while(i % 16 != 0) {
+      *pc1++ = ' ';
+      *pc1++ = ' ';
+      *pc1++ = ' ';
+      *pc2++ = ' ';
+      i++;
+    }
+
+    *pc1 = 0;
+    *pc2 = 0;
+    debug("%s:   %s  %s", buf0, buf1, buf2);
+  }
+}
+
+
 static ssize_t null_send(IOBuf *iob, char *buffer, int len)
 {
     return len;
@@ -183,13 +250,16 @@ char *IOBuf_read(IOBuf *buf, int need, int *out_len)
         if(buf->cur > 0 && IOBuf_compact_needed(buf, need)) {
             IOBuf_compact(buf);
         }
-
+        debug("IOBuf_read: calling the recv for %d bytes, buf->len: %d, buf->cur: %d, buf->avail: %d", 
+                           IOBuf_remaining(buf), buf->len, buf->cur, buf->avail);
         rc = buf->recv(buf, IOBuf_read_point(buf), IOBuf_remaining(buf));
 
         if(rc <= 0) {
             debug("Socket was closed, will return only what's available: %d", buf->avail);
             buf->closed = 1;
         }
+        debug("Read %d bytes of data. buf->cur: %d, buf->avail: %d", rc, buf->cur, buf->avail);
+        debug_dump(IOBuf_read_point(buf), rc);
 
         buf->avail = buf->avail + rc;
 
