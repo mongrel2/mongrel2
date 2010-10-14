@@ -920,54 +920,6 @@ int bSetChar (bstring b, int pos, char c) {
 
 #define INIT_SECURE_INPUT_LENGTH (256)
 
-/*  bstring bSecureInput (int maxlen, int termchar, 
- *                        bNgetc vgetchar, void * vgcCtx)
- *
- *  Read input from an abstracted input interface, for a length of at most
- *  maxlen characters.  If maxlen <= 0, then there is no length limit put
- *  on the input.  The result is terminated early if vgetchar() return EOF
- *  or the user specified value termchar.
- *
- */
-bstring bSecureInput (int maxlen, int termchar, bNgetc vgetchar, void * vgcCtx) {
-int i, m, c;
-bstring b, t;
-
-	if (!vgetchar) return NULL;
-
-	b = bfromcstralloc (INIT_SECURE_INPUT_LENGTH, "");
-	if ((c = UCHAR_MAX + 1) == termchar) c++;
-
-	for (i=0; ; i++) {
-		if (termchar == c || (maxlen > 0 && i >= maxlen)) c = EOF;
-		else c = vgetchar (vgcCtx);
-
-		if (EOF == c) break;
-
-		if (i+1 >= b->mlen) {
-
-			/* Double size, but deal with unusual case of numeric
-			   overflows */
-
-			if ((m = b->mlen << 1)   <= b->mlen &&
-			    (m = b->mlen + 1024) <= b->mlen &&
-			    (m = b->mlen + 16)   <= b->mlen &&
-			    (m = b->mlen + 1)    <= b->mlen) t = NULL;
-			else t = bfromcstralloc (m, "");
-
-			if (t) memcpy (t->data, b->data, i);
-			bSecureDestroy (b); /* Cleanse previous buffer */
-			b = t;
-			if (!b) return b;
-		}
-
-		b->data[i] = (unsigned char) c;
-	}
-
-	b->slen = i;
-	b->data[i] = (unsigned char) '\0';
-	return b;
-}
 
 #define BWS_BUFF_SZ (1024)
 

@@ -96,7 +96,7 @@ static int cb_connect(int fd, int istcp, struct sockaddr *psa, socklen_t sn)
 
     sn = sizeof *psa;
     rc = getpeername(fd, psa, &sn);
-    check(rc != -1, "Connection failed, either port isn't open or peername isn't available.");
+    check_debug(rc != -1, "Connection failed, either port isn't open or peername isn't available.");
 
     return fd;
 

@@ -164,7 +164,12 @@ static int gen_issuer(const char * dn[], uint8_t *buf, int *offset)
         gethostname(fqdn, sizeof(fqdn));
         fqdn_len = strlen(fqdn);
         fqdn[fqdn_len++] = '.';
-        getdomainname(&fqdn[fqdn_len], sizeof(fqdn)-fqdn_len);
+        int rc = getdomainname(&fqdn[fqdn_len], sizeof(fqdn)-fqdn_len);
+        if(rc == -1) {
+            fprintf(stderr, "Failed to get domain name.");
+            abort();
+        }
+
         fqdn_len = strlen(fqdn);
 
         if (fqdn[fqdn_len-1] == '.')    /* ensure '.' is not last char */

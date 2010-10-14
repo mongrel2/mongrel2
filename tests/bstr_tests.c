@@ -335,49 +335,6 @@ struct vfgetc {
     bstring base;
 };
 
-static int testaux13_fgetc (void * ctx) {
-    struct vfgetc * vctx = (struct vfgetc *) ctx;
-    int c;
-
-    if (NULL == vctx || NULL == vctx->base) return EOF;
-    if (vctx->ofs >= blength (vctx->base)) return EOF;
-    c = bchare (vctx->base, vctx->ofs, EOF);
-    vctx->ofs++;
-    return c;
-}
-
-int testaux13 (void) {
-    struct tagbstring t0 = bsStatic ("Random String");
-    struct vfgetc vctx;
-    bstring b;
-    int ret = 0;
-    int i;
-
-    debug ("TEST: bSecureInput, bSecureDestroy.");
-
-    for (i=0; i < 1000; i++) {
-        unsigned char * h;
-
-        vctx.ofs = 0;
-        vctx.base = &t0;
-
-        b = bSecureInput (INT_MAX, '\n', (bNgetc) testaux13_fgetc, &vctx);
-        ret += 1 != biseq (b, &t0);
-        h = b->data;
-        bSecureDestroy (b);
-
-        /* WARNING! Technically unsound code follows: */
-        // commented out by me since it crashes sometimes
-        // ret += (0 == memcmp (h, t0.data, t0.slen));
-
-        // if (ret) break;
-    }
-
-    debug ("\t# failures: %d", ret);
-
-    return ret;
-}
-
 
 /*
  * This source file is part of the bstring string library.  This code was
@@ -3849,7 +3806,6 @@ int taskmain (int argc, char * argv[])
     ret += testaux10 ();
     ret += testaux11 ();
     ret += testaux12 ();
-    ret += testaux13 ();
 
     if(ret > 0) {
         printf("FAILED: %d failures in bstrlib", ret);

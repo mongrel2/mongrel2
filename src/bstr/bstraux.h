@@ -102,8 +102,6 @@ bstring bstr__tmp = (b);	                                            \
 	    (t).mlen = -1;                                                            \
 	}                                                                             \
 }
-extern bstring bSecureInput (int maxlen, int termchar, 
-                             bNgetc vgetchar, void * vgcCtx);
 
 #ifdef __cplusplus
 }
