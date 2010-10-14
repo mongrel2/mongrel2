@@ -36,7 +36,7 @@ int canqlock(QLock *l)
 
 void qunlock(QLock *l)
 {
-    Task *ready;
+    Task *ready = NULL;
 
     assert(l->owner != 0 && "qunlock: owner == 0\n");
 
@@ -103,7 +103,7 @@ int canwlock(RWLock *l)
 
 void runlock(RWLock *l)
 {
-    Task *t;
+    Task *t = NULL;
 
     if(--l->readers == 0 && (t = l->wwaiting.head) != NULL) {
         deltask(&l->wwaiting, t);
@@ -114,7 +114,7 @@ void runlock(RWLock *l)
 
 void wunlock(RWLock *l)
 {
-    Task *t;
+    Task *t = NULL;
    
     assert(l->writer != NULL && "wunlock: not locked.");
 

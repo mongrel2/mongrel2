@@ -20,12 +20,9 @@ enum {
 Task    **alltask;
 int        nalltask;
 
-static char *argv0;
 static    void        contextswitch(Context *from, Context *to);
 
-
-static void
-taskstart(uint y, uint x)
+static void taskstart(uint y, uint x)
 {
     Task *t;
     ulong z;
@@ -41,8 +38,7 @@ taskstart(uint y, uint x)
 
 static int taskidgen;
 
-static Task*
-taskalloc(void (*fn)(void*), void *arg, uint stack)
+static Task* taskalloc(void (*fn)(void*), void *arg, uint stack)
 {
     Task *t = NULL;
     sigset_t zero;
@@ -99,15 +95,12 @@ error:
     abort();
 }
 
-int
-taskcreate(void (*fn)(void*), void *arg, uint stack)
+int taskcreate(void (*fn)(void*), void *arg, uint stack)
 {
-    int id = 0;
-    Task *t  = NULL;
+    Task *t  = taskalloc(fn, arg, stack);
+    int id = t->id;
 
-    t = taskalloc(fn, arg, stack);
     taskcount++;
-    id = t->id;
 
     if(nalltask % TASK_LIST_GROWTH == 0){
         alltask = realloc(alltask, (nalltask + TASK_LIST_GROWTH)*sizeof(alltask[0]));
@@ -124,63 +117,54 @@ error:
     return -1;
 }
 
-void
-tasksystem(void)
+void tasksystem(void)
 {
-    if(!taskrunning->system){
+    if(!taskrunning->system) {
         taskrunning->system = 1;
         --taskcount;
     }
 }
 
-void
-taskswitch(void)
+void taskswitch(void)
 {
     needstack(0);
     contextswitch(&taskrunning->context, &taskschedcontext);
 }
 
-void
-taskready(Task *t)
+void taskready(Task *t)
 {
     t->ready = 1;
     addtask(&taskrunqueue, t);
 }
 
-int
-taskyield(void)
+int taskyield(void)
 {
-    int n;
-    
-    n = tasknswitch;
+    int n = tasknswitch;
     taskready(taskrunning);
     taskstate("yield");
     taskswitch();
+
     return tasknswitch - n - 1;
 }
 
-int
-anyready(void)
+int anyready(void)
 {
     return taskrunqueue.head != NULL;
 }
 
-void
-taskexitall(int val)
+void taskexitall(int val)
 {
     exit(val);
 }
 
-void
-taskexit(int val)
+void taskexit(int val)
 {
     taskexitval = val;
     taskrunning->exiting = 1;
     taskswitch();
 }
 
-static void
-contextswitch(Context *from, Context *to)
+static void contextswitch(Context *from, Context *to)
 {
     if(swapcontext(&from->uc, &to->uc) < 0){
         log_err("swapcontext failed.");
@@ -188,8 +172,7 @@ contextswitch(Context *from, Context *to)
     }
 }
 
-static void
-taskscheduler(void)
+static void taskscheduler(void)
 {
     int i = 0;
     Task *t = NULL;
@@ -204,6 +187,7 @@ taskscheduler(void)
         check(t != NULL, "No runnable tasks, %d tasks stalled", taskcount);
 
         deltask(&taskrunqueue, t);
+
         t->ready = 0;
         taskrunning = t;
         tasknswitch++;
@@ -240,30 +224,24 @@ void taskname(char *name)
     memcpy(taskrunning->name, name, strlen(name)); 
 }
 
-char*
-taskgetname(void)
+char* taskgetname(void)
 {
     return taskrunning->name;
 }
 
-void
-taskstate(char *state)
+void taskstate(char *state)
 {
     memcpy(taskrunning->state, state, strlen(state)); 
 }
 
-char*
-taskgetstate(void)
+char* taskgetstate(void)
 {
     return taskrunning->state;
 }
 
-void
-needstack(int n)
+void needstack(int n)
 {
-    Task *t;
-
-    t = taskrunning;
+    Task *t = taskrunning;
 
     if((char*)&t <= (char*)t->stk
     || (char*)&t - (char*)t->stk < 256+n) {
@@ -271,14 +249,12 @@ needstack(int n)
     }
 }
 
-bstring
-taskgetinfo(void)
+bstring taskgetinfo(void)
 {
-    int i;
-    Task *t;
-
+    int i = 0;
+    Task *t = NULL;
     bstring data;
-    char* extra;
+    char* extra = NULL;
 
     data = bfromcstr("{\"task_list\":[");
 
@@ -286,12 +262,13 @@ taskgetinfo(void)
     {
         t = alltask[i];
 
-        if(t == taskrunning)
+        if(t == taskrunning) {
             extra = "running";
-        else if(t->ready)
+        } else if(t->ready) {
             extra = "ready";
-        else
+        } else {
             extra = "";
+        }
 
         bformata(data, "{\"id\": %d, \"system\": %d, \"name\": \"%s\", \"state\": \"%s\", \"extra\": \"%s\"}", t->id, t->system ? 1 : 0, t->name, t->state, extra);
 
@@ -318,17 +295,14 @@ int MAINSTACKSIZE = 96 * 1024;
 int MAINSTACKSIZE = 32 * 1024;
 #endif
 
-static void
-taskmainstart(void *v)
+static void taskmainstart(void *v)
 {
     taskname("taskmain");
     taskmain(taskargc, taskargv);
 }
 
-int
-main(int argc, char **argv)
+int main(int argc, char **argv)
 {
-    argv0 = argv[0];
     taskargc = argc;
     taskargv = argv;
 
@@ -337,41 +311,43 @@ main(int argc, char **argv)
 
     log_err("taskscheduler returned in main!\n");
     abort();
+
     return 0;
 }
 
 /*
  * hooray for linked lists
  */
-void
-addtask(Tasklist *l, Task *t)
+void addtask(Tasklist *l, Task *t)
 {
-    if(l->tail){
+    if(l->tail) {
         l->tail->next = t;
         t->prev = l->tail;
-    }else{
+    } else {
         l->head = t;
         t->prev = NULL;
     }
+
     l->tail = t;
     t->next = NULL;
 }
 
-void
-deltask(Tasklist *l, Task *t)
+void deltask(Tasklist *l, Task *t)
 {
-    if(t->prev)
+    if(t->prev) {
         t->prev->next = t->next;
-    else
+    } else {
         l->head = t->next;
-    if(t->next)
+    }
+
+    if(t->next) {
         t->next->prev = t->prev;
-    else
+    } else {
         l->tail = t->prev;
+    }
 }
 
-unsigned int
-taskid(void)
+unsigned int taskid(void)
 {
     return taskrunning->id;
 }
