@@ -164,3 +164,21 @@ error:
 }
 
 
+void Proxy_stream_to_close(Connection *conn)
+{
+    conn->client->close = 1;
+
+    int total = conn->iob->len <= conn->proxy_iob->len ? 
+        conn->iob->len : conn->proxy_iob->len;
+
+    int rc = IOBuf_send_all(conn->iob, IOBuf_start(conn->proxy_iob),
+            IOBuf_avail(conn->proxy_iob));
+
+    if(rc == -1) return;
+
+    IOBuf_read_commit(conn->proxy_iob, IOBuf_avail(conn->proxy_iob));
+
+    for(rc = 0; rc != -1;) {
+        rc = IOBuf_stream(conn->proxy_iob, conn->iob, total);
+    }
+}

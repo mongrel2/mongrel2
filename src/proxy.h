@@ -53,4 +53,6 @@ int Proxy_stream_chunks(struct Connection *conn);
 
 int Proxy_read_and_parse(struct Connection *conn);
 
+void Proxy_stream_to_close(struct Connection *conn);
+
 #endif
