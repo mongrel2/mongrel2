@@ -205,8 +205,16 @@ void final_setup()
 {
     start_terminator();
     Server_init();
-    bstring log = bformat("%s%s", bdata(SERVER->chroot), bdata(SERVER->access_log));
     bstring end_point = bfromcstr("inproc://access_log");
+    bstring log;
+
+    // TODO: should do a cleaner way to do figure if chroot or not
+    if(LOG_FILE == stderr) {
+        log = bformat("%s%s", bdata(SERVER->chroot), bdata(SERVER->access_log));
+    } else {
+        log = bstrcpy(SERVER->access_log);
+    }
+
     Log_init(log, end_point);
 }
 

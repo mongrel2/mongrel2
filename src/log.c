@@ -14,6 +14,7 @@ pthread_t LOG_THREAD;
 struct LoggingConfig {
     bstring file_name;
     bstring log_spec;
+    FILE *log_file;
 };
 
 static void *Log_internal_thread(void *spec)
@@ -34,9 +35,6 @@ static void *Log_internal_thread(void *spec)
     rc = zmq_connect(socket, bdata(config->log_spec));
     check(rc == 0, "Could connect to logging endpoint: %s", bdata(config->log_spec));
 
-    log_file = fopen((char *)config->file_name->data, "a+");
-    check(log_file, "Failed to open log file: %s for access logging.", bdata(config->file_name));
-    setbuf(log_file, NULL);
 
     while(1) {
        rc = zmq_msg_init(&msg);
@@ -80,6 +78,10 @@ int Log_init(bstring access_log, bstring log_spec)
             struct LoggingConfig *config = malloc(sizeof(struct LoggingConfig));
             config->log_spec = log_spec;
             config->file_name = access_log;
+
+            config->log_file = fopen((char *)config->file_name->data, "a+");
+            check(config->log_file, "Failed to open log file: %s for access logging.", bdata(config->file_name));
+            setbuf(config->log_file, NULL);
 
             LOG_SOCKET = zmq_socket(ZMQ_CTX, ZMQ_PUB);
             check(LOG_SOCKET != NULL, "Failed to create access log socket");
@@ -166,12 +168,14 @@ int Log_request(Connection *conn, int status, int size)
     rc = zmq_send(LOG_SOCKET, &msg, 0);
     check(rc == 0, "Could not send log message to socket.");
 
+    log_data = NULL; // that way errors from above can clean the log_data
     rc = zmq_msg_close(&msg);
     check(rc == 0, "Failed to close message object.");
 
     return 0;
 
 error:
+    bdestroy(log_data);
     zmq_msg_close(&msg);
     return -1;
 }
