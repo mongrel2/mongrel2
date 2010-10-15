@@ -42,6 +42,7 @@ pristine: clean
 	rm -f run/*
 	${MAKE} -C tools/m2sh pristine
 
+.PHONY: tests
 tests: build/libm2.a tests/config.sqlite ${TESTS}
 	sh ./tests/runtests.sh
 
