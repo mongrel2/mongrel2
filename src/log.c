@@ -21,7 +21,6 @@ static void *Log_internal_thread(void *spec)
 {
     zmq_msg_t msg;
     int rc = 0;
-    FILE *log_file = NULL;
     struct LoggingConfig *config = spec;
 
     void *socket = zmq_socket(ZMQ_CTX, ZMQ_SUB);
@@ -44,7 +43,7 @@ static void *Log_internal_thread(void *spec)
        check(rc == 0, "Failed to receive from the zeromq logging socket.");
        check(zmq_msg_size(&msg) > 0, "Received poison pill, log thread exiting.");
 
-       fprintf(log_file, "%.*s", (int)zmq_msg_size(&msg), (char *)zmq_msg_data(&msg));
+       fprintf(config->log_file, "%.*s", (int)zmq_msg_size(&msg), (char *)zmq_msg_data(&msg));
 
        rc = zmq_msg_close(&msg);
        check(rc == 0, "Message close failed.");
