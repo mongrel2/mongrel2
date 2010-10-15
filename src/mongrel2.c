@@ -187,14 +187,19 @@ int attempt_chroot_drop(Server *srv)
     } else {
         log_err("Couldn't chroot too %s, assuming running in test mode.", bdata(srv->chroot));
 
-        bstring local_pid = bformat(".%s", bdata(srv->pid_file));
-        bdestroy(srv->pid_file);
-        srv->pid_file = local_pid;
+        // rewrite the access log to be in the right location
+        bstring temp = bformat("%s%s", bdata(srv->chroot), bdata(srv->access_log));
+        bassign(srv->access_log, temp);
+        bdestroy(temp);
+
+        temp = bformat(".%s", bdata(srv->pid_file));
+        bassign(srv->pid_file, temp);
+        bdestroy(temp);
 
         rc = Unixy_pid_file(srv->pid_file);
         check(rc == 0, "Failed to make the PID file %s", bdata(srv->pid_file));
-        
     }
+
     return 0;
 
 error:
@@ -206,16 +211,8 @@ void final_setup()
     start_terminator();
     Server_init();
     bstring end_point = bfromcstr("inproc://access_log");
-    bstring log;
 
-    // TODO: should do a cleaner way to do figure if chroot or not
-    if(LOG_FILE == stderr) {
-        log = bformat("%s%s", bdata(SERVER->chroot), bdata(SERVER->access_log));
-    } else {
-        log = bstrcpy(SERVER->access_log);
-    }
-
-    Log_init(log, end_point);
+    Log_init(bstrcpy(SERVER->access_log), end_point);
 }
 
 

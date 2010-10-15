@@ -11,17 +11,28 @@
 static void *LOG_SOCKET = NULL;
 pthread_t LOG_THREAD;
 
-struct LoggingConfig {
+typedef struct LogConfig {
     bstring file_name;
     bstring log_spec;
     FILE *log_file;
-};
+} LogConfig;
+
+
+void LogConfig_destroy(LogConfig *config)
+{
+    if(config) {
+        bdestroy(config->file_name);
+        bdestroy(config->log_spec);
+        if(config->log_file) fclose(config->log_file);
+        free(config);
+    }
+}
 
 static void *Log_internal_thread(void *spec)
 {
     zmq_msg_t msg;
     int rc = 0;
-    struct LoggingConfig *config = spec;
+    LogConfig *config = spec;
 
     void *socket = zmq_socket(ZMQ_CTX, ZMQ_SUB);
     check(socket, "Could not bind the logging subscribe socket.");
@@ -52,16 +63,38 @@ static void *Log_internal_thread(void *spec)
     rc = zmq_close(socket);
     check(rc == 0, "Could not close socket");
 
+    LogConfig_destroy(config);
     return NULL;
 
 error: 
+    LogConfig_destroy(config);
     // could leak the socket and the msg but not much we can do
     return NULL;
 }
 
+
+LogConfig *LogConfig_create(bstring access_log, bstring log_spec)
+{
+    LogConfig *config = malloc(sizeof(LogConfig));
+    config->log_spec = log_spec;
+    config->file_name = access_log;
+
+    config->log_file = fopen((char *)config->file_name->data, "a+");
+    check(config->log_file, "Failed to open log file: %s for access logging.", bdata(config->file_name));
+    setbuf(config->log_file, NULL);
+
+    return config;
+
+error:
+    LogConfig_destroy(config);
+    return NULL;
+}
+
+
 int Log_init(bstring access_log, bstring log_spec)
 {
     int rc = 0;
+    LogConfig *config = NULL;
 
     if(LOG_SOCKET == NULL) 
     {
@@ -73,14 +106,8 @@ int Log_init(bstring access_log, bstring log_spec)
         } 
         else 
         {
-            // Who owns this, and who should be killing it -josh
-            struct LoggingConfig *config = malloc(sizeof(struct LoggingConfig));
-            config->log_spec = log_spec;
-            config->file_name = access_log;
-
-            config->log_file = fopen((char *)config->file_name->data, "a+");
-            check(config->log_file, "Failed to open log file: %s for access logging.", bdata(config->file_name));
-            setbuf(config->log_file, NULL);
+            config = LogConfig_create(access_log, log_spec);
+            check(config, "Failed to configure access logging.");
 
             LOG_SOCKET = zmq_socket(ZMQ_CTX, ZMQ_PUB);
             check(LOG_SOCKET != NULL, "Failed to create access log socket");
@@ -94,8 +121,11 @@ int Log_init(bstring access_log, bstring log_spec)
 
     return 0;
 error:
+
+    LogConfig_destroy(config);
     return -1;
 }
+
 
 int Log_poison_workers()
 {
