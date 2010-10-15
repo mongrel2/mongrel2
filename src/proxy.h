@@ -55,4 +55,7 @@ int Proxy_read_and_parse(struct Connection *conn);
 
 void Proxy_stream_to_close(struct Connection *conn);
 
+extern int PROXY_READ_RETRIES;
+extern int PROXY_READ_RETRY_WARN;
+
 #endif

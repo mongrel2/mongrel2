@@ -4190,6 +4190,15 @@
     those requests, because the average is 400-600 bytes.
 
     <dt class="description"><span class=
+    "pplb7t-">limits.client</span><span class=
+    "pplb7t-">_read</span><span class="pplb7t-">_retries=5</span>
+
+    <dd class="description">How many times it will attempt to read
+    a complete HTTP header from a client. This prevents attacks
+    where a client trickles an incomplete request at you until you
+    run out of resources.
+
+    <dt class="description"><span class=
     "pplb7t-">limits.connection</span><span class=
     "pplb7t-">_stack</span><span class="pplb7t-">_size=32 *
     1024</span>
@@ -4268,6 +4277,26 @@
     <dd class="description">Maximum length of MIME type extensions.
 
     <dt class="description"><span class=
+    "pplb7t-">limits.proxy</span><span class=
+    "pplb7t-">_read</span><span class="pplb7t-">_retries=100</span>
+
+    <dd class="description">The number of read attempts Mongrel2
+    should make when reading from a backend proxy. Many backend
+    servers don't buffer their I/O properly and Mongrel2 will
+    ditch their HTTP response if it doesn't get a header
+    after this many attempts.
+
+    <dt class="description"><span class=
+    "pplb7t-">limits.proxy</span><span class=
+    "pplb7t-">_read</span><span class=
+    "pplb7t-">_retry</span><span class="pplb7t-">_warn=10</span>
+
+    <dd class="description">This is the threshold where you get a
+    warning that a particular backend is having performance
+    problems, useful for spotting potential errors before they
+    become a problem.
+
+    <dt class="description"><span class=
     "pplb7t-">limits.url</span><span class=
     "pplb7t-">_path=256</span>
 
@@ -4307,11 +4336,11 @@
     <dd class="description">Number of 0MQ IO threads to run.
     Careful, we've experienced thread bugs in 0MQ sometimes
     with high numbers of these.
-  </dl><!--l. 695-->
+  </dl><!--l. 698-->
 
   <p class="noindent">You can also update your <span class=
   "pcrro7t-">mimetypes</span> in the same way, just set a variable
-  with them: <!--l. 697-->
+  with them: <!--l. 700-->
 
   <p class="noindent"><a id="x1-38005r13" name="x1-38005r13"></a>
   <hr class="float">
@@ -4322,7 +4351,7 @@
       "content"><span class="pplri7t-">Changing</span> <span class=
       "pplri7t-">Settings</span></span>
     </div><!--tex4ht:label?: x1-38005r13 -->
-    <!--l. 698-->
+    <!--l. 701-->
 
     <div class="lstlisting" id="listing-11">
       <span class="label"><a id="x1-38006r1" name=
@@ -4378,9 +4407,6 @@
     </div>
   </div>
   <hr class="endfloat">
-  <!--l. 1-->
-
-  <p class="noindent">
 
   <h2 class="chapterHead"><span class=
   "titlemark">Chapter&nbsp;4</span><br>
@@ -9805,7 +9831,7 @@
       "pcrr7t-x-x-90">get</span><span class=
       "pcrr7t-x-x-90">(</span><span class=
       "pcrr7t-x-x-90">"</span><span class=
-      "pcrr7t-x-x-90">KILLME</span><span class=
+      "pcrr7t-x-x-90">killme</span><span class=
       "pcrr7t-x-x-90">"</span><span class=
       "pcrr7t-x-x-90">,</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
@@ -10559,13 +10585,13 @@
       "pcrr7t-x-x-90">get</span><span class=
       "pcrr7t-x-x-90">(</span><span class=
       "pcrr8c-x-x-90">'</span><span class=
-      "pcrr7t-x-x-90">X</span><span class=
+      "pcrr7t-x-x-90">x</span><span class=
       "pcrr7t-x-x-90">-</span><span class=
-      "pcrr7t-x-x-90">Mongrel2</span><span class=
+      "pcrr7t-x-x-90">mongrel2</span><span class=
       "pcrr7t-x-x-90">-</span><span class=
-      "pcrr7t-x-x-90">Upload</span><span class=
+      "pcrr7t-x-x-90">upload</span><span class=
       "pcrr7t-x-x-90">-</span><span class=
-      "pcrr7t-x-x-90">Done</span><span class=
+      "pcrr7t-x-x-90">done</span><span class=
       "pcrr8c-x-x-90">'</span><span class=
       "pcrr7t-x-x-90">,</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
@@ -10594,13 +10620,13 @@
       "pcrr7t-x-x-90">get</span><span class=
       "pcrr7t-x-x-90">(</span><span class=
       "pcrr8c-x-x-90">'</span><span class=
-      "pcrr7t-x-x-90">X</span><span class=
+      "pcrr7t-x-x-90">x</span><span class=
       "pcrr7t-x-x-90">-</span><span class=
-      "pcrr7t-x-x-90">Mongrel2</span><span class=
+      "pcrr7t-x-x-90">mongrel2</span><span class=
       "pcrr7t-x-x-90">-</span><span class=
-      "pcrr7t-x-x-90">Upload</span><span class=
+      "pcrr7t-x-x-90">upload</span><span class=
       "pcrr7t-x-x-90">-</span><span class=
-      "pcrr7t-x-x-90">Start</span><span class=
+      "pcrr7t-x-x-90">start</span><span class=
       "pcrr8c-x-x-90">'</span><span class=
       "pcrr7t-x-x-90">,</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
@@ -10630,13 +10656,13 @@
       "pcrr7t-x-x-90">get</span><span class=
       "pcrr7t-x-x-90">(</span><span class=
       "pcrr8c-x-x-90">'</span><span class=
-      "pcrr7t-x-x-90">X</span><span class=
+      "pcrr7t-x-x-90">x</span><span class=
       "pcrr7t-x-x-90">-</span><span class=
-      "pcrr7t-x-x-90">Mongrel2</span><span class=
+      "pcrr7t-x-x-90">mongrel2</span><span class=
       "pcrr7t-x-x-90">-</span><span class=
-      "pcrr7t-x-x-90">Upload</span><span class=
+      "pcrr7t-x-x-90">upload</span><span class=
       "pcrr7t-x-x-90">-</span><span class=
-      "pcrr7t-x-x-90">Done</span><span class=
+      "pcrr7t-x-x-90">done</span><span class=
       "pcrr8c-x-x-90">'</span><span class=
       "pcrr7t-x-x-90">,</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
@@ -10877,13 +10903,13 @@
       "pcrr7t-x-x-90">get</span><span class=
       "pcrr7t-x-x-90">(</span><span class=
       "pcrr8c-x-x-90">'</span><span class=
-      "pcrr7t-x-x-90">X</span><span class=
+      "pcrr7t-x-x-90">x</span><span class=
       "pcrr7t-x-x-90">-</span><span class=
-      "pcrr7t-x-x-90">Mongrel2</span><span class=
+      "pcrr7t-x-x-90">mongrel2</span><span class=
       "pcrr7t-x-x-90">-</span><span class=
-      "pcrr7t-x-x-90">Upload</span><span class=
+      "pcrr7t-x-x-90">upload</span><span class=
       "pcrr7t-x-x-90">-</span><span class=
-      "pcrr7t-x-x-90">Start</span><span class=
+      "pcrr7t-x-x-90">start</span><span class=
       "pcrr8c-x-x-90">'</span><span class=
       "pcrr7t-x-x-90">,</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
@@ -10954,13 +10980,13 @@
       "pcrr7t-x-x-90">get</span><span class=
       "pcrr7t-x-x-90">(</span><span class=
       "pcrr8c-x-x-90">'</span><span class=
-      "pcrr7t-x-x-90">X</span><span class=
+      "pcrr7t-x-x-90">x</span><span class=
       "pcrr7t-x-x-90">-</span><span class=
-      "pcrr7t-x-x-90">Mongrel2</span><span class=
+      "pcrr7t-x-x-90">mongrel2</span><span class=
       "pcrr7t-x-x-90">-</span><span class=
-      "pcrr7t-x-x-90">Upload</span><span class=
+      "pcrr7t-x-x-90">upload</span><span class=
       "pcrr7t-x-x-90">-</span><span class=
-      "pcrr7t-x-x-90">Start</span><span class=
+      "pcrr7t-x-x-90">start</span><span class=
       "pcrr8c-x-x-90">'</span><span class=
       "pcrr7t-x-x-90">,</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=

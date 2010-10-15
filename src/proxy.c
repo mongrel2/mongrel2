@@ -46,6 +46,8 @@
 #include <connection.h>
 #include <http11/httpclient_parser.h>
 
+int PROXY_READ_RETRIES = 100;
+int PROXY_READ_RETRY_WARN = 10;
 
 void Proxy_destroy(Proxy *proxy)
 {
@@ -69,9 +71,6 @@ error:
     Proxy_destroy(proxy);
     return NULL;
 }
-
-const int PROXY_READ_RETRIES = 100;
-const int PROXY_READ_RETRY_WARN = 10;
 
 int Proxy_read_and_parse(Connection *conn)
 {

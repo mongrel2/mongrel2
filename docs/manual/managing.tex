@@ -674,6 +674,7 @@ of available settings are:
 \begin{description}
 \item[control\_port=ipc://run/control] This is where Mongrel2 will listen with 0MQ for control messages.  You should use \verb|ipc://| for the spec so that only a local user with file access can get at it.
 \item[limits.buffer\_size=2 * 1024] Internal IO buffers, used for things like proxying and handling requests.  This is a \emph{very} conservative setting, so if you get HTTP headers greater than this, you'll want to increase this setting.  You'll also want to shoot whoever is sending you those requests, because the average is 400-600 bytes.
+\item[limits.client\_read\_retries=5] How many times it will attempt to read a complete HTTP header from a client. This prevents attacks where a client trickles an incomplete request at you until you run out of resources.
 \item[limits.connection\_stack\_size=32 * 1024] Size of the stack used for connection coroutines.  If you're trying to cram a ton of connections into very little RAM, see how low this can go.
 \item[limits.content\_length=20 * 1024] Maximum allowed content length on submitted requests.  This is, right now, a hard limit so requests that go over it are rejected.  Later versions of Mongrel2 will use an upload mechanism that will allow any size upload.
 \item[limits.dir\_max\_path=256] Max path length you can set for Dir handlers.
@@ -684,6 +685,8 @@ of available settings are:
 \item[limits.header\_count=128 * 10] Maximum number of allowed headers from a client connection.
 \item[limits.host\_name=256] Maximum hostname for Host specifiers and other DNS related settings.
 \item[limits.mime\_ext\_len=128] Maximum length of MIME type extensions.
+\item[limits.proxy\_read\_retries=100] The number of read attempts Mongrel2 should make when reading from a backend proxy. Many backend servers don't buffer their I/O properly and Mongrel2 will ditch their HTTP response if it doesn't get a header after this many attempts.
+\item[limits.proxy\_read\_retry\_warn=10] This is the threshold where you get a warning that a particular backend is having performance problems, useful for spotting potential errors before they become a problem.
 \item[limits.url\_path=256] Max URL paths. Does not include query string, just path.
 \item[superpoll.hot\_dividend=4] Ratio of the total (like 1/4th, 1/8th) that should be in the hot selection.  Set this higher if you have lots of idle connections; set it lower if you have more active connections.
 \item[superpoll.max\_fd=10 * 1024] Maximum possible open files.  Do not set this above 64 * 1024, and expect it to take a bit while Mongrel2 sets up constant structures.

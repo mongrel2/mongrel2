@@ -252,6 +252,8 @@ static inline void Request_nuke_parts(Request *req)
 
     req->status_code = 0;
     req->response_size = 0;
+    req->parser.json_sent = 0;
+    req->parser.xml_sent = 0;
 }
 
 void Request_destroy(Request *req)

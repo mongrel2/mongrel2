@@ -55,7 +55,7 @@ struct tagbstring POLICY_XML_REQUEST = bsStatic("<policy-file-request");
 int MAX_CONTENT_LENGTH = 20 * 1024;
 int BUFFER_SIZE = 4 * 1024;
 int CONNECTION_STACK = 32 * 1024;
-const int CLIENT_READ_RETRIES = 5;
+int CLIENT_READ_RETRIES = 5;
 
 
 static inline int Connection_backend_event(Backend *found, Connection *conn)
@@ -525,17 +525,15 @@ Connection *Connection_create(Server *srv, int fd, int rport,
     conn->req = Request_create();
     check_mem(conn->req);
 
-    if(ssl_ctx != NULL)
-    {
+    if(ssl_ctx != NULL) {
         conn->iob = IOBuf_create(BUFFER_SIZE, fd, IOBUF_SSL);
         check(conn->iob != NULL, "Failed to create the SSL IOBuf.");
         conn->iob->ssl = ssl_server_new(ssl_ctx, IOBuf_fd(conn->iob));
         check(conn->iob->ssl != NULL, "Failed to create new ssl for connection");
-    }
-    else
-    {
+    } else {
         conn->iob = IOBuf_create(BUFFER_SIZE, fd, IOBUF_SOCKET);
     }
+
     return conn;
 
 error:
@@ -561,7 +559,8 @@ void Connection_task(void *v)
 
     for(i = 0, next = OPEN; next != CLOSE; i++) {
         next = State_exec(&conn->state, next, (void *)conn);
-        error_unless(next >= CLOSE && next < EVENT_END, conn, 500, 
+
+        check(next >= CLOSE && next < EVENT_END,
                 "!!! Invalid next event[%d]: %d, Tell ZED!", i, next);
     }
 
@@ -620,7 +619,7 @@ int Connection_read_header(Connection *conn, Request *req)
 
     Request_start(req);
 
-    for(tries = 0; rc == 0 && tries < 5; tries++) {
+    for(tries = 0; rc == 0 && tries < CLIENT_READ_RETRIES; tries++) {
         if(avail > 0) {
             rc = Request_parse(req, data, avail, &nparsed);
         }
@@ -631,7 +630,8 @@ int Connection_read_header(Connection *conn, Request *req)
         }
     }
 
-    error_unless(tries < 5, conn, 400, "Too many small packet read attempts.");
+    error_unless(tries < CLIENT_READ_RETRIES, conn, 
+            400, "Too many small packet read attempts.");
     error_unless(rc == 1, conn, 400, "Error parsing request.");
 
     // add the x-forwarded-for header
@@ -653,9 +653,18 @@ void Connection_init()
     MAX_CONTENT_LENGTH = Setting_get_int("limits.content_length", 20 * 1024);
     BUFFER_SIZE = Setting_get_int("limits.buffer_size", 4 * 1024);
     CONNECTION_STACK = Setting_get_int("limits.connection_stack_size", 32 * 1024);
+    CLIENT_READ_RETRIES = Setting_get_int("limits.client_read_retries", 5);
 
-    log_info("MAX limits.content_length=%d, limits.buffer_size=%d, limits.connection_stack_size=%d",
-            MAX_CONTENT_LENGTH, BUFFER_SIZE, CONNECTION_STACK);
+
+    log_info("MAX limits.content_length=%d, limits.buffer_size=%d, limits.connection_stack_size=%d, limits.client_read_retries=%d",
+            MAX_CONTENT_LENGTH, BUFFER_SIZE, CONNECTION_STACK,
+            CLIENT_READ_RETRIES);
+
+    PROXY_READ_RETRIES = Setting_get_int("limits.proxy_read_retries", 100);
+    PROXY_READ_RETRY_WARN = Setting_get_int("limits.proxy_read_retry_warn", 10);
+
+    log_info("MAX limits.proxy_read_retries=%d, limits.proxy_read_retry_warn=%d",
+            PROXY_READ_RETRIES, PROXY_READ_RETRY_WARN);
 }
 
 
