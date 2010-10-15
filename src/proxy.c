@@ -88,6 +88,7 @@ int Proxy_read_and_parse(Connection *conn)
     for(tries = 0; tries < PROXY_READ_RETRIES; tries++) {
         data = IOBuf_read_some(conn->proxy_iob, &avail);
         check(data != NULL, "Failed to read from proxy.");
+        check(avail > 0, "Proxy read returned %d bytes.", avail);
 
         data[avail] = '\0';
         nparsed = httpclient_parser_execute(conn->client, data, avail, nparsed);
