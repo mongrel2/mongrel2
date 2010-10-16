@@ -25,7 +25,7 @@ def read_msg():
     return json.loads(b64decode(reply))
 
 def post_msg(data):
-    msg = '@chat {"type": "msg", "msg": "%s"}\x00' % (data)
+    msg = '@bbs {"type": "msg", "msg": "%s"}\x00' % (data)
     CONN.send(msg)
 
 print "Connecting to %s:%d" % (host, port)
