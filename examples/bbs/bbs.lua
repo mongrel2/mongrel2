@@ -73,7 +73,7 @@ local MAINMENU = {
 
         if db.user_exists(to) then
             local msg = read_long_message(conn, req, user)
-            db.send_to(to, user, table.concat(msg, "\n"))
+            db.send_to(to, user, msg)
 
             ui.display(conn, req, "Message sent to " .. to)
         else
@@ -82,19 +82,17 @@ local MAINMENU = {
     end,
 
     ['4'] = function(conn, req, user)
-        local inbox = db.read_inbox(user)
-        
-        if inbox then
-            for i, msg in ipairs(inbox) do
-                ui.display(conn, req, "From: " .. msg.from .. "\n" .. msg.msg)
-                ui.ask(conn, req, "Enter to continue.", '> ')
-            end
-
-            ui.display(conn, req, "Messages all read.")
-        else
+        if db.inbox_count(user) == 0 then
             ui.display(conn, req, 'No messages for you. Try back later.')
         end
+
+        while db.inbox_count(user) > 0 do
+            local msg = db.read_inbox(user)
+            ui.display(conn, req, msg)
+            ui.ask(conn, req, "Enter to continue.", '> ')
+        end
     end,
+
 
     ['Q'] = function(conn, req, user)
         ui.exit(conn, req, 'bye')

@@ -8,12 +8,12 @@ module 'db'
 
 local DB = sidereal.connect('localhost', 6379)
 
-local INBOXES = {}
+local function format_message(user, msg)
+    return 'From: ' .. user .. "\n" .. table.concat(msg, "\n")
+end
 
 function post_message(user, msg)
-    local formatted = 'From: ' .. user .. "\n" .. table.concat(msg, "\n")
-
-    DB:rpush("MESSAGES", formatted)
+    DB:rpush("MESSAGES", format_message(user, msg))
 end
 
 function message_count()
@@ -25,8 +25,7 @@ function message_read(i)
 end
 
 function send_to(to, from, msg)
-    if not INBOXES[to] then INBOXES[to] = {} end
-    table.insert(INBOXES[to], {from = from, msg = msg})
+    DB:lpush("INBOX:" .. to, format_message(from, msg))
 end
 
 
@@ -38,10 +37,12 @@ function user_exists(user)
     return DB:hexists("LOGINS", user) == 1
 end
 
+function inbox_count(user)
+    return DB:llen("INBOX:" .. user)
+end
+
 function read_inbox(user)
-    local inbox = INBOXES[user]
-    INBOXES[user] = nil
-    return inbox
+    return DB:lpop("INBOX:" .. user)
 end
 
 function auth_user(user, password)
