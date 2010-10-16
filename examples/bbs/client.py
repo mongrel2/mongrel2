@@ -2,6 +2,7 @@
 
 import sys
 import socket
+import json
 from base64 import b64decode
 
 try:
@@ -25,7 +26,7 @@ def read_msg():
     return json.loads(b64decode(reply))
 
 def post_msg(data):
-    msg = '@bbs {"type": "msg", "msg": "%s"}\x00' % (data)
+    msg = '@bbs %s\x00' % (json.dumps({'type': 'msg', 'msg': data}))
     CONN.send(msg)
 
 print "Connecting to %s:%d" % (host, port)
