@@ -2,16 +2,27 @@ local config = require 'config'
 local sidereal = require 'sidereal'
 local table = table
 local ipairs = ipairs
+local print = print
 
 module 'db'
 
-local LOGINS = {}
-local MESSAGES = {}
-local INBOXES = {}
+local DB = sidereal.connect('localhost', 6379)
 
+local INBOXES = {}
+local LOGINS = {}
 
 function post_message(user, msg)
-    table.insert(MESSAGES, 'From: ' .. user .. "\n" .. table.concat(msg, "\n"))
+    local formatted = 'From: ' .. user .. "\n" .. table.concat(msg, "\n")
+
+    DB:rpush("MESSAGES", formatted)
+end
+
+function message_count()
+    return DB:llen("MESSAGES")
+end
+
+function message_read(i)
+    return DB:lindex("MESSAGES", i)
 end
 
 function send_to(to, from, msg)
@@ -40,6 +51,3 @@ function auth_user(user, password)
     return auth == password
 end
 
-function imessages()
-    return ipairs(MESSAGES)
-end

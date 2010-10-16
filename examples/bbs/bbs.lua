@@ -52,9 +52,16 @@ local MAINMENU = {
     ['2'] = function(conn, req, user)
         ui.screen(conn, req, 'read_msg')
 
-        for i,msg in db.imessages() do
+        for i = 0, db.message_count() - 1 do
+            local msg = db.message_read(i)
+
             ui.display(conn, req, msg .. '\n')
-            ui.ask(conn, req, "Enter To Read More", '> ')
+
+            if i == db.message_count() - 1 then
+                ui.ask(conn, req, "Last message, Enter for MAIN MENU.", '> ')
+            else
+                ui.ask(conn, req, "Enter To Read More", '> ')
+            end
         end
 
         ui.display(conn, req, "No more messages.")
