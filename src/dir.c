@@ -264,7 +264,7 @@ static inline int normalize_path(bstring target)
 
     // Some platforms (OSX!) don't allocate for you, so we have to
     char *normalized = realpath((const char *)target->data, path_buf);
-    check(normalized, "Failed to normalize path: %s", bdata(target));
+    check_debug(normalized, "Failed to normalize path: %s", bdata(target));
 
     bassigncstr(target, normalized);
 
