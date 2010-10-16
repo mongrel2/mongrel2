@@ -102,10 +102,10 @@ local MAINMENU = {
 
 local function m2bbs(conn, req)
     req = ui.prompt(conn, req, 'welcome')
-    user = req.data.msg
+    local user = req.data.msg
 
     req = ui.prompt(conn, req, 'password')
-    password = req.data.msg
+    local password = req.data.msg
     
     if not db.user_exists(user) then
         new_user(conn, req, user, password)
