@@ -2,7 +2,7 @@ local m2 = require 'mongrel2'
 local ui = require 'ui'
 local config = require 'config'
 local engine = require 'engine'
-
+local db = require 'db'
 
 local ctx = mongrel2.new(config.io_threads)
 
@@ -11,19 +11,6 @@ print("connecting", config.sender_id, config.sub_addr, config.pub_addr)
 local conn = ctx:new_connection(config.sender_id, config.sub_addr, config.pub_addr)
 
 
-local LOGINS = {}
-local MESSAGES = {}
-local DIRECTS = {}
-
-
-local function post_message(user, msg)
-    table.insert(MESSAGES, 'From: ' .. user .. "\n" .. table.concat(msg, "\n"))
-end
-
-local function send_to(to, from, msg)
-    if not DIRECTS[to] then DIRECTS[to] = {} end
-    table.insert(DIRECTS[to], {from = from, msg = msg})
-end
 
 local function new_user(conn, req, user, password)
     req = ui.prompt(conn, req, 'new_user')
@@ -32,9 +19,11 @@ local function new_user(conn, req, user, password)
         req = ui.prompt(conn, req, 'repeat_pass')
     end 
 
-    LOGINS[user] = password
+    db.register_user(user, password)
+
     ui.screen(conn, req, 'welcome_newbie')
 end
+
 
 local function read_long_message(conn, req, user)
     local msg = {}
@@ -55,16 +44,15 @@ local MAINMENU = {
     ['1'] = function(conn, req, user)
         local msg = read_long_message(conn, req, user)
 
-        post_message(user, msg)
+        db.post_message(user, msg)
 
         ui.screen(conn, req, 'posted')
     end,
 
-
     ['2'] = function(conn, req, user)
         ui.screen(conn, req, 'read_msg')
 
-        for i,msg in ipairs(MESSAGES) do
+        for i,msg in db.imessages() do
             ui.display(conn, req, msg .. '\n')
             ui.ask(conn, req, "Enter To Read More", '> ')
         end
@@ -76,9 +64,9 @@ local MAINMENU = {
         req = ui.ask(conn, req, 'Who do you want to send it to?', '> ')
         local to = req.data.msg
 
-        if LOGINS[to] then
+        if db.user_exists(to) then
             local msg = read_long_message(conn, req, user)
-            send_to(to, user, table.concat(msg, "\n"))
+            db.send_to(to, user, table.concat(msg, "\n"))
 
             ui.display(conn, req, "Message sent to " .. to)
         else
@@ -87,7 +75,7 @@ local MAINMENU = {
     end,
 
     ['4'] = function(conn, req, user)
-        local inbox = DIRECTS[user]
+        local inbox = db.read_inbox(user)
         
         if inbox then
             for i, msg in ipairs(inbox) do
@@ -95,7 +83,6 @@ local MAINMENU = {
                 ui.ask(conn, req, "Enter to continue.", '> ')
             end
 
-            DIRECTS[user] = nil
             ui.display(conn, req, "Messages all read.")
         else
             ui.display(conn, req, 'No messages for you. Try back later.')
@@ -114,12 +101,10 @@ local function m2bbs(conn, req)
 
     req = ui.prompt(conn, req, 'password')
     password = req.data.msg
-
-    local auth = LOGINS[user]
-
-    if not auth then
+    
+    if not db.user_exists(user) then
         new_user(conn, req, user, password)
-    elseif auth ~= password then
+    elseif not db.auth_user(user, password) then
         ui.exit(conn, req, 'bad_pass')
         return
     end
