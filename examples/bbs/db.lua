@@ -9,7 +9,6 @@ module 'db'
 local DB = sidereal.connect('localhost', 6379)
 
 local INBOXES = {}
-local LOGINS = {}
 
 function post_message(user, msg)
     local formatted = 'From: ' .. user .. "\n" .. table.concat(msg, "\n")
@@ -32,11 +31,11 @@ end
 
 
 function register_user(user, password)
-    LOGINS[user] = password
+    DB:hset("LOGINS", user, password)
 end
 
 function user_exists(user)
-    return LOGINS[user] ~= nil
+    return DB:hexists("LOGINS", user) == 1
 end
 
 function read_inbox(user)
@@ -45,9 +44,8 @@ function read_inbox(user)
     return inbox
 end
 
-
 function auth_user(user, password)
-    local auth = LOGINS[user]
+    local auth = DB:hget("LOGINS", user)
     return auth == password
 end
 
