@@ -36,7 +36,7 @@ sudo pacman -S sqlite3
 <p>最快的方式是直接下载tar.gz文件：</p>
 
 <pre>
-wget http://mongrel2.org/static/downloads/mongrel2-1.3.tar.bz2
+wget http://mongrel2.org/static/downloads/mongrel2-1.4.tar.bz2
 </pre>
 
 
@@ -45,8 +45,8 @@ wget http://mongrel2.org/static/downloads/mongrel2-1.3.tar.bz2
 <p>现在你需要编译Mongrel2：</p>
 
 <pre>
-tar -xjvf mongrel2-1.3.tar.bz2
-cd mongrel2-1.3/
+tar -xjvf mongrel2-1.4.tar.bz2
+cd mongrel2-1.4/
 make clean all install
 </pre>
 
