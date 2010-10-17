@@ -3,10 +3,11 @@ local sidereal = require 'sidereal'
 local table = table
 local ipairs = ipairs
 local print = print
+local assert = assert
 
 module 'db'
 
-local DB = sidereal.connect('localhost', 6379)
+local DB, error = assert(sidereal.connect('localhost', 6379))
 
 local function format_message(user, msg)
     return 'From: ' .. user .. "\n" .. table.concat(msg, "\n")

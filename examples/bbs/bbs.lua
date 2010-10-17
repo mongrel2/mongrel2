@@ -3,6 +3,7 @@ local ui = require 'ui'
 local config = require 'config'
 local engine = require 'engine'
 local db = require 'db'
+local strict = require 'strict'
 
 local ctx = mongrel2.new(config.io_threads)
 
@@ -30,7 +31,7 @@ local function read_long_message(conn, req, user)
     ui.screen(conn, req, 'leave_msg')
     req = ui.ask(conn, req, 'From: ' .. user .. '\n---', '')
 
-    while req.data.msg ~= '.' do
+    while req.data.msg ~= '.' and #msg < 24 do
         table.insert(msg, req.data.msg)
         req = ui.ask(conn, req, '', '')
     end
@@ -51,16 +52,22 @@ local MAINMENU = {
 
     ['2'] = function(conn, req, user)
         ui.screen(conn, req, 'read_msg')
+        local i
 
-        for i = 0, db.message_count() - 1 do
+        for i = db.message_count() - 1, 0, -1 do
             local msg = db.message_read(i)
 
+            ui.display(conn, req, ('---- #%d -----'):format(i))
             ui.display(conn, req, msg .. '\n')
 
-            if i == db.message_count() - 1 then
+            if i == 0 then
                 ui.ask(conn, req, "Last message, Enter for MAIN MENU.", '> ')
             else
-                ui.ask(conn, req, "Enter To Read More", '> ')
+                req = ui.ask(conn, req, "Enter, or Q to stop reading.", '> ')
+                if req.data.msg == 'Q' or req.data.msg == 'q' then
+                    ui.display(conn, req, "Done reading.")
+                    return
+                end
             end
         end
 
@@ -106,7 +113,9 @@ local function m2bbs(conn, req)
 
     req = ui.prompt(conn, req, 'password')
     local password = req.data.msg
-    
+   
+    print('login attempt', user, password)
+
     if not db.user_exists(user) then
         new_user(conn, req, user, password)
     elseif not db.auth_user(user, password) then
