@@ -278,7 +278,7 @@ static int Config_load_server_cb(void* param, int cols, char **data, char **name
 {
 	Server **server = NULL;
     char *query = NULL;
-    arity(8);
+    arity(9);
 
     server = (Server **)param;
     if(*server != NULL)
@@ -287,7 +287,16 @@ static int Config_load_server_cb(void* param, int cols, char **data, char **name
         Server_destroy(*server);
     }
 
-    *server = Server_create(data[1], data[2], data[3], data[4], data[5], data[6], data[7]);
+    *server = Server_create(
+            data[1], // uuid
+            data[2], // default_host
+            data[3], // bind_addr
+            data[4], // port
+            data[5], // chroot
+            data[6], // access_log
+            data[7], // error_log
+            data[8] // pid_file
+            );
     check(*server, "Failed to create server %s:%s on port %s", data[0], data[2], data[3]);
 
 
@@ -317,7 +326,7 @@ Server *Config_load_server(const char *uuid)
     Config_load_proxies();
     Config_load_dirs();
 
-    const char *SERVER_QUERY = "SELECT id, uuid, default_host, port, chroot, access_log, error_log, pid_file FROM server WHERE uuid=%Q";
+    const char *SERVER_QUERY = "SELECT id, uuid, default_host, bind_addr, port, chroot, access_log, error_log, pid_file FROM server WHERE uuid=%Q";
     char *query = SQL(SERVER_QUERY, uuid);
 
     Server *server = NULL;

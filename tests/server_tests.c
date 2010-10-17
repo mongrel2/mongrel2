@@ -16,7 +16,8 @@ char *test_Server_init()
 
 char *test_Server_create_destroy()
 {
-    Server *server = Server_create("uuid", "localhost", "8080", "chroot", "access_log", "error_log", "pid_file");
+    Server *server = Server_create("uuid", "localhost",
+            "0.0.0.0", "8080", "chroot", "access_log", "error_log", "pid_file");
     mu_assert(server != NULL, "Failed to make the server, something on 8090?");
 
     Server_destroy(server);
@@ -29,7 +30,8 @@ char *test_Server_adds()
 {
     int rc = 0;
 
-    Server *srv = Server_create("uuid", "localhost", "8080", "chroot", "access_log", "error_log", "pid_file");
+    Server *srv = Server_create("uuid", "localhost",
+            "0.0.0.0", "8080", "chroot", "access_log", "error_log", "pid_file");
     mu_assert(srv != NULL, "Failed to make the server, something on 8090?");
 
     Host *host = Host_create("zedshaw.com");

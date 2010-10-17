@@ -1,3 +1,5 @@
+#undef NDEBUG
+
 #include "taskimpl.h"
 #include "dbg.h"
 #include "server.h"
@@ -120,13 +122,19 @@ static int netgetsocket(int istcp, char *server, int port,
 {
     int rc = 0;
     int fd = -1;
-    int proto = 0;
+    int proto = istcp ? SOCK_STREAM : SOCK_DGRAM;
     char str[IPADDR_SIZE+1];
-    struct addrinfo hints;
     struct addrinfo *res = NULL, *ressave = NULL;
-    struct addrinfo synt_res;
-    struct sockaddr_in6 *psin6 = NULL;
-    char service[6]; /* 1..65535 + terminator */
+    int passive = is_active_open && server == NULL ? 0 : AI_PASSIVE;
+    int numeric = is_active_open ? 0 : AI_NUMERICHOST;
+
+    struct addrinfo hints = {
+        .ai_socktype = proto,
+        .ai_flags = numeric | passive
+            
+    };
+
+    char service[6] = {0}; /* 1..65535 + terminator */
 
     check(port >= 0 && port <= 65535, "Port %d is outsid allowed range.", port);
 
@@ -134,37 +142,17 @@ static int netgetsocket(int istcp, char *server, int port,
                                 istcp, server, port, 
                                 is_active_open);
 
-    memset(psa, 0, sizeof(*psa));
-    memset(service, 0, sizeof(service));
-    memset(&hints, 0, sizeof(hints));
     proto = istcp ? SOCK_STREAM : SOCK_DGRAM;
-    memset(&hints, 0, sizeof(struct addrinfo));
+
     hints.ai_socktype = proto;
 
     /* BUG: the lookup is blocking. */
-    if((server != NULL) && (strcmp(server, "*") != 0)) {
-        snprintf(service, sizeof(service), "%d", port);
+    snprintf(service, sizeof(service), "%d", port);
 
-        rc = getaddrinfo(server, service, &hints, &res);
-        check(rc != -1, "Get addrinfo failed for server: %s.", server);
+    rc = getaddrinfo(server, service, &hints, &res);
+    check(rc != -1, "Get addrinfo failed for server: %s.", server);
 
-        ressave = res;
-    } else {
-        synt_res.ai_family = AF_INET6;
-        synt_res.ai_protocol = 0;
-        synt_res.ai_addrlen = sizeof(struct sockaddr_in6);
-        synt_res.ai_addr = (struct sockaddr *)psa;
-        synt_res.ai_next = NULL;
-        psin6 = psa;
-
-        memset(psa, 0, sizeof(*psa));
-        psin6->sin6_port = htons(port);
-        psin6->sin6_family = AF_INET6;
-        res = &synt_res;
-
-        // Set ressave to NULL so we do not try to free it later
-        ressave = NULL;
-    }
+    ressave = res;
 
     debug("Enumerating targets...");
     for(; res; res = res->ai_next) {

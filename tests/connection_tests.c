@@ -69,7 +69,8 @@ char * all_tests() {
     mu_suite_start();
 
     Server_init();
-    Server *SRV = Server_create("uuid", "localhost", "1999", "chroot", "access_log", "error_log", "pid_file");
+    Server *SRV = Server_create("uuid", "localhost", "0.0.0.0",
+            "1999", "chroot", "access_log", "error_log", "pid_file");
     Host *zedshaw_com = Host_create("zedshaw.com");
 
     Host_add_backend(zedshaw_com, "@chat", strlen("@chat"), BACKEND_HANDLER, NULL);

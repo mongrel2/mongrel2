@@ -19,6 +19,7 @@ struct tagbstring CONFIG_SCHEMA = bsStatic(
 "    pid_File TEXT,\n"
 "    default_host INTEGER,\n"
 "    name TEXT DEFAULT '',\n"
+"    bind_addr TEXT DEFAULT \"0.0.0.0\","
 "    port INTEGER);\n"
 "\n"
 "CREATE TABLE host (id INTEGER PRIMARY KEY, \n"
@@ -75,7 +76,7 @@ struct tagbstring CONFIG_SCHEMA = bsStatic(
 
 
 
-struct tagbstring SERVER_SQL = bsStatic("INSERT INTO server (uuid, access_log, error_log, pid_file, chroot, default_host, name, port) VALUES (%Q, %Q, %Q, %Q, %Q, %Q, %Q, %s);");
+struct tagbstring SERVER_SQL = bsStatic("INSERT INTO server (uuid, access_log, error_log, pid_file, chroot, default_host, name, bind_addr, port) VALUES (%Q, %Q, %Q, %Q, %Q, %Q, %Q, %Q, %s);");
 
 struct tagbstring HOST_SQL = bsStatic("INSERT INTO host (server_id, name, matching) VALUES (%d, %Q, %Q);");
 

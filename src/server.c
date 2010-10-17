@@ -57,7 +57,7 @@ void host_destroy_cb(Route *r, RouteMap *map)
 }
 
 Server *Server_create(const char *uuid, const char *default_host,
-        const char *port, const char *chroot, const char *access_log,
+        const char *bind_addr, const char *port, const char *chroot, const char *access_log,
         const char *error_log, const char *pid_file)
 {
     Server *srv = h_calloc(sizeof(Server), 1);
@@ -71,6 +71,7 @@ Server *Server_create(const char *uuid, const char *default_host,
 
     srv->listen_fd = 0;
 
+    srv->bind_addr = bfromcstr(bind_addr); check_mem(srv->bind_addr);
     srv->uuid = bfromcstr(uuid); check_mem(srv->uuid);
     srv->chroot = bfromcstr(chroot); check_mem(srv->chroot);
     srv->access_log = bfromcstr(access_log); check_mem(srv->access_log);

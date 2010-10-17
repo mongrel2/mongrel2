@@ -51,6 +51,7 @@ typedef struct Server {
     int listen_fd;
     Host *default_host;
     RouteMap *hosts;
+    bstring bind_addr;
     bstring uuid;
     bstring chroot;
     bstring access_log;
@@ -62,8 +63,8 @@ typedef struct Server {
 
 
 Server *Server_create(const char *uuid, const char *default_host,
-        const char *port, const char *chroot, const char *access_log,
-        const char *error_log, const char *pid_file);
+        const char *bind_addr, const char *port, const char *chroot,
+        const char *access_log, const char *error_log, const char *pid_file);
 
 void Server_destroy(Server *srv);
 

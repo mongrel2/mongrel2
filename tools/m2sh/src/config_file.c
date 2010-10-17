@@ -1,3 +1,5 @@
+#undef NDEBUG
+
 #include <config/db.h>
 #include "constants.h"
 #include <bstring.h>
@@ -216,6 +218,7 @@ error:
     return -1;
 }
 
+struct tagbstring BIND_ADDR = bsStatic("bind_addr");
 
 int Server_load(tst_t *settings, Value *val)
 {
@@ -224,6 +227,13 @@ int Server_load(tst_t *settings, Value *val)
     int rc = 0;
     char *sql = NULL;
     struct tagbstring HOSTS_VAR = bsStatic("hosts");
+    const char *bind_addr = NULL;
+
+    if(tst_search(cls->params, bdata(&BIND_ADDR), blength(&BIND_ADDR))) {
+        bind_addr = AST_str(settings, cls->params, "bind_addr", VAL_QSTRING);
+    } else {
+        bind_addr = "0.0.0.0";
+    }
 
     sql = sqlite3_mprintf(bdata(&SERVER_SQL),
             AST_str(settings, cls->params, "uuid", VAL_QSTRING),
@@ -233,6 +243,7 @@ int Server_load(tst_t *settings, Value *val)
             AST_str(settings, cls->params, "chroot", VAL_QSTRING),
             AST_str(settings, cls->params, "default_host", VAL_QSTRING),
             AST_str(settings, cls->params, "name", VAL_QSTRING),
+            bind_addr,
             AST_str(settings, cls->params, "port", VAL_NUMBER));
 
     rc = DB_exec(sql, NULL, NULL);

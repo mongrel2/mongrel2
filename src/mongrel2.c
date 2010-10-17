@@ -120,7 +120,7 @@ Server *load_server(const char *db_file, const char *server_uuid, int reuse_fd)
     check(rc == 0, "Failed to load global settings.");
 
     if(reuse_fd == -1) {
-        srv->listen_fd = netannounce(TCP, 0, srv->port);
+        srv->listen_fd = netannounce(TCP, bdata(srv->bind_addr), srv->port);
         check(srv->listen_fd >= 0, "Can't announce on TCP port %d", srv->port);
         check(fdnoblock(srv->listen_fd) == 0, "Failed to set listening port %d nonblocking.", srv->port);
     } else {
