@@ -38,7 +38,7 @@ Q. Quit the BBS.
 
     ['bye'] = "Alright, see ya later.",
 
-    ['leave_msg'] = "Enter your message, then enter . by itself to end it:\n",
+    ['leave_msg'] = "Enter your message, up to 20 lines, then enter . by itself to end it:\n",
 
     ['read_msg'] = "These are left by different users:\n",
 
