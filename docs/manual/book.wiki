@@ -8146,11 +8146,11 @@
       many web servers and browsers that I'm baffled how it
       got into the standard. The only thing I can think of is some
       &ldquo;reverse colonialist&rdquo; who thinks the world should
-      a happy rainbow of Unicode demanded it be in there. Unicode
-      in the wire protocol adds no linguistic value (nobody reads
-      headers), complicates servers, adds security concerns because
-      Unicode is ambiguous, and also violates the existing HTTP
-      standard which specifies ASCII for the wire protocol. As
+      be a happy rainbow of Unicode demanded it be in there.
+      Unicode in the wire protocol adds no linguistic value (nobody
+      reads headers), complicates servers, adds security concerns
+      because Unicode is ambiguous, and also violates the existing
+      HTTP standard which specifies ASCII for the wire protocol. As
       I've said before in this manual, writing protocols is
       hard enough without having to translate and deal with weird
       UTF-8 Unicode bizarreness. <!--l. 167-->
