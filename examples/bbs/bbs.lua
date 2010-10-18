@@ -1,17 +1,8 @@
+local strict = require 'strict'
 local m2 = require 'mongrel2'
 local ui = require 'ui'
-local config = require 'config'
 local engine = require 'engine'
 local db = require 'db'
-local strict = require 'strict'
-
-local ctx = mongrel2.new(config.io_threads)
-
-print("connecting", config.sender_id, config.sub_addr, config.pub_addr)
-
-local conn = ctx:new_connection(config.sender_id, config.sub_addr, config.pub_addr)
-
-
 
 local function new_user(conn, req, user, password)
     req = ui.prompt(conn, req, 'new_user')
@@ -39,7 +30,14 @@ local function read_long_message(conn, req, user)
     return msg
 end
 
-
+local function message_iterator(db, i)
+    if i > 0 then
+        return i-1, db.message_read(i-1)
+    end
+end
+local function messages(db)
+    return message_iterator, db, db.message_count()
+end
 
 local MAINMENU = {
     ['1'] = function(conn, req, user)
@@ -52,19 +50,16 @@ local MAINMENU = {
 
     ['2'] = function(conn, req, user)
         ui.screen(conn, req, 'read_msg')
-        local i
 
-        for i = db.message_count() - 1, 0, -1 do
-            local msg = db.message_read(i)
-
+        for i, msg in messages(db) do
             ui.display(conn, req, ('---- #%d -----'):format(i))
             ui.display(conn, req, msg .. '\n')
 
             if i == 0 then
-                ui.ask(conn, req, "Last message, Enter for MAIN MENU.", '> ')
+                ui.ask(conn, req, "Last message, Enter for MAIN MENU.", '> ')                
             else
                 req = ui.ask(conn, req, "Enter, or Q to stop reading.", '> ')
-                if req.data.msg == 'Q' or req.data.msg == 'q' then
+                if req.data.msg:upper() == 'Q' then
                     ui.display(conn, req, "Done reading.")
                     return
                 end
@@ -91,6 +86,7 @@ local MAINMENU = {
     ['4'] = function(conn, req, user)
         if db.inbox_count(user) == 0 then
             ui.display(conn, req, 'No messages for you. Try back later.')
+            return
         end
 
         while db.inbox_count(user) > 0 do
@@ -113,7 +109,7 @@ local function m2bbs(conn, req)
 
     req = ui.prompt(conn, req, 'password')
     local password = req.data.msg
-   
+
     print('login attempt', user, password)
 
     if not db.user_exists(user) then
@@ -124,24 +120,34 @@ local function m2bbs(conn, req)
     end
 
     req = ui.prompt(conn, req, 'motd')
-    
-    if req.data.msg == "n" then
+    if req.data.msg:upper() == "N" then
         ui.exit(conn, req, 'bye')
         return
-    else
-        repeat
-            req = ui.prompt(conn, req, 'menu')
-            local selection = MAINMENU[req.data.msg]
-            print("message:", req.data.msg)
-
-            if selection then
-                selection(conn, req, user)
-            else
-                ui.screen(conn, req, 'menu_error')
-            end
-        until req.data.msg == "Q"
     end
+
+    repeat
+        req = ui.prompt(conn, req, 'menu')
+        local selection = MAINMENU[req.data.msg]
+        print("message:", req.data.msg)
+
+        if selection then
+            selection(conn, req, user)
+        else
+            ui.screen(conn, req, 'menu_error')
+        end
+    until req.data.msg:upper() == "Q"
 end
 
-engine.run(conn, m2bbs)
+
+do
+  local config = {}
+  setfenv(assert(loadfile('config.lua')), config)()
+
+  local ctx = mongrel2.new(config.io_threads)
+
+  print("connecting", config.sender_id, config.sub_addr, config.pub_addr)
+
+  local conn = ctx:new_connection(config.sender_id, config.sub_addr, config.pub_addr)
+  engine.run(conn, m2bbs)
+end
 
