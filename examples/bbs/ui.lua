@@ -13,8 +13,8 @@ local SCREENS = {
                                
 
 Welcome to the Mongrel2 BBS.
-
-What's your name?]],
+]],
+    ['name'] = "What's your name?",
 
     ['welcome_newbie'] = 'Awesome! Welcome to our little BBS. Have fun.\n',
 
@@ -25,7 +25,7 @@ MOTD: There's not much going on here currently, and we're mostly just trying out
 this whole Lua with Mongrel2 thing. If you like it then help out by leaving a 
 message and trying to break it. -- Zed
 
-Do you want to continue? (Y/n)]],
+Enter to continue.]],
 
     ['menu'] = [[
 ---(((MAIN MENU))---

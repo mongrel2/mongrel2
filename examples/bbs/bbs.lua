@@ -104,7 +104,10 @@ local MAINMENU = {
 
 
 local function m2bbs(conn, req)
-    req = ui.prompt(conn, req, 'welcome')
+    ui.display(conn, req, 'welcome')
+
+    -- Have the user log in
+    req = ui.prompt(conn, req, 'name')
     local user = req.data.msg
 
     req = ui.prompt(conn, req, 'password')
@@ -119,15 +122,12 @@ local function m2bbs(conn, req)
         return
     end
 
-    req = ui.prompt(conn, req, 'motd')
-    if req.data.msg:upper() == "N" then
-        ui.exit(conn, req, 'bye')
-        return
-    end
+    -- Display the MoTD and wait for the user to hit Enter.
+    ui.prompt(conn, req, 'motd')
 
     repeat
         req = ui.prompt(conn, req, 'menu')
-        local selection = MAINMENU[req.data.msg]
+        local selection = MAINMENU[req.data.msg:upper()]
         print("message:", req.data.msg)
 
         if selection then
@@ -140,14 +140,16 @@ end
 
 
 do
+  -- Load configuration properties
   local config = {}
   setfenv(assert(loadfile('config.lua')), config)()
 
-  local ctx = mongrel2.new(config.io_threads)
-
+  -- Connect to the Mongrel2 server
   print("connecting", config.sender_id, config.sub_addr, config.pub_addr)
-
+  
+  local ctx = mongrel2.new(config.io_threads)
   local conn = ctx:new_connection(config.sender_id, config.sub_addr, config.pub_addr)
+
+  -- Run the BBS engine
   engine.run(conn, m2bbs)
 end
-
