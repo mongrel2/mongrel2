@@ -57,93 +57,106 @@ Mongrel2 достаточно просто распарсить, поэтому 
 
 Mongrel2 поддерживает основные фичи стандартного веб-сервера, такие как выдача
 файлов, перенаправление запросов на другой веб-сервер, обслуживание нескольких
-хостов, кеширование страниц, да и вообще всё, что позволяет нормально общаться с
-браузером. Вы и сами это уже заметили, когда настраивали его. Тем не менее,
-давайте рассмотрим каждый пункт более детально.
+хостов, кеширование страниц; да и вообще всё, что позволяет нормально общаться
+с браузером. Вы и сами могли это заметить во время конфигурирования. Тем не
+менее, давайте рассмотрим каждый пункт в деталях.
 
 \subsection{HTTP}
 
-Mongrel2 uses the original Mongrel parser that powers quite a few other web servers and large,
-successful websites.  This parser is rock solid, dead accurate, and by design blocks a lot of
-security attacks.  For the most part you don't have to worry about this and just need to know
-Mongrel2 is using the same stable HTTP processing that has been working great for many years.
+Mongrel2 использует парсер из первой версии сервера (Mongrel). Он также
+используется в других веб-серверах, которые обслуживают большие и успешные
+сайты. Этот парсер очень надёжен и точен, и сам его дизайн позволяет
+блокировать множество атак. По большому счёту, для того чтобы использовать
+Mongrel2 об этом можно и не беспокоиться; просто знайте, что для обработки
+HTTP-протокола используется код, которые проверен годами эксплуатации.
 
-Another way to put this is if Mongrel2 says your request is invalid, it most definitely is.
+Иными словами, если Mongrel2 говорит, что запрос не валидный --- вероятнее всего
+так и есть.
 
-\begin{aside}{Idiots and RFC Implementers}
-I don't know why, but people who implement RFCs pick up very weird cargo cult
-beliefs peddled by the people who write the standards.  In HTTP it was two things
-which the creators of HTTP have actually back-peddled on:  Accept everything, and
-keep-alives with pipe-lines.
+\begin{aside}{Идиоты и реализаторы спецификаций RFC}
+Не знаю почему, но те, кто реализуют стандарты RFC, придерживаются довольно
+странных и порой ложных убеждений, пропагандируемых теми, кто эти стандарты
+создаёт. Что касается HTTP, создатели этого стандарта облажались по двум
+пунктам: возможность принимить абсолютно всё в качестве ввода и конвейерные
+keep-alive запросы.
 
-The truth is, if you want a secure server of \emph{any} kind, blindly accepting
-every single thing any idiot sends you is going to open your server up to a
-huge number of attacks.  If you look at every attack on existing HTTP servers
-you'll find that about 80\% of them are exploiting ambiguous parts of the HTTP
-grammar to pass through malicious content or overflow buffers.  In Mongrel2 we
-use a parser that rejects invalid requests from first basic principles using
-technology that's 30 years old and backed by solid mathematics.  Not only does
-Mongrel2 reject bad requests, but it can tell you \emph{why} the request was
-bad, just like a compiler.  This doesn't mean Mongrel2 is ruthless, but it
-definitely doesn't tolerate ambiguity or stupidity.
+Если вам нужен надёжный сервер, то тупо принимая \emph{всё}, что посылает
+какой-нибудь идиот, вы подвергаете сервер множеству атак. Если проанализировать
+все атаки на существующие веб-сервера, то окажется, что 80\% используют
+неоднозначности в HTTP-грамматике для передачи вредоносного контента или
+переполнения буферов. Mongrel2 использует парсер, который блокирует некорректные
+запросы на основании базовых принципов, разработанных 30 лет назад и
+подтвержденных математическими выкладками. Он не только фильтрует запросы, но и
+может сказать, \emph{почему} тот или иной запрос невалиден; прям как компилятор.
+Это не значит, что Mongrel2 безжалостен: он просто не терпит неоднозначности и
+тупости.
 
-Mongrel2 completey supports keep-alives because now, since it's not using Ruby
-\emph{at all} it can scale up beyond 1024 file descriptors.  Ruby was limited
-in the number of open files a process could have, so the original Mongrel had
-to break keep-alive and kill connections in order to save itself from greedy
-browsers that never close them.  Mongrel2 doesn't have this limitation, so it
-uses full keep-alives and has a dead accurate state machine to manage them correctly.
+Mongrel2 полностью поддерживает запросы keep-alive, поскольку он не использует
+Руби и не ограничен 1024 файловыми дескрипторами. В Руби существует ограничение
+на количество открытых файлов в одном процессе, поэтому Mongrel был вынужден
+прерывать keep-alive соединения, чтобы спасти себя от жадных браузеров. В
+Mongrel2 нет этого лимита и соединения не страдают; более того, все они
+управляются абсолютно точным конечным автоматом.
 
-Where problems come in is with pipe-lined requests, meaning a browser sends a bunch
-of requests in a big blast, then hangs out for all the responses.  This was such a
-horrible stupid idea that pretty much everone gets it wrong and doesn't support it
-fully, if at all.  The reason is it's much too easy to blast a server with a ton
-of request, wait a bit so they hit proxied backends, and then close the socket.  The
-web server and the backends are now screwed having to handle these requests which will
-go nowhere.
+Проблемы также начинаются тогда, когда клиент шлёт запросы конвейером, т.е.
+посылает кучу запросов одновременно и ждёт ответы на все запросы. Это абсолютно
+глупая идея, в которую многие просто не въезжают и, соответственно, либо вовсе
+не поддерживают в реализации, либо поддерживают кое-как. А проблема в том, что
+очень легко пригрузить сервер если отправить тонну запросов; подождать немного
+пока они достигнут прокси-бэкендов; и тут же отключиться. И веб-сервер и бэкенды
+обречены выполнять бесполезную работу, генерируя ответы, которые по сути уже
+никому не нужны.
 
-Mongrel2 does \emph{not} support pipe-lined requests.  It sends one, and waits for the
-reponse, and if you want more, then tough.  Screw you because it has \emph{no} advantage
-for Mongrel2 and dubious advantages to you.  It is simply one more attack vector for
-the server and is rejected outright.
+Таким образом, Mongrel2 \emph{не поддерживает} конвейерные запросы. Он ожидает
+один запрос и посылает один ответ. Если вам нужно всё и сразу --- идите лесом,
+потому что веб-сервер от этого никоим образом не выигрывает; да и у вас
+сомнительный выигрыш. Это просто ещё один вектор атаки и он сразу же
+блокируется.
 
-These two things are rejected outright by Mongrel2 simply because they are stupid ideas
-and in 2010 nobody should be writing clients so badly that they need these features.
+Итак, описанные выше два пункта, две дурацкие идеи, не реализованы в Mongrel2.
+Очнитесь! На дворе 2010 год и просто недопустимо писать клиентские приложения
+настолько плохо, чтобы возникла потребность в этих никчёмных фичах.
 \end{aside}
 
-\subsection{Proxying}
+\subsection{Прокси}
 
-You've already seen configurations that have the Proxy routes working, so it should
-be easy to understand what's going on.  You just create routes to backends that are
-HTTP servers and Mongrel2 shuttles requests to them, then proxies responses back.
+Вы уже видели как настроить прокси-маршруты, поэтому имеете представление о том,
+что происходит во время проксирования. Вкратце, вы создаёте маршрут, где в
+качестве бэкенда выступает ещё один веб-сервер. Когда поступает запрос, Mongrel2
+просто перенаправляет его в этот сервер и ждёт ответ.
 
-The Proxying support in Mongrel2 is accurate, but it's not very capable right now.  For
-example, there's not round-robin backend selection, or page caching, or other things you
-might need for more serious deployments.  Those features will come eventually, though.
+Mongrel2 поддерживает проксирование на достаточно хорошем, но пока еще
+ограниченном, уровне. Например, нет возможности выбора бэкенда в стиле
+round-robin, нет кэширования страниц и других вещей, полезных в реальных
+сценариях работы веб-сервера. Но все они появятся со временем.
 
-What you do get with Mongrel2's proxying, though, is a dead accurate way of slicing up
-your application by routes.  Other web servers make you go through great pain in order
-to have some URLs go to a proxy and others go to handlers or directories.  They make you
-use odd ``file syntax'', weird pseudo-turing logic if-statements, and other odd hacks
-to get flexible route selection.  They also tend to not maintain keep-alives properly
-between proxy requests and other requests.
+Однако в Mongrel2 прокси-маршрут задаётся так же как и статическая директория
+или обработчик, т.е. соблюдается логичность и однообразие в конфигурационном
+файле. В других веб-серверах всё гораздо сложнее: нужно использовать довольно
+странный синтаксис и кривые if-конструкции, чтобы отделить зёрна от плевел, т.е.
+прокси-маршруты от не-прокси.
 
-Mongrel2 uses the exact same routing syntax for all backends and has no distinction between
-them.  It also properly does keep-alives for as long as it is efficient to do so.
+Mongrel2 использует одинаковый синтаксис для определения любого маршрута, куда
+бы он ни вёл. Он также должным образом держит соединение с прокси-сервером
+столько сколько нужно.
 
-\begin{aside}{Proxying And 0MQ Handlers Are Like mod\_*}
-A quick note for people coming from other web servers.  If you use nginx then you are probably
-familiar with the concept of proxying to a "backend" like Ruby on Rails or Django.
-If you use PHP or another language, you may be used to a system like \ident{mod\_php} which 
-manages your code for you and reloads when you make changes.
-If you use Apache, then you probably think in terms of "virtual hosts" and "mod\_rewrite rules".
+\begin{aside}{Прокси и 0MQ обработчики подобны mod\_*}
+Заметка для тех у кого есть некоторый опыт работы с другими веб-серверами.
 
-In Mongrel2 all the same concepts are there, it's just cleaned up.  If you want Mongrel2
-to "nginx/mod\_rewrite style" talk to another backend web server, then that's Proxying.
-If you want to have fast backend handlers then that's 0MQ Handlers.
+Если вы используете nginx, то, вероятно, знакомы с концепцией проксирования в
+такие ``бэкенды'', как Ruby on Rails и Django. Если есть опыт с Apache, то знаете
+о \ident{mod\_php}, который управляет кодом и автоматически загружает изменения.
+Вы также, скорее всего, знакомы с понятиями ``виртуальный хост'' и
+``mod\_rewrite''.
 
-We really don't have anything like mod\_php because the whole idea of embedding a programming
-language runtime inside Mongrel2 would defeat the point of making it language agnostic.
+Все эти концепции пристуствуют и в Mongrel2, тольков более чистом виде. Если
+хотите, чтобы Mongrel2 общался с другим веб-сервером в стиле
+``nginx/mod\_rewrite'', то создавайте прокси-маршрут. Если в роли бэкенда будут
+написанные вами скрипты --- используйте 0MQ-обработчики.
+
+Однако здесь вы не найдёте чего-либо вроде mod\_php, потому что встраивать среду
+выполнения какого-либо конкретного языка программирования означает разрушить
+парадигму языкового нейтралитета.
 \end{aside}
 
 \subsection{WebSockets}
