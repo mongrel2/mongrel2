@@ -104,7 +104,7 @@ local MAINMENU = {
 
 
 local function m2bbs(conn, req)
-    ui.display(conn, req, 'welcome')
+    ui.screen(conn, req, 'welcome')
 
     -- Have the user log in
     req = ui.prompt(conn, req, 'name')
