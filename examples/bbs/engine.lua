@@ -9,47 +9,46 @@ local STATE = {}
 
 function run(conn, engine)
     while true do
+        -- Get a message from the Mongrel2 server
         local good, request = pcall(conn.recv_json, conn)
 
         if good then
-            local data = request.data
-            local done = false
-            local eng = STATE[request.conn_id]
-            local good
-            local error
+            local msg_type = request.data.type
 
-            if data.type == 'disconnect' then
+            if msg_type == 'disconnect' then
+            -- The client has disconnected
                 print("disconnect", request.conn_id)
-                done = true
-            elseif data.type == 'msg' then
-                if eng then
-                    print "RESUME!"
-                    good, error = coroutine.resume(eng, request)
-                else
-                    print "CREATE"
+                STATE[request.conn_id] = nil
+            elseif msg_type == 'msg' then
+            -- The client has sent data
+                local eng = STATE[request.conn_id]
+
+                -- If the client hasn't sent data before, create a new engine.
+                if not eng then
                     eng = coroutine.create(engine)
-                    good, error = coroutine.resume(eng, conn, request)
+                    STATE[request.conn_id] = eng
+
+                    -- Initialize the engine with the client's connection
+                    coroutine.resume(eng, conn)
                 end
 
-                done = coroutine.status(eng) == "dead"
+                -- Pass the data on to the engine
+                local good, error = coroutine.resume(eng, request)
                 print("status", coroutine.status(eng))
-                if error then
+
+                if not good then
+                -- There was an error
                     print("ERROR", error)
+                    ui.exit(conn, request, 'error')
+                elseif coroutine.status(eng) == "dead" then
+                -- The engine has finished
+                    STATE[request.conn_id] = nil
                 end
             else
                 print("invalid message.")
             end
 
-            print("done", done, "eng", eng)
-
-            if done then
-                if data.type ~= 'disconnect' then
-                    ui.exit(conn, request, 'error')
-                end
-                STATE[request.conn_id] = nil
-            else
-                STATE[request.conn_id] = eng
-            end
+            print("eng", STATE[request.conn_id])
         end
     end
 end

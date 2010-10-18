@@ -51,22 +51,25 @@ local MAINMENU = {
     ['2'] = function(conn, req, user)
         ui.screen(conn, req, 'read_msg')
 
+        if db.message_count() == 0 then
+          ui.display(conn, req, "There are no messages!")
+          return
+        end
+
         for i, msg in messages(db) do
             ui.display(conn, req, ('---- #%d -----'):format(i))
             ui.display(conn, req, msg .. '\n')
 
             if i == 0 then
-                ui.ask(conn, req, "Last message, Enter for MAIN MENU.", '> ')                
+                ui.ask(conn, req, "No more messages; Enter for MAIN MENU.", '> ')                
             else
                 req = ui.ask(conn, req, "Enter, or Q to stop reading.", '> ')
                 if req.data.msg:upper() == 'Q' then
                     ui.display(conn, req, "Done reading.")
-                    return
+                    break
                 end
             end
         end
-
-        ui.display(conn, req, "No more messages.")
     end,
 
     ['3'] = function (conn, req, user)
@@ -103,7 +106,9 @@ local MAINMENU = {
 }
 
 
-local function m2bbs(conn, req)
+local function m2bbs(conn)
+    local req = coroutine.yield() -- Wait for data
+
     ui.screen(conn, req, 'welcome')
 
     -- Have the user log in
