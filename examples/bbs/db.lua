@@ -1,16 +1,14 @@
-local config = require 'config'
 local sidereal = require 'sidereal'
-local table = table
-local ipairs = ipairs
+local table_concat = table.concat
 local print = print
 local assert = assert
 
 module 'db'
 
-local DB, error = assert(sidereal.connect('localhost', 6379))
+local DB = assert(sidereal.connect('localhost', 6379))
 
 local function format_message(user, msg)
-    return 'From: ' .. user .. "\n" .. table.concat(msg, "\n")
+    return ('From: %s\n%s'):format(user, table_concat(msg, "\n"))
 end
 
 function post_message(user, msg)
@@ -39,7 +37,6 @@ function user_exists(user)
 end
 
 function inbox_count(user)
-    print("INBOX:" .. user)
     return DB:llen("INBOX:" .. user)
 end
 
@@ -48,7 +45,6 @@ function read_inbox(user)
 end
 
 function auth_user(user, password)
-    local auth = DB:hget("LOGINS", user)
-    return auth == password
+    return DB:hget("LOGINS", user) == password
 end
 
