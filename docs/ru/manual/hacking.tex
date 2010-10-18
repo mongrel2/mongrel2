@@ -1,59 +1,65 @@
-\chapter{Hacking}
+\chapter{Погружение}
 
-This chapter is all about making cool things with Mongrel2.  It covers all the non-deployment
-features that you get from the browser's side and the handler/backend side of your application.
-I'll show you how the chat demo works for the async web sockets.  I'll get into writing your
-own handlers using a few other demos.  I'll cover some of the interesting things you can
-do with Mongrel2 you can't do with other servers.  Finally, I'll get into practical things,
-when to do proxying and when to use a 0MQ handler.
+Эта глава о том, как делать крутые вещи в Mongrel2. Она посвящена всему, что не
+касается развёртывания и управления сервером. Мы погрузимся в детали его работы
+--- рассмотрим как на самом деле браузер взаимодействует с бэкендами; узнаем как
+демо-чат асинхронно передаёт сообщения через сокеты; напишем свои обработчики. Я
+расскажу чем Mongrel2 кардинально отличается от других веб-серверов.  Ну и,
+наконец, поведаю вам о более практических вещах: когда следует использовать
+обработчики, а когда --- воздержаться от них и просто проксировать запросы.
 
-For the majority of this chapter, I'll be using Python, but the demos should translate to
-the other languages that are implemented.  I'll periodically show how another language
-does one of the demos, so you can get the idea that Mongrel2 is \emph{language agnostic}.
-In no way should you take me using Python in this chapter to mean you can't use something
-else for your handlers.
+Большинство примеров написаны на Питоне, но их легко адаптировать на другие
+языки, поскольку они достаточно просты. Время от времени я буду демонстрировать
+обработчики на других языках. И вы на практике убедитесь в философии
+\emph{языкового нейтралитета}. Примеры на Питоне отнюдь не означают, что
+аналогичное нельзя написать на своём любимом языке программирования.
 
-Currently supported languages are:
+На данный момент вы можете писать бэкенды на следующих языках:
 
 \begin{description}
-\item [Python] When you installed the \shell{m2sh} gear, you also got a \ident{mongrel2} Python library.
-\item [Ruby] Probably the most extensively supported language, with good Rack support, by \href{http://github.com/perplexes/m2r}{perplexes on github}.
-\item [C++] C++ support by \href{http://github.com/akrennmair/mongrel2-cpp}{akrennmair on github}.
-\item [PHP] PHP support by \href{http://github.com/winks/m2php}{winks on github}.
-\item [C] You can also write handlers in C using the Mongrel2 library, but it's really rough, and not recommended yet.  A C library will come, though.
-\item [Others?] \href{http://zeromq.org}{ZeroMQ} supports Ada, Basic, C, C++, Common Lisp, Erlang, Go, Haskell, Java, Lua, .NET, Objective-C, ooc, Perl, PHP, Python, and Ruby, so after reading this chapter you can easily write handlers in any of those languages too.
+\item [Питон] Необходимые файлы включены в проект и лежат в \file{examples/python}.
+\item [Руби] Спасибо \href{http://github.com/perplexes/m2r}{perplexes}. Поддерживает Rack.
+\item [C++] Спасибо \href{http://github.com/akrennmair/mongrel2-cpp}{akrennmair}.
+\item [PHP] Спасибо \href{http://github.com/winks/m2php}{winks}.
+\item[Си] Вы, конечно, можете писать обработчики на Си, но это --- жесть; и
+пока не рекомендуется. Библиотека для Си будет позже.
+\item[Другие?] \href{http://zeromq.org}{ZeroMQ} поддерживает следующие языки:
+Ada, Basic, C, C++, Common Lisp, Erlang, Go, Haskell, Java, Lua, .NET,
+Objective-C, ooc, Perl, PHP, Python, и Ruby. Так что после прочтения этой главы
+можете написать библиотеку на своём любимом языке.
 \end{description}
 
-However, no matter how many languages Mongrel2 supports, you will still have applications that
-can't fit into 0MQ handlers and just work better as classic web apps, either because you've
-already written them and have existing infrastructure, or because of some architectural issues
-that require it to run traditionally.  Because of that, Mongrel2 supports \emph{HTTP proxying},
-which allows you to route requests to basic web server backends that don't support 0MQ.
+Несмотря на этот достаточно длинный список языков программирования, есть и будут
+приложения, которые не совместимы с 0MQ-обработчиками. Например, уже написанные
+скрипты, которые экономически нецелесообразно переписывать заново. Или же
+скрипты, которые ввиду тех или иных архитектурных особенностей удобней запускать
+как классические веб-приложения. Для поддержки таких скриптов в Mongrel2
+встроено \emph{http-проксирование}. 
 
-\begin{aside}{What About FastCGI/AJP/CGI/SCGI/WSGI/Rack?}
-Nothing prevents you from writing your own connector between Mongrel2 and your
-deployment protocol of choice.  If you need to run FastCGI or AJP in your environment,
-then your best bet is to just make a handler that translates Mongrel2 requests
-to the protocol you need and back.  The Mongrel2 format is very easy to parse and
-translate, so you should be able to do it with no problem.  The Ruby library already supports
-Rack as an example, and Python will support WSGI soon.
+\begin{aside}{Как насчёт FastCGI/AJP/CGI/SCGI/WSGI/Rack?}
+Ничто не мешает написать свой коннектор между Mongrel2 и протоколом, который
+поддерживает ваш фреймворк. Если приложение, например, работает посредством
+FastCGI или AJP, нужно написать небольшой обработчик, который бы транслировал
+запросы от Mongrel2 в понятный вашему протоколу формат и наоборот. Сообщения
+Mongrel2 достаточно просто распарсить, поэтому написание такого обработчика не
+должно составить много труда. На данный момент есть поддержка Rack для
+приложений на Руби; для Питона скоро появится поддержка WSGI.
 
-However, Mongrel2 itself doesn't support any of these directly.  Doing so would bring
-back the language specific infections that cause other web servers to go south.  The
-design of most of these protocols tends to be either before the modern web, or specific
-to one particular language.  Instead of trying to cater to all the possible languages
-out there, Mongrel2 just gives the tools to connect to it yourself.
+Однако стоит заметить, что Mongrel2 непосредственно не поддерживает ни один из
+перечисленных протоколов. Такая поддержка означала бы привязанность к тому или
+иному языку, что противоречит философии проекта в целом. Вместо этого Mongrel2
+предоставляет возможность для реализации \emph{любого} протокола и поддержки
+\emph{любого} языка.
 \end{aside}
 
 
-\section{Front-end Goodies}
+\section{Фронтенд}
 
-Mongrel2 supports your standard web server features like serving files, routing requests to
-another HTTP server, multiple host matching, good 304 support, and just generally being able
-to interact with a browser like normal.  You've seen most of these features as you setup and
-deployed a Mongrel2 configuration, but let's go through some of them in more detail so you
-know what's possible.
-
+Mongrel2 поддерживает основные фичи стандартного веб-сервера, такие как выдача
+файлов, перенаправление запросов на другой веб-сервер, обслуживание нескольких
+хостов, кеширование страниц, да и вообще всё, что позволяет нормально общаться с
+браузером. Вы и сами это уже заметили, когда настраивали его. Тем не менее,
+давайте рассмотрим каждый пункт более детально.
 
 \subsection{HTTP}
 
