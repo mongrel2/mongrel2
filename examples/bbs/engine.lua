@@ -36,13 +36,14 @@ function run(conn, engine)
                 local good, error = coroutine.resume(eng, request)
                 print("status", coroutine.status(eng))
 
-                if not good then
-                -- There was an error
-                    print("ERROR", error)
-                    ui.exit(conn, request, 'error')
-                elseif coroutine.status(eng) == "dead" then
-                -- The engine has finished
+                -- If the engine is done, stop tracking the client
+                if coroutine.status(eng) == "dead" then
                     STATE[request.conn_id] = nil
+                    if not good then
+                    -- There was an error
+                        print("ERROR", error)
+                        ui.exit(conn, request, 'error')
+                    end
                 end
             else
                 print("invalid message.")
