@@ -2,6 +2,7 @@ local print = print
 local pcall = pcall
 local coroutine = coroutine
 local ui = require 'ui'
+local db = require 'db'
 
 module 'engine'
 
@@ -43,6 +44,11 @@ function run(conn, engine)
                     -- There was an error
                         print("ERROR", error)
                         ui.exit(conn, request, 'error')
+                        local status, error = db.reconnect()
+
+                        if error then
+                            print("FAILED RECONNECT", error)
+                        end
                     end
                 end
             else

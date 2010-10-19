@@ -1,3 +1,4 @@
+local strict = require 'strict'
 local sidereal = require 'sidereal'
 local table_concat = table.concat
 local print = print
@@ -6,6 +7,10 @@ local assert = assert
 module 'db'
 
 local DB = assert(sidereal.connect('localhost', 6379))
+
+function reconnect()
+    return sidereal.connect('localhost', 6379)
+end
 
 local function format_message(user, msg)
     return ('From: %s\n%s'):format(user, table_concat(msg, "\n"))
@@ -33,7 +38,7 @@ function register_user(user, password)
 end
 
 function user_exists(user)
-    return DB:hexists("LOGINS", user) == 1
+    return DB:hexists("LOGINS", user)
 end
 
 function inbox_count(user)

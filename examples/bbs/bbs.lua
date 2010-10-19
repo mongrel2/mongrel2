@@ -37,7 +37,25 @@ local function message_iterator(db, i)
 end
 
 local function messages(db)
-    return message_iterator, db, db.message_count()
+    local count = assert(db.message_count())
+    return message_iterator, db, count
+end
+
+local function list_all_messages(conn, req)
+    for i, msg in messages(db) do
+        ui.display(conn, req, ('---- #%d -----'):format(i))
+        ui.display(conn, req, msg .. '\n')
+
+        if i == 0 then
+            ui.ask(conn, req, "No more messages; Enter for MAIN MENU.", '> ')                
+        else
+            req = ui.ask(conn, req, "Enter, or Q to stop reading.", '> ')
+            if req.data.msg:upper() == 'Q' then
+                ui.display(conn, req, "Done reading.")
+                break
+            end
+        end
+    end
 end
 
 local MAINMENU = {
@@ -51,33 +69,21 @@ local MAINMENU = {
 
     ['2'] = function(conn, req, user)
         ui.screen(conn, req, 'read_msg')
+        local count = assert(db.message_count())
 
-        if db.message_count() == 0 then
+        if count == 0 then
           ui.display(conn, req, "There are no messages!")
-          return
-        end
-
-        for i, msg in messages(db) do
-            ui.display(conn, req, ('---- #%d -----'):format(i))
-            ui.display(conn, req, msg .. '\n')
-
-            if i == 0 then
-                ui.ask(conn, req, "No more messages; Enter for MAIN MENU.", '> ')                
-            else
-                req = ui.ask(conn, req, "Enter, or Q to stop reading.", '> ')
-                if req.data.msg:upper() == 'Q' then
-                    ui.display(conn, req, "Done reading.")
-                    break
-                end
-            end
+        else
+            list_all_messages(conn, req)
         end
     end,
 
     ['3'] = function (conn, req, user)
         req = ui.ask(conn, req, 'Who do you want to send it to?', '> ')
         local to = req.data.msg
+        local exists = assert(db.user_exists(to))
 
-        if db.user_exists(to) then
+        if exists then
             local msg = read_long_message(conn, req, user)
             db.send_to(to, user, msg)
 
@@ -88,13 +94,16 @@ local MAINMENU = {
     end,
 
     ['4'] = function(conn, req, user)
-        if db.inbox_count(user) == 0 then
+        local count = assert(db.inbox_count(user))
+
+        if count == 0 then
             ui.display(conn, req, 'No messages for you. Try back later.')
             return
         end
 
         while db.inbox_count(user) > 0 do
-            local msg = db.read_inbox(user)
+            local msg = assert(db.read_inbox(user))
+
             ui.display(conn, req, msg)
             ui.ask(conn, req, "Enter to continue.", '> ')
         end
@@ -121,7 +130,13 @@ local function m2bbs(conn)
 
     print('login attempt', user, password)
 
-    if not db.user_exists(user) then
+    local exists, error = db.user_exists(user)
+
+    if error then
+        print("ERROR:", error)
+        ui.display(conn, req, 'We had an error, sorry. Try again.')
+        return
+    elseif not exists then
         new_user(conn, req, user, password)
     elseif not db.auth_user(user, password) then
         ui.exit(conn, req, 'bad_pass')
