@@ -16,10 +16,13 @@ body {
 
 #screen {
     overflow: auto;
-    height: 700px;
 }
 
 #terminal {
+    white-space: -moz-pre-wrap; /* Mozilla, supported since 1999 */
+    white-space: -pre-wrap; /* Opera 4 - 6 */
+    white-space: -o-pre-wrap; /* Opera 7 */
+    white-space: pre-wrap;
 }
 
 #prompt {
