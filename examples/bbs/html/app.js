@@ -32,13 +32,13 @@ function handlekeys(field, state, e)
 
 function display(text) {
     var div = document.createElement("div");
-    div.innerHTML = text;
+    div.innerHTML = escapeHTML(text);
     var cl = document.getElementById("terminal");
     cl.appendChild(div);
     div.scrollIntoView();
 }
 
-function change_prompt(new_prompt) {
+function change_prompt() {
     var p = document.getElementById("prompt")
     p.scrollIntoView();
     p.focus();
@@ -47,15 +47,15 @@ function change_prompt(new_prompt) {
 
 
 function clear_prompt() {
-    change_prompt("");
+    change_prompt();
     var prompt = document.getElementById("prompt");
     prompt.value = "";
 }
 
-function prompt(text, pchar) {
+function prompt(text) {
     clear_prompt();
-    display(text);
-    change_prompt(pchar);
+    display(escapeHTML(text));
+    change_prompt();
 }
 
 
@@ -77,8 +77,8 @@ state = new FSM({
 
     connected: {
         PROMPT: function(fsm, event) {
-            prompt(event.msg, event.pchar);
-            fsm.last_pchar = event.pchar;
+            prompt(event.msg);
+            fsm.last_pchar = escapeHTML(event.pchar);
         },
 
         EXIT: function(fsm, event) {
