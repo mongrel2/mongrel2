@@ -35,6 +35,7 @@ local function message_iterator(db, i)
         return i-1, db.message_read(i-1)
     end
 end
+
 local function messages(db)
     return message_iterator, db, db.message_count()
 end
@@ -151,7 +152,7 @@ do
 
   -- Connect to the Mongrel2 server
   print("connecting", config.sender_id, config.sub_addr, config.pub_addr)
-  
+
   local ctx = mongrel2.new(config.io_threads)
   local conn = ctx:new_connection(config.sender_id, config.sub_addr, config.pub_addr)
 

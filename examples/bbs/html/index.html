@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+    <head>
+		<title>M2BBS</title>
+        <link rel="stylesheet" href="reset.css" />
+        <link rel="stylesheet" href="text.css" />
+        <link rel="stylesheet" href="site.css" />
+
+		<script src="js/jsonStringify.js" type="text/javascript"></script>
+		<script src="js/jsSocket.js" type="text/javascript"></script>
+		<script src="bbs.js" type="text/javascript"></script>
+		<script src="fsm.js" type="text/javascript"></script>
+        <script src="app.js" type="text/javascript"></script>
+        <SCRIPT TYPE="text/javascript">
+        </SCRIPT>
+
+	</head>
+
+    <body>
+        <div id="screen">
+            <pre id="terminal">
+            </pre>
+
+            <form>
+                <input type="text" id="prompt" onKeyPress="return handlekeys(this, state, event);" />
+            </form>
+        </div>
+    </body>
+
+    <script type="text/javascript">
+        window.onload = function() {
+            state.start('loading');
+        }
+    </script>
+</html>

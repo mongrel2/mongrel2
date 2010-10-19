@@ -1,0 +1,32 @@
+/* nothing */
+
+* {
+    color: #00ff00;
+    background-color: black;
+}
+
+body {
+    color: #00ff00;
+    font-size: 1em;
+    background-color: black;
+    margin-left: 3px;
+    margin-right: 3px;
+    overflow: hidden;
+}
+
+#screen {
+    overflow: auto;
+    height: 700px;
+}
+
+#terminal {
+}
+
+#prompt {
+    width: 100%;
+    border-style: none;
+    background-color: #00ff00;
+    color: black;
+}
+
+
