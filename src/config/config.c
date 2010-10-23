@@ -322,15 +322,22 @@ error:
 
 Server *Config_load_server(const char *uuid)
 {
-    Config_load_handlers();
-    Config_load_proxies();
-    Config_load_dirs();
+    int rc = 0;
+
+    rc = Config_load_handlers();
+    check(rc == 0, "You have an error in your handlers, aborting startup.");
+
+    rc = Config_load_proxies();
+    check(rc == 0, "You have an error in your proxies, aborting startup.");
+
+    rc = Config_load_dirs();
+    check(rc == 0, "You have an error in your directories, aborting startup.");
 
     const char *SERVER_QUERY = "SELECT id, uuid, default_host, bind_addr, port, chroot, access_log, error_log, pid_file FROM server WHERE uuid=%Q";
     char *query = SQL(SERVER_QUERY, uuid);
 
     Server *server = NULL;
-    int rc = DB_exec(query, Config_load_server_cb, &server);
+    rc = DB_exec(query, Config_load_server_cb, &server);
     check(rc == 0, "Failed to select server with uuid %s", uuid);
 
     SQL_FREE(query);
