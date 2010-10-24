@@ -40,8 +40,6 @@ class Request(object):
             return self.data['type'] == 'disconnect'
 
     def should_close(self):
-        # TODO: hmm, these headers need to be normalized or we need a new
-        # data structure for it so we can do case-insensitive handling
         if self.headers.get('connection') == 'close':
             return True
         elif self.headers.get('VERSION') == 'HTTP/1.0':
