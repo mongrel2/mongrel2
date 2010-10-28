@@ -25,7 +25,9 @@ technologies.</p>
 <h2><a name="features">Features</a></h2>
 
 <ul>
-    <li><b>Language Agnostic</b> with a simple backend protocol supporting <a href="http://github.com/perplexes/m2r">Ruby</a>,
+    <li><b>Language Agnostic</b> with a simple backend protocol supporting 
+    <a href="http://github.com/perplexes/m2r">Ruby</a>,
+    <a href="http://github.com/darkhelmet/rack-mongrel2">Ruby through Rack</a>,
     <a href="http://github.com/berry/Mongrel2-WSGI-Handler">Python</a>,
     <a href="http://github.com/akrennmair/mongrel2-cpp">C++</a>,
     <a href="http://github.com/winks/m2php">PHP</a>,
