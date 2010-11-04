@@ -75,100 +75,6 @@ static int CONTROL_RUNNING = 1;
 
 
 #line 78 "control.c"
-static const char _ControlParser_actions[] = {
-	0, 1, 1, 1, 2, 1, 3, 1, 
-	4, 1, 5, 1, 6, 1, 7, 1, 
-	8, 1, 9, 2, 0, 5
-};
-
-static const char _ControlParser_key_offsets[] = {
-	0, 0, 6, 7, 8, 9, 10, 11, 
-	12, 13, 14, 15, 16, 17, 18, 19, 
-	20, 21, 22, 23, 26, 31, 32, 33, 
-	34, 35, 36, 37, 39, 40, 41, 42, 
-	45, 50, 51, 52, 53, 54, 55, 56, 
-	57, 59, 60, 61, 62, 63, 64, 65, 
-	66, 67, 68, 68
-};
-
-static const char _ControlParser_trans_keys[] = {
-	99, 104, 107, 114, 115, 116, 111, 110, 
-	116, 114, 111, 108, 32, 115, 116, 111, 
-	112, 101, 108, 112, 105, 108, 108, 32, 
-	9, 13, 32, 9, 13, 48, 57, 101, 
-	108, 111, 97, 100, 116, 97, 111, 116, 
-	117, 115, 32, 9, 13, 32, 110, 116, 
-	9, 13, 101, 116, 97, 115, 107, 115, 
-	112, 101, 105, 114, 109, 105, 110, 97, 
-	116, 101, 109, 101, 48, 57, 0
-};
-
-static const char _ControlParser_single_lengths[] = {
-	0, 6, 1, 1, 1, 1, 1, 1, 
-	1, 1, 1, 1, 1, 1, 1, 1, 
-	1, 1, 1, 1, 1, 1, 1, 1, 
-	1, 1, 1, 2, 1, 1, 1, 1, 
-	3, 1, 1, 1, 1, 1, 1, 1, 
-	2, 1, 1, 1, 1, 1, 1, 1, 
-	1, 1, 0, 0
-};
-
-static const char _ControlParser_range_lengths[] = {
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 1, 2, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 1, 
-	1, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 1
-};
-
-static const unsigned char _ControlParser_index_offsets[] = {
-	0, 0, 7, 9, 11, 13, 15, 17, 
-	19, 21, 23, 25, 27, 29, 31, 33, 
-	35, 37, 39, 41, 44, 48, 50, 52, 
-	54, 56, 58, 60, 63, 65, 67, 69, 
-	72, 77, 79, 81, 83, 85, 87, 89, 
-	91, 94, 96, 98, 100, 102, 104, 106, 
-	108, 110, 112, 113
-};
-
-static const char _ControlParser_trans_targs[] = {
-	2, 13, 16, 21, 26, 40, 0, 3, 
-	0, 4, 0, 5, 0, 6, 0, 7, 
-	0, 8, 0, 9, 0, 10, 0, 11, 
-	0, 12, 0, 50, 0, 14, 0, 15, 
-	0, 50, 0, 17, 0, 18, 0, 19, 
-	0, 20, 20, 0, 20, 20, 51, 0, 
-	22, 0, 23, 0, 24, 0, 25, 0, 
-	50, 0, 27, 0, 28, 39, 0, 29, 
-	0, 30, 0, 31, 0, 32, 32, 0, 
-	32, 33, 35, 32, 0, 34, 0, 50, 
-	0, 36, 0, 37, 0, 38, 0, 50, 
-	0, 50, 0, 41, 48, 0, 42, 0, 
-	43, 0, 44, 0, 45, 0, 46, 0, 
-	47, 0, 50, 0, 49, 0, 50, 0, 
-	0, 51, 0, 0
-};
-
-static const char _ControlParser_trans_actions[] = {
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 5, 0, 0, 0, 0, 
-	0, 17, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 19, 0, 
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	11, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 3, 
-	0, 0, 0, 0, 0, 0, 0, 1, 
-	0, 13, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 15, 0, 0, 0, 7, 0, 
-	0, 9, 0, 0
-};
-
 static const int ControlParser_start = 1;
 static const int ControlParser_first_final = 50;
 static const int ControlParser_error = 0;
@@ -189,110 +95,236 @@ bstring Control_execute(bstring req)
     debug("RECEIVED CONTROL COMMAND: %s", bdata(req));
 
     
-#line 193 "control.c"
+#line 99 "control.c"
 	{
 	cs = ControlParser_start;
 	}
 
 #line 179 "control.rl"
     
-#line 200 "control.c"
+#line 106 "control.c"
 	{
-	int _klen;
-	unsigned int _trans;
-	const char *_acts;
-	unsigned int _nacts;
-	const char *_keys;
-
-	if ( cs == 0 )
-		goto _out;
-_resume:
-	_keys = _ControlParser_trans_keys + _ControlParser_key_offsets[cs];
-	_trans = _ControlParser_index_offsets[cs];
-
-	_klen = _ControlParser_single_lengths[cs];
-	if ( _klen > 0 ) {
-		const char *_lower = _keys;
-		const char *_mid;
-		const char *_upper = _keys + _klen - 1;
-		while (1) {
-			if ( _upper < _lower )
-				break;
-
-			_mid = _lower + ((_upper-_lower) >> 1);
-			if ( (*p) < *_mid )
-				_upper = _mid - 1;
-			else if ( (*p) > *_mid )
-				_lower = _mid + 1;
-			else {
-				_trans += (_mid - _keys);
-				goto _match;
-			}
-		}
-		_keys += _klen;
-		_trans += _klen;
-	}
-
-	_klen = _ControlParser_range_lengths[cs];
-	if ( _klen > 0 ) {
-		const char *_lower = _keys;
-		const char *_mid;
-		const char *_upper = _keys + (_klen<<1) - 2;
-		while (1) {
-			if ( _upper < _lower )
-				break;
-
-			_mid = _lower + (((_upper-_lower) >> 1) & ~1);
-			if ( (*p) < _mid[0] )
-				_upper = _mid - 2;
-			else if ( (*p) > _mid[1] )
-				_lower = _mid + 2;
-			else {
-				_trans += ((_mid - _keys)>>1);
-				goto _match;
-			}
-		}
-		_trans += _klen;
-	}
-
-_match:
-	cs = _ControlParser_trans_targs[_trans];
-
-	if ( _ControlParser_trans_actions[_trans] == 0 )
-		goto _again;
-
-	_acts = _ControlParser_actions + _ControlParser_trans_actions[_trans];
-	_nacts = (unsigned int) *_acts++;
-	while ( _nacts-- > 0 )
+	switch ( cs )
 	{
-		switch ( *_acts++ )
-		{
-	case 0:
-#line 73 "control.rl"
-	{ mark = p; }
-	break;
-	case 1:
-#line 75 "control.rl"
-	{ reply = taskgetinfo(); {p++; goto _out; } }
-	break;
-	case 2:
-#line 76 "control.rl"
-	{ reply = Register_info(); {p++; goto _out; } }
-	break;
-	case 3:
+case 1:
+	switch( (*p) ) {
+		case 99: goto st2;
+		case 104: goto st13;
+		case 107: goto st16;
+		case 114: goto st21;
+		case 115: goto st26;
+		case 116: goto st40;
+	}
+	goto st0;
+st0:
+cs = 0;
+	goto _out;
+st2:
+	p += 1;
+case 2:
+	if ( (*p) == 111 )
+		goto st3;
+	goto st0;
+st3:
+	p += 1;
+case 3:
+	if ( (*p) == 110 )
+		goto st4;
+	goto st0;
+st4:
+	p += 1;
+case 4:
+	if ( (*p) == 116 )
+		goto st5;
+	goto st0;
+st5:
+	p += 1;
+case 5:
+	if ( (*p) == 114 )
+		goto st6;
+	goto st0;
+st6:
+	p += 1;
+case 6:
+	if ( (*p) == 111 )
+		goto st7;
+	goto st0;
+st7:
+	p += 1;
+case 7:
+	if ( (*p) == 108 )
+		goto st8;
+	goto st0;
+st8:
+	p += 1;
+case 8:
+	if ( (*p) == 32 )
+		goto st9;
+	goto st0;
+st9:
+	p += 1;
+case 9:
+	if ( (*p) == 115 )
+		goto st10;
+	goto st0;
+st10:
+	p += 1;
+case 10:
+	if ( (*p) == 116 )
+		goto st11;
+	goto st0;
+st11:
+	p += 1;
+case 11:
+	if ( (*p) == 111 )
+		goto st12;
+	goto st0;
+st12:
+	p += 1;
+case 12:
+	if ( (*p) == 112 )
+		goto tr17;
+	goto st0;
+tr17:
 #line 78 "control.rl"
 	{
         reply = bfromcstr("{\"msg\": \"stopping control port\"}");
-        CONTROL_RUNNING = 0; {p++; goto _out; }
+        CONTROL_RUNNING = 0; {p++; cs = 50; goto _out;}
     }
-	break;
-	case 4:
+	goto st50;
+tr20:
+#line 140 "control.rl"
+	{
+        reply = bfromcstr("{\"command_list\":[");
+        bcatcstr(reply, "{\"name\": \"control stop\", \"description\": \"Close the control port.\"},\n");
+        bcatcstr(reply, "{\"name\": \"kill <id>\", \"description\": \"Kill a connection in a violent way.\"},\n");
+        bcatcstr(reply, "{\"name\": \"reload\", \"description\": \"Reload the server. Same as `kill -SIGHUP <server_pid>`.\"},\n");
+        bcatcstr(reply, "{\"name\": \"status net\", \"description\": \"Return a list of active connections.\"},\n");
+        bcatcstr(reply, "{\"name\": \"status tasks\", \"description\": \"Return a list of active tasks.\"},\n");
+        bcatcstr(reply, "{\"name\": \"stop\", \"description\": \"Gracefully shut down the server. Same as `kill -SIGINT <server_pid>`.\"},\n");
+        bcatcstr(reply, "{\"name\": \"terminate\", \"description\": \"Unconditionally terminate the server. Same as `kill -SIGTERM <server_pid>.\"},\n");
+        bcatcstr(reply, "{\"name\": \"time\", \"description\": \"Return server timestamp.\"}\n");
+        bcatcstr(reply, "]}\n");
+        {p++; cs = 50; goto _out;}
+    }
+	goto st50;
+tr30:
+#line 106 "control.rl"
+	{
+        int rc = raise(SIGHUP);
+        if (0 == rc) {
+            reply = bfromcstr("{\"msg\": \"the server will be reloaded\"}");
+        } else {
+            reply = bfromcstr("{\"error\": \"failed to reload the server\"}");
+        }
+        {p++; cs = 50; goto _out;}
+    }
+	goto st50;
+tr41:
+#line 76 "control.rl"
+	{ reply = Register_info(); {p++; cs = 50; goto _out;} }
+	goto st50;
+tr45:
+#line 75 "control.rl"
+	{ reply = taskgetinfo(); {p++; cs = 50; goto _out;} }
+	goto st50;
+tr46:
+#line 116 "control.rl"
+	{
+        // TODO: probably report back the number of waiting tasks
+        int rc = raise(SIGINT);
+        if (0 == rc) {
+            reply = bfromcstr("{\"msg\": \"the server will be stopped\"}");
+        } else {
+            reply = bfromcstr("{\"error\": \"failed to stop the server\"}");
+        }
+        {p++; cs = 50; goto _out;}
+    }
+	goto st50;
+tr55:
+#line 127 "control.rl"
+	{
+        // TODO: the server might have been terminated before
+        // the reply is sent back. If this scenario is crucial (if possible at all)
+        // find a workaround, otherwise, forget about it and remove this comment.
+        int rc = raise(SIGTERM);
+        if (0 == rc) {
+            reply = bfromcstr("{\"msg\": \"the server will be terminated\"}");
+        } else {
+            reply = bfromcstr("{\"error\": \"failed to terminate the server\"}");
+        }
+        {p++; cs = 50; goto _out;}
+    }
+	goto st50;
+tr57:
 #line 83 "control.rl"
 	{
-        reply = bformat("{\"time\": %d}", (int)time(NULL)); {p++; goto _out; }
+        reply = bformat("{\"time\": %d}", (int)time(NULL)); {p++; cs = 50; goto _out;}
     }
-	break;
-	case 5:
+	goto st50;
+st50:
+	p += 1;
+case 50:
+#line 269 "control.c"
+	goto st0;
+st13:
+	p += 1;
+case 13:
+	if ( (*p) == 101 )
+		goto st14;
+	goto st0;
+st14:
+	p += 1;
+case 14:
+	if ( (*p) == 108 )
+		goto st15;
+	goto st0;
+st15:
+	p += 1;
+case 15:
+	if ( (*p) == 112 )
+		goto tr20;
+	goto st0;
+st16:
+	p += 1;
+case 16:
+	if ( (*p) == 105 )
+		goto st17;
+	goto st0;
+st17:
+	p += 1;
+case 17:
+	if ( (*p) == 108 )
+		goto st18;
+	goto st0;
+st18:
+	p += 1;
+case 18:
+	if ( (*p) == 108 )
+		goto st19;
+	goto st0;
+st19:
+	p += 1;
+case 19:
+	if ( (*p) == 32 )
+		goto st20;
+	if ( 9 <= (*p) && (*p) <= 13 )
+		goto st20;
+	goto st0;
+st20:
+	p += 1;
+case 20:
+	if ( (*p) == 32 )
+		goto st20;
+	if ( (*p) > 13 ) {
+		if ( 48 <= (*p) && (*p) <= 57 )
+			goto tr25;
+	} else if ( (*p) >= 9 )
+		goto st20;
+	goto st0;
+tr25:
+#line 73 "control.rl"
+	{ mark = p; }
 #line 87 "control.rl"
 	{
         int id = atoi(p);
@@ -310,74 +342,224 @@ _match:
             }
         }
 
-        {p++; goto _out; }
+        {p++; cs = 51; goto _out;}
     }
-	break;
-	case 6:
-#line 106 "control.rl"
+	goto st51;
+tr58:
+#line 87 "control.rl"
 	{
-        int rc = raise(SIGHUP);
-        if (0 == rc) {
-            reply = bfromcstr("{\"msg\": \"the server will be reloaded\"}");
+        int id = atoi(p);
+
+        if(id < 0 || id > MAX_REGISTERED_FDS) {
+            reply = bformat("{\"error\": \"invalid id: %d\"}", id);
         } else {
-            reply = bfromcstr("{\"error\": \"failed to reload the server\"}");
+            int fd = Register_fd_for_id(id);
+
+            if(fd >= 0) {
+                fdclose(fd);
+                reply = bformat("{\"result\": \"killed %d\"}", id);
+            } else {
+                reply = bformat("{\"error\": \"does not exist: %d\"}", id);
+            }
         }
-        {p++; goto _out; }
+
+        {p++; cs = 51; goto _out;}
     }
-	break;
-	case 7:
-#line 116 "control.rl"
-	{
-        // TODO: probably report back the number of waiting tasks
-        int rc = raise(SIGINT);
-        if (0 == rc) {
-            reply = bfromcstr("{\"msg\": \"the server will be stopped\"}");
-        } else {
-            reply = bfromcstr("{\"error\": \"failed to stop the server\"}");
-        }
-        {p++; goto _out; }
-    }
-	break;
-	case 8:
-#line 127 "control.rl"
-	{
-        // TODO: the server might have been terminated before
-        // the reply is sent back. If this scenario is crucial (if possible at all)
-        // find a workaround, otherwise, forget about it and remove this comment.
-        int rc = raise(SIGTERM);
-        if (0 == rc) {
-            reply = bfromcstr("{\"msg\": \"the server will be terminated\"}");
-        } else {
-            reply = bfromcstr("{\"error\": \"failed to terminate the server\"}");
-        }
-        {p++; goto _out; }
-    }
-	break;
-	case 9:
-#line 140 "control.rl"
-	{
-        reply = bfromcstr("{\"command_list\":[");
-        bcatcstr(reply, "{\"name\": \"control stop\", \"description\": \"Close the control port.\"},\n");
-        bcatcstr(reply, "{\"name\": \"kill <id>\", \"description\": \"Kill a connection in a violent way.\"},\n");
-        bcatcstr(reply, "{\"name\": \"reload\", \"description\": \"Reload the server. Same as `kill -SIGHUP <server_pid>`.\"},\n");
-        bcatcstr(reply, "{\"name\": \"status net\", \"description\": \"Return a list of active connections.\"},\n");
-        bcatcstr(reply, "{\"name\": \"status tasks\", \"description\": \"Return a list of active tasks.\"},\n");
-        bcatcstr(reply, "{\"name\": \"stop\", \"description\": \"Gracefully shut down the server. Same as `kill -SIGINT <server_pid>`.\"},\n");
-        bcatcstr(reply, "{\"name\": \"terminate\", \"description\": \"Unconditionally terminate the server. Same as `kill -SIGTERM <server_pid>.\"},\n");
-        bcatcstr(reply, "{\"name\": \"time\", \"description\": \"Return server timestamp.\"}\n");
-        bcatcstr(reply, "]}\n");
-        {p++; goto _out; }
-    }
-	break;
+	goto st51;
+st51:
+	p += 1;
+case 51:
 #line 373 "control.c"
-		}
+	if ( 48 <= (*p) && (*p) <= 57 )
+		goto tr58;
+	goto st0;
+st21:
+	p += 1;
+case 21:
+	if ( (*p) == 101 )
+		goto st22;
+	goto st0;
+st22:
+	p += 1;
+case 22:
+	if ( (*p) == 108 )
+		goto st23;
+	goto st0;
+st23:
+	p += 1;
+case 23:
+	if ( (*p) == 111 )
+		goto st24;
+	goto st0;
+st24:
+	p += 1;
+case 24:
+	if ( (*p) == 97 )
+		goto st25;
+	goto st0;
+st25:
+	p += 1;
+case 25:
+	if ( (*p) == 100 )
+		goto tr30;
+	goto st0;
+st26:
+	p += 1;
+case 26:
+	if ( (*p) == 116 )
+		goto st27;
+	goto st0;
+st27:
+	p += 1;
+case 27:
+	switch( (*p) ) {
+		case 97: goto st28;
+		case 111: goto st39;
+	}
+	goto st0;
+st28:
+	p += 1;
+case 28:
+	if ( (*p) == 116 )
+		goto st29;
+	goto st0;
+st29:
+	p += 1;
+case 29:
+	if ( (*p) == 117 )
+		goto st30;
+	goto st0;
+st30:
+	p += 1;
+case 30:
+	if ( (*p) == 115 )
+		goto st31;
+	goto st0;
+st31:
+	p += 1;
+case 31:
+	if ( (*p) == 32 )
+		goto st32;
+	if ( 9 <= (*p) && (*p) <= 13 )
+		goto st32;
+	goto st0;
+st32:
+	p += 1;
+case 32:
+	switch( (*p) ) {
+		case 32: goto st32;
+		case 110: goto st33;
+		case 116: goto st35;
+	}
+	if ( 9 <= (*p) && (*p) <= 13 )
+		goto st32;
+	goto st0;
+st33:
+	p += 1;
+case 33:
+	if ( (*p) == 101 )
+		goto st34;
+	goto st0;
+st34:
+	p += 1;
+case 34:
+	if ( (*p) == 116 )
+		goto tr41;
+	goto st0;
+st35:
+	p += 1;
+case 35:
+	if ( (*p) == 97 )
+		goto st36;
+	goto st0;
+st36:
+	p += 1;
+case 36:
+	if ( (*p) == 115 )
+		goto st37;
+	goto st0;
+st37:
+	p += 1;
+case 37:
+	if ( (*p) == 107 )
+		goto st38;
+	goto st0;
+st38:
+	p += 1;
+case 38:
+	if ( (*p) == 115 )
+		goto tr45;
+	goto st0;
+st39:
+	p += 1;
+case 39:
+	if ( (*p) == 112 )
+		goto tr46;
+	goto st0;
+st40:
+	p += 1;
+case 40:
+	switch( (*p) ) {
+		case 101: goto st41;
+		case 105: goto st48;
+	}
+	goto st0;
+st41:
+	p += 1;
+case 41:
+	if ( (*p) == 114 )
+		goto st42;
+	goto st0;
+st42:
+	p += 1;
+case 42:
+	if ( (*p) == 109 )
+		goto st43;
+	goto st0;
+st43:
+	p += 1;
+case 43:
+	if ( (*p) == 105 )
+		goto st44;
+	goto st0;
+st44:
+	p += 1;
+case 44:
+	if ( (*p) == 110 )
+		goto st45;
+	goto st0;
+st45:
+	p += 1;
+case 45:
+	if ( (*p) == 97 )
+		goto st46;
+	goto st0;
+st46:
+	p += 1;
+case 46:
+	if ( (*p) == 116 )
+		goto st47;
+	goto st0;
+st47:
+	p += 1;
+case 47:
+	if ( (*p) == 101 )
+		goto tr55;
+	goto st0;
+st48:
+	p += 1;
+case 48:
+	if ( (*p) == 109 )
+		goto st49;
+	goto st0;
+st49:
+	p += 1;
+case 49:
+	if ( (*p) == 101 )
+		goto tr57;
+	goto st0;
 	}
 
-_again:
-	if ( cs == 0 )
-		goto _out;
-	p += 1;
-	goto _resume;
 	_out: {}
 	}
 
@@ -387,7 +569,7 @@ _again:
         (long int)(pe - p));
 
     if ( cs == 
-#line 391 "control.c"
+#line 573 "control.c"
 0
 #line 184 "control.rl"
  ) {
