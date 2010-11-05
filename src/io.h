@@ -4,9 +4,18 @@
 #include <stdlib.h>
 #include <ssl/ssl.h>
 
+#if defined(__APPLE__) || defined(__FreeBSD__) || defined(__NetBSD__)
+#include "bsd_specific.h"
+#else
+#include <sys/sendfile.h>
+#endif
+
+extern int MAX_SEND_BUFFER;
+
 struct IOBuf;
 
 typedef ssize_t (*io_cb)(struct IOBuf *, char *data, int len);
+typedef ssize_t (*io_stream_file_cb)(struct IOBuf *, int fd, int len);
 
 typedef enum IOBufType {
     IOBUF_SSL, IOBUF_SOCKET, IOBUF_FILE, IOBUF_NULL
@@ -29,6 +38,7 @@ typedef struct IOBuf {
     int closed;
     io_cb recv;
     io_cb send;
+    io_stream_file_cb stream_file;
     char *buf;
 
     int type;
@@ -37,6 +47,7 @@ typedef struct IOBuf {
     SSL *ssl;
     char *ssl_buf;
     int ssl_buf_len;
+    int ssl_did_receive;
 } IOBuf;
 
 IOBuf *IOBuf_create(size_t len, int fd, IOBufType type);
@@ -56,6 +67,8 @@ char *IOBuf_read_all(IOBuf *buf, int len, int retries);
 
 int IOBuf_stream(IOBuf *from, IOBuf *to, int total);
 
+int IOBuf_stream_file(IOBuf *buf, int fd, int len);
+
 #define IOBuf_read_some(I,A) IOBuf_read((I), (I)->len, A)
 
 #define IOBuf_closed(I) ((I)->closed)
@@ -72,5 +85,11 @@ int IOBuf_stream(IOBuf *from, IOBuf *to, int total);
 #define IOBuf_avail(I) ((I)->avail)
 
 #define IOBuf_fd(I) ((I)->fd)
+
+#if defined(__APPLE__) || defined(__FreeBSD__) || defined(__NetBSD__)
+#define Dir_send bsd_sendfile
+#else
+#define Dir_send sendfile
+#endif
 
 #endif

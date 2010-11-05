@@ -144,32 +144,21 @@ static inline int Dir_send_header(FileRecord *file, Connection *conn)
 int Dir_stream_file(FileRecord *file, Connection *conn)
 {
     ssize_t sent = 0;
-    size_t total = 0;
-    off_t offset = 0;
-    size_t block_size = MAX_SEND_BUFFER;
-    int conn_fd = IOBuf_fd(conn->iob);
 
     int rc = Dir_send_header(file, conn);
     check_debug(rc, "Failed to write header to socket.");
 
-    for(total = 0; fdwait(conn_fd, 'w') == 0 && total < file->sb.st_size;
-        total += sent) {
-
-        sent = Dir_send(conn_fd, file->fd, &offset, block_size);
-        debug("TOTAL: %d", total, offset);
-        check_debug(sent > 0, "Client closed probably during sendfile on socket: %d from "
-                    "file %d", conn_fd, file->fd);
-    }
+    sent = IOBuf_stream_file(conn->iob, file->fd, file->sb.st_size);
     
-    check(total <= file->sb.st_size, 
+    check(sent <= file->sb.st_size, 
             "Wrote way too much, wrote %d but size was %d",
-            (int)total, (int)file->sb.st_size);
+            (int)sent, (int)file->sb.st_size);
 
-    check(total == file->sb.st_size,
+    check(sent == file->sb.st_size,
             "Sent other than expected, sent: %d, but expected: %d", 
-            (int)total, (int)file->sb.st_size);
+            (int)sent, (int)file->sb.st_size);
 
-    return total;
+    return sent;
 
 error:
     return -1;

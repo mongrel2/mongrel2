@@ -81,6 +81,11 @@ static ssize_t null_recv(IOBuf *iob, char *buffer, int len)
     return len;
 }
 
+static ssize_t null_stream_file(IOBuf *iob, int fd, int len)
+{
+    return len;
+}
+
 static ssize_t plaintext_send(IOBuf *iob, char *buffer, int len)
 {
     return fdsend(iob->fd, buffer, len);
@@ -101,11 +106,40 @@ static ssize_t file_recv(IOBuf *iob, char *buffer, int len)
     return fdread(iob->fd, buffer, len);
 }
 
+static ssize_t plain_stream_file(IOBuf *iob, int fd, int len)
+{
+    ssize_t sent = 0;
+    ssize_t total = 0;
+    off_t offset = 0;
+    size_t block_size = MAX_SEND_BUFFER;
+    int conn_fd = IOBuf_fd(iob);
+
+    for(total = 0; fdwait(conn_fd, 'w') == 0 && total < len; total += sent) {
+
+        sent = Dir_send(conn_fd, fd, &offset, block_size);
+        debug("TOTAL: %d", total);
+        check_debug(sent > 0, "Client closed probably during sendfile on socket: %d from "
+                    "file %d", conn_fd, fd);
+    }
+    
+    check(total <= len,
+            "Wrote way too much, wrote %d but size was %d",
+            (int)total, len);
+
+    check(total == len,
+            "Sent other than expected, sent: %d, but expected: %d", 
+            (int)total, len);
+
+    return total;
+
+error:
+    return -1;
+}
 
 static ssize_t ssl_send(IOBuf *iob, char *buffer, int len)
 {
     check(iob->ssl != NULL, "Cannot ssl_send on a iobection without ssl");
-    
+
     return ssl_write(iob->ssl, (const unsigned char*) buffer, len);
 
 error:
@@ -137,7 +171,8 @@ static ssize_t ssl_recv(IOBuf *iob, char *buffer, int len)
     else {
         do {
             nread = ssl_read(iob->ssl, pread);
-        } while(nread == SSL_OK);
+            if(nread > 0) iob->ssl_did_receive = 1;
+        } while(nread == SSL_OK && !iob->ssl_did_receive);
 
         // If we got more than they asked for, we should stash it for
         // successive calls.
@@ -147,7 +182,7 @@ static ssize_t ssl_recv(IOBuf *iob, char *buffer, int len)
             nread = len;
         }
     }
-    if(nread < 0) 
+    if(nread <= 0) 
         return nread;
 
     check(*pread != NULL, "Got a NULL from ssl_read despite no error code");
@@ -159,6 +194,46 @@ error:
     return -1;
 }
 
+static ssize_t ssl_stream_file(IOBuf *iob, int fd, int len)
+{
+    ssize_t sent = 0;
+    ssize_t total = 0;
+    ssize_t amt = 0;
+    ssize_t tosend = 0;
+    int conn_fd = IOBuf_fd(iob);
+    char buff[256];
+
+    for(total = 0; fdwait(conn_fd, 'w') == 0 && total < len; total += tosend) {
+        printf("total = %d\tlen = %d\n", total, len);
+        tosend = pread(fd, buff, sizeof(buff), total);
+        check_debug(tosend > 0, "Came up short in reading file %d\n", fd);
+
+        // We do this in case the file somehow lengthened on us.  In general,
+        // it shouldn't happen.
+        if(tosend + total > len)
+            tosend = len - total;
+
+        while(sent < tosend) {
+            amt = ssl_send(iob, buff, tosend);
+            check_debug(amt > 0, "ssl_send failed in ssl_stream_file with "
+                        "return code %d", amt);
+            sent += amt;
+        }
+    }
+    
+    check(total <= len,
+            "Wrote way too much, wrote %d but size was %d",
+            (int)total, len);
+
+    check(total == len,
+            "Sent other than expected, sent: %d, but expected: %d", 
+            (int)total, len);
+
+    return total;
+
+error:
+    return -1;
+}
 
 IOBuf *IOBuf_create(size_t len, int fd, IOBufType type)
 {
@@ -178,15 +253,20 @@ IOBuf *IOBuf_create(size_t len, int fd, IOBufType type)
     if(type == IOBUF_SSL) {
         buf->send = ssl_send;
         buf->recv = ssl_recv;
+        buf->stream_file = ssl_stream_file;
+        buf->ssl_did_receive = 0;
     } else if(type == IOBUF_NULL) {
         buf->send = null_send;
         buf->recv = null_recv;
+        buf->stream_file = null_stream_file;
     } else if(type == IOBUF_FILE) {
         buf->send = file_send;
         buf->recv = file_recv;
+        buf->stream_file = plain_stream_file;
     } else if(type == IOBUF_SOCKET) {
         buf->send = plaintext_send;
         buf->recv = plaintext_recv;
+        buf->stream_file = plain_stream_file;
     } else {
         sentinel("Invalid IOBufType given: %d", type);
     }
@@ -407,4 +487,15 @@ int IOBuf_send_all(IOBuf *buf, char *data, int len)
 
 error:
     return -1;
+}
+
+int IOBuf_stream_file(IOBuf *buf, int fd, int len)
+{
+    int rc = 0;
+
+    rc = buf->stream_file(buf, fd, len);
+
+    if(rc < 0) buf->closed = 1;
+
+    return rc;
 }
