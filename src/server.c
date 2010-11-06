@@ -64,6 +64,7 @@ Server *Server_create(const char *uuid, const char *default_host,
     bstring certdir = NULL;
     bstring certpath = NULL;
     bstring keypath = NULL;
+    bstring use_ssl_key = NULL;
     int rcode = 0;
 
     srv = h_calloc(sizeof(Server), 1);
@@ -86,8 +87,14 @@ Server *Server_create(const char *uuid, const char *default_host,
     srv->default_hostname = bfromcstr(default_host);
     srv->ssl_ctx = NULL;
 
-    certdir = Setting_get_str("certdir", NULL);
-    if(certdir != NULL) {
+    use_ssl_key = bfromcstr(uuid);
+    check_mem(use_ssl_key);
+    bcatcstr(use_ssl_key, ".use_ssl");
+
+    if(Setting_get_int(bdata(use_ssl_key), 0)) {
+        certdir = Setting_get_str("certdir", NULL);
+        check(certdir != NULL, "to use ssl, you must specify a certdir");
+
         srv->ssl_ctx = ssl_ctx_new(SSL_DISPLAY_RSA, 0);
         check(srv->ssl_ctx != NULL, "ssl_ctx_new failed");
 
@@ -103,20 +110,17 @@ Server *Server_create(const char *uuid, const char *default_host,
 
         rcode = ssl_obj_load(srv->ssl_ctx, SSL_OBJ_RSA_KEY, bdata(keypath),
                              NULL);
+        check(rcode == SSL_OK, "failed to load key from %s", bdata(keypath));
 
-        if(rcode == SSL_OK)
-            rcode = ssl_obj_load(srv->ssl_ctx, SSL_OBJ_X509_CERT, 
-                                 bdata(certpath), NULL);
+        rcode = ssl_obj_load(srv->ssl_ctx, SSL_OBJ_X509_CERT, 
+                             bdata(certpath), NULL);
+        check(rcode == SSL_OK, "failed to load cert from %s", bdata(certpath));
 
-        bdestroy(certpath);
-        bdestroy(keypath);
-
-        if(rcode != SSL_OK) {
-            ssl_ctx_free(srv->ssl_ctx);
-            srv->ssl_ctx = NULL;
-        }
-        
+        bdestroy(certpath); certpath = NULL;
+        bdestroy(keypath); keypath = NULL;
     }
+
+    bdestroy(use_ssl_key); use_ssl_key = NULL;
 
     return srv;
 
@@ -126,6 +130,7 @@ error:
     // Do not free certfile, as we're pulling it from Settings
     if(certpath != NULL) bdestroy(certpath);
     if(keypath != NULL) bdestroy(keypath);
+    if(use_ssl_key != NULL) bdestroy(use_ssl_key);
     return NULL;
 }
 
