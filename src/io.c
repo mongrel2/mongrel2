@@ -204,7 +204,6 @@ static ssize_t ssl_stream_file(IOBuf *iob, int fd, int len)
     char buff[256];
 
     for(total = 0; fdwait(conn_fd, 'w') == 0 && total < len; total += tosend) {
-        printf("total = %d\tlen = %d\n", total, len);
         tosend = pread(fd, buff, sizeof(buff), total);
         check_debug(tosend > 0, "Came up short in reading file %d\n", fd);
 

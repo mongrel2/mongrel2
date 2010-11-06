@@ -60,7 +60,13 @@ Server *Server_create(const char *uuid, const char *default_host,
         const char *bind_addr, const char *port, const char *chroot, const char *access_log,
         const char *error_log, const char *pid_file)
 {
-    Server *srv = h_calloc(sizeof(Server), 1);
+    Server *srv = NULL;
+    bstring certdir = NULL;
+    bstring certpath = NULL;
+    bstring keypath = NULL;
+    int rcode = 0;
+
+    srv = h_calloc(sizeof(Server), 1);
     check_mem(srv);
 
     srv->hosts = RouteMap_create(host_destroy_cb);
@@ -78,15 +84,48 @@ Server *Server_create(const char *uuid, const char *default_host,
     srv->error_log = bfromcstr(error_log); check_mem(srv->error_log);
     srv->pid_file = bfromcstr(pid_file); check_mem(srv->pid_file);
     srv->default_hostname = bfromcstr(default_host);
-
     srv->ssl_ctx = NULL;
-    // For a sneak peak of ssl, uncomment the following line
-    // srv->ssl_ctx = ssl_ctx_new(0, 0);
+
+    certdir = Setting_get_str("certdir", NULL);
+    if(certdir != NULL) {
+        srv->ssl_ctx = ssl_ctx_new(SSL_DISPLAY_RSA, 0);
+        check(srv->ssl_ctx != NULL, "ssl_ctx_new failed");
+
+        certpath = bstrcpy(certdir);
+        check_mem(certpath);
+        bcatcstr(certpath, uuid);
+        bcatcstr(certpath, ".crt");
+
+        keypath = bstrcpy(certdir);
+        check_mem(keypath);
+        bcatcstr(keypath, uuid);
+        bcatcstr(keypath, ".key");
+
+        rcode = ssl_obj_load(srv->ssl_ctx, SSL_OBJ_RSA_KEY, bdata(keypath),
+                             NULL);
+
+        if(rcode == SSL_OK)
+            rcode = ssl_obj_load(srv->ssl_ctx, SSL_OBJ_X509_CERT, 
+                                 bdata(certpath), NULL);
+
+        bdestroy(certpath);
+        bdestroy(keypath);
+
+        if(rcode != SSL_OK) {
+            ssl_ctx_free(srv->ssl_ctx);
+            srv->ssl_ctx = NULL;
+        }
+        
+    }
 
     return srv;
 
 error:
     Server_destroy(srv);
+
+    // Do not free certfile, as we're pulling it from Settings
+    if(certpath != NULL) bdestroy(certpath);
+    if(keypath != NULL) bdestroy(keypath);
     return NULL;
 }
 

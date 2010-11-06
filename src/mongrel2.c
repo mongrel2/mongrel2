@@ -110,14 +110,14 @@ Server *load_server(const char *db_file, const char *server_uuid, int reuse_fd)
     rc = Config_init_db(db_file);
     check(rc == 0, "Failed to load config database at %s", db_file);
     
+    rc = Config_load_settings();
+    check(rc == 0, "Failed to load global settings.");
+
     srv = Config_load_server(server_uuid);
     check(srv, "Failed to load server %s from %s", server_uuid, db_file);
 
     rc = Config_load_mimetypes();
     check(rc == 0, "Failed to load mime types.");
-
-    rc = Config_load_settings();
-    check(rc == 0, "Failed to load global settings.");
 
     if(reuse_fd == -1) {
         srv->listen_fd = netannounce(TCP, bdata(srv->bind_addr), srv->port);
