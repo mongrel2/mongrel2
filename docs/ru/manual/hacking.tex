@@ -1,4 +1,4 @@
-\chapter{Погружение}
+\chapter{Пишем код}
 
 Эта глава о том, как делать крутые вещи в Mongrel2. Она посвящена всему, что не
 касается развёртывания и управления сервером. Мы погрузимся в детали его работы
@@ -181,9 +181,9 @@ Mongrel2 поддерживает веб-сокеты (WebSockets) пока чт
 Во-первых, эта спецификация предполагает использование \emph{юникода} для
 передачи данных в HTTP-заголовках. Это настолько тупая идея, которая ещё выпьет
 много крови у разработчиков браузеров и серверов, что я просто удивлён, кому
-такое могло прийти в голову. Наверное, какой-нибудь глобалист, который считает,
-что всё должно быть в юникоде. С юникодом несколько проблем: он не добавляет
-лингвистической ценности в данном случае --- люди не читают HTTP-заголовки; он
+такое могло прийти в голову. Наверное, какому-нибудь глобалисту, который
+считает, что всё должно быть в юникоде. С юникодом несколько проблем: он не
+добавляет лингвистической ценности--- люди не читают HTTP-заголовки; он
 усложняет разработку серверов; добавляет проблемы безопасности, поскольку он
 неоднозначен; нарушает существующие стандарты, поскольку HTTP предполагает ASCII
 для передачи данных. Как я уже упоминал в этом документе --- разработка
@@ -194,7 +194,7 @@ Mongrel2 поддерживает веб-сокеты (WebSockets) пока чт
 такая --- берём число, например \verb|1234|, и добавляем в него случайные
 символы, например \verb|1@%^2*(34|. Настолько ``продвинутая'' схема, что можно
 расшифровать за шесть секунд в голове. Я, конечно, дико извиняюсь, но то, что
-придумывают 11-летние дети на бумаге нельзя назвать шифрованием, и уже тем более
+придумывают 11-летние дети на бумаге нельзя назвать шифрованием, и уж тем более
 использовать.
 
 Есть и прочие недостатки, но этих двух достаточно, чтобы воздержаться пока от
@@ -211,132 +211,136 @@ Mongrel2 поддерживает веб-сокеты (WebSockets) пока чт
 
 \subsection{Long Poll}
 
-Mongrel2 работает так, что всё есть long poll; и обычные запросы/ответы это
-супербыстрые long poll сессии. По большому счёту, даже нет необходимости об этом
-знать. Сервер получает запросы от клиента, которого можно в любой момент
-идентифицировать, и отсылает данные назад. Вот и всё. И не важно, посылает ли
-сервер одиночный ответ, потоковые данные, или в режиме long poll --- всё одно
---- для вас это прозрачно.
+В Mongrel2 всё --- long poll; и обычные запросы/ответы это супербыстрые long
+poll сессии. По большому счёту, даже нет необходимости об этом знать. Сервер
+получает запросы от клиента, которого можно в любой момент идентифицировать, и
+отсылает данные назад. Вот и всё. И не важно, посылает ли сервер одиночный
+ответ, потоковые данные, или в режиме long poll --- всё одно --- для вас это
+прозрачно.
 
 \subsection{Потоковые данные}
 
-Асинхронность и возможность посылать из обработчиков даже частичные сообщение любому количеству
-адресатов делает Mongrel2 полезным для работы с потоковыми данными (аудио,
-видео и т.п.). Кроме того, ZeroMQ --- невероятно эффективный транспортный
-механизм, с помощью которого можно пересылать горы информации множеству
-подключённых браузеров и других клиентов. Всё это в совокупности превращает
-передачу музыки и фильмов в тривиальную задачу. Мы рассмотрим пример mp3stream в
-котором реализован потоковый протокол ICY. 
+Асинхронность и возможность посылать из обработчиков даже незаконченные
+сообщения любому количеству адресатов делает Mongrel2 полезным для работы с
+потоковыми данными (аудио, видео и т.п.). Кроме того, ZeroMQ --- невероятно
+эффективный транспортный механизм, с помощью которого можно пересылать горы
+информации множеству подключённых браузеров и других клиентов. Всё это в
+совокупности превращает передачу музыки и фильмов в тривиальную задачу. Мы
+рассмотрим пример mp3stream, в котором реализован потоковый протокол ICY. 
 
-\subsection{N:M Responses}
+\subsection{Ответы N:M}
 
-What makes streaming, async messaging, and long poll designs so efficient in Mongrel2 is that you can send
-\emph{one} message and target up to 128 clients with that one message.  This means sending large scale replies
-to many browsers requires less copying of the message and less transports.
+Эффективность передачи потоковых данных, асинхронных сообщений и запросов long
+poll заключается в том, что \emph{одно} сообщение может быть адресовано вплоть
+до 128 клиентам. Т.е. один ответ может быть отправлен сразу нескольким браузерам
+и для этого не надо лишний раз копировать данные.
 
-In addition to this, you can setup Mongrel2 with the help of some 0MQ to send
-one request from a browser to as many target handlers as you like.  You can
-even send them messages using \href{http://code.google.com/p/openpgm/}{OpenPGM}
-for sending UDP messages reliably to clusters of computers.
+В дополнение к этому, с помощью 0MQ можно так настроить Mongrel2, что один зпрос
+от браузера будет перенаправлен нескольким обработчикам. Вы даже можете
+отправлять запросы целому кластеру из серверов по UDP протоколу, а для
+надёжности воспользоваться \href{http://code.google.com/p/openpgm}{OpenPGM}.
 
-This means that Mongrel2 is the only web server capable of sending one request
-from a browser to N backends at once, and then return the replies from these
-handlers to M browsers.  Not exactly sure what you could write with that, but
-it's probably something really damn cool.
+Пока что Mongrel2 --- единственный браузер который может делать такой трюк:
+отправлять запрос сразу N бэкендам, ждать ответа, и отправлять назад в M
+браузеров. Не знаю, какому типу приложений может это понадобиться, но, возможно,
+это что-то очень крутое.
 
-\subsection{Async Uploads}
+\subsection{Загрузка файлов}
 
-Mongrel2 also solves the problem of large uploads choking your server
-because you can't stop them before they're complete.  Mongrel2 will stream
-large requests to temporary files, but it sends your handlers an initial
-``upload started'' message.  When the upload is done, you get a final ``upload 
-finished'' message.  If, at any time, you want to kill the upload, you just
-send a 0-length reply (the official KILL MESSAGE) and the whole thing is
-aborted and cleaned up.
+Иногда при загрузке файлов они настолько большие, что парализуют сервер, потому
+что он не может прекратить процесс. Mongrel2 решает эту проблему. Он отправляет
+большие запросы во временные файлы, но перед этим уведомляет обработчик о начале
+загрузки. Когда загрузка завершена, обработчик также получает уведомление. Если
+по какой-то причине нужно остановить загрузку, вы просто посылаете пустое
+сообщение (из обработчика) и весь процесс отменяется.
 
+\section{Введение в ZeroMQ}
 
-\section{Introduction to ZeroMQ}
+Мы подошли, наверное, к самой главной части этого мануала ---
+\href{http://zeromq.org}{ZeroMQ}. В задачи этого документа не входит обучение
+всем тонкостям этой библиотеки, тем не менее, я расскажу основные принципы,
+чтобы понять, с чем мы имеем дело.
 
-Learning to use \href{http://zeromq.org}{ZeroMQ} is a bit outside the scope of this book, but I'll give you
-a quick introduction to it so that you can explore it further.  It is a very simple
-system, so hopefully you can figure it out from here.
-
-What ZeroMQ ends up being is ``sockets the way programmers think sockets work''.  Programmers
-usually hear about TCP or UDP sockets and they think in a na{\"\i}ve way that they work like
-this:
-
-\begin{description}
-\item [TCP] Programmers think these are streamed sequential messages, so if
-   they send a ``message'' that's 10k long then when the receiver gets it and read
-   from the TCP socket they get a single 10k message in reply.  This only works in
-   small messages and not on the Internet, so it's easy to see how it would seem
-   to work that way.  The reality is that you can get messages of any size, and without
-   some framing mechanism you wouldn't know where one messages ends or beings.
-   TCP is a \emph{streaming protocol}.
-
-\item [UDP] Programmers think UDP sockets are single, fast, \emph{reliable} messages
-    that can be sent to one or more target clients.  They at least know UDP has a fixed
-    upper bound size, but they don't get that UDP is very unreliable and that the addressing
-    is fairly weak.
-\end{description}
-
-What ZeroMQ does is create an API that looks a lot like sockets, and feels the
-same, but gives you the messaging styles you actually want.  By simply
-specifying the type of socket when you call
-\href{http://api.zeromq.org/zmq\_socket.html}{zmq\_socket} you can have
-multicast, request/reply, and many other styles.  Here's the list of ones
-currently implemented (as documented in \shell{man zmq\_socket}):
+Вкратце, ZeroMQ --- это библиотека, которая реализует сокеты так, как они должны
+работать с точки зрения программиста. Программисты же, когда слышат о TCP или
+UDP сокетах, наивно полагают, что они работают следующим образом:
 
 \begin{description}
-  \item [\texttt{ZMQ\_REQ}/\texttt{ZMQ\_REP}]  Your classic, strict, REQuest/REPly sockets, that work much like
-    HTTP request/response semantics.  These are more strict and lock-step, but are slower
-    because of the extra overhead in keeping the state organized.
-  \item [\texttt{ZMQ\_PUB}/\texttt{ZMQ\_SUB}]  These are PUBlish/SUBscribe sockets and work as a decentralized
-    asynchronous messaging.  PUB sockets just send out messages to multiple subscribers, without
-    expecting a reply.  SUB sockets just read messages that are sent to them, and can subscribe
-    to prefixes on the messages.
-  \item [\texttt{ZMQ\_PUSH}/\texttt{ZMQ\_PULL}] PUSH/PULL sockets are more like asynchronous round-robin
-    sockets.  They work like PUB/SUB, but instead of the message going to all subscribers that
-    are subscribed or not, a PUSH/PULL socket will have a message go to just one of the receivers
-    in a cluster.  This is a lot like having a round-robin proxy configuration in your web server.
-  \item [\texttt{ZMQ\_PAIR}] A PAIR is just a direct connection between two peers, basically like a better
-    TCP connection.
+\item [TCP] Разработчики думают, что это последовательные сообщения и если они
+    посылают такое ``сообщение'' размером, например 10кб, то когда принимающая
+    сторона получает его, то все 10кб считываются с сокета. Такая схема, на самом
+    деле, работает только с маленькими сообщениями и не в глобальной сети.
+    Реальность же такова, что вы можете получить сообщение любого размера и без
+    какого-либо маркера, который бы показывал, где кончается одно сообщение и
+    начинается другое. Т.е. TCP --- это \emph{потоковый} протокол.
+
+\item [UDP] Разработчики думают, что UDP сокеты это одиночные, быстрые,
+    \emph{надёжные} сообщения, которые могут переданы одному и более клиентам. По
+    крайней мере, они знают, что в UDP размер сообщения фиксированный, но они иногда
+    не понимают, что это очень ненадёжный протокол.
 \end{description}
 
-The next thing ZeroMQ does is it separates these types of \emph{messaging} from the underlying
-transport protocol and gives you a simple URL-like syntax for specifying that: \shell{tcp://127.0.0.1:9999/}
-for example.  The types of transports that you can use when you call \href{http://api.zeromq.org/zmq\_bind.html}{zmq\_bind}
-and \href{http://api.zeromq.org/zmq\_connect.html}{zmq\_connect} are:
+ZeroMQ предоставляет API, который очень похож на сокеты, но сильно превосходит
+их по удобству использования. С помощью вызова
+\href{http://api.zeromq.org/zmq\_socket.html}{zmq\_socket} можно задать тип
+соединения: среди них есть запрос/ответ, мультикаст, и другие. Вот полный
+список:
 
 \begin{description}
-\item [\texttt{tcp://}] This is a plain old TCP socket with a host and portnumber.
-\item [\texttt{ipc://}] This uses Unix inter-process communication like domain sockets, mq, or whatever is available.
-\item [\texttt{pgm://}] Reliable multicast messaging that uses raw IP layering and requires special privileges.
-\item [\texttt{epgm://}] The ``encapsulated'' version that uses regular UDP to do reliable multicast messaging.
+  \item [\texttt{ZMQ\_REQ}/\texttt{ZMQ\_REP}] Классический сокет запрос/ответ (REQ/REP).
+    По семантике очень похож на протокол HTTP, но только с более жёсткими
+    рамками. И несколько медленнее, чем другие типы подключений.
+
+  \item [\texttt{ZMQ\_PUB}/\texttt{ZMQ\_SUB}] Соединение типа
+    издатель/подписчик (PUB/SUB) для отправки асинхронных децентрализованных сообщений.
+    Издатель отправляет сообщение нескольким подписчикам и не ждёт в ответ ничего.
+    Подписчики же просто получают адресованные им сообщения; они также могут
+    подписаться на сообщения только с заданным префиксом (своего рода фильтр).
+
+  \item [\texttt{ZMQ\_PUSH}/\texttt{ZMQ\_PULL}] Сокеты PUSH/PULL --- что-то
+    вроде асинхронных сокетов, которые передают сообщения в стиле round-robin.
+    Они работают подобно PUB/SUB, но сообщение идёт только одному подписчику в
+    кластере.
+
+  \item [\texttt{ZMQ\_PAIR}] Пара --- это прямое соединение между двумя
+    адресатами, т.е. обычное TCP-соединение, только с некоторыми плюшками.
+
 \end{description}
 
-Finally, ZeroMQ divorces who binds and connects from the above two
-configurations.  This means that, unlike classic sockets, who connects and who
-binds doesn't matter for the direction or kind of message.  All that really
-matters is whether the connection makes sense for your application.  For
-example, in Mongrel2 the server does a bind on the handler ports so that
-handlers can connect at will, which gives your handlers a nice ``zero config''
-setup.  Mongrel2 doesn't need to know about handlers; they just need to know
-about Mongrel2.
+Далее, ZeroMQ отделяет типы сообщений от транспортных протоколов и предоставляет
+простой синтаксис для задания протокола: например \shell{tcp://127.0.0.1:9999}.
+Ниже перечислены все протоколы, которые нужно указать во время вызова
+\href{http://api.zeromq.org/zmq\_bind.html}{zmq\_bind} и
+\href{http://api.zeromq.org/zmq\_connect.html}{zmq\_connect}:
 
-How this last part works, and why it works, is that when clients or servers
-connect or disconnect, ZeroMQ \emph{doesn't blow up}.  In TCP, if I have a
-server, and then 10 clients connect, when one of them disconnects in the middle
-of a message I lose the message and get an error.  With ZeroMQ, clients
-connecting to a socket don't trigger an event, and disconnecting doesn't do
-anything other than hold or drop messages.  This is why you don't have to care
-about who binds or connects, because it's just an addressing mechanism, not a
-\emph{state management} mechanism.
+\begin{description}
+\item [\texttt{tcp://}] Старый добрый TCP сокет с хостом и портом.
+\item [\texttt{ipc://}] Межпроцессное взаимодействие с помощью Unix-сокетов.
+\item [\texttt{pgm://}] Надёжный мультикастовый протокол на основе IP; требует
+специальных прав.
+\item [\texttt{epgm://}] ``Инкапсулированная'' версия предыдущего протокола;
+использует UDP для надёжной передачи сообщений.
+\end{description}
 
-Another way to put this feature is there's no \emph{accept} in ZeroMQ.  Clients
-connect and go at will and the server is just reading messages off when they're
-available or sending them out for clients.
+Ну и наконец, для ZeroMQ не так уж важно, кто слушает порт, а кто к нему
+подключается (bind vs. connect). Важен тип сообщений и в каком направлении они
+передаются, т.е. важна семантика. В Mongrel2, например, сервер слушает порт, а
+обработчики по необходимости подключаются к нему. В результате получаются
+бэкенды с ``нулевой конфигурацией''. Для веб-сервера и нет необходимости знать
+об обработчиках; важно, чтобы они знали о сервере.
 
+Последний пункт: ZeroMQ гораздо толерантнее к неожиданным отключениям. При
+использовании обычных сокетов, если клиент прерывает связь в процессе передачи
+сообщения, то сообщение теряется и возникает ошибка. В ZeroMQ клиенты,
+подключенные к сокету, не генерируют какие-либо события; таким образом,
+отключение ведёт лишь к тому, что сообщение либо помещается в очередь, либо
+просто игнорируется. Вот почему не так уж важно, кто и с какой стороны
+подключается: это только механизм адресации, а \emph{не механизм управления
+состояниями}.
+
+По другому эту фичу можно описать так: в ZeroMQ нет вызова \emph{accept},
+клиенты подключаются и отключаются, а сервер считывает сообщения по мере
+поступления или отсылает их при необходимости.
 
 \subsection{A Quick Python ZeroMQ Example}
 
