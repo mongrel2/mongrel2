@@ -329,15 +329,15 @@ char *IOBuf_read(IOBuf *buf, int need, int *out_len)
         if(buf->cur > 0 && IOBuf_compact_needed(buf, need)) {
             IOBuf_compact(buf);
         }
-        debug("IOBuf_read: calling the recv for %d bytes, buf->len: %d, buf->cur: %d, buf->avail: %d", 
-                           IOBuf_remaining(buf), buf->len, buf->cur, buf->avail);
+        //debug("IOBuf_read: calling the recv for %d bytes, buf->len: %d, buf->cur: %d, buf->avail: %d", 
+        //                   IOBuf_remaining(buf), buf->len, buf->cur, buf->avail);
         rc = buf->recv(buf, IOBuf_read_point(buf), IOBuf_remaining(buf));
 
         if(rc <= 0) {
             debug("Socket was closed, will return only what's available: %d", buf->avail);
             buf->closed = 1;
         }
-        debug("Read %d bytes of data. buf->cur: %d, buf->avail: %d", rc, buf->cur, buf->avail);
+        //debug("Read %d bytes of data. buf->cur: %d, buf->avail: %d", rc, buf->cur, buf->avail);
         // debug_dump(IOBuf_read_point(buf), rc);
 
         buf->avail = buf->avail + rc;
@@ -401,25 +401,37 @@ int IOBuf_send(IOBuf *buf, char *data, int len)
 char *IOBuf_read_all(IOBuf *buf, int len, int retries)
 {
     int nread = 0;
+    int read_last = 0;
+    int attempts = 0;
+
     assert(len <= buf->len && "Cannot read more than the buffer length.");
 
     char *data = IOBuf_read(buf, len, &nread);
     check_debug(!IOBuf_closed(buf), "Closed when attempting to read from buffer.");
 
-    while(nread < len && retries > 0) {
+    read_last = nread;
+
+    while(nread < len && attempts < retries) {
         data = IOBuf_read(buf, len, &nread);
+
         check_debug(data, "Read error from socket.");
         assert(nread <= len && "Invalid nread size (too much) on IOBuf read.");
 
         if(nread == len) {
             break;
+        } else if(nread - read_last <= 0) {
+            // read attempted after we did a wait, but we got 0
+            attempts++;
+            fdwait(buf->fd, 'r');
         } else {
-            retries--;
             fdwait(buf->fd, 'r');
         }
-    }
 
-    check(retries > 0, "Too many retries (%d) while reading.", retries);
+        read_last = nread;
+    }
+    
+    check(attempts < retries, "Read attempted for %d length too %d attempts and was aborted.", len, attempts);
+
     IOBuf_read_commit(buf, len);
     return data;
 

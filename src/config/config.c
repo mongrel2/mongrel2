@@ -323,6 +323,7 @@ error:
 Server *Config_load_server(const char *uuid)
 {
     int rc = 0;
+    char *query = NULL;
 
     rc = Config_load_handlers();
     check(rc == 0, "You have an error in your handlers, aborting startup.");
@@ -334,7 +335,7 @@ Server *Config_load_server(const char *uuid)
     check(rc == 0, "You have an error in your directories, aborting startup.");
 
     const char *SERVER_QUERY = "SELECT id, uuid, default_host, bind_addr, port, chroot, access_log, error_log, pid_file FROM server WHERE uuid=%Q";
-    char *query = SQL(SERVER_QUERY, uuid);
+    query = SQL(SERVER_QUERY, uuid);
 
     Server *server = NULL;
     rc = DB_exec(query, Config_load_server_cb, &server);
