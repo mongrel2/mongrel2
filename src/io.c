@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <assert.h>
 
-
 void debug_dump(void *addr, int len)
 {
 #ifdef NDEBUG
@@ -401,7 +400,6 @@ int IOBuf_send(IOBuf *buf, char *data, int len)
 char *IOBuf_read_all(IOBuf *buf, int len, int retries)
 {
     int nread = 0;
-    int read_last = 0;
     int attempts = 0;
 
     assert(len <= buf->len && "Cannot read more than the buffer length.");
@@ -409,9 +407,9 @@ char *IOBuf_read_all(IOBuf *buf, int len, int retries)
     char *data = IOBuf_read(buf, len, &nread);
     check_debug(!IOBuf_closed(buf), "Closed when attempting to read from buffer.");
 
-    read_last = nread;
+    debug("INITIAL READ: len: %d, nread: %d", len, nread);
 
-    while(nread < len && attempts < retries) {
+    for(attempts = 0; nread < len; attempts++) {
         data = IOBuf_read(buf, len, &nread);
 
         check_debug(data, "Read error from socket.");
@@ -419,18 +417,16 @@ char *IOBuf_read_all(IOBuf *buf, int len, int retries)
 
         if(nread == len) {
             break;
-        } else if(nread - read_last <= 0) {
-            // read attempted after we did a wait, but we got 0
-            attempts++;
-            fdwait(buf->fd, 'r');
         } else {
             fdwait(buf->fd, 'r');
         }
-
-        read_last = nread;
     }
-    
-    check(attempts < retries, "Read attempted for %d length too %d attempts and was aborted.", len, attempts);
+   
+    debug("ATTEMPTS: %d, RETRIES: %d", attempts, retries);
+
+    if(attempts > retries) {
+        log_err("Read of %d length attempted %d times which is over %d retry limit..", len, attempts, retries);
+    }
 
     IOBuf_read_commit(buf, len);
     return data;

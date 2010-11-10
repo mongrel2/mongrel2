@@ -27,7 +27,7 @@ while True:
             print "GOT THE WRONG TARGET FILE: ", expected, upload
             continue
 
-        body = open(upload, 'r').read()
+        body = open("../../" + upload, 'r').read()
         print "UPLOAD DONE: BODY IS %d long, content length is %s" % (
             len(body), req.headers['content-length'])
 
