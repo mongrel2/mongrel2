@@ -338,7 +338,7 @@ char *IOBuf_read(IOBuf *buf, int need, int *out_len)
             buf->closed = 1;
         }
         debug("Read %d bytes of data. buf->cur: %d, buf->avail: %d", rc, buf->cur, buf->avail);
-        debug_dump(IOBuf_read_point(buf), rc);
+        // debug_dump(IOBuf_read_point(buf), rc);
 
         buf->avail = buf->avail + rc;
 

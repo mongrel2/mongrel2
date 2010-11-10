@@ -11,13 +11,14 @@ static inline int stream_to_disk(IOBuf *iob, int content_len, int tmpfd)
     char *data = NULL;
     int avail = 0;
 
+    debug("max content length: %d, content_len: %d", MAX_CONTENT_LENGTH, content_len);
+
     IOBuf_resize(iob, MAX_CONTENT_LENGTH); // give us a good buffer size
 
     while(content_len > 0) {
         data = IOBuf_read_some(iob, &avail);
         check(!IOBuf_closed(iob), "Closed while reading from IOBuf.");
         content_len -= avail;
-
         check(write(tmpfd, data, avail) == avail, "Failed to write requested amount to tempfile: %d", avail);
 
         IOBuf_read_commit(iob, avail);
@@ -58,13 +59,13 @@ int Upload_file(Connection *conn, Handler *handler, int content_len)
     check(tmpfd != -1, "Failed to create secure tempfile, did you end it with XXXXXX?");
     log_info("Writing tempfile %s for large upload.", bdata(tmp_name));
 
-    rc = Upload_notify(conn, handler, "Start", tmp_name);
+    rc = Upload_notify(conn, handler, "start", tmp_name);
     check(rc == 0, "Failed to notify of the start of upload.");
 
     rc = stream_to_disk(conn->iob, content_len, tmpfd);
     check(rc == 0, "Failed to stream to disk.");
 
-    rc = Upload_notify(conn, handler, "Done", bstrcpy(tmp_name));
+    rc = Upload_notify(conn, handler, "done", bstrcpy(tmp_name));
     check(rc == 0, "Failed to notify the end of the upload.");
 
     bdestroy(result);

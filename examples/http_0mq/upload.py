@@ -29,7 +29,7 @@ while True:
 
         body = open(upload, 'r').read()
         print "UPLOAD DONE: BODY IS %d long, content length is %s" % (
-            len(body), req.headers['Content-Length'])
+            len(body), req.headers['content-length'])
 
         response = "UPLOAD GOOD: %s" % hashlib.md5(body).hexdigest()
 

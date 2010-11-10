@@ -194,9 +194,9 @@ int connection_http_to_handler(Connection *conn)
 
     if(content_len == 0) {
         body = "";
+        rc = Connection_send_to_handler(conn, handler, body, content_len);
+        check_debug(rc == 0, "Failed to deliver to the handler.");
     } else if(content_len > MAX_CONTENT_LENGTH) {
-        body = "";
-        content_len = 0;
         rc = Upload_file(conn, handler, content_len);
         check(rc == 0, "Failed to upload file.");
     } else {
@@ -207,10 +207,10 @@ int connection_http_to_handler(Connection *conn)
 
         body = IOBuf_read_all(conn->iob, content_len, CLIENT_READ_RETRIES);
         check(body != NULL, "Client closed the connection during upload.");
-    }
 
-    rc = Connection_send_to_handler(conn, handler, body, content_len);
-    check_debug(rc == 0, "Failed to deliver to the handler.");
+        rc = Connection_send_to_handler(conn, handler, body, content_len);
+        check_debug(rc == 0, "Failed to deliver to the handler.");
+    }
 
     Log_request(conn, 200, content_len);
 
