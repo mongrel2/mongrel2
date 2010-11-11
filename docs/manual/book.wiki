@@ -563,7 +563,7 @@
     <li class="itemize">GNU make (gmake).
 
     <li class="itemize"><a href="http://zeromq.org">ZeroMQ
-    2.0.8</a> for the messaging.
+    2.0.10</a> for the messaging.
 
     <li class="itemize"><a href=
     "http://www.sqlite.org/">SQLite3</a>.
@@ -620,7 +620,7 @@
       "pcrr7t-x-x-90">download</span><span class=
       "pcrr7t-x-x-90">/</span><span class=
       "pcrr7t-x-x-90">zeromq</span><span class=
-      "pcrr7t-x-x-90">-2.0.8.</span><span class=
+      "pcrr7t-x-x-90">-2.0.10.</span><span class=
       "pcrr7t-x-x-90">tar</span><span class=
       "pcrr7t-x-x-90">.</span><span class=
       "pcrr7t-x-x-90">gz</span><span class=
@@ -635,7 +635,7 @@
       "pcrr7t-x-x-90">xzvf</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">zeromq</span><span class=
-      "pcrr7t-x-x-90">-2.0.8.</span><span class=
+      "pcrr7t-x-x-90">-2.0.10.</span><span class=
       "pcrr7t-x-x-90">tar</span><span class=
       "pcrr7t-x-x-90">.</span><span class=
       "pcrr7t-x-x-90">gz</span><span class=
@@ -647,7 +647,7 @@
       "pcrr7t-x-x-90">cd</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">zeromq</span><span class=
-      "pcrr7t-x-x-90">-2.0.8/</span><span class=
+      "pcrr7t-x-x-90">-2.0.10/</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
       <span class="label"><a id="x1-12006r5" name=
       "x1-12006r5"></a></span><span class=
@@ -10762,6 +10762,12 @@
       "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">open</span><span class=
       "pcrr7t-x-x-90">(</span><span class=
+      "pcrr7t-x-x-90">"</span><span class=
+      "pcrr7t-x-x-90">../../</span><span class=
+      "pcrr7t-x-x-90">"</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
+      "pcrr7t-x-x-90">+</span><span class=
+      "pcrr7t-x-x-90">&nbsp;</span><span class=
       "pcrr7t-x-x-90">upload</span><span class=
       "pcrr7t-x-x-90">,</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><span class=
@@ -10840,9 +10846,9 @@
       "pcrr7t-x-x-90">headers</span><span class=
       "pcrr7t-x-x-90">&#91;</span><span class=
       "pcrr8c-x-x-90">'</span><span class=
-      "pcrr7t-x-x-90">Content</span><span class=
+      "pcrr7t-x-x-90">content</span><span class=
       "pcrr7t-x-x-90">-</span><span class=
-      "pcrr7t-x-x-90">Length</span><span class=
+      "pcrr7t-x-x-90">length</span><span class=
       "pcrr8c-x-x-90">'</span><span class=
       "pcrr7t-x-x-90">&#93;)</span><span class=
       "pcrr7t-x-x-90">&nbsp;</span><br>
