@@ -1,5 +1,3 @@
-#undef NDEBUG
-
 #include "taskimpl.h"
 #include "dbg.h"
 #include "server.h"
