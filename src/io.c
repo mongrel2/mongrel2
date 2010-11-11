@@ -1,8 +1,11 @@
+#define _XOPEN_SOURCE 500
+
 #include "io.h"
 #include "mem/halloc.h"
 #include "dbg.h"
 #include <stdlib.h>
 #include <assert.h>
+#include <unistd.h>
 
 void debug_dump(void *addr, int len)
 {
