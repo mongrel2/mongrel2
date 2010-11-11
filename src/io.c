@@ -7,70 +7,6 @@
 #include <assert.h>
 #include <unistd.h>
 
-void debug_dump(void *addr, int len)
-{
-#ifdef NDEBUG
-  return;
-#endif
-
-  char tohex[] = "0123456789ABCDEF";
-  int i = 0;
-  unsigned char *pc = addr;
-
-  char buf0[32] = {0};                // offset
-  char buf1[64] = {0};                // hex
-  char buf2[64] = {0};                // literal
-
-  char *pc1 = NULL;
-  char *pc2 = NULL;
-
-  
-
-  while(--len >= 0) {
-
-    if(i % 16 == 0) {
-      sprintf(buf0, "%08x", i);
-      buf1[0] = 0;
-      buf2[0] = 0;
-      pc1 = buf1;
-      pc2 = buf2;
-    }
-
-    *pc1++ = tohex[*pc >> 4];
-    *pc1++ = tohex[*pc & 15];
-    *pc1++ = ' ';
-
-    if(*pc >= 32 && *pc < 127) {
-      *pc2++ = *pc;
-    } else {
-      *pc2++ = '.';
-    }
-
-    i++;
-    pc++;
-
-    if(i % 16 == 0) {
-      *pc1 = 0;
-      *pc2 = 0;
-      debug("%s:   %s  %s", buf0, buf1, buf2);
-    }
-
-  }
-
-  if(i % 16 != 0) {
-    while(i % 16 != 0) {
-      *pc1++ = ' ';
-      *pc1++ = ' ';
-      *pc1++ = ' ';
-      *pc2++ = ' ';
-      i++;
-    }
-
-    *pc1 = 0;
-    *pc2 = 0;
-    debug("%s:   %s  %s", buf0, buf1, buf2);
-  }
-}
 
 
 static ssize_t null_send(IOBuf *iob, char *buffer, int len)
@@ -508,4 +444,71 @@ int IOBuf_stream_file(IOBuf *buf, int fd, int len)
     if(rc < 0) buf->closed = 1;
 
     return rc;
+}
+
+
+
+void debug_dump(void *addr, int len)
+{
+#ifdef NDEBUG
+  return;
+#endif
+
+  char tohex[] = "0123456789ABCDEF";
+  int i = 0;
+  unsigned char *pc = addr;
+
+  char buf0[32] = {0};                // offset
+  char buf1[64] = {0};                // hex
+  char buf2[64] = {0};                // literal
+
+  char *pc1 = NULL;
+  char *pc2 = NULL;
+
+  
+
+  while(--len >= 0) {
+
+    if(i % 16 == 0) {
+      sprintf(buf0, "%08x", i);
+      buf1[0] = 0;
+      buf2[0] = 0;
+      pc1 = buf1;
+      pc2 = buf2;
+    }
+
+    *pc1++ = tohex[*pc >> 4];
+    *pc1++ = tohex[*pc & 15];
+    *pc1++ = ' ';
+
+    if(*pc >= 32 && *pc < 127) {
+      *pc2++ = *pc;
+    } else {
+      *pc2++ = '.';
+    }
+
+    i++;
+    pc++;
+
+    if(i % 16 == 0) {
+      *pc1 = 0;
+      *pc2 = 0;
+      debug("%s:   %s  %s", buf0, buf1, buf2);
+    }
+
+  }
+
+  if(i % 16 != 0) {
+    while(i % 16 != 0) {
+      *pc1++ = ' ';
+      *pc1++ = ' ';
+      *pc1++ = ' ';
+      *pc2++ = ' ';
+      i++;
+    }
+
+    *pc1 = 0;
+    *pc2 = 0;
+    debug("%s:   %s  %s", buf0, buf1, buf2);
+  }
 }
