@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <ssl/ssl.h>
 
-#if defined(__APPLE__) || defined(__FreeBSD__) || defined(__NetBSD__)
+#if defined(__APPLE__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
 #include "bsd_specific.h"
 #else
 #include <sys/sendfile.h>

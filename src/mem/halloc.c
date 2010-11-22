@@ -12,7 +12,7 @@
  *	http://www.opensource.org/licenses/bsd-license.php
  */
 
-#if defined(__APPLE__) || defined(__FreeBSD__)
+#if defined(__APPLE__) || defined(__FreeBSD__) || defined(__OpenBSD)
 #include <stdlib.h>
 #else
 #include <malloc.h>  /* realloc */

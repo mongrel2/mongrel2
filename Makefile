@@ -113,6 +113,10 @@ freebsd: OPTFLAGS=-I/usr/local/include
 freebsd: OPTLIBS=-L/usr/local/lib -pthread
 freebsd: all
 
+openbsd: OPTFLAGS=-l/usr/local/include
+openbsd: OPTLIBS=-L/usr/local/lib -pthread
+openbsd: all
+
 solaris: OPTFLAGS=-I/usr/local/include
 solaris: OPTLIBS=-L/usr/local/lib -R/usr/local/lib -lsocket -lnsl -lsendfile
 solaris: all
