@@ -35,10 +35,17 @@
 #define CONFIG_SSL_PRIVATE_KEY_LOCATION ""
 #define CONFIG_SSL_PRIVATE_KEY_PASSWORD ""
 #define CONFIG_SSL_X509_CERT_LOCATION ""
+
+/* We don't want our ssl library getting out in front of us and generating its
+ * own certificates (or at least Chrome doesn't).
+ */
+#if 0
 #define CONFIG_SSL_GENERATE_X509_CERT 1
 #define CONFIG_SSL_X509_COMMON_NAME "mongrel2.org"
 #define CONFIG_SSL_X509_ORGANIZATION_NAME "Mongrel2 Project"
 #define CONFIG_SSL_X509_ORGANIZATION_UNIT_NAME "Developers"
+#endif
+
 #define CONFIG_SSL_ENABLE_V23_HANDSHAKE 1
 #define CONFIG_SSL_HAS_PEM 1
 #define CONFIG_SSL_USE_PKCS12 1
