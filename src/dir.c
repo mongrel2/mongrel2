@@ -329,16 +329,16 @@ FileRecord *Dir_resolve_file(Dir *dir, bstring prefix, bstring path)
             bdata(dir->index_file));
 
     if(bchar(path, blength(path) - 1) == '/') {
-        // a directory so figureo out the index file
-        target = bformat("%s%s%s",
+        // a directory so figure out the index file
+        target = bformat("%s/%s%s",
                          bdata(dir->normalized_base),
-                         path->data + blength(prefix) - 1,
+                         path->data + blength(prefix),
                          bdata(dir->index_file));
     } else if(biseq(prefix, path)) {
         target = bformat("%s%s", bdata(dir->normalized_base), bdata(path));
 
     } else {
-        target = bformat("%s%s", bdata(dir->normalized_base), path->data + blength(prefix) - 1);
+        target = bformat("%s/%s", bdata(dir->normalized_base), path->data + blength(prefix));
     }
 
     check_mem(target);
