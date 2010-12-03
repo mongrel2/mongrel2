@@ -345,7 +345,7 @@ static inline bstring json_escape(bstring in)
     return vstr;
 }
 
-struct tagbstring LISTSEP = bsStatic(",");
+struct tagbstring JSON_LISTSEP = bsStatic("\",\"");
 
 bstring Request_to_payload(Request *req, bstring uuid, int fd, const char *buf, size_t len)
 {
@@ -366,11 +366,9 @@ bstring Request_to_payload(Request *req, bstring uuid, int fd, const char *buf, 
         key = (bstring)hnode_getkey(i);
 
         if(val_list->qty > 1) {
-            // first just hook up the key into the output
-            bformata(headers, ",\"%s\":[", bdata(key));
-            bstring list = bjoin(val_list, &LISTSEP);
-            bconcat(headers, list);
-            bconchar(headers, ']');
+            // join all the values together as a json array then add that to the key
+            bstring list = bjoin(val_list, &JSON_LISTSEP);
+            bformata(headers, ",\"%s\":[\"%s\"]", bdata(key), bdata(list));
             bdestroy(list);
         } else {
             B(key, val_list->entry[0]);

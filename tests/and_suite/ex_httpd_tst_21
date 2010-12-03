@@ -1,0 +1,4 @@
+GET / HTTP/1.0
+Cookie: foo=bar
+Cookie: test=yes; go=no
+
