@@ -277,7 +277,7 @@ void *Handler_send_create(const char *send_spec, const char *identity)
     rc = zmq_bind(handler_socket, send_spec);
     while(rc != 0) {
         taskdelay(1000);
-        debug("Failed to bind send socket trying again.");
+        log_warn("Failed to bind send socket trying again for: %s", send_spec);
         rc = zmq_bind(handler_socket, send_spec);
     }
 
