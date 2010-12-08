@@ -214,40 +214,47 @@ int netannounce(int istcp, char *server, int port)
 int netaccept(int fd, char *server, int *port)
 {
     int cfd = 0;
-    int one = 0;
-    struct sockaddr_in6 sa;
-    struct sockaddr_in *sa_ipv4;
-    socklen_t len = sizeof sa;
+    int opt = 0;
+
+    // welcome to hacks-central, where IPv6 and IPv4 live together in pensive harmony
+    union {
+        struct sockaddr_in6 ipv6;
+        struct sockaddr_in ipv4;
+    } addr_converter;
+
+    socklen_t len = sizeof(addr_converter);
     int rc = 0;
    
     rc = fdwait(fd, 'r');
     check(rc != -1, "Failed waiting on non-block accept.");
 
     taskstate("netaccept");
-    cfd = accept(fd, (void*)&sa, &len);
+    cfd = accept(fd, (void*)&addr_converter, &len);
     check(cfd != -1, "Failed calling accept on socket that was ready.");
 
     if(server) {
-        if(sa.sin6_family == AF_INET) {
-            // for some idiotic reason, inet_ntop converts sin6_ and friends to 0.0.0.0.
-            sa_ipv4 = (struct sockaddr_in *)&sa;
-            check(inet_ntop(sa_ipv4->sin_family, &sa_ipv4->sin_addr, server, IPADDR_SIZE) != NULL,
+        if(addr_converter.ipv6.sin6_family == AF_INET) {
+            check(inet_ntop(addr_converter.ipv4.sin_family, &addr_converter.ipv4.sin_addr, server, IPADDR_SIZE) != NULL,
                     "Major failure, cannot ntop ipaddresses.");
         } else {
-            check(inet_ntop(sa.sin6_family, &sa.sin6_addr, server, IPADDR_SIZE) != NULL,
+            check(inet_ntop(addr_converter.ipv6.sin6_family, &addr_converter.ipv6.sin6_addr, server, IPADDR_SIZE) != NULL,
                     "Major failure, cannot ntop ipaddresses.");
         }
     }
 
     if(port) {
-        *port = ntohs(sa.sin6_port);
+        if(addr_converter.ipv6.sin6_family == AF_INET) {
+            *port = ntohs(addr_converter.ipv4.sin_port);
+        } else {
+            *port = ntohs(addr_converter.ipv6.sin6_port);
+        }
     }
 
     fdnoblock(cfd);
 
     if(SET_NODELAY) {
-        one = 1;
-        setsockopt(cfd, IPPROTO_TCP, TCP_NODELAY, (char*)&one, sizeof one);
+        opt = 1;
+        setsockopt(cfd, IPPROTO_TCP, TCP_NODELAY, (char*)&opt, sizeof opt);
     }
 
     taskstate("netaccept succeeded");
