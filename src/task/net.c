@@ -216,6 +216,7 @@ int netaccept(int fd, char *server, int *port)
     int cfd = 0;
     int one = 0;
     struct sockaddr_in6 sa;
+    struct sockaddr_in *sa_ipv4;
     socklen_t len = sizeof sa;
     int rc = 0;
    
@@ -227,8 +228,15 @@ int netaccept(int fd, char *server, int *port)
     check(cfd != -1, "Failed calling accept on socket that was ready.");
 
     if(server) {
-        check(inet_ntop(sa.sin6_family, &sa.sin6_addr, server, IPADDR_SIZE) != NULL,
-                "Major failure, cannot ntop ipaddresses.");
+        if(sa.sin6_family == AF_INET) {
+            // for some idiotic reason, inet_ntop converts sin6_ and friends to 0.0.0.0.
+            sa_ipv4 = (struct sockaddr_in *)&sa;
+            check(inet_ntop(sa_ipv4->sin_family, &sa_ipv4->sin_addr, server, IPADDR_SIZE) != NULL,
+                    "Major failure, cannot ntop ipaddresses.");
+        } else {
+            check(inet_ntop(sa.sin6_family, &sa.sin6_addr, server, IPADDR_SIZE) != NULL,
+                    "Major failure, cannot ntop ipaddresses.");
+        }
     }
 
     if(port) {
