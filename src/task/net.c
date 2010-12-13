@@ -26,7 +26,7 @@ enum {
   CB_CONNECT 
 };
 
-int MAX_LISTEN_BACKLOG = 16;
+int MAX_LISTEN_BACKLOG = 128;
 int SET_NODELAY = 1;
 
 static void addr_ntop(void *sinx, char *target, int size) 
@@ -225,12 +225,19 @@ int netaccept(int fd, char *server, int *port)
     socklen_t len = sizeof(addr_converter);
     int rc = 0;
    
-    rc = fdwait(fd, 'r');
-    check(rc != -1, "Failed waiting on non-block accept.");
-
-    taskstate("netaccept");
     cfd = accept(fd, (void*)&addr_converter, &len);
-    check(cfd != -1, "Failed calling accept on socket that was ready.");
+
+    if(cfd == -1) {
+        if(errno == EAGAIN || errno == EWOULDBLOCK) {
+            rc = fdwait(fd, 'r');
+            check(rc != -1, "Failed waiting on non-block accept.");
+
+            cfd = accept(fd, (void*)&addr_converter, &len);
+            check(cfd != -1, "Failed to accept after doing a poll on the socket.");
+        } else {
+            sentinel("Failed calling accept on socket that was ready: %d, %d", cfd, errno == EAGAIN);
+        }
+    }
 
     if(server) {
         if(addr_converter.ipv6.sin6_family == AF_INET) {
