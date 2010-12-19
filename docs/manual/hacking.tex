@@ -127,13 +127,13 @@ them.  It also properly does keep-alives for as long as it is efficient to do so
 
 \begin{aside}{Proxying And 0MQ Handlers Are Like mod\_*}
 A quick note for people coming from other web servers.  If you use nginx then you are probably
-familiar with the concept of proxying to a "backend" like Ruby on Rails or Django.
+familiar with the concept of proxying to a ``backend'' like Ruby on Rails or Django.
 If you use PHP or another language, you may be used to a system like \ident{mod\_php} which 
 manages your code for you and reloads when you make changes.
-If you use Apache, then you probably think in terms of "virtual hosts" and "mod\_rewrite rules".
+If you use Apache, then you probably think in terms of ``virtual hosts'' and ``mod\_rewrite rules''.
 
 In Mongrel2 all the same concepts are there, it's just cleaned up.  If you want Mongrel2
-to "nginx/mod\_rewrite style" talk to another backend web server, then that's Proxying.
+to ``nginx/mod\_rewrite style'' talk to another backend web server, then that's Proxying.
 If you want to have fast backend handlers then that's 0MQ Handlers.
 
 We really don't have anything like mod\_php because the whole idea of embedding a programming

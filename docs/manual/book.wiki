@@ -7798,7 +7798,7 @@
     there will take your whole world down if they crash. Try doing
     a harsh <span class="pcrro7t-">kill</span> on your process
     manager and see how it behaves. As much as they like to tell
-    you not to worry about this because they &rdquo;run
+    you not to worry about this because they &ldquo;run
     forever&rdquo;, everything has bugs and stupid people tend to
     kill things they don't get. If taking one process down
     nukes your whole server, then that's a bad design.
@@ -8072,18 +8072,18 @@
 
       <p class="indent">A quick note for people coming from other
       web servers. If you use nginx then you are probably familiar
-      with the concept of proxying to a &rdquo;backend&rdquo; like
+      with the concept of proxying to a &ldquo;backend&rdquo; like
       Ruby on Rails or Django. If you use PHP or another language,
       you may be used to a system like <span class=
       "pcrro7t-">mod</span><span class="pcrro7t-">_php</span> which
       manages your code for you and reloads when you make changes.
       If you use Apache, then you probably think in terms of
-      &rdquo;virtual hosts&rdquo; and &rdquo;mod_rewrite
+      &ldquo;virtual hosts&rdquo; and &ldquo;mod_rewrite
       rules&rdquo;. <!--l. 135-->
 
       <p class="indent">In Mongrel2 all the same concepts are
       there, it's just cleaned up. If you want Mongrel2 to
-      &rdquo;nginx/mod_rewrite style&rdquo; talk to another backend
+      &ldquo;nginx/mod_rewrite style&rdquo; talk to another backend
       web server, then that's Proxying. If you want to have
       fast backend handlers then that's 0MQ Handlers. 
       <!--l. 139-->
