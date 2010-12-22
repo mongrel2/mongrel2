@@ -58,11 +58,11 @@ int bsd_sendfile(int out_fd, int in_fd, off_t *offset, size_t count) {
 #elif defined(__FreeBSD__)
         rc = sendfile(in_fd, out_fd, *offset, count, NULL, &my_count, 0);
 #endif
+        *offset += my_count;
     } while(rc != 0 && errno == 35);
 
     check(rc == 0, "OS X sendfile wrapper failed");
 
-    *offset += my_count;
     return my_count;
 
 error:
