@@ -92,10 +92,11 @@ Server *Server_create(const char *uuid, const char *default_host,
     bcatcstr(use_ssl_key, ".use_ssl");
 
     if(Setting_get_int(bdata(use_ssl_key), 0)) {
+        uint32_t ssl_opts = SSL_DISPLAY_RSA;
         certdir = Setting_get_str("certdir", NULL);
         check(certdir != NULL, "to use ssl, you must specify a certdir");
 
-        srv->ssl_ctx = ssl_ctx_new(SSL_DISPLAY_RSA, 0);
+        srv->ssl_ctx = ssl_ctx_new(SSL_NO_DEFAULT_KEY | ssl_opts, 0);
         check(srv->ssl_ctx != NULL, "ssl_ctx_new failed");
 
         certpath = bstrcpy(certdir);
