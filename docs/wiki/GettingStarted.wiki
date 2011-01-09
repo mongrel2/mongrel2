@@ -52,7 +52,7 @@ wget http://mongrel2.org/static/downloads/mongrel2-1.4.tar.bz2
 <pre>
 tar -xjvf mongrel2-1.4.tar.bz2
 cd mongrel2-1.4/
-make clean all install
+make clean all && sudo make install
 </pre>
 
 <p>The version number for your directory might be different since we 
