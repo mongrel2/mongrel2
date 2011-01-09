@@ -8355,7 +8355,7 @@
     it's easy to see how it would seem to work that way. The
     reality is that you can get messages of any size, and without
     some framing mechanism you wouldn't know where one
-    messages ends or beings. TCP is a <span class=
+    messages ends or begins. TCP is a <span class=
     "pplri7t-">streaming protocol</span>.
 
     <dt class="description"><span class="pplb7t-">UDP</span>

@@ -246,7 +246,7 @@ this:
    from the TCP socket they get a single 10k message in reply.  This only works in
    small messages and not on the Internet, so it's easy to see how it would seem
    to work that way.  The reality is that you can get messages of any size, and without
-   some framing mechanism you wouldn't know where one messages ends or beings.
+   some framing mechanism you wouldn't know where one messages ends or begins.
    TCP is a \emph{streaming protocol}.
 
 \item [UDP] Programmers think UDP sockets are single, fast, \emph{reliable} messages
