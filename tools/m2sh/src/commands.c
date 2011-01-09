@@ -686,23 +686,25 @@ void Command_destroy(Command *cmd)
     for(i = 0; i < cmd->token_count; i++) {
         Token_destroy(cmd->tokens[i]);
     }
+
+    free(cmd);
 }
 
 
 int Command_run(bstring arguments)
 {
-    Command cmd;
+    Command *cmd = calloc(1, sizeof(Command));
     CommandHandler *handler;
     int rc = 0;
 
-    check(cli_params_parse_args(arguments, &cmd) != -1, "USAGE: m2sh <command> [options]");
-    check_no_extra(&cmd);
+    check(cli_params_parse_args(arguments, cmd) != -1, "USAGE: m2sh <command> [options]");
+    check_no_extra(cmd);
 
     for(handler = COMMAND_MAPPING; handler->name != NULL; handler++)
     {
-        if(biseqcstr(cmd.name, handler->name)) {
-            rc = handler->cb(&cmd);
-            Command_destroy(&cmd);
+        if(biseqcstr(cmd->name, handler->name)) {
+            rc = handler->cb(cmd);
+            Command_destroy(cmd);
             return rc;
         }
     }
@@ -710,7 +712,7 @@ int Command_run(bstring arguments)
     log_err("INVALID COMMAND. Use m2sh help to find out what's available.");
 
 error:  // fallthrough on purpose
-    Command_destroy(&cmd);
+    Command_destroy(cmd);
     return -1;
 }
 
