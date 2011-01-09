@@ -122,4 +122,7 @@ solaris: OPTLIBS=-L/usr/local/lib -R/usr/local/lib -lsocket -lnsl -lsendfile
 solaris: all
 
 
+macports: OPTFLAGS=-I/opt/local/include
+macports: OPTLIBS=-L/opt/local/lib
+macports: all
 
