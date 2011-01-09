@@ -26,7 +26,7 @@ sudo pacman -S sqlite3
 <p>Le plus rapide est de récupérer l'archive tar.bz2 :</p>
 
 <pre>
-wget http://mongrel2.org/static/downloads/mongrel2-1.4.tar.bz2
+wget http://mongrel2.org/static/downloads/mongrel2-1.5.tar.bz2
 </pre>
 
 <h1>Installer Mongrel2</h1>
@@ -34,8 +34,8 @@ wget http://mongrel2.org/static/downloads/mongrel2-1.4.tar.bz2
 <p>Vous allez maintenant installer Mongrel2 :</p>
 
 <pre>
-tar -xjvf mongrel2-1.4.tar.bz2
-cd mongrel2-1.4
+tar -xjvf mongrel2-1.5.tar.bz2
+cd mongrel2-1.5
 make clean all install
 </pre>
 

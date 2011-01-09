@@ -56,7 +56,7 @@ technologies.</p>
 <p>Mongrel2 is now 1.5 as of Sun Jan  9 15:16:00 PST 2011:</p>
 
 <ul>
-    <li><a href="/static/downloads/mongrel2-1.4.tar.bz2">mongrel2-1.5.tar.bz2</a> 
+    <li><a href="/static/downloads/mongrel2-1.5.tar.bz2">mongrel2-1.5.tar.bz2</a> 
     MD5: </li>
 </ul>
 
