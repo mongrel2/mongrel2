@@ -1,5 +1,5 @@
 CFLAGS=-g -O2 -Wall -Isrc -DNDEBUG $(OPTFLAGS)
-LIBS=-lzmq -lsqlite3  $(OPTLIBS)
+LIBS=-lzmq -lsqlite3 -lpthread $(OPTLIBS)
 PREFIX?=/usr/local
 
 ASM=$(wildcard src/**/*.S src/*.S)
