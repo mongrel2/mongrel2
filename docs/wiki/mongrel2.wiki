@@ -53,13 +53,11 @@ technologies.</p>
 
 <h2><a name="download">Download</a></h2>
 
-<p>Mongrel2 is now 1.4 as of Sat Oct 16 11:20:30 PDT 2010:</p>
+<p>Mongrel2 is now 1.5 as of Sun Jan  9 15:16:00 PST 2011:</p>
 
 <ul>
-    <li><a href="/static/downloads/mongrel2-1.4.tar.bz2">mongrel2-1.4.tar.bz2</a> 
-    MD5: d5b917c7cb2fd0527f6824edda37cefb </li>
-    <li><a href="/static/downloads/mongrel2-1.4.zip">mongrel2-1.4.zip</a>
-    MD5: 7672174bc93aa64ffa7d5951a910e2d3 </li>
+    <li><a href="/static/downloads/mongrel2-1.4.tar.bz2">mongrel2-1.5.tar.bz2</a> 
+    MD5: </li>
 </ul>
 
 
