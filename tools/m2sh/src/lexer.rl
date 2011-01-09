@@ -144,6 +144,9 @@ tst_t *Parse_config_file(const char *path)
 
     fclose(script); script = NULL;
 
+    // make sure there's a \n at the end
+    bconchar(buffer, '\n');
+
     settings = Parse_config_string(buffer);
     check(settings != NULL, "Failed to parse file: %s", path);
 
