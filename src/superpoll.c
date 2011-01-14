@@ -134,7 +134,9 @@ static inline int SuperPoll_add_poll(SuperPoll *sp, void *data, void *socket, in
     int cur_fd = sp->nfd_hot;
     int bits = 0;
 
-    check(cur_fd < SuperPoll_max_hot(sp), "Too many open files requested: %d is greater than hot %d max.", cur_fd, SuperPoll_max_hot(sp));
+    check(cur_fd < SuperPoll_max_hot(sp), "Too many %s: %d is greater than hot %d max.",
+            socket ? "handler requests outstanding, your handler isn't running" : "files open",
+            cur_fd, SuperPoll_max_hot(sp));
 
 
     if(rw == 'r') {
