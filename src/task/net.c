@@ -164,7 +164,7 @@ static int netgetsocket(int istcp, char *server, int port,
                     res->ai_protocol);
 
         if(fd < 0) {
-            switch errno {
+            switch(errno) {
                 case EAFNOSUPPORT:
                     continue;
                 case EPROTONOSUPPORT:
