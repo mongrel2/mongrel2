@@ -129,7 +129,7 @@ getting changes into mongrel2.org.</p>
 
 <h2>I forgot my password, how do I set it?</h2>
 
-<p>Use <b>fossil user -R mongrel2.fossil YOU password</b> and it'll ask you for
+<p>Use <b>fossil user -R mongrel2.fossil password YOU</b> and it'll ask you for
 a new one.  You don't need the -R if you are in your source directory.</p>
 
 
