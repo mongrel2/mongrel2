@@ -24,9 +24,9 @@ If you want very good explanations for all of this, go read
 
 <pre>
 # install ZeroMQ 
-wget http://www.zeromq.org/local--files/area:download/zeromq-2.0.8.tar.gz 
-tar -xzvf zeromq-2.0.8.tar.gz 
-cd zeromq-2.0.8/ 
+wget http://www.zeromq.org/local--files/area:download/zeromq-2.0.10.tar.gz 
+tar -xzvf zeromq-2.0.10.tar.gz 
+cd zeromq-2.0.10/ 
 ./configure 
 make 
 sudo make install 
