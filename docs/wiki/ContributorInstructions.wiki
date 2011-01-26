@@ -120,7 +120,7 @@ fossil remote-url http://YOU@yourserver.com:8080/
 
 <p>It will then prompt you for a password which you should have setup when
 you cloned your fossil repository.  If you forgot you can change it on the
-remote machine with </b>fossil user -R mongrel2.fossil YOU password</b>.</p>
+remote machine with </b>fossil user -R mongrel2.fossil password YOU</b>.</p>
 
 <p>This tells your local fossil to use your remote fossil as the place
 to commit changes. Incidentally, that's the same thing you do for
