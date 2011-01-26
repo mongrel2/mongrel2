@@ -82,7 +82,7 @@ latest before you can commit.</p>
 
 <ol>
 <li>Edit the files you need and write a test if you can.</li>
-<li>Use <b>fossil st</b> to make sure you are only changing what you think you are changing.</li>
+<li>Use <b>fossil status</b> to make sure you are only changing what you think you are changing.</li>
 <li>Use <b>fossil up</b> to make sure you're on the latest.</li>
 <li>Then <b>fossil commit -m "SOME MESSAGE ABOUT WHY."</b> and you're done.</li>
 </ol>
