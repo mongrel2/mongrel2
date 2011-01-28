@@ -17,7 +17,7 @@ dev: CFLAGS=-g -Wall -Isrc -Wall -Wextra $(OPTFLAGS)
 dev: all
 
 bin/mongrel2: build/libm2.a src/mongrel2.o
-	$(CC) $(CFLAGS) $(LIBS) src/mongrel2.o -o $@ $<
+	$(CC) $(CFLAGS) src/mongrel2.o -o $@ $< $(LIBS)
 
 build/libm2.a: build ${LIB_OBJ}
 	ar rcs $@ ${LIB_OBJ}
@@ -52,7 +52,7 @@ tests/config.sqlite: src/config/config.sql src/config/example.sql src/config/mim
 	sqlite3 $@ < src/config/mimetypes.sql
 
 $(TESTS): %: %.c build/libm2.a
-	$(CC) $(CFLAGS) $(LIBS) -o $@ $< build/libm2.a
+	$(CC) $(CFLAGS) -o $@ $< build/libm2.a $(LIBS)
 
 src/state.c: src/state.rl src/state_machine.rl
 src/http11/http11_parser.c: src/http11/http11_parser.rl
