@@ -324,6 +324,11 @@ int connection_proxy_reply_parse(Connection *conn)
         total = client->body_start + client->content_len;
         rc = IOBuf_stream(conn->proxy_iob, conn->iob, total);
         check(rc != -1, "Failed streaming non-chunked response.");
+    } else if(client->status == 204 || client->status == 304) {
+        //  According to the RFC, these MUST NOT incude a body.
+        //  Proxy might keep the connection open but not send content-length.
+        rc = IOBuf_stream(conn->proxy_iob, conn->iob, client->body_start);
+        check(rc != -1, "Failed streaming non-chunked response.");
     } else if(client->close || client->content_len == -1) {
         debug("Response requested a read until close.");
         Proxy_stream_to_close(conn);
