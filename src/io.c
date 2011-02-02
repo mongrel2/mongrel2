@@ -139,7 +139,7 @@ static ssize_t ssl_stream_file(IOBuf *iob, int fd, int len)
     ssize_t amt = 0;
     ssize_t tosend = 0;
     int conn_fd = IOBuf_fd(iob);
-    char buff[256];
+    char buff[1024];
 
     for(total = 0; fdwait(conn_fd, 'w') == 0 && total < len; total += tosend) {
         tosend = pread(fd, buff, sizeof(buff), total);
@@ -150,6 +150,7 @@ static ssize_t ssl_stream_file(IOBuf *iob, int fd, int len)
         if(tosend + total > len)
             tosend = len - total;
 
+        sent = 0;
         while(sent < tosend) {
             amt = ssl_send(iob, buff, tosend);
             check_debug(amt > 0, "ssl_send failed in ssl_stream_file with "
