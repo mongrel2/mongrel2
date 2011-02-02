@@ -54,7 +54,7 @@ static ssize_t plain_stream_file(IOBuf *iob, int fd, int len)
 
     for(total = 0; fdwait(conn_fd, 'w') == 0 && total < len; total += sent) {
 
-        sent = Dir_send(conn_fd, fd, &offset, block_size);
+        sent = IOBuf_sendfile(conn_fd, fd, &offset, block_size);
         debug("TOTAL: %d", total);
         check_debug(sent > 0, "Client closed probably during sendfile on socket: %d from "
                     "file %d", conn_fd, fd);

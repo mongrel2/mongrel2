@@ -87,9 +87,9 @@ int IOBuf_stream_file(IOBuf *buf, int fd, int len);
 #define IOBuf_fd(I) ((I)->fd)
 
 #if defined(__APPLE__) || defined(__FreeBSD__) || defined(__NetBSD__)
-#define Dir_send bsd_sendfile
+#define IOBuf_sendfile bsd_sendfile
 #else
-#define Dir_send sendfile
+#define IOBuf_sendfile sendfile
 #endif
 
 #endif
