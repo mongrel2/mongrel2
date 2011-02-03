@@ -121,7 +121,7 @@ error:
 }
 
 
-void *Register_fd_exists(int fd)
+struct Connection *Register_fd_exists(int fd)
 {
     assert(fd < MAX_REGISTERED_FDS && "FD given to register is greater than max.");
     check(fd >= 0, "Invalid FD given for disconnect: %d", fd);

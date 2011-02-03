@@ -42,7 +42,7 @@
 #define MAX_REGISTERED_FDS  64 * 1024
 
 typedef struct Registration {
-    void *data;
+    struct Connection *data;
     uint16_t id;
     uint32_t last_ping;
 } Registration;
@@ -55,7 +55,7 @@ int Register_ping(int fd);
 
 void Register_init();
 
-void *Register_fd_exists(int fd);
+struct Connection *Register_fd_exists(int fd);
 
 int Register_id_for_fd(int fd);
 
