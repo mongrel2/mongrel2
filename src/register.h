@@ -39,21 +39,15 @@
 #include <stdint.h>
 #include <bstring.h>
 
-enum {
-    CONN_TYPE_HTTP=1,
-    CONN_TYPE_MSG,
-    CONN_TYPE_SOCKET
-};
-
 #define MAX_REGISTERED_FDS  64 * 1024
 
 typedef struct Registration {
-    uint8_t conn_type;
+    void *data;
     uint16_t id;
     uint32_t last_ping;
 } Registration;
 
-int Register_connect(int fd, int conn_type);
+int Register_connect(int fd, void *data);
 
 int Register_disconnect(int fd);
 
@@ -61,7 +55,7 @@ int Register_ping(int fd);
 
 void Register_init();
 
-int Register_fd_exists(int fd);
+void *Register_fd_exists(int fd);
 
 int Register_id_for_fd(int fd);
 

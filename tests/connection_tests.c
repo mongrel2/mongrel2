@@ -24,11 +24,14 @@ char *test_Connection_create_destroy()
 char *test_Connection_deliver()
 {
     bstring t1;
+    const char remote[IPADDR_SIZE];
+    Connection *conn = Connection_create(NULL, 1, 0, remote, NULL);
 
-    int rc = Connection_deliver(1, t1 = bfromcstr("TEST"));
+    int rc = Connection_deliver(conn, t1 = bfromcstr("TEST"));
     // depending on the platform this will fail or not if send is allowed on files
     mu_assert(rc == -1, "Should NOT be able to write.");
 
+    Connection_destroy(conn);
     bdestroy(t1);
 
     return NULL;

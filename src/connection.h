@@ -45,6 +45,11 @@ extern int CONNECTION_STACK;
 extern int BUFFER_SIZE;
 extern int MAX_CONTENT_LENGTH;
 
+enum {
+    CONN_TYPE_HTTP=1,
+    CONN_TYPE_MSG,
+    CONN_TYPE_SOCKET
+};
 
 typedef struct Connection {
     Server *server;
@@ -58,6 +63,7 @@ typedef struct Connection {
     struct httpclient_parser *client;
     char remote[IPADDR_SIZE+1];
     int close;
+    int type;
 } Connection;
 
 void Connection_destroy(Connection *conn);
@@ -72,9 +78,9 @@ void Connection_task(void *v);
 struct Handler;
 int Connection_send_to_handler(Connection *conn, Handler *handler, char *body, int content_len);
 
-int Connection_deliver_raw(int to_fd, bstring buf);
+int Connection_deliver_raw(Connection *conn, bstring buf);
 
-int Connection_deliver(int to_fd, bstring buf);
+int Connection_deliver(Connection *conn, bstring buf);
 
 int Connection_read_header(Connection *conn, Request *req);
 

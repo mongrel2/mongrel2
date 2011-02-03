@@ -103,18 +103,18 @@ static inline void handler_cap_payload(bstring payload)
     }
 }
 
-static inline int deliver_payload(int raw, int fd, bstring payload)
+static inline int deliver_payload(int raw, int fd, Connection *conn, bstring payload)
 {
     int rc = 0;
 
     if(raw) {
         debug("Sending raw message to %d length %d", fd, blength(payload));
-        rc = Connection_deliver_raw(fd, payload);
+        rc = Connection_deliver_raw(conn, payload);
         check(rc != -1, "Error sending raw message to HTTP listener on FD %d, closing them.", fd);
     } else {
         debug("Sending BASE64 message to %d length %d", fd, blength(payload));
         handler_cap_payload(payload);
-        rc = Connection_deliver(fd, payload);
+        rc = Connection_deliver(conn, payload);
         check(rc != -1, "Error sending to MSG listener on FD %d, closing them.", fd);
     }
 
@@ -123,12 +123,12 @@ error:
     return -1;
 }
 
-static inline void handler_process_request(Handler *handler, int id,
-        int fd, int conn_type, bstring payload)
+static inline void handler_process_request(Handler *handler, int id, int fd,
+        Connection *conn, bstring payload)
 {
     int rc = 0;
 
-    if(!conn_type) {
+    if(conn == NULL) {
         debug("Ident %d (fd %d) is no longer connected.", id, fd);
         Handler_notify_leave(handler, id);
     } else {
@@ -136,9 +136,9 @@ static inline void handler_process_request(Handler *handler, int id,
             rc = Register_disconnect(fd);
             check(rc != -1, "Register disconnect failed for: %d", fd);
         } else {
-            int raw = conn_type != CONN_TYPE_MSG || handler->raw;
+            int raw = conn->type != CONN_TYPE_MSG || handler->raw;
 
-            rc = deliver_payload(raw, fd, payload);
+            rc = deliver_payload(raw, fd, conn, payload);
             check(rc != -1, "Failed to deliver to connection %d on socket %d", id, fd);
         }
     }
@@ -215,9 +215,9 @@ void Handler_task(void *v)
             for(i = 0; i < (int)parser->target_count; i++) {
                 int id = (int)parser->targets[i];
                 int fd = Register_fd_for_id(id);
-                int conn_type = Register_fd_exists(fd);
+                Connection *conn = (Connection *)Register_fd_exists(fd);
 
-                handler_process_request(handler, id, fd, conn_type, parser->body);
+                handler_process_request(handler, id, fd, conn, parser->body);
             }
         } else {
             debug("Skipped invalid message from handler: %s", bdata(handler->send_spec));

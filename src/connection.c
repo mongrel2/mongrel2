@@ -428,36 +428,35 @@ int connection_error(Connection *conn)
 
 static inline int ident_and_register(Connection *conn, int reg_too)
 {
-    int conn_type = 0;
     int next = CLOSE;
 
     if(Request_is_xml(conn->req)) {
         if(biseq(Request_path(conn->req), &POLICY_XML_REQUEST)) {
             debug("XML POLICY CONNECTION");
-            conn_type = CONN_TYPE_SOCKET;
+            conn->type = CONN_TYPE_SOCKET;
             taskname("XML");
             next = SOCKET_REQ;
         } else {
             debug("XML MESSAGE");
-            conn_type = CONN_TYPE_MSG;
+            conn->type = CONN_TYPE_MSG;
             taskname("MSG");
             next = MSG_REQ;
         }
     } else if(Request_is_json(conn->req)) {
         debug("JSON SOCKET MESSAGE");
-        conn_type = CONN_TYPE_MSG;
+        conn->type = CONN_TYPE_MSG;
         taskname("MSG");
         next = MSG_REQ;
     } else if(Request_is_http(conn->req)) {
         debug("HTTP MESSAGE");
-        conn_type = CONN_TYPE_HTTP;
+        conn->type = CONN_TYPE_HTTP;
         taskname("HTTP");
         next = HTTP_REQ;
     } else {
         error_response(conn, 500, "Invalid code branch, tell Zed.");
     }
 
-    if(reg_too) Register_connect(IOBuf_fd(conn->iob), conn_type);
+    if(reg_too) Register_connect(IOBuf_fd(conn->iob), (void*)conn);
     return next;
 
 error:
@@ -529,6 +528,7 @@ Connection *Connection_create(Server *srv, int fd, int rport,
     conn->rport = rport;
     memcpy(conn->remote, remote, IPADDR_SIZE);
     conn->remote[IPADDR_SIZE] = '\0';
+    conn->type = 0;
 
     conn->req = Request_create();
     check_mem(conn->req);
@@ -578,18 +578,18 @@ error: // fallthrough
     return;
 }
 
-int Connection_deliver_raw(int to_fd, bstring buf)
+int Connection_deliver_raw(Connection *conn, bstring buf)
 {
-    return fdsend(to_fd, bdata(buf), blength(buf));
+    return IOBuf_send(conn->iob, bdata(buf), blength(buf));
 }
 
-int Connection_deliver(int to_fd, bstring buf)
+int Connection_deliver(Connection *conn, bstring buf)
 {
     int rc = 0;
 
     bstring b64_buf = bBase64Encode(buf);
-    rc = fdsend(to_fd, bdata(b64_buf), blength(b64_buf)+1);
-    check_debug(rc == blength(b64_buf)+1, "Failed to write entire message to conn %d", to_fd);
+    rc = IOBuf_send(conn->iob, bdata(b64_buf), blength(b64_buf)+1);
+    check_debug(rc == blength(b64_buf)+1, "Failed to write entire message to conn %d", IOBuf_fd(conn->iob));
 
     bdestroy(b64_buf);
     return 0;

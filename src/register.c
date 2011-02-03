@@ -54,27 +54,27 @@ void Register_init()
 
 static inline void Register_clear(Registration *reg)
 {
-    reg->conn_type = 0;
+    reg->data = NULL;
     reg->last_ping = 0;
     REG_ID_TO_FD[reg->id] = -1;
 }
 
-int Register_connect(int fd, int conn_type)
+int Register_connect(int fd, void* data)
 {
     int rc = 0;
     assert(fd < MAX_REGISTERED_FDS && "FD given to register is greater than max.");
-    assert(conn_type != 0 && "conn_type can't be 0");
+    assert(data != NULL && "data can't be NULL");
 
     Registration *reg = &REGISTRATIONS[fd];
 
-    if(reg->conn_type) {
+    if(reg->data != NULL) {
         debug("Looks like stale registration in %d, kill it before it gets out.", fd);
         // a new Register_connect came in, but we haven't disconnected the previous
-        Register_clear(reg);
+        rc = Register_disconnect(fd);
         check(rc != -1, "Weird error, tried to disconnect something that exists then got an error: %d", fd);
     }
 
-    reg->conn_type = conn_type;
+    reg->data = data;
     reg->last_ping = time(NULL);
     
     // purposefully want overflow on these
@@ -93,7 +93,7 @@ int Register_disconnect(int fd)
     assert(fd >= 0 && "Invalid FD given for disconnect.");
 
     Registration *reg = &REGISTRATIONS[fd];
-    check_debug(reg->conn_type != 0, "Attempt to unregister FD %d which is already gone.", fd);
+    check_debug(reg->data != NULL, "Attempt to unregister FD %d which is already gone.", fd);
 
     Register_clear(reg);
     fdclose(fd);
@@ -111,7 +111,7 @@ int Register_ping(int fd)
     check(fd >= 0, "Invalid FD given for disconnect: %d", fd);
     Registration *reg = &REGISTRATIONS[fd];
 
-    check_debug(reg->conn_type != 0, "Attemp to ping an FD that isn't registered: %d", fd);
+    check_debug(reg->data != NULL, "Attemp to ping an FD that isn't registered: %d", fd);
 
     reg->last_ping = time(NULL);
     return reg->last_ping;
@@ -121,14 +121,14 @@ error:
 }
 
 
-int Register_fd_exists(int fd)
+void *Register_fd_exists(int fd)
 {
     assert(fd < MAX_REGISTERED_FDS && "FD given to register is greater than max.");
     check(fd >= 0, "Invalid FD given for disconnect: %d", fd);
 
-    return REGISTRATIONS[fd].conn_type;
+    return REGISTRATIONS[fd].data;
 error:
-    return 0;
+    return NULL;
 }
 
 
@@ -153,7 +153,7 @@ bstring Register_info()
     time_t now = time(NULL);
 
     for(i = 0; i < MAX_REGISTERED_FDS; i++) {
-        if(REGISTRATIONS[i].conn_type) {
+        if(REGISTRATIONS[i].data != NULL) {
             bformata(result, "\"%d\":[%d,%d],", REGISTRATIONS[i].id,
                     i, now - REGISTRATIONS[i].last_ping);
             total++;

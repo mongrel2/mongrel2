@@ -1,6 +1,11 @@
 #include "minunit.h"
 #include <register.h>
 
+int V_TEST_CONN_1 = 1;
+int V_TEST_CONN_2 = 2;
+void *TEST_CONN_1 = &V_TEST_CONN_1;
+void *TEST_CONN_2 = &V_TEST_CONN_2;
+
 FILE *LOG_FILE = NULL;
 
 char *test_Register_init() 
@@ -12,8 +17,8 @@ char *test_Register_init()
 
 char *test_Register_connect_disconnect()
 {
-    int id = Register_connect(12, CONN_TYPE_MSG);
-    mu_assert(Register_fd_exists(12) == CONN_TYPE_MSG, "Didn't register.");
+    int id = Register_connect(12, TEST_CONN_1);
+    mu_assert(Register_fd_exists(12) == TEST_CONN_1, "Didn't register.");
     mu_assert(id >= 0, "Got a negative for the ident.");
 
     int fd = Register_fd_for_id(id);
@@ -34,16 +39,16 @@ char *test_Register_connect_disconnect()
 
 char *test_Register_ping()
 {
-    int id = Register_connect(12232, CONN_TYPE_HTTP);
+    int id = Register_connect(12232, TEST_CONN_1);
     mu_assert(id >= 0, "Failed to connect 12232.");
-    mu_assert(Register_fd_exists(12232) == CONN_TYPE_HTTP, "Didn't register.");
+    mu_assert(Register_fd_exists(12232) == TEST_CONN_1, "Didn't register.");
 
     mu_assert(Register_ping(12232), "Ping didn't work.");
 
     // attempt a double registration which should NOT work
-    int new_id = Register_connect(12232, CONN_TYPE_MSG);
+    int new_id = Register_connect(12232, TEST_CONN_2);
     mu_assert(new_id != id, "Second register should get new id.");
-    mu_assert(Register_fd_exists(12232) == CONN_TYPE_MSG, "Should have different conntype");
+    mu_assert(Register_fd_exists(12232) == TEST_CONN_2, "Should have different connection");
 
     id = Register_disconnect(12232);
     mu_assert(id != -1, "Didn't disconnect after some pings.");
