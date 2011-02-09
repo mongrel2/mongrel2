@@ -30,10 +30,12 @@ technologies.</p>
     <a href="http://github.com/darkhelmet/rack-mongrel2">Ruby through Rack</a>,
     <a href="http://github.com/berry/Mongrel2-WSGI-Handler">Python</a>,
     <a href="http://github.com/akrennmair/mongrel2-cpp">C++</a>,
+    <a href="https://github.com/derdewey/mongrel2_c_handler/">C</a>,
     <a href="http://github.com/winks/m2php">PHP</a>,
     <a href="http://github.com/cmoore/web-mongrel2">Haskell</a>,
     <a href="http://github.com/vseloved/cl-mongrel2">Common Lisp</a>,
     <a href="http://github.com/lestrrat/Plack-Handler-Mongrel2">Perl</a>,
+    <a href="https://github.com/jrockway/anyevent-mongrel2/">Perl (AnyEvent)</a>,
     <a href="http://github.com/AustinWise/m2net">.NET</a>,
     <a href="http://github.com/mikejs/ring/tree/master/ring-mongrel2-adapter/">Clojure</a>,
     and <a href="http://github.com/jsimmons/mongrel2-lua/">Lua</a> all written by Mongrel2 fans.</li>
@@ -47,6 +49,7 @@ technologies.</p>
     <li><b>Documented, Documented, Documented</b> We <a href="/doc/tip/docs/manual/book.wiki">document everything</a> in a well written manual that
     shows you how to use every feature.</li>
     <li><b>BSD Licensed</b> and all with a <a href="/wiki?name=License">BSD 3-clause license</a>.</li>
+    <li><a href="http://tir.mongrel2.org/">Tir</a> An official framework written in Lua that shows how to use Mongrel2.</li>
 </ul>
 
 
@@ -93,14 +96,17 @@ with more to come.</p>
 <p>Mongrel2 fans have written quite a few handlers already:</p>
 
 <ul>
-    <li><a href="http://github.com/perplexes/m2r">Ruby (with Rack support)</a></li>
-    <li><a href="http://github.com/berry/Mongrel2-WSGI-Handler">Python (with WSGI)</a></li>
+    <li><a href="http://github.com/perplexes/m2r">Ruby</a></li>
+    <li><a href="http://github.com/darkhelmet/rack-mongrel2">Ruby through Rack</a></li>
+    <li><a href="http://github.com/berry/Mongrel2-WSGI-Handler">Python</a></li>
     <li><a href="http://github.com/akrennmair/mongrel2-cpp">C++</a></li>
+    <li><a href="https://github.com/derdewey/mongrel2_c_handler/">C</a></li>
     <li><a href="http://github.com/winks/m2php">PHP</a></li>
     <li><a href="http://github.com/cmoore/web-mongrel2">Haskell</a></li>
     <li><a href="http://github.com/vseloved/cl-mongrel2">Common Lisp</a></li>
-    <li><a href="http://github.com/lestrrat/Plack-Handler-Mongrel2">Perl (with Plack)</a></li>
-    <li><a href="http://github.com/AustinWise/m2net">.NET (Windows <b>and</b> Linux with ASP.NET)</a></li>
+    <li><a href="http://github.com/lestrrat/Plack-Handler-Mongrel2">Perl</a></li>
+    <li><a href="https://github.com/jrockway/anyevent-mongrel2/">Perl (AnyEvent)</a></li>
+    <li><a href="http://github.com/AustinWise/m2net">.NET</a></li>
     <li><a href="http://github.com/mikejs/ring/tree/master/ring-mongrel2-adapter/">Clojure</a></li>
     <li><a href="http://github.com/jsimmons/mongrel2-lua/">Lua</a></li>
 </ul>
