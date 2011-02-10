@@ -95,7 +95,7 @@ static void *CONTROL_SOCKET = NULL;
             int fd = Register_fd_for_id(id);
 
             if(fd >= 0) {
-                fdclose(fd);
+                Register_disconnect(fd);
                 reply = bformat("{\"result\": \"killed %d\"}", id);
             } else {
                 reply = bformat("{\"error\": \"does not exist: %d\"}", id);
