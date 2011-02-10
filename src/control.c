@@ -59,7 +59,7 @@ static inline void send_reply(void *sock, bstring rep)
     rc = zmq_msg_init_data(outmsg, bdata(rep), blength(rep), bstring_free, rep);
     check(rc == 0, "Failed to init reply data.");
     
-    rc = mqsend(sock, outmsg, 0);
+    rc = mqsend(sock, outmsg, ZMQ_NOBLOCK);
     check(rc == 0, "Failed to deliver 0mq message to requestor.");
 
 error:
@@ -337,7 +337,7 @@ tr25:
             int fd = Register_fd_for_id(id);
 
             if(fd >= 0) {
-                fdclose(fd);
+                Register_disconnect(fd);
                 reply = bformat("{\"result\": \"killed %d\"}", id);
             } else {
                 reply = bformat("{\"error\": \"does not exist: %d\"}", id);
@@ -358,7 +358,7 @@ tr58:
             int fd = Register_fd_for_id(id);
 
             if(fd >= 0) {
-                fdclose(fd);
+                Register_disconnect(fd);
                 reply = bformat("{\"result\": \"killed %d\"}", id);
             } else {
                 reply = bformat("{\"error\": \"does not exist: %d\"}", id);
