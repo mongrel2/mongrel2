@@ -66,6 +66,8 @@ error:
 }
 
 static int CONTROL_RUNNING = 1;
+static void *CONTROL_SOCKET = NULL;
+
 
 %%{
     machine ControlParser;
@@ -206,29 +208,36 @@ void Control_task(void *v)
 
     log_info("Setting up control socket in at %s", bdata(spec));
 
-    void *sock = mqsocket(ZMQ_REP);
-    check(sock != NULL, "Can't create contol socket.");
+    CONTROL_SOCKET = mqsocket(ZMQ_REP);
+    check(CONTROL_SOCKET != NULL, "Can't create contol socket.");
 
-    rc = zmq_bind(sock, bdata(spec));
+    rc = zmq_bind(CONTROL_SOCKET, bdata(spec));
     check(rc == 0, "Failed to bind control port to run/control.");
 
     while(CONTROL_RUNNING) {
         taskstate("waiting");
         
-        req = read_message(sock);
-        check(req, "Failed to read message.");
+        req = read_message(CONTROL_SOCKET);
+        check(req, "Failed to read message %s.",errno);
 
         rep = Control_execute(req);
+        bdestroy(req);
 
         taskstate("replying");
-        send_reply(sock, rep);
+        send_reply(CONTROL_SOCKET, rep);
         check(rep, "Faild to create a reply.");
     }
 
+    rc = zmq_close(CONTROL_SOCKET);
+    check(rc == 0, "Failed to close control port socket.");
+    CONTROL_SOCKET = NULL;
     log_info("Control port exiting.");
     taskexit(0);
 
 error:
+    log_info("Control port exiting with error.");
+    zmq_close(CONTROL_SOCKET);
+    CONTROL_SOCKET = NULL;
     taskexit(1);
 }
 
@@ -236,4 +245,20 @@ error:
 void Control_port_start()
 {
     taskcreate(Control_task, NULL, 32 * 1024);
+}
+
+int Control_port_stop()
+{
+    int rc = 0;
+
+    if(CONTROL_SOCKET != NULL) {
+        rc = zmq_close(CONTROL_SOCKET);
+        check(rc == 0, "Failed to close control socket");
+
+        // TODO: wake up the control task.
+        // it doesn't seem to notice that the socket has been closed.
+    }
+
+error:
+    return rc;
 }

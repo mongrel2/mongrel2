@@ -262,6 +262,8 @@ void complete_shutdown(Server *srv)
     unlink((const char *)srv->pid_file->data);
 
     Server_destroy(srv);
+    Control_port_stop();
+    Log_term();
 
     zmq_term(ZMQ_CTX);
 

@@ -68,13 +68,15 @@ error:
 }
 
 static int CONTROL_RUNNING = 1;
-
-
-#line 164 "control.rl"
+static void *CONTROL_SOCKET = NULL;
 
 
 
-#line 78 "control.c"
+#line 166 "control.rl"
+
+
+
+#line 80 "control.c"
 static const int ControlParser_start = 1;
 static const int ControlParser_first_final = 50;
 static const int ControlParser_error = 0;
@@ -82,7 +84,7 @@ static const int ControlParser_error = 0;
 static const int ControlParser_en_main = 1;
 
 
-#line 167 "control.rl"
+#line 169 "control.rl"
 
 bstring Control_execute(bstring req)
 {
@@ -95,14 +97,14 @@ bstring Control_execute(bstring req)
     debug("RECEIVED CONTROL COMMAND: %s", bdata(req));
 
     
-#line 99 "control.c"
+#line 101 "control.c"
 	{
 	cs = ControlParser_start;
 	}
 
-#line 179 "control.rl"
+#line 181 "control.rl"
     
-#line 106 "control.c"
+#line 108 "control.c"
 	{
 	switch ( cs )
 	{
@@ -186,14 +188,14 @@ case 12:
 		goto tr17;
 	goto st0;
 tr17:
-#line 78 "control.rl"
+#line 80 "control.rl"
 	{
         reply = bfromcstr("{\"msg\": \"stopping control port\"}");
         CONTROL_RUNNING = 0; {p++; cs = 50; goto _out;}
     }
 	goto st50;
 tr20:
-#line 140 "control.rl"
+#line 142 "control.rl"
 	{
         reply = bfromcstr("{\"command_list\":[");
         bcatcstr(reply, "{\"name\": \"control stop\", \"description\": \"Close the control port.\"},\n");
@@ -209,7 +211,7 @@ tr20:
     }
 	goto st50;
 tr30:
-#line 106 "control.rl"
+#line 108 "control.rl"
 	{
         int rc = raise(SIGHUP);
         if (0 == rc) {
@@ -221,15 +223,15 @@ tr30:
     }
 	goto st50;
 tr41:
-#line 76 "control.rl"
+#line 78 "control.rl"
 	{ reply = Register_info(); {p++; cs = 50; goto _out;} }
 	goto st50;
 tr45:
-#line 75 "control.rl"
+#line 77 "control.rl"
 	{ reply = taskgetinfo(); {p++; cs = 50; goto _out;} }
 	goto st50;
 tr46:
-#line 116 "control.rl"
+#line 118 "control.rl"
 	{
         // TODO: probably report back the number of waiting tasks
         int rc = raise(SIGINT);
@@ -242,7 +244,7 @@ tr46:
     }
 	goto st50;
 tr55:
-#line 127 "control.rl"
+#line 129 "control.rl"
 	{
         // TODO: the server might have been terminated before
         // the reply is sent back. If this scenario is crucial (if possible at all)
@@ -257,7 +259,7 @@ tr55:
     }
 	goto st50;
 tr57:
-#line 83 "control.rl"
+#line 85 "control.rl"
 	{
         reply = bformat("{\"time\": %d}", (int)time(NULL)); {p++; cs = 50; goto _out;}
     }
@@ -265,7 +267,7 @@ tr57:
 st50:
 	p += 1;
 case 50:
-#line 269 "control.c"
+#line 271 "control.c"
 	goto st0;
 st13:
 	p += 1;
@@ -323,9 +325,9 @@ case 20:
 		goto st20;
 	goto st0;
 tr25:
-#line 73 "control.rl"
+#line 75 "control.rl"
 	{ mark = p; }
-#line 87 "control.rl"
+#line 89 "control.rl"
 	{
         int id = atoi(p);
 
@@ -346,7 +348,7 @@ tr25:
     }
 	goto st51;
 tr58:
-#line 87 "control.rl"
+#line 89 "control.rl"
 	{
         int id = atoi(p);
 
@@ -369,7 +371,7 @@ tr58:
 st51:
 	p += 1;
 case 51:
-#line 373 "control.c"
+#line 375 "control.c"
 	if ( 48 <= (*p) && (*p) <= 57 )
 		goto tr58;
 	goto st0;
@@ -563,15 +565,15 @@ case 49:
 	_out: {}
 	}
 
-#line 180 "control.rl"
+#line 182 "control.rl"
 
     check(p <= pe, "Buffer overflow after parsing.  Tell Zed that you sent something from a handler that went %ld past the end in the parser.", 
         (long int)(pe - p));
 
     if ( cs == 
-#line 573 "control.c"
+#line 575 "control.c"
 0
-#line 184 "control.rl"
+#line 186 "control.rl"
  ) {
         check(pe - p > 0, "Major erorr in the parser, tell Zed.");
         return bformat("{\"error\": \"parsing error at: ...%s\"}", bdata(req) + (pe - p));
@@ -597,29 +599,36 @@ void Control_task(void *v)
 
     log_info("Setting up control socket in at %s", bdata(spec));
 
-    void *sock = mqsocket(ZMQ_REP);
-    check(sock != NULL, "Can't create contol socket.");
+    CONTROL_SOCKET = mqsocket(ZMQ_REP);
+    check(CONTROL_SOCKET != NULL, "Can't create contol socket.");
 
-    rc = zmq_bind(sock, bdata(spec));
+    rc = zmq_bind(CONTROL_SOCKET, bdata(spec));
     check(rc == 0, "Failed to bind control port to run/control.");
 
     while(CONTROL_RUNNING) {
         taskstate("waiting");
         
-        req = read_message(sock);
-        check(req, "Failed to read message.");
+        req = read_message(CONTROL_SOCKET);
+        check(req, "Failed to read message %s.",errno);
 
         rep = Control_execute(req);
+        bdestroy(req);
 
         taskstate("replying");
-        send_reply(sock, rep);
+        send_reply(CONTROL_SOCKET, rep);
         check(rep, "Faild to create a reply.");
     }
 
+    rc = zmq_close(CONTROL_SOCKET);
+    check(rc == 0, "Failed to close control port socket.");
+    CONTROL_SOCKET = NULL;
     log_info("Control port exiting.");
     taskexit(0);
 
 error:
+    log_info("Control port exiting with error.");
+    zmq_close(CONTROL_SOCKET);
+    CONTROL_SOCKET = NULL;
     taskexit(1);
 }
 
@@ -627,4 +636,20 @@ error:
 void Control_port_start()
 {
     taskcreate(Control_task, NULL, 32 * 1024);
+}
+
+int Control_port_stop()
+{
+    int rc = 0;
+
+    if(CONTROL_SOCKET != NULL) {
+        rc = zmq_close(CONTROL_SOCKET);
+        check(rc == 0, "Failed to close control socket");
+
+        // TODO: wake up the control task.
+        // it doesn't seem to notice that the socket has been closed.
+    }
+
+error:
+    return rc;
 }
