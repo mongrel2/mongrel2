@@ -29,6 +29,7 @@ technologies.</p>
     <a href="http://github.com/perplexes/m2r">Ruby</a>,
     <a href="http://github.com/darkhelmet/rack-mongrel2">Ruby through Rack</a>,
     <a href="http://github.com/berry/Mongrel2-WSGI-Handler">Python</a>,
+    <a href="http://github.com/j2labs/brubeck">Python (Brubeck)</a>,
     <a href="http://github.com/akrennmair/mongrel2-cpp">C++</a>,
     <a href="https://github.com/derdewey/mongrel2_c_handler/">C</a>,
     <a href="http://github.com/winks/m2php">PHP</a>,
@@ -38,6 +39,7 @@ technologies.</p>
     <a href="https://github.com/jrockway/anyevent-mongrel2/">Perl (AnyEvent)</a>,
     <a href="http://github.com/AustinWise/m2net">.NET</a>,
     <a href="http://github.com/mikejs/ring/tree/master/ring-mongrel2-adapter/">Clojure</a>,
+	<a href="http://www.paperculture.com/code/java-mongrel2-handler.html">Java</a>,
     and <a href="http://github.com/jsimmons/mongrel2-lua/">Lua</a> all written by Mongrel2 fans.</li>
     <li><b>Modern Browser Friendly</b> designed to handle HTTP, Flash XMLSockets, or WebSockets, Long Polling on the same socket transparently.</li>
     <li><b><a href="http://zeromq.org">ZeroMQ</a> Enabled</b> as well as HTTP proxy support so it works with what you have already while giving you new super powers.</li>
