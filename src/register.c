@@ -108,13 +108,47 @@ error:
 int Register_ping(int fd)
 {
     assert(fd < MAX_REGISTERED_FDS && "FD given to register is greater than max.");
-    check(fd >= 0, "Invalid FD given for disconnect: %d", fd);
+    check(fd >= 0, "Invalid FD given for ping: %d", fd);
     Registration *reg = &REGISTRATIONS[fd];
 
-    check_debug(reg->data != NULL, "Attemp to ping an FD that isn't registered: %d", fd);
+    check_debug(reg->data != NULL, "Attempt to ping an FD that isn't registered: %d", fd);
 
     reg->last_ping = time(NULL);
     return reg->last_ping;
+
+error:
+    return -1;
+}
+
+
+int Register_read(int fd,uint32_t bytes)
+{
+    assert(fd < MAX_REGISTERED_FDS && "FD given to register is greater than max.");
+    check(fd >= 0, "Invalid FD given for Register_read: %d", fd);
+    Registration *reg = &REGISTRATIONS[fd];
+
+    check_debug(reg->data != NULL, "Attempt to register read on an FD that isn't registered: %d", fd);
+
+    reg->last_read = time(NULL);
+    reg->bytes_read += bytes;
+    return reg->last_read;
+
+error:
+    return -1;
+}
+
+
+int Register_write(int fd,uint32_t bytes)
+{
+    assert(fd < MAX_REGISTERED_FDS && "FD given to register is greater than max.");
+    check(fd >= 0, "Invalid FD given for Register_write: %d", fd);
+    Registration *reg = &REGISTRATIONS[fd];
+
+    check_debug(reg->data != NULL, "Attempt to register write on an FD that isn't registered: %d", fd);
+
+    reg->last_write = time(NULL);
+    reg->bytes_written += bytes;
+    return reg->last_write;
 
 error:
     return -1;
@@ -149,13 +183,20 @@ bstring Register_info()
 {
     int i = 0;
     int total = 0;
+    Registration reg;
     bstring result = bfromcstr("{");
     time_t now = time(NULL);
 
     for(i = 0; i < MAX_REGISTERED_FDS; i++) {
-        if(REGISTRATIONS[i].data != NULL) {
-            bformata(result, "\"%d\":[%d,%d],", REGISTRATIONS[i].id,
-                    i, now - REGISTRATIONS[i].last_ping);
+        reg = REGISTRATIONS[i];
+        if(reg.data != NULL) {
+            bformata(result, "\"%d\": {", reg.id);
+            bformata(result, "\"fd\": %d,", i);
+            bformata(result, "\"last_ping\": %d,", now - reg.last_ping);
+            bformata(result, "\"last_read\": %d,", now - reg.last_read);
+            bformata(result, "\"last_write\": %d,", now - reg.last_write);
+            bformata(result, "\"bytes_read\": %d,", reg.bytes_read);
+            bformata(result, "\"bytes_written\": %d}, ", reg.bytes_written);
             total++;
         }
     }

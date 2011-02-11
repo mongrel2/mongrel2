@@ -45,6 +45,10 @@ typedef struct Registration {
     struct Connection *data;
     uint16_t id;
     uint32_t last_ping;
+    uint32_t last_read;
+    uint32_t last_write;
+    uint32_t bytes_read;
+    uint32_t bytes_written;
 } Registration;
 
 int Register_connect(int fd, void *data);
@@ -52,6 +56,10 @@ int Register_connect(int fd, void *data);
 int Register_disconnect(int fd);
 
 int Register_ping(int fd);
+
+int Register_read(int fd, uint32_t bytes);
+
+int Register_write(int fd, uint32_t bytes);
 
 void Register_init();
 

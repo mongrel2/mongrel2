@@ -1,6 +1,7 @@
 #define _XOPEN_SOURCE 500
 
 #include "io.h"
+#include "register.h"
 #include "mem/halloc.h"
 #include "dbg.h"
 #include <stdlib.h>
@@ -55,6 +56,7 @@ static ssize_t plain_stream_file(IOBuf *iob, int fd, int len)
     for(total = 0; fdwait(conn_fd, 'w') == 0 && total < len; total += sent) {
 
         sent = IOBuf_sendfile(conn_fd, fd, &offset, block_size);
+        Register_write(iob->fd, sent);
         debug("TOTAL: %d", total);
         check_debug(sent > 0, "Client closed probably during sendfile on socket: %d from "
                     "file %d", conn_fd, fd);
@@ -157,6 +159,7 @@ static ssize_t ssl_stream_file(IOBuf *iob, int fd, int len)
                         "return code %d", amt);
             sent += amt;
         }
+        Register_write(iob->fd, sent);
     }
     
     check(total <= len,
@@ -307,6 +310,7 @@ void IOBuf_read_commit(IOBuf *buf, int need)
 {
     buf->avail -= need;
     assert(buf->avail >= 0 && "Buffer commit reduced avail to < 0.");
+    Register_read(buf->fd, need);
 
     buf->mark = 0;
 
@@ -328,7 +332,11 @@ int IOBuf_send(IOBuf *buf, char *data, int len)
 
     rc = buf->send(buf, data, len);
 
-    if(rc < 0) buf->closed = 1;
+    if(rc >= 0) {
+        Register_write(buf->fd, rc);
+    } else {
+        buf->closed = 1;
+    }
 
     return rc;
 }
@@ -440,6 +448,9 @@ int IOBuf_stream_file(IOBuf *buf, int fd, int len)
 {
     int rc = 0;
 
+    // We depend on the stream_file callback to call Register_write.
+    // Doing it here would make the connection look inactive for long periods
+    // if we are streaming a large file.
     rc = buf->stream_file(buf, fd, len);
 
     if(rc < 0) buf->closed = 1;
