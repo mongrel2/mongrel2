@@ -1,3 +1,5 @@
+#undef NDEBUG
+
 /**
  *
  * Copyright (c) 2010, Zed A. Shaw and Mongrel2 Project Contributors.
@@ -41,6 +43,8 @@
 #include <unistd.h>
 
 
+uint32_t THE_CURRENT_TIME_IS = 0;
+
 static Registration REGISTRATIONS[MAX_REGISTERED_FDS];
 // this has to stay uint16_t so we wrap around
 static uint16_t REG_COUNT = 0;
@@ -48,6 +52,7 @@ static uint16_t REG_ID_TO_FD[MAX_REGISTERED_FDS];
 
 void Register_init()
 {
+    THE_CURRENT_TIME_IS = time(NULL);
     memset(REGISTRATIONS, 0, sizeof(REGISTRATIONS));
     memset(REG_ID_TO_FD, -1, sizeof(REG_ID_TO_FD));
 }
@@ -75,7 +80,7 @@ int Register_connect(int fd, void* data)
     }
 
     reg->data = data;
-    reg->last_ping = time(NULL);
+    reg->last_ping = THE_CURRENT_TIME_IS;
     
     // purposefully want overflow on these
     reg->id = REG_COUNT++;
@@ -113,7 +118,7 @@ int Register_ping(int fd)
 
     check_debug(reg->data != NULL, "Attempt to ping an FD that isn't registered: %d", fd);
 
-    reg->last_ping = time(NULL);
+    reg->last_ping = THE_CURRENT_TIME_IS;
     return reg->last_ping;
 
 error:
@@ -129,7 +134,7 @@ int Register_read(int fd,uint32_t bytes)
 
     check_debug(reg->data != NULL, "Attempt to register read on an FD that isn't registered: %d", fd);
 
-    reg->last_read = time(NULL);
+    reg->last_read = THE_CURRENT_TIME_IS;
     reg->bytes_read += bytes;
     return reg->last_read;
 
@@ -146,7 +151,7 @@ int Register_write(int fd,uint32_t bytes)
 
     check_debug(reg->data != NULL, "Attempt to register write on an FD that isn't registered: %d", fd);
 
-    reg->last_write = time(NULL);
+    reg->last_write = THE_CURRENT_TIME_IS;
     reg->bytes_written += bytes;
     return reg->last_write;
 
@@ -178,6 +183,7 @@ int Register_id_for_fd(int fd)
     return REGISTRATIONS[fd].id;
 }
 
+#define ZERO_OR_DELTA(N, T) (T == 0 ? T : N - T)
 
 bstring Register_info()
 {
@@ -185,16 +191,16 @@ bstring Register_info()
     int total = 0;
     Registration reg;
     bstring result = bfromcstr("{");
-    time_t now = time(NULL);
+    time_t now = THE_CURRENT_TIME_IS;
 
     for(i = 0; i < MAX_REGISTERED_FDS; i++) {
         reg = REGISTRATIONS[i];
         if(reg.data != NULL) {
             bformata(result, "\"%d\": {", reg.id);
             bformata(result, "\"fd\": %d,", i);
-            bformata(result, "\"last_ping\": %d,", now - reg.last_ping);
-            bformata(result, "\"last_read\": %d,", now - reg.last_read);
-            bformata(result, "\"last_write\": %d,", now - reg.last_write);
+            bformata(result, "\"last_ping\": %d,", ZERO_OR_DELTA(now, reg.last_ping));
+            bformata(result, "\"last_read\": %d,", ZERO_OR_DELTA(now, reg.last_read));
+            bformata(result, "\"last_write\": %d,", ZERO_OR_DELTA(now, reg.last_write));
             bformata(result, "\"bytes_read\": %d,", reg.bytes_read);
             bformata(result, "\"bytes_written\": %d}, ", reg.bytes_written);
             total++;

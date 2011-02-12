@@ -56,6 +56,7 @@
 FILE *LOG_FILE = NULL;
 
 extern int RUNNING;
+extern uint32_t THE_CURRENT_TIME_IS;
 int RELOAD;
 int MURDER;
 
@@ -155,7 +156,8 @@ void tickertask(void *v)
 {
     // this will be used later for timeouts
     while(1) {
-        taskdelay(10000);
+        THE_CURRENT_TIME_IS = time(NULL);
+        taskdelay(5000);
     }
 }
 

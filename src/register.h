@@ -41,6 +41,8 @@
 
 #define MAX_REGISTERED_FDS  64 * 1024
 
+extern uint32_t THE_CURRENT_TIME_IS;
+
 typedef struct Registration {
     struct Connection *data;
     uint16_t id;
