@@ -255,7 +255,7 @@ void complete_shutdown(Server *srv)
     while((left = taskwaiting()) > 1 && !MURDER) {
         // TODO: after a certain time close all of the connection sockets forcefully
         taskdelay(3000);
-        log_info("Waiting for connections to die: %d", left);
+        log_info("Waiting for connections to die: %d", left - 1);
     }
 
     MIME_destroy();
