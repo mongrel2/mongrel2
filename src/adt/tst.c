@@ -98,7 +98,7 @@ void *tst_search_suffix(tst_t *root, const char *s, size_t len)
     tst_t *last = NULL;
     int i = len-1;
 
-    while(i > 0 && p) {
+    while(i >= 0 && p) {
         if (s[i] < p->splitchar) {
             p = p->low; 
         } else if (s[i] == p->splitchar) {
