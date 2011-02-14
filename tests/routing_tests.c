@@ -84,10 +84,54 @@ char *test_routing_match()
 }
 
 
+char *test_routing_match_reversed() 
+{
+    RouteMap *routes = RouteMap_create(NULL);
+    mu_assert(routes != NULL, "Failed to make the route map.");
+    char *route_data1 = "route1";
+    char *route_data2 = "route2";
+    char *route_data3 = "route3";
+    bstring route1 = bfromcstr("foo");
+    bstring route2 = bfromcstr("moo");
+    bstring route3 = bfromcstr("fio");
+
+    Route *route = NULL;
+
+    RouteMap_insert_reversed(routes, route1, route_data1);
+    RouteMap_insert_reversed(routes, route2, route_data2);
+    RouteMap_insert_reversed(routes, route3, route_data3);
+
+    bstring path1 = bfromcstr("foo");
+    bstring path2 = bfromcstr("moo");
+    bstring path3 = bfromcstr("fio");
+
+    route = RouteMap_match_suffix(routes, path1);
+    mu_assert(route != NULL, "Pattern match failed.");
+    mu_assert(route->data == route_data1, "Pattern matched wrong route.");
+
+    route = RouteMap_match_suffix(routes, path2);
+    mu_assert(route != NULL, "Pattern match failed.");
+    mu_assert(route->data == route_data2, "Pattern matched wrong route.");
+
+    route = RouteMap_match_suffix(routes, path3);
+    mu_assert(route != NULL, "Pattern match failed.");
+    mu_assert(route->data == route_data3, "Pattern matched wrong route.");
+
+    bdestroy(path1);
+    bdestroy(path2);
+    bdestroy(path3);
+
+    RouteMap_destroy(routes);
+
+    return NULL;
+}
+
+
 char * all_tests() {
     mu_suite_start();
 
     mu_run_test(test_routing_match);
+    mu_run_test(test_routing_match_reversed);
 
     return NULL;
 }
