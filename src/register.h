@@ -53,7 +53,7 @@ typedef struct Registration {
     uint32_t bytes_written;
 } Registration;
 
-int Register_connect(int fd, void *data);
+int Register_connect(int fd, struct Connection *data);
 
 int Register_disconnect(int fd);
 

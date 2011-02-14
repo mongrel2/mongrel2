@@ -35,6 +35,7 @@
  */
 
 #include <register.h>
+#include <connection.h>
 #include <dbg.h>
 #include <task/task.h>
 #include <assert.h>
@@ -64,7 +65,7 @@ static inline void Register_clear(Registration *reg)
     REG_ID_TO_FD[reg->id] = -1;
 }
 
-int Register_connect(int fd, void* data)
+int Register_connect(int fd, Connection* data)
 {
     int rc = 0;
     assert(fd < MAX_REGISTERED_FDS && "FD given to register is greater than max.");
@@ -126,7 +127,7 @@ error:
 }
 
 
-int Register_read(int fd,uint32_t bytes)
+int Register_read(int fd, uint32_t bytes)
 {
     assert(fd < MAX_REGISTERED_FDS && "FD given to register is greater than max.");
     check(fd >= 0, "Invalid FD given for Register_read: %d", fd);
@@ -143,7 +144,7 @@ error:
 }
 
 
-int Register_write(int fd,uint32_t bytes)
+int Register_write(int fd, uint32_t bytes)
 {
     assert(fd < MAX_REGISTERED_FDS && "FD given to register is greater than max.");
     check(fd >= 0, "Invalid FD given for Register_write: %d", fd);
@@ -160,7 +161,7 @@ error:
 }
 
 
-struct Connection *Register_fd_exists(int fd)
+Connection *Register_fd_exists(int fd)
 {
     assert(fd < MAX_REGISTERED_FDS && "FD given to register is greater than max.");
     check(fd >= 0, "Invalid FD given for disconnect: %d", fd);
@@ -198,6 +199,7 @@ bstring Register_info()
         if(reg.data != NULL) {
             bformata(result, "\"%d\": {", reg.id);
             bformata(result, "\"fd\": %d,", i);
+            bformata(result, "\"type\": %d,", reg.data->type);
             bformata(result, "\"last_ping\": %d,", ZERO_OR_DELTA(now, reg.last_ping));
             bformata(result, "\"last_read\": %d,", ZERO_OR_DELTA(now, reg.last_read));
             bformata(result, "\"last_write\": %d,", ZERO_OR_DELTA(now, reg.last_write));
