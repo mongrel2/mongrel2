@@ -196,10 +196,7 @@ int connection_http_to_handler(Connection *conn)
     // we don't need the header anymore, so commit the buffer and deal with the body
     IOBuf_read_commit(conn->iob, Request_header_length(conn->req));
 
-    // WebSocket work around
-    // Problem: Sometimes avail returns 8 but when the message goes to
-    // the handler it's malformed.
-    // Ex: the body netstring looks like: '8:t' and misses those last 7 bytes!
+    // WebSocket detection
     bstring upgrade = Request_get(conn->req, (bstring)&UPGRADE);
     bstring connection = Request_get(conn->req, (bstring)&CONNECTION);
     if(upgrade != NULL && connection != NULL){
@@ -208,15 +205,9 @@ int connection_http_to_handler(Connection *conn)
             debug("Purported websocket but body does not have 8 bytes");
             goto error;
         }
-        /*
-        int outlen;
-        debug("Bytes available: %d",avail);
-        char* data = IOBuf_read(conn->iob,avail,&outlen);
-        debug("Bytes read: %d\nThe bytes:\n'%s'\n", outlen, data);
-        */
         content_len = avail;
     } else {
-        debug("Not a websocket.");
+        // debug("Not a websocket.");
     }
 
     if(content_len == 0) {
