@@ -183,6 +183,13 @@ error:
 
 static struct tagbstring UPGRADE = bsStatic("upgrade");
 static struct tagbstring CONNECTION = bsStatic("connection");
+const int WEBSOCKET_ARBITRARY_BODY_SIZE = 8;
+
+static inline int is_websocket(Connection *conn)
+{
+    return Request_get(conn->req, &UPGRADE) != NULL && 
+        Request_get(conn->req, &CONNECTION) != NULL;
+}
 
 int connection_http_to_handler(Connection *conn)
 {
@@ -197,13 +204,9 @@ int connection_http_to_handler(Connection *conn)
     IOBuf_read_commit(conn->iob, Request_header_length(conn->req));
 
     // WebSocket detection
-    bstring upgrade = Request_get(conn->req, &UPGRADE);
-    bstring connection = Request_get(conn->req, &CONNECTION);
-
-    if(upgrade != NULL && connection != NULL) {
-        int avail = IOBuf_avail(conn->iob);
-        check(avail == 8, "Purported websocket but body does not have 8 bytes");
-        content_len = avail;
+    if(is_websocket(conn)) {
+        content_len = IOBuf_avail(conn->iob);
+        check(content_len == WEBSOCKET_ARBITRARY_BODY_SIZE, "Purported websocket but body does not have 8 bytes");
     }
 
     if(content_len == 0) {
