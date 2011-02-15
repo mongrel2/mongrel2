@@ -197,17 +197,13 @@ int connection_http_to_handler(Connection *conn)
     IOBuf_read_commit(conn->iob, Request_header_length(conn->req));
 
     // WebSocket detection
-    bstring upgrade = Request_get(conn->req, (bstring)&UPGRADE);
-    bstring connection = Request_get(conn->req, (bstring)&CONNECTION);
-    if(upgrade != NULL && connection != NULL){
+    bstring upgrade = Request_get(conn->req, &UPGRADE);
+    bstring connection = Request_get(conn->req, &CONNECTION);
+
+    if(upgrade != NULL && connection != NULL) {
         int avail = IOBuf_avail(conn->iob);
-        if(avail != 8){
-            debug("Purported websocket but body does not have 8 bytes");
-            goto error;
-        }
+        check(avail == 8, "Purported websocket but body does not have 8 bytes");
         content_len = avail;
-    } else {
-        // debug("Not a websocket.");
     }
 
     if(content_len == 0) {
