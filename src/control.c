@@ -1,5 +1,5 @@
 
-#line 1 "control.rl"
+#line 1 "src/control.rl"
 #include "control.h"
 #include "bstring.h"
 #include "task/task.h"
@@ -72,11 +72,11 @@ static void *CONTROL_SOCKET = NULL;
 
 
 
-#line 166 "control.rl"
+#line 166 "src/control.rl"
 
 
 
-#line 80 "control.c"
+#line 80 "src/control.c"
 static const int ControlParser_start = 1;
 static const int ControlParser_first_final = 50;
 static const int ControlParser_error = 0;
@@ -84,7 +84,7 @@ static const int ControlParser_error = 0;
 static const int ControlParser_en_main = 1;
 
 
-#line 169 "control.rl"
+#line 169 "src/control.rl"
 
 bstring Control_execute(bstring req)
 {
@@ -97,14 +97,14 @@ bstring Control_execute(bstring req)
     debug("RECEIVED CONTROL COMMAND: %s", bdata(req));
 
     
-#line 101 "control.c"
+#line 101 "src/control.c"
 	{
 	cs = ControlParser_start;
 	}
 
-#line 181 "control.rl"
+#line 181 "src/control.rl"
     
-#line 108 "control.c"
+#line 108 "src/control.c"
 	{
 	switch ( cs )
 	{
@@ -188,14 +188,14 @@ case 12:
 		goto tr17;
 	goto st0;
 tr17:
-#line 80 "control.rl"
+#line 80 "src/control.rl"
 	{
         reply = bfromcstr("{\"msg\": \"stopping control port\"}");
         CONTROL_RUNNING = 0; {p++; cs = 50; goto _out;}
     }
 	goto st50;
 tr20:
-#line 142 "control.rl"
+#line 142 "src/control.rl"
 	{
         reply = bfromcstr("{\"command_list\":[");
         bcatcstr(reply, "{\"name\": \"control stop\", \"description\": \"Close the control port.\"},\n");
@@ -211,7 +211,7 @@ tr20:
     }
 	goto st50;
 tr30:
-#line 108 "control.rl"
+#line 108 "src/control.rl"
 	{
         int rc = raise(SIGHUP);
         if (0 == rc) {
@@ -223,15 +223,15 @@ tr30:
     }
 	goto st50;
 tr41:
-#line 78 "control.rl"
+#line 78 "src/control.rl"
 	{ reply = Register_info(); {p++; cs = 50; goto _out;} }
 	goto st50;
 tr45:
-#line 77 "control.rl"
+#line 77 "src/control.rl"
 	{ reply = taskgetinfo(); {p++; cs = 50; goto _out;} }
 	goto st50;
 tr46:
-#line 118 "control.rl"
+#line 118 "src/control.rl"
 	{
         // TODO: probably report back the number of waiting tasks
         int rc = raise(SIGINT);
@@ -244,7 +244,7 @@ tr46:
     }
 	goto st50;
 tr55:
-#line 129 "control.rl"
+#line 129 "src/control.rl"
 	{
         // TODO: the server might have been terminated before
         // the reply is sent back. If this scenario is crucial (if possible at all)
@@ -259,7 +259,7 @@ tr55:
     }
 	goto st50;
 tr57:
-#line 85 "control.rl"
+#line 85 "src/control.rl"
 	{
         reply = bformat("{\"time\": %d}", (int)time(NULL)); {p++; cs = 50; goto _out;}
     }
@@ -267,7 +267,7 @@ tr57:
 st50:
 	p += 1;
 case 50:
-#line 271 "control.c"
+#line 271 "src/control.c"
 	goto st0;
 st13:
 	p += 1;
@@ -325,9 +325,9 @@ case 20:
 		goto st20;
 	goto st0;
 tr25:
-#line 75 "control.rl"
+#line 75 "src/control.rl"
 	{ mark = p; }
-#line 89 "control.rl"
+#line 89 "src/control.rl"
 	{
         int id = atoi(p);
 
@@ -348,7 +348,7 @@ tr25:
     }
 	goto st51;
 tr58:
-#line 89 "control.rl"
+#line 89 "src/control.rl"
 	{
         int id = atoi(p);
 
@@ -371,7 +371,7 @@ tr58:
 st51:
 	p += 1;
 case 51:
-#line 375 "control.c"
+#line 375 "src/control.c"
 	if ( 48 <= (*p) && (*p) <= 57 )
 		goto tr58;
 	goto st0;
@@ -565,15 +565,15 @@ case 49:
 	_out: {}
 	}
 
-#line 182 "control.rl"
+#line 182 "src/control.rl"
 
     check(p <= pe, "Buffer overflow after parsing.  Tell Zed that you sent something from a handler that went %ld past the end in the parser.", 
         (long int)(pe - p));
 
     if ( cs == 
-#line 575 "control.c"
+#line 575 "src/control.c"
 0
-#line 186 "control.rl"
+#line 186 "src/control.rl"
  ) {
         check(pe - p > 0, "Major erorr in the parser, tell Zed.");
         return bformat("{\"error\": \"parsing error at: ...%s\"}", bdata(req) + (pe - p));
@@ -609,7 +609,7 @@ void Control_task(void *v)
         taskstate("waiting");
         
         req = read_message(CONTROL_SOCKET);
-        check(req, "Failed to read message %s.",errno);
+        check(req, "Failed to read message: %s.", strerror(errno));
 
         rep = Control_execute(req);
         bdestroy(req);

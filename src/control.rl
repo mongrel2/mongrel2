@@ -218,7 +218,7 @@ void Control_task(void *v)
         taskstate("waiting");
         
         req = read_message(CONTROL_SOCKET);
-        check(req, "Failed to read message %s.",errno);
+        check(req, "Failed to read message: %s.", strerror(errno));
 
         rep = Control_execute(req);
         bdestroy(req);
