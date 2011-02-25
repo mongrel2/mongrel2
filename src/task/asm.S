@@ -6,10 +6,16 @@
 #define GET getmcontext
 #endif
 
-#if defined(__OpenBSD__) && defined(__i386__)
+#if defined(__OpenBSD__)
+#if defined(__i386__)
 #define NEEDX86CONTEXT 1
 #define SET setmcontext
 #define GET getmcontext
+#elif defined(__x86_64__)
+#define NEEDAMD64CONTEXT 1
+#define SET setmcontext
+#define GET getmcontext
+#endif
 #endif
 
 #if defined(__APPLE__)

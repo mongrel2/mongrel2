@@ -71,10 +71,52 @@ error:
 
 #else
 
+extern int fdrecv(int fd, void *buf, int n);
+extern int fdsend(int fd, void *buf, int n);
+
+#define BSD_SENDFILE_BUF_SIZE 16384
+#include <unistd.h>
+
 /** For the BSDs without sendfile like open and net.**/
 
 int bsd_sendfile(int out_fd, int in_fd, off_t *offset, size_t count) {
-   return -1;
+   char buf[BSD_SENDFILE_BUF_SIZE];
+   int tot, cur, rem, sent;
+   int ret = -1;
+   off_t orig_offset;
+
+   if (offset != NULL) {
+     orig_offset = lseek(in_fd, 0, SEEK_CUR);
+     check(orig_offset >= 0, "lseek failure when determining current position");
+     check(lseek(in_fd, *offset, SEEK_SET) >= 0, "lseek failure when setting new position");
+   }
+
+   for (tot = 0, rem = count, cur = rem; cur != 0 && tot < count; tot += cur, rem -= cur) {
+     if (rem >= BSD_SENDFILE_BUF_SIZE) {
+       cur = BSD_SENDFILE_BUF_SIZE;
+     } else {
+       cur = rem;
+     }
+
+     cur = fdread(in_fd, buf, cur);
+     check(cur >= 0, "Internal sendfile emulation failed: fdread: %i", cur);
+
+     if (cur != 0) {
+       sent = fdwrite(out_fd, buf, cur); 
+       check(sent == cur, "Internal sendfile emulation failed: fdread: %i, fdwrite: %i", cur, sent);
+     }
+   }
+   
+   ret = tot;
+
+error:
+   if (offset != NULL) {
+     if (ret != -1) {
+       *offset += tot;
+     }
+     lseek(in_fd, orig_offset, SEEK_SET);
+   }
+   return ret;
 }
 
 #endif
