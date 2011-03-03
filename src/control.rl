@@ -2,12 +2,15 @@
 #include "bstring.h"
 #include "task/task.h"
 #include "register.h"
+#include "server.h"
 #include "dbg.h"
 #include <stdlib.h>
 #include <time.h>
 #include "setting.h"
 #include <signal.h>
 
+
+extern Server *SERVER;
 
 void bstring_free(void *data, void *hint)
 {
@@ -82,6 +85,10 @@ static void *CONTROL_SOCKET = NULL;
         CONTROL_RUNNING = 0; fbreak;
     }
 
+    action uuid {
+        reply = bformat("{\"uuid\": \"%s\"}", bdata(SERVER->uuid)); fbreak;
+    }
+
     action time {
         reply = bformat("{\"time\": %d}", (int)time(NULL)); fbreak;
     }
@@ -149,6 +156,7 @@ static void *CONTROL_SOCKET = NULL;
         bcatcstr(reply, "{\"name\": \"stop\", \"description\": \"Gracefully shut down the server. Same as `kill -SIGINT <server_pid>`.\"},\n");
         bcatcstr(reply, "{\"name\": \"terminate\", \"description\": \"Unconditionally terminate the server. Same as `kill -SIGTERM <server_pid>.\"},\n");
         bcatcstr(reply, "{\"name\": \"time\", \"description\": \"Return server timestamp.\"}\n");
+        bcatcstr(reply, "{\"name\": \"uuid\", \"description\": \"Return server uuid.\"}\n");
         bcatcstr(reply, "]}\n");
         fbreak;
     }
@@ -156,13 +164,14 @@ static void *CONTROL_SOCKET = NULL;
     Status = "status" space+ ("tasks" @status_tasks | "net" @status_net);
     Control = "control stop" @control_stop;
     Time = "time" @time;
+    UUID = "uuid" @uuid;
     Kill = "kill" space+ digit+ >mark @kill;
     Reload = "reload" @reload;
     Stop = "stop" @stop;
     Terminate = "terminate" @terminate;
     Help = "help" @help;
 
-    main := Status | Control | Time | Kill | Reload | Stop | Terminate | Help;
+    main := Status | Control | Time | UUID | Kill | Reload | Stop | Terminate | Help;
 }%%
 
 %% write data;

@@ -4,12 +4,15 @@
 #include "bstring.h"
 #include "task/task.h"
 #include "register.h"
+#include "server.h"
 #include "dbg.h"
 #include <stdlib.h>
 #include <time.h>
 #include "setting.h"
 #include <signal.h>
 
+
+extern Server *SERVER;
 
 void bstring_free(void *data, void *hint)
 {
@@ -72,19 +75,19 @@ static void *CONTROL_SOCKET = NULL;
 
 
 
-#line 166 "src/control.rl"
+#line 175 "src/control.rl"
 
 
 
-#line 80 "src/control.c"
+#line 83 "src/control.c"
 static const int ControlParser_start = 1;
-static const int ControlParser_first_final = 50;
+static const int ControlParser_first_final = 53;
 static const int ControlParser_error = 0;
 
 static const int ControlParser_en_main = 1;
 
 
-#line 169 "src/control.rl"
+#line 178 "src/control.rl"
 
 bstring Control_execute(bstring req)
 {
@@ -97,14 +100,14 @@ bstring Control_execute(bstring req)
     debug("RECEIVED CONTROL COMMAND: %s", bdata(req));
 
     
-#line 101 "src/control.c"
+#line 104 "src/control.c"
 	{
 	cs = ControlParser_start;
 	}
 
-#line 181 "src/control.rl"
+#line 190 "src/control.rl"
     
-#line 108 "src/control.c"
+#line 111 "src/control.c"
 	{
 	switch ( cs )
 	{
@@ -116,6 +119,7 @@ case 1:
 		case 114: goto st21;
 		case 115: goto st26;
 		case 116: goto st40;
+		case 117: goto st50;
 	}
 	goto st0;
 st0:
@@ -185,17 +189,17 @@ st12:
 	p += 1;
 case 12:
 	if ( (*p) == 112 )
-		goto tr17;
+		goto tr18;
 	goto st0;
-tr17:
-#line 80 "src/control.rl"
+tr18:
+#line 83 "src/control.rl"
 	{
         reply = bfromcstr("{\"msg\": \"stopping control port\"}");
-        CONTROL_RUNNING = 0; {p++; cs = 50; goto _out;}
+        CONTROL_RUNNING = 0; {p++; cs = 53; goto _out;}
     }
-	goto st50;
-tr20:
-#line 142 "src/control.rl"
+	goto st53;
+tr21:
+#line 149 "src/control.rl"
 	{
         reply = bfromcstr("{\"command_list\":[");
         bcatcstr(reply, "{\"name\": \"control stop\", \"description\": \"Close the control port.\"},\n");
@@ -206,12 +210,13 @@ tr20:
         bcatcstr(reply, "{\"name\": \"stop\", \"description\": \"Gracefully shut down the server. Same as `kill -SIGINT <server_pid>`.\"},\n");
         bcatcstr(reply, "{\"name\": \"terminate\", \"description\": \"Unconditionally terminate the server. Same as `kill -SIGTERM <server_pid>.\"},\n");
         bcatcstr(reply, "{\"name\": \"time\", \"description\": \"Return server timestamp.\"}\n");
+        bcatcstr(reply, "{\"name\": \"uuid\", \"description\": \"Return server uuid.\"}\n");
         bcatcstr(reply, "]}\n");
-        {p++; cs = 50; goto _out;}
+        {p++; cs = 53; goto _out;}
     }
-	goto st50;
-tr30:
-#line 108 "src/control.rl"
+	goto st53;
+tr31:
+#line 115 "src/control.rl"
 	{
         int rc = raise(SIGHUP);
         if (0 == rc) {
@@ -219,19 +224,19 @@ tr30:
         } else {
             reply = bfromcstr("{\"error\": \"failed to reload the server\"}");
         }
-        {p++; cs = 50; goto _out;}
+        {p++; cs = 53; goto _out;}
     }
-	goto st50;
-tr41:
-#line 78 "src/control.rl"
-	{ reply = Register_info(); {p++; cs = 50; goto _out;} }
-	goto st50;
-tr45:
-#line 77 "src/control.rl"
-	{ reply = taskgetinfo(); {p++; cs = 50; goto _out;} }
-	goto st50;
+	goto st53;
+tr42:
+#line 81 "src/control.rl"
+	{ reply = Register_info(); {p++; cs = 53; goto _out;} }
+	goto st53;
 tr46:
-#line 118 "src/control.rl"
+#line 80 "src/control.rl"
+	{ reply = taskgetinfo(); {p++; cs = 53; goto _out;} }
+	goto st53;
+tr47:
+#line 125 "src/control.rl"
 	{
         // TODO: probably report back the number of waiting tasks
         int rc = raise(SIGINT);
@@ -240,11 +245,11 @@ tr46:
         } else {
             reply = bfromcstr("{\"error\": \"failed to stop the server\"}");
         }
-        {p++; cs = 50; goto _out;}
+        {p++; cs = 53; goto _out;}
     }
-	goto st50;
-tr55:
-#line 129 "src/control.rl"
+	goto st53;
+tr56:
+#line 136 "src/control.rl"
 	{
         // TODO: the server might have been terminated before
         // the reply is sent back. If this scenario is crucial (if possible at all)
@@ -255,19 +260,25 @@ tr55:
         } else {
             reply = bfromcstr("{\"error\": \"failed to terminate the server\"}");
         }
-        {p++; cs = 50; goto _out;}
+        {p++; cs = 53; goto _out;}
     }
-	goto st50;
-tr57:
-#line 85 "src/control.rl"
+	goto st53;
+tr58:
+#line 92 "src/control.rl"
 	{
-        reply = bformat("{\"time\": %d}", (int)time(NULL)); {p++; cs = 50; goto _out;}
+        reply = bformat("{\"time\": %d}", (int)time(NULL)); {p++; cs = 53; goto _out;}
     }
-	goto st50;
-st50:
+	goto st53;
+tr61:
+#line 88 "src/control.rl"
+	{
+        reply = bformat("{\"uuid\": \"%s\"}", bdata(SERVER->uuid)); {p++; cs = 53; goto _out;}
+    }
+	goto st53;
+st53:
 	p += 1;
-case 50:
-#line 271 "src/control.c"
+case 53:
+#line 282 "src/control.c"
 	goto st0;
 st13:
 	p += 1;
@@ -285,7 +296,7 @@ st15:
 	p += 1;
 case 15:
 	if ( (*p) == 112 )
-		goto tr20;
+		goto tr21;
 	goto st0;
 st16:
 	p += 1;
@@ -320,14 +331,14 @@ case 20:
 		goto st20;
 	if ( (*p) > 13 ) {
 		if ( 48 <= (*p) && (*p) <= 57 )
-			goto tr25;
+			goto tr26;
 	} else if ( (*p) >= 9 )
 		goto st20;
 	goto st0;
-tr25:
-#line 75 "src/control.rl"
+tr26:
+#line 78 "src/control.rl"
 	{ mark = p; }
-#line 89 "src/control.rl"
+#line 96 "src/control.rl"
 	{
         int id = atoi(p);
 
@@ -344,11 +355,11 @@ tr25:
             }
         }
 
-        {p++; cs = 51; goto _out;}
+        {p++; cs = 54; goto _out;}
     }
-	goto st51;
-tr58:
-#line 89 "src/control.rl"
+	goto st54;
+tr62:
+#line 96 "src/control.rl"
 	{
         int id = atoi(p);
 
@@ -365,15 +376,15 @@ tr58:
             }
         }
 
-        {p++; cs = 51; goto _out;}
+        {p++; cs = 54; goto _out;}
     }
-	goto st51;
-st51:
+	goto st54;
+st54:
 	p += 1;
-case 51:
-#line 375 "src/control.c"
+case 54:
+#line 386 "src/control.c"
 	if ( 48 <= (*p) && (*p) <= 57 )
-		goto tr58;
+		goto tr62;
 	goto st0;
 st21:
 	p += 1;
@@ -403,7 +414,7 @@ st25:
 	p += 1;
 case 25:
 	if ( (*p) == 100 )
-		goto tr30;
+		goto tr31;
 	goto st0;
 st26:
 	p += 1;
@@ -466,7 +477,7 @@ st34:
 	p += 1;
 case 34:
 	if ( (*p) == 116 )
-		goto tr41;
+		goto tr42;
 	goto st0;
 st35:
 	p += 1;
@@ -490,13 +501,13 @@ st38:
 	p += 1;
 case 38:
 	if ( (*p) == 115 )
-		goto tr45;
+		goto tr46;
 	goto st0;
 st39:
 	p += 1;
 case 39:
 	if ( (*p) == 112 )
-		goto tr46;
+		goto tr47;
 	goto st0;
 st40:
 	p += 1;
@@ -546,7 +557,7 @@ st47:
 	p += 1;
 case 47:
 	if ( (*p) == 101 )
-		goto tr55;
+		goto tr56;
 	goto st0;
 st48:
 	p += 1;
@@ -558,22 +569,40 @@ st49:
 	p += 1;
 case 49:
 	if ( (*p) == 101 )
-		goto tr57;
+		goto tr58;
+	goto st0;
+st50:
+	p += 1;
+case 50:
+	if ( (*p) == 117 )
+		goto st51;
+	goto st0;
+st51:
+	p += 1;
+case 51:
+	if ( (*p) == 105 )
+		goto st52;
+	goto st0;
+st52:
+	p += 1;
+case 52:
+	if ( (*p) == 100 )
+		goto tr61;
 	goto st0;
 	}
 
 	_out: {}
 	}
 
-#line 182 "src/control.rl"
+#line 191 "src/control.rl"
 
     check(p <= pe, "Buffer overflow after parsing.  Tell Zed that you sent something from a handler that went %ld past the end in the parser.", 
         (long int)(pe - p));
 
     if ( cs == 
-#line 575 "src/control.c"
+#line 604 "src/control.c"
 0
-#line 186 "src/control.rl"
+#line 195 "src/control.rl"
  ) {
         check(pe - p > 0, "Major erorr in the parser, tell Zed.");
         return bformat("{\"error\": \"parsing error at: ...%s\"}", bdata(req) + (pe - p));
