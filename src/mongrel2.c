@@ -98,6 +98,16 @@ void start_terminator()
     sigaction(SIGTERM, &sa, &osa);
     sigaction(SIGHUP, &sa, &osa);
 
+    // try blocking SIGPIPE with this
+    sigset_t x;
+    sigemptyset(&x);
+    sigaddset(&x, SIGPIPE);
+    sigprocmask(SIG_BLOCK, &x, NULL);
+
+    sigemptyset(&x);
+    sigaddset(&x, SIGPIPE);
+    pthread_sigmask(SIG_BLOCK, &x, NULL);
+
     sa.sa_handler = SIG_IGN;
     sigaction(SIGPIPE, &sa, &osa);
 }
