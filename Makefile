@@ -113,7 +113,7 @@ freebsd: OPTFLAGS=-I/usr/local/include
 freebsd: OPTLIBS=-L/usr/local/lib -pthread
 freebsd: all
 
-openbsd: OPTFLAGS=-l/usr/local/include
+openbsd: OPTFLAGS=-I/usr/local/include
 openbsd: OPTLIBS=-L/usr/local/lib -pthread
 openbsd: all
 

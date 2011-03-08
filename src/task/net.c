@@ -88,6 +88,7 @@ static int cb_connect(int fd, int istcp, struct sockaddr *psa, socklen_t sn)
 
     /* start connecting */
     rc = connect(fd, psa, sn);
+    log_info("Errno after connect is: %d:%s", errno, strerror(errno));
     check(rc != -1 || errno == EINPROGRESS, "Connect failed.");
 
     /* wait for finish */    

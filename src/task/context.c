@@ -20,9 +20,14 @@
 #define NEEDSWAPCONTEXT
 #endif
 
-#if defined(__OpenBSD__) && defined(__i386__)
+#if defined(__OpenBSD__)
+#if defined(__i386__)
 #define NEEDX86MAKECONTEXT
 #define NEEDSWAPCONTEXT
+#elif defined(__x86_64__)
+#define NEEDAMD64MAKECONTEXT
+#define NEEDSWAPCONTEXT
+#endif
 #endif
 
 #if defined(__linux__) && defined(__arm__)
