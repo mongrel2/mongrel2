@@ -29,6 +29,7 @@ technologies.</p>
     <a href="http://github.com/perplexes/m2r">Ruby</a>,
     <a href="http://github.com/darkhelmet/rack-mongrel2">Ruby through Rack</a>,
     <a href="http://github.com/berry/Mongrel2-WSGI-Handler">Python</a>,
+    <a href="http://www.photon-project.com">PHP (Photon)</a>,
     <a href="http://github.com/j2labs/brubeck">Python (Brubeck)</a>,
     <a href="http://github.com/akrennmair/mongrel2-cpp">C++</a>,
     <a href="https://github.com/derdewey/mongrel2_c_handler/">C</a>,
@@ -51,7 +52,7 @@ technologies.</p>
     <li><b>Documented, Documented, Documented</b> We <a href="/doc/tip/docs/manual/book.wiki">document everything</a> in a well written manual that
     shows you how to use every feature.</li>
     <li><b>BSD Licensed</b> and all with a <a href="/wiki?name=License">BSD 3-clause license</a>.</li>
-    <li><a href="http://tir.mongrel2.org/">Tir</a> An official framework written in Lua that shows how to use Mongrel2.</li>
+    <li><a href="http://tir.mongrel2.org/">Tir</a> An official framework written in Lua that shows how to use Mongrel2.  In addition, there's the <a href="http://www.photon-project.com">Photon Project</a> which is similar to Tir in design and purpose.</li>
 </ul>
 
 
@@ -103,6 +104,7 @@ with more to come.</p>
     <li><a href="http://github.com/berry/Mongrel2-WSGI-Handler">Python</a></li>
     <li><a href="http://github.com/akrennmair/mongrel2-cpp">C++</a></li>
     <li><a href="https://github.com/derdewey/mongrel2_c_handler/">C</a></li>
+    <li><a href="http://www.photon-project.com">PHP (Photon)</a></li>
     <li><a href="http://github.com/winks/m2php">PHP</a></li>
     <li><a href="http://github.com/cmoore/web-mongrel2">Haskell</a></li>
     <li><a href="http://github.com/vseloved/cl-mongrel2">Common Lisp</a></li>
