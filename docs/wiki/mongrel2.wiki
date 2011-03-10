@@ -35,7 +35,8 @@ technologies.</p>
     <a href="https://github.com/derdewey/mongrel2_c_handler/">C</a>,
     <a href="http://github.com/winks/m2php">PHP</a>,
     <a href="http://github.com/cmoore/web-mongrel2">Haskell</a>,
-    <a href="http://github.com/vseloved/cl-mongrel2">Common Lisp</a>,
+    <a href="http://github.com/vseloved/cl-mongrel2">Common Lisp (Maintained?)</a>,
+    <a href="https://github.com/galdor/m2cl">Common Lisp</a>,
     <a href="http://github.com/lestrrat/Plack-Handler-Mongrel2">Perl</a>,
     <a href="https://github.com/jrockway/anyevent-mongrel2/">Perl (AnyEvent)</a>,
     <a href="http://github.com/AustinWise/m2net">.NET</a>,
@@ -108,12 +109,22 @@ with more to come.</p>
     <li><a href="http://github.com/winks/m2php">PHP</a></li>
     <li><a href="http://github.com/cmoore/web-mongrel2">Haskell</a></li>
     <li><a href="http://github.com/vseloved/cl-mongrel2">Common Lisp</a></li>
+    <li><a href="https://github.com/galdor/m2cl">Common Lisp</a></li>
     <li><a href="http://github.com/lestrrat/Plack-Handler-Mongrel2">Perl</a></li>
     <li><a href="https://github.com/jrockway/anyevent-mongrel2/">Perl (AnyEvent)</a></li>
     <li><a href="http://github.com/AustinWise/m2net">.NET</a></li>
     <li><a href="http://github.com/mikejs/ring/tree/master/ring-mongrel2-adapter/">Clojure</a></li>
     <li><a href="http://github.com/jsimmons/mongrel2-lua/">Lua</a></li>
 </ul>
+
+<p>There are also frameworks that are Mongrel2 specific:</p>
+
+<ul>
+<li><a href="http://tir.mongrel2.org/">Tir</a> is a Lua framework written to show how to do direct frameworks with Mongrel2.</li>
+<li><a href="https://github.com/daogangtang/bamboo">Bamboo</a> is a Tir derivative with a bunch more features.</li>
+<li><a href="http://www.photon-project.com">Photon</a> is a PHP framework similar to Tir using Mongrel2.</li>
+</ul>
+
 
 <p>It is very easy to create a handler, you should read the <a href="http://mongrel2.org/doc/tip/docs/manual/book.wiki#x1-590005.2">manual about handlers</a> for 
 information on writing one for your language.</p>
