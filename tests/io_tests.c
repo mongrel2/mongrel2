@@ -1,18 +1,21 @@
 
 #include "minunit.h"
 #include <io.h>
+#include <connection.h>
+#include <register.h>
 
 FILE *LOG_FILE = NULL;
-
 
 char *test_IOBuf_read_operations() 
 {
     char *data = NULL;
     int avail = 0;
+    Connection conn = {.type = 1};
 
     int zero_fd = open("/dev/zero", O_RDONLY);
     IOBuf *buf = IOBuf_create(10 * 1024, zero_fd, IOBUF_FILE);
     mu_assert(buf != NULL, "Failed to allocate buf.");
+    Register_connect(zero_fd, &conn);
 
     IOBuf_resize(buf, 31);
     mu_assert(buf->len == 31, "Wrong size after resize.");
@@ -33,7 +36,7 @@ char *test_IOBuf_read_operations()
     mu_assert(!IOBuf_compact_needed(buf, 10), "Should not need compacting for 10.");
     mu_assert(IOBuf_compact_needed(buf, 100), "SHOULD need compacting for 100.");
 
-    IOBuf_read_commit(buf, 10);
+    mu_assert(IOBuf_read_commit(buf, 10) != -1, "Failed to commit.");
 
     data = IOBuf_start(buf);
     avail = IOBuf_avail(buf);
@@ -45,7 +48,7 @@ char *test_IOBuf_read_operations()
     mu_assert(data != NULL, "Should get something always.");
     mu_assert(avail == 10, "Should get 10 bytes.");
 
-    IOBuf_read_commit(buf, 10);
+    mu_assert(IOBuf_read_commit(buf, 10) != -1, "Finaly commit failed.");
 
 
     data = IOBuf_start(buf);
@@ -65,7 +68,7 @@ char *test_IOBuf_read_operations()
     mu_assert(data != NULL, "Should get something always.");
     mu_assert(avail == 20, "Should get 10 bytes.");
 
-    IOBuf_read_commit(buf, 21);
+    mu_assert(IOBuf_read_commit(buf, 21) != -1, "Final commit failed.");
     debug("We've got %d avail after the last read.", buf->avail);
     mu_assert(buf->avail == 10, "Should have 11 still in the queue.");
 
@@ -79,15 +82,19 @@ char *test_IOBuf_read_operations()
     mu_assert(avail == 31, "And we should get the full amount.");
 
     IOBuf_destroy(buf);
+    Register_disconnect(zero_fd);
 
     return NULL;
 }
 
 char *test_IOBuf_send_operations() 
 {
+    Connection conn;
     int null_fd = open("/dev/null", O_WRONLY);
     IOBuf *buf = IOBuf_create(10 * 1024, null_fd, IOBUF_FILE);
     mu_assert(buf != NULL, "Failed to allocate buf.");
+    Register_connect(buf->fd, &conn);
+    mu_assert(Register_fd_exists(buf->fd) != NULL, "Damn fd isn't registered.");
 
     int rc = IOBuf_send(buf, "012345789", 10);
     mu_assert(!IOBuf_closed(buf), "Should not be closed.");
@@ -99,6 +106,7 @@ char *test_IOBuf_send_operations()
     mu_assert(rc == -1, "Should send nothing.");
 
     IOBuf_destroy(buf);
+    Register_disconnect(null_fd);
 
     return NULL;
 }
@@ -107,11 +115,15 @@ char *test_IOBuf_send_operations()
 char *test_IOBuf_streaming()
 {
     // test streaming from /dev/zero to /dev/null
+    Connection conn;
     int zero_fd = open("/dev/zero", O_RDONLY);
     IOBuf *from = IOBuf_create(1024, zero_fd, IOBUF_FILE);
+    Register_connect(zero_fd, &conn);
 
+    Connection conn2;
     int null_fd = open("/dev/null", O_WRONLY);
     IOBuf *to = IOBuf_create(1024, null_fd, IOBUF_FILE);
+    Register_connect(null_fd, &conn2);
 
     int rc = IOBuf_stream(from, to, 500);
     mu_assert(rc == 500, "Didn't stream the right amount on small test.");
@@ -127,10 +139,13 @@ char *test_IOBuf_streaming()
     rc = IOBuf_stream(from, to, 10 * 1024);
     mu_assert(rc == -1, "Should fail if recv side is closed.");
 
+    Register_disconnect(zero_fd);
+    Register_disconnect(null_fd);
     return NULL;
 }
 
 char * all_tests() {
+    Register_init();
     mu_suite_start();
 
     mu_run_test(test_IOBuf_read_operations);

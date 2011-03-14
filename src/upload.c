@@ -21,7 +21,7 @@ static inline int stream_to_disk(IOBuf *iob, int content_len, int tmpfd)
         content_len -= avail;
         check(write(tmpfd, data, avail) == avail, "Failed to write requested amount to tempfile: %d", avail);
 
-        IOBuf_read_commit(iob, avail);
+        check(IOBuf_read_commit(iob, avail) != -1, "Final commit failed streaming to disk.");
     }
 
     check(content_len == 0, "Failed to write everything to the large upload tmpfile.");

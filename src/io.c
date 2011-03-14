@@ -56,7 +56,9 @@ static ssize_t plain_stream_file(IOBuf *iob, int fd, int len)
     for(total = 0; fdwait(conn_fd, 'w') == 0 && total < len; total += sent) {
 
         sent = IOBuf_sendfile(conn_fd, fd, &offset, block_size);
-        Register_write(iob->fd, sent);
+
+        check(Register_write(iob->fd, sent) != -1, "Failed to record write, must have died.");
+
         debug("TOTAL: %d", total);
         check_debug(sent > 0, "Client closed probably during sendfile on socket: %d from "
                     "file %d", conn_fd, fd);
@@ -159,7 +161,7 @@ static ssize_t ssl_stream_file(IOBuf *iob, int fd, int len)
                         "return code %d", amt);
             sent += amt;
         }
-        Register_write(iob->fd, sent);
+        check(Register_write(iob->fd, sent) != -1, "Failed to record write, must have died.");
     }
     
     check(total <= len,
@@ -306,11 +308,12 @@ char *IOBuf_read(IOBuf *buf, int need, int *out_len)
  * You use this after you're done working with the data and want to
  * do the next read.
  */
-void IOBuf_read_commit(IOBuf *buf, int need)
+int IOBuf_read_commit(IOBuf *buf, int need)
 {
     buf->avail -= need;
     assert(buf->avail >= 0 && "Buffer commit reduced avail to < 0.");
-    Register_read(buf->fd, need);
+    
+    check(Register_read(buf->fd, need) != -1, "Failed to record read, must have died.");
 
     buf->mark = 0;
 
@@ -320,6 +323,10 @@ void IOBuf_read_commit(IOBuf *buf, int need)
     } else {
         buf->cur += need;
     }
+
+    return 0;
+error:
+    return -1;
 }
 
 /**
@@ -333,12 +340,15 @@ int IOBuf_send(IOBuf *buf, char *data, int len)
     rc = buf->send(buf, data, len);
 
     if(rc >= 0) {
-        Register_write(buf->fd, rc);
+        check(Register_write(buf->fd, rc) != -1, "Failed to record write, must have died.");
     } else {
         buf->closed = 1;
     }
 
     return rc;
+
+error:
+    return -1;
 }
 
 /**
@@ -376,7 +386,7 @@ char *IOBuf_read_all(IOBuf *buf, int len, int retries)
         log_err("Read of %d length attempted %d times which is over %d retry limit..", len, attempts, retries);
     }
 
-    IOBuf_read_commit(buf, len);
+    check(IOBuf_read_commit(buf, len) != -1, "Final commit failed of read_all.");
     return data;
 
 error:
@@ -409,7 +419,7 @@ int IOBuf_stream(IOBuf *from, IOBuf *to, int total)
         check_debug(rc == avail, "Failed to send all of the data: %d of %d", rc, avail)
 
         // commit whatever we just did
-        IOBuf_read_commit(from, rc);
+        check(IOBuf_read_commit(from, rc) != -1, "Final commit failed during streaming.");
 
         // reduce it by the given amount
         remain -= rc;

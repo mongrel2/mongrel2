@@ -83,7 +83,7 @@ int bsd_sendfile(int out_fd, int in_fd, off_t *offset, size_t count) {
    char buf[BSD_SENDFILE_BUF_SIZE];
    int tot, cur, rem, sent;
    int ret = -1;
-   off_t orig_offset;
+   off_t orig_offset = 0;
 
    if (offset != NULL) {
      orig_offset = lseek(in_fd, 0, SEEK_CUR);
