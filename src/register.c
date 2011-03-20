@@ -138,11 +138,13 @@ int Register_read(int fd, uint32_t bytes)
     check(fd >= 0, "Invalid FD given for Register_read: %d", fd);
     Registration *reg = &REGISTRATIONS[fd];
 
-    check_debug(reg->data != NULL, "Attempt to register read on an FD that isn't registered: %d", fd);
-
-    reg->last_read = THE_CURRENT_TIME_IS;
-    reg->bytes_read += bytes;
-    return reg->last_read;
+    if(reg->data) {
+        reg->last_read = THE_CURRENT_TIME_IS;
+        reg->bytes_read += bytes;
+        return reg->last_read;
+    } else {
+        return 0;
+    }
 
 error:
     return -1;
@@ -155,11 +157,13 @@ int Register_write(int fd, uint32_t bytes)
     check(fd >= 0, "Invalid FD given for Register_write: %d", fd);
     Registration *reg = &REGISTRATIONS[fd];
 
-    check_debug(reg->data != NULL, "Attempt to register write on an FD that isn't registered: %d", fd);
-
-    reg->last_write = THE_CURRENT_TIME_IS;
-    reg->bytes_written += bytes;
-    return reg->last_write;
+    if(reg->data) {
+        reg->last_write = THE_CURRENT_TIME_IS;
+        reg->bytes_written += bytes;
+        return reg->last_write;
+    } else {
+        return 0;
+    }
 
 error:
     return -1;

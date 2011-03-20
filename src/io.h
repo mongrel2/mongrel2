@@ -57,7 +57,7 @@ void IOBuf_resize(IOBuf *buf, size_t new_size);
 void IOBuf_destroy(IOBuf *buf);
 
 char *IOBuf_read(IOBuf *buf, int need, int *out_len);
-void IOBuf_read_commit(IOBuf *buf, int need);
+int IOBuf_read_commit(IOBuf *buf, int need);
 
 int IOBuf_send(IOBuf *buf, char *data, int len);
 

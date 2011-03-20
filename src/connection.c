@@ -148,7 +148,7 @@ int connection_msg_to_handler(Connection *conn)
     }
 
     // consumes \0 from body_len
-    IOBuf_read_commit(conn->iob, header_len + body_len);
+    check(IOBuf_read_commit(conn->iob, header_len + body_len) != -1, "Final commit failed.");
 
     return REQ_SENT;
 
@@ -201,7 +201,7 @@ int connection_http_to_handler(Connection *conn)
     error_unless(handler, conn, 404, "No action for request: %s", bdata(Request_path(conn->req)));
 
     // we don't need the header anymore, so commit the buffer and deal with the body
-    IOBuf_read_commit(conn->iob, Request_header_length(conn->req));
+    check(IOBuf_read_commit(conn->iob, Request_header_length(conn->req)) != -1, "Finaly commit failed streaming the connection to http handlers.");
 
     // WebSocket detection
     if(is_websocket(conn)) {
@@ -247,8 +247,8 @@ int connection_http_to_directory(Connection *conn)
     int rc = Dir_serve_file(dir, conn->req, conn);
     check_debug(rc == 0, "Failed to serve file: %s", bdata(Request_path(conn->req)));
 
-    IOBuf_read_commit(conn->iob,
-            Request_header_length(conn->req) + Request_content_length(conn->req));
+    check(IOBuf_read_commit(conn->iob,
+            Request_header_length(conn->req) + Request_content_length(conn->req)) != -1, "Finaly commit failed sending from directory.");
 
     Log_request(conn, conn->req->status_code, conn->req->response_size);
 
@@ -346,7 +346,7 @@ int connection_proxy_reply_parse(Connection *conn)
         check(rc != -1, "Failed streaming non-chunked response.");
     } else if(client->close || client->content_len == -1) {
         debug("Response requested a read until close.");
-        Proxy_stream_to_close(conn);
+        check(Proxy_stream_to_close(conn) != -1, "Failed streaming to client.");
     } else {
         sentinel("Should not reach this code, Tell Zed.");
     }

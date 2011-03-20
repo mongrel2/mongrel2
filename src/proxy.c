@@ -164,7 +164,7 @@ error:
 }
 
 
-void Proxy_stream_to_close(Connection *conn)
+int Proxy_stream_to_close(Connection *conn)
 {
     conn->client->close = 1;
 
@@ -174,11 +174,16 @@ void Proxy_stream_to_close(Connection *conn)
     int rc = IOBuf_send_all(conn->iob, IOBuf_start(conn->proxy_iob),
             IOBuf_avail(conn->proxy_iob));
 
-    if(rc == -1) return;
+    check_debug(rc != -1, "Failure sending all on proxy stream.");
 
-    IOBuf_read_commit(conn->proxy_iob, IOBuf_avail(conn->proxy_iob));
+    check(IOBuf_read_commit(conn->proxy_iob, IOBuf_avail(conn->proxy_iob)) != -1, "Final commit failed proxy streaming until closed.");
 
     for(rc = 0; rc != -1;) {
         rc = IOBuf_stream(conn->proxy_iob, conn->iob, total);
     }
+
+    return 0;
+
+error:
+    return -1;
 }
