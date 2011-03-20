@@ -56,11 +56,11 @@ static hash_val_t bstr_hash_fun(const void *kv)
     bstring key = (bstring)kv;
     const unsigned char *str = (const unsigned char *)bdata(key);
 
-    hash_val_t acc = 14695981039346656037;
+    hash_val_t acc = 14695981039346656037u;
 
     while(*str) {
         acc ^= *str;
-        acc *= 1099511628211;
+        acc *= 1099511628211u;
         str++;
     }
 
@@ -338,7 +338,7 @@ static inline bstring json_escape(bstring in)
 struct tagbstring JSON_LISTSEP = bsStatic("\",\"");
 struct tagbstring JSON_OBJSEP = bsStatic("\":\"");
 
-static const int PAYLOAD_GUESS = 64;
+static const int PAYLOAD_GUESS = 128;
 
 static inline void B(bstring headers, const bstring k, const bstring v)
 {
@@ -350,7 +350,7 @@ static inline void B(bstring headers, const bstring k, const bstring v)
 
         bstring vstr = json_escape(v);
         bconcat(headers, vstr);
-        bcatcstr(headers, "\"") == BSTR_OK;
+        bcatcstr(headers, "\"");
 
         bdestroy(vstr);
     }
