@@ -280,11 +280,9 @@ char *IOBuf_read(IOBuf *buf, int need, int *out_len)
         if(rc <= 0) {
             debug("Socket was closed, will return only what's available: %d", buf->avail);
             buf->closed = 1;
+        } else {
+            buf->avail = buf->avail + rc;
         }
-        //debug("Read %d bytes of data. buf->cur: %d, buf->avail: %d", rc, buf->cur, buf->avail);
-        // debug_dump(IOBuf_read_point(buf), rc);
-
-        buf->avail = buf->avail + rc;
 
         if(buf->avail < need) {
             // less than expected

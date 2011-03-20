@@ -3,19 +3,41 @@
 #include <io.h>
 #include <connection.h>
 #include <register.h>
+#include <assert.h>
+#include <mem/halloc.h>
 
 FILE *LOG_FILE = NULL;
+
+Connection *fake_conn(const char *file, int mode, int type) {
+    Connection *conn = h_calloc(sizeof(Connection), 1);
+    assert(conn && "Failed to create connection.");
+
+    int fd = open(file, mode);
+    assert(fd != -1 && "Failed to open file.");
+
+    conn->iob = IOBuf_create(10 * 1024, fd, IOBUF_FILE);
+    assert(conn->iob && "Failed to create iobuffer.");
+    conn->type = type;
+
+    Register_connect(fd, conn);
+
+    return conn;
+}
+
+void fake_conn_close(Connection *conn)
+{
+    assert(conn && conn->iob && "Invalid connection.");
+    Register_disconnect(conn->iob->fd);
+    Connection_destroy(conn);
+}
 
 char *test_IOBuf_read_operations() 
 {
     char *data = NULL;
     int avail = 0;
-    Connection conn = {.type = 1};
-
-    int zero_fd = open("/dev/zero", O_RDONLY);
-    IOBuf *buf = IOBuf_create(10 * 1024, zero_fd, IOBUF_FILE);
-    mu_assert(buf != NULL, "Failed to allocate buf.");
-    Register_connect(zero_fd, &conn);
+    Connection *conn = fake_conn("/dev/zero", O_RDONLY, 1);
+    mu_assert(conn != NULL, "Failed to make fake /dev/zero connection.");
+    IOBuf *buf = conn->iob;
 
     IOBuf_resize(buf, 31);
     mu_assert(buf->len == 31, "Wrong size after resize.");
@@ -81,19 +103,15 @@ char *test_IOBuf_read_operations()
     mu_assert(buf->avail == 31, "Should be full.");
     mu_assert(avail == 31, "And we should get the full amount.");
 
-    IOBuf_destroy(buf);
-    Register_disconnect(zero_fd);
-
+    fake_conn_close(conn);
     return NULL;
 }
 
 char *test_IOBuf_send_operations() 
 {
-    Connection conn;
-    int null_fd = open("/dev/null", O_WRONLY);
-    IOBuf *buf = IOBuf_create(10 * 1024, null_fd, IOBUF_FILE);
-    mu_assert(buf != NULL, "Failed to allocate buf.");
-    Register_connect(buf->fd, &conn);
+    Connection *conn = fake_conn("/dev/null", O_WRONLY, 1);
+    mu_assert(conn != NULL, "Failed to allocate buf.");
+    IOBuf *buf = conn->iob;
     mu_assert(Register_fd_exists(buf->fd) != NULL, "Damn fd isn't registered.");
 
     int rc = IOBuf_send(buf, "012345789", 10);
@@ -105,8 +123,7 @@ char *test_IOBuf_send_operations()
     mu_assert(IOBuf_closed(buf), "Should be closed.");
     mu_assert(rc == -1, "Should send nothing.");
 
-    IOBuf_destroy(buf);
-    Register_disconnect(null_fd);
+    fake_conn_close(conn);
 
     return NULL;
 }
@@ -115,15 +132,10 @@ char *test_IOBuf_send_operations()
 char *test_IOBuf_streaming()
 {
     // test streaming from /dev/zero to /dev/null
-    Connection conn;
-    int zero_fd = open("/dev/zero", O_RDONLY);
-    IOBuf *from = IOBuf_create(1024, zero_fd, IOBUF_FILE);
-    Register_connect(zero_fd, &conn);
-
-    Connection conn2;
-    int null_fd = open("/dev/null", O_WRONLY);
-    IOBuf *to = IOBuf_create(1024, null_fd, IOBUF_FILE);
-    Register_connect(null_fd, &conn2);
+    Connection *zero = fake_conn("/dev/zero", O_RDONLY, 1);
+    IOBuf *from = zero->iob;
+    Connection *null = fake_conn("/dev/null", O_WRONLY, 1);
+    IOBuf *to = null->iob;
 
     int rc = IOBuf_stream(from, to, 500);
     mu_assert(rc == 500, "Didn't stream the right amount on small test.");
@@ -131,16 +143,17 @@ char *test_IOBuf_streaming()
     rc = IOBuf_stream(from, to, 10 * 1024);
     mu_assert(rc == 10 * 1024, "Didn't stream oversized amount.");
 
-    fdclose(null_fd);
+    fdclose(from->fd);
     rc = IOBuf_stream(from, to, 10 * 1024);
     mu_assert(rc == -1, "Should fail if send side is closed.");
+    mu_assert(from->avail >= 0, "Avail should never go below 0.");
 
-    fdclose(zero_fd);
+    fdclose(to->fd);
     rc = IOBuf_stream(from, to, 10 * 1024);
     mu_assert(rc == -1, "Should fail if recv side is closed.");
 
-    Register_disconnect(zero_fd);
-    Register_disconnect(null_fd);
+    fake_conn_close(zero);
+    fake_conn_close(null);
     return NULL;
 }
 

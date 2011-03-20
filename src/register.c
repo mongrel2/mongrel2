@@ -101,6 +101,11 @@ int Register_disconnect(int fd)
     Registration *reg = &REGISTRATIONS[fd];
     check_debug(reg->data != NULL, "Attempt to unregister FD %d which is already gone.", fd);
 
+    // TODO: actually do this somewhere else
+    if (reg->data->iob != NULL) {
+        reg->data->iob->closed=1;
+    }
+
     Register_clear(reg);
     fdclose(fd);
 

@@ -49,29 +49,23 @@
 int MAX_HEADER_COUNT=0;
 int MAX_DUPE_HEADERS=5;
 
-// just copied from hash.c but applied to bstrings
+// FNV1a hash from http://isthe.com/chongo/tech/comp/fnv/
+// Magic values for 64bit hash.
+// TODO: Maybe we should change adt to fix the hash width instead of working off the
+// width of a long on the host system?
 static hash_val_t bstr_hash_fun(const void *kv)
 {
     bstring key = (bstring)kv;
-
-    static unsigned long randbox[] = {
-	0x49848f1bU, 0xe6255dbaU, 0x36da5bdcU, 0x47bf94e9U,
-	0x8cbcce22U, 0x559fc06aU, 0xd268f536U, 0xe10af79aU,
-	0xc1af4d69U, 0x1d2917b5U, 0xec4c304dU, 0x9ee5016cU,
-	0x69232f74U, 0xfead7bb3U, 0xe9089ab6U, 0xf012f6aeU,
-    };
-
     const unsigned char *str = (const unsigned char *)bdata(key);
-    hash_val_t acc = 0;
 
-    while (*str) {
-	acc ^= randbox[(*str + acc) & 0xf];
-	acc = (acc << 1) | (acc >> 31);
-	acc &= 0xffffffffU;
-	acc ^= randbox[((*str++ >> 4) + acc) & 0xf];
-	acc = (acc << 2) | (acc >> 30);
-	acc &= 0xffffffffU;
+    hash_val_t acc = 14695981039346656037u;
+
+    while(*str) {
+        acc ^= *str;
+        acc *= 1099511628211u;
+        str++;
     }
+
     return acc;
 }
 
@@ -323,8 +317,6 @@ int Request_get_date(Request *req, bstring field, const char *format)
 }
 
 
-#define B(K, V) if((V) != NULL) { vstr = json_escape(V); bformata(headers, ",\"%s\":\"%s\"", bdata(K), bdata(vstr)); bdestroy(vstr); }
-
 static struct tagbstring QUOTE_CHAR = bsStatic("\"");
 static struct tagbstring QUOTE_REPLACE = bsStatic("\\\"");
 
@@ -335,43 +327,83 @@ static inline bstring json_escape(bstring in)
 {
     if(in == NULL) return NULL;
 
-    // TODO: this isn't efficient at all, make it better
+    // Slightly better than the old solution.
     bstring vstr = bstrcpy(in);
-
-    // MUST GO IN THIS ORDER
-    bfindreplace(vstr, &BSLASH_CHAR, &BSLASH_REPLACE, 0);
-    bfindreplace(vstr, &QUOTE_CHAR, &QUOTE_REPLACE, 0);
+    
+    int i;
+    for(i = 0; i < blength(vstr); i++)
+    {
+        if(bdata(vstr)[i] == '\\')
+        {
+            binsertch(vstr, i, 1, '\\');
+            i++;
+        }
+        else if(bdata(vstr)[i] == '"')
+        {
+            binsertch(vstr, i, 1, '\\');
+            i++;
+        }
+    }
 
     return vstr;
 }
 
 struct tagbstring JSON_LISTSEP = bsStatic("\",\"");
+struct tagbstring JSON_OBJSEP = bsStatic("\":\"");
+
+static const int PAYLOAD_GUESS = 128;
+
+static inline void B(bstring headers, const bstring k, const bstring v)
+{
+    if(v)
+    {
+        bcatcstr(headers, ",\"");
+        bconcat(headers, k);
+        bconcat(headers, &JSON_OBJSEP);
+
+        bstring vstr = json_escape(v);
+        bconcat(headers, vstr);
+        bcatcstr(headers, "\"");
+
+        bdestroy(vstr);
+    }
+}
 
 bstring Request_to_payload(Request *req, bstring uuid, int fd, const char *buf, size_t len)
 {
-    bstring headers = bformat("{\"%s\":\"%s\"", bdata(&HTTP_PATH), bdata(req->path));
+    bstring headers = NULL;
     bstring result = NULL;
+
     int id = Register_id_for_fd(fd);
-    bstring vstr = NULL; // used in the B macro
-    bstring key = NULL;
-    hnode_t *i = NULL;
+    check(id != -1, "Asked to generate a payload for a fd that doesn't exist: %d", fd);
+
+    headers = bfromcstralloc(PAYLOAD_GUESS, "{\"");
+    bconcat(headers, &HTTP_PATH);
+    bconcat(headers, &JSON_OBJSEP);
+    bconcat(headers, req->path);
+    bconchar(headers, '"');
+
     hscan_t scan;
-    struct bstrList *val_list = NULL;
-
-    check(id != -1, "Asked to generate a paylod for an fd that doesn't exist: %d", fd);
-
+    hnode_t *i;
     hash_scan_begin(&scan, req->headers);
-    for(i = hash_scan_next(&scan); i != NULL; i = hash_scan_next(&scan)) {
-        val_list = hnode_get(i);
-        key = (bstring)hnode_getkey(i);
+    for(i = hash_scan_next(&scan); i != NULL; i = hash_scan_next(&scan))
+    {
+        struct bstrList *val_list = hnode_get(i);
+        bstring key = (bstring)hnode_getkey(i);
 
-        if(val_list->qty > 1) {
-            // join all the values together as a json array then add that to the key
+        if(val_list->qty > 1)
+        {
             bstring list = bjoin(val_list, &JSON_LISTSEP);
-            bformata(headers, ",\"%s\":[\"%s\"]", bdata(key), bdata(list));
+            bcatcstr(headers, ",\"");
+            bconcat(headers, key);
+            bcatcstr(headers, "\":[\"");
+            bconcat(headers, list);
+            bcatcstr(headers, "\"]");
             bdestroy(list);
-        } else {
-            B(key, val_list->entry[0]);
+        }
+        else
+        {
+            B(headers, key, val_list->entry[0]);
         }
     }
 
@@ -379,35 +411,39 @@ bstring Request_to_payload(Request *req, bstring uuid, int fd, const char *buf, 
     // hash algorithms languages have will replace the browser ones with ours
 
     if(Request_is_json(req)) {
-        B(&HTTP_METHOD, &JSON_METHOD);
+        B(headers, &HTTP_METHOD, &JSON_METHOD);
     } else if(Request_is_xml(req)) {
-        B(&HTTP_METHOD, &XML_METHOD);
+        B(headers, &HTTP_METHOD, &XML_METHOD);
     } else {
-        B(&HTTP_METHOD, req->request_method);
+        B(headers, &HTTP_METHOD, req->request_method);
     }
 
-    B(&HTTP_VERSION, req->version);
-    B(&HTTP_URI, req->uri);
-    B(&HTTP_QUERY, req->query_string);
-    B(&HTTP_FRAGMENT, req->fragment);
-    B(&HTTP_PATTERN, req->pattern);
+    B(headers, &HTTP_VERSION, req->version);
+    B(headers, &HTTP_URI, req->uri);
+    B(headers, &HTTP_QUERY, req->query_string);
+    B(headers, &HTTP_FRAGMENT, req->fragment);
+    B(headers, &HTTP_PATTERN, req->pattern);
 
     bconchar(headers, '}');
 
     result = bformat("%s %d %s %d:%s,%d:", bdata(uuid), id, 
             bdata(Request_path(req)),
-            blength(headers), bdata(headers), len);
+            blength(headers),
+            bdata(headers),
+            len);
+
+    bdestroy(headers);
 
     bcatblk(result, buf, len);
     bconchar(result, ',');
 
     check(result, "Failed to construct payload result.");
 
-    bdestroy(headers);
     return result;
 
 error:
     bdestroy(headers);
     bdestroy(result);
+
     return NULL;
 }
