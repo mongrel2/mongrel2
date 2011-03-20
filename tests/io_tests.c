@@ -8,7 +8,7 @@
 
 FILE *LOG_FILE = NULL;
 
-Connection *fake_conn(const char *file, int mode, int type) {
+Connection *fake_conn(const char *file, int mode) {
     Connection *conn = h_calloc(sizeof(Connection), 1);
     assert(conn && "Failed to create connection.");
 
@@ -17,7 +17,7 @@ Connection *fake_conn(const char *file, int mode, int type) {
 
     conn->iob = IOBuf_create(10 * 1024, fd, IOBUF_FILE);
     assert(conn->iob && "Failed to create iobuffer.");
-    conn->type = type;
+    conn->type = CONN_TYPE_HTTP;
 
     Register_connect(fd, conn);
 
@@ -35,7 +35,7 @@ char *test_IOBuf_read_operations()
 {
     char *data = NULL;
     int avail = 0;
-    Connection *conn = fake_conn("/dev/zero", O_RDONLY, 1);
+    Connection *conn = fake_conn("/dev/zero", O_RDONLY);
     mu_assert(conn != NULL, "Failed to make fake /dev/zero connection.");
     IOBuf *buf = conn->iob;
 
@@ -109,16 +109,16 @@ char *test_IOBuf_read_operations()
 
 char *test_IOBuf_send_operations() 
 {
-    Connection *conn = fake_conn("/dev/null", O_WRONLY, 1);
+    Connection *conn = fake_conn("/dev/null", O_WRONLY);
     mu_assert(conn != NULL, "Failed to allocate buf.");
     IOBuf *buf = conn->iob;
-    mu_assert(Register_fd_exists(buf->fd) != NULL, "Damn fd isn't registered.");
+    mu_assert(Register_fd_exists(IOBuf_fd(buf)) != NULL, "Damn fd isn't registered.");
 
     int rc = IOBuf_send(buf, "012345789", 10);
     mu_assert(!IOBuf_closed(buf), "Should not be closed.");
     mu_assert(rc == 10, "Should have sent 10 bytes.");
 
-    fdclose(buf->fd);
+    fdclose(IOBuf_fd(buf));
     rc = IOBuf_send(buf, "012345789", 10);
     mu_assert(IOBuf_closed(buf), "Should be closed.");
     mu_assert(rc == -1, "Should send nothing.");
@@ -132,9 +132,9 @@ char *test_IOBuf_send_operations()
 char *test_IOBuf_streaming()
 {
     // test streaming from /dev/zero to /dev/null
-    Connection *zero = fake_conn("/dev/zero", O_RDONLY, 1);
+    Connection *zero = fake_conn("/dev/zero", O_RDONLY);
     IOBuf *from = zero->iob;
-    Connection *null = fake_conn("/dev/null", O_WRONLY, 1);
+    Connection *null = fake_conn("/dev/null", O_WRONLY);
     IOBuf *to = null->iob;
 
     int rc = IOBuf_stream(from, to, 500);

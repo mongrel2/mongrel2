@@ -57,9 +57,8 @@ static ssize_t plain_stream_file(IOBuf *iob, int fd, int len)
 
         sent = IOBuf_sendfile(conn_fd, fd, &offset, block_size);
 
-        check(Register_write(iob->fd, sent) != -1, "Failed to record write, must have died.");
+        check(Register_write(iob->fd, sent) != -1, "Socket seems to be closed.");
 
-        debug("TOTAL: %d", total);
         check_debug(sent > 0, "Client closed probably during sendfile on socket: %d from "
                     "file %d", conn_fd, fd);
     }
@@ -161,6 +160,7 @@ static ssize_t ssl_stream_file(IOBuf *iob, int fd, int len)
                         "return code %d", amt);
             sent += amt;
         }
+
         check(Register_write(iob->fd, sent) != -1, "Failed to record write, must have died.");
     }
     
