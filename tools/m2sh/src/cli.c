@@ -24,7 +24,7 @@
 
 
 
-#line 2 "src/cli.c"
+#line 28 "src/cli.c"
 static const int params_start = 4;
 static const int params_first_final = 4;
 static const int params_error = -1;
@@ -40,7 +40,7 @@ void cli_params_init( struct params *fsm )
     fsm->token_count = 0;
     fsm->curtk = 0;
 	
-#line 2 "src/cli.c"
+#line 44 "src/cli.c"
 	{
 	 fsm->cs = params_start;
 	 fsm->ts = 0;
@@ -59,7 +59,7 @@ void cli_params_execute( struct params *fsm, bstring data)
     Token *temp = NULL;
 
 	
-#line 2 "src/cli.c"
+#line 63 "src/cli.c"
 	{
 	if ( p == pe )
 		goto _test_eof;
@@ -117,7 +117,7 @@ st4:
 case 4:
 #line 1 "NONE"
 	{ fsm->ts = p;}
-#line 2 "src/cli.c"
+#line 121 "src/cli.c"
 	switch( (*p) ) {
 		case 32: goto tr7;
 		case 34: goto tr8;
@@ -154,7 +154,7 @@ st5:
 	if ( ++p == pe )
 		goto _test_eof5;
 case 5:
-#line 2 "src/cli.c"
+#line 158 "src/cli.c"
 	if ( (*p) == 32 )
 		goto tr13;
 	if ( 9 <= (*p) && (*p) <= 13 )
@@ -168,7 +168,7 @@ st6:
 	if ( ++p == pe )
 		goto _test_eof6;
 case 6:
-#line 2 "src/cli.c"
+#line 172 "src/cli.c"
 	switch( (*p) ) {
 		case 32: goto st0;
 		case 34: goto tr15;
@@ -199,7 +199,7 @@ st7:
 	if ( ++p == pe )
 		goto _test_eof7;
 case 7:
-#line 2 "src/cli.c"
+#line 203 "src/cli.c"
 	if ( (*p) == 32 )
 		goto st0;
 	if ( 9 <= (*p) && (*p) <= 13 )
@@ -213,7 +213,7 @@ st8:
 	if ( ++p == pe )
 		goto _test_eof8;
 case 8:
-#line 2 "src/cli.c"
+#line 217 "src/cli.c"
 	switch( (*p) ) {
 		case 32: goto st2;
 		case 39: goto tr15;
@@ -244,7 +244,7 @@ st9:
 	if ( ++p == pe )
 		goto _test_eof9;
 case 9:
-#line 2 "src/cli.c"
+#line 248 "src/cli.c"
 	if ( (*p) == 32 )
 		goto st2;
 	if ( 9 <= (*p) && (*p) <= 13 )

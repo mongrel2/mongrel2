@@ -659,7 +659,7 @@ int Connection_read_header(Connection *conn, Request *req)
 
     // add the x-forwarded-for header
     Request_set(conn->req, bstrcpy(&HTTP_X_FORWARDED_FOR),
-            blk2bstr(conn->remote, IPADDR_SIZE), 1);
+            bfromcstr(conn->remote), 1);
 
     check_should_close(conn, conn->req);
 
