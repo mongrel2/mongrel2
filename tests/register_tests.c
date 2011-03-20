@@ -1,16 +1,20 @@
 #include "minunit.h"
+#include <connection.h>
 #include <register.h>
 
 int V_TEST_CONN_1 = 1;
 int V_TEST_CONN_2 = 2;
-void *TEST_CONN_1 = &V_TEST_CONN_1;
-void *TEST_CONN_2 = &V_TEST_CONN_2;
+Connection *TEST_CONN_1 = NULL;
+Connection *TEST_CONN_2 = NULL;
 
 FILE *LOG_FILE = NULL;
 
 char *test_Register_init() 
 {
     Register_init();
+
+    TEST_CONN_1 = calloc(sizeof(Connection), 1);
+    TEST_CONN_2 = calloc(sizeof(Connection), 1);
 
     return NULL;
 }
