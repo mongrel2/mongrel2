@@ -51,6 +51,8 @@ int MAX_DUPE_HEADERS=5;
 
 // FNV1a hash from http://isthe.com/chongo/tech/comp/fnv/
 // Magic values for 64bit hash.
+// TODO: Maybe we should change adt to fix the hash width instead of working off the
+// width of a long on the host system?
 static hash_val_t bstr_hash_fun(const void *kv)
 {
     bstring key = (bstring)kv;
@@ -325,12 +327,23 @@ static inline bstring json_escape(bstring in)
 {
     if(in == NULL) return NULL;
 
-    // TODO: this isn't efficient at all, make it better
+    // Slightly better than the old solution.
     bstring vstr = bstrcpy(in);
-
-    // MUST GO IN THIS ORDER
-    bfindreplace(vstr, &BSLASH_CHAR, &BSLASH_REPLACE, 0);
-    bfindreplace(vstr, &QUOTE_CHAR, &QUOTE_REPLACE, 0);
+    
+    int i;
+    for(i = 0; i < blength(vstr); i++)
+    {
+        if(bdata(vstr)[i] == '\\')
+        {
+            binsertch(vstr, i, 1, '\\');
+            i++;
+        }
+        else if(bdata(vstr)[i] == '"')
+        {
+            binsertch(vstr, i, 1, '\\');
+            i++;
+        }
+    }
 
     return vstr;
 }
