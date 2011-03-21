@@ -49,20 +49,21 @@
 int MAX_HEADER_COUNT=0;
 int MAX_DUPE_HEADERS=5;
 
+// Values for a 32 bit hash. Note hash_val_t is now fixed to uint32_t.
+static const unsigned int FNV_PRIME = 16777619;
+static const unsigned int FNV_OFFSET_BASIS = 2166136261;
+
 // FNV1a hash from http://isthe.com/chongo/tech/comp/fnv/
-// Magic values for 64bit hash.
-// TODO: Maybe we should change adt to fix the hash width instead of working off the
-// width of a long on the host system?
 static hash_val_t bstr_hash_fun(const void *kv)
 {
     bstring key = (bstring)kv;
     const unsigned char *str = (const unsigned char *)bdata(key);
 
-    hash_val_t acc = 14695981039346656037u;
+    hash_val_t acc = FNV_OFFSET_BASIS;
 
     while(*str) {
         acc ^= *str;
-        acc *= 1099511628211u;
+        acc *= FNV_PRIME;
         str++;
     }
 
@@ -351,7 +352,8 @@ static inline bstring json_escape(bstring in)
 struct tagbstring JSON_LISTSEP = bsStatic("\",\"");
 struct tagbstring JSON_OBJSEP = bsStatic("\":\"");
 
-static const int PAYLOAD_GUESS = 128;
+// This chosen extremely arbitrarily. Certainly needs work.
+static const int PAYLOAD_GUESS = 256;
 
 static inline void B(bstring headers, const bstring k, const bstring v)
 {

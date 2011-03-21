@@ -141,11 +141,13 @@ void Server_destroy(Server *srv)
 {
     if(srv) {
         RouteMap_destroy(srv->hosts);
+        bdestroy(srv->bind_addr);
         bdestroy(srv->uuid);
         bdestroy(srv->chroot);
         bdestroy(srv->access_log);
         bdestroy(srv->error_log);
         bdestroy(srv->pid_file);
+        bdestroy(srv->default_hostname);
 
         fdclose(srv->listen_fd);
         h_free(srv);

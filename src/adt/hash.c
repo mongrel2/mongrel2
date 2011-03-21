@@ -60,7 +60,8 @@ static void hnode_free(hnode_t *node, void *context);
 static hash_val_t hash_fun_default(const void *key);
 static int hash_comp_default(const void *key1, const void *key2);
 
-int hash_val_t_bit;
+// Fixed for our usage -josh
+//int hash_val_t_bit;
 
 /*
  * Compute the number of bits in the hash_val_t type.  We know that hash_val_t
@@ -75,6 +76,8 @@ int hash_val_t_bit;
  *    right, replacing the topmost bit by zero.
  */
 
+#if 0
+Fixed for our usage -josh
 static void compute_bits(void)
 {
     hash_val_t val = HASH_VAL_T_MAX;	/* 1 */
@@ -87,6 +90,7 @@ static void compute_bits(void)
 
     hash_val_t_bit = bits;
 }
+#endif
 
 /*
  * Verify whether the given argument is a power of two.
@@ -293,8 +297,9 @@ hash_t *hash_create(hashcount_t maxcount, hash_comp_t compfun,
 {
     hash_t *hash;
 
-    if (hash_val_t_bit == 0)	/* 1 */
-	compute_bits();
+    // Fixed size for our usage
+    //if (hash_val_t_bit == 0)	/* 1 */
+	//compute_bits();
 
     hash = malloc(sizeof *hash);	/* 2 */
 
@@ -399,8 +404,9 @@ hash_t *hash_init(hash_t *hash, hashcount_t maxcount,
 	hash_comp_t compfun, hash_fun_t hashfun, hnode_t **table,
 	hashcount_t nchains)
 {
-    if (hash_val_t_bit == 0)	/* 1 */
-	compute_bits();
+    // Fixed size for our usage.
+    //if (hash_val_t_bit == 0)	/* 1 */
+	//compute_bits();
 
     assert (is_power_of_two(nchains));
 

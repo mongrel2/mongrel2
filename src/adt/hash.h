@@ -22,6 +22,8 @@
 #define HASH_H
 
 #include <limits.h>
+#include <stdint.h>
+
 #ifdef KAZLIB_SIDEEFFECT_DEBUG
 #include "sfx.h"
 #endif
@@ -37,10 +39,10 @@ extern "C" {
 typedef unsigned long hashcount_t;
 #define HASHCOUNT_T_MAX ULONG_MAX
 
-typedef unsigned long hash_val_t;
-#define HASH_VAL_T_MAX ULONG_MAX
+typedef uint32_t hash_val_t;
+#define HASH_VAL_T_MAX UINT32_MAX
 
-extern int hash_val_t_bit;
+static const int hash_val_t_bit = 32;
 
 #ifndef HASH_VAL_T_BIT
 #define HASH_VAL_T_BIT ((int) hash_val_t_bit)
