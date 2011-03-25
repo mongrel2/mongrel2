@@ -57,6 +57,7 @@ static inline void tnetstring_encode_list(bstring payload, struct bstrList *data
         }
 
         bformata(payload, "%d:%s]", blength(out), bdata(out));
+        bdestroy(out);
     }
 }
 
@@ -84,6 +85,7 @@ static inline void tnetstring_encode_hash(bstring payload, hash_t *data)
         }
 
         bformata(payload, "%d:%s}", blength(out), bdata(out));
+        bdestroy(out);
     }
 }
 

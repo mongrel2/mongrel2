@@ -109,18 +109,18 @@ def dump_tnetstring(data):
 
 
 TESTS = {
-    '0:}': {},
-    '0:]': [],
-    '44:5:hello,32:11:12345678901#4:this,4:true!0:~]}': 
-            {'hello': [12345678901, 'this', True, None]},
-    '5:12345#': 12345,
-    '12:this is cool,': "this is cool",
-    '0:,': "",
-    '4:true!': True,
-    '5:false!': False,
-    '24:5:12345#5:67890#5:xxxxx,]': [12345, 67890, 'xxxxx'],
-    '42:7:VERSION,3:XML,6:METHOD,13:4:JSON,3:XML,]}': [],
-    '27:3:one,3:two,5:three,4:four,]': [],
+    #'0:}': {},
+    #'0:]': [],
+    #'44:5:hello,32:11:12345678901#4:this,4:true!0:~]}': 
+    #        {'hello': [12345678901, 'this', True, None]},
+    #'5:12345#': 12345,
+    #'12:this is cool,': "this is cool",
+    #'0:,': "",
+    #'4:true!': True,
+    #'5:false!': False,
+    #'24:5:12345#5:67890#5:xxxxx,]': [12345, 67890, 'xxxxx'],
+    #'42:7:VERSION,3:XML,6:METHOD,13:4:JSON,3:XML,]}': [],
+    #'27:3:one,3:two,5:three,4:four,]': [],
     '47:4:test,4:test,4:test,3:100#3:200#4:test,4:test,]': [],
     '34:3:age,3:100#4:name,11:Zed A. Shaw,}': [],
     "78:4:test,4:test,4:test,3:100#3:200#4:test,4:test,27:3:one,3:two,5:three,4:four,]]": [],
@@ -134,9 +134,9 @@ for i in xrange(0,count):
         again = dump_tnetstring(payload)
         back, extra = parse_tnetstring(again)
 
-        print "PAYLOAD:", repr(payload)
-        print "AGAIN:", repr(again)
-        print "BACK:", repr(back)
-        print "EXTRA:", repr(extra)
-        print "----"
+        # print "PAYLOAD:", repr(payload)
+        # print "AGAIN:", repr(again)
+        # print "BACK:", repr(back)
+        # print "EXTRA:", repr(extra)
+        # print "----"
 
