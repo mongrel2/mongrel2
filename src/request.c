@@ -316,13 +316,6 @@ int Request_get_date(Request *req, bstring field, const char *format)
     }
 }
 
-
-static struct tagbstring QUOTE_CHAR = bsStatic("\"");
-static struct tagbstring QUOTE_REPLACE = bsStatic("\\\"");
-
-static struct tagbstring BSLASH_CHAR = bsStatic("\\");
-static struct tagbstring BSLASH_REPLACE = bsStatic("\\\\");
-
 static inline bstring json_escape(bstring in)
 {
     if(in == NULL) return NULL;
