@@ -69,8 +69,8 @@ m2sh:
 install: all install-bin install-m2sh
 
 install-bin:
-	install -d $(PREFIX)/bin/
-	install bin/mongrel2 $(PREFIX)/bin/
+	install -d $(DESTDIR)/$(PREFIX)/bin/
+	install bin/mongrel2 $(DESTDIR)/$(PREFIX)/bin/
 
 install-m2sh:
 	${MAKE} -C tools/m2sh install
