@@ -2,73 +2,89 @@
 #include "minunit.h"
 #include <tnetstrings.h>
 #include <request.h>
+#include <assert.h>
 
 FILE *LOG_FILE = NULL;
 
-char *test_start_push_done()
+char *test_tnetstring_encode()
 {
-    bstring list_data = bfromcstr("one two three four");
-    struct bstrList *list = bsplit(list_data, ' ');
-    bdestroy(list_data);
+    size_t len = 0;
+    unsigned long i = 0;
 
-    tns_start();
-    tns_push("%!%!%!", "test", "test", "test");
-    tns_push("%d%d", 100, 200);
-    tns_push("%!%!", "test", "test");
-    tns_push("%l", list);
-    tns_pop(']');
+    for(i = 0; i < 100000; i++) {
+        tns_value_t val = {.type = tns_tag_null};
+        char *result = tns_render(&val, &len);
+        mu_assert(len == 3, "Wrong length on null.");
+        free(result);
 
-    mu_assert(biseqcstr(
-            tns_top(),
-            "78:4:test,4:test,4:test,3:100#3:200#4:test,4:test,27:3:one,3:two,5:three,4:four,]]"),
-            "Pushing a list fails.");
+        tns_value_t num = {.type = tns_tag_number, .value.number = 12345};
+        result = tns_render(&num, &len);
+        mu_assert(len == 8, "Wrong length on number.");
+        free(result);
 
-    tns_clear();
+        bstring data = bfromcstr("hello");
+        tns_value_t str = {.type = tns_tag_string, .value.string = data};
+        result = tns_render(&str, &len);
+        mu_assert(len == 8, "Wrong length on string.");
+        bdestroy(data);
+        free(result);
 
-    tns_push("%!%d", "age", 100);
-    tns_push("%!%!", "name", "Zed A. Shaw");
-    tns_pop('}');
+        tns_value_t boolean = {.type = tns_tag_bool, .value.bool = 1};
+        result = tns_render(&boolean, &len);
+        mu_assert(len == 7, "Wrong length on true.");
+        free(result);
 
-    mu_assert(biseqcstr(tns_top(),
-                "34:3:age,3:100#4:name,11:Zed A. Shaw,}"), "Pushing a hash fails.");
-    tns_done();
+        boolean.value.bool = 0;
+        result = tns_render(&boolean, &len);
+        mu_assert(len == 8, "Wrong length on false.");
+        free(result);
+    }
 
-    bstrListDestroy(list);
     return NULL;
 }
 
-char *test_tnetstrings_encode() 
+char *test_tnetstring_decode() 
 {
-    bstring payload = bfromcstr("");
-    bstring test_bstr = bfromcstr("testbstr");
+    bstring data = bfromcstr("0:~");
+    tns_value_t *result = tns_parse(bdata(data), blength(data), NULL);
 
-    tnetstring_encode(payload, "%!%s%s%d%b",
-            "test yo", NULL, test_bstr, 10234, 1);
+    mu_assert(result != NULL, "Failed to get a true.");
+    mu_assert(result->type == tns_tag_null, "Wrong type, should be null.");
+    free(result);
 
-    mu_assert(biseqcstr(payload, "7:test yo,0:~8:testbstr,5:10234#4:true!"), "Payload fails.");
+    bassigncstr(data, "4:true!");
+    result = tns_parse(bdata(data), blength(data), NULL);
+    mu_assert(result != NULL, "Failed to parse a true.");
+    mu_assert(result->type == tns_tag_bool, "Wrong type, should be bool.");
+    mu_assert(result->value.bool == 1, "Wrong value, should be 1.");
+    free(result);
 
-    bstring list_data = bfromcstr("one two three four");
-    struct bstrList *list = bsplit(list_data, ' ');
-    bdestroy(list_data);
+    bassigncstr(data, "5:false!");
+    result = tns_parse(bdata(data), blength(data), NULL);
+    mu_assert(result != NULL, "Failed to parse a true.");
+    mu_assert(result->type == tns_tag_bool, "Wrong type, should be bool.");
+    mu_assert(result->value.bool == 0, "Wrong value, should be 0.");
+    free(result);
 
-    btrunc(payload, 0);
-    tnetstring_encode(payload, "%l", list);
-    mu_assert(biseqcstr(payload, "27:3:one,3:two,5:three,4:four,]"), "List fails.");
-    bstrListDestroy(list);
+    bassigncstr(data, "5:hello,");
+    bstring compare = bfromcstr("hello");
+    result = tns_parse(bdata(data), blength(data), NULL);
+    mu_assert(result != NULL, "Failed to parse a true.");
+    mu_assert(result->type == tns_tag_string, "Wrong type, should be string.");
+    mu_assert(biseq(result->value.string, compare), "Wrong value, should be 'hello'.");
+    bdestroy(result->value.string);
+    free(result);
+    bdestroy(compare);
 
-    Request *req = Request_create();
-    Request_set(req, &HTTP_METHOD, &JSON_METHOD, 0);
-    Request_set(req, &HTTP_METHOD, &XML_METHOD, 0);
-    Request_set(req, &HTTP_VERSION, &XML_METHOD, 0);
+    bassigncstr(data, "5:12345#");
+    result = tns_parse(bdata(data), blength(data), NULL);
+    mu_assert(result != NULL, "Failed to parse a true.");
+    mu_assert(result->type == tns_tag_number, "Wrong type, should be number.");
+    mu_assert(result->value.number == 12345, "Wrong value, should be 12345.");
+    free(result);
 
-    btrunc(payload, 0);
-    tnetstring_encode(payload, "%h", req->headers);
+    bdestroy(data);
 
-    mu_assert(biseqcstr(payload, "42:7:VERSION,3:XML,6:METHOD,13:4:JSON,3:XML,]}"), "Hash fails.");
-
-    Request_destroy(req);
-    bdestroy(payload);
-    bdestroy(test_bstr);
     return NULL;
 }
 
@@ -76,12 +92,8 @@ char * all_tests() {
     Request_init();
     mu_suite_start();
 
-    mu_run_test(test_tnetstrings_encode);
-
-    int i = 0;
-    for(i = 0; i < 30000; i++) {
-        mu_run_test(test_start_push_done);
-    }
+    mu_run_test(test_tnetstring_encode);
+    mu_run_test(test_tnetstring_decode);
 
     return NULL;
 }
