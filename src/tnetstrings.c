@@ -3,6 +3,7 @@
 #include "dbg.h"
 #include <assert.h>
 
+
 static inline int
 tns_parse_dict(void *dict, const char *data, size_t len);
 
@@ -33,139 +34,7 @@ tns_outbuf_rputs(tns_outbuf *outbuf, const char *data, size_t len);
 static inline void
 tns_inplace_reverse(char *data, size_t len);
 
-/** Helper functions for the tns code to work with internal data structures. */
-
-//  Functions to introspect the type of a data object.
-static inline tns_type_tag tns_get_type(void *val)
-{
-    tns_value_t *t = (tns_value_t *)val;
-    return t->type;
-}
-
-//  Functions for parsing and rendering primitive datatypes.
-static inline void *tns_parse_string(const char *data, size_t len)
-{
-    tns_value_t *t = calloc(sizeof(tns_value_t), 1);
-    t->type = tns_tag_string;
-    t->value.string = blk2bstr(data, len);
-    return t;
-}
-
-static inline int tns_render_string(void *val, tns_outbuf *outbuf)
-{
-    tns_value_t *t = (tns_value_t *)val;
-    assert(t->type == tns_tag_string && "Value is not a string.");
-    return tns_outbuf_rputs(outbuf, bdata(t->value.string), blength(t->value.string));
-}
-
-static inline void *tns_parse_integer(const char *data, size_t len)
-{
-    tns_value_t *t = calloc(sizeof(tns_value_t), 1);
-    t->type = tns_tag_number;
-    t->value.number = strtol(data, NULL, 10);
-    return t;
-}
-
-static inline int tns_render_number(void *val, tns_outbuf *outbuf)
-{
-    tns_value_t *t = (tns_value_t *)val;
-    char out[120] = {0};
-
-    assert(t->type == tns_tag_bool && "Value is not a string.");
-
-    int rc = snprintf(out, 119, "%ld", t->value.number);
-    check(rc != -1 && rc <= 119, "Failed to generate number.");
-
-    out[119] = '\0'; // safety since snprintf might not do this
-
-    return tns_outbuf_rputs(outbuf, out, rc);
-
-error:
-    return -1;
-}
-
-static inline int tns_render_bool(void *val, tns_outbuf *outbuf)
-{
-    tns_value_t *t = (tns_value_t *)val;
-    assert(t->type == tns_tag_bool && "Value is not a string.");
-
-    if(t->value.bool) {
-        return tns_outbuf_rputs(outbuf, "true", 4);
-    } else {
-        return tns_outbuf_rputs(outbuf, "false", 5);
-    }
-}
-
-
-//  Constructors to get constant primitive datatypes.
-static inline void *tns_get_null(void)
-{
-    tns_value_t *t = calloc(sizeof(tns_value_t), 1);
-    t->type = tns_tag_null;
-    return t;
-}
-
-static inline void *tns_get_true(void)
-{
-    tns_value_t *t = calloc(sizeof(tns_value_t), 1);
-    t->type = tns_tag_bool;
-    t->value.bool = 1;
-    return t;
-}
-
-static inline void *tns_get_false(void)
-{
-    tns_value_t *t = calloc(sizeof(tns_value_t), 1);
-    t->type = tns_tag_bool;
-    t->value.bool = 0;
-    return t;
-}
-
-
-//  Functions for manipulating compound datatypes.
-static inline void *tns_new_dict(void)
-{
-    return NULL;
-}
-
-static inline void tns_free_dict(void* dict)
-{
-    return;
-}
-
-static inline int tns_add_to_dict(void *dict, void *key, void *item)
-{
-    return -1;
-}
-
-static inline int tns_render_dict(void *dict, tns_outbuf *outbuf)
-{
-    return -1;
-}
-
-static inline void *tns_new_list(void)
-{
-    return NULL;
-}
-
-static inline void tns_free_list(void* list)
-{
-    return;
-}
-
-static inline int tns_add_to_list(void *list, void *item)
-{
-    return -1;
-}
-
-static inline int tns_render_list(void *dict, tns_outbuf *outbuf)
-{
-    return -1;
-}
-
-
-
-
+#include "tnetstrings_impl.h"
 
 void* tns_parse(const char *data, size_t len, char **remain)
 {
@@ -325,7 +194,7 @@ tns_render_value(void *val, tns_outbuf *outbuf)
       res = tns_render_list(val, outbuf);
       break;
     default:
-      log_err("unknown type tag");
+      log_err("unknown type tag: '%c'", type);
       return -1;
   }
 

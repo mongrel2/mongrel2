@@ -5,6 +5,8 @@
 #include <stddef.h>
 #include <ctype.h>
 #include "bstring.h"
+#include "adt/hash.h"
+#include "adt/list.h"
 
 typedef struct tns_outbuf_s {
   char *buffer;
@@ -27,9 +29,12 @@ typedef struct tns_value_t {
         bstring string;
         long number;
         int bool;
+        list_t *list;
+        hash_t *dict;
     } value;
 } tns_value_t;
 
+void tns_value_destroy(tns_value_t *value);
 
 /**
 *  Parse an object off the front of a tnetstring.
