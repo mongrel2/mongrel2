@@ -8,6 +8,8 @@ int MAX_HASH_COUNT=128 * 10;
 
 void tns_value_destroy(tns_value_t *value)
 {
+    if(value == NULL) return;
+
     list_t *L = value->value.list;
     lnode_t *n = NULL;
 
@@ -65,7 +67,7 @@ static inline tns_type_tag tns_get_type(void *val)
 //  Functions for parsing and rendering primitive datatypes.
 static inline void *tns_parse_string(const char *data, size_t len)
 {
-    tns_value_t *t = calloc(sizeof(tns_value_t), 1);
+    tns_value_t *t = malloc(sizeof(tns_value_t));
     t->type = tns_tag_string;
     t->value.string = blk2bstr(data, len);
     return t;
@@ -80,7 +82,7 @@ static inline int tns_render_string(void *val, tns_outbuf *outbuf)
 
 static inline void *tns_parse_integer(const char *data, size_t len)
 {
-    tns_value_t *t = calloc(sizeof(tns_value_t), 1);
+    tns_value_t *t = malloc(sizeof(tns_value_t));
     t->type = tns_tag_number;
     t->value.number = strtol(data, NULL, 10);
     return t;
@@ -120,14 +122,14 @@ static inline int tns_render_bool(void *val, tns_outbuf *outbuf)
 //  Constructors to get constant primitive datatypes.
 static inline void *tns_get_null(void)
 {
-    tns_value_t *t = calloc(sizeof(tns_value_t), 1);
+    tns_value_t *t = malloc(sizeof(tns_value_t));
     t->type = tns_tag_null;
     return t;
 }
 
 static inline void *tns_get_true(void)
 {
-    tns_value_t *t = calloc(sizeof(tns_value_t), 1);
+    tns_value_t *t = malloc(sizeof(tns_value_t));
     t->type = tns_tag_bool;
     t->value.bool = 1;
     return t;
@@ -135,7 +137,7 @@ static inline void *tns_get_true(void)
 
 static inline void *tns_get_false(void)
 {
-    tns_value_t *t = calloc(sizeof(tns_value_t), 1);
+    tns_value_t *t = malloc(sizeof(tns_value_t));
     t->type = tns_tag_bool;
     t->value.bool = 0;
     return t;
@@ -145,22 +147,12 @@ static inline void *tns_get_false(void)
 //  Functions for manipulating compound datatypes.
 static inline void *tns_new_dict(void)
 {
-    tns_value_t *val = calloc(sizeof(tns_value_t), 1);
+    tns_value_t *val = malloc(sizeof(tns_value_t));
     val->value.dict = hash_create(MAX_HASH_COUNT, (hash_comp_t)bstrcmp, bstr_hash_fun);
     hash_set_allocator(val->value.dict, tns_hnode_alloc, tns_hnode_free, NULL);
     val->type = tns_tag_dict;
 
     return val;
-}
-
-static inline void tns_free_dict(void* dict)
-{
-    // TODO: this will leak the contents, need to determine the contents
-    // and then loop through to destroy or do an halloc or something
-    hash_t *h = ((tns_value_t *)dict)->value.dict;
-
-    hash_free_nodes(h);
-    hash_destroy(h);
 }
 
 static inline int tns_add_to_dict(void *dict, void *key, void *item)
@@ -201,24 +193,12 @@ error:
 
 static inline void *tns_new_list(void)
 {
-    tns_value_t *val = calloc(sizeof(tns_value_t), 1);
+    tns_value_t *val = malloc(sizeof(tns_value_t));
 
     val->value.list = list_create(LISTCOUNT_T_MAX);
     val->type = tns_tag_list;
 
     return val;
-}
-
-static inline void tns_free_list(void* list)
-{
-    list_t *L = (list_t *)list;
-    lnode_t *n = NULL;
-
-    for(n = list_last(L); n != NULL; n = list_prev(L, n)) {
-        tns_value_destroy(lnode_get(n));
-    }
-    list_destroy_nodes(L);
-    list_destroy(L);
 }
 
 static inline int tns_add_to_list(void *list, void *item)
