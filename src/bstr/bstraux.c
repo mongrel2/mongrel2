@@ -1076,3 +1076,24 @@ void * parm;
 	return parm;
 }
 
+
+// FNV1a hash from http://isthe.com/chongo/tech/comp/fnv/
+// Magic values for 64bit hash.
+// TODO: Maybe we should change adt to fix the hash width instead of working off the
+// width of a long on the host system?
+unsigned long bstr_hash_fun(const void *kv)
+{
+    bstring key = (bstring)kv;
+    const unsigned char *str = (const unsigned char *)bdata(key);
+
+    unsigned long acc = 14695981039346656037u;
+
+    while(*str) {
+        acc ^= *str;
+        acc *= 1099511628211u;
+        str++;
+    }
+
+    return acc;
+}
+

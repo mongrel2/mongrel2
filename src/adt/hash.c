@@ -81,8 +81,8 @@ static void compute_bits(void)
     int bits = 0;
 
     while (val) {	/* 2 */
-	bits++;
-	val >>= 1;
+        bits++;
+        val >>= 1;
     }
 
     hash_val_t_bit = bits;
@@ -95,9 +95,9 @@ static void compute_bits(void)
 static int is_power_of_two(hash_val_t arg)
 {
     if (arg == 0)
-	return 0;
+        return 0;
     while ((arg & 1) == 0)
-	arg >>= 1;
+        arg >>= 1;
     return (arg == 1);
 }
 
@@ -122,7 +122,7 @@ static void clear_table(hash_t *hash)
     hash_val_t i;
 
     for (i = 0; i < hash->nchains; i++)
-	hash->table[i] = NULL;
+        hash->table[i] = NULL;
 }
 
 /*
@@ -160,39 +160,39 @@ static void grow_table(hash_t *hash)
     assert (2 * hash->nchains > hash->nchains);	/* 1 */
 
     newtable = realloc(hash->table,
-	    sizeof *newtable * hash->nchains * 2);	/* 4 */
+            sizeof *newtable * hash->nchains * 2);	/* 4 */
 
     if (newtable) {	/* 5 */
-	hash_val_t mask = (hash->mask << 1) | 1;	/* 3 */
-	hash_val_t exposed_bit = mask ^ hash->mask;	/* 6 */
-	hash_val_t chain;
+        hash_val_t mask = (hash->mask << 1) | 1;	/* 3 */
+        hash_val_t exposed_bit = mask ^ hash->mask;	/* 6 */
+        hash_val_t chain;
 
-	assert (mask != hash->mask);
+        assert (mask != hash->mask);
 
-	for (chain = 0; chain < hash->nchains; chain++) { /* 7 */
-	    hnode_t *low_chain = 0, *high_chain = 0, *hptr, *next;
+        for (chain = 0; chain < hash->nchains; chain++) { /* 7 */
+            hnode_t *low_chain = 0, *high_chain = 0, *hptr, *next;
 
-	    for (hptr = newtable[chain]; hptr != 0; hptr = next) {
-		next = hptr->next;
+            for (hptr = newtable[chain]; hptr != 0; hptr = next) {
+                next = hptr->next;
 
-		if (hptr->hkey & exposed_bit) {
-		    hptr->next = high_chain;
-		    high_chain = hptr;
-		} else {
-		    hptr->next = low_chain;
-		    low_chain = hptr;
-		}
-	    }
+                if (hptr->hkey & exposed_bit) {
+                    hptr->next = high_chain;
+                    high_chain = hptr;
+                } else {
+                    hptr->next = low_chain;
+                    low_chain = hptr;
+                }
+            }
 
-	    newtable[chain] = low_chain; 	/* 8 */
-	    newtable[chain + hash->nchains] = high_chain;
-	}
+            newtable[chain] = low_chain; 	/* 8 */
+            newtable[chain + hash->nchains] = high_chain;
+        }
 
-	hash->table = newtable;			/* 9 */
-	hash->mask = mask;
-	hash->nchains *= 2;
-	hash->lowmark *= 2;
-	hash->highmark *= 2;
+        hash->table = newtable;			/* 9 */
+        hash->mask = mask;
+        hash->nchains *= 2;
+        hash->lowmark *= 2;
+        hash->highmark *= 2;
     }
     assert (hash_verify(hash));
 }
@@ -236,21 +236,21 @@ static void shrink_table(hash_t *hash)
     nchains = hash->nchains / 2;
 
     for (chain = 0; chain < nchains; chain++) {
-	low_chain = hash->table[chain];		/* 2 */
-	high_chain = hash->table[chain + nchains];
-	for (low_tail = low_chain; low_tail && low_tail->next; low_tail = low_tail->next)
-	    ;	/* 3 */
-	if (low_chain != 0)				/* 4 */
-	    low_tail->next = high_chain;
-	else if (high_chain != 0)			/* 5 */
-	    hash->table[chain] = high_chain;
-	else
-	    assert (hash->table[chain] == NULL);	/* 6 */
+        low_chain = hash->table[chain];		/* 2 */
+        high_chain = hash->table[chain + nchains];
+        for (low_tail = low_chain; low_tail && low_tail->next; low_tail = low_tail->next)
+            ;	/* 3 */
+        if (low_chain != 0)				/* 4 */
+            low_tail->next = high_chain;
+        else if (high_chain != 0)			/* 5 */
+            hash->table[chain] = high_chain;
+        else
+            assert (hash->table[chain] == NULL);	/* 6 */
     }
     newtable = realloc(hash->table,
-	    sizeof *newtable * nchains);		/* 7 */
+            sizeof *newtable * nchains);		/* 7 */
     if (newtable)					/* 8 */
-	hash->table = newtable;
+        hash->table = newtable;
     hash->mask >>= 1;			/* 9 */
     hash->nchains = nchains;
     hash->lowmark /= 2;
@@ -289,35 +289,35 @@ static void shrink_table(hash_t *hash)
  */
 
 hash_t *hash_create(hashcount_t maxcount, hash_comp_t compfun,
-	hash_fun_t hashfun)
+        hash_fun_t hashfun)
 {
     hash_t *hash;
 
     if (hash_val_t_bit == 0)	/* 1 */
-	compute_bits();
+        compute_bits();
 
     hash = malloc(sizeof *hash);	/* 2 */
 
     if (hash) {		/* 3 */
-	hash->table = malloc(sizeof *hash->table * INIT_SIZE);	/* 4 */
-	if (hash->table) {	/* 5 */
-	    hash->nchains = INIT_SIZE;		/* 6 */
-	    hash->highmark = INIT_SIZE * 2;
-	    hash->lowmark = INIT_SIZE / 2;
-	    hash->nodecount = 0;
-	    hash->maxcount = maxcount;
-	    hash->compare = compfun ? compfun : hash_comp_default;
-	    hash->function = hashfun ? hashfun : hash_fun_default;
-	    hash->allocnode = hnode_alloc;
-	    hash->freenode = hnode_free;
-	    hash->context = NULL;
-	    hash->mask = INIT_MASK;
-	    hash->dynamic = 1;			/* 7 */
-	    clear_table(hash);			/* 8 */
-	    assert (hash_verify(hash));
-	    return hash;
-	} 
-	free(hash);
+        hash->table = malloc(sizeof *hash->table * INIT_SIZE);	/* 4 */
+        if (hash->table) {	/* 5 */
+            hash->nchains = INIT_SIZE;		/* 6 */
+            hash->highmark = INIT_SIZE * 2;
+            hash->lowmark = INIT_SIZE / 2;
+            hash->nodecount = 0;
+            hash->maxcount = maxcount;
+            hash->compare = compfun ? compfun : hash_comp_default;
+            hash->function = hashfun ? hashfun : hash_fun_default;
+            hash->allocnode = hnode_alloc;
+            hash->freenode = hnode_free;
+            hash->context = NULL;
+            hash->mask = INIT_MASK;
+            hash->dynamic = 1;			/* 7 */
+            clear_table(hash);			/* 8 */
+            assert (hash_verify(hash));
+            return hash;
+        } 
+        free(hash);
     }
 
     return NULL;
@@ -328,7 +328,7 @@ hash_t *hash_create(hashcount_t maxcount, hash_comp_t compfun,
  */
 
 void hash_set_allocator(hash_t *hash, hnode_alloc_t al,
-	hnode_free_t fr, void *context)
+        hnode_free_t fr, void *context)
 {
     assert (hash_count(hash) == 0);
     assert ((al == 0 && fr == 0) || (al != 0 && fr != 0));
@@ -349,8 +349,8 @@ void hash_free_nodes(hash_t *hash)
     hnode_t *node;
     hash_scan_begin(&hs, hash);
     while ((node = hash_scan_next(&hs))) {
-	hash_scan_delete(hash, node);
-	hash->freenode(node, hash->context);
+        hash_scan_delete(hash, node);
+        hash->freenode(node, hash->context);
     }
     hash->nodecount = 0;
     clear_table(hash);
@@ -396,11 +396,11 @@ void hash_destroy(hash_t *hash)
  */
 
 hash_t *hash_init(hash_t *hash, hashcount_t maxcount,
-	hash_comp_t compfun, hash_fun_t hashfun, hnode_t **table,
-	hashcount_t nchains)
+        hash_comp_t compfun, hash_fun_t hashfun, hnode_t **table,
+        hashcount_t nchains)
 {
     if (hash_val_t_bit == 0)	/* 1 */
-	compute_bits();
+        compute_bits();
 
     assert (is_power_of_two(nchains));
 
@@ -440,13 +440,13 @@ void hash_scan_begin(hscan_t *scan, hash_t *hash)
     /* 1 */
 
     for (chain = 0; chain < nchains && hash->table[chain] == 0; chain++)
-	;
+        ;
 
     if (chain < nchains) {	/* 2 */
-	scan->chain = chain;
-	scan->next = hash->table[chain];
+        scan->chain = chain;
+        scan->next = hash->table[chain];
     } else {			/* 3 */
-	scan->next = NULL;
+        scan->next = NULL;
     }
 }
 
@@ -486,18 +486,18 @@ hnode_t *hash_scan_next(hscan_t *scan)
     assert (hash_val_t_bit != 0);	/* 2 */
 
     if (next) {			/* 3 */
-	if (next->next) {	/* 4 */
-	    scan->next = next->next;
-	} else {
-	    while (chain < nchains && hash->table[chain] == 0)	/* 5 */
-	    	chain++;
-	    if (chain < nchains) {	/* 6 */
-		scan->chain = chain;
-		scan->next = hash->table[chain];
-	    } else {
-		scan->next = NULL;
-	    }
-	}
+        if (next->next) {	/* 4 */
+            scan->next = next->next;
+        } else {
+            while (chain < nchains && hash->table[chain] == 0)	/* 5 */
+                chain++;
+            if (chain < nchains) {	/* 6 */
+                scan->chain = chain;
+                scan->next = hash->table[chain];
+            } else {
+                scan->next = NULL;
+            }
+        }
     }
     return next;
 }
@@ -525,7 +525,7 @@ void hash_insert(hash_t *hash, hnode_t *node, const void *key)
     assert (hash_lookup(hash, key) == NULL);	/* 2 */
 
     if (hash->dynamic && hash->nodecount >= hash->highmark)	/* 3 */
-	grow_table(hash);
+        grow_table(hash);
 
     hkey = hash->function(key);
     chain = hkey & hash->mask;	/* 4 */
@@ -562,8 +562,8 @@ hnode_t *hash_lookup(hash_t *hash, const void *key)
     chain = hkey & hash->mask;		/* 2 */
 
     for (nptr = hash->table[chain]; nptr; nptr = nptr->next) {	/* 3 */
-	if (nptr->hkey == hkey && hash->compare(nptr->key, key) == 0)
-	    return nptr;
+        if (nptr->hkey == hkey && hash->compare(nptr->key, key) == 0)
+            return nptr;
     }
 
     return NULL;
@@ -596,23 +596,23 @@ hnode_t *hash_delete(hash_t *hash, hnode_t *node)
     assert (hash_val_t_bit != 0);
 
     if (hash->dynamic && hash->nodecount <= hash->lowmark
-	    && hash->nodecount > INIT_SIZE)
-	shrink_table(hash);				/* 2 */
+            && hash->nodecount > INIT_SIZE)
+        shrink_table(hash);				/* 2 */
 
     chain = node->hkey & hash->mask;			/* 3 */
     hptr = hash->table[chain];
 
     if (hptr == node) {					/* 4 */
-	hash->table[chain] = node->next;
+        hash->table[chain] = node->next;
     } else {
-	while (hptr->next != node) {			/* 5 */
-	    assert (hptr != 0);
-	    hptr = hptr->next;
-	}
-	assert (hptr->next == node);
-	hptr->next = node->next;
+        while (hptr->next != node) {			/* 5 */
+            assert (hptr != 0);
+            hptr = hptr->next;
+        }
+        assert (hptr->next == node);
+        hptr->next = node->next;
     }
-	
+
     hash->nodecount--;
     assert (hash_verify(hash));
 
@@ -625,9 +625,9 @@ int hash_alloc_insert(hash_t *hash, const void *key, void *data)
     hnode_t *node = hash->allocnode(hash->context);
 
     if (node) {
-	hnode_init(node, data);
-	hash_insert(hash, node, key);
-	return 1;
+        hnode_init(node, data);
+        hash_insert(hash, node, key);
+        return 1;
     }
     return 0;
 }
@@ -655,13 +655,13 @@ hnode_t *hash_scan_delete(hash_t *hash, hnode_t *node)
     hptr = hash->table[chain];
 
     if (hptr == node) {
-	hash->table[chain] = node->next;
+        hash->table[chain] = node->next;
     } else {
-	while (hptr->next != node) 
-	    hptr = hptr->next;
-	hptr->next = node->next;
+        while (hptr->next != node) 
+            hptr = hptr->next;
+        hptr->next = node->next;
     }
-	
+
     hash->nodecount--;
     assert (hash_verify(hash));
     node->next = NULL;
@@ -695,24 +695,24 @@ int hash_verify(hash_t *hash)
     hnode_t *hptr;
 
     if (hash->dynamic) {	/* 1 */
-	if (hash->lowmark >= hash->highmark)
-	    return 0;
-	if (!is_power_of_two(hash->highmark))
-	    return 0;
-	if (!is_power_of_two(hash->lowmark))
-	    return 0;
+        if (hash->lowmark >= hash->highmark)
+            return 0;
+        if (!is_power_of_two(hash->highmark))
+            return 0;
+        if (!is_power_of_two(hash->lowmark))
+            return 0;
     }
 
     for (chain = 0; chain < hash->nchains; chain++) {	/* 2 */
-	for (hptr = hash->table[chain]; hptr != 0; hptr = hptr->next) {
-	    if ((hptr->hkey & hash->mask) != chain)
-		return 0;
-	    count++;
-	}
+        for (hptr = hash->table[chain]; hptr != 0; hptr = hptr->next) {
+            if ((hptr->hkey & hash->mask) != chain)
+                return 0;
+            count++;
+        }
     }
 
     if (count != hash->nodecount)
-	return 0;
+        return 0;
 
     return 1;
 }
@@ -758,8 +758,8 @@ hnode_t *hnode_create(void *data)
 {
     hnode_t *node = malloc(sizeof *node);
     if (node) {
-	node->data = data;
-	node->next = NULL;
+        node->data = data;
+        node->next = NULL;
     }
     return node;
 }
@@ -817,22 +817,22 @@ hashcount_t hash_size(hash_t *hash)
 static hash_val_t hash_fun_default(const void *key)
 {
     static unsigned long randbox[] = {
-	0x49848f1bU, 0xe6255dbaU, 0x36da5bdcU, 0x47bf94e9U,
-	0x8cbcce22U, 0x559fc06aU, 0xd268f536U, 0xe10af79aU,
-	0xc1af4d69U, 0x1d2917b5U, 0xec4c304dU, 0x9ee5016cU,
-	0x69232f74U, 0xfead7bb3U, 0xe9089ab6U, 0xf012f6aeU,
+        0x49848f1bU, 0xe6255dbaU, 0x36da5bdcU, 0x47bf94e9U,
+        0x8cbcce22U, 0x559fc06aU, 0xd268f536U, 0xe10af79aU,
+        0xc1af4d69U, 0x1d2917b5U, 0xec4c304dU, 0x9ee5016cU,
+        0x69232f74U, 0xfead7bb3U, 0xe9089ab6U, 0xf012f6aeU,
     };
 
     const unsigned char *str = key;
     hash_val_t acc = 0;
 
     while (*str) {
-	acc ^= randbox[(*str + acc) & 0xf];
-	acc = (acc << 1) | (acc >> 31);
-	acc &= 0xffffffffU;
-	acc ^= randbox[((*str++ >> 4) + acc) & 0xf];
-	acc = (acc << 2) | (acc >> 30);
-	acc &= 0xffffffffU;
+        acc ^= randbox[(*str + acc) & 0xf];
+        acc = (acc << 1) | (acc >> 31);
+        acc &= 0xffffffffU;
+        acc ^= randbox[((*str++ >> 4) + acc) & 0xf];
+        acc = (acc << 2) | (acc >> 30);
+        acc &= 0xffffffffU;
     }
     return acc;
 }
