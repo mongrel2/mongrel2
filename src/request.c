@@ -325,7 +325,8 @@ static inline bstring json_escape(bstring in)
 struct tagbstring JSON_LISTSEP = bsStatic("\",\"");
 struct tagbstring JSON_OBJSEP = bsStatic("\":\"");
 
-static const int PAYLOAD_GUESS = 128;
+// This chosen extremely arbitrarily. Certainly needs work.
+static const int PAYLOAD_GUESS = 256;
 
 static inline void B(bstring headers, const bstring k, const bstring v)
 {
