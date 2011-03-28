@@ -33,8 +33,11 @@ char *test_Request_create()
     mu_assert(rc == 1, "It should parse.");
     mu_assert(nparsed > 0, "Should have parsed something.");
 
-    bstring payload = Request_to_payload(req, &JSON_METHOD, 0, "", 0);
+    bstring payload = Request_to_payload(req, &HTTP_GET, 0, "", 0);
     debug("PAYLOAD IS: %s", bdata(payload));
+    bdestroy(payload);
+    payload = Request_to_tnetstring(req, &HTTP_GET, 0, "HELLO", 5);
+    debug("TNETSTRING PAYLOAD: '%.*s'", blength(payload), bdata(payload));
 
     mu_assert(Request_get(req, &HTTP_IF_MODIFIED_SINCE) != NULL,
             "Should have an if-modified-since header.");

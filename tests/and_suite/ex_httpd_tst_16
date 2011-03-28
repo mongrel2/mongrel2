@@ -4,6 +4,9 @@ HOST: foo.example.com:1234
 Comment-date-rfc1123: Sun, 10 Oct 2004 07:02:24 GMT
 If-Modified-since: Tue, 17 Aug 10 03:21:45 +0000
 If-UNModified-since: Sunday, 10-Oct-04 07:02:24 GMT
+Duplicate: VAL1
+Duplicate: VAL2
+Duplicate: VAL3
 
 HEAD / HTTP/1.1
 HOST: foo.example.com:1234

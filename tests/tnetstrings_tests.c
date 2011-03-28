@@ -107,7 +107,7 @@ char *test_complex_types()
     tns_value_destroy(result);
     bdestroy(key);
 
-    bassigncstr(data, "16:5:hello,5:12345#]");
+    bassigncstr(data, "32:5:hello,5:12345#5:hello,5:56789#]");
     result = tns_parse(bdata(data), blength(data), NULL);
     mu_assert(result != NULL, "Failed to parse a list.");
     mu_assert(result->type == tns_tag_list, "Wrong type, should be list.");
@@ -115,7 +115,7 @@ char *test_complex_types()
     val = lnode_get(list_last(result->value.list));
     mu_assert(val != NULL, "Should have hello as key.");
     mu_assert(val->type == tns_tag_number, "Value should be a number.");
-    mu_assert(val->value.number == 12345, "Value should equal 12345.");
+    mu_assert(val->value.number == 56789, "Value should equal 56789.");
 
     rendered = tns_render((void *)result, &len);
     debug("RENDERED LIST: %s", rendered);
@@ -125,6 +125,7 @@ char *test_complex_types()
 
     tns_value_destroy(result);
     bdestroy(data);
+
 
     return NULL;
 }

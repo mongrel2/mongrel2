@@ -124,6 +124,9 @@ TESTS = {
     '47:4:test,4:test,4:test,3:100#3:200#4:test,4:test,]': [],
     '34:3:age,3:100#4:name,11:Zed A. Shaw,}': [],
     "78:4:test,4:test,4:test,3:100#3:200#4:test,4:test,27:3:one,3:two,5:three,4:four,]]": [],
+
+    '361:6:METHOD,3:GET,3:URI,15:/test?howdy=yes,7:VERSION,8:HTTP/1.1,4:PATH,5:/test,9:duplicate,21:4:VAL1,4:VAL2,4:VAL3,]4:host,20:foo.example.com:1234,19:if-unmodified-since,30:Sunday, 10-Oct-04 07:02:24 GMT,11:comment-tst,30:Test different date formats...,20:comment-date-rfc1123,29:Sun, 10 Oct 2004 07:02:24 GMT,17:if-modified-since,29:Tue, 17 Aug 10 03:21:45 +0000,}'
+    : []
 }
 
 count = int(sys.argv[1])
@@ -134,9 +137,9 @@ for i in xrange(0,count):
         again = dump_tnetstring(payload)
         back, extra = parse_tnetstring(again)
 
-        # print "PAYLOAD:", repr(payload)
-        # print "AGAIN:", repr(again)
-        # print "BACK:", repr(back)
-        # print "EXTRA:", repr(extra)
-        # print "----"
+        print "PAYLOAD:", repr(payload)
+        print "AGAIN:", repr(again)
+        print "BACK:", repr(back)
+        print "EXTRA:", repr(extra)
+        print "----"
 

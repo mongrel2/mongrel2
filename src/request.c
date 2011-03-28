@@ -45,6 +45,7 @@
 #include "adt/hash.h"
 #include "dbg.h"
 #include "request.h"
+#include "tnetstrings.h"
 
 int MAX_HEADER_COUNT=0;
 int MAX_DUPE_HEADERS=5;
@@ -340,6 +341,59 @@ static inline void B(bstring headers, const bstring k, const bstring v)
 
         bdestroy(vstr);
     }
+}
+
+static inline bstring request_determine_method(Request *req)
+{
+    if(Request_is_json(req)) {
+        return &JSON_METHOD;
+    } else if(Request_is_xml(req)) {
+        return &XML_METHOD;
+    } else {
+        return req->request_method;
+    }
+}
+
+bstring Request_to_tnetstring(Request *req, bstring uuid, int id, const char *buf, size_t len)
+{
+    tns_outbuf outbuf;
+    bstring method = request_determine_method(req);
+    check(method, "Impossible, got an invalid request method.");
+
+    // outbuf is initialized by this call
+    check(tns_render_request_headers(&outbuf, req->headers) == 0,
+            "Failed to render headers to a tnetstring.");
+
+    if(req->path) tns_render_hash_pair(&outbuf, &HTTP_PATH, req->path);
+    if(req->version) tns_render_hash_pair(&outbuf, &HTTP_VERSION, req->version);
+    if(req->uri) tns_render_hash_pair(&outbuf, &HTTP_URI, req->uri);
+    if(req->fragment) tns_render_hash_pair(&outbuf, &HTTP_FRAGMENT, req->fragment);
+    if(req->pattern) tns_render_hash_pair(&outbuf, &HTTP_PATTERN, req->pattern);
+
+    tns_render_hash_pair(&outbuf, &HTTP_METHOD, method);
+
+    // close it off with the final size, minus ending } terminator
+    tns_outbuf_clamp(&outbuf, 1);
+
+    bstring front = bstrcpy(uuid);
+    bconchar(front, ' ');
+    bformata(front, "%d", id);
+    bconchar(front, ' ');
+    bconcat(front, Request_path(req));
+    bconchar(front, ' ');
+
+    // header now owns the outbuf buffer
+    bstring headers = tns_outbuf_to_bstring(&outbuf);
+    bconcat(front, headers);
+    bdestroy(headers);
+    bformata(front, "%d:", len);
+    bcatblk(front, buf, len);
+    bconchar(front, ',');
+
+    return front;
+error:
+    if(outbuf.buffer) free(outbuf.buffer);
+    return NULL;
 }
 
 bstring Request_to_payload(Request *req, bstring uuid, int fd, const char *buf, size_t len)

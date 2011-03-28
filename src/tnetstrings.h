@@ -25,6 +25,7 @@ typedef enum tns_type_tag_e {
 
 typedef struct tns_value_t {
     tns_type_tag type;
+
     union {
         bstring string;
         long number;
@@ -63,5 +64,14 @@ char *tns_render(void *val, size_t *len);
 *  save yourself the cost of reversing it in-place.
 */
 char *tns_render_reversed(void *val, size_t *len);
+
+
+void tns_render_hash_pair(tns_outbuf *outbuf, bstring key, bstring value);
+
+int tns_render_request_headers(tns_outbuf *outbuf, hash_t *headers);
+
+bstring tns_outbuf_to_bstring(tns_outbuf *outbuf);
+
+void tns_outbuf_clamp(tns_outbuf *outbuf, int orig_size);
 
 #endif
