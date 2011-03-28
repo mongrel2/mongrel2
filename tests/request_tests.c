@@ -3,10 +3,56 @@
 #include "minunit.h"
 #include <request.h>
 #include <headers.h>
+#include <glob.h>
 
 FILE *LOG_FILE = NULL;
 
 const char *RFC_822_TIME = "%a, %d %b %y %T";
+
+char *test_Request_payloads()
+{
+    glob_t test_files;
+    Request *req = Request_create();
+    size_t nparsed = 0;
+    int i = 0;
+    int rc = glob("tests/and_suite/*", 0, NULL, &test_files);
+    mu_assert(rc == 0, "Failed to glob file sin tests/and_suite/*");
+    FILE *test_cases = fopen("tests/request_payloads.txt", "w");
+    mu_assert(test_cases != NULL, "Failed to create the tests/request_payloads.txt file.");
+
+    for(i = 0; i < test_files.gl_pathc; i++) {
+        FILE *infile = fopen(test_files.gl_pathv[i], "r");
+        mu_assert(infile != NULL, "Failed to open test file.");
+
+        bstring data = bread((bNread)fread, infile);
+        fclose(infile);
+        mu_assert(data != NULL, "Failed to read test file.");
+
+        Request_start(req);
+        rc = Request_parse(req, bdata(data), blength(data), &nparsed);
+
+        if(rc == 1) {
+            mu_assert(nparsed > 0, "Should have parsed something.");
+
+            // TODO: fix this up so that we never get a null for path
+            if(req->path == NULL) req->path = bfromcstr("/");
+
+            bstring payload = Request_to_payload(req, &HTTP_GET, 0, "", 0);
+            bconchar(payload, '\n');
+            fwrite(payload->data, blength(payload), 1, test_cases);
+            bdestroy(payload);
+
+            payload = Request_to_tnetstring(req, &HTTP_GET, 0, "HELLO", 5);
+            debug("TNETSTRING PAYLOAD: '%.*s'", blength(payload), bdata(payload));
+            bdestroy(payload);
+            bconchar(payload, '\n');
+            fwrite(payload->data, blength(payload), 1, test_cases);
+        }
+    }
+
+    fclose(test_cases);
+    return NULL;
+}
 
 char *test_Request_create() 
 {
@@ -109,6 +155,7 @@ char * all_tests() {
 
     mu_run_test(test_Request_create);
     mu_run_test(test_Multiple_Header_Request);
+    mu_run_test(test_Request_payloads);
 
     return NULL;
 }
