@@ -43,7 +43,7 @@ char *test_Request_payloads()
             fwrite(payload->data, blength(payload), 1, test_cases);
             bdestroy(payload);
 
-            payload = Request_to_tnetstring(req, &HTTP_GET, 0, "HELLO", 5);
+            payload = Request_to_tnetstring(req, &HTTP_GET, 0, "", 0);
             debug("TNETSTRING PAYLOAD: '%.*s'", blength(payload), bdata(payload));
             bconchar(payload, '\n');
             fwrite(payload->data, blength(payload), 1, test_cases);
@@ -83,7 +83,7 @@ char *test_Request_create()
     bstring payload = Request_to_payload(req, &HTTP_GET, 0, "", 0);
     debug("PAYLOAD IS: %s", bdata(payload));
     bdestroy(payload);
-    payload = Request_to_tnetstring(req, &HTTP_GET, 0, "HELLO", 5);
+    payload = Request_to_tnetstring(req, &HTTP_GET, 0, "", 0);
     debug("TNETSTRING PAYLOAD: '%.*s'", blength(payload), bdata(payload));
 
     mu_assert(Request_get(req, &HTTP_IF_MODIFIED_SINCE) != NULL,
