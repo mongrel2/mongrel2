@@ -21,6 +21,7 @@ char *test_Request_payloads()
     mu_assert(test_cases != NULL, "Failed to create the tests/request_payloads.txt file.");
 
     for(i = 0; i < test_files.gl_pathc; i++) {
+        nparsed = 0;
         FILE *infile = fopen(test_files.gl_pathv[i], "r");
         mu_assert(infile != NULL, "Failed to open test file.");
 
@@ -44,9 +45,9 @@ char *test_Request_payloads()
 
             payload = Request_to_tnetstring(req, &HTTP_GET, 0, "HELLO", 5);
             debug("TNETSTRING PAYLOAD: '%.*s'", blength(payload), bdata(payload));
-            bdestroy(payload);
             bconchar(payload, '\n');
             fwrite(payload->data, blength(payload), 1, test_cases);
+            bdestroy(payload);
         }
     }
 

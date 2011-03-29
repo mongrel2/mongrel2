@@ -409,12 +409,12 @@ error:
 
 bstring tns_outbuf_to_bstring(tns_outbuf *outbuf)
 {
+    tns_outbuf_putc(outbuf, '\0');
     tns_inplace_reverse(outbuf->buffer, outbuf->used_size);
 
     bstring b = malloc(sizeof(struct tagbstring));
     b->slen = outbuf->used_size;
     b->data = (unsigned char *)outbuf->buffer;
-    b->data[b->slen] = '\0';
     b->mlen = outbuf->alloc_size;
 
     return b;
