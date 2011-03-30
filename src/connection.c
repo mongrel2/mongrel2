@@ -142,7 +142,7 @@ int connection_msg_to_handler(Connection *conn)
 
 
         rc = Handler_deliver(handler->send_socket, bdata(payload), blength(payload));
-        bdestroy(payload);
+        free(payload);
     
         check(rc == 0, "Failed to deliver to handler: %s", bdata(Request_path(conn->req)));
     }
@@ -160,23 +160,23 @@ error:
 int Connection_send_to_handler(Connection *conn, Handler *handler, char *body, int content_len)
 {
     int rc = 0;
-    bstring result = NULL;
+    bstring payload = NULL;
 
-    result = Request_to_payload(conn->req, handler->send_ident, 
+    payload = Request_to_payload(conn->req, handler->send_ident, 
             IOBuf_fd(conn->iob), body, content_len);
-    check(result, "Failed to create payload for request.");
+    check(payload, "Failed to create payload for request.");
 
-    debug("HTTP TO HANDLER: %.*s", blength(result) - content_len, bdata(result));
+    debug("HTTP TO HANDLER: %.*s", blength(payload) - content_len, bdata(payload));
 
-    rc = Handler_deliver(handler->send_socket, bdata(result), blength(result));
+    rc = Handler_deliver(handler->send_socket, bdata(payload), blength(payload));
+    free(payload);
+
     error_unless(rc != -1, conn, 502, "Failed to deliver to handler: %s", 
             bdata(Request_path(conn->req)));
-
-    bdestroy(result);
     return 0;
 
 error:
-    bdestroy(result);
+    bdestroy(payload);
     return -1;
 }
 
