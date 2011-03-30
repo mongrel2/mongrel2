@@ -378,7 +378,6 @@ bstring Request_to_tnetstring(Request *req, bstring uuid, int id, const char *bu
 
     check(tns_render_request_end(&outbuf, header_start, uuid, id, Request_path(req)) != -1, "Failed to finalize request.");
 
-    // TODO: now, can we just put this right into a zmq_message and cut out even more copying and whatnot
     // header now owns the outbuf buffer
     bstring headers = tns_outbuf_to_bstring(&outbuf);
     bformata(headers, "%d:", len);
