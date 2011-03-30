@@ -421,13 +421,23 @@ bstring Request_to_payload(Request *req, bstring uuid, int fd, const char *buf, 
 
         if(val_list->qty > 1)
         {
-            bstring list = bjoin(val_list, &JSON_LISTSEP);
+            struct bstrList *escaped = bstrListCreate();
+            bstrListAlloc(escaped, val_list->qty);
+            escaped->qty = val_list->qty;
+
+            int x = 0;
+            for(x = 0; x < val_list->qty; x++) {
+                escaped->entry[x] = json_escape(val_list->entry[x]);
+            }
+
+            bstring list = bjoin(escaped, &JSON_LISTSEP);
             bcatcstr(headers, ",\"");
             bconcat(headers, key);
             bcatcstr(headers, "\":[\"");
             bconcat(headers, list);
             bcatcstr(headers, "\"]");
             bdestroy(list);
+            bstrListDestroy(escaped);
         }
         else
         {
