@@ -74,4 +74,9 @@ bstring tns_outbuf_to_bstring(tns_outbuf *outbuf);
 
 void tns_outbuf_clamp(tns_outbuf *outbuf, int orig_size);
 
+
+int tns_render_request_start(tns_outbuf *outbuf);
+
+int tns_render_request_end(tns_outbuf *outbuf, int header_start, bstring uuid, int id, bstring path);
+
 #endif

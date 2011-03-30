@@ -380,21 +380,49 @@ void tns_render_hash_pair(tns_outbuf *outbuf, bstring key, bstring value)
     tns_render_value(&val, outbuf);
 }
 
+int tns_render_request_start(tns_outbuf *outbuf)
+{
+    check(tns_outbuf_init(outbuf) != -1, "Failed to init buffer.");
+
+    check(tns_outbuf_putc(outbuf, '}') != -1, "Failed ending request.");
+
+    return outbuf->used_size;
+error:
+    return -1;
+}
+
+int tns_render_request_end(tns_outbuf *outbuf, int header_start, bstring uuid, int id, bstring path)
+{
+    // close it off with the final size, minus ending } terminator
+    tns_outbuf_clamp(outbuf, header_start);
+
+    check(tns_outbuf_putc(outbuf, ' ') != -1, "Failed ending request.");
+    check(tns_outbuf_rputs(outbuf, bdata(path), blength(path)) != -1, "Failed ending request.");
+
+    check(tns_outbuf_putc(outbuf, ' ') != -1, "Failed ending request.");
+    check(tns_outbuf_itoa(id, outbuf) != -1, "Failed ending request.");
+
+    check(tns_outbuf_putc(outbuf, ' ') != -1, "Failed ending request.");
+    check(tns_outbuf_rputs(outbuf, bdata(uuid), blength(uuid)) != -1, "Failed ending request.");
+
+    return 0;
+
+error:
+    return -1;
+}
+
 int tns_render_request_headers(tns_outbuf *outbuf, hash_t *headers)
 {
     hscan_t scan;
     hnode_t *n = NULL;
-
-    check(tns_outbuf_init(outbuf) != -1, "Failed to initialize outbuf.");
     hash_scan_begin(&scan, headers);
-
-    tns_outbuf_putc(outbuf, '}');
 
     for(n = hash_scan_next(&scan); n != NULL; n = hash_scan_next(&scan)) {
         struct bstrList *val_list = hnode_get(n);
         if(val_list->qty == 0) continue;
 
         bstring key = (bstring)hnode_getkey(n);
+
         if(val_list->qty == 1) {
             tns_render_hash_pair(outbuf, key, val_list->entry[0]);
         } else {
@@ -403,8 +431,6 @@ int tns_render_request_headers(tns_outbuf *outbuf, hash_t *headers)
     }
 
     return 0;
-error:
-    return -1;
 }
 
 bstring tns_outbuf_to_bstring(tns_outbuf *outbuf)

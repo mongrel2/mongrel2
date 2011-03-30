@@ -361,7 +361,9 @@ bstring Request_to_tnetstring(Request *req, bstring uuid, int id, const char *bu
     bstring method = request_determine_method(req);
     check(method, "Impossible, got an invalid request method.");
 
-    // outbuf is initialized by this call
+    int header_start = tns_render_request_start(&outbuf);
+    check(header_start != -1, "Failed to initialize outbuf.");
+
     check(tns_render_request_headers(&outbuf, req->headers) == 0,
             "Failed to render headers to a tnetstring.");
 
@@ -374,25 +376,15 @@ bstring Request_to_tnetstring(Request *req, bstring uuid, int id, const char *bu
 
     tns_render_hash_pair(&outbuf, &HTTP_METHOD, method);
 
-    // close it off with the final size, minus ending } terminator
-    tns_outbuf_clamp(&outbuf, 1);
-
-    bstring front = bstrcpy(uuid);
-    bconchar(front, ' ');
-    bformata(front, "%d", id);
-    bconchar(front, ' ');
-    bconcat(front, Request_path(req));
-    bconchar(front, ' ');
+    check(tns_render_request_end(&outbuf, header_start, uuid, id, Request_path(req)) != -1, "Failed to finalize request.");
 
     // header now owns the outbuf buffer
     bstring headers = tns_outbuf_to_bstring(&outbuf);
-    bconcat(front, headers);
-    bdestroy(headers);
-    bformata(front, "%d:", len);
-    bcatblk(front, buf, len);
-    bconchar(front, ',');
+    bformata(headers, "%d:", len);
+    bcatblk(headers, buf, len);
+    bconchar(headers, ',');
 
-    return front;
+    return headers;
 error:
     if(outbuf.buffer) free(outbuf.buffer);
     return NULL;
