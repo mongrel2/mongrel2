@@ -368,6 +368,7 @@ bstring Request_to_tnetstring(Request *req, bstring uuid, int id, const char *bu
     if(req->path) tns_render_hash_pair(&outbuf, &HTTP_PATH, req->path);
     if(req->version) tns_render_hash_pair(&outbuf, &HTTP_VERSION, req->version);
     if(req->uri) tns_render_hash_pair(&outbuf, &HTTP_URI, req->uri);
+    if(req->query_string) tns_render_hash_pair(&outbuf, &HTTP_QUERY, req->query_string);
     if(req->fragment) tns_render_hash_pair(&outbuf, &HTTP_FRAGMENT, req->fragment);
     if(req->pattern) tns_render_hash_pair(&outbuf, &HTTP_PATTERN, req->pattern);
 
