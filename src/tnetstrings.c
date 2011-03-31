@@ -548,7 +548,7 @@ tns_parse_list(void *val, const char *data, size_t len)
     char *remain = NULL;
     size_t orig_len = len;
 
-    assert(value != NULL && "Value cannot be NULL.");
+    assert(val != NULL && "Value cannot be NULL.");
     assert(data != NULL && "data cannot be NULL.");
 
     while(len > 0) {
