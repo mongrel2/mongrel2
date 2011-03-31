@@ -2,6 +2,7 @@
 
 #include "minunit.h"
 #include <request.h>
+#include <tnetstrings.h>
 #include <headers.h>
 #include <glob.h>
 
@@ -12,6 +13,7 @@ const char *RFC_822_TIME = "%a, %d %b %y %T";
 char *test_Request_payloads()
 {
     glob_t test_files;
+    bstring fake_sender = bfromcstr("FAKESENDER");
     Request *req = Request_create();
     size_t nparsed = 0;
     int i = 0;
@@ -38,20 +40,71 @@ char *test_Request_payloads()
             // TODO: fix this up so that we never get a null for path
             if(req->path == NULL) req->path = bfromcstr("/");
 
-            bstring payload = Request_to_payload(req, &HTTP_GET, 0, "", 0);
+            bstring payload = Request_to_payload(req, fake_sender, 0, "", 0);
             bconchar(payload, '\n');
             fwrite(payload->data, blength(payload), 1, test_cases);
             bdestroy(payload);
 
-            payload = Request_to_tnetstring(req, &HTTP_GET, 0, "", 0);
+            payload = Request_to_tnetstring(req, fake_sender, 0, "", 0);
             debug("TNETSTRING PAYLOAD: '%.*s'", blength(payload), bdata(payload));
             bconchar(payload, '\n');
             fwrite(payload->data, blength(payload), 1, test_cases);
             bdestroy(payload);
         }
+
+        bdestroy(data);
     }
 
+    globfree(&test_files);
     fclose(test_cases);
+    bdestroy(fake_sender);
+    Request_destroy(req);
+    return NULL;
+}
+
+char *test_Request_speeds()
+{
+    int i = 0;
+    FILE *infile = fopen("tests/request_payloads.txt", "r");
+    mu_assert(infile != NULL, "Failed to open the tests/request_payloads.txt test file.");
+    struct bstrList *list = bstrListCreate();
+    bstrListAlloc(list, 300);
+
+    // load up all the ones we can
+    for(i = 0; i < 300; i++, list->qty++) {
+        bstring sender = bgets((bNgetc)fgetc, infile, ' ');
+        bstring conn_id = bgets((bNgetc)fgetc, infile, ' ');
+        bstring path = bgets((bNgetc)fgetc, infile, ' ');
+        list->entry[i] = bgets((bNgetc)fgetc, infile, '\n');
+
+        // stop if we didn't read anything
+        if(!(sender && conn_id && path)) break;
+
+        bdestroy(sender);
+        bdestroy(conn_id);
+        bdestroy(path);
+    }
+
+    fclose(infile);
+
+
+    // now rip through and parse them for speed test
+    int j = 0;
+    for(j = 0; j < 200; j++) {
+        for(i = 0; i < list->qty; i++) {
+            tns_value_t *val = tns_parse(bdata(list->entry[i]), blength(list->entry[i]), NULL);
+            mu_assert(val->type == tns_tag_string || val->type == tns_tag_dict, "Got an invalid data chunk from file.");
+
+            size_t len = 0;
+            char *payload = tns_render(val, &len);
+            mu_assert(len > 0, "Failed to render the payload.");
+
+            free(payload);
+            tns_value_destroy(val);
+        }
+    }
+
+    bstrListDestroy(list);
     return NULL;
 }
 
@@ -59,6 +112,7 @@ char *test_Request_create()
 {
     int rc = 0;
     size_t nparsed = 0;
+    bstring fake_sender = bfromcstr("FAKESENDER");
 
     Request_init();
 
@@ -80,10 +134,11 @@ char *test_Request_create()
     mu_assert(rc == 1, "It should parse.");
     mu_assert(nparsed > 0, "Should have parsed something.");
 
-    bstring payload = Request_to_payload(req, &HTTP_GET, 0, "", 0);
+    bstring payload = Request_to_payload(req, fake_sender, 0, "", 0);
     debug("PAYLOAD IS: %s", bdata(payload));
     bdestroy(payload);
-    payload = Request_to_tnetstring(req, &HTTP_GET, 0, "", 0);
+
+    payload = Request_to_tnetstring(req, fake_sender, 0, "", 0);
     debug("TNETSTRING PAYLOAD: '%.*s'", blength(payload), bdata(payload));
 
     mu_assert(Request_get(req, &HTTP_IF_MODIFIED_SINCE) != NULL,
@@ -104,6 +159,9 @@ char *test_Request_create()
 
     // test with null
     Request_destroy(NULL);
+    bdestroy(payload);
+    bdestroy(fake_sender);
+    bdestroy(data);
 
     return NULL;
 }
@@ -146,6 +204,8 @@ char *test_Multiple_Header_Request()
             "Expected header not in correct format.");
 
     Request_destroy(req);
+    bdestroy(payload);
+    bdestroy(data);
 
     return NULL;
 }
@@ -157,6 +217,7 @@ char * all_tests() {
     mu_run_test(test_Request_create);
     mu_run_test(test_Multiple_Header_Request);
     mu_run_test(test_Request_payloads);
+    mu_run_test(test_Request_speeds);
 
     return NULL;
 }
