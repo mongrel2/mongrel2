@@ -42,6 +42,12 @@ static void *Log_internal_thread(void *spec)
     rc = zmq_setsockopt(socket, ZMQ_SUBSCRIBE, "", 0);
     check(rc == 0, "Could not subscribe to the logger.");
 
+#ifdef ZMQ_LINGER
+    int opt = 1000;
+    rc = zmq_setsockopt(socket, ZMQ_LINGER, &opt, sizeof(opt));
+    check(rc == 0, "Could not set the linger option.");
+#endif
+
     rc = zmq_connect(socket, bdata(config->log_spec));
     check(rc == 0, "Could connect to logging endpoint: %s", bdata(config->log_spec));
 

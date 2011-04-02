@@ -41,6 +41,8 @@
 
 extern int HANDLER_STACK;
 
+typedef enum { HANDLER_PROTO_JSON, HANDLER_PROTO_TNET } handler_protocol_t;
+
 typedef struct Handler {
     void *send_socket;
     void *recv_socket;
@@ -51,6 +53,7 @@ typedef struct Handler {
     Task *task;
     int running;
     int raw;
+    handler_protocol_t protocol;
 } Handler;
 
 void Handler_task(void *v);

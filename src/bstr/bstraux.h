@@ -16,6 +16,7 @@
 #ifndef BSTRAUX_INCLUDE
 #define BSTRAUX_INCLUDE
 
+#include <stdint.h>
 #include <time.h>
 #include "bstrlib.h"
 
@@ -63,6 +64,9 @@ extern int bJustifyLeft (bstring b, int space);
 extern int bJustifyRight (bstring b, int width, int space);
 extern int bJustifyMargin (bstring b, int width, int space);
 extern int bJustifyCenter (bstring b, int width, int space);
+
+/** Used in hash_t construction for a good bstr hash value. */
+uint32_t bstr_hash_fun(const void *kv);
 
 /* Esoteric standards specific functions */
 extern char * bStr2NetStr (const_bstring b);

@@ -1,11 +1,11 @@
 JUNK_FILES=book-final.* *.aux *.log styles/*.aux
 SOURCE=book
-WEBSITE=zedshaw.com:/usr/local/nginx/html/projects/build_your_own_mongrel
+WEBSITE=$(USER)@mongrel2.org:deployment/files/static
+FINAL=book-final
 
 draft: book-final.dvi
 	htlatex book-final.tex
 	tidy -quiet -ashtml -omit -ic -m book-final.html
-	sed -f clean.sed book-final.html > book.wiki
 
 book-final.dvi:
 	cp $(SOURCE).tex book-final.tex
@@ -21,7 +21,10 @@ clean:
 	rm -rf $(JUNK_FILES)
 	find . -name "*.aux" -exec rm {} \;
 
-release: clean book-final.pdf
-	rsync -vz $(FINAL).pdf $(WEBSITE)
+release: clean book-final.pdf draft book-final.pdf sync
 
+sync:
+	rsync -vz $(FINAL).pdf $(WEBSITE)/mongrel2-manual.pdf
+	rsync -vz $(FINAL).html $(WEBSITE)/mongrel2-manual.html
+	rsync -vz $(FINAL).css $(FINAL)[0-9]*.html $(WEBSITE)/ 
 

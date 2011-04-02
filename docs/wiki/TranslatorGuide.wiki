@@ -1,6 +1,6 @@
 <h1>Translator Guide</h1>
 
-<p>If you would like to translate any part of the <a href="http://mongrel2.org/wcontent">wiki</a> or the <a href="http://mongrel2.org/doc/tip/docs/manual/book.wiki">manual</a> to another language then there are just a few things you need to do.  First let's cover some things to consider before starting:
+<p>If you would like to translate any part of the <a href="http://mongrel2.org/wcontent">wiki</a> or the <a href="http://mongrel2.org/static/mongrel2-manual.html">manual</a> to another language then there are just a few things you need to do.  First let's cover some things to consider before starting:
 </p>
 
 <ol>
@@ -8,7 +8,7 @@
 <li>You have to agree to keep any nationalistic, racist, or ethnocentric concerns out of your language choice.  This means that if your language choice is controversial because of war, genocide, oppression, or similar concerns then I'll remove it.</li>
 <li>The most popular document to translate is the <a href="http://mongrel2.org/wiki?name=GettingStarted">GettingStarted</a> wiki page.  I would recommend starting with that.</li>
 <li>You can also translate any of the other wiki pages, as most of them are short and easy to do.</li>
-<li>There are also people interested in translating the full <a href="http://mongrel2.org/doc/tip/docs/manual/book.wiki">manual</a> but this is a big task. If you want to do the manual, consider taking it slow and taking your time.</li>
+<li>There are also people interested in translating the full <a href="http://mongrel2.org/static/mongrel2-manual.html">manual</a> but this is a big task. If you want to do the manual, consider taking it slow and taking your time.</li>
 <li>Translating wiki pages means you need to know HTML.</li>
 <li>Translating the manual requires knowing TeX and having a Full <a href="http://tug.org/texlive/">TexLive</a> install, which can take a while.</li>
 </ol>

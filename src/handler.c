@@ -51,11 +51,10 @@ struct tagbstring LEAVE_MSG = bsStatic("{\"type\":\"disconnect\"}");
 
 int HANDLER_STACK;
 
-static void bstring_free(void *data, void *hint)
+static void cstr_free(void *data, void *hint)
 {
-    bdestroy((bstring)hint);
+    free(data);
 }
-
 
 void Handler_notify_leave(Handler *handler, int id)
 {
@@ -71,7 +70,7 @@ void Handler_notify_leave(Handler *handler, int id)
         log_err("Can't tell handler %d died.", id);
     }
 
-    bdestroy(payload);
+    free(payload);
 }
 
 
@@ -240,27 +239,22 @@ error:
 int Handler_deliver(void *handler_socket, char *buffer, size_t len)
 {
     int rc = 0;
-    zmq_msg_t *msg = calloc(sizeof(zmq_msg_t), 1);
-    bstring msg_buf = NULL;
+    zmq_msg_t msg;
 
-    rc = zmq_msg_init(msg);
+    rc = zmq_msg_init(&msg);
     check(rc == 0, "Failed to initialize 0mq message to send.");
 
-    msg_buf = blk2bstr(buffer, len);
-    check_mem(msg_buf);
-
-    rc = zmq_msg_init_data(msg, bdata(msg_buf), blength(msg_buf), bstring_free, msg_buf);
+    rc = zmq_msg_init_data(&msg, buffer, len, cstr_free, NULL);
     check(rc == 0, "Failed to init 0mq message data.");
 
-    rc = mqsend(handler_socket, msg, ZMQ_NOBLOCK);
+    rc = mqsend(handler_socket, &msg, ZMQ_NOBLOCK);
     check(rc == 0, "Failed to deliver 0mq message to handler.");
 
-    if(msg) free(msg);
+    // zeromq owns the ram now
     return 0;
 
 error:
-    // TODO: confirm what if this is the right shutdown
-    if(msg) free(msg);
+    free(buffer); // we own the ram now
     return -1;
 }
 
@@ -329,6 +323,7 @@ Handler *Handler_create(const char *send_spec, const char *send_ident,
     handler->send_spec = bfromcstr(send_spec);
     handler->running = 0;
     handler->raw = 0;
+    handler->protocol = HANDLER_PROTO_JSON;
 
     return handler;
 error:

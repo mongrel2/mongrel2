@@ -1,3 +1,5 @@
+#undef KAZLIB_OPAQUE_DEBUG
+
 /*
  * List Abstract Data Type
  * Copyright (C) 1997 Kaz Kylheku <kaz@ashi.footprints.net>

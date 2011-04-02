@@ -135,14 +135,25 @@ int connection_msg_to_handler(Connection *conn)
         Register_ping(IOBuf_fd(conn->iob));
     } else {
         check(body_len >= 0, "Parsing error, body length ended up being: %d", body_len);
+        bstring payload = NULL;
 
-        bstring payload = Request_to_payload(conn->req, handler->send_ident,
-                IOBuf_fd(conn->iob), IOBuf_start(conn->iob) + header_len,
-                body_len - 1);  // drop \0 on payloads
+        if(handler->protocol == HANDLER_PROTO_TNET) {
+            payload = Request_to_tnetstring(conn->req, handler->send_ident,
+                    IOBuf_fd(conn->iob), IOBuf_start(conn->iob) + header_len,
+                    body_len - 1);  // drop \0 on payloads
+        } else if(handler->protocol == HANDLER_PROTO_JSON) {
+            payload = Request_to_payload(conn->req, handler->send_ident,
+                    IOBuf_fd(conn->iob), IOBuf_start(conn->iob) + header_len,
+                    body_len - 1);  // drop \0 on payloads
+        } else {
+            sentinel("Invalid protocol type: %d", handler->protocol);
+        }
 
+        debug("SENT: %s", bdata(payload));
+        check(payload != NULL, "Failed to generate payload.");
 
         rc = Handler_deliver(handler->send_socket, bdata(payload), blength(payload));
-        bdestroy(payload);
+        free(payload);
     
         check(rc == 0, "Failed to deliver to handler: %s", bdata(Request_path(conn->req)));
     }
@@ -160,23 +171,33 @@ error:
 int Connection_send_to_handler(Connection *conn, Handler *handler, char *body, int content_len)
 {
     int rc = 0;
-    bstring result = NULL;
+    bstring payload = NULL;
 
-    result = Request_to_payload(conn->req, handler->send_ident, 
-            IOBuf_fd(conn->iob), body, content_len);
-    check(result, "Failed to create payload for request.");
+    if(handler->protocol == HANDLER_PROTO_TNET) {
+        payload = Request_to_tnetstring(conn->req, handler->send_ident, 
+                IOBuf_fd(conn->iob), body, content_len);
+    } else if(handler->protocol == HANDLER_PROTO_JSON) {
+        payload = Request_to_payload(conn->req, handler->send_ident, 
+                IOBuf_fd(conn->iob), body, content_len);
+    } else {
+        sentinel("Invalid protocol type: %d", handler->protocol);
+    }
 
-    debug("HTTP TO HANDLER: %.*s", blength(result) - content_len, bdata(result));
+    debug("SENT: %s", bdata(payload));
 
-    rc = Handler_deliver(handler->send_socket, bdata(result), blength(result));
+    check(payload, "Failed to create payload for request.");
+
+    debug("HTTP TO HANDLER: %.*s", blength(payload) - content_len, bdata(payload));
+
+    rc = Handler_deliver(handler->send_socket, bdata(payload), blength(payload));
+    free(payload);
+
     error_unless(rc != -1, conn, 502, "Failed to deliver to handler: %s", 
             bdata(Request_path(conn->req)));
-
-    bdestroy(result);
     return 0;
 
 error:
-    bdestroy(result);
+    bdestroy(payload);
     return -1;
 }
 

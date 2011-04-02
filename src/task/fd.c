@@ -226,7 +226,20 @@ int fdwait(int fd, int rw)
 
 void *mqsocket(int type)
 {
-    return zmq_socket(ZMQ_CTX, type);
+    void *sock = zmq_socket(ZMQ_CTX, type);
+    check(sock != NULL, "Failed to create zmq socket.");
+
+#ifdef ZMQ_LINGER
+    int opt = 1000;
+    int rc = zmq_setsockopt(sock, ZMQ_LINGER, &opt, sizeof(opt));
+    check(rc == 0, "Failed to set linger timeout for socket.");
+#endif
+
+    return sock;
+
+error:
+    if(sock) zmq_close(sock);
+    return NULL;
 }
 
 int mqwait(void *socket, int rw)

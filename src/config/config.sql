@@ -32,7 +32,8 @@ CREATE TABLE handler (id INTEGER PRIMARY KEY,
     send_ident TEXT,
     recv_spec TEXT,
     recv_ident TEXT,
-    raw_payload INTEGER DEFAULT 0);
+    raw_payload INTEGER DEFAULT 0,
+    protocol TEXT DEFAULT 'json');
 
 CREATE TABLE proxy (id INTEGER PRIMARY KEY,
     addr TEXT,

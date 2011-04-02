@@ -97,6 +97,8 @@ int Request_get_date(Request *req, bstring field, const char *format);
 
 #define Request_header_length(R) ((R)->parser.body_start)
 
+bstring Request_to_tnetstring(Request *req, bstring uuid, int fd, const char *buf, size_t len);
+
 bstring Request_to_payload(Request *req, bstring uuid, int fd, const char *buf, size_t len);
 
 void Request_init();

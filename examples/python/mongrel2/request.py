@@ -3,12 +3,7 @@ try:
 except:
     import simplejson as json
 
-
-def parse_netstring(ns):
-    len, rest = ns.split(':', 1)
-    len = int(len)
-    assert rest[len] == ',', "Netstring did not end in ','"
-    return rest[:len], rest[len+1:]
+from mongrel2 import tnetstrings
 
 
 class Request(object):
@@ -28,10 +23,11 @@ class Request(object):
     @staticmethod
     def parse(msg):
         sender, conn_id, path, rest = msg.split(' ', 3)
-        headers, rest = parse_netstring(rest)
-        body, _ = parse_netstring(rest)
+        headers, rest = tnetstrings.parse(rest)
+        body, _ = tnetstrings.parse(rest)
 
-        headers = json.loads(headers)
+        if type(headers) is str:
+            headers = json.loads(headers)
 
         return Request(sender, conn_id, path, headers, body)
 

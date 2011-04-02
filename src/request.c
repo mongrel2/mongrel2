@@ -45,30 +45,10 @@
 #include "adt/hash.h"
 #include "dbg.h"
 #include "request.h"
+#include "tnetstrings.h"
 
 int MAX_HEADER_COUNT=0;
 int MAX_DUPE_HEADERS=5;
-
-// Values for a 32 bit hash. Note hash_val_t is now fixed to uint32_t.
-static const unsigned int FNV_PRIME = 16777619;
-static const unsigned int FNV_OFFSET_BASIS = 2166136261;
-
-// FNV1a hash from http://isthe.com/chongo/tech/comp/fnv/
-static hash_val_t bstr_hash_fun(const void *kv)
-{
-    bstring key = (bstring)kv;
-    const unsigned char *str = (const unsigned char *)bdata(key);
-
-    hash_val_t acc = FNV_OFFSET_BASIS;
-
-    while(*str) {
-        acc ^= *str;
-        acc *= FNV_PRIME;
-        str++;
-    }
-
-    return acc;
-}
 
 void Request_init()
 {
@@ -317,13 +297,6 @@ int Request_get_date(Request *req, bstring field, const char *format)
     }
 }
 
-
-static struct tagbstring QUOTE_CHAR = bsStatic("\"");
-static struct tagbstring QUOTE_REPLACE = bsStatic("\\\"");
-
-static struct tagbstring BSLASH_CHAR = bsStatic("\\");
-static struct tagbstring BSLASH_REPLACE = bsStatic("\\\\");
-
 static inline bstring json_escape(bstring in)
 {
     if(in == NULL) return NULL;
@@ -371,6 +344,55 @@ static inline void B(bstring headers, const bstring k, const bstring v)
     }
 }
 
+static inline bstring request_determine_method(Request *req)
+{
+    if(Request_is_json(req)) {
+        return &JSON_METHOD;
+    } else if(Request_is_xml(req)) {
+        return &XML_METHOD;
+    } else {
+        return req->request_method;
+    }
+}
+
+bstring Request_to_tnetstring(Request *req, bstring uuid, int fd, const char *buf, size_t len)
+{
+    tns_outbuf outbuf;
+    bstring method = request_determine_method(req);
+    check(method, "Impossible, got an invalid request method.");
+
+    int id = Register_id_for_fd(fd);
+    check(id != -1, "Asked to generate a payload for a fd that doesn't exist: %d", fd);
+
+    int header_start = tns_render_request_start(&outbuf);
+    check(header_start != -1, "Failed to initialize outbuf.");
+
+    check(tns_render_request_headers(&outbuf, req->headers) == 0,
+            "Failed to render headers to a tnetstring.");
+
+    if(req->path) tns_render_hash_pair(&outbuf, &HTTP_PATH, req->path);
+    if(req->version) tns_render_hash_pair(&outbuf, &HTTP_VERSION, req->version);
+    if(req->uri) tns_render_hash_pair(&outbuf, &HTTP_URI, req->uri);
+    if(req->query_string) tns_render_hash_pair(&outbuf, &HTTP_QUERY, req->query_string);
+    if(req->fragment) tns_render_hash_pair(&outbuf, &HTTP_FRAGMENT, req->fragment);
+    if(req->pattern) tns_render_hash_pair(&outbuf, &HTTP_PATTERN, req->pattern);
+
+    tns_render_hash_pair(&outbuf, &HTTP_METHOD, method);
+
+    check(tns_render_request_end(&outbuf, header_start, uuid, id, Request_path(req)) != -1, "Failed to finalize request.");
+
+    // header now owns the outbuf buffer
+    bstring headers = tns_outbuf_to_bstring(&outbuf);
+    bformata(headers, "%d:", len);
+    bcatblk(headers, buf, len);
+    bconchar(headers, ',');
+
+    return headers;
+error:
+    if(outbuf.buffer) free(outbuf.buffer);
+    return NULL;
+}
+
 bstring Request_to_payload(Request *req, bstring uuid, int fd, const char *buf, size_t len)
 {
     bstring headers = NULL;
@@ -395,13 +417,23 @@ bstring Request_to_payload(Request *req, bstring uuid, int fd, const char *buf, 
 
         if(val_list->qty > 1)
         {
-            bstring list = bjoin(val_list, &JSON_LISTSEP);
+            struct bstrList *escaped = bstrListCreate();
+            bstrListAlloc(escaped, val_list->qty);
+            escaped->qty = val_list->qty;
+
+            int x = 0;
+            for(x = 0; x < val_list->qty; x++) {
+                escaped->entry[x] = json_escape(val_list->entry[x]);
+            }
+
+            bstring list = bjoin(escaped, &JSON_LISTSEP);
             bcatcstr(headers, ",\"");
             bconcat(headers, key);
             bcatcstr(headers, "\":[\"");
             bconcat(headers, list);
             bcatcstr(headers, "\"]");
             bdestroy(list);
+            bstrListDestroy(escaped);
         }
         else
         {

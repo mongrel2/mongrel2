@@ -29,10 +29,13 @@ char *test_Handler_send_create()
 char *test_Handler_deliver()
 {
     void *socket = Handler_send_create("tcp://127.0.0.1:12346", "ZED");
+    int opt = 0;
+    zmq_setsockopt(socket, ZMQ_LINGER, &opt, sizeof(opt));
     mu_assert(socket != NULL, "Failed to make the send socket.");
 
-    char *message = "{\"type\":\"join\"}";
-    int rc = Handler_deliver(socket, message, strlen(message));
+    bstring message = bfromcstr("{\"type\":\"join\"}");
+    int rc = Handler_deliver(socket, bdata(message), blength(message));
+    free(message);  // handler owns the message->data so we just free
 
     mu_assert(rc == 0, "Failed to deliver the message.");
 
@@ -57,7 +60,7 @@ char * all_tests() {
 
     mu_run_test(test_Handler_send_create);
     mu_run_test(test_Handler_recv_create);
-    //TODO  DISABLED FOR NOW: mu_run_test(test_Handler_deliver);
+    // disabled for now mu_run_test(test_Handler_deliver);
     mu_run_test(test_Handler_create_destroy);
 
     zmq_term(ZMQ_CTX);
