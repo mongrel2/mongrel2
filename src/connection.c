@@ -135,11 +135,22 @@ int connection_msg_to_handler(Connection *conn)
         Register_ping(IOBuf_fd(conn->iob));
     } else {
         check(body_len >= 0, "Parsing error, body length ended up being: %d", body_len);
+        bstring payload = NULL;
 
-        bstring payload = Request_to_payload(conn->req, handler->send_ident,
-                IOBuf_fd(conn->iob), IOBuf_start(conn->iob) + header_len,
-                body_len - 1);  // drop \0 on payloads
+        if(handler->protocol == HANDLER_PROTO_TNET) {
+            payload = Request_to_tnetstring(conn->req, handler->send_ident,
+                    IOBuf_fd(conn->iob), IOBuf_start(conn->iob) + header_len,
+                    body_len - 1);  // drop \0 on payloads
+        } else if(handler->protocol == HANDLER_PROTO_JSON) {
+            payload = Request_to_payload(conn->req, handler->send_ident,
+                    IOBuf_fd(conn->iob), IOBuf_start(conn->iob) + header_len,
+                    body_len - 1);  // drop \0 on payloads
+        } else {
+            sentinel("Invalid protocol type: %d", handler->protocol);
+        }
 
+        debug("SENT: %s", bdata(payload));
+        check(payload != NULL, "Failed to generate payload.");
 
         rc = Handler_deliver(handler->send_socket, bdata(payload), blength(payload));
         free(payload);
@@ -162,8 +173,18 @@ int Connection_send_to_handler(Connection *conn, Handler *handler, char *body, i
     int rc = 0;
     bstring payload = NULL;
 
-    payload = Request_to_payload(conn->req, handler->send_ident, 
-            IOBuf_fd(conn->iob), body, content_len);
+    if(handler->protocol == HANDLER_PROTO_TNET) {
+        payload = Request_to_tnetstring(conn->req, handler->send_ident, 
+                IOBuf_fd(conn->iob), body, content_len);
+    } else if(handler->protocol == HANDLER_PROTO_JSON) {
+        payload = Request_to_payload(conn->req, handler->send_ident, 
+                IOBuf_fd(conn->iob), body, content_len);
+    } else {
+        sentinel("Invalid protocol type: %d", handler->protocol);
+    }
+
+    debug("SENT: %s", bdata(payload));
+
     check(payload, "Failed to create payload for request.");
 
     debug("HTTP TO HANDLER: %.*s", blength(payload) - content_len, bdata(payload));

@@ -38,6 +38,7 @@ error:
 }
 
 struct tagbstring RAW_PAYLOAD = bsStatic("raw_payload");
+struct tagbstring PROTOCOL = bsStatic("protocol");
 
 int Handler_load(tst_t *settings, tst_t *params)
 {
@@ -55,9 +56,21 @@ int Handler_load(tst_t *settings, tst_t *params)
 
     if(tst_search(params, bdata(&RAW_PAYLOAD), blength(&RAW_PAYLOAD))) {
         const char *raw_payload = AST_str(settings, params, "raw_payload", VAL_NUMBER);
+
         if(raw_payload && raw_payload[0] == '1') {
             DB_exec(bdata(&HANDLER_RAW_SQL), NULL, NULL);
         }
+    }
+
+    if(tst_search(params, bdata(&PROTOCOL), blength(&PROTOCOL))) {
+        const char *protocol = AST_str(settings, params, "protocol", VAL_QSTRING);
+        protocol = protocol != NULL ? protocol : "json";
+
+        sqlite3_free(sql);
+
+        sql = sqlite3_mprintf(bdata(&HANDLER_PROTOCOL_SQL), protocol);
+        check(sql != NULL, "Invalid SQL with your protocol setting: '%s'", protocol);
+        DB_exec(sql, NULL, NULL);
     }
 
     sqlite3_free(sql);

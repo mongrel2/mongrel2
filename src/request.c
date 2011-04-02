@@ -355,11 +355,14 @@ static inline bstring request_determine_method(Request *req)
     }
 }
 
-bstring Request_to_tnetstring(Request *req, bstring uuid, int id, const char *buf, size_t len)
+bstring Request_to_tnetstring(Request *req, bstring uuid, int fd, const char *buf, size_t len)
 {
     tns_outbuf outbuf;
     bstring method = request_determine_method(req);
     check(method, "Impossible, got an invalid request method.");
+
+    int id = Register_id_for_fd(fd);
+    check(id != -1, "Asked to generate a payload for a fd that doesn't exist: %d", fd);
 
     int header_start = tns_render_request_start(&outbuf);
     check(header_start != -1, "Failed to initialize outbuf.");

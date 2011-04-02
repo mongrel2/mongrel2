@@ -58,9 +58,9 @@ static tst_t *LOADED_HANDLERS = NULL;
 static tst_t *LOADED_PROXIES = NULL;
 static tst_t *LOADED_DIRS = NULL;
 
-static int Config_load_raw_payload_cb(void *param, int cols, char **data, char **names)
+static int Config_load_handler_options_cb(void *param, int cols, char **data, char **names)
 {
-    arity(2);
+    arity(3);
     Handler *handler = (Handler *)param;
 
     if(data[1][0] == '1') {
@@ -73,10 +73,18 @@ static int Config_load_raw_payload_cb(void *param, int cols, char **data, char *
         handler->raw = 1;
     }
 
+    log_info("Using handler protocol: '%s'", data[2]);
+
+    if(data[2] != NULL && data[2][0] == 't') {
+        handler->protocol = HANDLER_PROTO_TNET;
+    } else {
+        handler->protocol = HANDLER_PROTO_JSON;
+    }
+
     return 0;
 
 error:
-    return 1;
+    return -1;
 }
 
 static int Config_load_handler_cb(void *param, int cols, char **data, char **names)
@@ -91,10 +99,10 @@ static int Config_load_handler_cb(void *param, int cols, char **data, char **nam
 
     log_info("Loaded handler %s with send_spec=%s send_ident=%s recv_spec=%s recv_ident=%s", data[0], data[1], data[2], data[3], data[4]);
 
-    sql = sqlite3_mprintf("SELECT id, raw_payload FROM handler WHERE id=%q", data[0]);
+    sql = sqlite3_mprintf("SELECT id, raw_payload, protocol FROM handler WHERE id=%q", data[0]);
     check_mem(sql);
 
-    rc = DB_exec(sql, Config_load_raw_payload_cb, handler);
+    rc = DB_exec(sql, Config_load_handler_options_cb, handler);
 
     if(rc != 0) {
         log_warn("Couldn't get the Handler.raw_payload setting, you might need to rebuild your db.");

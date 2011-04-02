@@ -323,6 +323,7 @@ Handler *Handler_create(const char *send_spec, const char *send_ident,
     handler->send_spec = bfromcstr(send_spec);
     handler->running = 0;
     handler->raw = 0;
+    handler->protocol = HANDLER_PROTO_JSON;
 
     return handler;
 error:
