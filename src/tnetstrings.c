@@ -125,7 +125,7 @@ static inline int tns_render_number(void *val, tns_outbuf *outbuf)
     tns_value_t *t = (tns_value_t *)val;
     char out[120] = {0};
 
-    assert(t->type == tns_tag_bool && "Value is not a string.");
+    assert(t->type == tns_tag_number && "Value is not a number.");
 
     int rc = snprintf(out, 119, "%ld", t->value.number);
     check(rc != -1 && rc <= 119, "Failed to generate number.");
@@ -141,7 +141,7 @@ error:
 static inline int tns_render_bool(void *val, tns_outbuf *outbuf)
 {
     tns_value_t *t = (tns_value_t *)val;
-    assert(t->type == tns_tag_bool && "Value is not a string.");
+    assert(t->type == tns_tag_bool && "Value is not a bool.");
 
     if(t->value.bool) {
         return tns_outbuf_rputs(outbuf, "true", 4);
