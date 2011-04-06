@@ -82,7 +82,7 @@ char *test_tst_search_prefix()
     mu_assert(res != NULL, "Should find for short prefix.");
 
     res = tst_search_prefix(node, "TE--", strlen("TE--"));
-    mu_assert(res == NULL, "Should NOT find for invalid prefix.");
+    mu_assert(res != NULL, "Should find for partial prefix.");
 
 
     return NULL;

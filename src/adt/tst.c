@@ -127,6 +127,7 @@ void *tst_search_prefix(tst_t *root, const char *s, size_t len)
     if(len == 0) return NULL;
 
     tst_t *p = root;
+    tst_t *last = NULL;
     int i = 0;
 
     while(i < len && p) {
@@ -135,12 +136,15 @@ void *tst_search_prefix(tst_t *root, const char *s, size_t len)
         } else if (s[i] == p->splitchar) {
             i++;
             if(i < len) {
+                if(p->value) last = p;
                 p = p->equal;
             }
         } else {
             p = p->high; 
         }
     }
+
+    p = p ? p : last;
 
     // traverse until we find the first value in the chain of splitchars
     while(p && !p->value) {
