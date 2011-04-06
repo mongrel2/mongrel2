@@ -62,6 +62,9 @@ char *test_tst_search_suffix()
     res = tst_search_suffix(node, "EST", strlen("EST"));
     mu_assert(res != NULL, "Reverse search should find by the suffix.");
 
+    res = tst_search_suffix(node, "ESTO", strlen("ESTO"));
+    mu_assert(res == NULL, "Reverse search should not find invalid suffix.");
+
     return NULL;
 }
 
@@ -74,6 +77,13 @@ char *test_tst_search_prefix()
     res = tst_search_prefix(node, bdata(test1), 1);
     debug("result: %p, expected: %p", res, valueA);
     mu_assert(res == value4, "Got wrong value4 for prefix of 1.");
+
+    res = tst_search_prefix(node, "TE", strlen("TE"));
+    mu_assert(res != NULL, "Should find for short prefix.");
+
+    res = tst_search_prefix(node, "TE--", strlen("TE--"));
+    mu_assert(res == NULL, "Should NOT find for invalid prefix.");
+
 
     return NULL;
 }

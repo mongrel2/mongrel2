@@ -130,8 +130,6 @@ void *tst_search_prefix(tst_t *root, const char *s, size_t len)
     int i = 0;
 
     while(i < len && p) {
-        debug("FIND: '%c' = %p -> %p", p->splitchar, p, p->value);
-
         if (s[i] < p->splitchar) {
             p = p->low; 
         } else if (s[i] == p->splitchar) {
@@ -146,11 +144,9 @@ void *tst_search_prefix(tst_t *root, const char *s, size_t len)
 
     // traverse until we find the first value in the chain of splitchars
     while(p && !p->value) {
-        debug("TRAVERSE: '%c' = %p -> %p", p->splitchar, p, p->value);
         p = p->equal;
     }
 
-    debug("RESULT: '%c' = %p -> %p", p->splitchar, p, p ? p->value : NULL);
     return p ? p->value : NULL;
 }
 
