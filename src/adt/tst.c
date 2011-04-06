@@ -32,6 +32,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#undef NDEBUG
 #include <stdlib.h>
 #include "tst.h"
 #include <stdio.h>
@@ -112,13 +113,13 @@ void *tst_search_suffix(tst_t *root, const char *s, size_t len)
         }
     }
 
-    if(p) {
-        return p->value;
-    } else if(last) {
-        return last->value;
-    } else {
-        return NULL;
+    p = p ? p : last;
+
+    while(p && !p->value) {
+        p = p->equal;
     }
+
+    return p ? p->value : NULL;
 }
 
 void *tst_search_prefix(tst_t *root, const char *s, size_t len)
@@ -126,16 +127,16 @@ void *tst_search_prefix(tst_t *root, const char *s, size_t len)
     if(len == 0) return NULL;
 
     tst_t *p = root;
-    tst_t *last = NULL;
     int i = 0;
 
     while(i < len && p) {
+        debug("FIND: '%c' = %p -> %p", p->splitchar, p, p->value);
+
         if (s[i] < p->splitchar) {
             p = p->low; 
         } else if (s[i] == p->splitchar) {
             i++;
             if(i < len) {
-                if(p->value) last = p;
                 p = p->equal;
             }
         } else {
@@ -143,13 +144,14 @@ void *tst_search_prefix(tst_t *root, const char *s, size_t len)
         }
     }
 
-    if(p) {
-        return p->value;
-    } else if(last) {
-        return last->value;
-    } else {
-        return NULL;
+    // traverse until we find the first value in the chain of splitchars
+    while(p && !p->value) {
+        debug("TRAVERSE: '%c' = %p -> %p", p->splitchar, p, p->value);
+        p = p->equal;
     }
+
+    debug("RESULT: '%c' = %p -> %p", p->splitchar, p, p ? p->value : NULL);
+    return p ? p->value : NULL;
 }
 
 void *tst_search(tst_t *root, const char *s, size_t len)

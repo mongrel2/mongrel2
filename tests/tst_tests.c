@@ -60,7 +60,7 @@ char *test_tst_search_suffix()
     mu_assert(res == NULL, "Reverse search should find nothing.");
 
     res = tst_search_suffix(node, "EST", strlen("EST"));
-    mu_assert(res == NULL, "Reverse search should find nothing on suffix.");
+    mu_assert(res != NULL, "Reverse search should find by the suffix.");
 
     return NULL;
 }
