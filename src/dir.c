@@ -170,6 +170,8 @@ Dir *Dir_create(const char *base, const char *index_file, const char *default_ct
     Dir *dir = calloc(sizeof(Dir), 1);
     check_mem(dir);
 
+    dir->running = 1;
+
     if(!MAX_SEND_BUFFER || !MAX_DIR_PATH) {
         MAX_SEND_BUFFER = Setting_get_int("limits.dir_send_buffer", 16 * 1024);
         MAX_DIR_PATH = Setting_get_int("limits.dir_max_path", 256);
@@ -458,6 +460,7 @@ int Dir_serve_file(Dir *dir, Request *req, Connection *conn)
     bstring path = Request_path(req);
     bstring prefix = req->prefix;
     check(prefix != NULL, "Request without a prefix hit.");
+    check(dir->running, "Directory is not running anymore.");
 
     int rc = 0;
     int is_get = biseq(req->request_method, &HTTP_GET);

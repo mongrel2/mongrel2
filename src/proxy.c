@@ -64,6 +64,7 @@ Proxy *Proxy_create(bstring server, int port)
     
     proxy->server = server;
     proxy->port = port;
+    proxy->running = 1;
 
     return proxy;
 

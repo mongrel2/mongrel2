@@ -31,7 +31,7 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
+#undef NDEBUG
 #include "config/config.h"
 
 #include <assert.h>
@@ -54,9 +54,51 @@
 #define SQL(Q, ...) sqlite3_mprintf((Q), ##__VA_ARGS__)
 #define SQL_FREE(Q) if(Q) sqlite3_free(Q)
 
-static tst_t *LOADED_HANDLERS = NULL;
-static tst_t *LOADED_PROXIES = NULL;
-static tst_t *LOADED_DIRS = NULL;
+static tst_t *LOADED = NULL;
+
+typedef struct BackendValue {
+    void *value;
+    bstring key;
+    BackendType type;
+} BackendValue;
+
+static inline bstring cols_to_key(const char *type, int cols, char **data)
+{
+    bstring key = bfromcstr("");
+    int i = 0;
+
+    for(i = 0; i < cols; i++) {
+        bformata(key, "%s:", data[i]);
+    }
+
+    return key;
+}
+
+static inline BackendValue *find_by_type(const char *type, const char *id)
+{
+    bstring key = bformat("%s:", id);
+    void *result = tst_search_prefix(LOADED, bdata(key), blength(key));
+    bdestroy(key);
+    return result;
+}
+
+
+static inline int store_in_loaded(bstring key, void *value, BackendType type) {
+    BackendValue *elem = calloc(sizeof(BackendValue), 1);
+    check_mem(elem);
+
+    elem->value = value;
+    elem->key = key;
+    elem->type = type;
+
+    LOADED = tst_insert(LOADED, bdata(key), blength(key), elem);
+
+    return 0;
+
+error:
+    return -1;
+}
+
 
 static int Config_load_handler_options_cb(void *param, int cols, char **data, char **names)
 {
@@ -87,33 +129,47 @@ error:
     return -1;
 }
 
+
 static int Config_load_handler_cb(void *param, int cols, char **data, char **names)
 {
     int rc = 0;
     char *sql = NULL;
-
+    bstring key = cols_to_key("handler", cols, data);
     arity(5);
 
-    Handler *handler = Handler_create(data[1], data[2], data[3], data[4]);
-    check(handler != NULL, "Loaded handler %s with send_spec=%s send_ident=%s recv_spec=%s recv_ident=%s", data[0], data[1], data[2], data[3], data[4]);
+    check_mem(key);
 
-    log_info("Loaded handler %s with send_spec=%s send_ident=%s recv_spec=%s recv_ident=%s", data[0], data[1], data[2], data[3], data[4]);
+    BackendValue *backend = tst_search(LOADED, bdata(key), blength(key));
 
-    sql = sqlite3_mprintf("SELECT id, raw_payload, protocol FROM handler WHERE id=%q", data[0]);
-    check_mem(sql);
+    if(backend) {
+        check(backend->type == BACKEND_HANDLER, "Didn't get a Handler type backend for key: %s", bdata(key));
+        Handler *handler = backend->value;
+        handler->running = 1;
+    } else {
+        Handler *handler = Handler_create(data[1], data[2], data[3], data[4]);
+        check(handler != NULL, "Loaded handler %s with send_spec=%s send_ident=%s recv_spec=%s recv_ident=%s", data[0], data[1], data[2], data[3], data[4]);
 
-    rc = DB_exec(sql, Config_load_handler_options_cb, handler);
+        log_info("Loaded handler %s with send_spec=%s send_ident=%s recv_spec=%s recv_ident=%s", data[0], data[1], data[2], data[3], data[4]);
 
-    if(rc != 0) {
-        log_warn("Couldn't get the Handler.raw_payload setting, you might need to rebuild your db.");
+        sql = sqlite3_mprintf("SELECT id, raw_payload, protocol FROM handler WHERE id=%q", data[0]);
+        check_mem(sql);
+
+        rc = DB_exec(sql, Config_load_handler_options_cb, handler);
+
+        if(rc != 0) {
+            log_warn("Couldn't get the Handler.raw_payload setting, you might need to rebuild your db.");
+        }
+
+        rc = store_in_loaded(key, handler, BACKEND_HANDLER);
+        check(rc == 0, "Failed to store handler %s in backend store.", bdata(key));
+
+        sqlite3_free(sql);
     }
 
-    LOADED_HANDLERS = tst_insert(LOADED_HANDLERS, data[0], strlen(data[0]), handler);
-
-    sqlite3_free(sql);
     return 0;
 
 error:
+    if(key) bdestroy(key);
     if(sql) sqlite3_free(sql);
     return -1;
 }
@@ -131,20 +187,31 @@ error:
     return -1;
 }
 
+
 static int Config_load_proxy_cb(void *param, int cols, char **data, char **names)
 {
+    bstring key = cols_to_key("proxy", cols, data);
+
     arity(3);
 
-    Proxy *proxy = Proxy_create(bfromcstr(data[1]), atoi(data[2]));
-    check(proxy != NULL, "Failed to create proxy %s with address=%s port=%s", data[0], data[1], data[2]);
+    BackendValue *backend = tst_search(LOADED, bdata(key), blength(key));
 
-    log_info("Loaded proxy %s with address=%s port=%s", data[0], data[1], data[2]);
+    if(backend) {
+        Proxy *proxy = backend->value;
+        proxy->running = 1;
+    } else {
+        Proxy *proxy = Proxy_create(bfromcstr(data[1]), atoi(data[2]));
+        check(proxy != NULL, "Failed to create proxy %s with address=%s port=%s", data[0], data[1], data[2]);
 
-    LOADED_PROXIES = tst_insert(LOADED_PROXIES, data[0], strlen(data[0]), proxy);
+        log_info("Loaded proxy %s with address=%s port=%s", data[0], data[1], data[2]);
+
+        check(store_in_loaded(key, proxy, BACKEND_PROXY) == 0, "Failed to store proxy.");
+    }
 
     return 0;
 
 error:
+    if(key) bdestroy(key);
     return -1;
 }
 
@@ -163,18 +230,27 @@ error:
 
 static int Config_load_dir_cb(void *param, int cols, char **data, char **names)
 {
+    bstring key = cols_to_key("dir", cols, data);
     arity(4);
 
-    Dir* dir = Dir_create(data[1], data[2], data[3]);
-    check(dir != NULL, "Failed to create dir %s with base=%s index=%s def_ctype=%s", data[0], data[1], data[2], data[3]);
+    BackendValue *backend = tst_search(LOADED, bdata(key), blength(key));
 
-    log_info("Loaded dir %s with base=%s index=%s def_ctype=%s", data[0], data[1], data[2], data[3]);
+    if(backend) {
+        Dir *dir = backend->value;
+        dir->running = 1;
+    } else {
+        Dir* dir = Dir_create(data[1], data[2], data[3]);
+        check(dir != NULL, "Failed to create dir %s with base=%s index=%s def_ctype=%s", data[0], data[1], data[2], data[3]);
 
-    LOADED_DIRS = tst_insert(LOADED_DIRS, data[0], strlen(data[0]), dir);
+        log_info("Loaded dir %s with base=%s index=%s def_ctype=%s", data[0], data[1], data[2], data[3]);
+
+        check(store_in_loaded(key, dir, BACKEND_DIR) == 0, "Failed to store Dir in loaded.");
+    }
 
     return 0;
 
 error:
+    if(key) bdestroy(key);
     return -1;
 }
 
@@ -197,48 +273,12 @@ static int Config_load_route_cb(void *param, int cols, char **data, char **names
 
     Host *host = (Host*)param;
     check(host, "Expected host as param");
-
-    void *target = NULL;
-    BackendType type = 0;
-
     check(data[3] != NULL, "Route type is NULL but shouldn't be for route id=%s", data[0]);
 
-    if(strcmp("handler", data[3]) == 0)
-    {
-        Handler *handler = tst_search(LOADED_HANDLERS, data[2], strlen(data[2]));
-        check(handler, "Failed to find handler %s for route %s:%s", data[2], data[0], data[1]);
+    BackendValue *backend = find_by_type(data[3], data[2]);
+    check(backend != NULL, "Failed to find %s:%s for route %s:%s", data[3], data[2], data[0], data[1]);
 
-        log_info("Created handler route %s:%s -> %s:%s", data[0], data[1], bdata(handler->send_ident), bdata(handler->send_spec));
-        target = handler;
-
-        type = BACKEND_HANDLER;
-    }
-    else if(strcmp("proxy", data[3]) == 0)
-    {
-        Proxy *proxy = tst_search(LOADED_PROXIES, data[2], strlen(data[2]));
-        check(proxy, "Failed to find proxy %s for route %s:%s", data[2], data[0], data[1]);
-
-        log_info("Created proxy route %s:%s -> %s:%d", data[0], data[1], bdata(proxy->server), proxy->port);
-        target = proxy;
-
-        type = BACKEND_PROXY;
-    }
-    else if(strcmp("dir", data[3]) == 0)
-    {
-        Dir *dir = tst_search(LOADED_DIRS, data[2], strlen(data[2]));
-        check(dir, "Failed to find dir %s for route %s:%s", data[2], data[0], data[1]);
-
-        log_info("Created directory route %s:%s -> %s:%s", data[0], data[1], data[2], bdata(dir->base));
-        target = dir;
-
-        type = BACKEND_DIR;
-    }
-    else
-    {
-        sentinel("Invalid handler type %s for host %s", data[3], bdata(host->name));
-    }
-
-    Host_add_backend(host, data[1], strlen(data[1]), type, target);
+    Host_add_backend(host, data[1], strlen(data[1]), backend->type, backend->value);
 
     return 0;
 
@@ -424,94 +464,78 @@ void Config_close_db()
 
 static void handlers_receive_start(void *value, void *data)
 {
-    Handler *handler = (Handler *)value;
+    BackendValue *backend = (BackendValue *)value;
 
-    if(!handler->running) {
-        debug("LOADING BACKEND %s", bdata(handler->send_spec));
-        taskcreate(Handler_task, handler, HANDLER_STACK);
-        handler->running = 1;
+    if(backend->type == BACKEND_HANDLER) {
+        Handler *handler = backend->value;
+
+        if(!handler->running) {
+            // TODO: need three states, running, suspended, not running
+            debug("LOADING BACKEND %s", bdata(handler->send_spec));
+            taskcreate(Handler_task, handler, HANDLER_STACK);
+            handler->running = 1;
+        }
     }
 }
 
 void Config_start_handlers()
 {
     debug("LOADING ALL HANDLERS...");
-    tst_traverse(LOADED_HANDLERS, handlers_receive_start, NULL);
+    tst_traverse(LOADED, handlers_receive_start, NULL);
 }
 
-static void shutdown_handler(void *value, void *data)
+
+static void shutdown_cb(void *value, void *data)
 {
-    Handler *handler = (Handler *)value;
-    assert(handler && "Why? Handler is NULL.");
+    BackendValue *backend = (BackendValue *)value;
+    assert(backend->value != NULL && "Backend had a NULL value!");
 
-    if(handler->running) {
+    if(backend->type == BACKEND_HANDLER) {
+        debug("Stopping handler: %s", bdata(backend->key));
+        Handler *handler = backend->value;
         handler->running = 0;
+    } else if(backend->type == BACKEND_PROXY) {
+        debug("Stopping proxy: %s", bdata(backend->key));
+        Proxy *proxy = backend->value;
+        proxy->running = 0;
+    } else if(backend->type == BACKEND_DIR) {
+        debug("Stopping dir: %s", bdata(backend->key));
+        Dir *dir = backend->value;
+        dir->running = 0;
+    } else {
+        sentinel("Invalid backend type: %d", backend->type);
+    }
 
-        if(tasknuke(taskgetid(handler->task)) == 0) {
-            taskready(handler->task);
+    return;
+
+error:
+    return;
+}
+
+void Config_stop_all()
+{
+    tst_traverse(LOADED, shutdown_cb, NULL);
+}
+
+static void running_count_cb(void *value, void *data)
+{
+    BackendValue *backend = (BackendValue *)value;
+    assert(backend->value != NULL && "Backend had a NULL value!");
+
+    if(backend->type == BACKEND_HANDLER) {
+        Handler *handler = backend->value;
+        if(handler->running == 0) {
+            int *count = (int *)data;
+            (*count)++;
         }
     }
 }
 
-static void close_handler(void *value, void *data)
+int Config_running_counts()
 {
-    Handler *handler = (Handler *)value;
-    assert(handler && "Why? Handler is NULL.");
+    int count = 0;
 
+    tst_traverse(LOADED, running_count_cb, &count);
 
-    if(handler->send_socket) {
-        zmq_close(handler->send_socket);
-        handler->send_socket = NULL;
-    }
-
-    if(handler->recv_socket) {
-        zmq_close(handler->recv_socket);
-        handler->recv_socket = NULL;
-    }
-
-    Handler_destroy(handler);
-}
-
-void Config_stop_handlers()
-{
-    debug("STOPPING ALL HANDLERS");
-
-    tst_traverse(LOADED_HANDLERS, shutdown_handler, NULL);
-    taskyield();
-    taskdelay(100);
-    tst_traverse(LOADED_HANDLERS, close_handler, NULL);
-
-    tst_destroy(LOADED_HANDLERS);
-
-    LOADED_HANDLERS = NULL;
-}
-
-static void stop_proxy(void *value, void *data)
-{
-    Proxy_destroy((Proxy *)value);
-}
-
-void Config_stop_proxies()
-{
-    debug("STOPPING ALL PROXIES");
-    tst_traverse(LOADED_PROXIES, stop_proxy, NULL);
-
-    tst_destroy(LOADED_PROXIES);
-    LOADED_PROXIES = NULL;
-}
-
-static void stop_dir(void *value, void *data)
-{
-    Dir_destroy((Dir *)value);
-}
-
-void Config_stop_dirs()
-{
-    debug("STOPPING ALL DIRECTORIES");
-
-    tst_traverse(LOADED_DIRS, stop_dir, NULL);
-
-    tst_destroy(LOADED_DIRS);
-
-    LOADED_DIRS = NULL;
+    return count;
 }

@@ -29,8 +29,11 @@ char *test_Handler_send_create()
 char *test_Handler_deliver()
 {
     void *socket = Handler_send_create("tcp://127.0.0.1:12346", "ZED");
+#ifdef ZMQ_LINGER
     int opt = 0;
     zmq_setsockopt(socket, ZMQ_LINGER, &opt, sizeof(opt));
+#endif
+
     mu_assert(socket != NULL, "Failed to make the send socket.");
 
     bstring message = bfromcstr("{\"type\":\"join\"}");

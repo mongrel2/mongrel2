@@ -40,6 +40,7 @@
 typedef struct Proxy {
     bstring server;
     int port;
+    int running;
 } Proxy;
 
 Proxy *Proxy_create(bstring server, int port);

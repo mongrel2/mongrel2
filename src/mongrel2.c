@@ -234,10 +234,7 @@ Server *reload_server(Server *old_srv, const char *db_file, const char *server_u
     RUNNING = 1;
 
     MIME_destroy();
-
-    Config_stop_handlers();
-    Config_stop_proxies();
-    Config_stop_dirs();
+    Config_stop_all();
     Setting_destroy();
 
     Server *srv = load_server(db_file, server_uuid, old_srv->listen_fd);
@@ -254,18 +251,21 @@ error:
 void complete_shutdown(Server *srv)
 {
     fdclose(srv->listen_fd);
-    Config_stop_handlers();
-    Config_stop_proxies();
-    Config_stop_dirs();
+    Config_stop_all();
 
-    int left = taskwaiting();
+    int count = Config_running_counts();
+    int left = taskwaiting() - count;
 
     // need -1 for the control port
-    log_info("Waiting for connections to die: %d", left - 1);
-    while((left = taskwaiting()) > 1 && !MURDER) {
+    log_info("Waiting for connections to die: %d", left - count - 1);
+
+    // TODO: ugh this is disgusting
+    while(!(left <= 1) && !MURDER) {
         // TODO: after a certain time close all of the connection sockets forcefully
         taskdelay(3000);
-        log_info("Waiting for connections to die: %d", left - 1);
+        log_info("Waiting for connections to die: %d", left);
+
+        left = taskwaiting() - Config_running_counts();
     }
 
     MIME_destroy();

@@ -64,6 +64,7 @@ typedef struct FileRecord {
 } FileRecord;
 
 typedef struct Dir {
+    int running;
     Cache *fr_cache;
     bstring base;
     bstring normalized_base;

@@ -47,12 +47,10 @@ int Config_load_settings();
 
 void Config_close_db();
 
-void Config_stop_handlers();
+void Config_stop_all();
 
 void Config_start_handlers();
 
-void Config_stop_proxies();
-
-void Config_stop_dirs();
+int Config_running_counts();
 
 #endif
