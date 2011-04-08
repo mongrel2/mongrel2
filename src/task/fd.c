@@ -230,7 +230,7 @@ void *mqsocket(int type)
     check(sock != NULL, "Failed to create zmq socket.");
 
 #ifdef ZMQ_LINGER
-    int opt = 1000;
+    int opt = 0;
     int rc = zmq_setsockopt(sock, ZMQ_LINGER, &opt, sizeof(opt));
     check(rc == 0, "Failed to set linger timeout for socket.");
 #endif

@@ -43,7 +43,7 @@ static void *Log_internal_thread(void *spec)
     check(rc == 0, "Could not subscribe to the logger.");
 
 #ifdef ZMQ_LINGER
-    int opt = 1000;
+    int opt = 0;
     rc = zmq_setsockopt(socket, ZMQ_LINGER, &opt, sizeof(opt));
     check(rc == 0, "Could not set the linger option.");
 #endif
@@ -121,6 +121,12 @@ int Log_init(bstring access_log, bstring log_spec)
 
             LOG_SOCKET = zmq_socket(ZMQ_CTX, ZMQ_PUB);
             check(LOG_SOCKET != NULL, "Failed to create access log socket");
+
+#ifdef ZMQ_LINGER
+            int opt = 0;
+            rc = zmq_setsockopt(LOG_SOCKET, ZMQ_LINGER, &opt, sizeof(opt));
+            check(rc == 0, "Could not set the linger option.");
+#endif
 
             rc = zmq_bind(LOG_SOCKET, bdata(log_spec));
             check(rc == 0, "Failed to bind access_log zeromq socket.");
