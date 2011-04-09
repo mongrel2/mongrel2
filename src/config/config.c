@@ -67,6 +67,8 @@ static inline bstring cols_to_key(const char *type, int cols, char **data)
     bstring key = bfromcstr("");
     int i = 0;
 
+    bformata(key,"%s:",type);
+
     for(i = 0; i < cols; i++) {
         bformata(key, "%s:", data[i]);
     }
@@ -76,7 +78,7 @@ static inline bstring cols_to_key(const char *type, int cols, char **data)
 
 static inline BackendValue *find_by_type(const char *type, const char *id)
 {
-    bstring key = bformat("%s:", id);
+    bstring key = bformat("%s:%s:", type, id);
     void *result = tst_search_prefix(LOADED, bdata(key), blength(key));
     bdestroy(key);
     return result;
