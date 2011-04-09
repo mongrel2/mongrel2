@@ -68,7 +68,6 @@ def parse_pair(data):
     key, extra = parse(data)
     assert extra, "Unbalanced dictionary store."
     value, extra = parse(extra)
-    assert value, "Got an invalid value, null not allowed."
 
     return key, value, extra
 

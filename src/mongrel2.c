@@ -251,13 +251,15 @@ error:
 void complete_shutdown(Server *srv)
 {
     fdclose(srv->listen_fd);
+
     Config_stop_all();
+    taskdelay(1000);
 
     int count = Config_running_counts();
     int left = taskwaiting() - count;
 
     // need -1 for the control port
-    log_info("Waiting for connections to die: %d", left - count - 1);
+    log_info("Waiting for connections to die...");
 
     // TODO: ugh this is disgusting
     while(!(left <= 1) && !MURDER) {
@@ -265,23 +267,20 @@ void complete_shutdown(Server *srv)
         taskdelay(3000);
         log_info("Waiting for connections to die: %d", left);
 
-        left = taskwaiting() - Config_running_counts();
+        left = taskwaiting() - Config_running_counts() - 1;
     }
 
     MIME_destroy();
+    Control_port_stop();
+    Log_term();
+    Setting_destroy();
 
     log_info("Removing pid file %s", bdata(srv->pid_file));
     unlink((const char *)srv->pid_file->data);
 
     Server_destroy(srv);
-    Control_port_stop();
-    Log_term();
 
-    zmq_term(ZMQ_CTX);
-
-    Setting_destroy();
-
-    taskexitall(0);
+    exit(0);
 }
 
 
