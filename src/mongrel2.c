@@ -316,7 +316,7 @@ void taskmain(int argc, char **argv)
         if(RELOAD) {
             log_info("Reload requested, will load %s from %s", argv[2], argv[1]);
             Server *new_srv = reload_server(SERVER, argv[1], argv[2]);
-            check(new_srv, "Failed to load the new configuration, will keep the old one.");
+            check(new_srv, "Failed to load the new configuration, exiting.");
 
             // for this to work handlers need to die more gracefully
             
