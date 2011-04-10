@@ -24,6 +24,7 @@ int FDSTACK= 100 * 1024;
 #define MSG_NOSIGNAL 0
 #endif
 
+int SIGNALED = 0;
 
 void mqinit(int threads)
 {
@@ -98,11 +99,19 @@ fdtask(void *v)
 
         ms = next_task_sleeptime(500);
 
-        rc = SuperPoll_poll(POLL, &result, ms);
-        check(rc != -1, "SuperPoll failure, aborting.");
+        if(SIGNALED) {
+            for(i = 0; i < SuperPoll_active_hot(POLL); i++) {
+                Task *target = (Task *)SuperPoll_data(POLL, i);
+                if(target) taskready(target);
+                SuperPoll_compact_down(POLL, i);
+            }
+        } else {
+            rc = SuperPoll_poll(POLL, &result, ms);
+            check(rc != -1, "SuperPoll failure, aborting.");
 
-        for(i = 0; i < rc; i++) {
-            taskready(result.hits[i].data); 
+            for(i = 0; i < rc; i++) {
+                taskready(result.hits[i].data); 
+            }
         }
 
         wake_sleepers();
@@ -116,22 +125,6 @@ error:
 }
 
 
-int tasknuke(int id)
-{
-    int i = 0;
-    Task *target = NULL;
-
-    for(i = 0; i < SuperPoll_active_hot(POLL); i++) {
-        target = (Task *)SuperPoll_data(POLL, i);
-
-        if(target && target->id == id) {
-            SuperPoll_compact_down(POLL, i);
-            return 0;
-        }
-    }
-
-    return -1;
-}
 
 static inline void startfdtask()
 {
@@ -212,7 +205,11 @@ int _wait(void *socket, int fd, int rw)
     check(max != -1, "Error adding fd %d to task wait list.", fd);
 
     taskswitch();
-    return 0;
+    if(SIGNALED) {
+        return -1;
+    } else {
+        return 0;
+    }
 
 error:
     taskswitch();
@@ -395,4 +392,10 @@ static uvlong nsec(void)
     return (uvlong)tv.tv_sec*1000*1000*1000 + tv.tv_usec*1000;
 }
 
+
+void fdsignal()
+{
+    SIGNALED = 1;
+    taskdelay(1);
+}
 

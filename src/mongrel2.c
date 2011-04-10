@@ -253,21 +253,13 @@ void complete_shutdown(Server *srv)
     fdclose(srv->listen_fd);
 
     Config_stop_all();
-    taskdelay(1000);
-
-    int count = Config_running_counts();
-    int left = taskwaiting() - count;
-
-    // need -1 for the control port
-    log_info("Waiting for connections to die...");
+    fdsignal();
+    log_info("Waiting for connections to die: %d", taskwaiting());
 
     // TODO: ugh this is disgusting
-    while(!(left <= 1) && !MURDER) {
-        // TODO: after a certain time close all of the connection sockets forcefully
+    while(taskwaiting() > 1 && !MURDER) {
         taskdelay(3000);
-        log_info("Waiting for connections to die: %d", left);
-
-        left = taskwaiting() - Config_running_counts() - 1;
+        log_info("Waiting for connections to die: %d", taskwaiting());
     }
 
     MIME_destroy();
@@ -280,7 +272,7 @@ void complete_shutdown(Server *srv)
 
     Server_destroy(srv);
 
-    exit(0);
+    taskexitall(0);
 }
 
 

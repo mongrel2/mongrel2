@@ -147,7 +147,6 @@ static inline int SuperPoll_add_poll(SuperPoll *sp, void *data, void *socket, in
         sentinel("Invalid event %c handed to superpoll.  r/w only.", rw);
     }
 
-
     sp->pollfd[cur_fd].fd = fd;
     sp->pollfd[cur_fd].socket = socket;
     sp->pollfd[cur_fd].events = bits;

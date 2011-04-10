@@ -38,7 +38,6 @@ void    tasksystem(void);
 unsigned int  taskdelay(unsigned int);
 unsigned int  taskid(void);
 unsigned int  taskgetid(Task *task);
-int tasknuke(int id);
 int taskwaiting();
 
 void taskready(Task *t);
@@ -114,6 +113,7 @@ int fdsend(int, void*, int);
 int fdrecv(int, void*, int);
 int fdwait(int, int);
 int fdnoblock(int);
+void fdsignal();
 
 #define fdclose(fd) if(fd >= 0) close(fd)
 
