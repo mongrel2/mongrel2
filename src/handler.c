@@ -209,7 +209,6 @@ void Handler_task(void *v)
         taskstate("delivering");
 
         rc = handler_recv_parse(handler, parser);
-        log_info("Came out of handler recv parsing with: %d", rc);
 
         if(rc != -1 && parser->target_count > 0) {
             for(i = 0; i < (int)parser->target_count; i++) {

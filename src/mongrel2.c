@@ -251,15 +251,13 @@ error:
 void complete_shutdown(Server *srv)
 {
     fdclose(srv->listen_fd);
-
     Config_stop_all();
     fdsignal();
     log_info("Waiting for connections to die: %d", taskwaiting());
 
-    // TODO: ugh this is disgusting
-    while(taskwaiting() > 1 && !MURDER) {
-        taskdelay(3000);
+    while(taskwaiting() > 0 && !MURDER) {
         log_info("Waiting for connections to die: %d", taskwaiting());
+        taskdelay(1000);
     }
 
     MIME_destroy();

@@ -142,8 +142,7 @@ int taskwaiting()
 {
     startfdtask();
 
-    // TODO: do this right, for now just -1 for the epoll
-    return SuperPoll_active_count(POLL) - 1;
+    return SuperPoll_active_count(POLL);
 }
 
 
