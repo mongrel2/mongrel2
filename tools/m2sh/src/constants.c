@@ -17,7 +17,7 @@ struct tagbstring CONFIG_SCHEMA = bsStatic(
 "    error_log TEXT,\n"
 "    chroot TEXT DEFAULT '/var/www',\n"
 "    pid_File TEXT,\n"
-"    default_host INTEGER,\n"
+"    default_host TEXT,\n"
 "    name TEXT DEFAULT '',\n"
 "    bind_addr TEXT DEFAULT \"0.0.0.0\","
 "    port INTEGER);\n"

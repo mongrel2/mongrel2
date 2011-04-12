@@ -16,18 +16,18 @@ CREATE TABLE server (id INTEGER PRIMARY KEY,
     error_log TEXT,
     chroot TEXT DEFAULT '/var/www',
     pid_File TEXT,
-    default_host INTEGER,
+    default_host TEXT,
     name TEXT DEFAULT "",
     port INTEGER);
 
-CREATE TABLE host (id INTEGER PRIMARY KEY, 
+CREATE TABLE host (id INTEGER PRIMARY KEY,
     server_id INTEGER,
     maintenance BOOLEAN DEFAULT 0,
     name TEXT,
     matching TEXT);
 
 CREATE TABLE handler (id INTEGER PRIMARY KEY,
-    send_spec TEXT, 
+    send_spec TEXT,
     send_ident TEXT,
     recv_spec TEXT,
     recv_ident TEXT);
@@ -50,7 +50,7 @@ CREATE TABLE route (id INTEGER PRIMARY KEY,
 CREATE TABLE setting (id INTEGER PRIMARY KEY, key TEXT, value TEXT);
 
 
-CREATE TABLE statistic (id SERIAL, 
+CREATE TABLE statistic (id SERIAL,
     other_type TEXT,
     other_id INTEGER,
     name text,
@@ -73,7 +73,7 @@ CREATE TABLE IF NOT EXISTS log(id INTEGER PRIMARY KEY,
     happened_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     how TEXT,
     why TEXT);
-    
+
 commit;
 begin transaction;
 
