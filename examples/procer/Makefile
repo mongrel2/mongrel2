@@ -11,5 +11,5 @@ procer: rampart.o profile.o procer.o
 clean:
 	rm -f *.o procer
 
-install:
+install: all
 	sudo install procer $(PREFIX)/bin/
