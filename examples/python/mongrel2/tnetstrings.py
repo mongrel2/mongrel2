@@ -1,3 +1,5 @@
+# Note this implementation is more strict than necessary to demonstrate
+# minimum restrictions on types allowed in dictionaries.
 
 def dump(data):
     if type(data) is long or type(data) is int:
@@ -75,6 +77,8 @@ def parse_dict(data):
     if len(data) == 0: return {}
 
     key, value, extra = parse_pair(data)
+    assert type(key) is str, "Keys can only be strings."
+
     result = {key: value}
 
     while extra:
@@ -88,7 +92,7 @@ def parse_dict(data):
 def dump_dict(data):
     result = []
     for k,v in data.items():
-        result.append(dump(k))
+        result.append(dump(str(k)))
         result.append(dump(v))
 
     payload = ''.join(result)
