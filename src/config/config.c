@@ -347,7 +347,7 @@ static int Config_load_server_cb(void* param, int cols, char **data, char **name
             data[7], // error_log
             data[8] // pid_file
             );
-    check(*server, "Failed to create server %s:%s on port %s", data[0], data[2], data[3]);
+    check(*server, "Failed to create server %s:%s on port %s", data[0], data[2], data[4]);
 
 
     const char *HOST_QUERY = "SELECT id, name, matching, server_id FROM host WHERE server_id = %s";
@@ -355,7 +355,7 @@ static int Config_load_server_cb(void* param, int cols, char **data, char **name
     check(query, "Failed to craft query string");
 
     int rc = DB_exec(query, Config_load_host_cb, *server);
-    check(rc == 0, "Failed to find hosts for server %s:%s on port %s", data[0], data[1], data[2]);
+    check(rc == 0, "Failed to find hosts for server %s:%s on port %s", data[0], data[1], data[4]);
 
     log_info("Loaded server %s:%s on port %s with default host %s", data[0], data[1], data[4], data[2]);
 
