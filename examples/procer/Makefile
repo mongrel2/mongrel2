@@ -1,6 +1,6 @@
 CFLAGS=-I../../src -g $(OPTFLAGS) $(OPTLIBS)
 LIBS=../../build/libm2.a -lzmq -lsqlite3
-PREFIX?=/usr
+PREFIX?=/usr/local
 
 all: procer
 
