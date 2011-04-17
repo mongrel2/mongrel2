@@ -29,6 +29,12 @@ build:
 
 clean:
 	rm -rf build bin lib ${OBJECTS} ${TESTS} tests/config.sqlite
+	rm -f tests/perf.log 
+	rm -f tests/test.pid 
+	rm -f tests/tests.log 
+	rm -f tests/empty.sqlite 
+	rm -f tools/lemon/lemon
+	rm -f tools/m2sh/tests/tests.log 
 	find . -name "*.gc*" -exec rm {} \;
 	${MAKE} -C tools/m2sh OPTLIB=${OPTLIB} clean
 
