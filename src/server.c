@@ -177,8 +177,6 @@ void Server_start(Server *srv)
     int rport;
     char remote[IPADDR_SIZE];
 
-    check(srv->default_host, "No default_host set, you need one host named: %s", bdata(srv->default_hostname));
-
     taskname("SERVER");
 
     log_info("Starting server on port %d", srv->port);

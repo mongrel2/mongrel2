@@ -126,6 +126,7 @@ Server *load_server(const char *db_file, const char *server_uuid, int reuse_fd)
 
     srv = Config_load_server(server_uuid);
     check(srv, "Failed to load server %s from %s", server_uuid, db_file);
+    check(srv->default_host, "No default_host set for server: %s, you need one host named: %s", server_uuid, bdata(srv->default_hostname));
 
     rc = Config_load_mimetypes();
     check(rc == 0, "Failed to load mime types.");
