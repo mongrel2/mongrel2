@@ -10,7 +10,7 @@
 /*
  * General Configuration
  */
-#define PREFIX "/usr/local"
+#define PREFIX "/usr"
 #undef CONFIG_DEBUG
 #define CONFIG_STRIP_UNWANTED_SECTIONS 1
 #undef CONFIG_VISUAL_STUDIO_7_0
@@ -77,7 +77,7 @@
 #define CONFIG_HTTP_HAS_CGI 1
 #define CONFIG_HTTP_CGI_EXTENSIONS ".lua,.lp"
 #define CONFIG_HTTP_ENABLE_LUA 1
-#define CONFIG_HTTP_LUA_PREFIX "/usr/local"
+#define CONFIG_HTTP_LUA_PREFIX "/usr"
 #define CONFIG_HTTP_LUA_CGI_LAUNCHER "/bin/cgi"
 #undef CONFIG_HTTP_BUILD_LUA
 #define CONFIG_HTTP_DIRECTORIES 1

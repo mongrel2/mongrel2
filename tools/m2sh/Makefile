@@ -1,7 +1,7 @@
 CFLAGS=-DNDEBUG -DNO_LINENOS -g -I../../src -Isrc -Wall $(OPTFLAGS)
 LIBS=-lzmq -lsqlite3 ../../build/libm2.a $(OPTLIBS)
 
-PREFIX?=/usr/local
+PREFIX?=/usr
 SOURCES=$(wildcard src/*.c)
 OBJECTS=$(patsubst %.c,%.o,${SOURCES})
 TEST_SRC=$(wildcard tests/*.c)
@@ -15,7 +15,7 @@ dev: CFLAGS=-g -Wall -Wextra -Isrc -I../../src $(OPTFLAGS)
 dev: all
 
 install: build/m2sh
-	install build/m2sh ${PREFIX}/bin
+	install build/m2sh ${DESTDIR}${PREFIX}/bin
 
 build/libm2sh.a: ${LIB_OBJ}
 	mkdir -p build

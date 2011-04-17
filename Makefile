@@ -1,6 +1,6 @@
 CFLAGS=-g -O2 -Wall -Isrc -DNDEBUG $(OPTFLAGS)
 LIBS=-lzmq -lsqlite3 $(OPTLIBS)
-PREFIX?=/usr/local
+PREFIX?=/usr
 
 ASM=$(wildcard src/**/*.S src/*.S)
 RAGEL_TARGETS=src/state.c src/http11/http11_parser.c
