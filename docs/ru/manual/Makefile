@@ -1,7 +1,7 @@
 PDF=mongrel2-1.1-guide-ru.pdf
 JUNK_FILES=book-final.* *.aux *.log styles/*.aux book-final* $(PDF)
 SOURCE=book
-WEBSITE=zedshaw.com:/usr/local/nginx/html/projects/build_your_own_mongrel
+WEBSITE=zedshaw.com:/someplace
 
 draft: book-final.dvi
 	htlatex book-final.tex

@@ -556,6 +556,7 @@ tns_parse_list(void *val, const char *data, size_t len)
         check(item != NULL, "Failed to parse list.");
         tns_rotate_buffer(data, remain, len, orig_len);
         check(tns_add_to_list(val, item) != -1, "Failed to add element to list.");
+        item = NULL;
     }
     
     return 0;
@@ -587,11 +588,15 @@ tns_parse_dict(void *val, const char *data, size_t len)
 
         tns_rotate_buffer(data, remain, len, orig_len);
         check(tns_add_to_dict(val,key,item) != -1, "Failed to add element to dict.");
+        key = NULL;
+        item = NULL;
     }
 
     return 0;
 
 error:
+    if(key) tns_value_destroy(key);
+    if(item) tns_value_destroy(item);
     return -1;
 }
 

@@ -12,4 +12,4 @@ clean:
 	rm -f *.o procer
 
 install: all
-	sudo install procer $(PREFIX)/bin/
+	install procer $(DESTDIR)$(PREFIX)/bin/

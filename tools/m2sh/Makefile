@@ -15,7 +15,7 @@ dev: CFLAGS=-g -Wall -Wextra -Isrc -I../../src $(OPTFLAGS)
 dev: all
 
 install: build/m2sh
-	install build/m2sh ${PREFIX}/bin
+	install build/m2sh ${DESTDIR}${PREFIX}/bin
 
 build/libm2sh.a: ${LIB_OBJ}
 	mkdir -p build
