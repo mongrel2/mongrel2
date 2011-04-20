@@ -45,7 +45,8 @@
 
 #include "setting.h"
 
-struct tagbstring LEAVE_HEADER = bsStatic("{\"METHOD\":\"JSON\"}");
+struct tagbstring LEAVE_HEADER_JSON = bsStatic("{\"METHOD\":\"JSON\"}");
+struct tagbstring LEAVE_HEADER_TNET = bsStatic("16:6:METHOD,4:JSON,}");
 struct tagbstring LEAVE_MSG = bsStatic("{\"type\":\"disconnect\"}");
 
 
@@ -60,17 +61,28 @@ void Handler_notify_leave(Handler *handler, int id)
 {
     void *socket = handler->send_socket;
     assert(socket && "Socket can't be NULL");
+    bstring payload = NULL;
+    
+    if(handler->protocol == HANDLER_PROTO_TNET) {
+        payload = bformat("%s %d @* %s%d:%s,",
+                bdata(handler->send_ident), id,
+                blength(&LEAVE_HEADER_TNET), bdata(&LEAVE_HEADER_TNET),
+                blength(&LEAVE_MSG), bdata(&LEAVE_MSG));
+    } else {
+        payload = bformat("%s %d @* %d:%s,%d:%s,",
+                bdata(handler->send_ident), id,
+                blength(&LEAVE_HEADER_JSON), bdata(&LEAVE_HEADER_JSON),
+                blength(&LEAVE_MSG), bdata(&LEAVE_MSG));
+    }
 
-    bstring payload = bformat("%s %d @* %d:%s,%d:%s,",
-            bdata(handler->send_ident), id,
-            blength(&LEAVE_HEADER), bdata(&LEAVE_HEADER),
-            blength(&LEAVE_MSG), bdata(&LEAVE_MSG));
+    check(payload != NULL, "Failed to make the payload for disconnect.");
 
     if(Handler_deliver(socket, bdata(payload), blength(payload)) == -1) {
         log_err("Can't tell handler %d died.", id);
     }
 
-    free(payload);
+error: //fallthrough
+    if(payload) free(payload);
 }
 
 
