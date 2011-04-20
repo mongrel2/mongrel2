@@ -71,6 +71,6 @@ int Register_id_for_fd(int fd);
 
 int Register_fd_for_id(int id);
 
-bstring Register_info();
+struct tns_value_t *Register_info();
 
 #endif

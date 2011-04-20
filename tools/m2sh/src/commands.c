@@ -12,6 +12,9 @@
 #include <assert.h>
 #include <task/task.h>
 #include <register.h>
+#include <tnetstrings.h>
+#include <tnetstrings_impl.h>
+#include <pattern.h>
 
 typedef int (*Command_handler_cb)(Command *cmd);
 
@@ -501,12 +504,140 @@ static void bstring_free(void *data, void *hint)
     bdestroy((bstring)hint);
 }
 
+static struct tagbstring TOKENS = bsStatic(" \t\n=");
+static struct tagbstring NUMBER_PATTERN = bsStatic("[\\-0-9]+");
+
+bstring parse_input(bstring inbuf)
+{
+    size_t len = 0;
+    int i = 0;
+    char *data = NULL;
+    bstring result = NULL;
+    tns_value_t *req = tns_new_list();
+    tns_value_t *args = tns_new_dict();
+    tns_value_t *value = NULL;
+
+    btrimws(inbuf);
+    struct bstrList *list = bsplits(inbuf, &TOKENS);
+    check((list->qty + 1) % 2 == 0, "USAGE: command arg1=val1 arg2=val2");
+
+    tns_add_to_list(req,
+            tns_parse_string(bdata(list->entry[0]), blength(list->entry[0])));
+
+    for(i = 1; i < list->qty; i += 2) {
+        bstring key_str = list->entry[i];
+        bstring val_str = list->entry[i+1];
+        tns_value_t *key = tns_parse_string(bdata(key_str), blength(key_str));
+
+        if(bstring_match(val_str, &NUMBER_PATTERN)) {
+            value = tns_parse_integer(bdata(val_str), blength(val_str));
+        } else {
+            value = tns_parse_string(bdata(val_str), blength(val_str));
+        }
+
+        tns_add_to_dict(args, key, value);
+    }
+
+    tns_add_to_list(req, args);
+
+    data = tns_render(req, &len);
+    check(data != NULL, "Didn't render to a valid TNetstring.");
+    check(len > 0, "Didn't create a valid TNetstring.");
+
+    result = blk2bstr(data, len);
+    check(result != NULL, "Couldn't convert to string.");
+
+    tns_value_destroy(req);
+    free(data);
+    return result;
+
+error:
+
+    tns_value_destroy(req);
+    if(data) free(data);
+    if(result) bdestroy(result);
+
+    return NULL;
+}
+
+struct tagbstring ERROR_KEY = bsStatic("error");
+struct tagbstring HEADERS_KEY = bsStatic("headers");
+struct tagbstring ROWS_KEY = bsStatic("rows");
+
+void display_response(const char *msg, size_t len)
+{
+    tns_value_t *resp = tns_parse(msg, len, NULL);
+    hnode_t *node = NULL;
+    lnode_t *row = NULL;
+    lnode_t *el = NULL;
+
+    check(tns_get_type(resp) == tns_tag_dict, "Server returned an invalid response, must be a dict.");
+
+    node = hash_lookup(resp->value.dict, &ERROR_KEY);
+    if(node) {
+        tns_value_t *val = hnode_get(node);
+        printf("ERROR: %s\n", bdata(val->value.string));
+    } else {
+        node = hash_lookup(resp->value.dict, &HEADERS_KEY);
+        check(node != NULL, "Server returned an invalid response, need a 'headers'.");
+        tns_value_t *headers = hnode_get(node);
+
+        node = hash_lookup(resp->value.dict, &ROWS_KEY);
+        check(node != NULL, "Server returned an invalid response, need a 'rows'.");
+        tns_value_t *rows = hnode_get(node);
+
+        for(el = list_first(headers->value.list); el != NULL;
+                el = list_next(headers->value.list, el)) 
+        {
+            tns_value_t *h = lnode_get(el);
+            check(tns_get_type(h) == tns_tag_string,
+                    "Headers should be strings, not: %c", tns_get_type(h));
+            printf("%s  ", bdata(h->value.string));
+        }
+
+        printf("\n");
+
+        for(row = list_first(rows->value.list); row != NULL;
+                row = list_next(rows->value.list, row)) 
+        {
+            tns_value_t *cols = lnode_get(row);
+
+            check(tns_get_type(cols) == tns_tag_list,
+                    "Rows should be lists, not: %c", tns_get_type(cols));
+
+            for(el = list_first(cols->value.list); el != NULL;
+                    el = list_next(cols->value.list, el)) 
+            {
+                tns_value_t *col = lnode_get(el);
+                switch(tns_get_type(col)) {
+                    case tns_tag_string:
+                        printf("%s  ", bdata(col->value.string));
+                        break;
+                    case tns_tag_number:
+                        printf("%ld  ", col->value.number);
+                        break;
+                    case tns_tag_null:
+                        printf("(null)  ");
+                        break;
+                    case tns_tag_bool:
+                        printf("%s  ", col->value.bool ? "true" : "false");
+                        break;
+                    default:
+                        printf("NA  ");
+                }
+            }
+
+            printf("\n");
+        }
+    }
+
+error: // fallthrough
+    return;
+}
 
 static int send_recv_control(bstring args, void *socket)
 {
     int rc = 0;
-    bstring msg_buf = bstrcpy(args);
-    check_mem(msg_buf);
     zmq_msg_t *outmsg = NULL;
     zmq_msg_t *inmsg = NULL;
 
@@ -520,8 +651,11 @@ static int send_recv_control(bstring args, void *socket)
     rc = zmq_msg_init(inmsg);
     check(rc == 0, "Failed to initialize incoming message.");
 
+    bstring request = parse_input(args);
+    check(request != NULL, "Invalid command, try again.");
+
     // send the message
-    rc = zmq_msg_init_data(outmsg, bdata(msg_buf), blength(msg_buf)+1, bstring_free, msg_buf);
+    rc = zmq_msg_init_data(outmsg, bdata(request), blength(request)+1, bstring_free, request);
     check(rc == 0, "Failed to init outgoing message.");
 
     rc = mqsend(socket, outmsg, 0);
@@ -530,9 +664,10 @@ static int send_recv_control(bstring args, void *socket)
 
     // recv the response
     rc = mqrecv(socket, inmsg, 0);
-    check(rc == 0, "Failed to recev message from control port.");
+    check(rc == 0, "Failed to receive message from control port.");
 
-    printf("%.*s\n", (int)zmq_msg_size(inmsg), (const char *)zmq_msg_data(inmsg));
+    display_response((const char *)zmq_msg_data(inmsg), zmq_msg_size(inmsg));
+
     fflush(stdout);
     free(inmsg);
 

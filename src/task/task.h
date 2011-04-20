@@ -12,7 +12,7 @@ extern "C" {
 #include <inttypes.h>
 #include <zmq.h>
 
-#include "bstring.h"
+struct tns_value_t;
 
 /*
  * basic procs and threads
@@ -20,6 +20,8 @@ extern "C" {
 
 typedef struct Task Task;
 typedef struct Tasklist Tasklist;
+
+#define MAX_STATE_LENGTH 30
 
 int    anyready(void);
 int    taskcreate(void (*f)(void *arg), void *arg, unsigned int stacksize);
@@ -33,7 +35,7 @@ void    taskname(char*);
 void    taskstate(char*);
 char*    taskgetname(void);
 char*    taskgetstate(void);
-bstring taskgetinfo(void);
+struct tns_value_t *taskgetinfo(void);
 void    tasksystem(void);
 unsigned int  taskdelay(unsigned int);
 unsigned int  taskid(void);

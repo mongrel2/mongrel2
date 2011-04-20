@@ -4,6 +4,8 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include "dbg.h"
+#include "tnetstrings.h"
+#include "tnetstrings_impl.h"
 
 int    taskcount;
 int    tasknswitch;
@@ -221,7 +223,9 @@ void** taskdata(void)
  */
 void taskname(char *name)
 {
-    memcpy(taskrunning->name, name, strlen(name)); 
+    int len = strlen(name);
+    memcpy(taskrunning->name, name, len < MAX_STATE_LENGTH ? len : MAX_STATE_LENGTH);
+    taskrunning->name[len] = '\0';
 }
 
 char* taskgetname(void)
@@ -229,9 +233,12 @@ char* taskgetname(void)
     return taskrunning->name;
 }
 
+
 void taskstate(char *state)
 {
-    memcpy(taskrunning->state, state, strlen(state)); 
+    int len = strlen(state);
+    memcpy(taskrunning->state, state, len < MAX_STATE_LENGTH ? len : MAX_STATE_LENGTH);
+    taskrunning->state[len] = '\0';
 }
 
 char* taskgetstate(void)
@@ -249,14 +256,18 @@ void needstack(int n)
     }
 }
 
-bstring taskgetinfo(void)
+struct tagbstring TASKINFO_HEADERS = bsStatic("38:2:id,6:system,4:name,5:state,6:status,]");
+
+tns_value_t *taskgetinfo(void)
 {
     int i = 0;
     Task *t = NULL;
-    bstring data;
+    tns_value_t *result = tns_new_dict();
+    tns_value_t *rows = tns_new_list();
     char* extra = NULL;
 
-    data = bfromcstr("{\"task_list\":[");
+    tns_dict_setcstr(result, "headers", 
+            tns_parse(bdata(&TASKINFO_HEADERS), blength(&TASKINFO_HEADERS), NULL));
 
     for(i = 0; i < nalltask; i++)
     {
@@ -267,20 +278,22 @@ bstring taskgetinfo(void)
         } else if(t->ready) {
             extra = "ready";
         } else {
-            extra = "";
+            extra = "idle";
         }
 
-        bformata(data, "{\"id\": %d, \"system\": %d, \"name\": \"%s\", \"state\": \"%s\", \"extra\": \"%s\"}", t->id, t->system ? 1 : 0, t->name, t->state, extra);
+        tns_value_t *el = tns_new_list();
+        tns_add_to_list(el, tns_new_integer(t->id));
+        tns_add_to_list(el, t->system ? tns_get_true() : tns_get_false());
+        tns_add_to_list(el, tns_parse_string(t->name, strlen(t->name)));
+        tns_add_to_list(el, tns_parse_string(t->state, strlen(t->state)));
+        tns_add_to_list(el, tns_parse_string(extra, strlen(extra)));
 
-        if(i < nalltask - 1)
-        {
-            bcatcstr(data, ",\n");
-        }
+        tns_add_to_list(rows, el);
     }
 
-    bcatcstr(data, "]}\n");
+    tns_dict_setcstr(result, "rows", rows);
 
-    return data;
+    return result;
 }
 
 /*

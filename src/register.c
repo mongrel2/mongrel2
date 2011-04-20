@@ -42,6 +42,8 @@
 #include <errno.h>
 #include <string.h>
 #include <unistd.h>
+#include "tnetstrings.h"
+#include "tnetstrings_impl.h"
 
 
 uint32_t THE_CURRENT_TIME_IS = 0;
@@ -195,29 +197,39 @@ int Register_id_for_fd(int fd)
 
 #define ZERO_OR_DELTA(N, T) (T == 0 ? T : N - T)
 
-bstring Register_info()
+struct tagbstring REGISTER_HEADERS = bsStatic("86:2:id,2:fd,4:type,9:last_ping,9:last_read,10:last_write,10:bytes_read,13:bytes_written,]");
+
+tns_value_t *Register_info()
 {
     int i = 0;
-    int total = 0;
     Registration reg;
-    bstring result = bfromcstr("{");
+    tns_value_t *result = tns_new_dict();
+    tns_value_t *rows = tns_new_list();
+
+    tns_dict_setcstr(result, "headers",
+            tns_parse(bdata(&REGISTER_HEADERS), blength(&REGISTER_HEADERS), NULL));
+
     time_t now = THE_CURRENT_TIME_IS;
 
     for(i = 0; i < MAX_REGISTERED_FDS; i++) {
         reg = REGISTRATIONS[i];
+
         if(reg.data != NULL) {
-            bformata(result, "\"%d\": {", reg.id);
-            bformata(result, "\"fd\": %d,", i);
-            bformata(result, "\"type\": %d,", reg.data->type);
-            bformata(result, "\"last_ping\": %d,", ZERO_OR_DELTA(now, reg.last_ping));
-            bformata(result, "\"last_read\": %d,", ZERO_OR_DELTA(now, reg.last_read));
-            bformata(result, "\"last_write\": %d,", ZERO_OR_DELTA(now, reg.last_write));
-            bformata(result, "\"bytes_read\": %d,", reg.bytes_read);
-            bformata(result, "\"bytes_written\": %d}, ", reg.bytes_written);
-            total++;
+            tns_value_t *data = tns_new_list();
+            tns_add_to_list(data, tns_new_integer(reg.id));
+            tns_add_to_list(data, tns_new_integer(i)); // fd
+            tns_add_to_list(data, tns_new_integer(reg.data->type));
+            tns_add_to_list(data, tns_new_integer(ZERO_OR_DELTA(now, reg.last_ping)));
+            tns_add_to_list(data, tns_new_integer(ZERO_OR_DELTA(now, reg.last_read)));
+            tns_add_to_list(data, tns_new_integer(ZERO_OR_DELTA(now, reg.last_write)));
+            tns_add_to_list(data, tns_new_integer(reg.bytes_read));
+            tns_add_to_list(data, tns_new_integer(reg.bytes_written));
+            tns_add_to_list(rows, data);
         }
     }
 
-    bformata(result, "\"total\": %d}", total);
+    tns_dict_setcstr(result, "rows", rows);
+
     return result;
 }
+

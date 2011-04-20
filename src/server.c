@@ -195,10 +195,6 @@ void Server_start(Server *srv)
     debug("SERVER EXITED with error: %s and return value: %d", strerror(errno), cfd);
 
     return;
-
-error:
-    log_err("Server startup failed, aborting.");
-    taskexitall(1);
 }
 
 

@@ -125,8 +125,8 @@ struct Context
 
 struct Task
 {
-    char    name[256];    // offset known to acid
-    char    state[256];
+    char    name[MAX_STATE_LENGTH];    // offset known to acid
+    char    state[MAX_STATE_LENGTH];
     Task    *next;
     Task    *prev;
     Task    *allnext;

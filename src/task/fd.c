@@ -247,16 +247,16 @@ int mqrecv(void *socket, zmq_msg_t *msg, int flags)
 {
     int rc = -1;
 
-    // try to send right away rather than go into the poll
-    rc = zmq_recv(socket, msg, flags);
+    // try to recv right away rather than go into the poll
+    rc = zmq_recv(socket, msg, ZMQ_NOBLOCK);
 
     // if the send failed because it would block, then wait
-    if(rc != 0 && flags == ZMQ_NOBLOCK && errno == EAGAIN) {
+    while(rc != 0 && flags != ZMQ_NOBLOCK && errno == EAGAIN) {
         if(mqwait(socket, 'r') == -1) {
             return -1;
         }
 
-        rc = zmq_recv(socket, msg, flags);
+        rc = zmq_recv(socket, msg, ZMQ_NOBLOCK);
     }
 
     return rc;
@@ -267,15 +267,15 @@ int mqsend(void *socket, zmq_msg_t *msg, int flags)
     int rc = -1;
 
     // try to send right away rather than go into the poll
-    rc = zmq_send(socket, msg, flags);
+    rc = zmq_send(socket, msg, ZMQ_NOBLOCK);
 
     // if the send failed because it would block, then wait
-    if(rc != 0 && flags == ZMQ_NOBLOCK && errno == EAGAIN) {
+    while(rc != 0 && flags != ZMQ_NOBLOCK && errno == EAGAIN) {
         if(mqwait(socket, 'w') == -1) {
             return -1;
         }
 
-        rc = zmq_send(socket, msg, flags);
+        rc = zmq_send(socket, msg, ZMQ_NOBLOCK);
     }
 
     return rc;

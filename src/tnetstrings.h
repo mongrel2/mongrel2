@@ -35,6 +35,12 @@ typedef struct tns_value_t {
     } value;
 } tns_value_t;
 
+#define MAX_HASH_COUNT HASHCOUNT_T_MAX
+
+void tns_hnode_free(hnode_t *node, void *notused);
+
+hnode_t *tns_hnode_alloc(void *notused);
+
 void tns_value_destroy(tns_value_t *value);
 
 /**
@@ -78,5 +84,6 @@ void tns_outbuf_clamp(tns_outbuf *outbuf, int orig_size);
 int tns_render_request_start(tns_outbuf *outbuf);
 
 int tns_render_request_end(tns_outbuf *outbuf, int header_start, bstring uuid, int id, bstring path);
+
 
 #endif

@@ -164,7 +164,7 @@ static inline int handler_recv_parse(Handler *handler, HandlerParser *parser)
 
     taskstate("recv");
 
-    rc = mqrecv(handler->recv_socket, inmsg, ZMQ_NOBLOCK);
+    rc = mqrecv(handler->recv_socket, inmsg, 0);
     check(rc == 0, "Receive on handler socket failed.");
     check(handler->running, "Received shutdown notification, goodbye.");
 
@@ -247,7 +247,7 @@ int Handler_deliver(void *handler_socket, char *buffer, size_t len)
     rc = zmq_msg_init_data(&msg, buffer, len, cstr_free, NULL);
     check(rc == 0, "Failed to init 0mq message data.");
 
-    rc = mqsend(handler_socket, &msg, ZMQ_NOBLOCK);
+    rc = mqsend(handler_socket, &msg, 0);
     check(rc == 0, "Failed to deliver 0mq message to handler.");
 
     // zeromq owns the ram now

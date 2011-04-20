@@ -1,5 +1,3 @@
-
-#line 1 "src/control.rl"
 #include "control.h"
 #include "bstring.h"
 #include "task/task.h"
@@ -10,32 +8,60 @@
 #include <time.h>
 #include "setting.h"
 #include <signal.h>
-
+#include "tnetstrings.h"
+#include "tnetstrings_impl.h"
+#include "version.h"
 
 extern Server *SERVER;
 
-void bstring_free(void *data, void *hint)
+static void cstr_free(void *data, void *hint)
 {
-    bdestroy((bstring)hint);
+    free(data);
 }
 
-struct tagbstring REQ_STATUS_TASKS = bsStatic("status tasks");
-struct tagbstring REQ_STATUS_NET = bsStatic("status net");
+static int CONTROL_RUNNING = 1;
+static void *CONTROL_SOCKET = NULL;
+
+// I used python tnetstrings to print these out
+struct tagbstring INVALID_FORMAT_ERR = bsStatic("101:4:code,15:INVALID_REQUEST,5:error,63:Invalid request format, must be a list with two elements in it.,}");
+struct tagbstring INVALID_DATA_ERR = bsStatic("97:4:code,12:INVALID_DATA,5:error,62:Invalid data, expecting a list with a string and a hash in it.,}");
+struct tagbstring CALLBACK_RETURN_ERR = bsStatic("91:4:code,15:CALLBACK_RETURN,5:error,53:Callback failed and returned NULL, should not happen.,}");
+struct tagbstring CALLBACK_NOT_FOUND_ERR = bsStatic("74:4:code,18:CALLBACK_NOT_FOUND,5:error,33:Callback requested was not found.,}");
+struct tagbstring SIGNAL_FAILED_ERR = bsStatic("75:4:code,13:SIGNAL_FAILED,5:error,39:raise call failed, can't signal process,}");
+struct tagbstring INVALID_ARGUMENT_ERR = bsStatic("61:4:code,16:INVALID_ARGUMENT,5:error,22:Invalid argument type.,}");
+struct tagbstring NOT_CONNECTED_ERR = bsStatic("57:4:code,13:NOT_CONNECTED,5:error,21:Socket not connected.,}");
 
 
-static inline bstring read_message(void *sock)
+#define check_control_err(A, E, M, ...) if(!(A)) { result = tns_parse(bdata(E), blength(E), NULL); log_warn(M, ##__VA_ARGS__); errno=0; goto error; }
+
+typedef tns_value_t *(*callback_t)(bstring name, hash_t *args);
+
+typedef struct callback_list_t {
+    struct tagbstring name;
+    struct tagbstring help;
+    callback_t callback;
+} callback_list_t;
+
+callback_list_t CALLBACKS[];
+
+static inline tns_value_t *read_message(void *sock)
 {
-    bstring req = NULL;
+    tns_value_t *req = NULL;
     int rc = 0;
 
     zmq_msg_t *inmsg = calloc(sizeof(zmq_msg_t), 1);
     rc = zmq_msg_init(inmsg);
     check(rc == 0, "init failed.");
 
-    rc = mqrecv(sock, inmsg, ZMQ_NOBLOCK);
+    rc = mqrecv(sock, inmsg, 0);
     check(rc == 0, "Receive on control failed.");
 
-    req = blk2bstr(zmq_msg_data(inmsg), zmq_msg_size(inmsg));
+    req = tns_parse(zmq_msg_data(inmsg), zmq_msg_size(inmsg), NULL);
+
+    if(req == NULL) {
+        req = tns_get_null();
+    } 
+
     check(req, "Failed to create the request string.");
 
     zmq_msg_close(inmsg);
@@ -52,568 +78,270 @@ error:
     return NULL;
 }
 
-static inline void send_reply(void *sock, bstring rep)
+
+static inline int send_reply(void *sock, tns_value_t *rep)
 {
     int rc = 0;
+    size_t len = 0;
+
     zmq_msg_t *outmsg = calloc(sizeof(zmq_msg_t), 1);
+    check_mem(outmsg);
+
     rc = zmq_msg_init(outmsg);
     check(rc == 0, "init failed.");
 
-    rc = zmq_msg_init_data(outmsg, bdata(rep), blength(rep), bstring_free, rep);
+    char *outbuf = tns_render(rep, &len);
+    check(outbuf != NULL, "Failed to render control port reply.");
+    check(len > 0, "Control port reply is too small.");
+
+    rc = zmq_msg_init_data(outmsg, outbuf, len, cstr_free, rep);
     check(rc == 0, "Failed to init reply data.");
     
-    rc = mqsend(sock, outmsg, ZMQ_NOBLOCK);
+    rc = mqsend(sock, outmsg, 0);
     check(rc == 0, "Failed to deliver 0mq message to requestor.");
+    return 0;
 
 error:
     free(outmsg);
-    return;
+    return -1;
 }
 
-static int CONTROL_RUNNING = 1;
-static void *CONTROL_SOCKET = NULL;
-
-
-
-#line 175 "src/control.rl"
-
-
-
-#line 83 "src/control.c"
-static const int ControlParser_start = 1;
-static const int ControlParser_first_final = 53;
-static const int ControlParser_error = 0;
-
-static const int ControlParser_en_main = 1;
-
-
-#line 178 "src/control.rl"
-
-bstring Control_execute(bstring req)
+/**
+ * Does the most common response you'll make, which is a simple dict
+ * with a single key=value.  It takes over ownership of the key and
+ * value you pass in, so bstrcpy it if you don't want it to be 
+ * destroyed.
+ */
+static inline tns_value_t *basic_response(bstring key, bstring value)
 {
-    const char *p = bdata(req);
-    const char *pe = p+blength(req);
-    const char *mark = NULL;
-    int cs = 0;
-    bstring reply = NULL;
+    tns_value_t *result = tns_new_dict();
+    tns_value_t *headers = tns_new_list();
+    tns_value_t *rows = tns_new_list();
+    tns_value_t *cols = tns_new_list();
 
-    debug("RECEIVED CONTROL COMMAND: %s", bdata(req));
+    tns_add_to_list(headers, tns_parse_string(bdata(key), blength(key)));
+    tns_add_to_list(cols, tns_parse_string(bdata(value), blength(value)));
+    tns_add_to_list(rows, cols);
+    tns_dict_setcstr(result, "headers", headers);
+    tns_dict_setcstr(result, "rows", rows);
 
-    
-#line 104 "src/control.c"
-	{
-	cs = ControlParser_start;
-	}
+    bdestroy(key);
+    bdestroy(value);
 
-#line 190 "src/control.rl"
-    
-#line 111 "src/control.c"
-	{
-	switch ( cs )
-	{
-case 1:
-	switch( (*p) ) {
-		case 99: goto st2;
-		case 104: goto st13;
-		case 107: goto st16;
-		case 114: goto st21;
-		case 115: goto st26;
-		case 116: goto st40;
-		case 117: goto st50;
-	}
-	goto st0;
-st0:
-cs = 0;
-	goto _out;
-st2:
-	p += 1;
-case 2:
-	if ( (*p) == 111 )
-		goto st3;
-	goto st0;
-st3:
-	p += 1;
-case 3:
-	if ( (*p) == 110 )
-		goto st4;
-	goto st0;
-st4:
-	p += 1;
-case 4:
-	if ( (*p) == 116 )
-		goto st5;
-	goto st0;
-st5:
-	p += 1;
-case 5:
-	if ( (*p) == 114 )
-		goto st6;
-	goto st0;
-st6:
-	p += 1;
-case 6:
-	if ( (*p) == 111 )
-		goto st7;
-	goto st0;
-st7:
-	p += 1;
-case 7:
-	if ( (*p) == 108 )
-		goto st8;
-	goto st0;
-st8:
-	p += 1;
-case 8:
-	if ( (*p) == 32 )
-		goto st9;
-	goto st0;
-st9:
-	p += 1;
-case 9:
-	if ( (*p) == 115 )
-		goto st10;
-	goto st0;
-st10:
-	p += 1;
-case 10:
-	if ( (*p) == 116 )
-		goto st11;
-	goto st0;
-st11:
-	p += 1;
-case 11:
-	if ( (*p) == 111 )
-		goto st12;
-	goto st0;
-st12:
-	p += 1;
-case 12:
-	if ( (*p) == 112 )
-		goto tr18;
-	goto st0;
-tr18:
-#line 83 "src/control.rl"
-	{
-        reply = bfromcstr("{\"msg\": \"stopping control port\"}");
-        CONTROL_RUNNING = 0; {p++; cs = 53; goto _out;}
-    }
-	goto st53;
-tr21:
-#line 149 "src/control.rl"
-	{
-        reply = bfromcstr("{\"command_list\":[");
-        bcatcstr(reply, "{\"name\": \"control stop\", \"description\": \"Close the control port.\"},\n");
-        bcatcstr(reply, "{\"name\": \"kill <id>\", \"description\": \"Kill a connection in a violent way.\"},\n");
-        bcatcstr(reply, "{\"name\": \"reload\", \"description\": \"Reload the server. Same as `kill -SIGHUP <server_pid>`.\"},\n");
-        bcatcstr(reply, "{\"name\": \"status net\", \"description\": \"Return a list of active connections.\"},\n");
-        bcatcstr(reply, "{\"name\": \"status tasks\", \"description\": \"Return a list of active tasks.\"},\n");
-        bcatcstr(reply, "{\"name\": \"stop\", \"description\": \"Gracefully shut down the server. Same as `kill -SIGINT <server_pid>`.\"},\n");
-        bcatcstr(reply, "{\"name\": \"terminate\", \"description\": \"Unconditionally terminate the server. Same as `kill -SIGTERM <server_pid>.\"},\n");
-        bcatcstr(reply, "{\"name\": \"time\", \"description\": \"Return server timestamp.\"}\n");
-        bcatcstr(reply, "{\"name\": \"uuid\", \"description\": \"Return server uuid.\"}\n");
-        bcatcstr(reply, "]}\n");
-        {p++; cs = 53; goto _out;}
-    }
-	goto st53;
-tr31:
-#line 115 "src/control.rl"
-	{
-        int rc = raise(SIGHUP);
-        if (0 == rc) {
-            reply = bfromcstr("{\"msg\": \"the server will be reloaded\"}");
-        } else {
-            reply = bfromcstr("{\"error\": \"failed to reload the server\"}");
-        }
-        {p++; cs = 53; goto _out;}
-    }
-	goto st53;
-tr42:
-#line 81 "src/control.rl"
-	{ reply = Register_info(); {p++; cs = 53; goto _out;} }
-	goto st53;
-tr46:
-#line 80 "src/control.rl"
-	{ reply = taskgetinfo(); {p++; cs = 53; goto _out;} }
-	goto st53;
-tr47:
-#line 125 "src/control.rl"
-	{
-        // TODO: probably report back the number of waiting tasks
-        int rc = raise(SIGINT);
-        if (0 == rc) {
-            reply = bfromcstr("{\"msg\": \"the server will be stopped\"}");
-        } else {
-            reply = bfromcstr("{\"error\": \"failed to stop the server\"}");
-        }
-        {p++; cs = 53; goto _out;}
-    }
-	goto st53;
-tr56:
-#line 136 "src/control.rl"
-	{
-        // TODO: the server might have been terminated before
-        // the reply is sent back. If this scenario is crucial (if possible at all)
-        // find a workaround, otherwise, forget about it and remove this comment.
-        int rc = raise(SIGTERM);
-        if (0 == rc) {
-            reply = bfromcstr("{\"msg\": \"the server will be terminated\"}");
-        } else {
-            reply = bfromcstr("{\"error\": \"failed to terminate the server\"}");
-        }
-        {p++; cs = 53; goto _out;}
-    }
-	goto st53;
-tr58:
-#line 92 "src/control.rl"
-	{
-        reply = bformat("{\"time\": %d}", (int)time(NULL)); {p++; cs = 53; goto _out;}
-    }
-	goto st53;
-tr61:
-#line 88 "src/control.rl"
-	{
-        reply = bformat("{\"uuid\": \"%s\"}", bdata(SERVER->uuid)); {p++; cs = 53; goto _out;}
-    }
-	goto st53;
-st53:
-	p += 1;
-case 53:
-#line 282 "src/control.c"
-	goto st0;
-st13:
-	p += 1;
-case 13:
-	if ( (*p) == 101 )
-		goto st14;
-	goto st0;
-st14:
-	p += 1;
-case 14:
-	if ( (*p) == 108 )
-		goto st15;
-	goto st0;
-st15:
-	p += 1;
-case 15:
-	if ( (*p) == 112 )
-		goto tr21;
-	goto st0;
-st16:
-	p += 1;
-case 16:
-	if ( (*p) == 105 )
-		goto st17;
-	goto st0;
-st17:
-	p += 1;
-case 17:
-	if ( (*p) == 108 )
-		goto st18;
-	goto st0;
-st18:
-	p += 1;
-case 18:
-	if ( (*p) == 108 )
-		goto st19;
-	goto st0;
-st19:
-	p += 1;
-case 19:
-	if ( (*p) == 32 )
-		goto st20;
-	if ( 9 <= (*p) && (*p) <= 13 )
-		goto st20;
-	goto st0;
-st20:
-	p += 1;
-case 20:
-	if ( (*p) == 32 )
-		goto st20;
-	if ( (*p) > 13 ) {
-		if ( 48 <= (*p) && (*p) <= 57 )
-			goto tr26;
-	} else if ( (*p) >= 9 )
-		goto st20;
-	goto st0;
-tr26:
-#line 78 "src/control.rl"
-	{ mark = p; }
-#line 96 "src/control.rl"
-	{
-        int id = atoi(p);
+    return result;
+}
 
-        if(id < 0 || id > MAX_REGISTERED_FDS) {
-            reply = bformat("{\"error\": \"invalid id: %d\"}", id);
-        } else {
-            int fd = Register_fd_for_id(id);
+static inline tns_value_t *get_arg(hash_t *args, const char *name)
+{
+    bstring key = bfromcstr(name);
+    hnode_t *node = hash_lookup(args, key);
+    bdestroy(key);
 
-            if(fd >= 0) {
-                Register_disconnect(fd);
-                reply = bformat("{\"result\": \"killed %d\"}", id);
-            } else {
-                reply = bformat("{\"error\": \"does not exist: %d\"}", id);
-            }
-        }
+    check(node != NULL, "Missing argument %s in call.", name);
 
-        {p++; cs = 54; goto _out;}
-    }
-	goto st54;
-tr62:
-#line 96 "src/control.rl"
-	{
-        int id = atoi(p);
+    tns_value_t *val = hnode_get(node);
+    check(val != NULL, "Got a null for a dict in arguments.");
 
-        if(id < 0 || id > MAX_REGISTERED_FDS) {
-            reply = bformat("{\"error\": \"invalid id: %d\"}", id);
-        } else {
-            int fd = Register_fd_for_id(id);
-
-            if(fd >= 0) {
-                Register_disconnect(fd);
-                reply = bformat("{\"result\": \"killed %d\"}", id);
-            } else {
-                reply = bformat("{\"error\": \"does not exist: %d\"}", id);
-            }
-        }
-
-        {p++; cs = 54; goto _out;}
-    }
-	goto st54;
-st54:
-	p += 1;
-case 54:
-#line 386 "src/control.c"
-	if ( 48 <= (*p) && (*p) <= 57 )
-		goto tr62;
-	goto st0;
-st21:
-	p += 1;
-case 21:
-	if ( (*p) == 101 )
-		goto st22;
-	goto st0;
-st22:
-	p += 1;
-case 22:
-	if ( (*p) == 108 )
-		goto st23;
-	goto st0;
-st23:
-	p += 1;
-case 23:
-	if ( (*p) == 111 )
-		goto st24;
-	goto st0;
-st24:
-	p += 1;
-case 24:
-	if ( (*p) == 97 )
-		goto st25;
-	goto st0;
-st25:
-	p += 1;
-case 25:
-	if ( (*p) == 100 )
-		goto tr31;
-	goto st0;
-st26:
-	p += 1;
-case 26:
-	if ( (*p) == 116 )
-		goto st27;
-	goto st0;
-st27:
-	p += 1;
-case 27:
-	switch( (*p) ) {
-		case 97: goto st28;
-		case 111: goto st39;
-	}
-	goto st0;
-st28:
-	p += 1;
-case 28:
-	if ( (*p) == 116 )
-		goto st29;
-	goto st0;
-st29:
-	p += 1;
-case 29:
-	if ( (*p) == 117 )
-		goto st30;
-	goto st0;
-st30:
-	p += 1;
-case 30:
-	if ( (*p) == 115 )
-		goto st31;
-	goto st0;
-st31:
-	p += 1;
-case 31:
-	if ( (*p) == 32 )
-		goto st32;
-	if ( 9 <= (*p) && (*p) <= 13 )
-		goto st32;
-	goto st0;
-st32:
-	p += 1;
-case 32:
-	switch( (*p) ) {
-		case 32: goto st32;
-		case 110: goto st33;
-		case 116: goto st35;
-	}
-	if ( 9 <= (*p) && (*p) <= 13 )
-		goto st32;
-	goto st0;
-st33:
-	p += 1;
-case 33:
-	if ( (*p) == 101 )
-		goto st34;
-	goto st0;
-st34:
-	p += 1;
-case 34:
-	if ( (*p) == 116 )
-		goto tr42;
-	goto st0;
-st35:
-	p += 1;
-case 35:
-	if ( (*p) == 97 )
-		goto st36;
-	goto st0;
-st36:
-	p += 1;
-case 36:
-	if ( (*p) == 115 )
-		goto st37;
-	goto st0;
-st37:
-	p += 1;
-case 37:
-	if ( (*p) == 107 )
-		goto st38;
-	goto st0;
-st38:
-	p += 1;
-case 38:
-	if ( (*p) == 115 )
-		goto tr46;
-	goto st0;
-st39:
-	p += 1;
-case 39:
-	if ( (*p) == 112 )
-		goto tr47;
-	goto st0;
-st40:
-	p += 1;
-case 40:
-	switch( (*p) ) {
-		case 101: goto st41;
-		case 105: goto st48;
-	}
-	goto st0;
-st41:
-	p += 1;
-case 41:
-	if ( (*p) == 114 )
-		goto st42;
-	goto st0;
-st42:
-	p += 1;
-case 42:
-	if ( (*p) == 109 )
-		goto st43;
-	goto st0;
-st43:
-	p += 1;
-case 43:
-	if ( (*p) == 105 )
-		goto st44;
-	goto st0;
-st44:
-	p += 1;
-case 44:
-	if ( (*p) == 110 )
-		goto st45;
-	goto st0;
-st45:
-	p += 1;
-case 45:
-	if ( (*p) == 97 )
-		goto st46;
-	goto st0;
-st46:
-	p += 1;
-case 46:
-	if ( (*p) == 116 )
-		goto st47;
-	goto st0;
-st47:
-	p += 1;
-case 47:
-	if ( (*p) == 101 )
-		goto tr56;
-	goto st0;
-st48:
-	p += 1;
-case 48:
-	if ( (*p) == 109 )
-		goto st49;
-	goto st0;
-st49:
-	p += 1;
-case 49:
-	if ( (*p) == 101 )
-		goto tr58;
-	goto st0;
-st50:
-	p += 1;
-case 50:
-	if ( (*p) == 117 )
-		goto st51;
-	goto st0;
-st51:
-	p += 1;
-case 51:
-	if ( (*p) == 105 )
-		goto st52;
-	goto st0;
-st52:
-	p += 1;
-case 52:
-	if ( (*p) == 100 )
-		goto tr61;
-	goto st0;
-	}
-
-	_out: {}
-	}
-
-#line 191 "src/control.rl"
-
-    check(p <= pe, "Buffer overflow after parsing.  Tell Zed that you sent something from a handler that went %ld past the end in the parser.", 
-        (long int)(pe - p));
-
-    if ( cs == 
-#line 604 "src/control.c"
-0
-#line 195 "src/control.rl"
- ) {
-        check(pe - p > 0, "Major erorr in the parser, tell Zed.");
-        return bformat("{\"error\": \"parsing error at: ...%s\"}", bdata(req) + (pe - p));
-    } else if(!reply) {
-        return bformat("{\"error\": \"invalid command\"}", pe - p);
-    } else {
-        return reply;
-    }
-
+    return val;
 error:
-    return bfromcstr("{\"error\": \"fatal error\"}");
+    return NULL;
+}
+
+static tns_value_t *signal_server_cb(bstring name, hash_t *args) 
+{
+    int rc = -1;
+    tns_value_t *result = NULL;
+
+    if(biseqcstr(name, "stop")) {
+        rc = raise(SIGINT);
+    } else if(biseqcstr(name, "reload")) {
+        rc = raise(SIGHUP);
+    } else if(biseqcstr(name, "terminate")) {
+        rc = raise(SIGTERM);
+    } else {
+        rc = -1;
+    }
+
+    check_control_err(rc == 0, &SIGNAL_FAILED_ERR, "Signal failed.");
+
+    result = basic_response(bfromcstr("msg"), bfromcstr("signal sent to server"));
+
+error: // fallthrough
+    return result;
+}
+
+
+tns_value_t *version_cb(bstring name, hash_t *args)
+{
+    return basic_response(bfromcstr("version"), bfromcstr(VERSION));
+}
+
+tns_value_t *help_cb(bstring name, hash_t *args)
+{
+    tns_value_t *result = tns_new_dict();
+    tns_value_t *headers = tns_new_list();
+    tns_value_t *rows = tns_new_list();
+
+    tns_add_to_list(headers, tns_parse_string("name", strlen("name")));
+    tns_add_to_list(headers, tns_parse_string("help", strlen("help")));
+    tns_dict_setcstr(result, "headers", headers);
+
+    callback_list_t *cbel = NULL;
+
+    for(cbel = CALLBACKS; cbel->callback != NULL; cbel++) {
+        tns_value_t *col = tns_new_list();
+        tns_add_to_list(col, tns_parse_string(bdata(&cbel->name), blength(&cbel->name)));
+        tns_add_to_list(col, tns_parse_string(bdata(&cbel->help), blength(&cbel->help)));
+        tns_add_to_list(rows, col);
+    }
+
+    tns_dict_setcstr(result, "rows", rows);
+
+    return result;
+}
+
+tns_value_t *control_stop_cb(bstring name, hash_t *args)
+{
+    CONTROL_RUNNING = 0;
+
+    return basic_response(bfromcstr("msg"), bfromcstr("stopping the control port"));
+}
+
+tns_value_t *kill_cb(bstring name, hash_t *args)
+{
+    tns_value_t *result = tns_new_dict();
+
+    tns_value_t *arg = get_arg(args, "id");
+    check_control_err(arg != NULL, &INVALID_ARGUMENT_ERR, "Missing argument 'id'.");
+    check_control_err(tns_get_type(arg) == tns_tag_number, &INVALID_ARGUMENT_ERR, "Argument type error.");
+
+    int id = arg->value.number;
+    check_control_err(id >= 0 && id < MAX_REGISTERED_FDS, &INVALID_ARGUMENT_ERR, "Argument type error.");
+
+
+    int fd = Register_fd_for_id(id);
+    check_control_err(fd >= 0, &INVALID_ARGUMENT_ERR, "Argument type error.");
+    check_control_err(Register_fd_exists(fd), &NOT_CONNECTED_ERR, "Socket not connected.");
+
+    Register_disconnect(fd);
+
+    tns_value_destroy(result); // easier to just delete it and return a basic one
+
+    return basic_response(bfromcstr("status"), bfromcstr("OK"));
+   
+error: // fallthrough
+    return result;
+}
+
+
+tns_value_t *status_cb(bstring name, hash_t *args)
+{
+    tns_value_t *val = get_arg(args, "what");
+    tns_value_t *result = tns_new_dict();
+
+    check_control_err(val != NULL, &INVALID_ARGUMENT_ERR, "Missing argument what.");
+    check_control_err(val->type == tns_tag_string, &INVALID_ARGUMENT_ERR, "Argument type error.");
+    bstring what = val->value.string;
+
+    if(biseqcstr(what, "tasks")) {
+        tns_value_destroy(result);
+        return taskgetinfo();
+    } else if(biseqcstr(what, "net")) {
+        tns_value_destroy(result);
+        return Register_info();
+    } else {
+        bstring err = bfromcstr("Expected argument what=['net'|'tasks'].");
+        tns_dict_setcstr(result, "error", tns_parse_string(bdata(err), blength(err)));
+        bdestroy(err);
+    }
+
+error: // fallthrough
+    return result;
+}
+
+
+
+tns_value_t *time_cb(bstring name, hash_t *args)
+{
+    return basic_response(bfromcstr("time"), bformat("%d", (int)time(NULL)));
+}
+
+
+tns_value_t *uuid_cb(bstring name, hash_t *args)
+{
+    return basic_response(bfromcstr("uuid"), bstrcpy(SERVER->uuid));
+}
+
+
+callback_list_t CALLBACKS[] = {
+    {.name = bsStatic("stop"),
+        .help = bsStatic("stop the server (SIGINT)"), .callback = signal_server_cb},
+    {.name = bsStatic("reload"),
+        .help = bsStatic("reload the server"), .callback = signal_server_cb},
+    {.name = bsStatic("help"),
+        .help = bsStatic("this command"), .callback = help_cb},
+    {.name = bsStatic("control_stop"),
+        .help = bsStatic("stop control port"), .callback = control_stop_cb},
+    {.name = bsStatic("kill"),
+        .help = bsStatic("kill a connection"), .callback = kill_cb},
+    {.name = bsStatic("status"),
+        .help = bsStatic("status, what=['net'|'tasks']"), .callback = status_cb},
+    {.name = bsStatic("terminate"),
+        .help = bsStatic("terminate the server (SIGTERM)"), .callback = signal_server_cb},
+    {.name = bsStatic("time"),
+        .help = bsStatic("the server's time"), .callback = time_cb},
+    {.name = bsStatic("uuid"),
+        .help = bsStatic("the server's uuid"), .callback = uuid_cb},
+
+    {.name = bsStatic(""), .help = bsStatic(""), .callback = NULL},
+};
+
+
+tns_value_t *Control_execute(tns_value_t *req, callback_list_t *callbacks)
+{
+    tns_value_t *result = NULL;
+    tns_value_t *call = NULL;
+    tns_value_t *args = NULL;
+    lnode_t *node = NULL;
+    callback_list_t *cbel = NULL;
+
+    // validate all the possible things that can get screwed up in a request
+    check_control_err(req->type == tns_tag_list, &INVALID_FORMAT_ERR, "Invalid request format.");
+
+    // make sure first argument is a string
+    node = list_first(req->value.list);
+    check_control_err(node != NULL, &INVALID_FORMAT_ERR, "Didn't get a full list.");
+
+    call = lnode_get(node);
+    check_control_err(call != NULL, &INVALID_DATA_ERR, "Invalid first argument.");
+    check_control_err(call->type == tns_tag_string, &INVALID_DATA_ERR, "First argument must be string.");
+
+    // validate second argument is a dict
+    node = list_last(req->value.list);
+    check_control_err(node != NULL, &INVALID_FORMAT_ERR, "Didn't get a full list.");
+
+    args = lnode_get(node);
+    check_control_err(args != NULL, &INVALID_DATA_ERR, "Invalid second argument.");
+    check_control_err(args != call, &INVALID_DATA_ERR, "Must have more than one element to request.");
+    check_control_err(args->type == tns_tag_dict, &INVALID_DATA_ERR, "Second argument must be dict.");
+
+    // TODO: the above code will actually ignore anything but the first and last argument
+    // which should make it more robust, but might want to tighten
+
+    // find the matching callback
+    for(cbel = callbacks; cbel->callback != NULL; cbel++) {
+        if(biseq(call->value.string, &cbel->name)) {
+            result = cbel->callback(call->value.string, args->value.dict);
+            check_control_err(result != NULL, &CALLBACK_RETURN_ERR, "Callback return invalid data (NULL).");
+            break;
+        }
+    }
+
+    // if result is still NULL then it's an error we didn't find anything
+    check_control_err(result != NULL, &CALLBACK_NOT_FOUND_ERR, "Callback not found.");
+
+error: // fallthrough on purpose
+    return result;
 }
 
 struct tagbstring DEFAULT_CONTROL_SPEC = bsStatic("ipc://run/control");
@@ -621,8 +349,8 @@ struct tagbstring DEFAULT_CONTROL_SPEC = bsStatic("ipc://run/control");
 void Control_task(void *v)
 {
     int rc = 0;
-    bstring req = NULL;
-    bstring rep = NULL;
+    tns_value_t *req = NULL;
+    tns_value_t *rep = NULL;
     bstring spec = Setting_get_str("control_port", &DEFAULT_CONTROL_SPEC);
     taskname("control");
 
@@ -640,12 +368,20 @@ void Control_task(void *v)
         req = read_message(CONTROL_SOCKET);
         check(req, "Failed to read message: %s.", strerror(errno));
 
-        rep = Control_execute(req);
-        bdestroy(req);
+        if(req->type == tns_tag_null) {
+            rep = tns_parse(bdata(&INVALID_DATA_ERR), blength(&INVALID_DATA_ERR), NULL);
+        } else {
+            rep = Control_execute(req, CALLBACKS);
+        }
+
+        check(rep != NULL, "Should never get a NULL from the control port executor.");
 
         taskstate("replying");
-        send_reply(CONTROL_SOCKET, rep);
-        check(rep, "Faild to create a reply.");
+        rc = send_reply(CONTROL_SOCKET, rep);
+        check(rc == 0, "Failed to send a reply.");
+
+        tns_value_destroy(req);
+        tns_value_destroy(rep);
     }
 
     rc = zmq_close(CONTROL_SOCKET);
@@ -669,16 +405,7 @@ void Control_port_start()
 
 int Control_port_stop()
 {
-    int rc = 0;
+    CONTROL_RUNNING = 0;
 
-    if(CONTROL_SOCKET != NULL) {
-        rc = zmq_close(CONTROL_SOCKET);
-        check(rc == 0, "Failed to close control socket");
-
-        // TODO: wake up the control task.
-        // it doesn't seem to notice that the socket has been closed.
-    }
-
-error:
-    return rc;
+    return 0;
 }
