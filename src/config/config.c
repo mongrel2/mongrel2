@@ -60,6 +60,7 @@ typedef struct BackendValue {
     void *value;
     bstring key;
     BackendType type;
+    int active;
 } BackendValue;
 
 static inline bstring cols_to_key(const char *type, int cols, char **data)
@@ -92,6 +93,7 @@ static inline int store_in_loaded(bstring key, void *value, BackendType type) {
     elem->value = value;
     elem->key = key;
     elem->type = type;
+    elem->active = 0;
 
     LOADED = tst_insert(LOADED, bdata(key), blength(key), elem);
 
@@ -277,9 +279,11 @@ static int Config_load_route_cb(void *param, int cols, char **data, char **names
     check(host, "Expected host as param");
     check(data[3] != NULL, "Route type is NULL but shouldn't be for route id=%s", data[0]);
 
+    debug("Finding handler ID: %s", data[2]);
     BackendValue *backend = find_by_type(data[3], data[2]);
     check(backend != NULL, "Failed to find %s:%s for route %s:%s", data[3], data[2], data[0], data[1]);
 
+    backend->active = 1;  // now this backend is actually active
     Host_add_backend(host, data[1], strlen(data[1]), backend->type, backend->value);
 
     return 0;
@@ -468,7 +472,7 @@ static void handlers_receive_start(void *value, void *data)
 {
     BackendValue *backend = (BackendValue *)value;
 
-    if(backend->type == BACKEND_HANDLER) {
+    if(backend->type == BACKEND_HANDLER && backend->active) {
         Handler *handler = backend->value;
 
         if(!handler->running) {
