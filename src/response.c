@@ -110,7 +110,6 @@ struct tagbstring HTTP_412 = bsStatic("HTTP/1.1 412 Precondition Failed\r\n"
 
 
 struct tagbstring HTTP_304 = bsStatic("HTTP/1.1 304 Not Modified\r\n"
-    "Content-Type: text/plain\r\n"
     "Connection: close\r\n"
     "Content-Length: 0\r\n"
     "Server: " VERSION 
