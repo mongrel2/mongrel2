@@ -279,7 +279,6 @@ static int Config_load_route_cb(void *param, int cols, char **data, char **names
     check(host, "Expected host as param");
     check(data[3] != NULL, "Route type is NULL but shouldn't be for route id=%s", data[0]);
 
-    debug("Finding handler ID: %s", data[2]);
     BackendValue *backend = find_by_type(data[3], data[2]);
     check(backend != NULL, "Failed to find %s:%s for route %s:%s", data[3], data[2], data[0], data[1]);
 
@@ -495,6 +494,11 @@ static void shutdown_cb(void *value, void *data)
 {
     BackendValue *backend = (BackendValue *)value;
     assert(backend->value != NULL && "Backend had a NULL value!");
+
+    if(!backend->active) {
+        // just skip ones that are no longer active
+        return;
+    }
 
     if(backend->type == BACKEND_HANDLER) {
         debug("Stopping handler: %s", bdata(backend->key));
