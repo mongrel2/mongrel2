@@ -32,7 +32,6 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#undef NDEBUG
 #include <stdlib.h>
 #include "tst.h"
 #include <stdio.h>

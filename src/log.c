@@ -1,4 +1,3 @@
-#undef NDEBUG
 #include "log.h"
 #include "dbg.h"
 #include "request.h"

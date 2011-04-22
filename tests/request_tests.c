@@ -1,5 +1,3 @@
-#undef NDEBUG
-
 #include "minunit.h"
 #include <request.h>
 #include <tnetstrings.h>

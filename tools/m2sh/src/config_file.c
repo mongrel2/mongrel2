@@ -1,5 +1,3 @@
-#undef NDEBUG
-
 #include <config/db.h>
 #include "constants.h"
 #include <bstring.h>
