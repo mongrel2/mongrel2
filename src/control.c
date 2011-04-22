@@ -88,7 +88,7 @@ static inline int send_reply(void *sock, tns_value_t *rep)
     check_mem(outmsg);
 
     rc = zmq_msg_init(outmsg);
-    check(rc == 0, "init failed.");
+    check(rc == 0, "Cannot allocate zmq msg.");
 
     char *outbuf = tns_render(rep, &len);
     check(outbuf != NULL, "Failed to render control port reply.");
@@ -99,12 +99,14 @@ static inline int send_reply(void *sock, tns_value_t *rep)
     
     rc = mqsend(sock, outmsg, 0);
     check(rc == 0, "Failed to deliver 0mq message to requestor.");
+    free(outmsg);
     return 0;
 
 error:
     free(outmsg);
     return -1;
 }
+
 
 /**
  * Does the most common response you'll make, which is a simple dict
@@ -114,7 +116,7 @@ error:
  */
 static inline tns_value_t *basic_response(bstring key, bstring value)
 {
-    tns_value_t *result = tns_new_dict();
+    tns_value_t *results = tns_new_dict();
     tns_value_t *headers = tns_new_list();
     tns_value_t *rows = tns_new_list();
     tns_value_t *cols = tns_new_list();
@@ -122,14 +124,16 @@ static inline tns_value_t *basic_response(bstring key, bstring value)
     tns_add_to_list(headers, tns_parse_string(bdata(key), blength(key)));
     tns_add_to_list(cols, tns_parse_string(bdata(value), blength(value)));
     tns_add_to_list(rows, cols);
-    tns_dict_setcstr(result, "headers", headers);
-    tns_dict_setcstr(result, "rows", rows);
 
     bdestroy(key);
     bdestroy(value);
 
-    return result;
+    tns_dict_setcstr(results, "headers", headers);
+    tns_dict_setcstr(results, "rows", rows);
+
+    return results;
 }
+
 
 static inline tns_value_t *get_arg(hash_t *args, const char *name)
 {
@@ -259,17 +263,29 @@ error: // fallthrough
     return result;
 }
 
+struct tagbstring INFO_HEADERS = bsStatic("92:4:port,9:bind_addr,4:uuid,6:chroot,10:access_log,9:error_log,8:pid_file,16:default_hostname,]");
 
-
-tns_value_t *time_cb(bstring name, hash_t *args)
+tns_value_t *info_cb(bstring name, hash_t *args)
 {
-    return basic_response(bfromcstr("time"), bformat("%d", (int)time(NULL)));
-}
+    if(biseqcstr(name, "time")) {
+        return basic_response(bfromcstr("time"), bformat("%d", (int)time(NULL)));
+    } else if(biseqcstr(name, "uuid")) {
+        return basic_response(bfromcstr("uuid"), bstrcpy(SERVER->uuid));
+    } else {
+        tns_value_t *rows = tns_new_list();
+        tns_value_t *cols = tns_new_list();
+        tns_add_to_list(cols, tns_new_integer(SERVER->port));
+        tns_list_addstr(cols, SERVER->bind_addr);
+        tns_list_addstr(cols, SERVER->uuid);
+        tns_list_addstr(cols, SERVER->chroot);
+        tns_list_addstr(cols, SERVER->access_log);
+        tns_list_addstr(cols, SERVER->error_log);
+        tns_list_addstr(cols, SERVER->pid_file);
+        tns_list_addstr(cols, SERVER->default_hostname);
 
-
-tns_value_t *uuid_cb(bstring name, hash_t *args)
-{
-    return basic_response(bfromcstr("uuid"), bstrcpy(SERVER->uuid));
+        tns_add_to_list(rows, cols);
+        return tns_standard_table(&INFO_HEADERS, rows);
+    }
 }
 
 
@@ -289,9 +305,11 @@ callback_list_t CALLBACKS[] = {
     {.name = bsStatic("terminate"),
         .help = bsStatic("terminate the server (SIGTERM)"), .callback = signal_server_cb},
     {.name = bsStatic("time"),
-        .help = bsStatic("the server's time"), .callback = time_cb},
+        .help = bsStatic("the server's time"), .callback = info_cb},
     {.name = bsStatic("uuid"),
-        .help = bsStatic("the server's uuid"), .callback = uuid_cb},
+        .help = bsStatic("the server's uuid"), .callback = info_cb},
+    {.name = bsStatic("info"),
+        .help = bsStatic("information about this server"), .callback = info_cb},
 
     {.name = bsStatic(""), .help = bsStatic(""), .callback = NULL},
 };

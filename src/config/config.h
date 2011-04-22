@@ -51,6 +51,5 @@ void Config_stop_all();
 
 void Config_start_handlers();
 
-int Config_running_counts();
 
 #endif

@@ -85,5 +85,6 @@ int tns_render_request_start(tns_outbuf *outbuf);
 
 int tns_render_request_end(tns_outbuf *outbuf, int header_start, bstring uuid, int id, bstring path);
 
+tns_value_t *tns_standard_table(bstring header_data, tns_value_t *rows);
 
 #endif

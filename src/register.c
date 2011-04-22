@@ -203,11 +203,7 @@ tns_value_t *Register_info()
 {
     int i = 0;
     Registration reg;
-    tns_value_t *result = tns_new_dict();
     tns_value_t *rows = tns_new_list();
-
-    tns_dict_setcstr(result, "headers",
-            tns_parse(bdata(&REGISTER_HEADERS), blength(&REGISTER_HEADERS), NULL));
 
     time_t now = THE_CURRENT_TIME_IS;
 
@@ -228,8 +224,6 @@ tns_value_t *Register_info()
         }
     }
 
-    tns_dict_setcstr(result, "rows", rows);
-
-    return result;
+    return tns_standard_table(&REGISTER_HEADERS, rows);
 }
 

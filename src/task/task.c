@@ -262,12 +262,8 @@ tns_value_t *taskgetinfo(void)
 {
     int i = 0;
     Task *t = NULL;
-    tns_value_t *result = tns_new_dict();
     tns_value_t *rows = tns_new_list();
     char* extra = NULL;
-
-    tns_dict_setcstr(result, "headers", 
-            tns_parse(bdata(&TASKINFO_HEADERS), blength(&TASKINFO_HEADERS), NULL));
 
     for(i = 0; i < nalltask; i++)
     {
@@ -291,9 +287,7 @@ tns_value_t *taskgetinfo(void)
         tns_add_to_list(rows, el);
     }
 
-    tns_dict_setcstr(result, "rows", rows);
-
-    return result;
+    return tns_standard_table(&TASKINFO_HEADERS, rows);
 }
 
 /*

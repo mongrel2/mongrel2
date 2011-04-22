@@ -310,7 +310,6 @@ void taskmain(int argc, char **argv)
             check(new_srv, "Failed to load the new configuration, exiting.");
 
             // for this to work handlers need to die more gracefully
-            
             SERVER = new_srv;
         } else {
             log_info("Shutdown requested, goodbye.");

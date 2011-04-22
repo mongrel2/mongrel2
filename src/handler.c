@@ -315,6 +315,7 @@ error:
     return NULL;
 }
 
+const int DEFAULT_HANDLER_STACK = 100 * 1024;
 
 Handler *Handler_create(const char *send_spec, const char *send_ident,
         const char *recv_spec, const char *recv_ident)
@@ -322,7 +323,7 @@ Handler *Handler_create(const char *send_spec, const char *send_ident,
     debug("Creating handler %s:%s", send_spec, send_ident);
 
     if(!HANDLER_STACK) {
-        HANDLER_STACK = Setting_get_int("limits.handler_stack", 100 * 1024);
+        HANDLER_STACK = Setting_get_int("limits.handler_stack", DEFAULT_HANDLER_STACK);
         log_info("MAX limits.handler_stack=%d", HANDLER_STACK);
     }
 

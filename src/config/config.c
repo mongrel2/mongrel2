@@ -519,25 +519,3 @@ void Config_stop_all()
     tst_traverse(LOADED, shutdown_cb, NULL);
 }
 
-static void running_count_cb(void *value, void *data)
-{
-    BackendValue *backend = (BackendValue *)value;
-    assert(backend->value != NULL && "Backend had a NULL value!");
-
-    if(backend->type == BACKEND_HANDLER) {
-        Handler *handler = backend->value;
-        if(handler->running == 0) {
-            int *count = (int *)data;
-            (*count)++;
-        }
-    }
-}
-
-int Config_running_counts()
-{
-    int count = 0;
-
-    tst_traverse(LOADED, running_count_cb, &count);
-
-    return count;
-}

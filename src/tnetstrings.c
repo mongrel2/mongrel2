@@ -614,3 +614,13 @@ error:
   return -1;
 }
 
+tns_value_t *tns_standard_table(bstring header_data, tns_value_t *rows)
+{
+    tns_value_t *headers = tns_parse(bdata(header_data), blength(header_data), NULL);
+    tns_value_t *result = tns_new_dict();
+
+    tns_dict_setcstr(result, "headers", headers);
+    tns_dict_setcstr(result, "rows", rows);
+
+    return result;
+}

@@ -117,4 +117,10 @@ static inline int tns_dict_set(tns_value_t *d, bstring key, tns_value_t *val)
     return tns_add_to_dict(d, tns_parse_string(bdata(key), blength(key)), val);
 }
 
+static inline int tns_list_addstr(tns_value_t *d, bstring element)
+{
+    return tns_add_to_list(d, 
+            tns_parse_string(bdata(element), blength(element)));
+}
+
 #endif
