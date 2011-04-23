@@ -352,7 +352,23 @@ static inline int exec_server_operations(Command *cmd,
 
     rc = DB_exec(sql, callback, &run);
 
-    check(run.ran, "Operation on server failed.");
+    if(!run.ran) {
+        errno = 0;
+
+        if(every) {
+            log_err("You specified -every server but didn't load any. Not configured right?");
+        } else if(host) {
+            log_err("Could not load server with host '%s' from db %s.", bdata(host), bdata(db_file));
+        } else if(uuid) {
+            log_err("Could not load server with uuid '%s' from db %s.", bdata(uuid), bdata(db_file));
+        } else if(name) {
+            log_err("Could not load server named '%s' from db %s.", bdata(name), bdata(db_file));
+        } else {
+            log_err("Well looks like you broke something, please report what you did to mongrel2.org.");
+        }
+
+        sentinel("Error loading the requested server, see above for why.");
+    }
 
     if(sql) sqlite3_free(sql);
     DB_close();
