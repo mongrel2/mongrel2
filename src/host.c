@@ -53,7 +53,7 @@ void backend_destroy_cb(Route *r, RouteMap *map)
     }
 }
 
-Host *Host_create(const char *name)
+Host *Host_create(const char *name, const char *matching)
 {
     if(!MAX_URL_PATH || !MAX_HOST_NAME) {
         MAX_URL_PATH = Setting_get_int("limits.url_path", 256);
@@ -67,6 +67,11 @@ Host *Host_create(const char *name)
 
     host->name = bfromcstr(name);
     check(blength(host->name) < MAX_HOST_NAME, "Host name too long (max %d): '%s'\n", 
+            MAX_HOST_NAME, name);
+
+    host->matching = bfromcstr(matching);
+
+    check(blength(host->matching) < MAX_HOST_NAME, "Host matching pattern too long (max %d): '%s'\n", 
             MAX_HOST_NAME, name);
 
     host->routes = RouteMap_create(backend_destroy_cb);

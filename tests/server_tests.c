@@ -34,11 +34,13 @@ char *test_Server_adds()
             "0.0.0.0", "8080", "chroot", "access_log", "error_log", "pid_file");
     mu_assert(srv != NULL, "Failed to make the server, something on 8090?");
 
-    Host *host = Host_create("zedshaw.com");
+    Host *host = Host_create("zedshaw.com", "zedshaw.com");
     mu_assert(host != NULL, "Failed to make host.");
 
-    rc = Server_add_host(srv, bstrcpy(host->name), host);
+    rc = Server_add_host(srv, bstrcpy(host->matching), host);
     mu_assert(rc == 0, "Failed to add host to server.");
+
+    Server_set_default_host(srv, host);
 
     Host *zedshaw = Server_match_backend(srv, host->name);
     mu_assert(zedshaw == host, "Didn't get the right one back.");

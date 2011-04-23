@@ -74,7 +74,7 @@ char * all_tests() {
     Server_init();
     Server *SRV = Server_create("uuid", "localhost", "0.0.0.0",
             "1999", "chroot", "access_log", "error_log", "pid_file");
-    Host *zedshaw_com = Host_create("zedshaw.com");
+    Host *zedshaw_com = Host_create("zedshaw.com", "zedshaw.com");
 
     Host_add_backend(zedshaw_com, "@chat", strlen("@chat"), BACKEND_HANDLER, NULL);
 

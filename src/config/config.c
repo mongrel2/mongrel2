@@ -298,7 +298,7 @@ static int Config_load_host_cb(void *param, int cols, char **data, char **names)
     Server *server = (Server*)param;
     check(server, "Expected server as param");
 
-    Host *host = Host_create(data[1]);
+    Host *host = Host_create(data[1], data[2]);
     check(host != NULL, "Failed to create host %s with %s", data[0], data[1]);
 
     const char *ROUTE_QUERY = "SELECT route.id, route.path, route.target_id, route.target_type "
@@ -314,8 +314,12 @@ static int Config_load_host_cb(void *param, int cols, char **data, char **names)
     Server_add_host(server, bfromcstr(data[2]), host);
 
     if(biseq(host->name, server->default_hostname)) {
-        debug("Setting default host to host %s:%s", data[0], data[1]);
-        server->default_host = host;
+        check(server->default_host == NULL, "You have more than one host matching the default host: %s, the second one is: %s:%s:%s",
+                bdata(server->default_hostname),
+                data[0], data[1], data[2]);
+
+        log_info("Setting default host to host %s:%s:%s", data[0], data[1], data[2]);
+        Server_set_default_host(server, host);
     }
 
     SQL_FREE(query);

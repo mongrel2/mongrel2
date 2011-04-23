@@ -199,6 +199,8 @@ error:
     return -1;
 }
 
+struct tagbstring MATCHING_PARAM = bsStatic("matching");
+
 int Host_load(tst_t *settings, Value *val)
 {
     CONFIRM_TYPE("Host");
@@ -207,9 +209,15 @@ int Host_load(tst_t *settings, Value *val)
     struct tagbstring ROUTES_VAR = bsStatic("routes");
 
     const char *name = AST_str(settings, cls->params, "name", VAL_QSTRING);
+    const char *matching = name; // default to this then change it
     check(name, "No name set for Host.");
 
-    sql = sqlite3_mprintf(bdata(&HOST_SQL), SERVER_ID, name, name);
+    if(tst_search(cls->params, bdata(&MATCHING_PARAM), blength(&MATCHING_PARAM))) {
+        // specified matching so use that
+        matching = AST_str(settings, cls->params, bdata(&MATCHING_PARAM), VAL_QSTRING);
+    }
+
+    sql = sqlite3_mprintf(bdata(&HOST_SQL), SERVER_ID, name, matching);
     
     int rc = DB_exec(sql, NULL, NULL);
     check(rc == 0, "Failed to store Host: %s", name);
@@ -241,7 +249,8 @@ int Server_load(tst_t *settings, Value *val)
     const char *bind_addr = NULL;
 
     if(tst_search(cls->params, bdata(&BIND_ADDR), blength(&BIND_ADDR))) {
-        bind_addr = AST_str(settings, cls->params, "bind_addr", VAL_QSTRING);
+        bind_addr = AST_str(settings, cls->params,
+                bdata(&BIND_ADDR), VAL_QSTRING);
     } else {
         bind_addr = "0.0.0.0";
     }

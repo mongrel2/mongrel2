@@ -48,6 +48,7 @@ extern int MAX_URL_PATH;
 typedef struct Host {
     RouteMap *routes;
     bstring name;
+    bstring matching;
 } Host;
 
 
@@ -65,7 +66,7 @@ typedef struct Backend {
     } target;
 } Backend;
 
-Host *Host_create(const char *name);
+Host *Host_create(const char *name, const char *matching);
 void Host_destroy(Host *host);
 
 int Host_add_backend(Host *host, const char *path, size_t path_len, BackendType type, void *target);

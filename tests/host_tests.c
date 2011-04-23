@@ -4,7 +4,7 @@
 FILE *LOG_FILE = NULL;
 
 char * test_create_destroy() {
-    Host *host = Host_create("zedshaw.com");
+    Host *host = Host_create("zedshaw.com", "zedshaw.com");
 
     mu_assert(host != NULL, "Failed to make host.");
 

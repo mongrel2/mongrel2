@@ -201,6 +201,7 @@ void Server_start(Server *srv)
 
 int Server_add_host(Server *srv, bstring pattern, Host *host)
 {
+    assert(host->matching != NULL && "Host added to server without matching.");
     return RouteMap_insert_reversed(srv->hosts, pattern, host);
 }
 
@@ -214,19 +215,26 @@ void Server_set_default_host(Server *srv, Host *host)
 
 Host *Server_match_backend(Server *srv, bstring target)
 {
+    check(srv != NULL,  "Server is NULL?!");
+    check(srv->default_host != NULL,  "Server without a default_host set.");
+    check(srv->default_host->matching != NULL,  "Server without a default_host set.");
+
     debug("Looking for target host: %s", bdata(target));
     Route *found = RouteMap_match_suffix(srv->hosts, target);
 
     if(found) {
         return found->data;
     } else {
-        if(bstring_match(target, srv->default_hostname)) {
+        if(bstring_match(target, srv->default_host->matching)) {
             return srv->default_host;
         } else {
-            debug("Failed to match against any target and didn't match default_host: %s", bdata(srv->default_hostname));
+            debug("Failed to match against any target and didn't match default_host: %s:%s", 
+                    bdata(srv->default_hostname), 
+                    bdata(srv->deafult_host->matching));
             return NULL;
         }
     }
 
+error: // fallthrough
     return NULL;
 }
