@@ -375,7 +375,7 @@ to configure the main test system.  In it we've got the following things to chec
 \item First target is a \ident{Dir} that serves up files out of the \file{tests} directory and uses \file{index.html}
     as its default file.
 \item Next we setup a \ident{Proxy} pointing at the main website's server for testing the proxy.
-\item Then there's a \ident{Dir} target for the \url{http://mongrel2.org:6767/chatdemo/} that we'll look at later.
+\item Then there's a \ident{Dir} target for the \url{http://mongrel2.org:6767/chatdemo/} that we'll look at later. \emph{You MUST have flash for this to work!}
 \item And you have the \ident{Handler} for the same chat demo that does the actual logic of a chat system.
 \item After that's a little \ident{Handler} for testing out doing HTTP requests to a handler.  Notice how even
     though the chat demo and this handler use different protocols (chat demo is using JSSockets) you don't have
