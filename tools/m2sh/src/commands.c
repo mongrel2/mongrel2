@@ -564,12 +564,14 @@ bstring parse_input(bstring inbuf)
     check(result != NULL, "Couldn't convert to string.");
 
     tns_value_destroy(req);
+    bstrListDestroy(list);
     free(data);
     return result;
 
 error:
 
-    tns_value_destroy(req);
+    if(req) tns_value_destroy(req);
+    if(list) bstrListDestroy(list);
     if(data) free(data);
     if(result) bdestroy(result);
 
@@ -580,16 +582,98 @@ struct tagbstring ERROR_KEY = bsStatic("error");
 struct tagbstring HEADERS_KEY = bsStatic("headers");
 struct tagbstring ROWS_KEY = bsStatic("rows");
 
+static void print_datum(tns_value_t *col)
+{
+    switch(tns_get_type(col)) {
+        case tns_tag_string:
+            printf("%s", bdata(col->value.string));
+            break;
+        case tns_tag_number:
+            printf("%ld", col->value.number);
+            break;
+        case tns_tag_null:
+            printf("(null)");
+            break;
+        case tns_tag_bool:
+            printf("%s", col->value.bool ? "true" : "false");
+            break;
+        default:
+            printf("NA");
+    }
+
+}
+
+static void display_map_style(tns_value_t *headers, tns_value_t *rows)
+{
+    tns_value_t *cols = lnode_get(list_first(rows->value.list));
+    lnode_t *col = list_first(cols->value.list);
+    check(col != NULL, "Malformed response from server: bad columns.");
+    lnode_t *header = list_first(headers->value.list);
+    check(header != NULL, "Malformed response from server: bad headers.");
+
+    for(; col != NULL && header != NULL; 
+        col = list_next(cols->value.list, col),
+        header = list_next(headers->value.list, header))
+    {
+        print_datum(lnode_get(header));
+        printf(":  ");
+        print_datum(lnode_get(col));
+        printf("\n");
+    }
+
+error: // fallthrough
+    return;
+}
+
+
+static void display_table_style(tns_value_t *headers, tns_value_t *rows)
+{
+    lnode_t *row = NULL;
+    lnode_t *el = NULL;
+
+    for(el = list_first(headers->value.list); el != NULL;
+            el = list_next(headers->value.list, el)) 
+    {
+        tns_value_t *h = lnode_get(el);
+        check(tns_get_type(h) == tns_tag_string,
+                "Headers should be strings, not: %c", tns_get_type(h));
+        printf("%s  ", bdata(h->value.string));
+    }
+
+    printf("\n");
+
+    for(row = list_first(rows->value.list); row != NULL;
+            row = list_next(rows->value.list, row)) 
+    {
+        tns_value_t *cols = lnode_get(row);
+
+        check(tns_get_type(cols) == tns_tag_list,
+                "Rows should be lists, not: %c", tns_get_type(cols));
+
+        for(el = list_first(cols->value.list); el != NULL;
+                el = list_next(cols->value.list, el)) 
+        {
+            tns_value_t *col = lnode_get(el);
+            print_datum(col);
+            printf("  ");
+        }
+
+        printf("\n");
+    }
+
+error: // falthrough
+    return;
+}
+
 void display_response(const char *msg, size_t len)
 {
     tns_value_t *resp = tns_parse(msg, len, NULL);
     hnode_t *node = NULL;
-    lnode_t *row = NULL;
-    lnode_t *el = NULL;
 
     check(tns_get_type(resp) == tns_tag_dict, "Server returned an invalid response, must be a dict.");
 
     node = hash_lookup(resp->value.dict, &ERROR_KEY);
+
     if(node) {
         tns_value_t *val = hnode_get(node);
         printf("ERROR: %s\n", bdata(val->value.string));
@@ -597,57 +681,22 @@ void display_response(const char *msg, size_t len)
         node = hash_lookup(resp->value.dict, &HEADERS_KEY);
         check(node != NULL, "Server returned an invalid response, need a 'headers'.");
         tns_value_t *headers = hnode_get(node);
+        check(tns_get_type(headers) == tns_tag_list, "Headers must be a list, server is screwed up.");
 
         node = hash_lookup(resp->value.dict, &ROWS_KEY);
         check(node != NULL, "Server returned an invalid response, need a 'rows'.");
         tns_value_t *rows = hnode_get(node);
+        check(tns_get_type(rows) == tns_tag_list, "Rows must be a list, server is screwed up.");
 
-        for(el = list_first(headers->value.list); el != NULL;
-                el = list_next(headers->value.list, el)) 
-        {
-            tns_value_t *h = lnode_get(el);
-            check(tns_get_type(h) == tns_tag_string,
-                    "Headers should be strings, not: %c", tns_get_type(h));
-            printf("%s  ", bdata(h->value.string));
-        }
-
-        printf("\n");
-
-        for(row = list_first(rows->value.list); row != NULL;
-                row = list_next(rows->value.list, row)) 
-        {
-            tns_value_t *cols = lnode_get(row);
-
-            check(tns_get_type(cols) == tns_tag_list,
-                    "Rows should be lists, not: %c", tns_get_type(cols));
-
-            for(el = list_first(cols->value.list); el != NULL;
-                    el = list_next(cols->value.list, el)) 
-            {
-                tns_value_t *col = lnode_get(el);
-                switch(tns_get_type(col)) {
-                    case tns_tag_string:
-                        printf("%s  ", bdata(col->value.string));
-                        break;
-                    case tns_tag_number:
-                        printf("%ld  ", col->value.number);
-                        break;
-                    case tns_tag_null:
-                        printf("(null)  ");
-                        break;
-                    case tns_tag_bool:
-                        printf("%s  ", col->value.bool ? "true" : "false");
-                        break;
-                    default:
-                        printf("NA  ");
-                }
-            }
-
-            printf("\n");
+        if(list_count(rows->value.list) == 1) {
+            display_map_style(headers, rows);
+        } else {
+            display_table_style(headers, rows);
         }
     }
 
 error: // fallthrough
+    tns_value_destroy(resp);
     return;
 }
 
