@@ -2,7 +2,6 @@
 
 #include "adt/darray.h"
 #include "mem/halloc.h"
-#include "dbg.h"
 #include <assert.h>
 
 
@@ -27,18 +26,14 @@ error:
     return NULL;
 }
 
-void *darray_new(darray_t *array)
-{
-    return calloc(1, array->element_size);
-}
-
 void darray_clear(darray_t *array)
 {
     int i = 0;
-
-    for(i = 0; i < array->max; i++) {
-        if(array->contents[i] != NULL) {
-            free(array->contents[i]);
+    if(array->element_size > 0) {
+        for(i = 0; i < array->max; i++) {
+            if(array->contents[i] != NULL) {
+                free(array->contents[i]);
+            }
         }
     }
 }
@@ -79,29 +74,6 @@ void darray_destroy(darray_t *array)
 {
     darray_clear(array);
     h_free(array);
-}
-
-void darray_set(darray_t *array, int i, void *el)
-{
-    check(i < array->max, "darray attempt to set past max");
-    array->contents[i] = el;
-error:
-    return;
-}
-
-void *darray_get(darray_t *array, int i)
-{
-    assert(i < array->max && "darray attempt to get past max");
-    return array->contents[i];
-}
-
-void *darray_remove(darray_t *array, int i)
-{
-    void *el = array->contents[i];
-
-    array->contents[i] = NULL;
-
-    return el;
 }
 
 int darray_push(darray_t *array, void *el)

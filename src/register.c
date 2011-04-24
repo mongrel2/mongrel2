@@ -32,10 +32,6 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <register.h>
-#include <connection.h>
-#include <dbg.h>
-#include <task/task.h>
 #include <assert.h>
 #include <errno.h>
 #include <string.h>
@@ -43,26 +39,31 @@
 #include "tnetstrings.h"
 #include "tnetstrings_impl.h"
 
+#include "register.h"
+#include "connection.h"
+#include "dbg.h"
+#include "task/task.h"
+#include "adt/darray.h"
+
 
 uint32_t THE_CURRENT_TIME_IS = 0;
 
-static Registration REGISTRATIONS[MAX_REGISTERED_FDS];
-// this has to stay uint16_t so we wrap around
+static darray_t *REGISTRATIONS = NULL;
+static darray_t *REG_ID_TO_FD = NULL;
 static uint16_t REG_COUNT = 0;
-static uint16_t REG_ID_TO_FD[MAX_REGISTERED_FDS];
 
 void Register_init()
 {
     THE_CURRENT_TIME_IS = time(NULL);
-    memset(REGISTRATIONS, 0, sizeof(REGISTRATIONS));
-    memset(REG_ID_TO_FD, -1, sizeof(REG_ID_TO_FD));
+    REGISTRATIONS = darray_create(sizeof(Registration), MAX_REGISTERED_FDS);
+    REG_ID_TO_FD = darray_create(0, MAX_REGISTERED_FDS);
 }
 
 static inline void Register_clear(Registration *reg)
 {
     reg->data = NULL;
     reg->last_ping = 0;
-    REG_ID_TO_FD[reg->id] = -1;
+    darray_remove(REG_ID_TO_FD, reg->id);
 }
 
 int Register_connect(int fd, Connection* data)
@@ -71,7 +72,13 @@ int Register_connect(int fd, Connection* data)
     assert(fd < MAX_REGISTERED_FDS && "FD given to register is greater than max.");
     assert(data != NULL && "data can't be NULL");
 
-    Registration *reg = &REGISTRATIONS[fd];
+    Registration *reg = darray_get(REGISTRATIONS, fd);
+    if(reg == NULL) {
+        reg = darray_new(REGISTRATIONS);
+        // we only set this here since they stay in list forever rather than recycle
+        darray_set(REGISTRATIONS, fd, reg);
+        check(reg != NULL, "Failed to allocate a new registration.");
+    }
 
     if(reg->data != NULL) {
         debug("Looks like stale registration in %d, kill it before it gets out.", fd);
@@ -82,10 +89,11 @@ int Register_connect(int fd, Connection* data)
 
     reg->data = data;
     reg->last_ping = THE_CURRENT_TIME_IS;
+    reg->fd = fd;
     
     // purposefully want overflow on these
     reg->id = REG_COUNT++;
-    REG_ID_TO_FD[reg->id] = fd;
+    darray_set(REG_ID_TO_FD, reg->id, reg);
 
     return reg->id;
 error:
@@ -98,8 +106,10 @@ int Register_disconnect(int fd)
     assert(fd < MAX_REGISTERED_FDS && "FD given to register is greater than max.");
     assert(fd >= 0 && "Invalid FD given for disconnect.");
 
-    Registration *reg = &REGISTRATIONS[fd];
-    check_debug(reg->data != NULL, "Attempt to unregister FD %d which is already gone.", fd);
+    Registration *reg = darray_get(REGISTRATIONS, fd);
+
+    check_debug(reg != NULL && reg->data != NULL, "Attempt to unregister FD %d which is already gone.", fd);
+    check(reg->fd == fd, "Asked to disconnect fd %d but register had %d", fd, reg->fd);
 
     // TODO: actually do this somewhere else
     if (reg->data->iob != NULL) {
@@ -107,8 +117,7 @@ int Register_disconnect(int fd)
     }
 
     Register_clear(reg);
-    fdclose(fd);
-
+    fdclose(reg->fd);
     return reg->id;
 
 error:
@@ -120,7 +129,7 @@ int Register_ping(int fd)
 {
     assert(fd < MAX_REGISTERED_FDS && "FD given to register is greater than max.");
     check(fd >= 0, "Invalid FD given for ping: %d", fd);
-    Registration *reg = &REGISTRATIONS[fd];
+    Registration *reg = darray_get(REGISTRATIONS, fd);
 
     check_debug(reg->data != NULL, "Attempt to ping an FD that isn't registered: %d", fd);
 
@@ -136,9 +145,9 @@ int Register_read(int fd, uint32_t bytes)
 {
     assert(fd < MAX_REGISTERED_FDS && "FD given to register is greater than max.");
     check(fd >= 0, "Invalid FD given for Register_read: %d", fd);
-    Registration *reg = &REGISTRATIONS[fd];
+    Registration *reg = darray_get(REGISTRATIONS, fd);
 
-    if(reg->data) {
+    if(reg != NULL && reg->data != NULL) {
         reg->last_read = THE_CURRENT_TIME_IS;
         reg->bytes_read += bytes;
         return reg->last_read;
@@ -155,9 +164,9 @@ int Register_write(int fd, uint32_t bytes)
 {
     assert(fd < MAX_REGISTERED_FDS && "FD given to register is greater than max.");
     check(fd >= 0, "Invalid FD given for Register_write: %d", fd);
-    Registration *reg = &REGISTRATIONS[fd];
+    Registration *reg = darray_get(REGISTRATIONS, fd);
 
-    if(reg->data) {
+    if(reg != NULL && reg->data != NULL) {
         reg->last_write = THE_CURRENT_TIME_IS;
         reg->bytes_written += bytes;
         return reg->last_write;
@@ -174,8 +183,11 @@ Connection *Register_fd_exists(int fd)
 {
     assert(fd < MAX_REGISTERED_FDS && "FD given to register is greater than max.");
     check(fd >= 0, "Invalid FD given for disconnect: %d", fd);
+    Registration *reg = darray_get(REGISTRATIONS, fd);
 
-    return REGISTRATIONS[fd].data;
+    check(reg != NULL, "Registration for fd %d not valid.", fd);
+
+    return reg->data;
 error:
     return NULL;
 }
@@ -184,13 +196,23 @@ error:
 int Register_fd_for_id(int id)
 {
     assert(id < MAX_REGISTERED_FDS && "Ident (id) given to register is greater than max.");
-    return REG_ID_TO_FD[id];
+    Registration *reg = darray_get(REG_ID_TO_FD, id);
+    check(reg != NULL, "Nothing registered under id %d.", id);
+
+    return reg->fd;
+error:
+    return -1;
 }
 
 int Register_id_for_fd(int fd)
 {
     assert(fd < MAX_REGISTERED_FDS && "FD given to register is greater than max.");
-    return REGISTRATIONS[fd].id;
+    Registration *reg = darray_get(REGISTRATIONS, fd);
+    check(reg != NULL, "No ID for fd: %d", fd);
+
+    return reg->id;
+error:
+    return -1;
 }
 
 #define ZERO_OR_DELTA(N, T) (T == 0 ? T : N - T)
@@ -200,24 +222,24 @@ struct tagbstring REGISTER_HEADERS = bsStatic("86:2:id,2:fd,4:type,9:last_ping,9
 tns_value_t *Register_info()
 {
     int i = 0;
-    Registration reg;
+    Registration *reg;
     tns_value_t *rows = tns_new_list();
 
     time_t now = THE_CURRENT_TIME_IS;
 
-    for(i = 0; i < MAX_REGISTERED_FDS; i++) {
-        reg = REGISTRATIONS[i];
+    for(i = 0; i < darray_max(REGISTRATIONS); i++) {
+        reg = darray_get(REGISTRATIONS, i);
 
-        if(reg.data != NULL) {
+        if(reg != NULL && reg->data != NULL) {
             tns_value_t *data = tns_new_list();
-            tns_add_to_list(data, tns_new_integer(reg.id));
+            tns_add_to_list(data, tns_new_integer(reg->id));
             tns_add_to_list(data, tns_new_integer(i)); // fd
-            tns_add_to_list(data, tns_new_integer(reg.data->type));
-            tns_add_to_list(data, tns_new_integer(ZERO_OR_DELTA(now, reg.last_ping)));
-            tns_add_to_list(data, tns_new_integer(ZERO_OR_DELTA(now, reg.last_read)));
-            tns_add_to_list(data, tns_new_integer(ZERO_OR_DELTA(now, reg.last_write)));
-            tns_add_to_list(data, tns_new_integer(reg.bytes_read));
-            tns_add_to_list(data, tns_new_integer(reg.bytes_written));
+            tns_add_to_list(data, tns_new_integer(reg->data->type));
+            tns_add_to_list(data, tns_new_integer(ZERO_OR_DELTA(now, reg->last_ping)));
+            tns_add_to_list(data, tns_new_integer(ZERO_OR_DELTA(now, reg->last_read)));
+            tns_add_to_list(data, tns_new_integer(ZERO_OR_DELTA(now, reg->last_write)));
+            tns_add_to_list(data, tns_new_integer(reg->bytes_read));
+            tns_add_to_list(data, tns_new_integer(reg->bytes_written));
             tns_add_to_list(rows, data);
         }
     }

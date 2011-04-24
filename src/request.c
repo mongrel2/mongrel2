@@ -357,7 +357,7 @@ static inline bstring request_determine_method(Request *req)
 
 bstring Request_to_tnetstring(Request *req, bstring uuid, int fd, const char *buf, size_t len)
 {
-    tns_outbuf outbuf;
+    tns_outbuf outbuf = {.buffer = NULL};
     bstring method = request_determine_method(req);
     check(method, "Impossible, got an invalid request method.");
 

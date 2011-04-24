@@ -1,8 +1,10 @@
 #include "minunit.h"
-#include <request.h>
-#include <tnetstrings.h>
-#include <headers.h>
+#include "request.h"
+#include "tnetstrings.h"
+#include "headers.h"
 #include <glob.h>
+#include "register.h"
+#include "connection.h"
 
 FILE *LOG_FILE = NULL;
 
@@ -211,6 +213,13 @@ char *test_Multiple_Header_Request()
 
 char * all_tests() {
     mu_suite_start();
+    Register_init();
+
+    // some evil hackery to mock out a registration so that the payload functions work
+    Connection *conn = calloc(sizeof(Connection), 1);
+    conn->iob = NULL;
+    conn->type = CONN_TYPE_HTTP;
+    Register_connect(0, conn);
 
     mu_run_test(test_Request_create);
     mu_run_test(test_Multiple_Header_Request);

@@ -1,5 +1,6 @@
 #include "minunit.h"
-#include <dir.h>
+#include "dir.h"
+#include "register.h"
 #include <string.h>
 
 FILE *LOG_FILE = NULL;
@@ -102,6 +103,7 @@ char *test_Dir_serve_file()
 
 char * all_tests() {
     mu_suite_start();
+    Register_init();
 
     mu_run_test(test_Dir_find_file);
     mu_run_test(test_Dir_serve_file);

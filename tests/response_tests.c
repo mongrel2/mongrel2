@@ -1,7 +1,7 @@
 #include "minunit.h"
-#include <response.h>
-#include <connection.h>
-#include <register.h>
+#include "response.h"
+#include "connection.h"
+#include "register.h"
 
 FILE *LOG_FILE = NULL;
 
@@ -37,6 +37,7 @@ char *test_Response_send_socket_policy()
 
 char * all_tests() {
     mu_suite_start();
+    Register_init();
 
     mu_run_test(test_Response_send_status);
     mu_run_test(test_Response_send_socket_policy);

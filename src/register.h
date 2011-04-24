@@ -45,6 +45,7 @@ extern uint32_t THE_CURRENT_TIME_IS;
 
 typedef struct Registration {
     struct Connection *data;
+    uint16_t fd;
     uint16_t id;
     uint32_t last_ping;
     uint32_t last_read;
