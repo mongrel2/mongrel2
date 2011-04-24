@@ -217,7 +217,7 @@ Host *Server_match_backend(Server *srv, bstring target)
 {
     check(srv != NULL,  "Server is NULL?!");
     check(srv->default_host != NULL,  "Server without a default_host set.");
-    check(srv->default_host->matching != NULL,  "Server without a default_host set.");
+    check(srv->default_host->matching != NULL,  "Server has a default_host without matching.");
 
     debug("Looking for target host: %s", bdata(target));
     Route *found = RouteMap_match_suffix(srv->hosts, target);
