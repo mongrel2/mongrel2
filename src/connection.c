@@ -191,6 +191,7 @@ int Connection_send_to_handler(Connection *conn, Handler *handler, char *body, i
 
     rc = Handler_deliver(handler->send_socket, bdata(payload), blength(payload));
     free(payload);
+    payload=NULL;
 
     error_unless(rc != -1, conn, 502, "Failed to deliver to handler: %s", 
             bdata(Request_path(conn->req)));
