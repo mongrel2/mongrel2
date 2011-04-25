@@ -66,7 +66,7 @@ void Handler_notify_leave(Handler *handler, int id)
     if(handler->protocol == HANDLER_PROTO_TNET) {
         payload = bformat("%s %d @* %s%d:%s,",
                 bdata(handler->send_ident), id,
-                blength(&LEAVE_HEADER_TNET), bdata(&LEAVE_HEADER_TNET),
+                bdata(&LEAVE_HEADER_TNET),
                 blength(&LEAVE_MSG), bdata(&LEAVE_MSG));
     } else {
         payload = bformat("%s %d @* %d:%s,%d:%s,",
