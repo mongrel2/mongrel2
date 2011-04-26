@@ -225,14 +225,7 @@ Host *Server_match_backend(Server *srv, bstring target)
     if(found) {
         return found->data;
     } else {
-        if(bstring_match(target, srv->default_host->matching)) {
-            return srv->default_host;
-        } else {
-            debug("Failed to match against any target and didn't match default_host: %s:%s", 
-                    bdata(srv->default_hostname), 
-                    bdata(srv->deafult_host->matching));
-            return NULL;
-        }
+    	return srv->default_host;
     }
 
 error: // fallthrough

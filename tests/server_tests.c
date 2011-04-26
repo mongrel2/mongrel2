@@ -45,7 +45,7 @@ char *test_Server_adds()
     Host *zedshaw = Server_match_backend(srv, host->name);
     mu_assert(zedshaw == host, "Didn't get the right one back.");
 
-    mu_assert(Server_match_backend(srv, bfromcstr("NOWAY")) == NULL, "Should not find this one.");
+    mu_assert(Server_match_backend(srv, bfromcstr("NOWAY")) == host, "Didn't fall back to default_host");
 
     Server_destroy(srv);
 
