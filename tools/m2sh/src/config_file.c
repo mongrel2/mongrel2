@@ -13,12 +13,14 @@
 int SERVER_ID = 0;
 int HOST_ID = 0;
 
+struct tagbstring CACHE_TTL = bsStatic("cache_ttl");
+
 int Dir_load(tst_t *settings, tst_t *params)
 {
     const char *base = AST_str(settings, params, "base", VAL_QSTRING);
 
     char *sql = NULL;
-    
+
     sql = sqlite3_mprintf(bdata(&DIR_SQL),
             base,
             AST_str(settings, params, "index_file", VAL_QSTRING),
@@ -26,6 +28,18 @@ int Dir_load(tst_t *settings, tst_t *params)
 
     int rc = DB_exec(sql, NULL, NULL);
     check(rc == 0, "Failed to load Dir: %s", base);
+
+    if(tst_search(params, bdata(&CACHE_TTL), blength(&CACHE_TTL))) {
+        const char *cache_ttl = AST_str(settings, params, "cache_ttl", VAL_NUMBER);
+
+        if(cache_ttl && cache_ttl[0] != '0') {
+            sqlite3_free(sql);
+
+            sql = sqlite3_mprintf(bdata(&DIR_CACHE_TTL_SQL), cache_ttl);
+            rc = DB_exec(sql, NULL, NULL);
+            check(rc == 0, "Cannot load Dir cache_ttl: '%s'", cache_ttl);
+        }
+    }
 
     sqlite3_free(sql);
     return DB_lastid();
@@ -42,7 +56,7 @@ int Handler_load(tst_t *settings, tst_t *params)
 {
     const char *send_spec = AST_str(settings, params, "send_spec", VAL_QSTRING);
     char *sql = NULL;
-    
+
     sql = sqlite3_mprintf(bdata(&HANDLER_SQL),
             send_spec,
             AST_str(settings, params, "send_ident", VAL_QSTRING),
@@ -87,13 +101,13 @@ int Proxy_load(tst_t *settings, tst_t *params)
     const char *port = AST_str(settings, params, "port", VAL_NUMBER);
 
     char *sql = NULL;
-    
+
     sql = sqlite3_mprintf(bdata(&PROXY_SQL),
             addr, port);
 
     int rc = DB_exec(sql, NULL, NULL);
     check(rc == 0, "Failed to load Proxy: %s:%s", addr, port);
-    
+
     sqlite3_free(sql);
     return DB_lastid();
 
@@ -114,12 +128,12 @@ int Mimetypes_load(tst_t *settings, Pair *pair)
     check(val, "Error loading Mimetype %s", bdata(Pair_key(pair)));
 
     char *sql = NULL;
-    
+
     sql = sqlite3_mprintf(bdata(&MIMETYPE_SQL),
             ext, ext, bdata(val->as.string->data));
 
     int rc = DB_exec(sql, NULL, NULL);
-    check(rc == 0, "Failed to add mimetype: %s=%s", 
+    check(rc == 0, "Failed to add mimetype: %s=%s",
             ext, bdata(val->as.string->data));
 
     sqlite3_free(sql);
@@ -137,7 +151,7 @@ int Settings_load(tst_t *settings, Pair *pair)
     check(val, "Error loading Setting %s", bdata(Pair_key(pair)));
 
     char *sql = NULL;
-    
+
     sql = sqlite3_mprintf(bdata(&SETTING_SQL),
             name, bdata(val->as.string->data));
 
@@ -218,7 +232,7 @@ int Host_load(tst_t *settings, Value *val)
     }
 
     sql = sqlite3_mprintf(bdata(&HOST_SQL), SERVER_ID, name, matching);
-    
+
     int rc = DB_exec(sql, NULL, NULL);
     check(rc == 0, "Failed to store Host: %s", name);
 
@@ -272,7 +286,7 @@ int Server_load(tst_t *settings, Value *val)
     cls->id = SERVER_ID = DB_lastid();
 
     Value *hosts = AST_get(settings, cls->params, &HOSTS_VAR, VAL_LIST);
-    check(hosts != NULL, "Could not find Server.hosts setting in host %s:%s", 
+    check(hosts != NULL, "Could not find Server.hosts setting in host %s:%s",
             AST_str(settings, cls->params, "uuid", VAL_QSTRING),
             AST_str(settings, cls->params, "name", VAL_QSTRING));
 

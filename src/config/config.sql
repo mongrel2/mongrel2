@@ -40,7 +40,10 @@ CREATE TABLE proxy (id INTEGER PRIMARY KEY,
     port INTEGER);
 
 CREATE TABLE directory (id INTEGER PRIMARY KEY,
-    base TEXT, index_file TEXT, default_ctype TEXT);
+    base TEXT,
+    index_file TEXT,
+    default_ctype TEXT,
+    cache_ttl INTEGER DEFAULT 0);
 
 CREATE TABLE route (id INTEGER PRIMARY KEY,
     path TEXT,

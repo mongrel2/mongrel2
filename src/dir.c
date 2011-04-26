@@ -2,23 +2,23 @@
  *
  * Copyright (c) 2010, Zed A. Shaw and Mongrel2 Project Contributors.
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
  * met:
- * 
+ *
  *     * Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimer.
- * 
+ *
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- * 
+ *
  *     * Neither the name of the Mongrel2 Project, Zed A. Shaw, nor the names
  *       of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written
  *       permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
  * IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
  * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
@@ -71,7 +71,7 @@ const char *RFC_822_TIME = "%a, %d %b %Y %H:%M:%S GMT";
 static int filerecord_cache_lookup(void *data, void *key) {
     bstring request_path = (bstring) key;
     FileRecord *fr = (FileRecord *) data;
-    
+
     return !bstrcmp(fr->request_path, request_path);
 }
 
@@ -98,7 +98,7 @@ FileRecord *Dir_find_file(bstring path, bstring default_type)
         fr->is_dir = 1;
         return fr;
     }
-    
+
     fr->fd = open(p, O_RDONLY);
     check(fr->fd >= 0, "Failed to open file but stat worked: %s", bdata(path));
 
@@ -149,13 +149,13 @@ int Dir_stream_file(FileRecord *file, Connection *conn)
     check_debug(rc, "Failed to write header to socket.");
 
     sent = IOBuf_stream_file(conn->iob, file->fd, file->sb.st_size);
-    
-    check(sent <= file->sb.st_size, 
+
+    check(sent <= file->sb.st_size,
             "Wrote way too much, wrote %d but size was %d",
             (int)sent, (int)file->sb.st_size);
 
     check(sent == file->sb.st_size,
-            "Sent other than expected, sent: %d, but expected: %d", 
+            "Sent other than expected, sent: %d, but expected: %d",
             (int)sent, (int)file->sb.st_size);
 
     return sent;
@@ -165,7 +165,7 @@ error:
 }
 
 
-Dir *Dir_create(const char *base, const char *index_file, const char *default_ctype)
+Dir *Dir_create(const char *base, const char *index_file, const char *default_ctype, int cache_ttl)
 {
     Dir *dir = calloc(sizeof(Dir), 1);
     check_mem(dir);
@@ -190,6 +190,9 @@ Dir *Dir_create(const char *base, const char *index_file, const char *default_ct
     dir->fr_cache = Cache_create(FR_CACHE_SIZE, filerecord_cache_lookup,
                                  filerecord_cache_evict);
     check(dir->fr_cache, "Failed to create FileRecord cache");
+
+    check(cache_ttl >= 0, "Invalid cache ttl, must be a positive integer");
+    dir->cache_ttl = cache_ttl;
 
     return dir;
 
@@ -247,7 +250,7 @@ static inline int normalize_path(bstring target)
 {
     ballocmin(target, PATH_MAX);
     static char *path_buf = NULL;
-    
+
     if(path_buf == NULL) {
         path_buf = calloc(PATH_MAX+1, 1);
         check_mem(path_buf);
@@ -269,7 +272,7 @@ static inline int Dir_lazy_normalize_base(Dir *dir)
 {
     if(dir->normalized_base == NULL) {
         dir->normalized_base = bstrcpy(dir->base);
-        check(normalize_path(dir->normalized_base) == 0, 
+        check(normalize_path(dir->normalized_base) == 0,
             "Failed to normalize base path: %s", bdata(dir->normalized_base));
 
         debug("Lazy normalized base path %s into %s", bdata(dir->base), bdata(dir->normalized_base));
@@ -289,7 +292,7 @@ FileRecord *FileRecord_cache_check(Dir *dir, bstring path)
         const char *p = bdata(file->full_path);
         struct stat sb;
 
-        if(difftime(now, file->loaded) > FR_CACHE_TIME_TO_LIVE) {
+        if(difftime(now, file->loaded) > dir->cache_ttl) {
             int rcstat = stat(p, &sb);
 
             if(rcstat != 0 || file->sb.st_mtime != sb.st_mtime || file->sb.st_size != sb.st_size) {
@@ -320,11 +323,11 @@ FileRecord *Dir_resolve_file(Dir *dir, bstring prefix, bstring path)
         file->users++;
         return file;
     }
-    
+
     check(bchar(prefix, 0) == '/', "Route '%s' pointing to directory must have prefix with leading '/'", bdata(prefix));
     check(blength(prefix) < MAX_DIR_PATH, "Prefix is too long, must be less than %d", MAX_DIR_PATH);
 
-    debug("Building target from base: %s prefix: %s path: %s index_file: %s", 
+    debug("Building target from base: %s prefix: %s path: %s index_file: %s",
             bdata(dir->normalized_base),
             bdata(prefix),
             bdata(path),
@@ -347,9 +350,9 @@ FileRecord *Dir_resolve_file(Dir *dir, bstring prefix, bstring path)
 
     check_debug(normalize_path(target) == 0,
             "Failed to normalize target path: %s", bdata(target));
-   
-    check_debug(bstrncmp(target, dir->normalized_base, blength(dir->normalized_base)) == 0, 
-            "Request for path %s does not start with %s base after normalizing.", 
+
+    check_debug(bstrncmp(target, dir->normalized_base, blength(dir->normalized_base)) == 0,
+            "Request for path %s does not start with %s base after normalizing.",
             bdata(target), bdata(dir->base));
 
     // the FileRecord now owns the target

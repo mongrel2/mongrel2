@@ -40,8 +40,11 @@ struct tagbstring CONFIG_SCHEMA = bsStatic(
 "    addr TEXT,\n"
 "    port INTEGER);\n"
 "\n"
-"CREATE TABLE directory (id INTEGER PRIMARY KEY,\n"
-"    base TEXT, index_file TEXT, default_ctype TEXT);\n"
+"CREATE TABLE directory (id INTEGER PRIMARY KEY,"
+"   base TEXT,"
+"   index_file TEXT,"
+"   default_ctype TEXT,"
+"   cache_ttl INTEGER DEFAULT 0);"
 "\n"
 "CREATE TABLE route (id INTEGER PRIMARY KEY,\n"
 "    path TEXT,\n"
@@ -84,7 +87,8 @@ struct tagbstring HOST_SQL = bsStatic("INSERT INTO host (server_id, name, matchi
 struct tagbstring SETTING_SQL = bsStatic("INSERT INTO setting (key, value) VALUES (%Q, %Q);");
 struct tagbstring MIMETYPE_SQL = bsStatic("DELETE from mimetype where extension=%Q; INSERT INTO mimetype (extension, mimetype) VALUES (%Q, %Q);");
 
-struct tagbstring DIR_SQL = bsStatic("INSERT INTO directory (base, index_file, default_ctype) VALUES (%Q, %Q, %Q);");
+struct tagbstring DIR_SQL = bsStatic("INSERT INTO directory (base, index_file, default_ctype, cache_ttl) VALUES (%Q, %Q, %Q, %Q);");
+struct tagbstring DIR_CACHE_TTL_SQL = bsStatic("UPDATE directory SET cache_ttl=%Q WHERE id=last_insert_rowid();");
 
 struct tagbstring PROXY_SQL = bsStatic("INSERT INTO proxy (addr, port) VALUES (%Q, %Q);");
 

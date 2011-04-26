@@ -234,7 +234,7 @@ error:
 static int Config_load_dir_cb(void *param, int cols, char **data, char **names)
 {
     bstring key = cols_to_key("dir", cols, data);
-    arity(4);
+    arity(5);
 
     BackendValue *backend = tst_search(LOADED, bdata(key), blength(key));
 
@@ -242,10 +242,13 @@ static int Config_load_dir_cb(void *param, int cols, char **data, char **names)
         Dir *dir = backend->value;
         dir->running = 1;
     } else {
-        Dir* dir = Dir_create(data[1], data[2], data[3]);
-        check(dir != NULL, "Failed to create dir %s with base=%s index=%s def_ctype=%s", data[0], data[1], data[2], data[3]);
+        int cache_ttl = data[4] ? strtol(data[4], NULL, 10) : 0;
+        Dir* dir = Dir_create(data[1], data[2], data[3], cache_ttl);
+        check(dir != NULL, "Failed to create dir %s with base=%s index=%s def_ctype=%s cache_ttl=%d",
+              data[0], data[1], data[2], data[3], cache_ttl);
 
-        log_info("Loaded dir %s with base=%s index=%s def_ctype=%s", data[0], data[1], data[2], data[3]);
+        log_info("Loaded dir %s with base=%s index=%s def_ctype=%s cache_ttl=%d",
+                 data[0], data[1], data[2], data[3], cache_ttl);
 
         check(store_in_loaded(key, dir, BACKEND_DIR) == 0, "Failed to store Dir in loaded.");
     }
@@ -259,7 +262,7 @@ error:
 
 static int Config_load_dirs()
 {
-    const char *DIR_QUERY = "SELECT id, base, index_file, default_ctype FROM directory";
+    const char *DIR_QUERY = "SELECT id, base, index_file, default_ctype, cache_ttl FROM directory";
 
     int rc = DB_exec(DIR_QUERY, Config_load_dir_cb, NULL);
     check(rc == 0, "Failed to load directories");

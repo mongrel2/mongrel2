@@ -5,11 +5,11 @@
 
 FILE *LOG_FILE = NULL;
 
-char *test_Dir_find_file() 
+char *test_Dir_find_file()
 {
     bstring ctype = NULL;
 
-    FileRecord *file = Dir_find_file(bfromcstr("tests/sample.json"), 
+    FileRecord *file = Dir_find_file(bfromcstr("tests/sample.json"),
             ctype = bfromcstr("text/plain"));
 
     mu_assert(file != NULL, "Failed to find the file.");
@@ -23,7 +23,7 @@ char *test_Dir_find_file()
 
 char *test_Dir_resolve_file()
 {
-    Dir *test = Dir_create("tests/", "sample.html", "test/plain");
+    Dir *test = Dir_create("tests/", "sample.html", "test/plain", 0);
     mu_assert(test != NULL, "Failed to make test dir.");
 
     FileRecord *rec = Dir_resolve_file(test, bfromcstr("/"), bfromcstr("/sample.json"));
@@ -34,10 +34,10 @@ char *test_Dir_resolve_file()
 
     rec = Dir_resolve_file(test, bfromcstr("/"), bfromcstr("/../../../../../etc/passwd"));
     mu_assert(rec == NULL, "HACK! should not find this.");
-   
+
     Dir_destroy(test);
 
-    test = Dir_create("foobar/", "sample.html", "test/plan");
+    test = Dir_create("foobar/", "sample.html", "test/plan", 0);
     mu_assert(test != NULL, "Failed to make the failed dir.");
 
     rec = Dir_resolve_file(test, bfromcstr("/"), bfromcstr("/sample.json"));
@@ -79,7 +79,7 @@ char *test_Dir_serve_file()
     int rc = 0;
     Request *req = NULL;
 
-    Dir *test = Dir_create("tests/", "sample.html", "test/plain");
+    Dir *test = Dir_create("tests/", "sample.html", "test/plain", 0);
 
     Connection conn = {0};
     int zero_fd = open("/dev/null", O_WRONLY);

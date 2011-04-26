@@ -8,6 +8,7 @@ extern struct tagbstring HOST_SQL;
 extern struct tagbstring SETTING_SQL;
 extern struct tagbstring MIMETYPE_SQL;
 extern struct tagbstring DIR_SQL;
+extern struct tagbstring DIR_CACHE_TTL_SQL;
 extern struct tagbstring PROXY_SQL;
 extern struct tagbstring HANDLER_SQL;
 extern struct tagbstring ROUTE_SQL;

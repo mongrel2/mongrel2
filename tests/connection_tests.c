@@ -11,7 +11,7 @@ FILE *LOG_FILE = NULL;
 
 Server *SRV = NULL;
 
-char *test_Connection_create_destroy() 
+char *test_Connection_create_destroy()
 {
     const char remote[IPADDR_SIZE];
 
@@ -53,7 +53,7 @@ error:
     return 0;
 }
 
-char *test_Connection_task() 
+char *test_Connection_task()
 {
     // TODO: bring these back with a different mechanism
     // debug(">>>>> XML <<<<<");
@@ -78,7 +78,7 @@ char * all_tests() {
 
     Host_add_backend(zedshaw_com, "@chat", strlen("@chat"), BACKEND_HANDLER, NULL);
 
-    Dir *tests = Dir_create("tests/", "index.html", "text/plain");
+    Dir *tests = Dir_create("tests/", "index.html", "text/plain", 0);
 
     Host_add_backend(zedshaw_com, "/tests", strlen("/tests"), BACKEND_DIR, tests);
 
