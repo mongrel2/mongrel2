@@ -87,7 +87,7 @@ struct tagbstring HOST_SQL = bsStatic("INSERT INTO host (server_id, name, matchi
 struct tagbstring SETTING_SQL = bsStatic("INSERT INTO setting (key, value) VALUES (%Q, %Q);");
 struct tagbstring MIMETYPE_SQL = bsStatic("DELETE from mimetype where extension=%Q; INSERT INTO mimetype (extension, mimetype) VALUES (%Q, %Q);");
 
-struct tagbstring DIR_SQL = bsStatic("INSERT INTO directory (base, index_file, default_ctype, cache_ttl) VALUES (%Q, %Q, %Q, %Q);");
+struct tagbstring DIR_SQL = bsStatic("INSERT INTO directory (base, index_file, default_ctype) VALUES (%Q, %Q, %Q);");
 struct tagbstring DIR_CACHE_TTL_SQL = bsStatic("UPDATE directory SET cache_ttl=%Q WHERE id=last_insert_rowid();");
 
 struct tagbstring PROXY_SQL = bsStatic("INSERT INTO proxy (addr, port) VALUES (%Q, %Q);");
