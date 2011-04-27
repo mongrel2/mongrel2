@@ -267,14 +267,17 @@ char *IOBuf_read(IOBuf *buf, int need, int *out_len)
     assert(buf->avail >= 0 && "Buffer avail can't be < 0");
     assert(need <= buf->len && "Request for more than possible in the buffer.");
 
-    if(IOBuf_closed(buf) && buf->avail > 0) {
-        *out_len = buf->avail;
+    if(IOBuf_closed(buf)) {
+        if(buf->avail > 0) {
+            *out_len = buf->avail;
+        } else {
+            *out_len = 0;
+            return NULL;
+        }
     } else if(buf->avail < need) {
         if(buf->cur > 0 && IOBuf_compact_needed(buf, need)) {
             IOBuf_compact(buf);
         }
-        //debug("IOBuf_read: calling the recv for %d bytes, buf->len: %d, buf->cur: %d, buf->avail: %d", 
-        //                   IOBuf_remaining(buf), buf->len, buf->cur, buf->avail);
         rc = buf->recv(buf, IOBuf_read_point(buf), IOBuf_remaining(buf));
 
         if(rc <= 0) {
@@ -294,10 +297,13 @@ char *IOBuf_read(IOBuf *buf, int need, int *out_len)
     } else if(buf->avail >= need) {
         *out_len = need;
     } else {
-        assert(0 && "Invalid branch processing buffer, Tell Zed.");
+        sentinel("Invalid branch processing buffer, Tell Zed.");
     }
 
     return IOBuf_start(buf);
+
+error:
+    return NULL;
 }
 
 /**
@@ -358,13 +364,16 @@ char *IOBuf_read_all(IOBuf *buf, int len, int retries)
     int nread = 0;
     int attempts = 0;
 
-    assert(len <= buf->len && "Cannot read more than the buffer length.");
-
-    char *data = IOBuf_read(buf, len, &nread);
     check_debug(!IOBuf_closed(buf), "Closed when attempting to read from buffer.");
 
-    debug("INITIAL READ: len: %d, nread: %d", len, nread);
+    if(len > buf->len) {
+        // temporarily grow the buffer
+        IOBuf_resize(buf, len);
+    }
 
+    char *data = IOBuf_read(buf, len, &nread);
+
+    debug("INITIAL READ: len: %d, nread: %d", len, nread);
     for(attempts = 0; nread < len; attempts++) {
         data = IOBuf_read(buf, len, &nread);
 

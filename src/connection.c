@@ -240,11 +240,6 @@ int connection_http_to_handler(Connection *conn)
         rc = Upload_file(conn, handler, content_len);
         check(rc == 0, "Failed to upload file.");
     } else {
-        if(content_len > conn->iob->len) {
-            // temporarily grow the buffer
-            IOBuf_resize(conn->iob, content_len);
-        }
-
         debug("READ ALL CALLED with content_len: %d, and MAX_CONTENT_LENGTH: %d", content_len, MAX_CONTENT_LENGTH);
 
         body = IOBuf_read_all(conn->iob, content_len, CLIENT_READ_RETRIES);
