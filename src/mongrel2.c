@@ -169,6 +169,7 @@ void tickertask(void *v)
     while(1) {
         THE_CURRENT_TIME_IS = time(NULL);
         taskdelay(5000);
+        Register_cleanout(10, 300, 300);
     }
 }
 

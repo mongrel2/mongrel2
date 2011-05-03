@@ -183,13 +183,23 @@ void Server_start(Server *srv)
 
     Config_start_handlers();
 
-    while(RUNNING && (cfd = netaccept(srv->listen_fd, remote, &rport)) >= 0) {
-        debug("Connection from %s:%d to %s:%d", remote, rport, 
-                bdata(srv->default_host->name), srv->port);
+    while(RUNNING) {
+        cfd = netaccept(srv->listen_fd, remote, &rport);
 
-        Connection *conn = Connection_create(srv, cfd, rport, remote,
-                                             srv->ssl_ctx);
-        Connection_accept(conn);
+        if(cfd >= 0) {
+            Connection *conn = Connection_create(srv, cfd, rport, remote,
+                                                 srv->ssl_ctx);
+            Connection_accept(conn);
+        } else {
+            log_err("Failed to accept, probably overloaded, will try clear some dead connections.");
+
+            int cleared = Register_cleanout(10, 500, 500);
+
+            if(cleared == 0) {
+                log_err("Couldn't clear out any connections, looks like you're completely overloaded.");
+                taskdelay(1000);
+            }
+        }
     }
 
     debug("SERVER EXITED with error: %s and return value: %d", strerror(errno), cfd);

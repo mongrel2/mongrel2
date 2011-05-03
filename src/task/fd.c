@@ -1,3 +1,5 @@
+#undef NDEBUG
+
 #include "taskimpl.h"
 #include <zmq.h>
 #include <sys/poll.h>
@@ -5,9 +7,11 @@
 #include <stdio.h>
 #include <signal.h>
 #include <sys/socket.h>
-#include <superpoll.h>
-#include <dbg.h>
+
+#include "superpoll.h"
+#include "dbg.h"
 #include "setting.h"
+#include "register.h"
 
 
 static int STARTED_FDTASK = 0;
@@ -194,24 +198,32 @@ uint taskdelay(uint ms)
 int _wait(void *socket, int fd, int rw)
 {
     startfdtask();
+    check(socket != NULL || fd >= 0, "Attempt to wait on a dead socket/fd: %p or %d", socket, fd);
 
     int max = 0;
     int hot_add = SuperPoll_active_hot(POLL) < SuperPoll_max_hot(POLL);
-    
-    taskstate(rw == 'r' ? "read wait" : "write wait");
+
+    if(socket != NULL) {
+        taskstate(rw == 'r' ? "read handler" : "write handler");
+    } else {
+        taskstate(rw == 'r' ? "read fd" : "write fd");
+    }
 
     max = SuperPoll_add(POLL, (void *)taskrunning, socket, fd, rw, hot_add);
-    check(max != -1, "Error adding fd %d to task wait list.", fd);
+    check(max != -1, "Error adding fd: %d or socket: %p to task wait list.", fd, socket);
 
     taskswitch();
+
     if(SIGNALED) {
+        return -1;
+    } else if(socket == NULL && Register_fd_exists(fd) == NULL) {
+        debug("Socket %d was closed after a wait.", fd);
         return -1;
     } else {
         return 0;
     }
 
 error:
-    taskswitch();
     return -1;
 }
 

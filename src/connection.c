@@ -268,6 +268,7 @@ int connection_http_to_directory(Connection *conn)
     check(IOBuf_read_commit(conn->iob,
             Request_header_length(conn->req) + Request_content_length(conn->req)) != -1, "Finaly commit failed sending from directory.");
 
+
     Log_request(conn, conn->req->status_code, conn->req->response_size);
 
     if(conn->close) {
@@ -603,6 +604,8 @@ void Connection_task(void *v)
 
         check(next >= CLOSE && next < EVENT_END,
                 "!!! Invalid next event[%d]: %d, Tell ZED!", i, next);
+
+        if(conn->iob) Register_ping(IOBuf_fd(conn->iob));
     }
 
 error: // fallthrough

@@ -131,7 +131,7 @@ int Register_ping(int fd)
     check(fd >= 0, "Invalid FD given for ping: %d", fd);
     Registration *reg = darray_get(REGISTRATIONS, fd);
 
-    check_debug(reg->data != NULL, "Attempt to ping an FD that isn't registered: %d", fd);
+    check_debug(reg != NULL && reg->data != NULL, "Attempt to ping an FD that isn't registered: %d", fd);
 
     reg->last_ping = THE_CURRENT_TIME_IS;
     return reg->last_ping;
@@ -217,6 +217,7 @@ error:
 
 #define ZERO_OR_DELTA(N, T) (T == 0 ? T : N - T)
 
+
 struct tagbstring REGISTER_HEADERS = bsStatic("86:2:id,2:fd,4:type,9:last_ping,9:last_read,10:last_write,10:bytes_read,13:bytes_written,]");
 
 tns_value_t *Register_info()
@@ -247,3 +248,42 @@ tns_value_t *Register_info()
     return tns_standard_table(&REGISTER_HEADERS, rows);
 }
 
+
+int Register_cleanout(int over_ping, int min_read_rate, int min_write_rate)
+{
+    int i = 0;
+    int nkilled = 0;
+    time_t now = THE_CURRENT_TIME_IS;
+
+    for(i = 0; i < darray_max(REGISTRATIONS); i++) {
+        Registration *reg = darray_get(REGISTRATIONS, i);
+
+        if(reg != NULL && reg->data != NULL) {
+            int last_ping = ZERO_OR_DELTA(now, reg->last_ping);
+            int read_rate = reg->bytes_read / (ZERO_OR_DELTA(now, reg->last_read) + 1);
+            int write_rate = reg->bytes_written / (ZERO_OR_DELTA(now, reg->last_write) + 1);
+            int should_kill = 0;
+
+            if(last_ping > over_ping) {
+                log_warn("Connection %d:%d over ping time: %d < %d",
+                        i, reg->id, over_ping, last_ping);
+                should_kill = 1;
+            } else if(read_rate < min_read_rate) {
+                log_warn("Connection %d:%d read rate lower than allowed: %d < %d",
+                        i, reg->id, read_rate, min_read_rate);
+                should_kill = 1;
+            } else if(write_rate < min_write_rate) {
+                log_warn("Connection %d:%d write rate lower than allowed: %d < %d",
+                        i, reg->id, write_rate, min_write_rate);
+                should_kill = 1;
+            }
+
+            if(should_kill) {
+                nkilled++;
+                Register_disconnect(i);
+            }
+        }
+    }
+
+    return nkilled;
+}
