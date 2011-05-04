@@ -44,6 +44,7 @@
 #include "dbg.h"
 #include "task/task.h"
 #include "adt/darray.h"
+#include "setting.h"
 
 
 uint32_t THE_CURRENT_TIME_IS = 0;
@@ -51,6 +52,7 @@ uint32_t THE_CURRENT_TIME_IS = 0;
 static darray_t *REGISTRATIONS = NULL;
 static darray_t *REG_ID_TO_FD = NULL;
 static uint16_t REG_COUNT = 0;
+static int NUM_REG_FD = 0;
 
 void Register_init()
 {
@@ -63,16 +65,21 @@ static inline void Register_clear(Registration *reg)
 {
     reg->data = NULL;
     reg->last_ping = 0;
+    reg->bytes_read = 0;
+    reg->bytes_written = 0;
+    reg->last_read = 0;
+    reg->last_write = 0;
     darray_remove(REG_ID_TO_FD, reg->id);
 }
 
 int Register_connect(int fd, Connection* data)
 {
     int rc = 0;
-    assert(fd < MAX_REGISTERED_FDS && "FD given to register is greater than max.");
-    assert(data != NULL && "data can't be NULL");
+    check(fd < MAX_REGISTERED_FDS, "FD given to register is greater than max.");
+    check(data != NULL, "data can't be NULL");
 
     Registration *reg = darray_get(REGISTRATIONS, fd);
+
     if(reg == NULL) {
         reg = darray_new(REGISTRATIONS);
         // we only set this here since they stay in list forever rather than recycle
@@ -80,7 +87,7 @@ int Register_connect(int fd, Connection* data)
         check(reg != NULL, "Failed to allocate a new registration.");
     }
 
-    if(reg->data != NULL) {
+    if(Register_valid(reg)) {
         debug("Looks like stale registration in %d, kill it before it gets out.", fd);
         // a new Register_connect came in, but we haven't disconnected the previous
         rc = Register_disconnect(fd);
@@ -95,6 +102,9 @@ int Register_connect(int fd, Connection* data)
     reg->id = REG_COUNT++;
     darray_set(REG_ID_TO_FD, reg->id, reg);
 
+    // keep track of the number of registered things we're tracking
+    NUM_REG_FD++;
+
     return reg->id;
 error:
     return -1;
@@ -103,12 +113,12 @@ error:
 
 int Register_disconnect(int fd)
 {
-    assert(fd < MAX_REGISTERED_FDS && "FD given to register is greater than max.");
-    assert(fd >= 0 && "Invalid FD given for disconnect.");
+    check(fd < MAX_REGISTERED_FDS, "FD given to register is greater than max.");
+    check(fd >= 0, "Invalid FD given for disconnect.");
 
     Registration *reg = darray_get(REGISTRATIONS, fd);
 
-    check_debug(reg != NULL && reg->data != NULL, "Attempt to unregister FD %d which is already gone.", fd);
+    check_debug(Register_valid(reg), "Attempt to unregister FD %d which is already gone.", fd);
     check(reg->fd == fd, "Asked to disconnect fd %d but register had %d", fd, reg->fd);
 
     // TODO: actually do this somewhere else
@@ -118,6 +128,9 @@ int Register_disconnect(int fd)
 
     Register_clear(reg);
     fdclose(reg->fd);
+
+    // tracking the number of things we're processing
+    NUM_REG_FD--;
     return reg->id;
 
 error:
@@ -127,11 +140,11 @@ error:
 
 int Register_ping(int fd)
 {
-    assert(fd < MAX_REGISTERED_FDS && "FD given to register is greater than max.");
+    check(fd < MAX_REGISTERED_FDS, "FD given to register is greater than max.");
     check(fd >= 0, "Invalid FD given for ping: %d", fd);
     Registration *reg = darray_get(REGISTRATIONS, fd);
 
-    check_debug(reg != NULL && reg->data != NULL, "Attempt to ping an FD that isn't registered: %d", fd);
+    check_debug(Register_valid(reg), "Attempt to ping an FD that isn't registered: %d", fd);
 
     reg->last_ping = THE_CURRENT_TIME_IS;
     return reg->last_ping;
@@ -143,11 +156,11 @@ error:
 
 int Register_read(int fd, uint32_t bytes)
 {
-    assert(fd < MAX_REGISTERED_FDS && "FD given to register is greater than max.");
+    check(fd < MAX_REGISTERED_FDS, "FD given to register is greater than max.");
     check(fd >= 0, "Invalid FD given for Register_read: %d", fd);
     Registration *reg = darray_get(REGISTRATIONS, fd);
 
-    if(reg != NULL && reg->data != NULL) {
+    if(Register_valid(reg)) {
         reg->last_read = THE_CURRENT_TIME_IS;
         reg->bytes_read += bytes;
         return reg->last_read;
@@ -162,11 +175,11 @@ error:
 
 int Register_write(int fd, uint32_t bytes)
 {
-    assert(fd < MAX_REGISTERED_FDS && "FD given to register is greater than max.");
+    check(fd < MAX_REGISTERED_FDS, "FD given to register is greater than max.");
     check(fd >= 0, "Invalid FD given for Register_write: %d", fd);
     Registration *reg = darray_get(REGISTRATIONS, fd);
 
-    if(reg != NULL && reg->data != NULL) {
+    if(Register_valid(reg)) {
         reg->last_write = THE_CURRENT_TIME_IS;
         reg->bytes_written += bytes;
         return reg->last_write;
@@ -181,13 +194,12 @@ error:
 
 Connection *Register_fd_exists(int fd)
 {
-    assert(fd < MAX_REGISTERED_FDS && "FD given to register is greater than max.");
-    check(fd >= 0, "Invalid FD given for disconnect: %d", fd);
+    check(fd < MAX_REGISTERED_FDS, "FD given to register is greater than max.");
+    check(fd >= 0, "Invalid FD given for exists check");
+
     Registration *reg = darray_get(REGISTRATIONS, fd);
 
-    check(reg != NULL, "Registration for fd %d not valid.", fd);
-
-    return reg->data;
+    return reg != NULL ? reg->data : NULL;
 error:
     return NULL;
 }
@@ -195,9 +207,10 @@ error:
 
 int Register_fd_for_id(int id)
 {
-    assert(id < MAX_REGISTERED_FDS && "Ident (id) given to register is greater than max.");
+    check(id < MAX_REGISTERED_FDS, "Ident (id) given to register is greater than max.");
     Registration *reg = darray_get(REG_ID_TO_FD, id);
-    check(reg != NULL, "Nothing registered under id %d.", id);
+
+    check(Register_valid(reg), "Nothing registered under id %d.", id);
 
     return reg->fd;
 error:
@@ -206,9 +219,9 @@ error:
 
 int Register_id_for_fd(int fd)
 {
-    assert(fd < MAX_REGISTERED_FDS && "FD given to register is greater than max.");
+    check(fd < MAX_REGISTERED_FDS, "FD given to register is greater than max.");
     Registration *reg = darray_get(REGISTRATIONS, fd);
-    check(reg != NULL, "No ID for fd: %d", fd);
+    check(Register_valid(reg), "No ID for fd: %d", fd);
 
     return reg->id;
 error:
@@ -225,13 +238,16 @@ tns_value_t *Register_info()
     int i = 0;
     Registration *reg;
     tns_value_t *rows = tns_new_list();
+    int nscanned = 0;
 
     time_t now = THE_CURRENT_TIME_IS;
 
-    for(i = 0; i < darray_max(REGISTRATIONS); i++) {
+    for(i = 0, nscanned = 0; i < darray_max(REGISTRATIONS) && nscanned < NUM_REG_FD; i++) {
         reg = darray_get(REGISTRATIONS, i);
 
-        if(reg != NULL && reg->data != NULL) {
+        if(Register_valid(reg)) {
+            nscanned++;  // stop scaning after we found all of them
+
             tns_value_t *data = tns_new_list();
             tns_add_to_list(data, tns_new_integer(reg->id));
             tns_add_to_list(data, tns_new_integer(i)); // fd
@@ -248,41 +264,64 @@ tns_value_t *Register_info()
     return tns_standard_table(&REGISTER_HEADERS, rows);
 }
 
+#define DEFAULT_MIN_PING 120
+#define DEFAULT_MIN_READ_RATE 300
+#define DEFAULT_MIN_WRITE_RATE 300
+#define DEFAULT_KILL_LIMIT 2
 
-int Register_cleanout(int over_ping, int min_read_rate, int min_write_rate)
+int Register_cleanout()
 {
     int i = 0;
     int nkilled = 0;
+    int nscanned = 0;
     time_t now = THE_CURRENT_TIME_IS;
+    int min_ping = Setting_get_int("limits.min_ping", DEFAULT_MIN_PING);
+    int min_write_rate = Setting_get_int("limits.min_write_rate", DEFAULT_MIN_READ_RATE);
+    int min_read_rate = Setting_get_int("limits.min_read_rate", DEFAULT_MIN_WRITE_RATE);
+    int kill_limit = Setting_get_int("limits.kill_limit", DEFAULT_KILL_LIMIT);
 
-    for(i = 0; i < darray_max(REGISTRATIONS); i++) {
+    for(i = 0, nscanned = 0; i < darray_max(REGISTRATIONS) && nscanned < NUM_REG_FD; i++) {
         Registration *reg = darray_get(REGISTRATIONS, i);
 
-        if(reg != NULL && reg->data != NULL) {
+        if(Register_valid(reg)) {
+            nscanned++; // avoid scanning the whole array if we've found them all
+
             int last_ping = ZERO_OR_DELTA(now, reg->last_ping);
             int read_rate = reg->bytes_read / (ZERO_OR_DELTA(now, reg->last_read) + 1);
             int write_rate = reg->bytes_written / (ZERO_OR_DELTA(now, reg->last_write) + 1);
             int should_kill = 0;
 
-            if(last_ping > over_ping) {
-                log_warn("Connection %d:%d over ping time: %d < %d",
-                        i, reg->id, over_ping, last_ping);
-                should_kill = 1;
-            } else if(read_rate < min_read_rate) {
-                log_warn("Connection %d:%d read rate lower than allowed: %d < %d",
+            debug("Checking fd=%d:conn_id=%d against last_ping: %d, read_rate: %d, write_rate: %d",
+                    i, reg->id, last_ping, read_rate, write_rate);
+
+            // these are weighted so they are not if-else statements
+            if(last_ping > min_ping) {
+                debug("Connection fd=%d:conn_id=%d over limits.min_ping time: %d < %d",
+                        i, reg->id, min_ping, last_ping);
+                should_kill++;
+            }
+            
+            if(read_rate < min_read_rate) {
+                debug("Connection fd=%d:conn_id=%d read rate lower than allowed: %d < %d",
                         i, reg->id, read_rate, min_read_rate);
-                should_kill = 1;
-            } else if(write_rate < min_write_rate) {
-                log_warn("Connection %d:%d write rate lower than allowed: %d < %d",
+                should_kill++;
+            } 
+            
+            if(write_rate < min_write_rate) {
+                log_warn("Connection fd=%d:conn_id=%d write rate lower than allowed: %d < %d",
                         i, reg->id, write_rate, min_write_rate);
-                should_kill = 1;
+                should_kill++;
             }
 
-            if(should_kill) {
+            if(should_kill > kill_limit) {
                 nkilled++;
                 Register_disconnect(i);
             }
         }
+    }
+
+    if(nkilled) {
+        log_warn("Killed %d connections according to min_ping: %d, min_write_rate: %d, min_read_rate: %d", nkilled, min_ping, min_write_rate, min_read_rate);
     }
 
     return nkilled;

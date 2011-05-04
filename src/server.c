@@ -173,10 +173,9 @@ void Server_init()
 
 void Server_start(Server *srv)
 {
-    int cfd;
-    int rport;
+    int cfd = -1;
+    int rport = -1;
     char remote[IPADDR_SIZE];
-
     taskname("SERVER");
 
     log_info("Starting server on port %d", srv->port);
@@ -185,21 +184,31 @@ void Server_start(Server *srv)
 
     while(RUNNING) {
         cfd = netaccept(srv->listen_fd, remote, &rport);
+        int accept_good = 0;
 
         if(cfd >= 0) {
             Connection *conn = Connection_create(srv, cfd, rport, remote,
                                                  srv->ssl_ctx);
-            Connection_accept(conn);
+            if(Connection_accept(conn) != 0) {
+                log_err("Failed to register connection, overloaded.");
+                Connection_destroy(conn);
+                accept_good = 0;
+            } else {
+                accept_good = 1;
+            }
         } else {
             log_err("Failed to accept, probably overloaded, will try clear some dead connections.");
+            accept_good = 0;
+        }
 
-            int cleared = Register_cleanout(10, 500, 500);
+        if(!accept_good) {
+            int cleared = Register_cleanout();
 
             if(cleared == 0) {
                 log_err("Couldn't clear out any connections, looks like you're completely overloaded.");
                 taskdelay(1000);
             }
-        }
+        } // else nothing
     }
 
     debug("SERVER EXITED with error: %s and return value: %d", strerror(errno), cfd);

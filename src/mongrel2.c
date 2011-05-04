@@ -52,6 +52,7 @@
 #include "version.h"
 #include "control.h"
 #include "log.h"
+#include "register.h"
 
 FILE *LOG_FILE = NULL;
 
@@ -165,11 +166,21 @@ error:
 
 void tickertask(void *v)
 {
-    // this will be used later for timeouts
     while(1) {
         THE_CURRENT_TIME_IS = time(NULL);
-        taskdelay(5000);
-        Register_cleanout(10, 300, 300);
+
+        int min_wait = Setting_get_int("limits.tick_timer", 10);
+        debug("Waiting to do timeout check for: %d", min_wait);
+
+        taskdelay(min_wait * 1000);
+
+        int cleared = Register_cleanout();
+
+        if(cleared > 0) {
+            log_warn("Timeout task killed %d tasks, waiting %d seconds for more.", cleared, min_wait);
+        } else {
+            debug("No connections timed out.");
+        }
     }
 }
 

@@ -460,7 +460,7 @@ int connection_error(Connection *conn)
 }
 
 
-static inline int ident_and_register(Connection *conn, int reg_too)
+int connection_identify_request(Connection *conn)
 {
     int next = CLOSE;
 
@@ -490,7 +490,6 @@ static inline int ident_and_register(Connection *conn, int reg_too)
         error_response(conn, 500, "Invalid code branch, tell Zed.");
     }
 
-    if(reg_too) Register_connect(IOBuf_fd(conn->iob), (void*)conn);
     return next;
 
 error:
@@ -498,16 +497,6 @@ error:
 
 }
 
-
-int connection_register_request(Connection *conn)
-{
-    return ident_and_register(conn, 1);
-}
-
-int connection_identify_request(Connection *conn)
-{
-    return ident_and_register(conn, 0);
-}
 
 int connection_parse(Connection *conn)
 {
@@ -522,7 +511,7 @@ StateActions CONN_ACTIONS = {
     .error = connection_error,
     .close = connection_close,
     .parse = connection_parse,
-    .register_request = connection_register_request,
+    .register_request = connection_identify_request,
     .identify_request = connection_identify_request,
     .route_request = connection_route_request,
     .send_socket_response = connection_send_socket_response,
@@ -584,9 +573,17 @@ error:
 }
 
 
-void Connection_accept(Connection *conn)
+int Connection_accept(Connection *conn)
 {
-    taskcreate(Connection_task, conn, CONNECTION_STACK);
+    check(Register_connect(IOBuf_fd(conn->iob), (void*)conn) != -1,
+            "Failed to register connection.");
+
+    check(taskcreate(Connection_task, conn, CONNECTION_STACK) != -1,
+            "Failed to create connection task.");
+    
+    return 0;
+error:
+    return -1;
 }
 
 
@@ -605,7 +602,9 @@ void Connection_task(void *v)
         check(next >= CLOSE && next < EVENT_END,
                 "!!! Invalid next event[%d]: %d, Tell ZED!", i, next);
 
-        if(conn->iob) Register_ping(IOBuf_fd(conn->iob));
+        if(conn->iob && !conn->iob->closed) {
+            Register_ping(IOBuf_fd(conn->iob));
+        }
     }
 
 error: // fallthrough

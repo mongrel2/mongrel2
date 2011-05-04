@@ -76,4 +76,6 @@ int Register_cleanout();
 
 struct tns_value_t *Register_info();
 
+#define Register_valid(R) ((R) != NULL && (R)->data != NULL)
+
 #endif

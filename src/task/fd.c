@@ -202,10 +202,12 @@ int _wait(void *socket, int fd, int rw)
 
     int max = 0;
     int hot_add = SuperPoll_active_hot(POLL) < SuperPoll_max_hot(POLL);
+    int was_registered = 0;
 
     if(socket != NULL) {
         taskstate(rw == 'r' ? "read handler" : "write handler");
     } else {
+        was_registered = Register_fd_exists(fd) != NULL;
         taskstate(rw == 'r' ? "read fd" : "write fd");
     }
 
@@ -216,7 +218,7 @@ int _wait(void *socket, int fd, int rw)
 
     if(SIGNALED) {
         return -1;
-    } else if(socket == NULL && Register_fd_exists(fd) == NULL) {
+    } else if(was_registered && Register_fd_exists(fd) == NULL) {
         debug("Socket %d was closed after a wait.", fd);
         return -1;
     } else {

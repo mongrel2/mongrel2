@@ -251,13 +251,13 @@ static inline int normalize_path(bstring target)
     ballocmin(target, PATH_MAX);
     static char *path_buf = NULL;
 
+    // Some platforms (OSX!) don't allocate for you, so we have to
     if(path_buf == NULL) {
         path_buf = calloc(PATH_MAX+1, 1);
         check_mem(path_buf);
     }
 
-    // Some platforms (OSX!) don't allocate for you, so we have to
-    char *normalized = realpath((const char *)target->data, path_buf);
+    char *normalized = realpath((const char *)(bdata(target)), path_buf);
     check_debug(normalized, "Failed to normalize path: %s", bdata(target));
 
     bassigncstr(target, normalized);
@@ -337,13 +337,13 @@ FileRecord *Dir_resolve_file(Dir *dir, bstring prefix, bstring path)
         // a directory so figure out the index file
         target = bformat("%s/%s%s",
                          bdata(dir->normalized_base),
-                         path->data + blength(prefix),
+                         bdataofs(path, blength(prefix)),
                          bdata(dir->index_file));
     } else if(biseq(prefix, path)) {
         target = bformat("%s%s", bdata(dir->normalized_base), bdata(path));
 
     } else {
-        target = bformat("%s/%s", bdata(dir->normalized_base), path->data + blength(prefix));
+        target = bformat("%s/%s", bdata(dir->normalized_base), bdataofs(path, blength(prefix)));
     }
 
     check_mem(target);

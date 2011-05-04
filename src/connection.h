@@ -71,7 +71,7 @@ void Connection_destroy(Connection *conn);
 Connection *Connection_create(Server *srv, int fd, int rport,
                               const char *remote, SSL_CTX *ctx);
 
-void Connection_accept(Connection *conn);
+int Connection_accept(Connection *conn);
 
 void Connection_task(void *v);
 
