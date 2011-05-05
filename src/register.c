@@ -264,11 +264,6 @@ tns_value_t *Register_info()
     return tns_standard_table(&REGISTER_HEADERS, rows);
 }
 
-#define DEFAULT_MIN_PING 120
-#define DEFAULT_MIN_READ_RATE 300
-#define DEFAULT_MIN_WRITE_RATE 300
-#define DEFAULT_KILL_LIMIT 2
-
 int Register_cleanout()
 {
     int i = 0;
@@ -295,20 +290,20 @@ int Register_cleanout()
                     i, reg->id, last_ping, read_rate, write_rate);
 
             // these are weighted so they are not if-else statements
-            if(last_ping > min_ping) {
+            if(min_ping != 0 && last_ping > min_ping) {
                 debug("Connection fd=%d:conn_id=%d over limits.min_ping time: %d < %d",
                         i, reg->id, min_ping, last_ping);
                 should_kill++;
             }
             
-            if(read_rate < min_read_rate) {
+            if(min_read_rate != 0 && read_rate < min_read_rate) {
                 debug("Connection fd=%d:conn_id=%d read rate lower than allowed: %d < %d",
                         i, reg->id, read_rate, min_read_rate);
                 should_kill++;
             } 
-            
-            if(write_rate < min_write_rate) {
-                log_warn("Connection fd=%d:conn_id=%d write rate lower than allowed: %d < %d",
+
+            if(min_write_rate != 0 && write_rate < min_write_rate) {
+                debug("Connection fd=%d:conn_id=%d write rate lower than allowed: %d < %d",
                         i, reg->id, write_rate, min_write_rate);
                 should_kill++;
             }

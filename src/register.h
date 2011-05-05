@@ -40,6 +40,11 @@
 #include <bstring.h>
 
 #define MAX_REGISTERED_FDS  64 * 1024
+#define DEFAULT_MIN_PING 120
+#define DEFAULT_MIN_READ_RATE 300
+#define DEFAULT_MIN_WRITE_RATE 300
+#define DEFAULT_KILL_LIMIT 2
+
 
 extern uint32_t THE_CURRENT_TIME_IS;
 
