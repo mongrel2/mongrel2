@@ -22,7 +22,7 @@ To get everything working you will need the following dependencies:
 
 \begin{itemize}
 \item GNU make (gmake).
-\item \href{http://zeromq.org}{ZeroMQ 2.0.10} for the messaging.
+\item \href{http://zeromq.org}{ZeroMQ 2.1.6} for the messaging.
 \item \href{http://www.sqlite.org/}{SQLite3}.
 \end{itemize}
 
@@ -32,18 +32,7 @@ Since every system is different, it is difficult to tell you exactly how to
 install required packages for your OS, but here's how I did it on my computer:
 
 \begin{code}{Installing Dependencies on ArchLinux}
-\begin{lstlisting}
-# install ZeroMQ
-> wget http://download.zeromq.org/zeromq-2.0.10.tar.gz
-> tar -xzvf zeromq-2.0.10.tar.gz
-> cd zeromq-2.0.10/
-> ./configure
-> make
-> sudo make install
-
-# install sqlite3
-> sudo pacman -S sqlite3
-\end{lstlisting}
+<< d['docs/manual/inputs/install_dependencies.sh|pyg|l'] >>
 \end{code}
 
 If you run into parts that your OS is missing, which is likely on
@@ -85,13 +74,7 @@ tree while we work on it:
 Once you have fossil you can then get the Mongrel2 source and open it up:
 
 \begin{code}{Cloning the Mongrel2 Source}
-\begin{lstlisting}
-> mkdir ~/fossils
-> fossil clone http://mongrel2.org:44445 ~/fossils/mongrel2.fossil
-> mkdir mongrel2
-> cd mongrel2
-> fossil open ~/fossils/mongrel2.fossil
-\end{lstlisting}
+<< d['docs/manual/inputs/cloning_mongrel2_source.sh|pyg|l'] >>
 \end{code}
 
 Make sure you do this in order (just like with every set of instructions you follow)
@@ -130,13 +113,7 @@ There's a test configuration file in \file{tests/config.sqlite} that you can
 use to try it out:
 
 \begin{code}{First Test Run}
-\begin{lstlisting}
-> mkdir run
-> mkdir logs
-> mkdir tmp
-> m2sh servers -db tests/config.sqlite
-> m2sh start -db tests/config.sqlite -host localhost
-\end{lstlisting}
+<< d['docs/manual/inputs/first_mongrel2_run.sh|pyg|l'] >>
 \end{code}
 
 That's it.  Just hit CTRL-c for now and we'll get into playing with this
@@ -144,13 +121,9 @@ setup later.
 
 \section{Upgrading from trunk}
 \begin{code}{Update your checkout}
-\begin{lstlisting}
-> cd mongrel2
-> fossil up trunk
-\end{lstlisting}
+<< d['docs/manual/inputs/updating_your_checkout.sh|pyg|l'] >>
 \end{code}
 
-Don't forget \shell{make clean all \&\& sudo make install}.
 
 
 \section{Up Next}

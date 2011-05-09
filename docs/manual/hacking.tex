@@ -317,36 +317,16 @@ available or sending them out for clients.
 
 I've written a simple abstraction over ZeroMQ that fits the Mongrel2 usage of it, but
 I think learning how you'd write your own ZeroMQ simple echo server in Python will
-help you get a handle on it.  First the client then the server:
+help you get a handle on it.  First the client:
 
 \begin{code}{Simple Python ZeroMQ Client}
-\begin{lstlisting}
-import zmq
-
-ctx = zmq.Context()
-s = ctx.socket(zmq.SUB)
-s.connect("tcp://127.0.0.1:5566")
-s.setsockopt(zmq.SUBSCRIBE, '')
-
-msg = s.recv()
-print "MSG: ", repr(msg)
-\end{lstlisting}
+<< d['docs/manual/inputs/simple_python_zmq_client.py|pyg|l'] >>
 \end{code}
 
+And then then the server:
 
 \begin{code}{Simple Python ZeroMQ Server}
-\begin{lstlisting}
-import zmq
-import time
-
-ctx = zmq.Context()
-s = ctx.socket(zmq.PUB)
-s.bind("tcp://127.0.0.1:5566")
-
-while True:
-    s.send("HELLO")
-    time.sleep(1)
-\end{lstlisting}
+<< d['docs/manual/inputs/simple_python_zmq_server.py|pyg|l'] >>
 \end{code}
 
 
@@ -359,33 +339,12 @@ use.
 Here's an example that does the same thing but with REQ/REP style of messages.
 
 \begin{code}{ZeroMQ REQ/REP Client}
-\begin{lstlisting}
-import zmq
-
-ctx = zmq.Context()
-s = ctx.socket(zmq.REQ)
-s.connect("tcp://127.0.0.1:5566")
-
-s.send('HI FROM CLIENT')
-
-msg = s.recv()
-print "MSG: ", repr(msg)
-\end{lstlisting}
+<< d['docs/manual/inputs/zmq_req_rep_client.py|pyg|l'] >>
 \end{code}
 
 
 \begin{code}{ZeroMQ REQ/REP Server}
-\begin{lstlisting}
-import zmq
-
-ctx = zmq.Context()
-s = ctx.socket(zmq.REP)
-s.bind("tcp://127.0.0.1:5566")
-
-while True:
-    print "GOT BACK", repr(s.recv())
-    s.send("HELLO")
-\end{lstlisting}
+<< d['docs/manual/inputs/zmq_req_rep_server.py|pyg|l'] >>
 \end{code}
 
 As you can see when you run this, it's more like your classic web server style of messaging,
@@ -534,9 +493,9 @@ Now, even though we laid out all of this as a series of rules, the actual code t
 these is very simple.  First here's a simple ``grammar'' for how a request that
 gets sent to your handlers is formatted:
 
-\begin{lstlisting}
+\begin{Verbatim}
 UUID ID PATH SIZE:HEADERS,SIZE:BODY,
-\end{lstlisting}
+\end{Verbatim}
 
 That's obviously a much simpler way to specify the request than all those
 rules, but it also doesn't tell you why.  The above description, while
@@ -545,24 +504,7 @@ boring as hell, tells you why each of these pieces exist.
 To parse this in Python we simply do this:
 
 \begin{code}{Parsing Mongrel2 Requests In Python}
-\begin{lstlisting}
-import json
-
-def parse_netstring(ns):
-    len, rest = ns.split(':', 1)
-    len = int(len)
-    assert rest[len] == ',', "Netstring did not end in ','"
-    return rest[:len], rest[len+1:]
-
-def parse(msg):
-    sender, conn_id, path, rest = msg.split(' ', 3)
-    headers, rest = parse_netstring(rest)
-    body, _ = parse_netstring(rest)
-
-    headers = json.loads(headers)
-
-    return uuid, id, path, headers, body
-\end{lstlisting}
+<< d['docs/manual/inputs/parsing_mongrel2_reqs.py|pyg|l'] >>
 \end{code}
 
 This is actually all of the code needed to parse a request, and is
@@ -573,25 +515,15 @@ example of making a full request object.
 A response is then just as simple and involves crafting a similar
 setup like this:
 
-\begin{lstlisting}
+\begin{Verbatim}
 UUID SIZE:ID ID ID, BODY
-\end{lstlisting}
+\end{Verbatim}
 
 Notice I've got three IDs here, but you can do anywhere from 1 up to 128.  Generating
 this is very easy in Python:
 
 \begin{code}{Generating Responses}
-\begin{lstlisting}
-
-def send(uuid, conn_id, msg):
-    header = "%s %d:%s," % (uuid, len(str(conn_id)), str(conn_id))
-    self.resp.send(header + ' ' + msg)
-
-
-def deliver(uuid, idents, data):
-    self.send(uuid, ' '.join(idents), data)
-
-\end{lstlisting}
+<< d['docs/manual/inputs/generating_responses.py|pyg|l'] >>
 \end{code}
 
 That, again, is all there is to it.  The \ident{send} method is the
@@ -621,7 +553,7 @@ and it just the simplest thing possible:\footnote{This is the same code as the o
 file, but with extraneous prints removed for simplicity.}
 
 \begin{code}{http.py example}
-  \lstinputlisting[language=Python]{../../examples/http_0mq/http.py}
+ << d['examples/http_0mq/http.py|pyg|l'] >>
 \end{code}
 
 All this code does is print back a simple little dump of what it received, and
@@ -649,16 +581,7 @@ This is all you need at first to do simple HTTP handlers.  In reality, the \iden
 just syntactic sugar on crafting a decent HTTP response.  Here's the actual method that is crafting these replies:
 
 \begin{code}{HTTP Response Python Code}
-\begin{lstlisting}
-def http_response(body, code, status, headers):
-    payload = {'code': code, 'status': status, 'body': body}
-    headers['Content-Length'] = len(body)
-    payload['headers'] = "\r\n".join('%s: %s' % (k,v) for k,v in
-                                     headers.items())
-
-    return HTTP_FORMAT % payload
-
-\end{lstlisting}
+<< d['docs/manual/inputs/http_response_python_code.py|pyg|l'] >>
 \end{code}
 
 Which is then used by \ident{Connection.reply\_http} and
@@ -694,7 +617,7 @@ Here's an example handler in \file{examples/http\_0mq/upload.py} that shows
 you how to do it:
 
 \begin{code}{Async Upload Example}
-\lstinputlisting[language=Python]{../../examples/http_0mq/upload.py}
+<< d['examples/http_0mq/upload.py|pyg|l'] >>
 \end{code}
 
 You can test this with something like
@@ -738,7 +661,7 @@ at the main file and see how simple it is once you get the
 streaming thread right:
 
 \begin{code}{Base mp3stream Code}
-  \lstinputlisting[language=Python]{../../examples/mp3stream/handler.py}
+<< d['examples/mp3stream/handler.py|pyg|l'] >>
 \end{code}
 
 Walking through this example is fairly easy, assuming you just trust
@@ -763,9 +686,9 @@ that the streaming thread stuff works:
 That is the base of it, and if you point mplayer at it (which is
 the only player that works, really) you should hear it play:
 
-\begin{lstlisting}
-> mplayer http://localhost:6767/mp3stream
-\end{lstlisting}
+\begin{Verbatim}
+mplayer http://localhost:6767/mp3stream
+\end{Verbatim}
 
 That is, assuming you put some mp3 files into the directory and
 started the handler again.

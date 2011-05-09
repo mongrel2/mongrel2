@@ -108,6 +108,15 @@ system_tests:
 	./tests/system_tests/curl_tests
 	./tests/system_tests/chat_tests
 
+manual:
+	dexy
+	cp docs/manual/Makefile output/docs/manual/
+	cp docs/manual/pastie.sty output/docs/manual/
+	${MAKE} -C output/docs/manual clean book-final.pdf
+	rm -rf output/docs/manual/*.dvi output/docs/manual/*.pdf
+	${MAKE} -C output/docs/manual book-final.pdf
+	${MAKE} -C output/docs/manual draft
+
 netbsd: OPTFLAGS=-I/usr/local/include -I/usr/pkg/include
 netbsd: OPTLIBS=-L/usr/local/lib -L/usr/pkg/lib
 netbsd: dev

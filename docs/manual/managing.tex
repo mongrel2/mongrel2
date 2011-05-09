@@ -80,12 +80,7 @@ First, make sure you are in the mongrel2 source and you've ran the build so that
 After you have that, do this:
 
 \begin{code}{Sample m2sh Commands}
-\begin{lstlisting}
-> m2sh servers -db tests/config.sqlite
-> m2sh hosts -db tests/config.sqlite -server test
-> m2sh running -db tests/config.sqlite -name test
-> m2sh start -db tests/config.sqlite -host localhost
-\end{lstlisting}
+<< d['docs/manual/inputs/sample_m2sh_commands.sh|pyg|l'] >>
 \end{code}
 
 At this point you should see lists of servers and hosts, seen that mongrel2 is
@@ -96,16 +91,7 @@ You can now try doing some simple starting, stopping and reloading using sudo (m
 to exit from the previous start command):
 
 \begin{code}{Starting, Stopping, Reloading}
-\begin{lstlisting}
-> m2sh start -db tests/config.sqlite -host localhost -sudo
-> tail logs/error.log
-> m2sh reload -db tests/config.sqlite -host localhost
-> tail logs/error.log
-> curl http://localhost:6767/
-> tail logs/error.log
-> m2sh running -db tests/config.sqlite -host localhost
-> m2sh stop -db tests/config.sqlite -host localhost
-\end{lstlisting}
+<< d['docs/manual/inputs/starting_stopping_reloading.sh|pyg|l'] >>
 \end{code}
 
 Awesome, right?  Using just this one little management tool, you
@@ -155,7 +141,9 @@ load}.  For our example, we'll use the example configuration from
 \file{examples/configs/sample.conf} to make a simple one:
 
 \begin{code}{Simple Little Config Example}
-  \lstinputlisting[language=Python]{../../examples/configs/sample.conf}
+\begin{lstlisting}
+<< d['examples/configs/sample.conf|dexy'] >>
+\end{lstlisting}
 \end{code}
 
 If you aren't familiar with Python then this code might look freaky, but it's really
@@ -163,13 +151,7 @@ simple.  We'll get into how its structured in a second, but to load this file
 we would just do this:
 
 \begin{code}{Loading The Simple Config}
-\begin{lstlisting}
-> m2sh load -config examples/config/sample.conf
-> ls -l config.sqlite
-> m2sh servers
-> m2sh hosts -server test
-> m2sh start -name test
-\end{lstlisting}
+<< d['docs/manual/inputs/load_simple_config.sh|pyg|l'] >>
 \end{code}
 
 Notice that we didn't have to tell m2sh that the database was \file{config.sqlite}.
@@ -362,7 +344,9 @@ a more complex example.  We'll take a look at this example and I'll just say wha
 going on, and you try to match what I'm saying to the code.  Here's the file \file{examples/configs/mongrel2.conf}:
 
 \begin{code}{Mongrel2.org Config Script}
-  \lstinputlisting[language=Python]{../../examples/configs/mongrel2.conf}
+\begin{lstlisting}
+<< d['examples/configs/mongrel2.conf|dexy'] >>
+\end{lstlisting}
 \end{code}
 
 If you haven't guessed yet, this configuration is what's used on \url{http://mongrel2.org}
@@ -546,59 +530,37 @@ very raw, but it will improve as we work on the control port and what it does.
 The list of commands you can issue are:
 
 \begin{description}
-\item[status tasks] Dumps a JSON formatted dict (object) of all the currently
+\item[stop] Stops the server using a SIGINT.
+\item[reload] Reloads the server using a SIGHUP.
+\item[terminate] Terminates the server with SIGTERM.
+\item[help] Prints out a simple help message.
+\item[uuid] Gives you the server's UUID.
+\item[info] More information about the server.
+\item[status what=tasks] Dumps a JSON formatted dict (object) of all the currently
     running tasks and what they're doing.  Think of it like an internal \file{ps}
     command.
-\item[status net] Dumps a JSON dict that matches connections IDs (same ones your
+\item[status what=net] Dumps a JSON dict that matches connections IDs (same ones your
         handlers get) to the seconds since their last ping.  In the case of an
         HTTP connection this is how long they've been connected.  In the case
         of a JSON socket this is the last time a ping message was received.
 \item[time] Prints the unix time the server thinks it's using.  Useful for synching.
-\item[kill ID] Does a forced close on the socket that is at this ID from the \ident{status net}
+\item[kill id=ID] Does a forced close on the socket that is at this ID from the \ident{status net}
     command.  This is a rather violent way to kill a connection so don't do it that
     often, but if you're overloaded then this is where to go.
-\item[control stop] Shuts down the control port permanently in case you want to keep
+\item[control\_stop] Shuts down the control port permanently in case you want to keep
     it from being accessed for some reason.
 \end{description}
 
 You then use the control port by running \ident{m2sh}:
 
-\begin{Verbatim}
-m2sh control -db config.sqlite -name test
-CONNECTING...
-> status net
-{"total": 0}
-> time
-{"time": 1282980306}
-\end{Verbatim}
+<< d['docs/manual/inputs/sample_m2sh_run.sh|pyg|l'] >>
 
-As we work on this feature more, we'll have a nicer interface to it.
-If you wanted to connect on your own, here is a simple Python
-script showing how to do it:
-
+The protocol to and from the control socket is a simple tnetstring in and out that 
+any langauge can read.  Here's a nearly complete Python client that is using
+the control port:
 
 \begin{code}{Python Control Port Example}
-\begin{lstlisting}
-import zmq
-
-CTX = zmq.Context()
-
-addr = "ipc://run/control"
-
-ctl = CTX.socket(zmq.REQ)
-
-print "CONNECTING"
-ctl.connect(addr)
-
-while True:
-    cmd = raw_input("> ")
-
-    ctl.send(cmd)
-
-    print ctl.recv()
-
-ctl.close()
-\end{lstlisting}
+<< d['docs/manual/inputs/python_control_port.py|pyg|l'] >>
 \end{code}
 
 You obviously don't need to do this, but should you want to do
@@ -623,31 +585,31 @@ two servers which attempt to bind to localhost), m2sh will list the matching ser
 and ask you to clarify your selection.
 
 For example:
-\begin{Verbatim}
+\begin{lstlisting}
 > m2sh start -db config.sqlite -every
-Launching server localhost 9f0cbd7d-aeff-4195-921e-2ce1c25512d3 on port 6768
+Launching server localhost XXX on port 6768
 ...
-Launching server localhost 3d815ade-9081-4c36-94dc-77a9b060b021 on port 6767
+Launching server localhost XXX on port 6767
 ...
 
 > m2sh start -db config.sqlite -host localhost
 Not sure which server to run, what I found:
 NAME HOST UUID
 --------------
-localhost localhost 3d815ade-9081-4c36-94dc-77a9b060b021
-localhost localhost 9f0cbd7d-aeff-4195-921e-2ce1c25512d3
+localhost localhost XXX
+localhost localhost XXX
 * Use -every to run them all.
 
-> m2sh start -db config.sqlite -uuid 3d815ade-9081-4c36-94dc-77a9b060b021
-Launching server localhost 3d815ade-9081-4c36-94dc-77a9b060b021 on port 6767
+> m2sh start -db config.sqlite -uuid XXX
+Launching server localhost XXX on port 6767
 ...
 
 > m2sh running -db config.sqlite -every
-Found server localhost 3d815ade-9081-4c36-94dc-77a9b060b021 RUNNING at PID 28525
-PID file run/mongrel2.pid not found for server localhost 9f0cbd7d-aeff-4195-921e-2ce1c25512d3
+Found server localhost XXX RUNNING at PID 28525
+PID file run/mongrel2.pid not found for server localhost XXX
 
 > m2sh stop -db config.sqlite -every
-\end{Verbatim}
+\end{lstlisting}
 
 \section{Tweakable Expert Settings}
 
@@ -662,9 +624,7 @@ To configure your settings, you set the variable \ident{settings} and you're don
 
 \begin{code}{Changing Settings}
 \begin{lstlisting}
-settings = {"zeromq.threads": 1, "limits.url_path": 1024}
-
-servers = [main]
+<< d['docs/manual/inputs/changing_settings.conf|dexy'] >>
 \end{lstlisting}
 \end{code}
 
@@ -698,12 +658,9 @@ of available settings are:
 
 You can also update your \ident{mimetypes} in the same way, just set a variable with them:
 
-\begin{code}{Changing Settings}
+\begin{code}{Changing Mimetypes}
 \begin{lstlisting}
-settings = {"zeromq.threads": 1, "limits.url_path": 1024}
-mimetypes = {".txt": "text/superawesome"}
-
-servers = [main]
+<< d['docs/manual/inputs/changing_settings.conf|dexy'] >>
 \end{lstlisting}
 \end{code}
 
