@@ -1,5 +1,3 @@
-#undef NDEBUG
-
 #include "taskimpl.h"
 #include <zmq.h>
 #include <sys/poll.h>

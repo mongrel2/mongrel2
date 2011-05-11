@@ -1,3 +1,5 @@
+#undef NDEBUG
+
 #include "minunit.h"
 #include <routing.h>
 #include <string.h>
@@ -8,50 +10,122 @@ FILE *LOG_FILE = NULL;
 
 int check_routing(list_t *found, Route *route, int expected_count, const char *route_data)
 {
+    if(list_first(found)) {
+        route = lnode_get(list_first(found));
+    }
+
     check(list_count(found) == expected_count, "Didn't find right number of routes: got %d, expected %d.", 
             (int)list_count(found), expected_count);
-    route = lnode_get(list_first(found));
-    debug("Route returned: %s", (const char *)route->data);
-    check(route->data == route_data, "Wrong data returned.");
+
+    if(route_data == NULL) {
+        check(route == NULL, "Should have no routes found.");
+    } else {
+        check(route->data == route_data, "Wrong data returned.");
+    }
     return 1;
 
 error:
+    if(route) debug("Route returned: %s", (const char *)route->data);
     return 0;
 }
 
+
+int check_simple_prefix(RouteMap *routes, const char* path, const char *expected)
+{
+    bstring path_str = bfromcstr(path);
+    Route *found = RouteMap_simple_prefix_match(routes, path_str);
+    debug("Testing simple prefix: %s to match %s and found %s",
+            path, expected, found == NULL ? "NULL" : (const char *)found->data);
+
+    if(expected != NULL) {
+        check(found != NULL, "Should find a match.");
+        check(found->data == expected, "Didn't match.");
+    } else {
+        check(found == NULL, "Should not find a match.");
+    }
+
+    bdestroy(path_str);
+    return 1;
+error: 
+    bdestroy(path_str);
+    return 0;
+}
+
+char *test_simple_prefix_matching() 
+{
+    RouteMap *routes = RouteMap_create(NULL);
+    mu_assert(routes != NULL, "Failed to make the route map.");
+    char *route_data0 = "route0";
+    char *route_data1 = "route1";
+    char *route_data2 = "route2";
+    char *route_data3 = "route3";
+    char *route_data4 = "route4";
+    bstring route0 = bfromcstr("/");
+    bstring route1 = bfromcstr("/users/([0-9]+)");
+    bstring route2 = bfromcstr("/users");
+    bstring route3 = bfromcstr("/users/people/([0-9]+)$");
+    bstring route4 = bfromcstr("/cars-fast/([a-z]-)$");
+
+    RouteMap_insert(routes, route0, route_data0);
+    RouteMap_insert(routes, route1, route_data1);
+    RouteMap_insert(routes, route2, route_data2);
+    RouteMap_insert(routes, route3, route_data3);
+    RouteMap_insert(routes, route4, route_data4);
+
+    mu_assert(check_simple_prefix(routes, "/users/1234/testing", route_data1), "Failed.");
+    mu_assert(check_simple_prefix(routes, "/users", route_data2), "Failed.");  
+    mu_assert(check_simple_prefix(routes, "/users/people/1234", route_data3), "Failed.");  
+    mu_assert(check_simple_prefix(routes, "/cars-fast/cadillac", route_data4), "Failed.");  
+    mu_assert(check_simple_prefix(routes, "/users/1234", route_data1), "Failed.");  
+    mu_assert(check_simple_prefix(routes, "/", route_data0), "Failed.");
+
+    // this is expected, because /users isn't explicitly patterned to be exact, it 
+    // only prefix matches.
+    mu_assert(check_simple_prefix(routes, "/usersBLAAHAHAH", route_data2), "Failed.");
+
+    mu_assert(check_simple_prefix(routes, "/us", route_data2), "Failed.");
+
+    RouteMap_destroy(routes);
+
+    return NULL;
+}
 
 char *test_routing_match() 
 {
     RouteMap *routes = RouteMap_create(NULL);
     mu_assert(routes != NULL, "Failed to make the route map.");
+    char *route_data0 = "route0";
     char *route_data1 = "route1";
     char *route_data2 = "route2";
     char *route_data3 = "route3";
     char *route_data4 = "route4";
+    bstring route0 = bfromcstr("/");
     bstring route1 = bfromcstr("/users/([0-9]+)");
     bstring route2 = bfromcstr("/users");
-    bstring route3 = bfromcstr("/users/people/([0-9]+))$");
+    bstring route3 = bfromcstr("/users/people/([0-9]+)$");
     bstring route4 = bfromcstr("/cars-fast/([a-z]-)$");
 
     Route *route = NULL;
 
+    RouteMap_insert(routes, route0, route_data0);
     RouteMap_insert(routes, route1, route_data1);
     RouteMap_insert(routes, route2, route_data2);
-    RouteMap_insert(routes, route3, route_data4);
-    RouteMap_insert(routes, route4, route_data3);
+    RouteMap_insert(routes, route3, route_data3);
+    RouteMap_insert(routes, route4, route_data4);
 
     bstring path1 = bfromcstr("/users/1234/testing");
     bstring path2 = bfromcstr("/users");
-    bstring path3 = bfromcstr("/cars-fast/cadillac");
-    bstring path4 = bfromcstr("/users/people/1234"); 
+    bstring path3 = bfromcstr("/users/people/1234"); 
+    bstring path4 = bfromcstr("/cars-fast/cadillac");
     bstring path5 = bfromcstr("/users/1234");
+    bstring path6 = bfromcstr("/");
+    bstring path7 = bfromcstr("/users/people/1234/notgonnawork");
 
     list_t *found = RouteMap_match(routes, path5);
     mu_assert(check_routing(found, route, 1, route_data1), "Pattern match route wrong.");
     list_destroy_nodes(found);
     list_destroy(found);
 
-    // must make sure that match is partial unless $ explicitly
     found = RouteMap_match(routes, path1);
     mu_assert(check_routing(found, route, 1, route_data1), "Past end route wrong.");
     list_destroy_nodes(found);
@@ -69,6 +143,21 @@ char *test_routing_match()
 
     found = RouteMap_match(routes, path4);
     mu_assert(check_routing(found, route, 1, route_data4), "Wrong longer route match.");
+    list_destroy_nodes(found);
+    list_destroy(found);
+
+    found = RouteMap_match(routes, path5);
+    mu_assert(check_routing(found, route, 1, route_data1), "Wrong route for /users/1234");
+    list_destroy_nodes(found);
+    list_destroy(found);
+
+    found = RouteMap_match(routes, path6);
+    mu_assert(check_routing(found, route, 2, route_data0), "Should get root / route.");
+    list_destroy_nodes(found);
+    list_destroy(found);
+
+    found = RouteMap_match(routes, path7);
+    mu_assert(check_routing(found, route, 0, NULL), "Should not match past end");
     list_destroy_nodes(found);
     list_destroy(found);
 
@@ -131,6 +220,7 @@ char * all_tests() {
     mu_suite_start();
 
     mu_run_test(test_routing_match);
+    mu_run_test(test_simple_prefix_matching);
     mu_run_test(test_routing_match_reversed);
 
     return NULL;

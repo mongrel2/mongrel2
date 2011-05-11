@@ -1,5 +1,3 @@
-#undef NDEBUG
-
 #include "adt/darray.h"
 #include "mem/halloc.h"
 #include <assert.h>
