@@ -96,6 +96,7 @@ valgrind:
 	$(CC) $(CFLAGS) -c $< -o $@
 
 coverage: CFLAGS += -fprofile-arcs -ftest-coverage
+coverage: LDFLAGS += -fprofile-arcs
 coverage: clean all coverage_report
 
 coverage_report:

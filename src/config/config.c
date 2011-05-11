@@ -141,14 +141,17 @@ static int Config_load_handler_cb(void *param, int cols, char **data, char **nam
     arity(5);
 
     check_mem(key);
+    debug("VALIDATING KEY for reload: %s", bdata(key));
 
     BackendValue *backend = tst_search(LOADED, bdata(key), blength(key));
 
     if(backend) {
+        debug("Found original handler, keeping it running.");
         check(backend->type == BACKEND_HANDLER, "Didn't get a Handler type backend for key: %s", bdata(key));
         Handler *handler = backend->value;
         handler->running = 1;
     } else {
+        debug("No handler found, making a new one for: %s", bdata(key));
         Handler *handler = Handler_create(data[1], data[2], data[3], data[4]);
         check(handler != NULL, "Loaded handler %s with send_spec=%s send_ident=%s recv_spec=%s recv_ident=%s", data[0], data[1], data[2], data[3], data[4]);
 
@@ -278,6 +281,8 @@ static int Config_load_route_cb(void *param, int cols, char **data, char **names
     arity(4);
 
     Host *host = (Host*)param;
+    debug("ROUTE BEING LOADED into HOST %p: %s:%s for route %s:%s", host, data[3], data[2], data[0], data[1]);
+
     check(host, "Expected host as param");
     check(data[3] != NULL, "Route type is NULL but shouldn't be for route id=%s", data[0]);
 
@@ -477,7 +482,11 @@ static void handlers_receive_start(void *value, void *data)
 {
     BackendValue *backend = (BackendValue *)value;
 
+    debug("SCANNING BACKEND: %s has active %d and type %d",
+            bdata(backend->key), backend->active, backend->type);
+
     if(backend->type == BACKEND_HANDLER && backend->active) {
+        debug("STARTING handler: %s", bdata(backend->key));
         Handler *handler = backend->value;
 
         if(!handler->running) {
@@ -486,6 +495,8 @@ static void handlers_receive_start(void *value, void *data)
             taskcreate(Handler_task, handler, HANDLER_STACK);
             handler->running = 1;
         }
+    } else {
+        debug("SKIPPING DISABLED HANDLER: %s", bdata(backend->key));
     }
 }
 
@@ -521,6 +532,8 @@ static void shutdown_cb(void *value, void *data)
     } else {
         sentinel("Invalid backend type: %d", backend->type);
     }
+
+    backend->active = 0; // now the backend is forced down
 
     return;
 

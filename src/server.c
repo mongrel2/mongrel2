@@ -220,6 +220,9 @@ void Server_start(Server *srv)
 
 int Server_add_host(Server *srv, bstring pattern, Host *host)
 {
+    debug("ADDING HOST %p TO SERVER %p on pattern %s",
+            host, srv, bdata(pattern));
+
     assert(host->matching != NULL && "Host added to server without matching.");
     return RouteMap_insert_reversed(srv->hosts, pattern, host);
 }
@@ -235,8 +238,10 @@ void Server_set_default_host(Server *srv, Host *host)
 Host *Server_match_backend(Server *srv, bstring target)
 {
     check(srv != NULL,  "Server is NULL?!");
-    check(srv->default_host != NULL,  "Server without a default_host set.");
-    check(srv->default_host->matching != NULL,  "Server has a default_host without matching.");
+
+    if(srv->default_host) {
+        check(srv->default_host->matching != NULL,  "Server has a default_host without matching.");
+    }
 
     debug("Looking for target host: %s", bdata(target));
     Route *found = RouteMap_match_suffix(srv->hosts, target);

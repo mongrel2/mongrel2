@@ -97,6 +97,7 @@ void Host_destroy(Host *host)
 
 int Host_add_backend(Host *host, const char *path, size_t path_len, BackendType type, void *target)
 {
+    debug("ADDING ROUTE TO HOST %p: %.*s", host, path_len, path);
     Backend *backend = calloc(sizeof(Backend), 1);
     check_mem(backend);
 
@@ -125,6 +126,7 @@ error:
 Backend *Host_match_backend(Host *host, bstring target, Route **out_route)
 {
     Route *found = NULL;
+    debug("MATCHING BACKEND IN HOST %p AGAINST %s in ROUTES: %p", host, bdata(target), host->routes);
 
     found = RouteMap_simple_prefix_match(host->routes, target);
 
