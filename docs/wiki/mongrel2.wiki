@@ -31,7 +31,7 @@ technologies. <img src="http://mongrel2.org/static/logo.png" align="right"></p>
 
 <ul>
     <li><a href="/static/downloads/mongrel2-1.6.tar.bz2">mongrel2-1.6.tar.bz2</a> 
-    MD5: </li>
+    MD5: 4b7467c17dcd192e574d4d2c1455997c</li>
 </ul>
 
 
@@ -85,10 +85,17 @@ with more to come.</p>
     <li><a href="http://github.com/jsimmons/mongrel2-lua/">Lua</a></li>
 </ul>
 
-<p>There are also frameworks that are Mongrel2 specific:</p>
+<h2><a name="frameworks">Frameworks</a></h2>
+
+<p>Mongrel2 works with man WSGI, Rack, Plack and similar framework
+middleware systems, so most framework should operate with it out of the box.
+In addition to that, there's Mongrel2 <b>specific</b> frameworks that
+don't require any middleware and take advantage of Mongrel2 new 
+protocol features:</p>
 
 <ul>
 <li><a href="http://tir.mongrel2.org/">Tir</a> is a Lua framework written to show how to do direct frameworks with Mongrel2.</li>
+<li><a href="http://github.com/j2labs/brubeck">Brubeck</a> is an asynchronous, non-blocking web framework written in Python.</li>
 <li><a href="https://github.com/daogangtang/bamboo">Bamboo</a> is a Tir derivative with a bunch more features.</li>
 <li><a href="http://www.photon-project.com">Photon</a> is a PHP framework similar to Tir using Mongrel2.</li>
 </ul>
