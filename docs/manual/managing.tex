@@ -434,7 +434,7 @@ Well, I hate to say it, but tough.  Protocols are hard enough without having to
 worry about the bewildering mess that is Unicode.  When you sit down to write a
 network protocol, the last thing you need is a format that's inconsistent, has
 multiple interpretations, can't be properly capitalized or lowercased, and
-requires extra translations steps for every operation.  With ASCII, every
+requires extra translation steps for every operation.  With ASCII, every
 computer just knows what it is, and it's the fastest for creating wire protocol
 formats.
 
@@ -449,7 +449,6 @@ stable and works.
 Protocols work better when there's less politics in their design.  This means
 you can't put Unicode into your URL patterns.  I mean, you can try; but the
 behavior is completely undefined.
-
 \end{aside}
 
 
@@ -467,6 +466,78 @@ Here are some example routes you can try to get a feel for the system:
 That should give the idea of how you can use them.  Notice also that I'm using the Python \verb|"blah"| string syntax which is
 interchangeable with the \verb|'blah'| syntax so I don't have to double escape everything.
 
+\subsection{How Routing Works}
+
+The routing algorithm is actually kind of simple, but it's an unfamiliar algorithm
+to most programmers.  I won't go into the details of how a "Ternary Search Tree"
+works, but basically it lets you match one prefix against a bunch of other strings
+very fast.  This data structure lets Mongrel2 very quickly determine the target
+for a route, and also know if it has a route at all.  Typically it can match a route
+in just a few characters, and reject a route in even fewer.
+
+For practical usage, it's better to just read how it works rather than how it's
+implemented.  Here's how Mongrel2 matches an incoming URL against routes you've
+given it:
+
+\begin{enumerate}
+\item Your configuration has a route for \verb|"/images/(.*.jpg)"| and \verb|"/users"|.
+\item Mongrel2 loads these and converts them to PREFIX/PATTERN pairs.  For the first one
+    the PREFIX="images", PATTERN="(.*.jpg)".  For the second one it's PREFIX="/users" and
+    PATTERN=None.
+\item It stores these in the URL routes by their PREFIX, and there can be only one
+    PREFIX at a time.  This means you can't put \verb|"/foo/(.*)"| and \verb|"/foo/"|
+    in at the same time (that's always redundant anyway).
+\item A request comes in for \verb|/images/hello.jpg| so Mongrel2 takes the whole URL
+    and searches for the longest first route that can possibly match.  In this case, that's
+    the /images route.
+\item It checks if the route it found has a pattern, and if it does then it runs the
+    pattern match code for the whole thing.  If they match then this is the target 
+    and it's good.  If not it returns a 404.  In this case the /images URL and patterns
+    match so it's good.
+\item Next, a request comes in for /users/johndoe/1234.
+\item Mongrel2 does the PREFIX search again, and the longest matching prefix is the
+    route for \verb|"/users"| so it gets that from the routing table.
+\item Since the /users route doesn't have a PATTERN, then this is the route and it passes
+    by default. No pattern matching code is run.
+\item Now for a slightly confusing result:  A request comes in for /us.  Since a PREFIX
+    for \verb|"/users"| exists, and it's the longest "first" match, it will match that
+    route.  If you wanted this condition to fail, you'd need to be explicit and add on a
+    pattern like, \verb|"/users(.*$)"| to say you need an exact match. Another option is
+    to give a \verb|"/"| route for a default location (which usually happens).
+\item Finally, a request comes in for /XRAY.  This will match no prefix at all, so it
+    gets a 404.
+\end{enumerate}
+
+That example should show you how routes work, and the important thing to realize
+is that they'll try to match the "longest first route" as what we call the "best"
+route.  If you get unexpected routing behavior, then you'll want to just make them
+explicit by putting a pattern at the end.
+
+Finally, here's some examples directly from the unit test that we have for
+the routing system.  Imagine we have these routes:
+
+\begin{itemize}
+\item \verb|"/"| == handler0
+\item \verb|"/users/([0-9]+)"| == handler1
+\item \verb|"/users"| == handler2
+\item \verb|"/users/people/([0-9]+)$"| == handler3
+\item \verb|"/cars-fast/([a-z]-)$"| == handler4
+\end{itemize}
+
+Then this is how a set of example requests would match:
+
+\begin{itemize}
+\item /users/1234/testing -> handler1
+\item /users ->  handler2
+\item /users/people/1234 ->  handler3
+\item /cars-fast/cadillac ->  handler4
+\item /users/1234 ->  handler1
+\item / ->  handler0
+\item /usersBLAHAHAHAHA ->  handler2
+\item /us -> handler2
+\end{itemize}
+
+Work through those in your head so you make sure you understand them.
 
 \section{Deployment Logs And Commits}
 
@@ -653,6 +724,14 @@ of available settings are:
 \item[superpoll.max\_fd=10 * 1024] Maximum possible open files.  Do not set this above 64 * 1024, and expect it to take a bit while Mongrel2 sets up constant structures.
 \item[upload.temp\_store=None] This is not set by default.  If you want large requests to reach your handlers, then set this to a directory they can access, and make sure they can handle it.  Read about it in the Hacking section under Uploads.  The file has to end in XXXXXX chars to work (read man mkstemp).
 \item[zeromq.threads=1] Number of 0MQ IO threads to run.  Careful, we've experienced thread bugs in 0MQ sometimes with high numbers of these.
+
+\item[limits.tick\_timer=10] Mongrel2 keeps an internal clock for efficiency and to run the
+timouts.  This is how often that clock updates, and defaults to 10 seconds.
+
+\item[limits.min\_ping=120] Minimum time since last activity before considering closing a socket.  Set to 0 to disable it.
+\item[limits.min\_write\_rate=300] Minimum bytes/second written before considering closing a socket. Set to 0 to disable it.
+\item[limits.min\_read\_rate=300] Minimum bytes/second read before considering closing a socket. Set to 0 to disable it.
+\item[limits.kill\_limit=2] How many of min\_ping, min\_write\_rate, and min\_read\_rate have to trigger before a socket is killed.
 \end{description}
 
 

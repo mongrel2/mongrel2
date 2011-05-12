@@ -14,3 +14,4 @@ def parse(msg):
     headers = json.loads(headers)
 
     return uuid, id, path, headers, body
+
