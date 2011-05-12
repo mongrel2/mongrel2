@@ -9,24 +9,7 @@ technologies. <img src="http://mongrel2.org/static/logo.png" align="right"></p>
 <h2><a name="features">Features</a></h2>
 
 <ul>
-    <li><b>Language Agnostic</b> with a simple backend protocol supporting 
-    <a href="http://github.com/perplexes/m2r">Ruby</a>,
-    <a href="http://github.com/darkhelmet/rack-mongrel2">Ruby through Rack</a>,
-    <a href="http://github.com/berry/Mongrel2-WSGI-Handler">Python</a>,
-    <a href="http://www.photon-project.com">PHP (Photon)</a>,
-    <a href="http://github.com/j2labs/brubeck">Python (Brubeck)</a>,
-    <a href="http://github.com/akrennmair/mongrel2-cpp">C++</a>,
-    <a href="https://github.com/derdewey/mongrel2_c_handler/">C</a>,
-    <a href="http://github.com/winks/m2php">PHP</a>,
-    <a href="http://github.com/cmoore/web-mongrel2">Haskell</a>,
-    <a href="http://github.com/vseloved/cl-mongrel2">Common Lisp (Maintained?)</a>,
-    <a href="https://github.com/galdor/m2cl">Common Lisp</a>,
-    <a href="http://github.com/lestrrat/Plack-Handler-Mongrel2">Perl</a>,
-    <a href="https://github.com/jrockway/anyevent-mongrel2/">Perl (AnyEvent)</a>,
-    <a href="http://github.com/AustinWise/m2net">.NET</a>,
-    <a href="http://github.com/mikejs/ring/tree/master/ring-mongrel2-adapter/">Clojure</a>,
-	<a href="http://www.paperculture.com/code/java-mongrel2-handler.html">Java</a>,
-    and <a href="http://github.com/jsimmons/mongrel2-lua/">Lua</a> all written by Mongrel2 fans.</li>
+    <li><b>Language Agnostic</b> with a simple backend protocol supporting <a href="#languages">16 languages and platforms</a> all written by Mongrel2 fans.</li>
     <li><b>Modern Browser Friendly</b> designed to handle HTTP, Flash XMLSockets, or WebSockets, Long Polling on the same socket transparently.</li>
     <li><b><a href="http://zeromq.org">ZeroMQ</a> Enabled</b> as well as HTTP proxy support so it works with what you have already while giving you new super powers.</li>
     <li><b>Network Architecture Agnostic</b> so you can carve your operations up anyway that reduces costs.</li>
@@ -89,6 +72,7 @@ with more to come.</p>
     <li><a href="http://github.com/berry/Mongrel2-WSGI-Handler">Python</a></li>
     <li><a href="http://github.com/akrennmair/mongrel2-cpp">C++</a></li>
     <li><a href="https://github.com/derdewey/mongrel2_c_handler/">C</a></li>
+    <li><a href="https://github.com/kwo/mojaha">Java</a></li>
     <li><a href="http://www.photon-project.com">PHP (Photon)</a></li>
     <li><a href="http://github.com/winks/m2php">PHP</a></li>
     <li><a href="http://github.com/cmoore/web-mongrel2">Haskell</a></li>
