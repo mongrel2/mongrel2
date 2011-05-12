@@ -174,12 +174,19 @@ void tickertask(void *v)
 
         taskdelay(min_wait * 1000);
 
-        int cleared = Register_cleanout();
+        // don't bother if these are all 0
+        int min_ping = Setting_get_int("limits.min_ping", DEFAULT_MIN_PING);
+        int min_write_rate = Setting_get_int("limits.min_write_rate", DEFAULT_MIN_READ_RATE);
+        int min_read_rate = Setting_get_int("limits.min_read_rate", DEFAULT_MIN_WRITE_RATE);
 
-        if(cleared > 0) {
-            log_warn("Timeout task killed %d tasks, waiting %d seconds for more.", cleared, min_wait);
-        } else {
-            debug("No connections timed out.");
+        if(min_ping > 0 || min_write_rate > 0 || min_read_rate > 0) {
+            int cleared = Register_cleanout();
+
+            if(cleared > 0) {
+                log_warn("Timeout task killed %d tasks, waiting %d seconds for more.", cleared, min_wait);
+            } else {
+                debug("No connections timed out.");
+            }
         }
     }
 }
