@@ -27,11 +27,11 @@ technologies. <img src="http://mongrel2.org/static/logo.png" align="right"></p>
 
 <h2><a name="download">Download</a></h2>
 
-<p>Mongrel2 is now 1.5 as of Sun Jan  9 15:16:00 PST 2011:</p>
+<p>Mongrel2 is now 1.6 as of Thu May 12 08:36:22 PDT 2011</p>
 
 <ul>
-    <li><a href="/static/downloads/mongrel2-1.5.tar.bz2">mongrel2-1.5.tar.bz2</a> 
-    MD5: b699ffc7ef922ad7d703fcd39a897910</li>
+    <li><a href="/static/downloads/mongrel2-1.6.tar.bz2">mongrel2-1.6.tar.bz2</a> 
+    MD5: </li>
 </ul>
 
 
@@ -94,7 +94,7 @@ with more to come.</p>
 </ul>
 
 
-<p>It is very easy to create a handler, you should read the <a href="http://mongrel2.org/static/mongrel2-manual.html#x1-590005.2">manual about handlers</a> for 
+<p>It is very easy to create a handler, you should read the <a href="http://mongrel2.org/static/mongrel2-manual.html">manual about handlers</a> for 
 information on writing one for your language.</p>
 
 

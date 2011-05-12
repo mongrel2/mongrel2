@@ -20,9 +20,9 @@ ką čia ketinate daryti, geriau perskaitykite
 
 <pre>
 # ZeroMQ diegimas 
-wget http://www.zeromq.org/local--files/area:download/zeromq-2.0.8.tar.gz 
-tar -xzvf zeromq-2.0.8.tar.gz 
-cd zeromq-2.0.8/ 
+wget http://www.zeromq.org/local--files/area:download/zeromq-2.1.4.tar.gz 
+tar -xzvf zeromq-2.1.4.tar.gz 
+cd zeromq-2.1.4/ 
 ./configure 
 make 
 sudo make install 
@@ -37,7 +37,7 @@ sudo pacman -S sqlite3
 <p>Greičiausias būdas - parsisiųsti tar.bz2 bylą:</p>
 
 <pre>
-wget http://mongrel2.org/static/downloads/mongrel2-1.5.tar.bz2
+wget http://mongrel2.org/static/downloads/mongrel2-1.6.tar.bz2
 </pre>
 
 
@@ -46,8 +46,8 @@ wget http://mongrel2.org/static/downloads/mongrel2-1.5.tar.bz2
 <p>Dabar galite sukompiliuoti mongrel2:</p>
 
 <pre>
-tar -xjvf mongrel2-1.5.tar.bz2
-cd mongrel2-1.5/
+tar -xjvf mongrel2-1.6.tar.bz2
+cd mongrel2-1.6/
 make clean all install
 </pre>
 
