@@ -1,3 +1,23 @@
+% Alter some LaTeX defaults for better treatment of figures:
+    % See p.105 of "TeX Unbound" for suggested values.
+    % See pp. 199-200 of Lamport's "LaTeX" book for details.
+    %   General parameters, for ALL pages:
+    \renewcommand{\topfraction}{0.9}	% max fraction of floats at top
+    \renewcommand{\bottomfraction}{0.8}	% max fraction of floats at bottom
+    %   Parameters for TEXT pages (not float pages):
+    \setcounter{topnumber}{2}
+    \setcounter{bottomnumber}{2}
+    \setcounter{totalnumber}{2}     % 2 may work better
+    \renewcommand{\dbltopfraction}{0.9}	% fit big float above 2-col. text
+    \renewcommand{\textfraction}{0.07}	% allow minimal text w. figs
+    %   Parameters for FLOAT pages (not text pages):
+    \renewcommand{\floatpagefraction}{0.7}	% require fuller float pages
+	% N.B.: floatpagefraction MUST be less than topfraction !!
+    \renewcommand{\dblfloatpagefraction}{0.7}	% require fuller float pages
+
+	% remember to use [htp] or [htpb] for placement
+
+
 \newcommand{\versal}[1]{\noindent{\Huge #1\kern-.10em}}
 \newcommand{\file}[1]{{\bf\ttfamily #1}}
 \newcommand{\ident}[1]{{\it\ttfamily #1}}
@@ -17,7 +37,7 @@
 }
 { \end{quote} \end{note} }
 
-\newenvironment{code}[1]
+\newenvironment{code}[1][h]
 {
     \begin{source}
     \caption{\hfill\it #1}

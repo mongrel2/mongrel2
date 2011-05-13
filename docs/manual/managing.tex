@@ -539,6 +539,68 @@ Then this is how a set of example requests would match:
 
 Work through those in your head so you make sure you understand them.
 
+\subsection{JSON/XML Message Routing Syntax}
+
+Mongrel2 works with Flash sockets out of the box (with WebSockets coming soon)
+and can handle either XML messages or special JSON messages.  It does this by
+modifying the parser it has internally to parse out HTTP or (exclusive) XML
+and JSON messages.  This feature can be used by any TCP client, not just Flash,
+it just happens to be a simple way to send simple async messages without using HTTP.
+
+To make it work, there's a slight modification to the routes used by
+JSON or XML messages.  Basically, JSON routes start with a \verb|'@'| and XML routes
+start with a \verb|'<'| and both must be terminated with a NUL byte \verb|'\0'|.  When the
+parser sees these at the beginning of a request, it parses that message and
+send it "as-is" to your target handler.
+
+Let's look at two examples from the chat demo and from some test suites:
+
+\begin{itemize}
+\item \verb|"@chat": chat_demo|
+\item \verb|"<test": xml_demo|
+\end{itemize}
+
+The first one will take any Flash (or just TCP connection) that sends lines like
+\verb|@chat {"msg": "hello"}\0| and route those to the \verb|chat_demo| handler.
+You can connect, and then just stream these JSON messages all you want, and handlers
+can send back the same responses.  In fact, as long as you don't include a \verb|'\0'|
+character you could probably send anything you want.
+
+The second route will take any XML that is wrapped in a \verb|<test>| tag and send
+that to your handlers.  That means you can send \verb|<test name="joe"><age>21</age></test>|
+and it will send it to \verb|xml_demo|.
+
+This is powerful because Mongrel2 now becomes a generic XML or JSON messaging
+server very easily.  For example, I wrote a simple little BBS demo with Mongrel2
+and wrote a very basic terminal client in Python for people to use instead
+of the browser.  Look at \verb|examples/bbs/client.py| to see how that works in
+full, but the meat of it is:
+
+\begin{code}{BBS Client JSON Socket Handling}
+<< d['docs/manual/inputs/bbs_client_socket.py|pyg|l'] >>
+\end{code}
+
+In that code, notice how (for historical reasons due to Flash sucking) the
+response is base64 encoded, but your handler doesn't have to do that.  You can
+just adopt the same protocol back.  Other than that, the BBS example client
+is just opening a socket and sending message, but Mongrel2 is converting them
+to messages to backend handlers for processing.
+
+Finally, here's the grammar rules in the parser for handling these messages:
+
+\begin{code}{JSON/XML Message Grammar}
+<< d['docs/manual/inputs/json_xml_socket_grammar.py|pyg|l'] >>
+\end{code}
+
+If you read that carefully, you'll see you can actually pass query string
+and path parameters to your JSON socket handlers.  That's currently not
+used but in the future we may use it.
+
+One caveat to this whole feature is these targets can only be routed to the
+\verb|Server.default\_host| of the server.  There's not enough information
+in these routes to determine a target host (like the \verb|Host:| header in
+HTTP) so you can only send it to the default target host.
+
 \section{Deployment Logs And Commits}
 
 A very nice feature for people doing operations work is that m2sh keeps track of all the
