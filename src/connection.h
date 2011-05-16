@@ -40,6 +40,7 @@
 #include "state.h"
 #include "proxy.h"
 #include "io.h"
+#include "adt/hash.h"
 
 extern int CONNECTION_STACK;
 extern int BUFFER_SIZE;
@@ -61,9 +62,10 @@ typedef struct Connection {
     int rport;
     State state;
     struct httpclient_parser *client;
-    char remote[IPADDR_SIZE+1];
     int close;
     int type;
+    hash_t *filter_state;
+    char remote[IPADDR_SIZE+1];
 } Connection;
 
 void Connection_destroy(Connection *conn);

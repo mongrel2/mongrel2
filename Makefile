@@ -1,4 +1,4 @@
-CFLAGS=-g -O2 -Wall -Isrc -DNDEBUG $(OPTFLAGS)
+CFLAGS=-g -O2 -Wall -Isrc -rdynamic -ldl -DNDEBUG $(OPTFLAGS)
 LIBS=-lzmq -lsqlite3 $(OPTLIBS)
 PREFIX?=/usr/local
 
@@ -19,6 +19,7 @@ dev: all
 bin/mongrel2: build/libm2.a src/mongrel2.o
 	$(CC) $(CFLAGS) src/mongrel2.o -o $@ $< $(LIBS)
 
+build/libm2.a: OPTFLAGS = -fPIC
 build/libm2.a: build ${LIB_OBJ}
 	ar rcs $@ ${LIB_OBJ}
 	ranlib $@
@@ -37,6 +38,7 @@ clean:
 	rm -f tools/m2sh/tests/tests.log 
 	find . -name "*.gc*" -exec rm {} \;
 	${MAKE} -C tools/m2sh OPTLIB=${OPTLIB} clean
+	${MAKE} -C tools/filters OPTLIB=${OPTLIB} clean
 
 pristine: clean
 	sudo rm -rf examples/python/build examples/python/dist examples/python/m2py.egg-info
@@ -49,7 +51,7 @@ pristine: clean
 	${MAKE} -C tools/m2sh pristine
 
 .PHONY: tests
-tests: build/libm2.a tests/config.sqlite ${TESTS}
+tests: build/libm2.a tests/config.sqlite ${TESTS} filters
 	sh ./tests/runtests.sh
 
 tests/config.sqlite: src/config/config.sql src/config/example.sql src/config/mimetypes.sql
@@ -70,6 +72,9 @@ check:
 
 m2sh: 
 	${MAKE} OPTFLAGS="${OPTFLAGS}" OPTLIBS="${OPTLIBS}" -C tools/m2sh all
+
+filters: 
+	${MAKE} OPTFLAGS="${OPTFLAGS}" OPTLIBS="${OPTLIBS}" -C tools/filters all
 
 install: all install-bin install-m2sh
 

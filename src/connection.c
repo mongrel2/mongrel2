@@ -48,6 +48,7 @@
 #include "setting.h"
 #include "log.h"
 #include "upload.h"
+#include "filter.h"
 
 struct tagbstring PING_PATTERN = bsStatic("@[a-z/]- {\"type\":\\s*\"ping\"}");
 
@@ -597,6 +598,13 @@ void Connection_task(void *v)
     State_init(&conn->state, &CONN_ACTIONS);
 
     for(i = 0, next = OPEN; next != CLOSE; i++) {
+
+        if(Filter_activated()) {
+            next = Filter_run(next, conn);
+            check(next >= CLOSE && next < EVENT_END,
+                    "!!! Invalid next event[%d]: %d from filter!", i, next);
+        }
+
         next = State_exec(&conn->state, next, (void *)conn);
 
         check(next >= CLOSE && next < EVENT_END,

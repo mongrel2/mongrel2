@@ -35,6 +35,8 @@
 #ifndef _events_h
 #define _events_h
 
+#define EVENT_MIN 100
+
 typedef enum StateEvent {
     CLOSE=100,
     CONNECT=101,
