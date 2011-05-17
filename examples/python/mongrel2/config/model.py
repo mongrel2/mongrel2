@@ -68,10 +68,11 @@ class Server(object):
     name = Unicode()
     pid_file = Unicode()
     port = Int()
+    bind_addr = Unicode(default=unicode('0.0.0.0'))
 
     def __init__(self, uuid=None, access_log=None, error_log=None,
                  chroot=None, default_host=None, name=None, pid_file=None,
-                 port=None, hosts=None):
+                 port=None, hosts=None, bind_addr='0.0.0.0'):
         super(Server, self).__init__()
         self.uuid = unicode(uuid)
         self.access_log = unicode(access_log)
@@ -81,6 +82,7 @@ class Server(object):
         self.name = unicode(name) if name else self.default_host
         self.pid_file = unicode(pid_file)
         self.port = port
+        self.bind_addr = unicode(bind_addr)
 
         for h in hosts or []:
             self.hosts.add(h)
@@ -129,13 +131,18 @@ class Handler(object):
     send_ident = Unicode()
     recv_spec = Unicode()
     recv_ident = Unicode()
+    raw_payload = Bool(default = 0)
+    protocol = Unicode(default = unicode('json'))
 
-    def __init__(self, send_spec, send_ident, recv_spec, recv_ident):
+    def __init__(self, send_spec, send_ident, recv_spec, recv_ident,
+                 raw_payload=False, protocol='json'):
         super(Handler, self).__init__()
         self.send_spec = unicode(send_spec)
         self.send_ident = unicode(send_ident)
         self.recv_spec = unicode(recv_spec)
         self.recv_ident = unicode(recv_ident)
+        self.raw_payload = raw_payload
+        self.protocol = unicode(protocol)
 
     def __repr__(self):
         return "Handler(send_spec=%r, send_ident=%r, recv_spec=%r, recv_ident=%r)" % (
@@ -168,12 +175,14 @@ class Dir(object):
     base = Unicode()
     index_file = Unicode()
     default_ctype = Unicode()
+    cache_ttl = Int(default=0)
 
-    def __init__(self, base, index_file, default_ctype="text/plain"):
+    def __init__(self, base, index_file, default_ctype="text/plain", cache_ttl=0):
         super(Dir, self).__init__()
         self.base = unicode(base)
         self.index_file = unicode(index_file)
         self.default_ctype = unicode(default_ctype)
+        self.cache_ttl = cache_ttl
 
     def __repr__(self):
         return "Dir(base=%r, index_file=%r, default_ctype=%r)" % (
