@@ -18,7 +18,7 @@ typedef struct Filter {
 
 int Filter_init();
 int Filter_run(StateEvent next, Connection *conn);
-int Filter_add(StateEvent state, filter_cb);
+int Filter_add(StateEvent state, filter_cb cb, bstring load_path);
 int Filter_load(Server *srv, bstring load_path);
 
 static inline StateEvent *Filter_state_list(StateEvent *states, int length)

@@ -51,13 +51,13 @@ int Filter_run(StateEvent next, Connection *conn)
     darray_t *filters = Filter_lookup(next);
 
     if(filters != NULL) {
-        for(i = 0; i < darray_end(filters); i++) {
+        for(i = 0; i < darray_end(filters) && res == next; i++) {
             Filter *filter = darray_get(filters, i);
             check(filter != NULL, "Expected to get a filter record but got NULL.");
 
-            res = filter->cb(res, conn);
+            res = filter->cb(next, conn);
             check(res >= CLOSE && res < EVENT_END,
-                    "Invalid event when adding filter: %d", res);
+                    "Filter %s returned invalid event: %d", bdata(filter->load_path), res);
         }
     }
 
@@ -67,10 +67,11 @@ error:
     return -1;
 }
 
-int Filter_add(StateEvent state, filter_cb cb)
+int Filter_add(StateEvent state, filter_cb cb, bstring load_path)
 {
     darray_t *filters = Filter_lookup_create(state);
-    check(filters != NULL, "Invalid filter state: %d given.", state);
+    check(filters != NULL, "Invalid filter state: %d given for filter %s",
+            state, bdata(load_path));
 
     Filter *filter = h_calloc(sizeof(Filter), 1);
     check_mem(filter);
@@ -79,6 +80,7 @@ int Filter_add(StateEvent state, filter_cb cb)
 
     filter->state = state;
     filter->cb = cb;
+    filter->load_path = bstrcpy(load_path);
 
     darray_push(filters, filter);
 
@@ -120,7 +122,7 @@ int Filter_load(Server *srv, bstring load_path)
                 "Invalid state return by %s Filter_init: %d", bdata(load_path), state);
 
         // now create the internal Filter record for activity later.
-        check(Filter_add(state, cb) == 0, "Failed to add filter:state %s:%d",
+        check(Filter_add(state, cb, load_path) == 0, "Failed to add filter:state %s:%d",
                 bdata(load_path), state);
     }
 
