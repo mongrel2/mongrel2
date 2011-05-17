@@ -1,6 +1,7 @@
 #undef NDEBUG
 #include "minunit.h"
 #include <filter.h>
+#include <connection.h>
 
 FILE *LOG_FILE = NULL;
 
@@ -29,11 +30,56 @@ char *test_Filter_run()
 }
 
 
+char *test_Filter_run_chain(){
+
+	Filter_init(); /*We need a fresh new Filter storage*/
+	Connection *conn = Connection_create(NULL, 0, 80, "", NULL);
+
+    int res_filter_a = Filter_load(NULL, bfromcstr("tools/filters/test_filter_a.so"));
+    mu_assert(res_filter_a == 0, "Failed to load tools/filters/test_filter_a.so");
+
+    int res_filter_b = Filter_load(NULL, bfromcstr("tools/filters/test_filter_b.so"));
+    mu_assert(res_filter_b == 0, "Failed to load tools/filters/test_filter_b.so");
+
+    Filter_run(CONNECT, conn);
+
+    /* filter_a sums 2 on conn->rport, filter_b sums 8*/
+    mu_assert(conn->rport == 90, "Not all filters was run, rport not correctly changed");
+
+	return NULL;
+}
+
+char *test_Filter_stop_filter_chain(){
+	Filter_init(); /*We need a fresh new Filter storage*/
+	Connection *conn = Connection_create(NULL, 0, 80, "", NULL);
+
+    int res_filter_a = Filter_load(NULL, bfromcstr("tools/filters/test_filter_a.so"));
+    mu_assert(res_filter_a == 0, "Failed to load tools/filters/test_filter_a.so");
+
+    int res_filter_c = Filter_load(NULL, bfromcstr("tools/filters/test_filter_c.so"));
+    mu_assert(res_filter_c == 0, "Failed to load tools/filters/test_filter_c.so");
+
+    int res_filter_b = Filter_load(NULL, bfromcstr("tools/filters/test_filter_b.so"));
+    mu_assert(res_filter_b == 0, "Failed to load tools/filters/test_filter_b.so");
+
+    int next = Filter_run(CONNECT, conn);
+    mu_assert(next == CLOSE, "Last filter not run correctly");
+
+    /* Only filter_a and filter_c should run. */
+    mu_assert(conn->rport == 87, "Not all filters should be run");
+
+	return NULL;
+}
+
+
+
 char * all_tests() {
     mu_suite_start();
 
     mu_run_test(test_Filter_load);
     mu_run_test(test_Filter_run);
+    mu_run_test(test_Filter_run_chain);
+    mu_run_test(test_Filter_stop_filter_chain);
 
     return NULL;
 }
