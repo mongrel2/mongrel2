@@ -502,7 +502,7 @@ given it:
 \item Now for a slightly confusing result:  A request comes in for /us.  Since a PREFIX
     for \verb|"/users"| exists, and it's the longest "first" match, it will match that
     route.  If you wanted this condition to fail, you'd need to be explicit and add on a
-    pattern like, \verb|"/users(.*$)"| to say you need an exact match. Another option is
+    pattern like, \verb|"/users()$"| to say you need an exact match. Another option is
     to give a \verb|"/"| route for a default location (which usually happens).
 \item Finally, a request comes in for /XRAY.  This will match no prefix at all, so it
     gets a 404.
