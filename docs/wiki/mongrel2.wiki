@@ -20,7 +20,8 @@ technologies. <img src="http://mongrel2.org/static/logo.png" align="right"></p>
     <li><b>Documented, Documented, Documented</b> We <a href="http://mongrel2.org/static/mongrel2-manual.html">document everything</a> in a well written manual that
     shows you how to use every feature.</li>
     <li><b>BSD Licensed</b> and all with a <a href="/wiki?name=License">BSD 3-clause license</a>.</li>
-    <li><a href="http://tir.mongrel2.org/">Tir</a> An official framework written in Lua that shows how to use Mongrel2.  In addition, there's the <a href="http://www.photon-project.com">Photon Project</a> which is similar to Tir in design and purpose.</li>
+    <li><b><a href="http://tir.mongrel2.org/">Tir</a></b> An official framework written in Lua that shows how to use Mongrel2 to create <a href=
+"#frameworks">other frameworks for PHP, Python, etc</a>.</li>
 </ul>
 
 
@@ -64,25 +65,22 @@ with more to come.</p>
 
 <h2><a name="languages">Languages</a></h2>
 
-<p>Mongrel2 fans have written quite a few handlers already:</p>
+<p>Mongrel2 fans have written quite a few handlers already for many different languages.  Here's the
+list of currently supported languages and platforms, in alphabetical order:</p>
 
 <ul>
-    <li><a href="http://github.com/perplexes/m2r">Ruby</a></li>
-    <li><a href="http://github.com/darkhelmet/rack-mongrel2">Ruby through Rack</a></li>
-    <li><a href="http://github.com/berry/Mongrel2-WSGI-Handler">Python</a></li>
-    <li><a href="http://github.com/akrennmair/mongrel2-cpp">C++</a></li>
-    <li><a href="https://github.com/derdewey/mongrel2_c_handler/">C</a></li>
-    <li><a href="https://github.com/kwo/mojaha">Java</a></li>
-    <li><a href="http://www.photon-project.com">PHP (Photon)</a></li>
-    <li><a href="http://github.com/winks/m2php">PHP</a></li>
-    <li><a href="http://github.com/cmoore/web-mongrel2">Haskell</a></li>
-    <li><a href="http://github.com/vseloved/cl-mongrel2">Common Lisp</a></li>
-    <li><a href="https://github.com/galdor/m2cl">Common Lisp</a></li>
-    <li><a href="http://github.com/lestrrat/Plack-Handler-Mongrel2">Perl</a></li>
-    <li><a href="https://github.com/jrockway/anyevent-mongrel2/">Perl (AnyEvent)</a></li>
-    <li><a href="http://github.com/AustinWise/m2net">.NET</a></li>
-    <li><a href="http://github.com/mikejs/ring/tree/master/ring-mongrel2-adapter/">Clojure</a></li>
-    <li><a href="http://github.com/jsimmons/mongrel2-lua/">Lua</a></li>
+    <li>C++: <a href="http://github.com/akrennmair/mongrel2-cpp">mongrel2-cpp</a></li>
+    <li>C: <a href="https://github.com/derdewey/mongrel2_c_handler/">mongrel2_c_handler</a></li>
+    <li>Clojure: <a href="http://github.com/mikejs/ring/tree/master/ring-mongrel2-adapter/">ring-mongrel2-adapter</a></li>
+    <li>Common Lisp: <a href="http://github.com/vseloved/cl-mongrel2">cl-mongrel2</a> and <a href="https://github.com/galdor/m2cl">m2cl</a></li>
+    <li>Haskell: <a href="http://github.com/cmoore/web-mongrel2">web-mongrel2</a></li>
+    <li>Java: <a href="https://github.com/kwo/mojaha">MoJaHa</a> and <a href="https://github.com/asinger/mongrel2j">Mongrel2J</a></li>
+    <li>Lua: <a href="http://github.com/jsimmons/mongrel2-lua/">mongrel2-lua</a></li>
+    <li>.NET: <a href="http://github.com/AustinWise/m2net">m2net</a></li>
+    <li>PHP: <a href="http://github.com/winks/m2php">m2php</a></li>
+    <li>Perl: <a href="http://github.com/lestrrat/Plack-Handler-Mongrel2">Plack-Handler-Mongrel2</a> and <a href="https://github.com/jrockway/anyevent-mongrel2/">AnyEvent-Mongrel2</a></li>
+    <li>Python: <a href="http://github.com/berry/Mongrel2-WSGI-Handler">Mongrel2-WSGI-Handler</a></li>
+    <li>Ruby: <a href="http://github.com/perplexes/m2r">m2r</a> and <a href="http://github.com/darkhelmet/rack-mongrel2">rack-mongrel2</a></li>
 </ul>
 
 <h2><a name="frameworks">Frameworks</a></h2>
@@ -97,7 +95,7 @@ protocol features:</p>
 <li><a href="http://tir.mongrel2.org/">Tir</a> is a Lua framework written to show how to do direct frameworks with Mongrel2.</li>
 <li><a href="http://github.com/j2labs/brubeck">Brubeck</a> is an asynchronous, non-blocking web framework written in Python.</li>
 <li><a href="https://github.com/daogangtang/bamboo">Bamboo</a> is a Tir derivative with a bunch more features.</li>
-<li><a href="http://www.photon-project.com">Photon</a> is a PHP framework similar to Tir using Mongrel2.</li>
+<li><a href="http://www.photon-project.com">Photon</a> is a PHP framework similar to Tir and *way* faster than PHP.</li>
 </ul>
 
 
@@ -123,12 +121,15 @@ information on writing one for your language.</p>
 
 <ul>
     <li><a href="http://twitter.com/alexgartrell"><b>agartrell</b></a> works on core Mongrel2 like directory serving and the kegogi testing tool.</li>
+    <li><a href="http://twitter.com/anderiasch"><b>wink</b></a> wrote the PHP stuff and hacks on Mongrel2.</li>
+    <li><a href="http://twitter.com/daltonmatos"><b>daltonmatos</b></a> contributes patches and fixes and hacks on the filters system.</li>
     <li><a href="http://twitter.com/joshrsimmons"><b>jsimmons</b></a> wrote the Lua binding and hacks on the core Mongrel2.</li>
+    <li><a href="http://twitter.com/tordek"><b>tordek</b></a> finds bugs in Mongrel2 and edited <a href="http://mongrel2.org/static/mongrel2-manual.html">the manual</a>.</li>
+    <li><a href="http://twitter.com/zedshaw"><b>zedshaw</b></a> started it all.</li>
+    <li><b>jasom</b> contributes patches and fixes.</li>
     <li><b>pbastov</b> works on translating things to Russian.</li>
     <li><b>phred</b> hacks on procer and some of the core Mongrel2.</li>
-    <li><a href="http://twitter.com/tordek"><b>tordek</b></a> finds bugs in Mongrel2 and edited <a href="http://mongrel2.org/static/mongrel2-manual.html">the manual</a>.</li>
-    <li><a href="http://twitter.com/anderiasch"><b>wink</b></a> wrote the PHP stuff and hacks on Mongrel2.</li>
-    <li><a href="http://twitter.com/zedshaw"><b>zedshaw</b></a> started it all.</li>
+    <li><b>rkelly</b> (not the singer) wrote the tnetstrings C code we use and fixes things.</li>
 </ul>
 
 
