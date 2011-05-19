@@ -48,6 +48,18 @@
 
 int RUNNING=1;
 
+static char *ssl_default_dhm_P = 
+    "E4004C1F94182000103D883A448B3F80" \
+    "2CE4B44A83301270002C20D0321CFD00" \
+    "11CCEF784C26A400F43DFB901BCA7538" \
+    "F2C6B176001CF5A0FD16D2C48B1D0C1C" \
+    "F6AC8E1DA6BCC3B4E1F96B0564965300" \
+    "FFA1D0B601EB2800F489AA512C4B248C" \
+    "01F76949A60BB7F00A40B1EAB64BDD48" \
+    "E8A700D60B7F1200FA8E77B0A979DABF";
+
+static char *ssl_default_dhm_G = "4";
+
 void host_destroy_cb(Route *r, RouteMap *map)
 {
     if(r->data) {
@@ -85,19 +97,15 @@ Server *Server_create(const char *uuid, const char *default_host,
     srv->error_log = bfromcstr(error_log); check_mem(srv->error_log);
     srv->pid_file = bfromcstr(pid_file); check_mem(srv->pid_file);
     srv->default_hostname = bfromcstr(default_host);
-    srv->ssl_ctx = NULL;
+    srv->use_ssl = 0;
 
     use_ssl_key = bfromcstr(uuid);
     check_mem(use_ssl_key);
     bcatcstr(use_ssl_key, ".use_ssl");
 
     if(Setting_get_int(bdata(use_ssl_key), 0)) {
-        uint32_t ssl_opts = SSL_DISPLAY_RSA;
         certdir = Setting_get_str("certdir", NULL);
         check(certdir != NULL, "to use ssl, you must specify a certdir");
-
-        srv->ssl_ctx = ssl_ctx_new(SSL_NO_DEFAULT_KEY | ssl_opts, 0);
-        check(srv->ssl_ctx != NULL, "ssl_ctx_new failed");
 
         certpath = bstrcpy(certdir);
         check_mem(certpath);
@@ -109,13 +117,18 @@ Server *Server_create(const char *uuid, const char *default_host,
         bcatcstr(keypath, uuid);
         bcatcstr(keypath, ".key");
 
-        rcode = ssl_obj_load(srv->ssl_ctx, SSL_OBJ_RSA_KEY, bdata(keypath),
-                             NULL);
-        check(rcode == SSL_OK, "failed to load key from %s", bdata(keypath));
+        rcode = x509parse_crtfile(&srv->own_cert, bdata(certpath));
+        check(rcode == 0, "Failed to load cert from %s", bdata(certpath));
 
-        rcode = ssl_obj_load(srv->ssl_ctx, SSL_OBJ_X509_CERT, 
-                             bdata(certpath), NULL);
-        check(rcode == SSL_OK, "failed to load cert from %s", bdata(certpath));
+        rcode = x509parse_keyfile(&srv->rsa_key, bdata(keypath), NULL);
+        check(rcode == 0, "Failed to load key from %s", bdata(keypath));
+
+        srv->ciphers = ssl_default_ciphers;
+
+        srv->dhm_P = ssl_default_dhm_P;
+        srv->dhm_G = ssl_default_dhm_G;
+
+        srv->use_ssl = 1;
 
         bdestroy(certpath); certpath = NULL;
         bdestroy(keypath); keypath = NULL;
@@ -187,8 +200,7 @@ void Server_start(Server *srv)
         int accept_good = 0;
 
         if(cfd >= 0) {
-            Connection *conn = Connection_create(srv, cfd, rport, remote,
-                                                 srv->ssl_ctx);
+            Connection *conn = Connection_create(srv, cfd, rport, remote);
             if(Connection_accept(conn) != 0) {
                 log_err("Failed to register connection, overloaded.");
                 Connection_destroy(conn);

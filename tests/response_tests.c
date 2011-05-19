@@ -2,6 +2,7 @@
 #include "response.h"
 #include "connection.h"
 #include "register.h"
+#include <fcntl.h>
 
 FILE *LOG_FILE = NULL;
 

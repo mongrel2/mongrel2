@@ -1,6 +1,8 @@
 #include <filter.h>
 #include <dbg.h>
 
+FILE *LOG_FILE = NULL;
+
 StateEvent filter_transition(StateEvent state, Connection *conn)
 {
 	conn->rport += 8;

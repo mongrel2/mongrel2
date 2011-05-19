@@ -2,6 +2,7 @@
 #include "dir.h"
 #include "register.h"
 #include <string.h>
+#include <fcntl.h>
 
 FILE *LOG_FILE = NULL;
 

@@ -39,7 +39,9 @@
 #include <adt/list.h>
 #include <host.h>
 #include <routing.h>
-#include <ssl/ssl.h>
+#include <polarssl/ssl.h>
+#include <polarssl/x509.h>
+#include <polarssl/rsa.h>
 
 enum {
      /* IPv6 addr can be up to 40 chars long */
@@ -58,9 +60,13 @@ typedef struct Server {
     bstring error_log;
     bstring pid_file;
     bstring default_hostname;
-    SSL_CTX *ssl_ctx;
+    int use_ssl;
+    x509_cert own_cert;
+    rsa_context rsa_key;
+    int *ciphers;
+    char *dhm_P;
+    char *dhm_G;
 } Server;
-
 
 Server *Server_create(const char *uuid, const char *default_host,
         const char *bind_addr, const char *port, const char *chroot,

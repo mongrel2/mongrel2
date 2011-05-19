@@ -541,8 +541,8 @@ void Connection_destroy(Connection *conn)
 }
 
 
-Connection *Connection_create(Server *srv, int fd, int rport, 
-                              const char *remote, SSL_CTX *ssl_ctx)
+Connection *Connection_create(Server *srv, int fd, int rport,
+                              const char *remote)
 {
     Connection *conn = h_calloc(sizeof(Connection), 1);
     check_mem(conn);
@@ -557,11 +557,13 @@ Connection *Connection_create(Server *srv, int fd, int rport,
     conn->req = Request_create();
     check_mem(conn->req);
 
-    if(ssl_ctx != NULL) {
+    if(srv != NULL && srv->use_ssl) {
         conn->iob = IOBuf_create(BUFFER_SIZE, fd, IOBUF_SSL);
         check(conn->iob != NULL, "Failed to create the SSL IOBuf.");
-        conn->iob->ssl = ssl_server_new(ssl_ctx, IOBuf_fd(conn->iob));
-        check(conn->iob->ssl != NULL, "Failed to create new ssl for connection");
+
+        ssl_set_own_cert(&conn->iob->ssl, &srv->own_cert, &srv->rsa_key);
+        ssl_set_dh_param(&conn->iob->ssl, srv->dhm_P, srv->dhm_G);
+        ssl_set_ciphers(&conn->iob->ssl, srv->ciphers);
     } else {
         conn->iob = IOBuf_create(BUFFER_SIZE, fd, IOBUF_SOCKET);
     }

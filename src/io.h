@@ -2,7 +2,10 @@
 #define _io_h
 
 #include <stdlib.h>
-#include <ssl/ssl.h>
+#include <polarssl/x509.h>
+#include <polarssl/rsa.h>
+#include <polarssl/ssl.h>
+#include <polarssl/havege.h>
 
 #if defined(__APPLE__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
 #include "bsd_specific.h"
@@ -44,10 +47,11 @@ typedef struct IOBuf {
     int type;
 
     int fd;
-    SSL *ssl;
-    char *ssl_buf;
-    int ssl_buf_len;
-    int ssl_did_receive;
+    int use_ssl;
+    int handshake_performed;
+    ssl_context ssl;
+    ssl_session ssn;
+    havege_state hs;
 } IOBuf;
 
 IOBuf *IOBuf_create(size_t len, int fd, IOBufType type);

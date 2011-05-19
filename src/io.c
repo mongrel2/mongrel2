@@ -7,8 +7,9 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <unistd.h>
-
-
+#include <polarssl/havege.h>
+#include <polarssl/ssl.h>
+#include <task/task.h>
 
 static ssize_t null_send(IOBuf *iob, char *buffer, int len)
 {
@@ -77,60 +78,52 @@ error:
     return -1;
 }
 
+static int ssl_fdsend_wrapper(void *p_iob, unsigned char *ubuffer, int len)
+{
+    IOBuf *iob = (IOBuf *) p_iob;
+    return fdsend(iob->fd, (char *) ubuffer, len);
+}
+
+static int ssl_fdrecv_wrapper(void *p_iob, unsigned char *ubuffer, int len)
+{
+    IOBuf *iob = (IOBuf *) p_iob;
+    return fdrecv1(iob->fd, (char *) ubuffer, len);
+}
+
+static int ssl_do_handshake(IOBuf *iob)
+{
+    int rcode;
+    check(!iob->handshake_performed, "ssl_do_handshake called unnecessarily");
+    while((rcode = ssl_handshake(&iob->ssl)) != 0) {
+        check(rcode == POLARSSL_ERR_NET_TRY_AGAIN,
+              "handshake failed with error code %d", rcode);
+    }
+    iob->handshake_performed = 1;
+    return 0;
+error:
+    return -1;
+}
+
 static ssize_t ssl_send(IOBuf *iob, char *buffer, int len)
 {
-    check(iob->ssl != NULL, "Cannot ssl_send on a iobection without ssl");
-
-    return ssl_write(iob->ssl, (const unsigned char*) buffer, len);
-
+    check(iob->use_ssl, "IOBuf not set up to use ssl");
+    if(!iob->handshake_performed) {
+        int rcode = ssl_do_handshake(iob);
+        check(rcode == 0, "handshake failed");
+    }
+    return ssl_write(&iob->ssl, (const unsigned char*) buffer, len);
 error:
     return -1;
 }
 
 static ssize_t ssl_recv(IOBuf *iob, char *buffer, int len)
 {
-    check(iob->ssl != NULL, "Cannot ssl_recv on a iobection without ssl");
-    unsigned char *read = NULL;
-    unsigned char **pread = &read;
-    int nread;
-
-    // If we didn't read all of what we recieved last time
-    if(iob->ssl_buf != NULL) {
-        if(iob->ssl_buf_len < len) {
-            nread = iob->ssl_buf_len;
-            *pread = (unsigned char *)iob->ssl_buf;
-            iob->ssl_buf_len = 0;
-            iob->ssl_buf = NULL;
-        }
-        else {
-            nread = len;
-            *pread = (unsigned char *)iob->ssl_buf;
-            iob->ssl_buf += nread;
-            iob->ssl_buf_len -= nread;
-        }
+    check(iob->use_ssl, "IOBuf not set up to use ssl");
+    if(!iob->handshake_performed) {
+        int rcode = ssl_do_handshake(iob);
+        check(rcode == 0, "handshake failed");
     }
-    else {
-        do {
-            nread = ssl_read(iob->ssl, pread);
-            if(nread > 0) iob->ssl_did_receive = 1;
-        } while(nread == SSL_OK && !iob->ssl_did_receive);
-
-        // If we got more than they asked for, we should stash it for
-        // successive calls.
-        if(nread > len) {
-            iob->ssl_buf = buffer + len;
-            iob->ssl_buf_len = nread - len;
-            nread = len;
-        }
-    }
-    if(nread <= 0) 
-        return nread;
-
-    check(*pread != NULL, "Got a NULL from ssl_read despite no error code");
-    
-    memcpy(buffer, *pread, nread);
-    return nread;
-
+    return ssl_read(&iob->ssl, (unsigned char*) buffer, len);
 error:
     return -1;
 }
@@ -178,6 +171,11 @@ error:
     return -1;
 }
 
+void ssl_debug(void *p, int level, char *msg) {
+    if(level < 2)
+        debug("polarssl: %s", msg);
+}
+
 IOBuf *IOBuf_create(size_t len, int fd, IOBufType type)
 {
     IOBuf *buf = h_calloc(sizeof(IOBuf), 1);
@@ -194,10 +192,22 @@ IOBuf *IOBuf_create(size_t len, int fd, IOBufType type)
     buf->type = type;
 
     if(type == IOBUF_SSL) {
+        buf->use_ssl = 1;
+        buf->handshake_performed = 0;
+        ssl_init(&buf->ssl);
+        ssl_set_endpoint(&buf->ssl, SSL_IS_SERVER);
+        ssl_set_authmode(&buf->ssl, SSL_VERIFY_NONE);
+        havege_init(&buf->hs);
+        ssl_set_rng(&buf->ssl, havege_rand, &buf->hs);
+        ssl_set_dbg(&buf->ssl, ssl_debug, NULL);
+        ssl_set_bio(&buf->ssl, ssl_fdrecv_wrapper, buf, 
+                    ssl_fdsend_wrapper, buf);
+        ssl_set_session(&buf->ssl, 1, 0, &buf->ssn);
+        memset(&buf->ssn, 0, sizeof(buf->ssn));
+
         buf->send = ssl_send;
         buf->recv = ssl_recv;
         buf->stream_file = ssl_stream_file;
-        buf->ssl_did_receive = 0;
     } else if(type == IOBUF_NULL) {
         buf->send = null_send;
         buf->recv = null_recv;
@@ -224,7 +234,9 @@ error:
 void IOBuf_destroy(IOBuf *buf)
 {
     if(buf) {
-        if(buf->ssl) ssl_free(buf->ssl);
+        if(buf->use_ssl) {
+            ssl_free(&buf->ssl);
+        }
         fdclose(buf->fd);
         h_free(buf);
     }

@@ -5,6 +5,7 @@
 #include <register.h>
 #include <assert.h>
 #include <mem/halloc.h>
+#include <fcntl.h>
 
 FILE *LOG_FILE = NULL;
 

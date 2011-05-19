@@ -15,7 +15,7 @@ char *test_Connection_create_destroy()
 {
     const char remote[IPADDR_SIZE];
 
-    Connection *conn = Connection_create(NULL, 0, 0, remote, NULL);
+    Connection *conn = Connection_create(NULL, 0, 0, remote);
     Connection_destroy(conn);
 
     return NULL;
@@ -25,7 +25,7 @@ char *test_Connection_deliver()
 {
     bstring t1;
     const char remote[IPADDR_SIZE];
-    Connection *conn = Connection_create(NULL, 1, 0, remote, NULL);
+    Connection *conn = Connection_create(NULL, 1, 0, remote);
 
     int rc = Connection_deliver(conn, t1 = bfromcstr("TEST"));
     // depending on the platform this will fail or not if send is allowed on files
@@ -41,7 +41,7 @@ int test_task_with_sample(const char *sample_file)
 {
     check(SRV, "Server isn't configured.");
 
-    Connection *conn = Connection_create(SRV, 12, 1400, "127.0.0.1", NULL);
+    Connection *conn = Connection_create(SRV, 12, 1400, "127.0.0.1");
     check(conn, "Failed to create the conn.");
 
     sentinel("REWRITE NEEDED");

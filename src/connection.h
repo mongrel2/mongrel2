@@ -71,7 +71,7 @@ typedef struct Connection {
 void Connection_destroy(Connection *conn);
 
 Connection *Connection_create(Server *srv, int fd, int rport,
-                              const char *remote, SSL_CTX *ctx);
+                              const char *remote);
 
 int Connection_accept(Connection *conn);
 

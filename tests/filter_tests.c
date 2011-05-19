@@ -33,7 +33,7 @@ char *test_Filter_run()
 char *test_Filter_run_chain(){
 
 	Filter_init(); /*We need a fresh new Filter storage*/
-	Connection *conn = Connection_create(NULL, 0, 80, "", NULL);
+	Connection *conn = Connection_create(NULL, 0, 80, "");
 
     int res_filter_a = Filter_load(NULL, bfromcstr("tools/filters/test_filter_a.so"));
     mu_assert(res_filter_a == 0, "Failed to load tools/filters/test_filter_a.so");
@@ -51,7 +51,7 @@ char *test_Filter_run_chain(){
 
 char *test_Filter_stop_filter_chain(){
 	Filter_init(); /*We need a fresh new Filter storage*/
-	Connection *conn = Connection_create(NULL, 0, 80, "", NULL);
+	Connection *conn = Connection_create(NULL, 0, 80, "");
 
     int res_filter_a = Filter_load(NULL, bfromcstr("tools/filters/test_filter_a.so"));
     mu_assert(res_filter_a == 0, "Failed to load tools/filters/test_filter_a.so");
