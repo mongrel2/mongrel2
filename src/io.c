@@ -171,7 +171,7 @@ error:
     return -1;
 }
 
-void ssl_debug(void *p, int level, char *msg) {
+void ssl_debug(void *p, int level, const char *msg) {
     if(level < 2)
         debug("polarssl: %s", msg);
 }
@@ -235,8 +235,10 @@ void IOBuf_destroy(IOBuf *buf)
 {
     if(buf) {
         if(buf->use_ssl) {
+            ssl_close_notify(&buf->ssl);
             ssl_free(&buf->ssl);
         }
+        
         fdclose(buf->fd);
         h_free(buf);
     }

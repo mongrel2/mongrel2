@@ -68,14 +68,114 @@ void host_destroy_cb(Route *r, RouteMap *map)
     }
 }
 
+static int Server_init_ssl(Server *srv)
+{
+    bstring certdir = NULL;
+    bstring certpath = NULL;
+    bstring keypath = NULL;
+    bstring ssl_ciphers_val = NULL;
+    char *cipher_list = NULL;
+    int *ciphers = NULL;
+    int rcode = 0;
+    
+    certdir = Setting_get_str("certdir", NULL);
+    check(certdir != NULL, "to use ssl, you must specify a certdir");
+
+    certpath = bstrcpy(certdir);
+    check_mem(certpath);
+    bconcat(certpath, srv->uuid);
+    bcatcstr(certpath, ".crt");
+
+    keypath = bstrcpy(certdir);
+    check_mem(keypath);
+    bconcat(keypath, srv->uuid);
+    bcatcstr(keypath, ".key");
+
+    rcode = x509parse_crtfile(&srv->own_cert, bdata(certpath));
+    check(rcode == 0, "Failed to load cert from %s", bdata(certpath));
+
+    rcode = x509parse_keyfile(&srv->rsa_key, bdata(keypath), NULL);
+    check(rcode == 0, "Failed to load key from %s", bdata(keypath));
+
+    ssl_ciphers_val = Setting_get_str("ssl_ciphers", NULL);
+    if(ssl_ciphers_val != NULL) {
+        int i, max_num_ciphers = 0;
+        char *s, *last = NULL;
+        while(ssl_default_ciphers[max_num_ciphers] != 0)
+            max_num_ciphers++;
+        ciphers = h_calloc(max_num_ciphers + 1, sizeof(int));
+        check_mem(ciphers);
+        
+        cipher_list = strdup(bdata(ssl_ciphers_val));
+        check_mem(cipher_list);
+
+        s = strtok_r(cipher_list, ", ", &last);
+        for(i = 0; i < max_num_ciphers && s != NULL; i++) {
+            if(!strcmp("SSL_RSA_RC4_128_MD5", s))
+                ciphers[i] = SSL_RSA_RC4_128_MD5;
+            else if(!strcmp("SSL_RSA_RC4_128_SHA", s))
+                ciphers[i] = SSL_RSA_RC4_128_SHA;
+            else if(!strcmp("SSL_RSA_DES_168_SHA", s))
+                ciphers[i] = SSL_RSA_DES_168_SHA;
+            else if(!strcmp("SSL_EDH_RSA_DES_168_SHA", s))
+                ciphers[i] = SSL_EDH_RSA_DES_168_SHA;
+            else if(!strcmp("SSL_RSA_AES_128_SHA", s))
+                ciphers[i] = SSL_RSA_AES_128_SHA;
+            else if(!strcmp("SSL_EDH_RSA_AES_128_SHA", s))
+                ciphers[i] = SSL_EDH_RSA_AES_128_SHA;
+            else if(!strcmp("SSL_RSA_AES_256_SHA", s))
+                ciphers[i] = SSL_RSA_AES_256_SHA;
+            else if(!strcmp("SSL_EDH_RSA_AES_256_SHA", s))
+                ciphers[i] = SSL_EDH_RSA_AES_256_SHA;
+            else if(!strcmp("SSL_RSA_CAMELLIA_128_SHA", s))
+                ciphers[i] = SSL_RSA_CAMELLIA_128_SHA;
+            else if(!strcmp("SSL_EDH_RSA_CAMELLIA_128_SHA", s))
+                ciphers[i] = SSL_EDH_RSA_CAMELLIA_128_SHA;
+            else if(!strcmp("SSL_RSA_CAMELLIA_256_SHA", s))
+                ciphers[i] = SSL_RSA_CAMELLIA_256_SHA;
+            else if(!strcmp("SSL_EDH_RSA_CAMELLIA_256_SHA", s))
+                ciphers[i] = SSL_EDH_RSA_CAMELLIA_256_SHA;
+            else
+                check(0, "Unrecognized cipher: %s", s);
+            s = strtok_r(NULL, ", ", &last);
+        }
+        check(s == NULL, "Specified too many (or repeated) ciphers. "
+              "If there are no repeats, please file a bug!")
+        check(i > 0, "Must specify at least one cipher "
+              "(or omit the ssl_ciphers field from your settings)");
+        ciphers[i] = 0;
+        
+        free(cipher_list); cipher_list = NULL;
+
+        srv->ciphers = ciphers;
+        hattach(ciphers, srv);
+    }
+    else {
+        srv->ciphers = ssl_default_ciphers;
+    }
+    srv->dhm_P = ssl_default_dhm_P;
+    srv->dhm_G = ssl_default_dhm_G;
+
+    srv->use_ssl = 1;
+
+    bdestroy(certpath); certpath = NULL;
+    bdestroy(keypath); keypath = NULL;
+
+    return 0;
+
+error:
+    // Do not free certfile, as we're pulling it from Settings
+    if(certpath != NULL) bdestroy(certpath);
+    if(keypath != NULL) bdestroy(keypath);
+    if(ciphers != NULL) h_free(ciphers);
+    return -1;
+}
+
 Server *Server_create(const char *uuid, const char *default_host,
         const char *bind_addr, const char *port, const char *chroot, const char *access_log,
         const char *error_log, const char *pid_file)
 {
     Server *srv = NULL;
-    bstring certdir = NULL;
-    bstring certpath = NULL;
-    bstring keypath = NULL;
     bstring use_ssl_key = NULL;
     int rcode = 0;
 
@@ -104,34 +204,8 @@ Server *Server_create(const char *uuid, const char *default_host,
     bcatcstr(use_ssl_key, ".use_ssl");
 
     if(Setting_get_int(bdata(use_ssl_key), 0)) {
-        certdir = Setting_get_str("certdir", NULL);
-        check(certdir != NULL, "to use ssl, you must specify a certdir");
-
-        certpath = bstrcpy(certdir);
-        check_mem(certpath);
-        bcatcstr(certpath, uuid);
-        bcatcstr(certpath, ".crt");
-
-        keypath = bstrcpy(certdir);
-        check_mem(keypath);
-        bcatcstr(keypath, uuid);
-        bcatcstr(keypath, ".key");
-
-        rcode = x509parse_crtfile(&srv->own_cert, bdata(certpath));
-        check(rcode == 0, "Failed to load cert from %s", bdata(certpath));
-
-        rcode = x509parse_keyfile(&srv->rsa_key, bdata(keypath), NULL);
-        check(rcode == 0, "Failed to load key from %s", bdata(keypath));
-
-        srv->ciphers = ssl_default_ciphers;
-
-        srv->dhm_P = ssl_default_dhm_P;
-        srv->dhm_G = ssl_default_dhm_G;
-
-        srv->use_ssl = 1;
-
-        bdestroy(certpath); certpath = NULL;
-        bdestroy(keypath); keypath = NULL;
+        rcode = Server_init_ssl(srv);
+        check(rcode == 0, "Failed to initialize ssl for server %s", uuid);
     }
 
     bdestroy(use_ssl_key); use_ssl_key = NULL;
@@ -141,9 +215,6 @@ Server *Server_create(const char *uuid, const char *default_host,
 error:
     Server_destroy(srv);
 
-    // Do not free certfile, as we're pulling it from Settings
-    if(certpath != NULL) bdestroy(certpath);
-    if(keypath != NULL) bdestroy(keypath);
     if(use_ssl_key != NULL) bdestroy(use_ssl_key);
     return NULL;
 }
@@ -153,6 +224,11 @@ error:
 void Server_destroy(Server *srv)
 {
     if(srv) {
+        if(srv->use_ssl) {
+            x509_free(&srv->own_cert);
+            rsa_free(&srv->rsa_key);
+            // srv->ciphers freed (if non-default) by h_free
+        }
         RouteMap_destroy(srv->hosts);
         bdestroy(srv->bind_addr);
         bdestroy(srv->uuid);
@@ -161,7 +237,6 @@ void Server_destroy(Server *srv)
         bdestroy(srv->error_log);
         bdestroy(srv->pid_file);
         bdestroy(srv->default_hostname);
-
         fdclose(srv->listen_fd);
         h_free(srv);
     }
