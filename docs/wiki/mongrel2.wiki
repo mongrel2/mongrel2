@@ -73,6 +73,7 @@ list of currently supported languages and platforms, in alphabetical order:</p>
     <li>C: <a href="https://github.com/derdewey/mongrel2_c_handler/">mongrel2_c_handler</a></li>
     <li>Clojure: <a href="http://github.com/mikejs/ring/tree/master/ring-mongrel2-adapter/">ring-mongrel2-adapter</a></li>
     <li>Common Lisp: <a href="http://github.com/vseloved/cl-mongrel2">cl-mongrel2</a> and <a href="https://github.com/galdor/m2cl">m2cl</a></li>
+    <li>Scheme: <a href="http://wiki.call-cc.org/eggref/4/mongrel2">Mongrel2 for Chicken Scheme</a></li>
     <li>Haskell: <a href="http://github.com/cmoore/web-mongrel2">web-mongrel2</a></li>
     <li>Java: <a href="https://github.com/kwo/mojaha">MoJaHa</a> and <a href="https://github.com/asinger/mongrel2j">Mongrel2J</a></li>
     <li>Lua: <a href="http://github.com/jsimmons/mongrel2-lua/">mongrel2-lua</a></li>
