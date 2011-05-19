@@ -9,7 +9,7 @@ technologies. <img src="http://mongrel2.org/static/logo.png" align="right"></p>
 <h2><a name="features">Features</a></h2>
 
 <ul>
-    <li><b>Language Agnostic</b> with a simple backend protocol supporting <a href="#languages">16 languages and platforms</a> all written by Mongrel2 fans.</li>
+    <li><b>Language Agnostic</b> with a simple backend protocol supporting <a href="#languages">17 languages and platforms</a> all written by Mongrel2 fans.</li>
     <li><b>Modern Browser Friendly</b> designed to handle HTTP, Flash XMLSockets, or WebSockets, Long Polling on the same socket transparently.</li>
     <li><b><a href="http://zeromq.org">ZeroMQ</a> Enabled</b> as well as HTTP proxy support so it works with what you have already while giving you new super powers.</li>
     <li><b>Network Architecture Agnostic</b> so you can carve your operations up anyway that reduces costs.</li>
