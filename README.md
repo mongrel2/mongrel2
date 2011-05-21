@@ -13,7 +13,7 @@ Features
   WebSockets, Long Polling on the same socket transparently.
 * ZeroMQ Enabled as well as HTTP proxy support so it works with what you have
   already while giving you new super powers.
-* Network Architecture Agnostic so you can carve your operations up anyway that
+* Network Architecture Agnostic so you can carve your operations up any way that
   reduces costs.
 * N:M Messaging Patterns means you can have any N handlers answer to any M
   browsers arbitrarily, but still easy to do plain request/response.
@@ -23,10 +23,10 @@ Features
   companies with a proven security track record, event based I/O, fast
   coroutines to handle that I/O, and smart reasonable defaults with zero
   configuration needed usually.
-* Documented, Documented, Documented We document everything in a well written
+* Documented, Documented, Documented. We document everything in a well written
   manual that shows you how to use every feature.
 * BSD Licensed and all with a BSD 3-clause license.
-* Tir An official framework written in Lua that shows how to use Mongrel2 to
+* Tir -- An official framework written in Lua that shows how to use Mongrel2 to
   create other frameworks for PHP, Python, etc.
 
 Download
