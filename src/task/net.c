@@ -8,6 +8,7 @@
 #include <netinet/tcp.h>
 #include <sys/poll.h>
 #include <stdio.h>
+#include <arpa/inet.h>
 
 /* 
  * The getaddrinfo family suggests we called socket functions in a cycle 
