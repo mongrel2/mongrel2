@@ -2,10 +2,14 @@ CFLAGS=-g -O2 -Wall -Isrc -rdynamic -DNDEBUG $(OPTFLAGS)
 LIBS=-lzmq -ldl -lsqlite3 $(OPTLIBS)
 PREFIX?=/usr/local
 
+get_objs = $(addsuffix .o,$(basename $(wildcard $(1))))
+
 ASM=$(wildcard src/**/*.S src/*.S)
 RAGEL_TARGETS=src/state.c src/http11/http11_parser.c
 SOURCES=$(wildcard src/**/*.c src/*.c) $(RAGEL_TARGETS)
 OBJECTS=$(patsubst %.c,%.o,${SOURCES}) $(patsubst %.S,%.o,${ASM})
+OBJECTS_EXTERNAL+=$(call get_objs,src/polarssl/*.c)
+OBJECTS_NOEXT=$(filter-out ${OBJECTS_EXTERNAL},${OBJECTS})
 LIB_SRC=$(filter-out src/mongrel2.c,${SOURCES})
 LIB_OBJ=$(filter-out src/mongrel2.o,${OBJECTS})
 TEST_SRC=$(wildcard tests/*.c)
@@ -15,6 +19,8 @@ all: bin/mongrel2 tests m2sh
 
 dev: CFLAGS=-g -Wall -Isrc -Wall -Wextra $(OPTFLAGS)
 dev: all
+
+${OBJECTS_NOEXT}: CFLAGS += ${NOEXTCFLAGS}
 
 bin/mongrel2: build/libm2.a src/mongrel2.o
 	$(CC) $(CFLAGS) src/mongrel2.o -o $@ $< $(LIBS)
@@ -71,10 +77,10 @@ check:
 	@egrep '[^_.>a-zA-Z0-9](str(n?cpy|n?cat|xfrm|n?dup|str|pbrk|tok|_)|stpn?cpy|a?sn?printf|byte_)' $(filter-out src/bstr/bsafe.c,${SOURCES})
 
 m2sh: 
-	${MAKE} OPTFLAGS="${OPTFLAGS}" OPTLIBS="${OPTLIBS}" -C tools/m2sh all
+	${MAKE} OPTFLAGS="${NOEXTCFLAGS} ${OPTFLAGS}" OPTLIBS="${OPTLIBS}" LIBS="${LIBS}" -C tools/m2sh all
 
 filters: 
-	${MAKE} OPTFLAGS="${OPTFLAGS}" OPTLIBS="${OPTLIBS}" -C tools/filters all
+	${MAKE} OPTFLAGS="${NOEXTCFLAGS} ${OPTFLAGS}" OPTLIBS="${OPTLIBS}" LIBS="${LIBS}" -C tools/filters all
 
 install: all install-bin install-m2sh
 
@@ -100,14 +106,15 @@ valgrind:
 %.o: %.S
 	$(CC) $(CFLAGS) -c $< -o $@
 
-coverage: CFLAGS += -fprofile-arcs -ftest-coverage
+coverage: NOEXTCFLAGS += -fprofile-arcs -ftest-coverage
+coverage: LIBS += -lgcov
 coverage: LDFLAGS += -fprofile-arcs
 coverage: clean all coverage_report
 
 coverage_report:
 	rm -rf tests/m2.zcov tests/coverage
 	zcov-scan tests/m2.zcov
-	zcov-genhtml tests/m2.zcov tests/coverage
+	zcov-genhtml --root $(CURDIR) tests/m2.zcov tests/coverage
 	zcov-summarize tests/m2.zcov
 
 system_tests:
