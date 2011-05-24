@@ -19,7 +19,7 @@ dev: all
 bin/mongrel2: build/libm2.a src/mongrel2.o
 	$(CC) $(CFLAGS) src/mongrel2.o -o $@ $< $(LIBS)
 
-build/libm2.a: OPTFLAGS = -fPIC
+build/libm2.a: OPTFLAGS += -fPIC
 build/libm2.a: build ${LIB_OBJ}
 	ar rcs $@ ${LIB_OBJ}
 	ranlib $@
@@ -123,25 +123,25 @@ manual:
 	${MAKE} -C output/docs/manual book-final.pdf
 	${MAKE} -C output/docs/manual draft
 
-netbsd: OPTFLAGS=-I/usr/local/include -I/usr/pkg/include
-netbsd: OPTLIBS=-L/usr/local/lib -L/usr/pkg/lib
+netbsd: OPTFLAGS += -I/usr/local/include -I/usr/pkg/include
+netbsd: OPTLIBS += -L/usr/local/lib -L/usr/pkg/lib
 netbsd: dev
 
 
-freebsd: OPTFLAGS=-I/usr/local/include
-freebsd: OPTLIBS=-L/usr/local/lib -pthread
+freebsd: OPTFLAGS += -I/usr/local/include
+freebsd: OPTLIBS += -L/usr/local/lib -pthread
 freebsd: all
 
-openbsd: OPTFLAGS=-I/usr/local/include
-openbsd: OPTLIBS=-L/usr/local/lib -pthread
+openbsd: OPTFLAGS += -I/usr/local/include
+openbsd: OPTLIBS += -L/usr/local/lib -pthread
 openbsd: all
 
-solaris: OPTFLAGS=-I/usr/local/include
-solaris: OPTLIBS=-L/usr/local/lib -R/usr/local/lib -lsocket -lnsl -lsendfile
+solaris: OPTFLAGS += -I/usr/local/include
+solaris: OPTLIBS += -L/usr/local/lib -R/usr/local/lib -lsocket -lnsl -lsendfile
 solaris: all
 
 
-macports: OPTFLAGS=-I/opt/local/include
-macports: OPTLIBS=-L/opt/local/lib
+macports: OPTFLAGS += -I/opt/local/include
+macports: OPTLIBS += -L/opt/local/lib
 macports: all
 
