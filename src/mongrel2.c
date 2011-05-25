@@ -166,13 +166,16 @@ error:
 
 void tickertask(void *v)
 {
-    while(1) {
+    taskname("ticker");
+
+    while(!task_was_signaled()) {
         THE_CURRENT_TIME_IS = time(NULL);
 
         int min_wait = Setting_get_int("limits.tick_timer", 10);
         debug("Waiting to do timeout check for: %d", min_wait);
 
         taskdelay(min_wait * 1000);
+        debug("BACK FROM TASK DELAY: signal=%d", task_was_signaled());
 
         // don't bother if these are all 0
         int min_ping = Setting_get_int("limits.min_ping", DEFAULT_MIN_PING);
@@ -272,13 +275,16 @@ void complete_shutdown(Server *srv)
 {
     fdclose(srv->listen_fd);
     Config_stop_all();
-    fdsignal();
-    log_info("Waiting for connections to die: %d", taskwaiting());
+    int attempts = 0;
+    taskallsignal(SIGTERM);
 
-    while(taskwaiting() > 0 && !MURDER) {
-        log_info("Waiting for connections to die: %d", taskwaiting());
-        taskdelay(1000);
+    // we will always be the last task, so wait until only 1 is running, us
+    for(attempts = 0; tasksrunning() > 1 && attempts < 20; attempts++) {
+        taskallsignal(SIGTERM);
+        log_info("Waiting for connections to die: %d", tasksrunning());
     }
+
+    log_info("Tasks now running: %d", tasksrunning());
 
     MIME_destroy();
     Control_port_stop();

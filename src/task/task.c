@@ -49,7 +49,7 @@ static Task* taskalloc(void (*fn)(void*), void *arg, uint stack)
     ulong z = 0L;
 
     /* allocate the task and stack together */
-    t = calloc(sizeof *t+stack, 1);
+    t = calloc(sizeof(Task) + stack, 1);
     check_mem(t);
 
     t->stk = (uchar*)(t+1);
@@ -59,7 +59,6 @@ static Task* taskalloc(void (*fn)(void*), void *arg, uint stack)
     t->startarg = arg;
 
     /* do a reasonable initialization */
-    memset(&t->context.uc, 0, sizeof t->context.uc);
     sigemptyset(&zero);
     sigprocmask(SIG_BLOCK, &zero, &t->context.uc.uc_sigmask);
 
@@ -174,6 +173,19 @@ static void contextswitch(Context *from, Context *to)
     }
 }
 
+int tasksrunning()
+{
+    int i = 0;
+
+    debug("Tasks running nalltask=%d, taskcount=%d", nalltask, taskcount);
+    for(i = 0; i < nalltask; i++) {
+        debug("RUNNING id=%d:%p", alltask[i]->id, alltask[i]);
+    }
+
+    return nalltask;
+}
+
+
 static void taskscheduler(void)
 {
     int i = 0;
@@ -186,8 +198,18 @@ static void taskscheduler(void)
 
         t = taskrunqueue.head;
 
+        if(t == NULL) {
+            debug("Nothing runnable, here's the tasks that are stalled (%d,%d):", nalltask, taskcount);
+            for(i = 0; i < nalltask; i++) {
+                debug("STALLED id=%d:%p", alltask[i]->id, alltask[i]);
+            }
+        }
+
         check(t != NULL, "No runnable tasks, %d tasks stalled", taskcount);
 
+        if(LOG_FILE) {
+            debug("DELETING TASK: %p", t);
+        }
         deltask(&taskrunqueue, t);
 
         t->ready = 0;
@@ -205,17 +227,13 @@ static void taskscheduler(void)
             i = t->alltaskslot;
             alltask[i] = alltask[--nalltask];
             alltask[i]->alltaskslot = i;
+            debug("REMOVED EXITING TASK: id=%d at %p", t->id, t);
             free(t);
         }
     }
 
 error:
     abort();
-}
-
-void** taskdata(void)
-{
-    return &taskrunning->udata;
 }
 
 /*
@@ -263,18 +281,20 @@ tns_value_t *taskgetinfo(void)
     int i = 0;
     Task *t = NULL;
     tns_value_t *rows = tns_new_list();
-    char* extra = NULL;
+    char* status = NULL;
 
     for(i = 0; i < nalltask; i++)
     {
         t = alltask[i];
 
         if(t == taskrunning) {
-            extra = "running";
+            status = "running";
         } else if(t->ready) {
-            extra = "ready";
+            status = "ready";
+        } else if(t->exiting) {
+            status = "exiting";
         } else {
-            extra = "idle";
+            status = "idle";
         }
 
         tns_value_t *el = tns_new_list();
@@ -282,7 +302,7 @@ tns_value_t *taskgetinfo(void)
         tns_add_to_list(el, t->system ? tns_get_true() : tns_get_false());
         tns_add_to_list(el, tns_parse_string(t->name, strlen(t->name)));
         tns_add_to_list(el, tns_parse_string(t->state, strlen(t->state)));
-        tns_add_to_list(el, tns_parse_string(extra, strlen(extra)));
+        tns_add_to_list(el, tns_parse_string(status, strlen(status)));
 
         tns_add_to_list(rows, el);
     }
@@ -316,7 +336,7 @@ int main(int argc, char **argv)
     taskcreate(taskmainstart, NULL, MAINSTACKSIZE);
     taskscheduler();
 
-    log_err("taskscheduler returned in main!\n");
+    fprintf(stderr, "taskscheduler returned in main!\n");
     abort();
 
     return 0;
@@ -327,6 +347,12 @@ int main(int argc, char **argv)
  */
 void addtask(Tasklist *l, Task *t)
 {
+    Task *test = NULL;
+    for(test = taskrunqueue.head; test != NULL; test = test->next)
+    {
+        assert(test != t && "Fucking double addtask mother fucker!");
+    }
+
     if(l->tail) {
         l->tail->next = t;
         t->prev = l->tail;
@@ -352,6 +378,9 @@ void deltask(Tasklist *l, Task *t)
     } else {
         l->tail = t->prev;
     }
+
+    t->next = NULL;
+    t->prev = NULL;
 }
 
 unsigned int taskid(void)
@@ -368,4 +397,70 @@ Task *taskself()
 unsigned int  taskgetid(Task *task)
 {
     return task->id;
+}
+
+int tasksignal(Task *task, int signal)
+{
+    check(task != NULL, "Task was NULL, that's really bad.");
+    check(signal > 0, "Signal has to be greater than 0.");
+
+    task->signal = signal;
+    taskready(task);
+
+    return 0;
+error:
+    return -1;
+}
+
+int taskallsignal(int signal)
+{
+    debug("Sending %d to all tasks.", signal);
+    int i = 0;
+    Task *t = NULL;
+    check(signal > 0, "Signal must be greater than 0.");
+
+    if(FDTASK != NULL) {
+        debug("MAKE THE FDTASK SIGNAL FIRST");
+        FDTASK->signal = signal;
+        taskdelay(1);
+        debug("BACK NOW CLEAR THE REST.");
+    }
+
+    // first signal everything that's already running
+    for(t = taskrunqueue.head; t != NULL ; t = t->next) {
+        if(t != FDTASK && !t->exiting && t->signal == 0) {
+            debug("SIGNAL RUNNING: id=%d, %p", t->id, t);
+            t->signal = signal;
+        }
+    }
+
+    // then signal the tasks that are idle
+    for(i = 0; i < nalltask; i++)
+    {
+        t = alltask[i];
+        // don't signal any exiting tasks, ourself, or ones that are already signaled
+        if(t != NULL && !t->exiting && t != taskrunning && t->signal == 0 && t->next == NULL && t->prev == NULL) {
+            debug("SIGNAL IDLE: id=%d, %p", t->id, t);
+            t->signal = signal;
+            taskready(t);
+        }
+    }
+
+    while((i = taskyield()) > 0) {
+        debug("BACK FROM THE FINAL SWITCH! TASK YIELD: %d", i);
+    }
+
+    return 0;
+error:
+    return -1;
+}
+
+int task_was_signaled()
+{
+    return taskrunning->signal;
+}
+
+void task_clear_signal()
+{
+    taskrunning->signal = 0;
 }

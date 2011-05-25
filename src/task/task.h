@@ -41,7 +41,7 @@ unsigned int  taskdelay(unsigned int);
 unsigned int  taskid(void);
 unsigned int  taskgetid(Task *task);
 int taskwaiting();
-
+int tasksrunning();
 void taskready(Task *t);
 Task *taskself();
 void taskswitch();
@@ -51,6 +51,13 @@ struct Tasklist  /* used internally */
   Task  *head;
   Task  *tail;
 };
+
+/** Signal management. **/
+
+int tasksignal(Task *task, int signal);
+int task_was_signaled();
+void task_clear_signal();
+int taskallsignal(int signal);
 
 /*
  * queuing locks
@@ -115,7 +122,8 @@ int fdsend(int, void*, int);
 int fdrecv(int, void*, int);
 int fdwait(int, int);
 int fdnoblock(int);
-void fdsignal();
+
+extern Task *FDTASK;
 
 #define fdclose(fd) if(fd >= 0) close(fd)
 

@@ -129,8 +129,6 @@ struct Task
     char    state[MAX_STATE_LENGTH];
     Task    *next;
     Task    *prev;
-    Task    *allnext;
-    Task    *allprev;
     Context    context;
     uvlong    alarmtime;
     uint    id;
@@ -142,7 +140,7 @@ struct Task
     int    ready;
     void    (*startfn)(void*);
     void    *startarg;
-    void    *udata;
+    int signal;
 };
 
 void    taskready(Task*);

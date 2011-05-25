@@ -17,6 +17,7 @@ static Tasklist sleeping;
 static int sleepingcounted;
 static uvlong nsec(void);
 SuperPoll *POLL = NULL;
+Task *FDTASK;
 
 void *ZMQ_CTX = NULL;
 
@@ -25,8 +26,6 @@ int FDSTACK= 100 * 1024;
 #ifndef MSG_NOSIGNAL
 #define MSG_NOSIGNAL 0
 #endif
-
-int SIGNALED = 0;
 
 void mqinit(int threads)
 {
@@ -78,12 +77,30 @@ static inline void wake_sleepers()
     }
 }
 
+static inline void fdtask_shutdown(int signal)
+{
+    int i = 0;
+    debug("WE GOT SIGNALED: %d I AM id=%d", taskrunning->signal, taskrunning->id);
+
+    for(i = 0; i < SuperPoll_active_hot(POLL); i++) {
+        SuperPoll_compact_down(POLL, i);
+    }
+
+    // move all our sleeping tasks over to the main runqueue
+    Task *t = NULL;
+    while((t = sleeping.head)){
+        deltask(&sleeping, t);
+        tasksignal(t, task_was_signaled());
+    }
+}
+
 void
 fdtask(void *v)
 {
     int i, ms;
     PollResult result;
     int rc = 0;
+    FDTASK = taskself();
     
     rc = PollResult_init(POLL, &result);
     check(rc == 0, "Failed to initialize the poll result.");
@@ -96,17 +113,16 @@ fdtask(void *v)
         while(taskyield() > 0)
             ;
         /* we're the only one runnable - poll for i/o */
+
         errno = 0;
         taskstate("poll");
 
         ms = next_task_sleeptime(500);
 
-        if(SIGNALED) {
-            for(i = 0; i < SuperPoll_active_hot(POLL); i++) {
-                Task *target = (Task *)SuperPoll_data(POLL, i);
-                if(target) taskready(target);
-                SuperPoll_compact_down(POLL, i);
-            }
+        if(task_was_signaled()) {
+            fdtask_shutdown(task_was_signaled());
+            task_clear_signal();
+            break;
         } else {
             rc = SuperPoll_poll(POLL, &result, ms);
             check(rc != -1, "SuperPoll failure, aborting.");
@@ -114,13 +130,15 @@ fdtask(void *v)
             for(i = 0; i < rc; i++) {
                 taskready(result.hits[i].data); 
             }
+
+            wake_sleepers();
         }
 
-        wake_sleepers();
     }
 
     PollResult_clean(&result);
-    taskexit(0);
+    FDTASK = NULL;
+    return;
 
 error:
     taskexitall(1);
@@ -212,11 +230,14 @@ int _wait(void *socket, int fd, int rw)
     max = SuperPoll_add(POLL, (void *)taskrunning, socket, fd, rw, hot_add);
     check(max != -1, "Error adding fd: %d or socket: %p to task wait list.", fd, socket);
 
+    debug("ENTER SWITCH!");
     taskswitch();
 
-    if(SIGNALED) {
+    debug("WOKE UP IN WAIT");
+    if(task_was_signaled()) {
+        debug("GOT SIGNAL %d AFTER WAIT", taskrunning->signal);
         return -1;
-    } else if(was_registered && Register_fd_exists(fd) == NULL) {
+    } if(was_registered && Register_fd_exists(fd) == NULL) {
         debug("Socket %d was closed after a wait.", fd);
         return -1;
     } else {
@@ -404,9 +425,4 @@ static uvlong nsec(void)
 }
 
 
-void fdsignal()
-{
-    SIGNALED = 1;
-    taskdelay(1);
-}
 

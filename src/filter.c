@@ -1,5 +1,3 @@
-#undef NDEBUG
-
 #include "filter.h"
 #include "adt/darray.h"
 #include "mem/halloc.h"
