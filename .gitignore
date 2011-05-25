@@ -28,3 +28,10 @@ tools/m2sh/tests/tests.log
 run/*
 logs/*
 tmp/*
+
+#Coverage generated files
+*.zcov
+tests/coverage
+*.gcno
+*.gcda
+
