@@ -34,4 +34,4 @@ tmp/*
 tests/coverage
 *.gcno
 *.gcda
-
+*.dSYM
