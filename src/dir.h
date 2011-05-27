@@ -44,9 +44,12 @@
 #include <unistd.h>
 #include <request.h>
 #include <connection.h>
+#include "version.h"
 
 extern int MAX_SEND_BUFFER;
 extern int MAX_DIR_PATH;
+
+extern const char *RESPONSE_FORMAT;
 
 typedef struct FileRecord {
     int is_dir;

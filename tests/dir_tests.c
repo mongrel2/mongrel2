@@ -114,6 +114,40 @@ char *test_Dir_serve_file()
     return NULL;
 }
 
+char *test_Dir_serve_big_files(){
+
+  struct stat less2gb;
+  less2gb.st_size = 1564355066; /* ~1.5GB */
+
+  struct stat more2gb;
+  more2gb.st_size = 399560397; /* ~4GB */
+  
+  char *LESS_2GB = "HTTP/1.1 200 OK\r\n"
+    "Date: \r\n"
+    "Content-Type: \r\n"
+    "Content-Length: 1564355066\r\n"
+    "Last-Modified: \r\n"
+    "ETag: \r\n"
+    "Server: " VERSION
+    "\r\n\r\n";
+  
+  char *MORE_2GB = "HTTP/1.1 200 OK\r\n"
+    "Date: \r\n"
+    "Content-Type: \r\n"
+    "Content-Length: 399560397\r\n"
+    "Last-Modified: \r\n"
+    "ETag: \r\n"
+    "Server: " VERSION
+    "\r\n\r\n";
+
+  bstring response_less_2gb = bformat(RESPONSE_FORMAT, "", "", less2gb.st_size, "", "");
+  bstring response_more_2gb = bformat(RESPONSE_FORMAT, "", "", more2gb.st_size, "", "");
+
+  mu_assert(bstrcmp(response_less_2gb, bfromcstr(LESS_2GB)) == 0, "Wrong size for <2GB files");
+  mu_assert(bstrcmp(response_more_2gb,  bfromcstr(MORE_2GB)) == 0, "Wrong size for >2GB files");
+  return NULL;
+}
+
 char * all_tests() {
     mu_suite_start();
     Register_init();
@@ -121,6 +155,7 @@ char * all_tests() {
     mu_run_test(test_Dir_find_file);
     mu_run_test(test_Dir_serve_file);
     mu_run_test(test_Dir_resolve_file);
+    mu_run_test(test_Dir_serve_big_files);
 
     return NULL;
 }
