@@ -162,15 +162,15 @@ int Dir_stream_file(FileRecord *file, Connection *conn)
     int rc = Dir_send_header(file, conn);
     check_debug(rc, "Failed to write header to socket.");
 
-    sent = IOBuf_stream_file(conn->iob, file->fd, file->sb.st_size);
+    sent = IOBuf_stream_file(conn->iob, file->fd, file->file_size);
 
-    check(sent <= file->sb.st_size,
-            "Wrote way too much, wrote %d but size was %d",
-            (int)sent, (int)file->sb.st_size);
+    check(sent <= file->file_size,
+            "Wrote way too much, wrote %llu but size was %llu",
+            sent, file->file_size);
 
-    check(sent == file->sb.st_size,
-            "Sent other than expected, sent: %d, but expected: %d",
-            (int)sent, (int)file->sb.st_size);
+    check(sent == file->file_size,
+            "Sent other than expected, sent: %llu, but expected: %llu",
+            sent, file->file_size);
 
     return sent;
 
