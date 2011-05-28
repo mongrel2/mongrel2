@@ -21,6 +21,23 @@ char *test_Dir_find_file()
     return NULL;
 }
 
+char *test_Dir_find_file_isdir(){
+
+    bstring ctype = NULL;
+
+    FileRecord *file = Dir_find_file(bfromcstr("tests/"),
+            ctype = bfromcstr("text/plain"));
+
+    mu_assert(file != NULL, "Failed to find the directory.");
+    mu_assert(file->is_dir == 1, "Did not recognized it's a directory");
+
+    FileRecord_destroy(file);
+    bdestroy(ctype);
+
+
+	return NULL;
+}
+
 
 char *test_Dir_resolve_file()
 {
@@ -156,6 +173,7 @@ char * all_tests() {
     mu_run_test(test_Dir_serve_file);
     mu_run_test(test_Dir_resolve_file);
     mu_run_test(test_Dir_serve_big_files);
+    mu_run_test(test_Dir_find_file_isdir);
 
     return NULL;
 }
