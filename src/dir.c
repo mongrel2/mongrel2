@@ -59,6 +59,17 @@ const char *RESPONSE_FORMAT = "HTTP/1.1 200 OK\r\n"
     "Server: " VERSION
     "\r\n\r\n";
 
+const char *CHUNKED_RESPONSE_FORMAT = "HTTP/1.1 200 OK\r\n"
+    "Date: %s\r\n"
+    "Content-Type: %s\r\n"
+    "Content-Length: %llu\r\n"
+	"Transfer-Encoding: chunked\r\n"
+    "Last-Modified: %s\r\n"
+    "ETag: %s\r\n"
+    "Server: " VERSION
+    "\r\n\r\n";
+
+
 const char *DIR_REDIRECT_FORMAT = "HTTP/1.1 301 Moved Permanently\r\n"
     "Location: http://%s%s/\r\n"
     "Content-Length: 0\r\n"
@@ -123,7 +134,7 @@ FileRecord *Dir_find_file(bstring path, bstring default_type)
 
     fr->etag = bformat("%x-%x", fr->sb.st_mtime, fr->file_size);
 
-    fr->header = bformat(RESPONSE_FORMAT,
+    fr->header = bformat(fr->file_size >= _2GB ? CHUNKED_RESPONSE_FORMAT : RESPONSE_FORMAT,
         bdata(fr->date),
         bdata(fr->content_type),
         fr->file_size,

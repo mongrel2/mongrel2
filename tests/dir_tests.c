@@ -152,16 +152,19 @@ char *test_Dir_serve_big_files(){
     "Date: \r\n"
     "Content-Type: \r\n"
     "Content-Length: 399560397\r\n"
+	"Transfer-Encoding: chunked\r\n"
     "Last-Modified: \r\n"
     "ETag: \r\n"
     "Server: " VERSION
     "\r\n\r\n";
 
   bstring response_less_2gb = bformat(RESPONSE_FORMAT, "", "", less2gb.st_size, "", "");
-  bstring response_more_2gb = bformat(RESPONSE_FORMAT, "", "", more2gb.st_size, "", "");
+  bstring response_more_2gb = bformat(CHUNKED_RESPONSE_FORMAT, "", "", more2gb.st_size, "", "");
 
-  mu_assert(bstrcmp(response_less_2gb, bfromcstr(LESS_2GB)) == 0, "Wrong size for <2GB files");
-  mu_assert(bstrcmp(response_more_2gb,  bfromcstr(MORE_2GB)) == 0, "Wrong size for >2GB files");
+  mu_assert(bstrcmp(response_less_2gb, bfromcstr(LESS_2GB)) == 0, "Wrong response headers for <2GB files");
+  printf("MORE_2GB=%s\n", MORE_2GB);
+  printf("RESPONSE=%s\n", bdata(response_more_2gb));
+  mu_assert(bstrcmp(response_more_2gb,  bfromcstr(MORE_2GB)) == 0, "Wrong response headers for >2GB files");
   return NULL;
 }
 

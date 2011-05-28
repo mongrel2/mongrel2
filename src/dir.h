@@ -46,10 +46,14 @@
 #include <connection.h>
 #include "version.h"
 
+#define _2GB 1024*1024*2
+
 extern int MAX_SEND_BUFFER;
 extern int MAX_DIR_PATH;
 
 extern const char *RESPONSE_FORMAT;
+extern const char *CHUNKED_RESPONSE_FORMAT;
+
 
 typedef struct FileRecord {
     int is_dir;
