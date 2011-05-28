@@ -64,6 +64,7 @@ typedef struct FileRecord {
     bstring full_path;
     bstring etag;
     struct stat sb;
+    long long unsigned int file_size;
 } FileRecord;
 
 typedef struct Dir {

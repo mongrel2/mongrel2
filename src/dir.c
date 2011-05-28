@@ -31,7 +31,7 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
+#define _LARGEFILE64_SOURCE
 #include <dir.h>
 #include <cache.h>
 #include <fcntl.h>
@@ -99,8 +99,11 @@ FileRecord *Dir_find_file(bstring path, bstring default_type)
         return fr;
     }
 
-    fr->fd = open(p, O_RDONLY);
+    fr->fd = open(p, O_RDONLY | O_LARGEFILE);
     check(fr->fd >= 0, "Failed to open file but stat worked: %s", bdata(path));
+
+    fr->file_size = lseek(fr->fd, 0L, SEEK_END);
+    lseek(fr->fd, 0L, SEEK_SET);
 
     fr->loaded = time(NULL);
 
@@ -118,12 +121,12 @@ FileRecord *Dir_find_file(bstring path, bstring default_type)
 
     fr->date = bStrfTime(RFC_822_TIME, gmtime(&now));
 
-    fr->etag = bformat("%x-%x", fr->sb.st_mtime, fr->sb.st_size);
+    fr->etag = bformat("%x-%x", fr->sb.st_mtime, fr->file_size);
 
     fr->header = bformat(RESPONSE_FORMAT,
         bdata(fr->date),
         bdata(fr->content_type),
-        fr->sb.st_size,
+        fr->file_size,
         bdata(fr->last_mod),
         bdata(fr->etag));
 
