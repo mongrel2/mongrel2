@@ -46,7 +46,7 @@
 #include <connection.h>
 #include "version.h"
 
-#define _2GB 1024*1024*2
+extern long long unsigned int _1GB;
 
 extern int MAX_SEND_BUFFER;
 extern int MAX_DIR_PATH;
@@ -88,7 +88,7 @@ void Dir_destroy(Dir *dir);
 
 FileRecord *Dir_find_file(bstring path, bstring default_type);
 
-int Dir_stream_file(FileRecord *file, Connection *conn);
+long long int Dir_stream_file(FileRecord *file, Connection *conn);
 
 int Dir_serve_file(Dir *dir, Request *req, Connection *conn);
 

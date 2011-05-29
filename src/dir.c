@@ -47,6 +47,7 @@
 
 int MAX_DIR_PATH = 0;
 int MAX_SEND_BUFFER = 0;
+long long unsigned int _1GB = 1024*1024*1024;
 
 struct tagbstring ETAG_PATTERN = bsStatic("[a-e0-9]+-[a-e0-9]+");
 
@@ -134,7 +135,7 @@ FileRecord *Dir_find_file(bstring path, bstring default_type)
 
     fr->etag = bformat("%x-%x", fr->sb.st_mtime, fr->file_size);
 
-    fr->header = bformat(fr->file_size >= _2GB ? CHUNKED_RESPONSE_FORMAT : RESPONSE_FORMAT,
+    fr->header = bformat(fr->file_size > _1GB ? CHUNKED_RESPONSE_FORMAT : RESPONSE_FORMAT,
         bdata(fr->date),
         bdata(fr->content_type),
         fr->file_size,
@@ -155,24 +156,49 @@ static inline int Dir_send_header(FileRecord *file, Connection *conn)
     return IOBuf_send(conn->iob, bdata(file->header), blength(file->header));
 }
 
-int Dir_stream_file(FileRecord *file, Connection *conn)
+long long int Dir_stream_file(FileRecord *file, Connection *conn)
 {
-    ssize_t sent = 0;
+    long long int sent = 0;
+    long long int total = 0;
 
     int rc = Dir_send_header(file, conn);
     check_debug(rc, "Failed to write header to socket.");
 
-    sent = IOBuf_stream_file(conn->iob, file->fd, file->file_size);
+    if (file->file_size <= _1GB){
+      sent = IOBuf_stream_file(conn->iob, file->fd, file->file_size);
+    }else {
+      debug("File is bigger than 1GB: %llu", file->file_size);
+      int to_send = 0;
+      bstring chunk_data;
+      total = file->file_size;
+      while (total > 0){
+        to_send = total > _1GB ? _1GB : total;
+        chunk_data = bformat("%x\r\n", to_send);
+        debug("sending chunk: size=%d", to_send);
 
-    check(sent <= file->file_size,
-            "Wrote way too much, wrote %llu but size was %llu",
-            sent, file->file_size);
+        /* chunk start */
+        sent = IOBuf_send(conn->iob, bdata(chunk_data), blength(chunk_data));
+        check(sent > 0, "Failed sending start of chunk");
 
-    check(sent == file->file_size,
+        debug("Sending file bytes: %d", to_send);
+        sent = IOBuf_stream_file(conn->iob, file->fd, to_send);
+        check(sent > 0, "Failed sending chunk content: IOBuf_stream_file returned %d ", sent);
+
+        total -= sent;
+
+        /* chunk end */
+        IOBuf_send(conn->iob, "\r\n", 2);
+    	}
+
+      /* Send the last chunk */
+      IOBuf_send(conn->iob, "0\r\n\r\n", 5);
+    }
+
+    check(total == 0,
             "Sent other than expected, sent: %llu, but expected: %llu",
-            sent, file->file_size);
+            (file->file_size - total), file->file_size);
 
-    return sent;
+    return file->file_size;
 
 error:
     return -1;
@@ -479,7 +505,7 @@ int Dir_serve_file(Dir *dir, Request *req, Connection *conn)
     check(prefix != NULL, "Request without a prefix hit.");
     check(dir->running, "Directory is not running anymore.");
 
-    int rc = 0;
+    long long int rc = 0;
     int is_get = biseq(req->request_method, &HTTP_GET);
     int is_head = is_get ? 0 : biseq(req->request_method, &HTTP_HEAD);
 
@@ -501,7 +527,7 @@ int Dir_serve_file(Dir *dir, Request *req, Connection *conn)
         } else if(is_get) {
             rc = Dir_stream_file(file, conn);
             req->response_size = rc;
-            check_debug(rc == file->sb.st_size, "Didn't send all of the file, sent %d of %s.", rc, bdata(path));
+            check_debug(rc == file->file_size, "Didn't send all of the file, sent %ll of %s.", rc, bdata(path));
         } else if(is_head) {
             rc = Dir_send_header(file, conn);
             check_debug(rc, "Failed to write header to socket.");
