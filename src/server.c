@@ -310,9 +310,6 @@ void Server_start(Server *srv)
 
 int Server_add_host(Server *srv, Host *host)
 {
-    debug("ADDING HOST %p TO SERVER %p on pattern %s",
-            host, srv, bdata(pattern));
-
     check(host->matching != NULL, "Host's matching can't be NULL.");
     return RouteMap_insert_reversed(srv->hosts, host->matching, host);
 error:
