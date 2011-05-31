@@ -133,22 +133,22 @@ char *test_Dir_serve_file()
 
 char *test_Dir_serve_big_files(){
 
-  struct stat less2gb;
-  less2gb.st_size = 1564355066; /* ~1.5GB */
+  struct stat less1gb;
+  less1gb.st_size = 858993459; /* ~1.5GB */
 
-  struct stat more2gb;
-  more2gb.st_size = 399560397; /* ~4GB */
+  struct stat more1gb;
+  more1gb.st_size = 399560397; /* ~4GB */
   
-  char *LESS_2GB = "HTTP/1.1 200 OK\r\n"
+  char *LESS_1GB = "HTTP/1.1 200 OK\r\n"
     "Date: \r\n"
     "Content-Type: \r\n"
-    "Content-Length: 1564355066\r\n"
+    "Content-Length: 858993459\r\n"
     "Last-Modified: \r\n"
     "ETag: \r\n"
     "Server: " VERSION
     "\r\n\r\n";
   
-  char *MORE_2GB = "HTTP/1.1 200 OK\r\n"
+  char *MORE_1GB = "HTTP/1.1 200 OK\r\n"
     "Date: \r\n"
     "Content-Type: \r\n"
     "Content-Length: 399560397\r\n"
@@ -158,13 +158,13 @@ char *test_Dir_serve_big_files(){
     "Server: " VERSION
     "\r\n\r\n";
 
-  bstring response_less_2gb = bformat(RESPONSE_FORMAT, "", "", less2gb.st_size, "", "");
-  bstring response_more_2gb = bformat(CHUNKED_RESPONSE_FORMAT, "", "", more2gb.st_size, "", "");
+  bstring response_less_1gb = bformat(RESPONSE_FORMAT, "", "", less1gb.st_size, "", "");
+  bstring response_more_1gb = bformat(CHUNKED_RESPONSE_FORMAT, "", "", more1gb.st_size, "", "");
 
-  mu_assert(bstrcmp(response_less_2gb, bfromcstr(LESS_2GB)) == 0, "Wrong response headers for <2GB files");
-  printf("MORE_2GB=%s\n", MORE_2GB);
-  printf("RESPONSE=%s\n", bdata(response_more_2gb));
-  mu_assert(bstrcmp(response_more_2gb,  bfromcstr(MORE_2GB)) == 0, "Wrong response headers for >2GB files");
+  mu_assert(bstrcmp(response_less_1gb, bfromcstr(LESS_1GB)) == 0, "Wrong response headers for <1GB files");
+  printf("MORE_1GB=%s\n", MORE_1GB);
+  printf("RESPONSE=%s\n", bdata(response_more_1gb));
+  mu_assert(bstrcmp(response_more_1gb,  bfromcstr(MORE_1GB)) == 0, "Wrong response headers for >1GB files");
   return NULL;
 }
 
