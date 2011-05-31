@@ -111,7 +111,7 @@ FileRecord *Dir_find_file(bstring path, bstring default_type)
         return fr;
     }
 
-    fr->fd = open(p, O_RDONLY | O_LARGEFILE);
+    fr->fd = open(p, O_RDONLY);
     check(fr->fd >= 0, "Failed to open file but stat worked: %s", bdata(path));
 
     fr->file_size = lseek(fr->fd, 0L, SEEK_END);
