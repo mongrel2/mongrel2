@@ -47,9 +47,5 @@ int Config_load_settings();
 
 void Config_close_db();
 
-void Config_stop_all();
-
-void Config_start_handlers();
-
 
 #endif

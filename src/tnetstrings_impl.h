@@ -24,6 +24,7 @@ static inline void *tns_new_dict(void)
 
 static inline int tns_add_to_dict(void *dict, void *key, void *item)
 {
+    check(tns_get_type(dict) == tns_tag_dict, "Can't add to that, it's not a dict.");
     hash_t *h = ((tns_value_t *)dict)->value.dict;
     tns_value_t *k = key;
 
@@ -60,28 +61,21 @@ static inline void *tns_get_false(void)
 static inline void *tns_new_list(void)
 {
     tns_value_t *val = tns_value_create(tns_tag_list);
-    val->value.list = list_create(LISTCOUNT_T_MAX);
+    val->value.list = darray_create(sizeof(tns_value_t), 100);
 
     return val;
 }
 
 static inline int tns_add_to_list(void *list, void *item)
 {
-    list_t *L = ((tns_value_t *)list)->value.list;
-
-    lnode_t *node = lnode_create(item);
-    list_append(L, node);
-
+    check(tns_get_type(list) == tns_tag_list, "Can't add to that, it's not a list.");
+    darray_t *L = ((tns_value_t *)list)->value.list;
+    darray_push(L, item);
     return 0;
+error:
+    return -1;
 }
 
-
-//  Functions to introspect the type of a data object.
-static inline tns_type_tag tns_get_type(void *val)
-{
-    tns_value_t *t = (tns_value_t *)val;
-    return t->type;
-}
 
 static inline void *tns_parse_string(const char *data, size_t len)
 {
@@ -97,6 +91,13 @@ static inline void *tns_parse_integer(const char *data, size_t len)
     return t;
 }
 
+static inline void *tns_parse_float(const char *data, size_t len)
+{
+    tns_value_t *t = tns_value_create(tns_tag_float);
+    t->value.fpoint = strtod(data, NULL);
+    return t;
+}
+
 
 static inline void *tns_new_integer(long number)
 {
@@ -105,6 +106,12 @@ static inline void *tns_new_integer(long number)
     return t;
 }
 
+static inline void *tns_new_float(double fpoint)
+{
+    tns_value_t *t = tns_value_create(tns_tag_float);
+    t->value.fpoint = fpoint;
+    return t;
+}
 
 // convenience functions for doing stuff with dictionaries
 static inline int tns_dict_setcstr(tns_value_t *d, const char *key, tns_value_t *val)

@@ -1,17 +1,47 @@
 #include "minunit.h"
-#include <config/config.h>
-#include <server.h>
 #include <zmq.h>
-#include <task/task.h>
-#include <config/db.h>
+#include "server.h"
+#include "config/config.h"
+#include "config/db.h"
+#include "mime.h"
+#include "setting.h"
 
 FILE *LOG_FILE = NULL;
+
+char *test_Config_load_settings()
+{
+    Config_init_db("tests/config.sqlite");
+
+    int rc = Config_load_settings();
+    debug("LOADED %d SETTINGS", rc);
+    mu_assert(rc > 0, "Failed to load the right number of settings.");
+
+    Config_close_db();
+    Setting_destroy();
+
+    return NULL;
+}
+
+struct tagbstring TEST_MIME = bsStatic("/test.txt");
+
+char *test_Config_load_mimetypes()
+{
+    Config_init_db("tests/config.sqlite");
+
+    int rc = Config_load_mimetypes();
+    debug("LOADED %d MIME TYPES", rc);
+    mu_assert(rc > 2, "Failed to load the right number of mimetypes.");
+
+    mu_assert(MIME_match_ext(&TEST_MIME, NULL) != NULL, "Mime load failed.");
+    Config_close_db();
+    MIME_destroy();
+    return NULL;
+}
 
 char *test_Config_load() 
 {
     Config_init_db("tests/config.sqlite");
     Server *server = Config_load_server("AC1F8236-5919-4696-9D40-0F38DE9E5861");
-    
     mu_assert(server != NULL, "Failed to load server");
 
     Server_destroy(server);
@@ -27,6 +57,8 @@ char * all_tests()
 
     Server_init();
 
+    mu_run_test(test_Config_load_mimetypes);
+    mu_run_test(test_Config_load_settings);
     mu_run_test(test_Config_load);
 
     zmq_term(ZMQ_CTX);

@@ -30,10 +30,11 @@ typedef struct CommandHandler {
 static inline int log_action(bstring db_file, bstring what, bstring why, bstring where, bstring how)
 {
     int rc = 0;
-    char *sql = NULL;
+    tns_value_t *res = NULL;
+    bstring who = NULL;
     char *user = getlogin() == NULL ? getenv("LOGNAME") : getlogin();
     check(user != NULL, "getlogin failed and no LOGNAME env variable, how'd you do that?");
-    bstring who = bfromcstr(user);
+    who = bfromcstr(user);
 
     if(access((const char *)db_file->data, R_OK | W_OK) != 0) {
         // don't log if there's no file available
@@ -50,12 +51,10 @@ static inline int log_action(bstring db_file, bstring what, bstring why, bstring
         where = bfromcstr(name_buf);
     }
 
-    sql = sqlite3_mprintf("INSERT INTO log (who, what, location, how, why) VALUES (%Q, %Q, %Q, %Q, %Q)",
+    res = DB_exec("INSERT INTO log (who, what, location, how, why) VALUES (%Q, %Q, %Q, %Q, %Q)",
             bdata(who), bdata(what), bdata(where), bdata(how), bdata(why));
-
-    rc = DB_exec(sql, NULL, NULL);
-    check(rc == 0, "Failed to add log message, you're flying blind.");
-
+    check(res != NULL, "Failed to add log message, you're flying blind.");
+    tns_value_destroy(res);
 
     if(biseqcstr(who, "root")) {
         log_warn("You shouldn't be running things as %s.  Use a safe user instead.", bdata(who));
@@ -63,14 +62,13 @@ static inline int log_action(bstring db_file, bstring what, bstring why, bstring
 
     bdestroy(who);
     bdestroy(where);
-    sqlite3_free(sql);
     DB_close();
     return 0;
 
 error:
-    bdestroy(who);
-    bdestroy(where);
-    sqlite3_free(sql);
+    if(who) bdestroy(who);
+    if(where) bdestroy(where);
+    if(res) tns_value_destroy(res);
     DB_close();
     return -1;
 }
@@ -171,19 +169,6 @@ static int Command_shell(Command *cmd)
 }
 
 
-static int table_print(void *param, int cols, char **data, char **names)
-{
-    int i = 0;
-
-    for(i = 0; i < cols; i++) {
-        printf(" %s ", data[i]);
-    }
-
-    printf("\n");
-
-    return 0;
-}
-
 static inline int simple_query_print(bstring db_file, const char *sql)
 {
     int rc = 0;
@@ -191,8 +176,8 @@ static inline int simple_query_print(bstring db_file, const char *sql)
     rc = DB_init(bdata(db_file));
     check(rc != -1, "Failed to open database %s", bdata(db_file));
 
-    rc = DB_exec(sql, table_print, NULL);
-    check(rc == 0, "Query failed: %s.", bdata(db_file));
+    tns_value_t *res = DB_exec(sql);
+    check(res != NULL, "Query failed: %s.", bdata(db_file));
 
     DB_close();
     return 0;
@@ -309,10 +294,10 @@ struct ServerRun {
 
 
 static inline int exec_server_operations(Command *cmd,
-        int (*callback)(void*,int,char**,char**), const char *select)
+        int (*callback)(struct ServerRun *, tns_value_t *), const char *select)
 {
     int rc = 0;
-    char *sql = NULL;
+    tns_value_t *res = NULL;
 
     bstring db_file = option(cmd, "db", "config.sqlite");
     check_file(db_file, "config database", R_OK | W_OK);
@@ -334,23 +319,27 @@ static inline int exec_server_operations(Command *cmd,
         run.sudo = "";
     }
 
+    rc = DB_init(bdata(db_file));
+    check(rc == 0, "Failed to open db: %s", bdata(db_file));
+
     if(every) {
-        sql= sqlite3_mprintf("SELECT %s FROM server", select);
+        res = DB_exec("SELECT %s FROM server", select);
     } else if(name) {
-        sql = sqlite3_mprintf("SELECT %s FROM server where name = %Q", select, bdata(name));
+        res = DB_exec("SELECT %s FROM server where name = %Q", select, bdata(name));
     } else if(host) {
-        sql = sqlite3_mprintf("SELECT %s FROM server where default_host = %Q", select, bdata(host));
+        res = DB_exec("SELECT %s FROM server where default_host = %Q", select, bdata(host));
     } else if(uuid) {
         // yes, this is necessary, so that the callback runs
-        sql = sqlite3_mprintf("SELECT %s FROM server where uuid = %Q", select, bdata(uuid));
+        res = DB_exec("SELECT %s FROM server where uuid = %Q", select, bdata(uuid));
     } else {
         sentinel("You must give either -name, -uuid, or -host to start a server.");
     }
 
-    rc = DB_init(bdata(db_file));
-    check(rc == 0, "Failed to open db: %s", bdata(db_file));
+    check(res != NULL, "Failed to run command against database.");
+    check(tns_get_type(res) == tns_tag_list, "Wrong return type from query, should be list.");
+    check(darray_end(res->value.list) > 0, "Should get 1 result back.");
 
-    rc = DB_exec(sql, callback, &run);
+    check(callback(&run, res) != -1, "Failed to run internal operation.");
 
     if(!run.ran) {
         errno = 0;
@@ -370,25 +359,27 @@ static inline int exec_server_operations(Command *cmd,
         sentinel("Error loading the requested server, see above for why.");
     }
 
-    if(sql) sqlite3_free(sql);
+    if(res) tns_value_destroy(res);
     DB_close();
     return 0;
 
 error:
-    if(sql) sqlite3_free(sql);
+    if(res) tns_value_destroy(res);
     DB_close();
     return -1;
 }
 
 
-static int run_server(void *param, int cols, char **data, char **names)
+static int run_server(struct ServerRun *r, tns_value_t *res)
 {
-    assert(cols == 1 && "Wrong number of colums.");
-    struct ServerRun *r = (struct ServerRun *)param;
     r->ran = 0;
+    tns_value_t *uuid_val = darray_get(res->value.list, 0);
+    check(uuid_val != NULL && tns_get_type(uuid_val) == tns_tag_string,
+            "Invalid value for the server uuid on run.");
 
     bstring command = bformat("%s mongrel2 %s %s", r->sudo,
-            bdata(r->db_file), data[0]);
+            bdata(r->db_file), 
+            bdata(uuid_val->value.string));
 
     system(bdata(command));
 
@@ -396,6 +387,9 @@ static int run_server(void *param, int cols, char **data, char **names)
 
     r->ran = 1;
     return 0;
+
+error:
+    return -1;
 }
 
 static int Command_start(Command *cmd)
@@ -418,60 +412,68 @@ bstring read_pid_file(bstring pid_path)
     return pid;
 }
 
-
-static int stop_server(void *param, int cols, char **data, char **names)
+static int locate_pid_file(tns_value_t *res)
 {
-    struct ServerRun *r = (struct ServerRun *)param;
-    int rc = 0;
-    bstring pid_path = bformat("%s%s", data[0], data[1]);
+    bstring pid = NULL;
+    bstring pid_path = NULL;
 
-    bstring pid = read_pid_file(pid_path);
+    check(darray_end(res->value.list) == 2,
+            "Wrong number of results for stop command callback.");
+
+    tns_value_t *chroot = darray_get(res->value.list, 0);
+    check(tns_get_type(chroot) == tns_tag_string, "Wrong result for server chroot, should be a string.");
+
+    tns_value_t *pid_file = darray_get(res->value.list, 1);
+    check(tns_get_type(pid_file) == tns_tag_string, "Wrong result for server pid_file, should be a string.");
+
+    pid_path = bformat("%s%s", bdata(chroot->value.string), bdata(pid_file->value.string));
+
+    pid = read_pid_file(pid_path);
     check(pid, "Couldn't read the PID from %s", bdata(pid_path));
 
-    int signal = r->murder ? SIGTERM : SIGINT;
-
-    rc = kill(atoi((const char *)pid->data), signal);
-    check(rc == 0, "Failed to stop server with PID: %s", bdata(pid));
+    int result = atoi((const char *)pid->data);
 
     bdestroy(pid);
     bdestroy(pid_path);
-    r->ran = 1;
-    return 0;
+    return result;
 
 error:
     bdestroy(pid);
     bdestroy(pid_path);
+    return -1;
+}
+
+static int kill_server(struct ServerRun *r, tns_value_t *res, int signal)
+{
+    int pid = locate_pid_file(res);
+    check(pid != -1, "Failed to read the pid_file.");
+
+    int rc = kill(pid, signal);
+    check(rc == 0, "Failed to stop server with PID: %d", pid);
+
+    r->ran = 1;
+    return 0;
+
+error:
     r->ran = 0;
     return -1;
 }
+
+static int stop_server(struct ServerRun *r, tns_value_t *res)
+{
+    int signal = r->murder ? SIGTERM : SIGINT;
+    return kill_server(r, res, signal);
+}
+
 
 static int Command_stop(Command *cmd)
 {
     return exec_server_operations(cmd, stop_server, "chroot, pid_file");
 }
 
-static int reload_server(void *param, int cols, char **data, char **names)
+static int reload_server(struct ServerRun *r, tns_value_t *res)
 {
-    struct ServerRun *r = (struct ServerRun *)param;
-    int rc = 0;
-    bstring pid_path = bformat("%s%s", data[0], data[1]);
-
-    bstring pid = read_pid_file(pid_path);
-    check(pid, "Couldn't read the PID from %s", bdata(pid_path));
-
-    rc = kill(atoi((const char *)pid->data), SIGHUP);
-    check(rc == 0, "Failed to reload PID: %s", bdata(pid));
-
-    bdestroy(pid);
-    bdestroy(pid_path);
-    r->ran = 1;
-    return 0;
-
-error:
-    bdestroy(pid);
-    bdestroy(pid_path);
-    r->ran = 0;
-    return -1;
+    return kill_server(r, res, SIGHUP);
 }
 
 
@@ -480,31 +482,25 @@ static int Command_reload(Command *cmd)
     return exec_server_operations(cmd, reload_server, "chroot, pid_file");
 }
 
-static int check_server(void *param, int cols, char **data, char **names)
+static int check_server(struct ServerRun *r, tns_value_t *res)
 {
-    struct ServerRun *r = (struct ServerRun *)param;
     int rc = 0;
-    bstring pid_path = bformat("%s%s", data[0], data[1]);
+    int pid = locate_pid_file(res);
 
-    bstring pid = read_pid_file(pid_path);
-
-    if(pid == NULL) {
-        printf("mongrel2 is not running because pid_file %s isn't there.\n", bdata(pid_path));
-        bdestroy(pid_path);
+    if(pid == -1) {
+        printf("mongrel2 is not running because pid_file isn't there.\n");
         r->ran = 1;
         return 0;
     }
 
-    rc = kill(atoi((const char *)pid->data), 0);
+    rc = kill(pid, 0);
 
     if(rc != 0) {
-        printf("mongrel2 at PID %s is NOT running.\n", bdata(pid));
+        printf("mongrel2 at PID %d is NOT running.\n", pid);
     } else {
-        printf("mongrel2 at PID %s running.\n", bdata(pid));
+        printf("mongrel2 at PID %d running.\n", pid);
     }
 
-    bdestroy(pid);
-    bdestroy(pid_path);
     r->ran = 1;
     return 0;
 }
@@ -605,19 +601,18 @@ static void print_datum(tns_value_t *col)
 
 static void display_map_style(tns_value_t *headers, tns_value_t *rows)
 {
-    tns_value_t *cols = lnode_get(list_first(rows->value.list));
-    lnode_t *col = list_first(cols->value.list);
-    check(col != NULL, "Malformed response from server: bad columns.");
-    lnode_t *header = list_first(headers->value.list);
-    check(header != NULL, "Malformed response from server: bad headers.");
+    int i = 0;
+    darray_t *cols = rows->value.list;
+    darray_t *names = rows->value.list;
 
-    for(; col != NULL && header != NULL; 
-        col = list_next(cols->value.list, col),
-        header = list_next(headers->value.list, header))
+    check(darray_end(cols) == darray_end(names),
+            "Server returned a bad result, names isn't same length as elements.");
+
+    for(i = 0; i < darray_end(cols); i++)
     {
-        print_datum(lnode_get(header));
+        print_datum(darray_get(names, i));
         printf(":  ");
-        print_datum(lnode_get(col));
+        print_datum(darray_get(cols, i));
         printf("\n");
     }
 
@@ -626,15 +621,12 @@ error: // fallthrough
 }
 
 
-static void display_table_style(tns_value_t *headers, tns_value_t *rows)
+void display_table_style(tns_value_t *headers, tns_value_t *rows)
 {
-    lnode_t *row = NULL;
-    lnode_t *el = NULL;
-
-    for(el = list_first(headers->value.list); el != NULL;
-            el = list_next(headers->value.list, el)) 
+    int i = 0;
+    for(i = 0; i < darray_end(headers->value.list); i++)
     {
-        tns_value_t *h = lnode_get(el);
+        tns_value_t *h = darray_get(headers->value.list, i);
         check(tns_get_type(h) == tns_tag_string,
                 "Headers should be strings, not: %c", tns_get_type(h));
         printf("%s  ", bdata(h->value.string));
@@ -642,18 +634,17 @@ static void display_table_style(tns_value_t *headers, tns_value_t *rows)
 
     printf("\n");
 
-    for(row = list_first(rows->value.list); row != NULL;
-            row = list_next(rows->value.list, row)) 
+    for(i = 0; i < darray_end(rows->value.list); i++)
     {
-        tns_value_t *cols = lnode_get(row);
+        int j = 0;
+        tns_value_t *cols = darray_get(rows->value.list, i);
 
         check(tns_get_type(cols) == tns_tag_list,
                 "Rows should be lists, not: %c", tns_get_type(cols));
 
-        for(el = list_first(cols->value.list); el != NULL;
-                el = list_next(cols->value.list, el)) 
+        for(j = 0; j < darray_end(cols->value.list); j++)
         {
-            tns_value_t *col = lnode_get(el);
+            tns_value_t *col = darray_get(cols->value.list, j);
             print_datum(col);
             printf("  ");
         }
@@ -661,7 +652,7 @@ static void display_table_style(tns_value_t *headers, tns_value_t *rows)
         printf("\n");
     }
 
-error: // falthrough
+error: // fallthrough
     return;
 }
 
@@ -688,7 +679,7 @@ void display_response(const char *msg, size_t len)
         tns_value_t *rows = hnode_get(node);
         check(tns_get_type(rows) == tns_tag_list, "Rows must be a list, server is screwed up.");
 
-        if(list_count(rows->value.list) == 1) {
+        if(darray_end(rows->value.list) == 1) {
             display_map_style(headers, rows);
         } else {
             display_table_style(headers, rows);
@@ -700,7 +691,7 @@ error: // fallthrough
     return;
 }
 
-static int send_recv_control(bstring args, void *socket)
+int send_recv_control(bstring args, void *socket)
 {
     int rc = 0;
     zmq_msg_t *outmsg = NULL;
@@ -744,14 +735,16 @@ error:
     return -1;
 }
 
-static int control_server(void *param, int cols, char **data, char **names)
+int control_server(struct ServerRun *r, tns_value_t *res)
 {
     int rc = 0;
     void *socket = NULL;
-    struct ServerRun *r = (struct ServerRun *)param;
     r->ran = 1;
-    bstring prompt = bformat("m2 [%s]> ", data[0]);
-    bstring control = bformat("ipc://%s/run/control", data[1]);
+    check(tns_get_type(res) == tns_tag_list, "Expected a list but didn't get it.");
+    check(darray_end(res->value.list) == 2, "Wrong length for command callback control_server.");
+
+    bstring prompt = bformat("m2 [%s]> ", darray_get(res->value.list, 0));
+    bstring control = bformat("ipc://%s/run/control", darray_get(res->value.list, 1));
     log_info("Connecting to control port %s", bdata(control));
 
     mqinit(1);

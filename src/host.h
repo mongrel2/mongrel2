@@ -66,11 +66,10 @@ typedef struct Backend {
     } target;
 } Backend;
 
-Host *Host_create(const char *name, const char *matching);
+Host *Host_create(bstring name, bstring matching);
 void Host_destroy(Host *host);
 
-int Host_add_backend(Host *host, const char *path, size_t path_len, BackendType type, void *target);
-
+int Host_add_backend(Host *host, bstring path, BackendType type, void *target);
 
 Backend *Host_match_backend(Host *host, bstring target, Route **out_route);
 

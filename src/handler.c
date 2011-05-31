@@ -317,8 +317,8 @@ error:
 
 const int DEFAULT_HANDLER_STACK = 100 * 1024;
 
-Handler *Handler_create(const char *send_spec, const char *send_ident,
-        const char *recv_spec, const char *recv_ident)
+Handler *Handler_create(bstring send_spec, bstring send_ident,
+        bstring recv_spec, bstring recv_ident)
 {
     debug("Creating handler %s:%s", send_spec, send_ident);
 
@@ -330,10 +330,10 @@ Handler *Handler_create(const char *send_spec, const char *send_ident,
     Handler *handler = calloc(sizeof(Handler), 1);
     check_mem(handler);
 
-    handler->send_ident = bfromcstr(send_ident);
-    handler->recv_ident = bfromcstr(recv_ident);
-    handler->recv_spec = bfromcstr(recv_spec);
-    handler->send_spec = bfromcstr(send_spec);
+    handler->send_ident = bstrcpy(send_ident);
+    handler->recv_ident = bstrcpy(recv_ident);
+    handler->recv_spec = bstrcpy(recv_spec);
+    handler->send_spec = bstrcpy(send_spec);
     handler->running = 0;
     handler->raw = 0;
     handler->protocol = HANDLER_PROTO_JSON;

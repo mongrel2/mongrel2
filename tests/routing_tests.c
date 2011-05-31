@@ -1,5 +1,3 @@
-#undef NDEBUG
-
 #include "minunit.h"
 #include <routing.h>
 #include <string.h>

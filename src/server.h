@@ -35,13 +35,13 @@
 #ifndef _server_h
 #define _server_h
 
-#include <adt/tst.h>
-#include <adt/list.h>
-#include <host.h>
-#include <routing.h>
-#include <polarssl/ssl.h>
-#include <polarssl/x509.h>
-#include <polarssl/rsa.h>
+#include "adt/tst.h"
+#include "adt/darray.h"
+#include "host.h"
+#include "routing.h"
+#include "polarssl/ssl.h"
+#include "polarssl/x509.h"
+#include "polarssl/rsa.h"
 
 enum {
      /* IPv6 addr can be up to 40 chars long */
@@ -53,6 +53,7 @@ typedef struct Server {
     int listen_fd;
     Host *default_host;
     RouteMap *hosts;
+    darray_t *handlers;
     bstring bind_addr;
     bstring uuid;
     bstring chroot;
@@ -68,9 +69,9 @@ typedef struct Server {
     char *dhm_G;
 } Server;
 
-Server *Server_create(const char *uuid, const char *default_host,
-        const char *bind_addr, const char *port, const char *chroot,
-        const char *access_log, const char *error_log, const char *pid_file);
+Server *Server_create(bstring uuid, bstring default_host,
+        bstring bind_addr, int port, bstring chroot,
+        bstring access_log, bstring error_log, bstring pid_file);
 
 void Server_destroy(Server *srv);
 
@@ -78,10 +79,14 @@ void Server_init();
 
 void Server_start(Server *srv);
 
-int Server_add_host(Server *srv, bstring pattern, Host *host);
+int Server_add_host(Server *srv, Host *host);
 
 void Server_set_default_host(Server *srv, Host *host);
 
 Host *Server_match_backend(Server *srv, bstring target);
+
+int Server_start_handlers(Server *srv);
+
+int Server_stop_handlers(Server *srv);
 
 #endif

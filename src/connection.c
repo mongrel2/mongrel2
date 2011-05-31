@@ -1,3 +1,4 @@
+#undef DEBUG
 /**
  *
  * Copyright (c) 2010, Zed A. Shaw and Mongrel2 Project Contributors.
@@ -289,6 +290,8 @@ int connection_http_to_proxy(Connection *conn)
 {
     Proxy *proxy = Request_get_action(conn->req, proxy);
     check(proxy != NULL, "Should have a proxy backend.");
+
+    debug("CONNECT TO: %s:%d", bdata(proxy->server), proxy->port);
 
     int proxy_fd = netdial(1, bdata(proxy->server), proxy->port);
     check(proxy_fd != -1, "Failed to connect to proxy backend %s:%d",
@@ -633,6 +636,8 @@ int Connection_deliver(Connection *conn, bstring buf)
     int rc = 0;
 
     bstring b64_buf = bBase64Encode(buf);
+    assert(b64_buf != NULL && "WTF!");
+    assert(conn->iob != NULL && "WTF! NO IOBUF!");
     rc = IOBuf_send(conn->iob, bdata(b64_buf), blength(b64_buf)+1);
     check_debug(rc == blength(b64_buf)+1, "Failed to write entire message to conn %d", IOBuf_fd(conn->iob));
 

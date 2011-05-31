@@ -1,3 +1,4 @@
+#undef NDEBUG
 /**
  *
  * Copyright (c) 2010, Zed A. Shaw and Mongrel2 Project Contributors.
@@ -35,12 +36,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sqlite3.h>
-#include <dbg.h>
-#include <config/db.h>
-#include <assert.h>
+#include "dbg.h"
+#include "config/db.h"
+#include "assert.h"
+#include <stdarg.h>
+#include "tnetstrings_impl.h"
 
 sqlite3 *CONFIG_DB = NULL;
-
 
 int DB_init(const char *path)
 {
@@ -56,21 +58,172 @@ void DB_close()
 }
 
 
-int DB_exec(const char *query, 
-        int (*callback)(void*,int,char**,char**),
-        void *param)
+static inline tns_value_t *DB_convert_column(sqlite3_stmt *stmt)
 {
-    char *zErrMsg = NULL;
+    int col = 0;
+    tns_value_t *el = NULL;
+    tns_value_t *row = tns_new_list();
+    check_mem(row);
 
-    debug("[SQL] %s", query);
+    for(col = 0; col < sqlite3_column_count(stmt); col++) {
+        switch(sqlite3_column_type(stmt, col)) {
+            case SQLITE_INTEGER:
+                el = tns_new_integer(sqlite3_column_int(stmt, col));
+                break;
+            case SQLITE_FLOAT:
+                el = tns_new_float(sqlite3_column_double(stmt, col));
+                break;
+            case SQLITE_TEXT:
+                el = tns_parse_string(
+                    (const char *)sqlite3_column_text(stmt, col), 
+                    sqlite3_column_bytes(stmt, col));
+                break;
+            case SQLITE_BLOB:
+                el = tns_parse_string(
+                    sqlite3_column_blob(stmt, col), 
+                    sqlite3_column_bytes(stmt, col));
+                break;
+            case SQLITE_NULL:
+                el = tns_get_null();
+                break;
+            default:
+                break;
+        }
 
-    int rc = sqlite3_exec(CONFIG_DB, query, callback, param, &zErrMsg);
-    check(rc == SQLITE_OK, "[SQL ERROR]: %s : '%s'", query, zErrMsg);
+        check(el != NULL, "Got a NULL for a column");
+        tns_add_to_list(row, el);
+    }
 
-    return 0;
+    return row;
 
 error:
+    if(row) tns_value_destroy(row);
+    if(el) tns_value_destroy(el);
+    return NULL;
+}
+
+/**
+ * DB_exec will run a SQL query, using the sqlite3_mprintf syntax, and
+ * convert the results to a tns_value_t* that you can use.  It returns
+ * one of four types of results:
+ *
+ * - tns_tag_null -- The query wasn't expected to return anything, like UPDATE.
+ * - tns_tag_list(empty) -- The query expected to return rows, but nothing returned.
+ * - tns_tag_list -- There's rows that resulted from the query.
+ * - NULL -- There was an error processing your query.
+ *
+ * You own the row and everything in it, and you should know what the columns
+ * are, but they are tagged properly for each type that comes from the query.
+ */
+tns_value_t *DB_exec(const char *query, ...)
+{
+    va_list argp;
+    va_start(argp, query);
+    char *zErrMsg = NULL;
+    tns_value_t *res = NULL;
+    int rc = 0;
+    sqlite3_stmt *stmt = NULL;
+    const char *sql_tail = NULL;
+    char *sql = NULL;
+
+    check(CONFIG_DB != NULL, "The config database is not open.");
+
+    sql = sqlite3_vmprintf(query, argp);
+    check_mem(sql);
+  
+    rc = sqlite3_prepare_v2(CONFIG_DB, sql, -1, &stmt, &sql_tail);
+    check(rc == SQLITE_OK, "SQL error \"%s\" at: '%s'", sqlite3_errmsg(CONFIG_DB), sql_tail);
+
+    // we want to return a tns_tag_null if this is a query with no
+    // results, which means we have to do a little bit of weird logic
+    rc = sqlite3_step(stmt);
+
+    if(rc == SQLITE_DONE) {
+        if(sqlite3_column_count(stmt) == 0) {
+            // query like UPDATE with no results possible
+            res = tns_get_null();
+        } else {
+            // query that had results possible but had none
+            res = tns_new_list();
+        }
+    } else if(rc == SQLITE_ROW) {
+        // query with results, process them
+        res = tns_new_list();
+
+        do {
+            tns_value_t *row = DB_convert_column(stmt);
+            check(row != NULL, "Failed to convert DB column for sql: '%s'", sql);
+            tns_add_to_list(res, row);
+        } while((rc = sqlite3_step(stmt)) == SQLITE_ROW);
+    }
+
+    check(rc != SQLITE_ERROR, "Failure executing sql: %s", sqlite3_errmsg(CONFIG_DB));
+   
+    sqlite3_free(sql);
+    sqlite3_finalize(stmt);
+    va_end(argp);
+    return res;
+
+error:
+    va_end(argp);
+    if(stmt) sqlite3_finalize(stmt);
     if(zErrMsg) sqlite3_free(zErrMsg);
+    if(sql) sqlite3_free(sql);
+    if(res) tns_value_destroy(res);
+    return NULL;
+}
+
+/**
+ * Gets the tns_value_t at this result's row/col point,
+ * or NULL (which will be tns_get_type == tns_tag_invalid)
+ * if that row isn't possible.
+ */
+tns_value_t *DB_get(tns_value_t *res, int row, int col)
+{
+    check(tns_get_type(res) == tns_tag_list, "Result should be a list.");
+    check(row < darray_end(res->value.list),
+            "Row %d past end of result set length: %d", row, 
+            darray_end(res->value.list));
+
+    tns_value_t *r = darray_get(res->value.list, row);
+    check(tns_get_type(r) == tns_tag_list, "Row %d should be a list.", row);
+    check(col < darray_end(r->value.list),
+            "Column %d past end of result set length: %d", col, 
+            darray_end(r->value.list));
+
+    return darray_get(r->value.list, col);
+error:
+    return NULL;
+}
+
+/**
+ * Used to iterate through a result set using rows by columns.
+ * It returns the number of rows, or -1 if this result set isn't
+ * valid (like it's not a table form).  It sets the *cols as an
+ * out parameter for the number of cols that each row should have.
+ */
+int DB_counts(tns_value_t *res, int *cols)
+{
+    int rows = 0;
+
+    if(tns_get_type(res) == tns_tag_null) {
+        *cols = 0;
+    } else {
+        check(tns_get_type(res) == tns_tag_list, "Result should get a list.");
+        rows = darray_end(res->value.list);
+
+        if(rows) {
+            tns_value_t *first_row = darray_get(res->value.list, 0);
+            check(tns_get_type(first_row) == tns_tag_list,
+                    "Wrong column type, should be list.");
+            *cols = darray_end(first_row->value.list);
+        } else {
+            *cols = 0;
+        }
+    }
+
+    return rows;
+error:
     return -1;
 }
 

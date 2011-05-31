@@ -1,7 +1,9 @@
+#undef NDEBUG
 #include "tnetstrings.h"
 #include <string.h>
 #include "dbg.h"
 #include <assert.h>
+#include "mem/halloc.h"
 
 
 static inline int
@@ -100,11 +102,12 @@ error:
 
 static inline int tns_render_list(void *list, tns_outbuf *outbuf)
 {
-    list_t *L = ((tns_value_t *)list)->value.list;
-    lnode_t *n = NULL;
+    darray_t *L = ((tns_value_t *)list)->value.list;
+    int i = 0;
 
-    for(n = list_last(L); n != NULL; n = list_prev(L, n)) {
-        tns_value_t *val = lnode_get(n);
+    for(i = darray_end(L) - 1; i >= 0; i--) {
+        tns_value_t *val = darray_get(L, i);
+        check(val != NULL, "Invalid tns list structure, got a NULL.");
         check(tns_render_value(val, outbuf) == 0, "Failed to render list element.");
     }
 
@@ -118,9 +121,8 @@ error:
 void tns_value_destroy(tns_value_t *value)
 {
     if(value == NULL) return;
-
-    list_t *L = value->value.list;
-    lnode_t *n = NULL;
+    darray_t *L = value->value.list;
+    int i = 0;
 
     switch(value->type) {
         case tns_tag_bool:
@@ -130,12 +132,10 @@ void tns_value_destroy(tns_value_t *value)
             hash_free(value->value.dict);
             break;
         case tns_tag_list:
-            for(n = list_last(L); n != NULL; n = list_prev(L, n)) {
-                tns_value_destroy(lnode_get(n));
+            for(i = 0; i < darray_end(L); i++) {
+                tns_value_destroy(darray_get(L, i));
             }
-
-            list_destroy_nodes(value->value.list);
-            list_destroy(value->value.list);
+            h_free(L);
             break;
         case tns_tag_null:
             break;
@@ -197,6 +197,10 @@ void* tns_parse(const char *data, size_t len, char **remain)
     case tns_tag_number:
         val = tns_parse_integer(valstr, vallen);
         check(val != NULL, "Not a tnetstring: invalid integer literal.");
+        break;
+    case tns_tag_float:
+        val = tns_parse_float(valstr, vallen);
+        check(val != NULL, "Not a tnetstring: invalid float literal.");
         break;
     //  Primitive type: a boolean.
     //  The only acceptable values are "true" and "false".
@@ -408,6 +412,9 @@ tns_render_value(void *val, tns_outbuf *outbuf)
       break;
     case tns_tag_list:
       res = tns_render_list(val, outbuf);
+      break;
+    case tns_tag_invalid:
+      sentinel("invalid tns value, can't be NULL");
       break;
     default:
       sentinel("unknown type tag: '%c'", type);

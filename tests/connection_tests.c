@@ -16,6 +16,7 @@ char *test_Connection_create_destroy()
     const char remote[IPADDR_SIZE];
 
     Connection *conn = Connection_create(NULL, 0, 0, remote);
+    mu_assert(conn != NULL, "Failed to create a connection.");
     Connection_destroy(conn);
 
     return NULL;
@@ -26,6 +27,7 @@ char *test_Connection_deliver()
     bstring t1;
     const char remote[IPADDR_SIZE];
     Connection *conn = Connection_create(NULL, 1, 0, remote);
+    mu_assert(conn != NULL, "Failed to create a connection.");
 
     int rc = Connection_deliver(conn, t1 = bfromcstr("TEST"));
     // depending on the platform this will fail or not if send is allowed on files
@@ -72,15 +74,27 @@ char * all_tests() {
     mu_suite_start();
 
     Server_init();
-    Server *SRV = Server_create("uuid", "localhost", "0.0.0.0",
-            "1999", "chroot", "access_log", "error_log", "pid_file");
-    Host *zedshaw_com = Host_create("zedshaw.com", "zedshaw.com");
+    Server *SRV = Server_create(
+            bfromcstr("uuid"),
+            bfromcstr("localhost"),
+            bfromcstr("0.0.0.0"),
+            1999,
+            bfromcstr("chroot"),
+            bfromcstr("access_log"),
+            bfromcstr("error_log"),
+            bfromcstr("pid_file"));
 
-    Host_add_backend(zedshaw_com, "@chat", strlen("@chat"), BACKEND_HANDLER, NULL);
+    Host *zedshaw_com = Host_create(bfromcstr("zedshaw.com"), bfromcstr("zedshaw.com"));
 
-    Dir *tests = Dir_create("tests/", "index.html", "text/plain", 0);
+    Host_add_backend(zedshaw_com, bfromcstr("@chat"), BACKEND_HANDLER, NULL);
 
-    Host_add_backend(zedshaw_com, "/tests", strlen("/tests"), BACKEND_DIR, tests);
+    Dir *tests = Dir_create(
+            bfromcstr("tests/"),
+            bfromcstr("index.html"),
+            bfromcstr("text/plain"),
+            0);
+
+    Host_add_backend(zedshaw_com, bfromcstr("/tests"), BACKEND_DIR, tests);
 
     Server_set_default_host(SRV, zedshaw_com);
 

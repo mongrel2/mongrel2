@@ -6,7 +6,7 @@
 #include <ctype.h>
 #include "bstring.h"
 #include "adt/hash.h"
-#include "adt/list.h"
+#include "adt/darray.h"
 
 typedef struct tns_outbuf_s {
   char *buffer;
@@ -17,10 +17,12 @@ typedef struct tns_outbuf_s {
 typedef enum tns_type_tag_e {
     tns_tag_string = ',',
     tns_tag_number = '#',
+    tns_tag_float = '^',
     tns_tag_bool = '!',
     tns_tag_null = '~',
     tns_tag_dict = '}',
     tns_tag_list = ']',
+    tns_tag_invalid = 'Z',
 } tns_type_tag;
 
 typedef struct tns_value_t {
@@ -29,8 +31,9 @@ typedef struct tns_value_t {
     union {
         bstring string;
         long number;
+        double fpoint;
         int bool;
-        list_t *list;
+        darray_t *list;
         hash_t *dict;
     } value;
 } tns_value_t;
@@ -86,5 +89,7 @@ int tns_render_request_start(tns_outbuf *outbuf);
 int tns_render_request_end(tns_outbuf *outbuf, int header_start, bstring uuid, int id, bstring path);
 
 tns_value_t *tns_standard_table(bstring header_data, tns_value_t *rows);
+
+#define tns_get_type(T) (((tns_value_t *)(T)) == NULL ? tns_tag_invalid : ((tns_value_t *)(T))->type)
 
 #endif

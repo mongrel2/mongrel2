@@ -320,25 +320,17 @@ tns_value_t *Control_execute(tns_value_t *req, callback_list_t *callbacks)
     tns_value_t *result = NULL;
     tns_value_t *call = NULL;
     tns_value_t *args = NULL;
-    lnode_t *node = NULL;
     callback_list_t *cbel = NULL;
 
     // validate all the possible things that can get screwed up in a request
     check_control_err(req->type == tns_tag_list, &INVALID_FORMAT_ERR, "Invalid request format.");
 
-    // make sure first argument is a string
-    node = list_first(req->value.list);
-    check_control_err(node != NULL, &INVALID_FORMAT_ERR, "Didn't get a full list.");
-
-    call = lnode_get(node);
+    call = darray_get(req->value.list, 0);
     check_control_err(call != NULL, &INVALID_DATA_ERR, "Invalid first argument.");
     check_control_err(call->type == tns_tag_string, &INVALID_DATA_ERR, "First argument must be string.");
 
     // validate second argument is a dict
-    node = list_last(req->value.list);
-    check_control_err(node != NULL, &INVALID_FORMAT_ERR, "Didn't get a full list.");
-
-    args = lnode_get(node);
+    args = darray_get(req->value.list, 1);
     check_control_err(args != NULL, &INVALID_DATA_ERR, "Invalid second argument.");
     check_control_err(args != call, &INVALID_DATA_ERR, "Must have more than one element to request.");
     check_control_err(args->type == tns_tag_dict, &INVALID_DATA_ERR, "Second argument must be dict.");

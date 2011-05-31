@@ -60,8 +60,8 @@ void Handler_task(void *v);
 
 int Handler_deliver(void *handler_socket, char *buffer, size_t len);
 
-Handler *Handler_create(const char *send_spec, const char *send_ident,
-        const char *recv_spec, const char *recv_ident);
+Handler *Handler_create(bstring send_spec, bstring send_ident,
+        bstring recv_spec, bstring recv_ident);
 
 void Handler_destroy(Handler *handler);
 

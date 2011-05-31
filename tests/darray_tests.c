@@ -1,4 +1,3 @@
-#undef NDEBUG
 #include "minunit.h"
 #include <adt/darray.h>
 

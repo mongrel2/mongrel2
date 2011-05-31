@@ -16,8 +16,15 @@ char *test_Server_init()
 
 char *test_Server_create_destroy()
 {
-    Server *server = Server_create("uuid", "localhost",
-            "0.0.0.0", "8080", "chroot", "access_log", "error_log", "pid_file");
+    Server *server = Server_create(
+            bfromcstr("uuid"),
+            bfromcstr("localhost"),
+            bfromcstr("0.0.0.0"),
+            8080,
+            bfromcstr("chroot"),
+            bfromcstr("access_log"),
+            bfromcstr("error_log"),
+            bfromcstr("pid_file"));
     mu_assert(server != NULL, "Failed to make the server, something on 8090?");
 
     Server_destroy(server);
@@ -30,14 +37,21 @@ char *test_Server_adds()
 {
     int rc = 0;
 
-    Server *srv = Server_create("uuid", "localhost",
-            "0.0.0.0", "8080", "chroot", "access_log", "error_log", "pid_file");
+    Server *srv = Server_create(
+            bfromcstr("uuid"),
+            bfromcstr("localhost"),
+            bfromcstr("0.0.0.0"),
+            8080,
+            bfromcstr("chroot"),
+            bfromcstr("access_log"),
+            bfromcstr("error_log"),
+            bfromcstr("pid_file"));
     mu_assert(srv != NULL, "Failed to make the server, something on 8090?");
 
-    Host *host = Host_create("zedshaw.com", "zedshaw.com");
+    Host *host = Host_create(bfromcstr("zedshaw.com"), bfromcstr("zedshaw.com"));
     mu_assert(host != NULL, "Failed to make host.");
 
-    rc = Server_add_host(srv, bstrcpy(host->matching), host);
+    rc = Server_add_host(srv, host);
     mu_assert(rc == 0, "Failed to add host to server.");
 
     Server_set_default_host(srv, host);

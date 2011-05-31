@@ -73,8 +73,8 @@ typedef struct Dir {
     int cache_ttl;
 } Dir;
 
-Dir *Dir_create(const char *base, const char *index_file,
-                const char *default_ctype, int cache_ttl);
+Dir *Dir_create(bstring base, bstring index_file,
+                bstring default_ctype, int cache_ttl);
 
 void Dir_destroy(Dir *dir);
 

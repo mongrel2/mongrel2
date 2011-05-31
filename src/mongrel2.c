@@ -123,14 +123,14 @@ Server *load_server(const char *db_file, const char *server_uuid, int reuse_fd)
     check(rc == 0, "Failed to load config database at %s", db_file);
     
     rc = Config_load_settings();
-    check(rc == 0, "Failed to load global settings.");
+    check(rc != -1, "Failed to load global settings.");
 
     srv = Config_load_server(server_uuid);
     check(srv, "Failed to load server %s from %s", server_uuid, db_file);
     check(srv->default_host, "No default_host set for server: %s, you need one host named: %s", server_uuid, bdata(srv->default_hostname));
 
     rc = Config_load_mimetypes();
-    check(rc == 0, "Failed to load mime types.");
+    check(rc != -1, "Failed to load mime types.");
 
     if(reuse_fd == -1) {
         srv->listen_fd = netannounce(TCP, bdata(srv->bind_addr), srv->port);
@@ -141,6 +141,8 @@ Server *load_server(const char *db_file, const char *server_uuid, int reuse_fd)
         check(srv->listen_fd != -1, "Failed to dup the socket from the running server.");
         fdclose(reuse_fd);
     }
+
+    check(Server_start_handlers(srv) == 0, "Failed to start handlers.");
 
     Config_close_db();
     return srv;
@@ -257,7 +259,6 @@ Server *reload_server(Server *old_srv, const char *db_file, const char *server_u
     RUNNING = 1;
 
     MIME_destroy();
-    Config_stop_all();
     Setting_destroy();
 
     Server *srv = load_server(db_file, server_uuid, old_srv->listen_fd);
@@ -274,9 +275,10 @@ error:
 void complete_shutdown(Server *srv)
 {
     fdclose(srv->listen_fd);
-    Config_stop_all();
     int attempts = 0;
     taskallsignal(SIGTERM);
+
+    Server_stop_handlers(srv);
 
     // we will always be the last task, so wait until only 1 is running, us
     for(attempts = 0; tasksrunning() > 1 && attempts < 20; attempts++) {

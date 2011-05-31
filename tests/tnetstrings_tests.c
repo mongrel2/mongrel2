@@ -1,4 +1,3 @@
-#undef NDEBUG
 #include "minunit.h"
 #include <tnetstrings.h>
 #include <request.h>
@@ -112,7 +111,7 @@ char *test_complex_types()
     mu_assert(result != NULL, "Failed to parse a list.");
     mu_assert(result->type == tns_tag_list, "Wrong type, should be list.");
 
-    val = lnode_get(list_last(result->value.list));
+    val = darray_get(result->value.list, darray_end(result->value.list) - 1);
     mu_assert(val != NULL, "Should have hello as key.");
     mu_assert(val->type == tns_tag_number, "Value should be a number.");
     mu_assert(val->value.number == 56789, "Value should equal 56789.");

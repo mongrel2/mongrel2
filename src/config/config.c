@@ -1,3 +1,4 @@
+#undef NDEBUG
 /**
  *
  * Copyright (c) 2010, Zed A. Shaw and Mongrel2 Project Contributors.
@@ -37,512 +38,316 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
+#include <signal.h>
 
 #include <sqlite3.h>
 
 #include "adt/tst.h"
-#include "config/db.h"
 #include "dir.h"
 #include "dbg.h"
 #include "mime.h"
 #include "proxy.h"
 #include "server.h"
 #include "setting.h"
+#include "config/module.h"
+#include "config/db.h"
 
-#define arity(N) check(cols == (N), "Wrong number of cols: expected %d got %d", cols, (N))
-#define SQL(Q, ...) sqlite3_mprintf((Q), ##__VA_ARGS__)
-#define SQL_FREE(Q) if(Q) sqlite3_free(Q)
 
-static tst_t *LOADED = NULL;
-
-typedef struct BackendValue {
-    void *value;
-    bstring key;
-    BackendType type;
-    int active;
-} BackendValue;
-
-static inline bstring cols_to_key(const char *type, int cols, char **data)
+Handler *Config_load_handler(int handler_id)
 {
-    bstring key = bfromcstr("");
-    int i = 0;
+    tns_value_t *res = DEFAULT_CONFIG_MODULE.load_handler(handler_id);
+    int cols = 0;
+    int rows = DB_counts(res, &cols);
 
-    bformata(key,"%s:",type);
+    check(rows == 1, "Expected to get just one row for handler id: %d, but got %d.",
+            handler_id, rows);
+    check(cols == 7, "Expected 7 columns for handler id %d but got %d.",
+            handler_id, cols);
 
-    for(i = 0; i < cols; i++) {
-        bformata(key, "%s:", data[i]);
-    }
+    Handler *handler = Handler_create(
+            DB_get_as(res, 0, 1, string), // send_spec
+            DB_get_as(res, 0, 2, string), // send_ident
+            DB_get_as(res, 0, 3, string), // recv_spec
+            DB_get_as(res, 0, 4, string) // recv_ident
+            );
+    check(handler != NULL, "Failed to create handler id %d.", handler_id);
 
-    return key;
-}
-
-static inline BackendValue *find_by_type(const char *type, const char *id)
-{
-    bstring key = bformat("%s:%s:", type, id);
-    void *result = tst_search_prefix(LOADED, bdata(key), blength(key));
-    bdestroy(key);
-    return result;
-}
-
-
-static inline int store_in_loaded(bstring key, void *value, BackendType type) {
-    BackendValue *elem = calloc(sizeof(BackendValue), 1);
-    check_mem(elem);
-
-    elem->value = value;
-    elem->key = key;
-    elem->type = type;
-    elem->active = 0;
-
-    LOADED = tst_insert(LOADED, bdata(key), blength(key), elem);
-
-    return 0;
-
-error:
-    return -1;
-}
-
-
-static int Config_load_handler_options_cb(void *param, int cols, char **data, char **names)
-{
-    arity(3);
-    Handler *handler = (Handler *)param;
-
-    if(data[1][0] == '1') {
-        handler->raw = 1;
-    } else if(data[1][0] == '0') {
-        handler->raw = 0;
-    } else {
-        log_warn("Handler with id=%s has a weird raw_payload setting of %s, assuming you want raw. It should be 0 or 1.",
-                data[0], data[1]);
+    if(DB_get_as(res, 0, 5, number) == 1) {
         handler->raw = 1;
     }
 
-    log_info("Using handler protocol: '%s'", data[2]);
-
-    if(data[2] != NULL && data[2][0] == 't') {
+    if(biseqcstr(DB_get_as(res, 0, 6, string), "tnetstring")) {
         handler->protocol = HANDLER_PROTO_TNET;
-    } else {
-        handler->protocol = HANDLER_PROTO_JSON;
     }
 
-    return 0;
+    log_info("Loaded handler %d:%s:%s:%s:%s",
+            handler_id, bdata(handler->send_spec),
+            bdata(handler->send_ident),
+            bdata(handler->recv_spec),
+            bdata(handler->recv_ident));
 
+    tns_value_destroy(res);
+    return handler;
 error:
-    return -1;
+    if(res) tns_value_destroy(res);
+    return NULL;
 }
 
 
-static int Config_load_handler_cb(void *param, int cols, char **data, char **names)
+Proxy *Config_load_proxy(int proxy_id)
 {
+    tns_value_t *res = DEFAULT_CONFIG_MODULE.load_proxy(proxy_id);
+    int cols = 0;
+    int rows = DB_counts(res, &cols);
+
+    check(rows == 1, "Expected 1 row but got %d rows for proxy id: %d",
+            rows, proxy_id);
+    check(cols == 3, "Expected 3 columns but got %d for proxy id: %d",
+            cols, proxy_id);
+
+    Proxy *proxy = Proxy_create(
+            DB_get_as(res, 0, 1, string),
+            DB_get_as(res, 0, 2, number)
+            );
+    check(proxy != NULL, "Failed to create proxy with id %d.", proxy_id);
+
+    log_info("Loaded proxy %d:%s:%d",
+            proxy_id, bdata(proxy->server), proxy->port);
+
+    tns_value_destroy(res);
+    return proxy;
+error:
+    if(res) tns_value_destroy(res);
+    return NULL;
+}
+
+
+Dir *Config_load_dir(int dir_id)
+{
+    tns_value_t *res = DEFAULT_CONFIG_MODULE.load_dir(dir_id);
+    int cols = 0;
+    int rows = DB_counts(res, &cols);
+
+    check(rows == 1, "Expected 1 row for dir id %d, but got %d.",
+            dir_id, rows);
+    check(cols == 5, "Expected 5 columns for dir id %d, but got %d.",
+            dir_id, cols);
+
+    Dir *dir = Dir_create(
+            DB_get_as(res, 0, 1, string), // base
+            DB_get_as(res, 0, 2, string), // index_file
+            DB_get_as(res, 0, 3, string), // default_ctype
+            DB_get_as(res, 0, 4, number) // cache_ttl
+            );
+    check(dir != NULL, "Failed to create directory id %d.", dir_id);
+
+    log_info("Loaded directory %d:%s:%s",
+            dir_id, bdata(dir->base), bdata(dir->index_file));
+
+    tns_value_destroy(res);
+    return dir;
+error:
+    if(res) tns_value_destroy(res);
+    return NULL;
+}
+
+
+int Config_load_routes(Server *srv, Host *host, int host_id, int server_id)
+{
+    tns_value_t *res = DEFAULT_CONFIG_MODULE.load_routes(host_id, server_id);
+    int cols = 0;
+    int rows = DB_counts(res, &cols);
+    int row_i = 0;
     int rc = 0;
-    char *sql = NULL;
-    bstring key = cols_to_key("handler", cols, data);
-    arity(5);
 
-    check_mem(key);
-    debug("VALIDATING KEY for reload: %s", bdata(key));
+    check(rows > 0, "Server has no routes, it won't do anything without at least one.");
+    check(cols == 4, "Expected 6 columns in the routes for host %s, got %d.",
+            bdata(host->name), cols);
+ 
+    for(row_i = 0; row_i < rows; row_i++) {
+        int route_id = DB_get_as(res, row_i, 0, number);
+        bstring path = DB_get_as(res, row_i, 1, string);
+        int id = DB_get_as(res, row_i, 2, number);
+        bstring type = DB_get_as(res, row_i, 3, string);
+        void *target = NULL;
+        BackendType backend_type = 0;
 
-    BackendValue *backend = tst_search(LOADED, bdata(key), blength(key));
-
-    if(backend) {
-        debug("Found original handler, keeping it running.");
-        check(backend->type == BACKEND_HANDLER, "Didn't get a Handler type backend for key: %s", bdata(key));
-        Handler *handler = backend->value;
-        handler->running = 1;
-    } else {
-        debug("No handler found, making a new one for: %s", bdata(key));
-        Handler *handler = Handler_create(data[1], data[2], data[3], data[4]);
-        check(handler != NULL, "Loaded handler %s with send_spec=%s send_ident=%s recv_spec=%s recv_ident=%s", data[0], data[1], data[2], data[3], data[4]);
-
-        log_info("Loaded handler %s with send_spec=%s send_ident=%s recv_spec=%s recv_ident=%s", data[0], data[1], data[2], data[3], data[4]);
-
-        sql = sqlite3_mprintf("SELECT id, raw_payload, protocol FROM handler WHERE id=%q", data[0]);
-        check_mem(sql);
-
-        rc = DB_exec(sql, Config_load_handler_options_cb, handler);
-
-        if(rc != 0) {
-            log_warn("Couldn't get the Handler.raw_payload setting, you might need to rebuild your db.");
+        if(biseqcstr(type, "dir")) {
+            target = Config_load_dir(id);
+            backend_type = BACKEND_DIR;
+        } else if(biseqcstr(type, "proxy")) {
+            target = Config_load_proxy(id);
+            backend_type = BACKEND_PROXY;
+        } else if(biseqcstr(type, "handler")) {
+            target = Config_load_handler(id);
+            backend_type = BACKEND_HANDLER;
+            // in addition, we also add the handlers to the server
+            // directly so that we can manage reloads better
+            darray_push(srv->handlers, target);
+        } else {
+            sentinel("Invalid backend type: %s for route %d:%s.",
+                    bdata(type), route_id, bdata(path));
         }
 
-        rc = store_in_loaded(key, handler, BACKEND_HANDLER);
-        check(rc == 0, "Failed to store handler %s in backend store.", bdata(key));
+        check(target != NULL, "Failed to load backend type: %s for route %d:%s.",
+                bdata(type), route_id, bdata(path));
+        
+        // add it to the route map for this host
+        rc = Host_add_backend(host, path, backend_type, target);
+        check(rc == 0, "Failed to add route %s to host %s.",
+                bdata(path), bdata(host->name));
 
-        sqlite3_free(sql);
+        log_info("Loaded route %d:%s:%s for host %d:%s",
+                route_id, bdata(path), bdata(type),
+                host_id, bdata(host->name));
     }
 
-    return 0;
+    tns_value_destroy(res);
+    return row_i;
 
 error:
-    if(key) bdestroy(key);
-    if(sql) sqlite3_free(sql);
+    if(res) tns_value_destroy(res);
     return -1;
 }
 
-static int Config_load_handlers()
+int Config_load_hosts(Server *srv, int server_id)
 {
-    const char *HANDLER_QUERY = "SELECT id, send_spec, send_ident, recv_spec, recv_ident FROM handler";
+    tns_value_t *res = DEFAULT_CONFIG_MODULE.load_hosts(server_id);
+    int cols = 0;
+    int rows = DB_counts(res, &cols);
+    int row_i = 0; 
+    int rc = 0;
 
-    int rc = DB_exec(HANDLER_QUERY, Config_load_handler_cb, NULL);
-    check(rc == 0, "Failed to load handlers");
+    check(rows > 0, "Expected at least one host for server %d:%s but got none.",
+            server_id, bdata(srv->default_hostname));
+    check(cols == 4, "Expected 4 columns for Host, got %d instead.", cols);
 
-    return 0;
+    for(row_i = 0; row_i < rows; row_i++) {
+        Host *host = Host_create(
+                DB_get_as(res, row_i, 1, string), // name
+                DB_get_as(res, row_i, 2, string) // matching
+                );
+        check_mem(host);
 
-error:
-    return -1;
-}
+        int host_id = DB_get_as(res, row_i, 0, number);
+        rc = Config_load_routes(srv, host, host_id, server_id);
+        check(rc != -1, "Failed to load routes for host %s.", bdata(host->name));
+        check(rc > 0, "There are no routes for host %d:%s.", host_id, bdata(host->name));
 
+        rc = Server_add_host(srv, host);
+        check(rc == 0, "Failed to add host %s:%s to server.",
+                bdata(host->name), bdata(host->matching));
 
-static int Config_load_proxy_cb(void *param, int cols, char **data, char **names)
-{
-    bstring key = cols_to_key("proxy", cols, data);
-
-    arity(3);
-
-    BackendValue *backend = tst_search(LOADED, bdata(key), blength(key));
-
-    if(backend) {
-        Proxy *proxy = backend->value;
-        proxy->running = 1;
-    } else {
-        Proxy *proxy = Proxy_create(bfromcstr(data[1]), atoi(data[2]));
-        check(proxy != NULL, "Failed to create proxy %s with address=%s port=%s", data[0], data[1], data[2]);
-
-        log_info("Loaded proxy %s with address=%s port=%s", data[0], data[1], data[2]);
-
-        check(store_in_loaded(key, proxy, BACKEND_PROXY) == 0, "Failed to store proxy.");
+        if(biseq(srv->default_hostname, host->name)) {
+            srv->default_host = host;
+        }
     }
 
+    log_info("Loaded %d hosts for server %d:%s", row_i, server_id, bdata(srv->uuid));
+
+    tns_value_destroy(res);
     return 0;
 
 error:
-    if(key) bdestroy(key);
-    return -1;
-}
-
-static int Config_load_proxies()
-{
-    const char *PROXY_QUERY = "SELECT id, addr, port FROM proxy";
-
-    int rc = DB_exec(PROXY_QUERY, Config_load_proxy_cb, NULL);
-    check(rc == 0, "Failed to load proxies");
-
-    return 0;
-
-error:
-    return -1;
-}
-
-static int Config_load_dir_cb(void *param, int cols, char **data, char **names)
-{
-    bstring key = cols_to_key("dir", cols, data);
-    arity(5);
-
-    BackendValue *backend = tst_search(LOADED, bdata(key), blength(key));
-
-    if(backend) {
-        Dir *dir = backend->value;
-        dir->running = 1;
-    } else {
-        int cache_ttl = data[4] ? strtol(data[4], NULL, 10) : 0;
-        Dir* dir = Dir_create(data[1], data[2], data[3], cache_ttl);
-        check(dir != NULL, "Failed to create dir %s with base=%s index=%s def_ctype=%s cache_ttl=%d",
-              data[0], data[1], data[2], data[3], cache_ttl);
-
-        log_info("Loaded dir %s with base=%s index=%s def_ctype=%s cache_ttl=%d",
-                 data[0], data[1], data[2], data[3], cache_ttl);
-
-        check(store_in_loaded(key, dir, BACKEND_DIR) == 0, "Failed to store Dir in loaded.");
-    }
-
-    return 0;
-
-error:
-    if(key) bdestroy(key);
-    return -1;
-}
-
-static int Config_load_dirs()
-{
-    const char *DIR_QUERY = "SELECT id, base, index_file, default_ctype, cache_ttl FROM directory";
-
-    int rc = DB_exec(DIR_QUERY, Config_load_dir_cb, NULL);
-    check(rc == 0, "Failed to load directories");
-
-    return 0;
-
-error:
-    return -1;
-}
-
-static int Config_load_route_cb(void *param, int cols, char **data, char **names)
-{
-    arity(4);
-
-    Host *host = (Host*)param;
-    debug("ROUTE BEING LOADED into HOST %p: %s:%s for route %s:%s", host, data[3], data[2], data[0], data[1]);
-
-    check(host, "Expected host as param");
-    check(data[3] != NULL, "Route type is NULL but shouldn't be for route id=%s", data[0]);
-
-    BackendValue *backend = find_by_type(data[3], data[2]);
-    check(backend != NULL, "Failed to find %s:%s for route %s:%s", data[3], data[2], data[0], data[1]);
-
-    backend->active = 1;  // now this backend is actually active
-    Host_add_backend(host, data[1], strlen(data[1]), backend->type, backend->value);
-
-    return 0;
-
-error:
-    return -1;
-}
-
-static int Config_load_host_cb(void *param, int cols, char **data, char **names)
-{
-    char *query = NULL;
-    arity(4);
-
-    Server *server = (Server*)param;
-    check(server, "Expected server as param");
-
-    Host *host = Host_create(data[1], data[2]);
-    check(host != NULL, "Failed to create host %s with %s", data[0], data[1]);
-
-    const char *ROUTE_QUERY = "SELECT route.id, route.path, route.target_id, route.target_type "
-        "FROM route, host WHERE host_id=%s AND "
-        "host.server_id=%s AND host.id = route.host_id";
-    query = SQL(ROUTE_QUERY, data[0], data[3]);
-
-    int rc = DB_exec(query, Config_load_route_cb, host);
-    check(rc == 0, "Failed to load routes for host %s:%s", data[0], data[1]);
-
-    log_info("Adding host %s:%s to server at pattern %s", data[0], data[1], data[2]);
-
-    Server_add_host(server, bfromcstr(data[2]), host);
-
-    if(biseq(host->name, server->default_hostname)) {
-        check(server->default_host == NULL, "You have more than one host matching the default host: %s, the second one is: %s:%s:%s",
-                bdata(server->default_hostname),
-                data[0], data[1], data[2]);
-
-        log_info("Setting default host to host %s:%s:%s", data[0], data[1], data[2]);
-        Server_set_default_host(server, host);
-    }
-
-    SQL_FREE(query);
-    return 0;
-
-error:
-    SQL_FREE(query);
-    return -1;
-}
-
-static int Config_load_server_cb(void* param, int cols, char **data, char **names)
-{
-	Server **server = NULL;
-    char *query = NULL;
-    arity(9);
-
-    server = (Server **)param;
-    if(*server != NULL)
-    {
-        log_info("More than one server object matches given uuid, using last found");
-        Server_destroy(*server);
-    }
-
-    *server = Server_create(
-            data[1], // uuid
-            data[2], // default_host
-            data[3], // bind_addr
-            data[4], // port
-            data[5], // chroot
-            data[6], // access_log
-            data[7], // error_log
-            data[8] // pid_file
-            );
-    check(*server, "Failed to create server %s:%s on port %s", data[0], data[2], data[4]);
-
-
-    const char *HOST_QUERY = "SELECT id, name, matching, server_id FROM host WHERE server_id = %s";
-    query = SQL(HOST_QUERY, data[0]);
-    check(query, "Failed to craft query string");
-
-    int rc = DB_exec(query, Config_load_host_cb, *server);
-    check(rc == 0, "Failed to find hosts for server %s:%s on port %s", data[0], data[1], data[4]);
-
-    log_info("Loaded server %s:%s on port %s with default host %s", data[0], data[1], data[4], data[2]);
-
-    SQL_FREE(query);
-
-    return 0;
-
-error:
-	if (server) Server_destroy(*server);
-    SQL_FREE(query);
+    if(res) tns_value_destroy(res);
     return -1;
 
 }
 
 Server *Config_load_server(const char *uuid)
 {
+    tns_value_t *res = DEFAULT_CONFIG_MODULE.load_server(uuid);
+    int cols = 0;
+    int rows = DB_counts(res, &cols);
     int rc = 0;
-    char *query = NULL;
 
-    rc = Config_load_handlers();
-    check(rc == 0, "You have an error in your handlers, aborting startup.");
+    check(rows == 1, "Wrong number of servers returned, expected 1, got %d.", rows);
+    check(cols == 9, "Wrong number of columns returned, expected 9, got %d.", cols);
 
-    rc = Config_load_proxies();
-    check(rc == 0, "You have an error in your proxies, aborting startup.");
+    int server_id = DB_get_as(res, 0, 0, number); // id
 
-    rc = Config_load_dirs();
-    check(rc == 0, "You have an error in your directories, aborting startup.");
+    Server *srv = Server_create(
+            DB_get_as(res, 0, 1, string), // uuid
+            DB_get_as(res, 0, 2, string), // default_host
+            DB_get_as(res, 0, 3, string), // bind_addr
+            DB_get_as(res, 0, 4, number), // port
+            DB_get_as(res, 0, 5, string), // chroot
+            DB_get_as(res, 0, 6, string), // access_log
+            DB_get_as(res, 0, 7, string), // error_log
+            DB_get_as(res, 0, 8, string) // pid_file
+            );
+    check(srv != NULL, "Failed to create server %s", uuid);
 
-    const char *SERVER_QUERY = "SELECT id, uuid, default_host, bind_addr, port, chroot, access_log, error_log, pid_file FROM server WHERE uuid=%Q";
-    query = SQL(SERVER_QUERY, uuid);
+    rc = Config_load_hosts(srv, server_id);
+    check(rc == 0, "Failed to load the hosts for server: %s", bdata(srv->uuid));
 
-    Server *server = NULL;
-    rc = DB_exec(query, Config_load_server_cb, &server);
-    check(rc == 0, "Failed to select server with uuid %s", uuid);
-
-    SQL_FREE(query);
-
-    return server;
+    tns_value_destroy(res);
+    return srv;
 
 error:
-    SQL_FREE(query);
+    if(res) tns_value_destroy(res);
     return NULL;
 }
 
-static int Config_load_mimetypes_cb(void *param, int cols, char **data, char **names)
+
+static int simple_query_run(tns_value_t *res,
+        int (*callback)(const char *key, const char *value))
 {
-    arity(3);
+    int row_i = 0;
+    int cols = 0;
+    int rows = DB_counts(res, &cols);
+    check(rows >= 0, "Results are not a table.");
+    check(cols == 3, "Expected 3 columns for key=value style query.");
 
-    int rc = MIME_add_type(data[1], data[2]);
-    check(rc == 0, "Failed to create mimetype %s:%s from id %s", data[1], data[2], data[0]);
+    for(row_i = 0; row_i < rows; row_i++) {
+        bstring key = DB_get_as(res, row_i, 1, string);
+        bstring value = DB_get_as(res, row_i, 2, string);
 
-    return 0;
+        int rc = callback(bdata(key), bdata(value));
+        check_debug(rc == 0, "Load callback failed.");
+    }
 
+    return row_i;
 error:
     return -1;
 }
 
 int Config_load_mimetypes()
 {
-    const char *MIME_QUERY = "SELECT id, extension, mimetype FROM mimetype";
+    int rc = -1;
+    tns_value_t *res = DEFAULT_CONFIG_MODULE.load_mimetypes();
+    check(tns_get_type(res) == tns_tag_list, "Wrong type, expected valid rows.");
 
-    int rc = DB_exec(MIME_QUERY, Config_load_mimetypes_cb, NULL);
-    check(rc == 0, "Failed to load mimetypes");
+    rc = simple_query_run(res, MIME_add_type);
+    check(rc != -1, "Failed adding your settings, look at previous errors for clues.");
 
-    return 0;
-
-error:
-    return -1;
+error: // fallthrough
+    if(res) tns_value_destroy(res);
+    return rc;
 }
 
-static int Config_load_settings_cb(void *param, int cols, char **data, char **names)
-{
-    arity(3);
-
-    int rc = Setting_add(data[1], data[2]);
-    check(rc == 0, "Failed to create setting %s:%s from id %s", data[1], data[2], data[0]);
-
-    return 0;
-
-error:
-    return -1;
-}
 
 int Config_load_settings()
 {
-    const char *SETTINGS_QUERY = "SELECT id, key, value FROM setting";
+    tns_value_t *res = DEFAULT_CONFIG_MODULE.load_settings();
+    int rc = -1;
+    check(tns_get_type(res) == tns_tag_list, "Wrong type, expected valid rows.");
+    rc = simple_query_run(res, Setting_add);
+    check(rc != -1, "Failed adding your settings, look at previous errors for clues.");
 
-    int rc = DB_exec(SETTINGS_QUERY, Config_load_settings_cb, NULL);
-    check(rc == 0, "Failed to load settings");
-
-    return 0;
-
-error:
-    return -1;
+error: // falthrough
+    if(res) tns_value_destroy(res);
+    return rc;
 }
 
 int Config_init_db(const char *path)
 {
-    return DB_init(path);
+    return DEFAULT_CONFIG_MODULE.init(path);
 }
 
 void Config_close_db()
 {
-    DB_close();
+    DEFAULT_CONFIG_MODULE.close();
 }
 
-
-
-static void handlers_receive_start(void *value, void *data)
-{
-    BackendValue *backend = (BackendValue *)value;
-
-    debug("SCANNING BACKEND: %s has active %d and type %d",
-            bdata(backend->key), backend->active, backend->type);
-
-    if(backend->type == BACKEND_HANDLER && backend->active) {
-        debug("STARTING handler: %s", bdata(backend->key));
-        Handler *handler = backend->value;
-
-        if(!handler->running) {
-            // TODO: need three states, running, suspended, not running
-            debug("LOADING BACKEND %s", bdata(handler->send_spec));
-            taskcreate(Handler_task, handler, HANDLER_STACK);
-            handler->running = 1;
-        }
-    } else {
-        debug("SKIPPING DISABLED HANDLER: %s", bdata(backend->key));
-    }
-}
-
-void Config_start_handlers()
-{
-    debug("LOADING ALL HANDLERS...");
-    tst_traverse(LOADED, handlers_receive_start, NULL);
-}
-
-
-static void shutdown_cb(void *value, void *data)
-{
-    BackendValue *backend = (BackendValue *)value;
-    assert(backend->value != NULL && "Backend had a NULL value!");
-
-    if(!backend->active) {
-        // just skip ones that are no longer active
-        return;
-    }
-
-    if(backend->type == BACKEND_HANDLER) {
-        debug("Stopping handler: %s", bdata(backend->key));
-        Handler *handler = backend->value;
-        handler->running = 0;
-    } else if(backend->type == BACKEND_PROXY) {
-        debug("Stopping proxy: %s", bdata(backend->key));
-        Proxy *proxy = backend->value;
-        proxy->running = 0;
-    } else if(backend->type == BACKEND_DIR) {
-        debug("Stopping dir: %s", bdata(backend->key));
-        Dir *dir = backend->value;
-        dir->running = 0;
-    } else {
-        sentinel("Invalid backend type: %d", backend->type);
-    }
-
-    backend->active = 0; // now the backend is forced down
-
-    return;
-
-error:
-    return;
-}
-
-void Config_stop_all()
-{
-    tst_traverse(LOADED, shutdown_cb, NULL);
-}
 

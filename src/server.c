@@ -45,6 +45,7 @@
 #include "setting.h"
 #include "pattern.h"
 #include "config/config.h"
+#include <signal.h>
 
 int RUNNING=1;
 
@@ -171,9 +172,9 @@ error:
     return -1;
 }
 
-Server *Server_create(const char *uuid, const char *default_host,
-        const char *bind_addr, const char *port, const char *chroot, const char *access_log,
-        const char *error_log, const char *pid_file)
+Server *Server_create(bstring uuid, bstring default_host,
+        bstring bind_addr, int port, bstring chroot, bstring access_log,
+        bstring error_log, bstring pid_file)
 {
     Server *srv = NULL;
     bstring use_ssl_key = NULL;
@@ -185,27 +186,30 @@ Server *Server_create(const char *uuid, const char *default_host,
     srv->hosts = RouteMap_create(host_destroy_cb);
     check(srv->hosts, "Failed to create host RouteMap.");
 
-    srv->port = atoi(port);
-    check(port > 0, "Can't bind to the given port: %s", port);
+    srv->handlers = darray_create(sizeof(Handler), 20);
+    check_mem(srv->handlers);
+
+    check(port > 0, "Can't bind to the given port: %d", port);
+    srv->port = port;
 
     srv->listen_fd = 0;
 
-    srv->bind_addr = bfromcstr(bind_addr); check_mem(srv->bind_addr);
-    srv->uuid = bfromcstr(uuid); check_mem(srv->uuid);
-    srv->chroot = bfromcstr(chroot); check_mem(srv->chroot);
-    srv->access_log = bfromcstr(access_log); check_mem(srv->access_log);
-    srv->error_log = bfromcstr(error_log); check_mem(srv->error_log);
-    srv->pid_file = bfromcstr(pid_file); check_mem(srv->pid_file);
-    srv->default_hostname = bfromcstr(default_host);
+    srv->bind_addr = bstrcpy(bind_addr); check_mem(srv->bind_addr);
+    srv->uuid = bstrcpy(uuid); check_mem(srv->uuid);
+    srv->chroot = bstrcpy(chroot); check_mem(srv->chroot);
+    srv->access_log = bstrcpy(access_log); check_mem(srv->access_log);
+    srv->error_log = bstrcpy(error_log); check_mem(srv->error_log);
+    srv->pid_file = bstrcpy(pid_file); check_mem(srv->pid_file);
+    srv->default_hostname = bstrcpy(default_host);
     srv->use_ssl = 0;
 
-    use_ssl_key = bfromcstr(uuid);
+    use_ssl_key = bstrcpy(uuid);
     check_mem(use_ssl_key);
     bcatcstr(use_ssl_key, ".use_ssl");
 
     if(Setting_get_int(bdata(use_ssl_key), 0)) {
         rcode = Server_init_ssl(srv);
-        check(rcode == 0, "Failed to initialize ssl for server %s", uuid);
+        check(rcode == 0, "Failed to initialize ssl for server %s", bdata(uuid));
     }
 
     bdestroy(use_ssl_key); use_ssl_key = NULL;
@@ -230,6 +234,7 @@ void Server_destroy(Server *srv)
             // srv->ciphers freed (if non-default) by h_free
         }
         RouteMap_destroy(srv->hosts);
+        h_free(srv->handlers);
         bdestroy(srv->bind_addr);
         bdestroy(srv->uuid);
         bdestroy(srv->chroot);
@@ -268,8 +273,6 @@ void Server_start(Server *srv)
 
     log_info("Starting server on port %d", srv->port);
 
-    Config_start_handlers();
-
     while(RUNNING) {
         cfd = netaccept(srv->listen_fd, remote, &rport);
         int accept_good = 0;
@@ -305,13 +308,15 @@ void Server_start(Server *srv)
 
 
 
-int Server_add_host(Server *srv, bstring pattern, Host *host)
+int Server_add_host(Server *srv, Host *host)
 {
     debug("ADDING HOST %p TO SERVER %p on pattern %s",
             host, srv, bdata(pattern));
 
-    assert(host->matching != NULL && "Host added to server without matching.");
-    return RouteMap_insert_reversed(srv->hosts, pattern, host);
+    check(host->matching != NULL, "Host's matching can't be NULL.");
+    return RouteMap_insert_reversed(srv->hosts, host->matching, host);
+error:
+    return -1;
 }
 
 
@@ -342,3 +347,42 @@ Host *Server_match_backend(Server *srv, bstring target)
 error: // fallthrough
     return NULL;
 }
+
+int Server_start_handlers(Server *srv)
+{
+    int i = 0;
+    for(i = 0; i < darray_end(srv->handlers); i++) {
+        Handler *handler = darray_get(srv->handlers, i);
+        check(handler != NULL, "Invalid handler, can't be NULL.");
+
+        if(!handler->running) {
+            // TODO: need three states, running, suspended, not running
+            log_info("LOADING BACKEND %s", bdata(handler->send_spec));
+            taskcreate(Handler_task, handler, HANDLER_STACK);
+            handler->running = 1;
+        }
+    }
+
+    return 0;
+error:
+    return -1;
+}
+
+
+int Server_stop_handlers(Server *srv)
+{
+    int i = 0;
+    for(i = 0; i < darray_end(srv->handlers); i++) {
+        Handler *handler = darray_get(srv->handlers, i);
+        check(handler != NULL, "Invalid handler, can't be NULL.");
+        if(handler->running) {
+            log_info("STOPPING HANDLER %s", bdata(handler->send_spec));
+            tasksignal(handler->task, SIGINT);
+            handler->running = 0;
+        }
+    }
+    return 0;
+error:
+    return -1;
+}
+

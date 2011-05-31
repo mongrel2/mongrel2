@@ -53,7 +53,7 @@ void backend_destroy_cb(Route *r, RouteMap *map)
     }
 }
 
-Host *Host_create(const char *name, const char *matching)
+Host *Host_create(bstring name, bstring matching)
 {
     if(!MAX_URL_PATH || !MAX_HOST_NAME) {
         MAX_URL_PATH = Setting_get_int("limits.url_path", 256);
@@ -65,17 +65,17 @@ Host *Host_create(const char *name, const char *matching)
     Host *host = h_calloc(sizeof(Host), 1);
     check_mem(host);
 
-    host->name = bfromcstr(name);
+    host->name = bstrcpy(name);
     check(blength(host->name) < MAX_HOST_NAME, "Host name too long (max %d): '%s'\n", 
-            MAX_HOST_NAME, name);
+            MAX_HOST_NAME, bdata(name));
 
-    host->matching = bfromcstr(matching);
+    host->matching = bstrcpy(matching);
 
     check(blength(host->matching) < MAX_HOST_NAME, "Host matching pattern too long (max %d): '%s'\n", 
-            MAX_HOST_NAME, name);
+            MAX_HOST_NAME, bdata(name));
 
     host->routes = RouteMap_create(backend_destroy_cb);
-    check(host->routes, "Failed to create host route map for %s.", name);
+    check(host->routes, "Failed to create host route map for %s.", bdata(name));
     
     return host;
 
@@ -95,9 +95,9 @@ void Host_destroy(Host *host)
 
 
 
-int Host_add_backend(Host *host, const char *path, size_t path_len, BackendType type, void *target)
+int Host_add_backend(Host *host, bstring path, BackendType type, void *target)
 {
-    debug("ADDING ROUTE TO HOST %p: %.*s", host, path_len, path);
+    debug("ADDING ROUTE TO HOST %p: %s", host, bdata(path));
     Backend *backend = calloc(sizeof(Backend), 1);
     check_mem(backend);
 
@@ -113,8 +113,9 @@ int Host_add_backend(Host *host, const char *path, size_t path_len, BackendType 
         sentinel("Invalid proxy type given: %d", type);
     }
 
-    int rc = RouteMap_insert(host->routes, blk2bstr(path, path_len), backend);
-    check(rc == 0, "Failed to insert into host %s route map.", bdata(host->name));
+    int rc = RouteMap_insert(host->routes, bstrcpy(path), backend);
+    check(rc == 0, "Failed to insert %s into host %s route map.",
+            bdata(path), bdata(host->name));
 
     return 0;
     

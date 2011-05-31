@@ -49,7 +49,11 @@ char *test_Handler_deliver()
 
 char *test_Handler_create_destroy()
 {
-    Handler *handler = Handler_create("tcp://127.0.0.1:12348", "ZED", "tcp://127.0.0.1:4321", "ZED");
+    Handler *handler = Handler_create(
+            bfromcstr("tcp://127.0.0.1:12348"),
+            bfromcstr("ZED"),
+            bfromcstr("tcp://127.0.0.1:4321"),
+            bfromcstr("ZED"));
     mu_assert(handler != NULL, "Failed to make the handler.");
 
     Handler_destroy(handler);

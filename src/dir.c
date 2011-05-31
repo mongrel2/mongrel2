@@ -165,7 +165,7 @@ error:
 }
 
 
-Dir *Dir_create(const char *base, const char *index_file, const char *default_ctype, int cache_ttl)
+Dir *Dir_create(bstring base, bstring index_file, bstring default_ctype, int cache_ttl)
 {
     Dir *dir = calloc(sizeof(Dir), 1);
     check_mem(dir);
@@ -179,13 +179,13 @@ Dir *Dir_create(const char *base, const char *index_file, const char *default_ct
                 MAX_SEND_BUFFER, MAX_DIR_PATH);
     }
 
-    dir->base = bfromcstr(base);
+    dir->base = bstrcpy(base);
     check(blength(dir->base) < MAX_DIR_PATH, "Base directory is too long, must be less than %d", MAX_DIR_PATH);
-    check(bchar(dir->base, 0) != '/', "Don't start the base with / in %s, that will fail when not in chroot.", base);
-    check(bchar(dir->base, blength(dir->base) - 1) == '/', "End directory base with / in %s or it won't work right.", base);
+    check(bchar(dir->base, 0) != '/', "Don't start the base with / in %s, that will fail when not in chroot.", bdata(base));
+    check(bchar(dir->base, blength(dir->base) - 1) == '/', "End directory base with / in %s or it won't work right.", bdata(base));
 
-    dir->index_file = bfromcstr(index_file);
-    dir->default_ctype = bfromcstr(default_ctype);
+    dir->index_file = bstrcpy(index_file);
+    dir->default_ctype = bstrcpy(default_ctype);
 
     dir->fr_cache = Cache_create(FR_CACHE_SIZE, filerecord_cache_lookup,
                                  filerecord_cache_evict);

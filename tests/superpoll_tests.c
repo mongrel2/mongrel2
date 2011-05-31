@@ -1,8 +1,5 @@
-#include <assert.h>
-
-#define NDEBUG 1
-
 #include "minunit.h"
+#include <assert.h>
 #include <mem/halloc.h>
 
 #include <superpoll.h>
@@ -263,8 +260,6 @@ int run_main_loop(int hot)
 	}
 
     PollResult_clean(&result);
-
-    debug("NPOLL after run: %d", TEST_POLL->npollfd);
     return 0;
 
 error:

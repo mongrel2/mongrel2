@@ -62,7 +62,7 @@ Proxy *Proxy_create(bstring server, int port)
     Proxy *proxy = h_calloc(sizeof(Proxy), 1);
     check_mem(proxy);
     
-    proxy->server = server;
+    proxy->server = bstrcpy(server);
     proxy->port = port;
     proxy->running = 1;
 

@@ -36,16 +36,21 @@
 #define _db_h
 
 #include <sqlite3.h>
+#include "tnetstrings.h"
 
 int DB_init(const char *path);
 
 void DB_close();
 
-int DB_exec(const char *query, 
-        int (*callback)(void*,int,char**,char**),
-        void *param);
+tns_value_t *DB_exec(const char *query, ...);
+
+tns_value_t *DB_get(tns_value_t *res, int row, int col);
+
+int DB_counts(tns_value_t *res, int *cols);
 
 int DB_lastid();
+
+#define DB_get_as(RES, ROW, COL, TYPE) (((tns_value_t *)DB_get((RES), (ROW), (COL)))->value.TYPE)
 
 extern sqlite3 *CONFIG_DB;
 

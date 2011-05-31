@@ -1,3 +1,4 @@
+#undef NDEBUG
 #ifndef _minunit_h
 #define _minunit_h
 
