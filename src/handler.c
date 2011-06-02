@@ -1,4 +1,3 @@
-#undef NDEBUG
 /**
  *
  * Copyright (c) 2010, Zed A. Shaw and Mongrel2 Project Contributors.
@@ -277,7 +276,7 @@ error:
 
 void *Handler_send_create(const char *send_spec, const char *identity)
 {
-    
+    int bind_attempts = 10;
     void *handler_socket = mqsocket(ZMQ_PUSH);
     int rc = zmq_setsockopt(handler_socket, ZMQ_IDENTITY, identity, strlen(identity));
     check(rc == 0, "Failed to set handler socket %s identity %s", send_spec, identity);
@@ -285,11 +284,14 @@ void *Handler_send_create(const char *send_spec, const char *identity)
     log_info("Binding handler PUSH socket %s with identity: %s", send_spec, identity);
 
     rc = zmq_bind(handler_socket, send_spec);
-    while(rc != 0) {
+
+    while(rc != 0 && bind_attempts-- > 0) {
         taskdelay(1000);
         log_warn("Failed to bind send socket trying again for: %s", send_spec);
         rc = zmq_bind(handler_socket, send_spec);
     }
+
+    check(bind_attempts > 0, "Too many bind attempts for handler %s", send_spec);
 
     return handler_socket;
 
@@ -299,6 +301,7 @@ error:
 
 void *Handler_recv_create(const char *recv_spec, const char *uuid)
 {
+    int bind_attempts = 10;
     void *listener_socket = mqsocket(ZMQ_SUB);
     check(listener_socket, "Can't create ZMQ_SUB socket.");
 
@@ -307,11 +310,14 @@ void *Handler_recv_create(const char *recv_spec, const char *uuid)
     log_info("Binding listener SUB socket %s subscribed to: %s", recv_spec, uuid);
 
     rc = zmq_bind(listener_socket, recv_spec);
-    while(rc != 0) {
+
+    while(rc != 0 && bind_attempts-- > 0) {
         taskdelay(1000);
         debug("Failed to bind recv socket trying again.");
         rc = zmq_bind(listener_socket, recv_spec);
     }
+
+    check(bind_attempts > 0, "Too many bind attempts for handler %s", recv_spec);
 
     return listener_socket;
 

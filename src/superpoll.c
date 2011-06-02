@@ -201,8 +201,10 @@ error:
 void SuperPoll_compact_down(SuperPoll *sp, int i)
 {
     sp->nfd_hot--;
-    sp->pollfd[i] = sp->pollfd[sp->nfd_hot];
-    sp->hot_data[i] = sp->hot_data[sp->nfd_hot];
+    if(sp->nfd_hot >= 0) {
+        sp->pollfd[i] = sp->pollfd[sp->nfd_hot];
+        sp->hot_data[i] = sp->hot_data[sp->nfd_hot];
+    }
 }
 
 static inline void SuperPoll_add_hit(PollResult *result, zmq_pollitem_t *p, void *data)

@@ -1,4 +1,3 @@
-#undef NDEBUG
 /**
  *
  * Copyright (c) 2010, Zed A. Shaw and Mongrel2 Project Contributors.
@@ -151,6 +150,35 @@ error:
     return NULL;
 }
 
+static inline void Config_push_unique_handler(Server *srv, Handler *handler)
+{
+    int i = 0;
+    int found = 0;
+
+    // roll through the list of handlers and break if we find one
+    // this is because, unlike other backends, handlers can't have
+    // the same send/recv idents.
+    for(i = 0; i < darray_end(srv->handlers); i++) {
+        Handler *test = darray_get(srv->handlers, i);
+        int same_send = biseq(test->send_spec, handler->send_spec);
+        int same_recv = biseq(test->recv_spec, handler->recv_spec);
+
+        if(same_send && same_recv) {
+            found = 1;
+            break;
+        } else if(same_send) {
+            log_warn("You have two handlers with the same send_spec: %s",
+                    bdata(handler->send_spec));
+        } else if(same_recv) {
+            log_warn("You have two handlers with the same recv_spec: %s",
+                    bdata(handler->recv_spec));
+        }
+    }
+
+    if(!found) {
+        darray_push(srv->handlers, handler);
+    }
+}
 
 int Config_load_routes(Server *srv, Host *host, int host_id, int server_id)
 {
@@ -181,9 +209,7 @@ int Config_load_routes(Server *srv, Host *host, int host_id, int server_id)
         } else if(biseqcstr(type, "handler")) {
             target = Config_load_handler(id);
             backend_type = BACKEND_HANDLER;
-            // in addition, we also add the handlers to the server
-            // directly so that we can manage reloads better
-            darray_push(srv->handlers, target);
+            Config_push_unique_handler(srv, target);
         } else {
             sentinel("Invalid backend type: %s for route %d:%s.",
                     bdata(type), route_id, bdata(path));

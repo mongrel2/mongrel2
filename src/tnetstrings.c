@@ -1,4 +1,3 @@
-#undef NDEBUG
 #include "tnetstrings.h"
 #include <string.h>
 #include "dbg.h"
