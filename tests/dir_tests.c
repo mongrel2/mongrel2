@@ -162,8 +162,8 @@ char *test_Dir_serve_big_files(){
   bstring response_more_1gb = bformat(CHUNKED_RESPONSE_FORMAT, "", "", more1gb.st_size, "", "");
 
   mu_assert(bstrcmp(response_less_1gb, bfromcstr(LESS_1GB)) == 0, "Wrong response headers for <1GB files");
-  printf("MORE_1GB=%s\n", MORE_1GB);
-  printf("RESPONSE=%s\n", bdata(response_more_1gb));
+  debug("MORE_1GB=%s\n", MORE_1GB);
+  debug("RESPONSE=%s\n", bdata(response_more_1gb));
   mu_assert(bstrcmp(response_more_1gb,  bfromcstr(MORE_1GB)) == 0, "Wrong response headers for >1GB files");
   return NULL;
 }

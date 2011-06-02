@@ -171,24 +171,26 @@ long long int Dir_stream_file(FileRecord *file, Connection *conn)
       int to_send = 0;
       bstring chunk_data;
       total = file->file_size;
-      while (total > 0){
-        to_send = total > _1GB ? _1GB : total;
-        chunk_data = bformat("%x\r\n", to_send);
-        debug("sending chunk: size=%d", to_send);
 
-        /* chunk start */
-        sent = IOBuf_send(conn->iob, bdata(chunk_data), blength(chunk_data));
-        check(sent > 0, "Failed sending start of chunk");
+      while (total > 0) {
+          to_send = total > _1GB ? _1GB : total;
+          chunk_data = bformat("%x\r\n", to_send);
+          debug("sending chunk: size=%d", to_send);
 
-        debug("Sending file bytes: %d", to_send);
-        sent = IOBuf_stream_file(conn->iob, file->fd, to_send);
-        check(sent > 0, "Failed sending chunk content: IOBuf_stream_file returned %d ", sent);
+          /* chunk start */
+          sent = IOBuf_send(conn->iob, bdata(chunk_data), blength(chunk_data));
+          check(sent > 0, "Failed sending start of chunk");
 
-        total -= sent;
+          debug("Sending file bytes: %d", to_send);
+          sent = IOBuf_stream_file(conn->iob, file->fd, to_send);
+          check(sent > 0, "Failed sending chunk content: IOBuf_stream_file returned %d ", sent);
 
-        /* chunk end */
-        IOBuf_send(conn->iob, "\r\n", 2);
-    	}
+          total -= sent;
+
+          bdestroy(chunk_data);
+          /* chunk end */
+          IOBuf_send(conn->iob, "\r\n", 2);
+      }
 
       /* Send the last chunk */
       IOBuf_send(conn->iob, "0\r\n\r\n", 5);
