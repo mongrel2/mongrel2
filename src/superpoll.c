@@ -171,6 +171,32 @@ int SuperPoll_add(SuperPoll *sp, void *data, void *socket, int fd, int rw, int h
     }
 }
 
+int SuperPoll_del(SuperPoll *sp, void *socket, int fd, int hot)
+{
+    int i = 0;
+    int slot = 0;
+
+    for(i = 0; i < sp->nfd_hot; i++) {
+        if(socket) {
+            if(sp->pollfd[i].socket == socket) {
+                slot = i; break;
+            }
+        } else if(hot) {
+            if(sp->pollfd[i].fd == fd) {
+                slot = i; break;
+            }
+        } else {
+            sentinel("Not implemented yet.");
+        }
+    }
+
+    SuperPoll_compact_down(sp, slot);
+
+    return 0;
+error:
+    return -1;
+}
+
 
 void SuperPoll_compact_down(SuperPoll *sp, int i)
 {

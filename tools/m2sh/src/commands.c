@@ -335,10 +335,8 @@ static inline int exec_server_operations(Command *cmd,
         sentinel("You must give either -name, -uuid, or -host to start a server.");
     }
 
-    check(res != NULL, "Failed to run command against database.");
-    check(tns_get_type(res) == tns_tag_list, "Wrong return type from query, should be list.");
-    check(darray_end(res->value.list) > 0, "Should get 1 result back.");
-
+    check(tns_get_type(res) == tns_tag_list,
+            "Wrong return type from query, should be list.");
     check(callback(&run, res) != -1, "Failed to run internal operation.");
 
     if(!run.ran) {
@@ -373,7 +371,11 @@ error:
 static int run_server(struct ServerRun *r, tns_value_t *res)
 {
     r->ran = 0;
-    tns_value_t *uuid_val = darray_get(res->value.list, 0);
+    int cols = 0;
+    int rows = DB_counts(res, &cols);
+    check(rows == 1 && cols == 1, "Failed to find requested record.");
+    tns_value_t *uuid_val = DB_get(res, 0, 0);
+
     check(uuid_val != NULL && tns_get_type(uuid_val) == tns_tag_string,
             "Invalid value for the server uuid on run.");
 
@@ -417,13 +419,14 @@ static int locate_pid_file(tns_value_t *res)
     bstring pid = NULL;
     bstring pid_path = NULL;
 
-    check(darray_end(res->value.list) == 2,
-            "Wrong number of results for stop command callback.");
+    int cols = 0;
+    int rows = DB_counts(res, &cols);
+    check(rows == 1 && cols == 2, "Wrong number of results.");
 
-    tns_value_t *chroot = darray_get(res->value.list, 0);
+    tns_value_t *chroot = DB_get(res, 0, 0);
     check(tns_get_type(chroot) == tns_tag_string, "Wrong result for server chroot, should be a string.");
 
-    tns_value_t *pid_file = darray_get(res->value.list, 1);
+    tns_value_t *pid_file = DB_get(res, 0, 1);
     check(tns_get_type(pid_file) == tns_tag_string, "Wrong result for server pid_file, should be a string.");
 
     pid_path = bformat("%s%s", bdata(chroot->value.string), bdata(pid_file->value.string));

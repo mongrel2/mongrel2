@@ -258,11 +258,14 @@ Server *reload_server(Server *old_srv, const char *db_file, const char *server_u
 {
     RUNNING = 1;
 
+    Server_stop_handlers(old_srv);
+
     MIME_destroy();
     Setting_destroy();
 
     Server *srv = load_server(db_file, server_uuid, old_srv->listen_fd);
     check(srv, "Failed to load new server config.");
+
 
     RELOAD = 0;
     return srv;
@@ -277,8 +280,6 @@ void complete_shutdown(Server *srv)
     fdclose(srv->listen_fd);
     int attempts = 0;
     taskallsignal(SIGTERM);
-
-    Server_stop_handlers(srv);
 
     // we will always be the last task, so wait until only 1 is running, us
     for(attempts = 0; tasksrunning() > 1 && attempts < 20; attempts++) {

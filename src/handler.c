@@ -1,3 +1,4 @@
+#undef NDEBUG
 /**
  *
  * Copyright (c) 2010, Zed A. Shaw and Mongrel2 Project Contributors.
@@ -217,10 +218,13 @@ void Handler_task(void *v)
 
     check(Handler_setup(handler) == 0, "Failed to initialize handler, exiting.");
 
-    while(handler->running) {
+    while(handler->running && !task_was_signaled()) {
         taskstate("delivering");
 
         rc = handler_recv_parse(handler, parser);
+        if(task_was_signaled()) {
+            break;
+        }
 
         if(rc != -1 && parser->target_count > 0) {
             for(i = 0; i < (int)parser->target_count; i++) {

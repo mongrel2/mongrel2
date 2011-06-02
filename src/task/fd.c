@@ -236,6 +236,7 @@ int _wait(void *socket, int fd, int rw)
     debug("WOKE UP IN WAIT");
     if(task_was_signaled()) {
         debug("GOT SIGNAL %d AFTER WAIT", taskrunning->signal);
+        SuperPoll_del(POLL, socket, fd, hot_add);
         return -1;
     } if(was_registered && Register_fd_exists(fd) == NULL) {
         debug("Socket %d was closed after a wait.", fd);

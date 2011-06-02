@@ -85,6 +85,7 @@ void SuperPoll_destroy(SuperPoll *sp);
 SuperPoll *SuperPoll_create();
 
 int SuperPoll_add(SuperPoll *sp, void *data, void *socket, int fd, int rw, int hot);
+int SuperPoll_del(SuperPoll *sp, void *socket, int fd, int hot);
 
 void SuperPoll_compact_down(SuperPoll *sp, int i);
 

@@ -353,7 +353,6 @@ int Server_start_handlers(Server *srv)
         check(handler != NULL, "Invalid handler, can't be NULL.");
 
         if(!handler->running) {
-            // TODO: need three states, running, suspended, not running
             log_info("LOADING BACKEND %s", bdata(handler->send_spec));
             taskcreate(Handler_task, handler, HANDLER_STACK);
             handler->running = 1;
@@ -372,12 +371,16 @@ int Server_stop_handlers(Server *srv)
     for(i = 0; i < darray_end(srv->handlers); i++) {
         Handler *handler = darray_get(srv->handlers, i);
         check(handler != NULL, "Invalid handler, can't be NULL.");
+
         if(handler->running) {
             log_info("STOPPING HANDLER %s", bdata(handler->send_spec));
             tasksignal(handler->task, SIGINT);
             handler->running = 0;
+            taskdelay(1);
+            Handler_destroy(handler);
         }
     }
+
     return 0;
 error:
     return -1;
