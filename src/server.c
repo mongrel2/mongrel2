@@ -39,7 +39,7 @@
 #include "server.h"
 #include "host.h"
 #include <assert.h>
-#include "string.h"
+#include <string.h>
 #include "mem/halloc.h"
 #include "routing.h"
 #include "setting.h"
