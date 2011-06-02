@@ -13,7 +13,7 @@ a simple storage mechanism.
 
 \begin{aside}{Apparently SQL Inspires FUD}
 When I first started talking about Mongrel2, I said I'd store the configuration
-in SQLite and do a Model-View-Controller kind of design.  Immediately people who
+in SQLite and do a Model-View-Controller kind of design.  Immediately, people who
 can't read flipped out and thought this meant they'd be back in ``Windows registry hell'',
 but with SQL as their only way to access it.  They thought that they'd be stuck writing
 configurations with SQL; that SQL couldn't possibly configure a web server.
@@ -72,7 +72,7 @@ With Mongrel2, it's all right there.
 
 \section{Trying m2sh}
 
-To give this configuration system a try you just need to run the test configuration used
+To give this configuration system a try, you just need to run the test configuration used
 in the unit tests.  Let's try doing a few of the most basic commands with this configuration.
 
 First, make sure you are in the mongrel2 source and you've ran the build so that you get the
@@ -83,7 +83,7 @@ After you have that, do this:
 << d['docs/manual/inputs/sample_m2sh_commands.sh|pyg|l'] >>
 \end{code}
 
-At this point you should see lists of servers and hosts, seen that mongrel2 is
+At this point, you should have seen lists of servers and hosts, seen that mongrel2 is
 not running, and then started it.  You can find out about all the commands and
 get help for them with \shell{m2sh help} or \shell{ms2h help command}.
 
@@ -94,7 +94,7 @@ to exit from the previous start command):
 << d['docs/manual/inputs/starting_stopping_reloading.sh|pyg|l'] >>
 \end{code}
 
-Awesome, right?  Using just this one little management tool, you
+Awesome, right?  Using just this one little management tool you
 are able to completely manage a Mongrel2 instance without having to hack
 on a config file at all.  But you probably need to know how this is all
 working anyway.
@@ -111,7 +111,7 @@ what's going on.  Here's an explanation of what's going on behind the scenes:
 \item Mongrel2 is now running in the background as a daemon process, just like a regular server.
     However, what it did was chroot to the current directory and then drop privileges so that
     they match the owner of that directory (you).  Use \shell{ps aux} to take a look.
-\item With Mongrel2 running, you can look in the logs/error.log file to see what it said.  It should
+\item With Mongrel2 running, you can look in the \file{logs/error.log} file to see what it said.  It should
     be a bunch of debug logging, but check out the messages: nice and detailed.
 \item Next you did a soft reload with \shell{m2sh reload} and you should notice that your mongrel2
     process was able to load the new config \emph{without restarting}.
@@ -132,9 +132,9 @@ files.  You can now try building your own configuration that matches this one or
 
 To configure a new config database you'll write a file that looks a lot like
 a configuration file.  It looks like a Python file, because it comes from the
-first m2sh we wrote in Python (living in \file{examples/python}) but now it's
-written in C.  Even though it was rewritten we managed to keep the same format
-and even make it a little easier by making commas optional in most places.
+first m2sh we wrote in Python (living in \file{examples/python}), but now it's
+written in C.  Even though it was rewritten, we managed to keep the same format
+---and even make it a little easier by making commas optional in most places.
 
 First you load your configuration into a fresh database using \shell{m2sh
 load}.  For our example, we'll use the example configuration from
@@ -146,7 +146,7 @@ load}.  For our example, we'll use the example configuration from
 \end{lstlisting}
 \end{code}
 
-If you aren't familiar with Python then this code might look freaky, but it's really
+If you aren't familiar with Python, then this code might look freaky, but it's really
 simple.  We'll get into how its structured in a second, but to load this file
 we would just do this:
 
@@ -212,8 +212,8 @@ and general server specific deployment gear.
     You could easily use any string that's letters, numbers, or - characters.
 \item[chroot] This is the directory that Mongrel2 should chroot to and drop privileges.
 \item[access\_log] The access log file \emph{relative to the chroot}.  Usually starts with a `/'.  Make sure
-    you don't configure your server so that this and other files are accessible, or make this owned by root.
-\item[error\_log] The error log file just like access\_log.
+    you configure your server so that this and other files aren't accessible, or make this owned by root.
+\item[error\_log] The error log file, just like access\_log.
 \item[pid\_file] Like the access log, where within the chroot directory is the pid file stored.
 \item[default\_host] The server has a bunch of hosts listed, but it needs to know what the default host is.  This is also
     used as a convenient way to refer to this Server.
@@ -246,7 +246,7 @@ code in Mongrel2 to translate \ident{Host:} headers to \ident{Hosts} and URL pat
 \ident{Dirs}, and \ident{Proxies}.
 
 \begin{description}
-\item[path] This is path \emph{pattern} that matches a route.  The pattern uses the Mongrel2 pattern langauge
+\item[path] This is the path \emph{pattern} that matches a route.  The pattern uses the Mongrel2 pattern langauge
     which is a reduced version of the Lua pattern matching system.
 \item[reversed] Determines if this pattern is reversed, which is useful for matching file extensions, hostnames,
     and other naming systems where the ending is really the prefix.  Usually you don't set this.
@@ -270,9 +270,9 @@ as possible.  It also has default content-types and index files.
 
 \begin{description}
 \item[base]  This is the base directory \emph{from the chroot} that is served.  Files should not
-    be served outside of this base directory even in the chroot.
+    be served outside of this base directory, even if they're in the chroot.
 \item[index\_file] This is the default index file to use if a request doesn't give one.  The \ident{Dir}
-    also will do redirects if a request for a directory doesn't end in a / slash.
+    also will do redirects if a request for a directory doesn't end in a slash.
 \item[default\_ctype] The default Content-Type to use if none matches the MIMEType table.
 \end{description}
 
@@ -283,9 +283,9 @@ more of the settings to control how Dirs work.
 
 A proxy is used so that you can use Mongrel2 but not have to throw out your
 existing infrastructure.  Mongrel2 goes to great pains to make sure that it
-implements a fast and dead accurate proxy system internally, but no matter how
+implements a fast and dead-accurate proxy system internally, but no matter how
 good it is, it can't compete with ZeroMQ handlers.  The idea with giving Proxy
-functionality is you can point Mongrel2 at existing servers, and then slowly
+functionality is that you can point Mongrel2 at existing servers, and then slowly
 carve out pieces that will work as handlers.
 
 
@@ -321,7 +321,7 @@ testing has been done with TCP transports.
     to nothing and don't subscribe, or set it to the same as send\_ident.
 \end{description}
 
-The interesting thing about the \ident{Handler} configuration is you don't have to say where the
+The interesting thing about the \ident{Handler} configuration is that you don't have to say where the
 actual backend handlers live.  Did you notice you aren't declaring large clusters of proxies, proxy selection
 methods, or anything else, other than two 0MQ endpoints and some identifiers?  This is because Mongrel2 is
 \emph{binding} these sockets and listening.  Mongrel2 doesn't actively connect to backends; they connect
@@ -332,7 +332,7 @@ or reconfigure Mongrel2 to make them active.
 \subsection{Others}
 
 There's also \ident{Log}, \ident{MIMEType}, and \ident{Setting} objects/tables you can work
-with, but we'll get into those later since you don't need to know about them to understand
+with, but we'll get into those later, since you don't need to know about them to understand
 the Mongrel2 structure.
 
 
@@ -341,7 +341,7 @@ the Mongrel2 structure.
 
 All of this knowledge about the Mongrel2 configuration structure can now be used to take a look at
 a more complex example.  We'll take a look at this example and I'll just say what's
-going on, and you try to match what I'm saying to the code.  Here's the file \file{examples/configs/mongrel2.conf}:
+going on, and you try to match what I'm saying to the code.  Here's the \file{examples/configs/mongrel2.conf} file:
 
 \begin{code}{Mongrel2.org Config Script}
 \begin{lstlisting}
@@ -389,7 +389,7 @@ then uses routes to find the longest matching prefix and then tests the
 pattern.  If the pattern matches, then the route works.  If the route doesn't
 have a pattern, then it's assumed to match, and you're done.
 
-The only caveat is you have to wrap your pattern parts in parenthesis, but these don't mean anything
+The only caveat is that you have to wrap your pattern parts in parenthesis, but these don't mean anything
 other than to delimit where a pattern starts.  So instead of \shell{/images/.*.jpg}, write \shell{/images/(.*.jpg)}
 for it to work.
 
@@ -407,7 +407,7 @@ Here's the list of characters you can use in your patterns:
 \item \verb|\w| Alphanumeric characters.
 \item \verb|\x| Hexadecimal digits.
 \item \verb|\z| The 0 character (null terminator).
-\item \verb|[set]| Just like a regex [] where is a set of chars, like [0-9] for all digits.
+\item \verb|[set]| Just like a regex's [] where \emph{set} is a set of chars, like [0-9] for all digits.
 \item \verb|[^set]| Inverse character set, so \verb|[^0-9]| is anything but digits.
 \item \verb|*| Longest match of 0 or more of the preceding character.
 \item \verb|+| Longest match of 1 or more of the preceding character.
@@ -419,8 +419,8 @@ Here's the list of characters you can use in your patterns:
 \end{itemize}
 
 Using the uppercase version of an escaped character makes it work the opposite
-way (i.e., \verb|\A| matches any character that \emph{isn't} a letter). The backslash
-can be used to escape the following character, disabling its special abilities (i.e.,
+way (e.g., \verb|\A| matches any character that \emph{isn't} a letter). The backslash
+can be used to escape the following character, disabling its special abilities (e.g.,
 \verb|\\| will match a backslash).
 
 Anything that's not listed here is matched literally.
@@ -469,13 +469,13 @@ interchangeable with the \verb|'blah'| syntax so I don't have to double escape e
 \subsection{How Routing Works}
 
 The routing algorithm is actually kind of simple, but it's an unfamiliar algorithm
-to most programmers.  I won't go into the details of how a "Ternary Search Tree"
+to most programmers.  I won't go into the details of how a ``Ternary Search Tree''
 works, but basically it lets you match one prefix against a bunch of other strings
 very fast.  This data structure lets Mongrel2 very quickly determine the target
-for a route, and also know if it has a route at all.  Typically it can match a route
+for a route, and also know if it has a route at all.  Typically, it can match a route
 in just a few characters, and reject a route in even fewer.
 
-For practical usage, it's better to just read how it works rather than how it's
+For practical usage, it's better to just read how it works, rather than how it's
 implemented.  Here's how Mongrel2 matches an incoming URL against routes you've
 given it:
 
@@ -489,10 +489,10 @@ given it:
     in at the same time (that's always redundant anyway).
 \item A request comes in for \verb|/images/hello.jpg| so Mongrel2 takes the whole URL
     and searches for the longest first route that can possibly match.  In this case, that's
-    the /images route.
+    the \verb|/images| route.
 \item It checks if the route it found has a pattern, and if it does then it runs the
-    pattern match code for the whole thing.  If they match then this is the target 
-    and it's good.  If not it returns a 404.  In this case the /images URL and patterns
+    pattern match code for the whole thing.  If they match, then this is the target
+    and it's good.  If not, it returns a 404.  In this case the /images URL and patterns
     match so it's good.
 \item Next, a request comes in for /users/johndoe/1234.
 \item Mongrel2 does the PREFIX search again, and the longest matching prefix is the
@@ -509,7 +509,7 @@ given it:
 \end{enumerate}
 
 That example should show you how routes work, and the important thing to realize
-is that they'll try to match the "longest first route" as what we call the "best"
+is that they'll try to match the ``longest first route'' as what we call the ``best''
 route.  If you get unexpected routing behavior, then you'll want to just make them
 explicit by putting a pattern at the end.
 
@@ -551,7 +551,7 @@ To make it work, there's a slight modification to the routes used by
 JSON or XML messages.  Basically, JSON routes start with a \verb|'@'| and XML routes
 start with a \verb|'<'| and both must be terminated with a NUL byte \verb|'\0'|.  When the
 parser sees these at the beginning of a request, it parses that message and
-send it "as-is" to your target handler.
+sends it ``as-is'' to your target handler.
 
 Let's look at two examples from the chat demo and from some test suites:
 
@@ -564,7 +564,7 @@ The first one will take any Flash (or just TCP connection) that sends lines like
 \verb|@chat {"msg": "hello"}\0| and route those to the \verb|chat_demo| handler.
 You can connect, and then just stream these JSON messages all you want, and handlers
 can send back the same responses.  In fact, as long as you don't include a \verb|'\0'|
-character you could probably send anything you want.
+character, you could probably send anything you want.
 
 The second route will take any XML that is wrapped in a \verb|<test>| tag and send
 that to your handlers.  That means you can send \verb|<test name="joe"><age>21</age></test>|
@@ -592,9 +592,9 @@ Finally, here's the grammar rules in the parser for handling these messages:
 << d['docs/manual/inputs/json_xml_socket_grammar.py|pyg|l'] >>
 \end{code}
 
-If you read that carefully, you'll see you can actually pass query string
+If you read that carefully, you'll see you can actually pass query strings
 and path parameters to your JSON socket handlers.  That's currently not
-used but in the future we may use it.
+used, but in the future we might.
 
 One caveat to this whole feature is these targets can only be routed to the
 \verb|Server.default\_host| of the server.  There's not enough information
@@ -656,7 +656,7 @@ By default, the control port is in your chroot at run/control, but you can set
 the \ident{control\_port} setting to change this.  You can actually change it
 to any ZeroMQ valid spec you want, although you're advised to use IPC for security.
 
-Once Mongrel2 starts, you can then use \file{m2sh} to connect to Mongrel2 and 
+Once Mongrel2 starts, you can then use \file{m2sh} to connect to Mongrel2 and
 control it using the simple command language.  Currently, what you get back is
 very raw, but it will improve as we work on the control port and what it does.
 
@@ -688,7 +688,7 @@ You then use the control port by running \ident{m2sh}:
 
 << d['docs/manual/inputs/sample_m2sh_run.sh|pyg|l'] >>
 
-The protocol to and from the control socket is a simple tnetstring in and out that 
+The protocol to and from the control socket is a simple tnetstring in and out that
 any langauge can read.  Here's a nearly complete Python client that is using
 the control port:
 
@@ -766,7 +766,7 @@ what the settings are so you can debug them if they cause problems.  The list
 of available settings are:
 
 \begin{description}
-\item[control\_port=ipc://run/control] This is where Mongrel2 will listen with 0MQ for control messages.  You should use \verb|ipc://| for the spec so that only a local user with file access can get at it.
+\item[control\_port=ipc://run/control] This is where Mongrel2 will listen with 0MQ for control messages.  You should use \verb|ipc://| for the spec, so that only a local user with file access can get at it.
 \item[limits.buffer\_size=2 * 1024] Internal IO buffers, used for things like proxying and handling requests.  This is a \emph{very} conservative setting, so if you get HTTP headers greater than this, you'll want to increase this setting.  You'll also want to shoot whoever is sending you those requests, because the average is 400-600 bytes.
 \item[limits.client\_read\_retries=5] How many times it will attempt to read a complete HTTP header from a client. This prevents attacks where a client trickles an incomplete request at you until you run out of resources.
 \item[limits.connection\_stack\_size=32 * 1024] Size of the stack used for connection coroutines.  If you're trying to cram a ton of connections into very little RAM, see how low this can go.
@@ -788,7 +788,7 @@ of available settings are:
 \item[zeromq.threads=1] Number of 0MQ IO threads to run.  Careful, we've experienced thread bugs in 0MQ sometimes with high numbers of these.
 
 \item[limits.tick\_timer=10] Mongrel2 keeps an internal clock for efficiency and to run the
-timouts.  This is how often that clock updates, and defaults to 10 seconds.
+timeouts.  This is how often that clock updates, and defaults to 10 seconds.
 
 \item[limits.min\_ping=120] Minimum time since last activity before considering closing a socket.  Set to 0 to disable it.
 \item[limits.min\_write\_rate=300] Minimum bytes/second written before considering closing a socket. Set to 0 to disable it.
