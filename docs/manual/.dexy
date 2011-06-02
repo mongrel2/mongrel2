@@ -1,0 +1,6 @@
+{
+    "*.tex|jinja" : { "allinputs" : true },
+    "*.py|pyg|l": {},
+    "*.sh|pyg|l": {},
+    "*.conf|dexy": {}
+}
