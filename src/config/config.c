@@ -323,14 +323,17 @@ static int simple_query_run(tns_value_t *res,
     int cols = 0;
     int rows = DB_counts(res, &cols);
     check(rows >= 0, "Results are not a table.");
-    check(cols == 3, "Expected 3 columns for key=value style query.");
 
-    for(row_i = 0; row_i < rows; row_i++) {
-        bstring key = DB_get_as(res, row_i, 1, string);
-        bstring value = DB_get_as(res, row_i, 2, string);
+    if(rows > 0) {
+        check(cols == 3, "Expected 3 columns for key=value style query.");
 
-        int rc = callback(bdata(key), bdata(value));
-        check_debug(rc == 0, "Load callback failed.");
+        for(row_i = 0; row_i < rows; row_i++) {
+            bstring key = DB_get_as(res, row_i, 1, string);
+            bstring value = DB_get_as(res, row_i, 2, string);
+
+            int rc = callback(bdata(key), bdata(value));
+            check_debug(rc == 0, "Load callback failed.");
+        }
     }
 
     return row_i;
