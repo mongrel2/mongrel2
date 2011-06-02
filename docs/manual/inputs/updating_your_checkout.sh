@@ -1,5 +1,5 @@
 cd mongrel2
-fossil up trunk
+git pull
 
 # make sure you get a clean build
 make clean all
