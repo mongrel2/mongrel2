@@ -48,7 +48,6 @@
 int MAX_DIR_PATH = 0;
 int MAX_SEND_BUFFER = 0;
 long long unsigned int _1GB = 1024*1024*1024;
-struct tagbstring _1GB_CHUNK = bsStatic("40000000\r\n");
 
 struct tagbstring ETAG_PATTERN = bsStatic("[a-e0-9]+-[a-e0-9]+");
 
@@ -60,17 +59,6 @@ const char *RESPONSE_FORMAT = "HTTP/1.1 200 OK\r\n"
     "ETag: %s\r\n"
     "Server: " VERSION
     "\r\n\r\n";
-
-const char *CHUNKED_RESPONSE_FORMAT = "HTTP/1.1 200 OK\r\n"
-    "Date: %s\r\n"
-    "Content-Type: %s\r\n"
-    "Content-Length: %llu\r\n"
-	"Transfer-Encoding: chunked\r\n"
-    "Last-Modified: %s\r\n"
-    "ETag: %s\r\n"
-    "Server: " VERSION
-    "\r\n\r\n";
-
 
 const char *DIR_REDIRECT_FORMAT = "HTTP/1.1 301 Moved Permanently\r\n"
     "Location: http://%s%s/\r\n"
@@ -136,7 +124,7 @@ FileRecord *Dir_find_file(bstring path, bstring default_type)
 
     fr->etag = bformat("%x-%x", fr->sb.st_mtime, fr->file_size);
 
-    fr->header = bformat(fr->file_size > _1GB ? CHUNKED_RESPONSE_FORMAT : RESPONSE_FORMAT,
+    fr->header = bformat(RESPONSE_FORMAT,
         bdata(fr->date),
         bdata(fr->content_type),
         fr->file_size,
@@ -166,29 +154,12 @@ static inline int Dir_stream_huge_file(FileRecord *file, Connection *conn)
 
     while (total > 0) {
         to_send = total > _1GB ? _1GB : total;
-        chunk_data = to_send == _1GB ? &_1GB_CHUNK : bformat("%x\r\n", to_send);
-        debug("sending chunk: size=%d", to_send);
-
-        /* chunk start */
-        sent = IOBuf_send(conn->iob, bdata(chunk_data), blength(chunk_data));
-        check(sent > 0, "Failed sending start of chunk");
-
         debug("Sending file bytes: %d", to_send);
         sent = IOBuf_stream_file(conn->iob, file->fd, to_send);
         check(sent > 0, "Failed sending chunk content: IOBuf_stream_file returned %lld ", sent);
 
         total -= sent;
-
-        if(&_1GB_CHUNK != chunk_data) {
-            bdestroy(chunk_data);
-        }
-
-        /* chunk end */
-        IOBuf_send(conn->iob, "\r\n", 2);
     }
-
-    /* Send the last chunk */
-    IOBuf_send(conn->iob, "0\r\n\r\n", 5);
 
     return 0;
 error:
@@ -198,7 +169,6 @@ error:
 long long int Dir_stream_file(FileRecord *file, Connection *conn)
 {
     long long int sent = 0;
-    long long int total = 0;
 
     int rc = Dir_send_header(file, conn);
     check_debug(rc, "Failed to write header to socket.");
@@ -209,10 +179,6 @@ long long int Dir_stream_file(FileRecord *file, Connection *conn)
         debug("File is bigger than 1GB: %llu", file->file_size);
         check(Dir_stream_huge_file(file, conn) == 0, "Failed to stream giant file.");
     }
-
-    check(total == 0,
-            "Sent other than expected, sent: %llu, but expected: %llu",
-            (file->file_size - total), file->file_size);
 
     return file->file_size;
 

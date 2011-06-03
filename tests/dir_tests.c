@@ -152,14 +152,13 @@ char *test_Dir_serve_big_files(){
     "Date: \r\n"
     "Content-Type: \r\n"
     "Content-Length: 399560397\r\n"
-	"Transfer-Encoding: chunked\r\n"
     "Last-Modified: \r\n"
     "ETag: \r\n"
     "Server: " VERSION
     "\r\n\r\n";
 
   bstring response_less_1gb = bformat(RESPONSE_FORMAT, "", "", less1gb.st_size, "", "");
-  bstring response_more_1gb = bformat(CHUNKED_RESPONSE_FORMAT, "", "", more1gb.st_size, "", "");
+  bstring response_more_1gb = bformat(RESPONSE_FORMAT, "", "", more1gb.st_size, "", "");
 
   mu_assert(bstrcmp(response_less_1gb, bfromcstr(LESS_1GB)) == 0, "Wrong response headers for <1GB files");
   debug("MORE_1GB=%s\n", MORE_1GB);
