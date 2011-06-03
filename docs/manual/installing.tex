@@ -46,7 +46,7 @@ and try building it.  There's two ways you can get the source code to
 Mongrel2:
 
 \begin{enumerate}
-\item Install \href{http://fossil-scm.org}{Fossil SCM} and check out the source.
+\item Install \href{http://git-scm.org}{Git} and check out the source.
 \item Grab the source .zip or tar.bz2 release and install it from there.
 \end{enumerate}
 
@@ -57,33 +57,22 @@ The easiest way to build Mongrel2 is to use the .tar.bz2 file from
 Simply download it and you're done.
 
 
-\subsection{Using Fossil}
+\subsection{Using git}
 
 If you like living on the edge then here's how to follow the development source
 tree while we work on it:
 
-\begin{enumerate}
-\item Go to \href{http://www.fossil-scm.org/download.html}{the fossil download page} and
-    grab the binary that fits your system, or the source tar.gz.
-\item Follow their \href{http://fossil-scm.org/index.html/doc/tip/www/build.wiki}{install instructions}
-    to get it on your system.
-\item If you find that your version of fossil ends up having problems with mongrel2.org let us know since
-    we might need to upgrade.
-\end{enumerate}
+First, get git running on your system, through your package manager or fetch
+the proper sources or binaries from the \href{http://git-scm.com/download}{Git Download page}.
 
-Once you have fossil you can then get the Mongrel2 source and open it up:
+Once you have git you can then get the Mongrel2 source and open it up:
 
 \begin{code}{Cloning the Mongrel2 Source}
 << d['docs/manual/inputs/cloning_mongrel2_source.sh|pyg|l'] >>
 \end{code}
 
 Make sure you do this in order (just like with every set of instructions you follow)
-or else you'll get errors.  For example, if you don't make the \file{\~{}/fossils} directory
-then you'll get an error saying fossil can't open your file to clone.  Well, that's because
-you \emph{didn't make the \~{}/fossils directory}.  Just pay attention and don't blame fossil
-if you can't.
-
-
+or else you'll get errors.
 
 
 \section{Building And Installing}

@@ -1,5 +1,2 @@
-mkdir ~/fossils
-fossil clone http://mongrel2.org:44445 ~/fossils/mongrel2.fossil
-mkdir mongrel2
+git clone https://github.com/zedshaw/mongrel2.git
 cd mongrel2
-fossil open ~/fossils/mongrel2.fossil

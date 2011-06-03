@@ -144,7 +144,7 @@ language runtime inside Mongrel2 would defeat the point of making it language ag
 
 Mongrel2 does not support WebSockets because the original protocol was a complete
 ugly hack with security holes galore.  They've since fixed the entire protocol
-and we'll be implementing \href{http://tools.ietf.org/html/draft-ietf-hybi-thewebsocketprotocol-07}{the hybi-07}
+and we'll be implementing the \href{http://tools.ietf.org/html/draft-ietf-hybi-thewebsocketprotocol-07}{hybi-07}
 version of the protocol in the 1.7 or 1.8 release.
 
 
@@ -205,7 +205,7 @@ aborted and cleaned up.
 \section{Introduction to ZeroMQ}
 
 The ZeroMQ folks have finally written a decent manual for ZeroMQ which you should
-probably read.  I recommend you read the "0MQ - The Guide" at \href{http://zguide.zeromq.org/page:all}
+probably read.  I recommend you read the \href{http://zguide.zeromq.org/page:all}{``0MQ - The Guide''}
 as your introduction to 0MQ.
 
 \section{Handler ZeroMQ Format}
@@ -371,36 +371,36 @@ joined with a space.
 
 \subsection{TNetStrings Alternative Protocol}
 
-During the 1.6 development it became clear that we needed a sort of "internal"
+During the 1.6 development, it became clear that we needed a sort of ``internal''
 protocol for some new Mongrel2 features.  This internal protocol should be
 able to store all the same things that JSON can, but also store exact binary
-data.  This came about because we want to send raw data to handlers and 
+data.  This came about because we want to send raw data to handlers and
 other parts of the system like the control port, but JSON involved too
-much work to parse and deal with that.  We also did various analyses and 
+much work to parse and deal with that.  We also did various analyses and
 found that much of our time was spent just generating JSON.
 
-What we did then is create a small modification to netstrings that "tags"
+What we did, then, is create a small modification to netstrings that ``tags''
 each element with its type.  We did this by changing the (fairly useless)
-trailing ',' character so that it signified the type of what it contained.
-Types can be any of the main data types that JSON has (dicts, lists, integers, etc.)
-except that "strings" are now entirely raw binary strings, with no
-definition about whether they hold anything other than 8 bit octets.
+trailing `,' character so that it signified the type of what it contained.
+Types can be any of the main data types that JSON has (dicts, lists, integers, etc.),
+except that ``strings'' are now entirely raw binary strings, with no
+definition about whether they hold anything other than 8-bit octets.
 
 We also made the design so it was backward compatible with netstrings.
 This lets us use it to directly parse a zeromq message from anyone, and
-it will work whether it's a TNetString style nested structure, or just
+it will work whether it's a TNetString-style nested structure, or just
 a string with JSON in it.
 
-The end result is a simple specification at \href{http://tnetstrings.org}
-which encodes a naive parser that anyone can copy to other languages easily.
+The end result is a simple specification at \href{http://tnetstrings.org}{http://tnetstrings.org}
+which encodes a na\"{\i}ve parser that anyone can copy to other languages easily.
 Many other people implemented the protocol and it looks like you can do
 it in every language in about 100 lines of code.  Implementing a version
 with more performance (since every language needs tricks) seems to take
 about 500-1000 lines of code.
 
 Mongrel2 now supports either TNetStrings or JSON as defined above, on the
-fly, and without any modification to existing handlers.  Internally  Mongrel2
-uses TNetStrings to creat its internal control port protocol which makes
+fly, and without any modification to existing handlers.  Internally, Mongrel2
+uses TNetStrings to create its internal control port protocol, which makes
 working with Mongrel2 programatically even easier.
 
 To demonstrate this, here's the new code for parsing a request in Python:
@@ -410,14 +410,14 @@ To demonstrate this, here's the new code for parsing a request in Python:
 << d['docs/manual/inputs/parsing_reqs_tnetstrings.py|pyg|l'] >>
 \end{code}
 
-Our tests are also showing that TNetStrings are good compromise between
+Our tests also show that TNetStrings are a good compromise between
 speed and ease of parsing.  They're hard to get wrong in parsing, easy
 to write out, and faster than many other protocols out there.  The few
 that are faster are also much, much, harder to parse and more error
-prone.  In our tests we've found that TNetStrings in Python can be
+prone.  In our tests, we've found that TNetStrings in Python can be
 faster than Python's own pickle format when we use a C extension.
 
-The most important point about TNetStrings though is how it opens up
+The most important point about TNetStrings, though, is how it opens up
 Mongrel2 for even more control and automation.
 
 \subsection{Python Handler API}
