@@ -48,6 +48,7 @@
 int MAX_DIR_PATH = 0;
 int MAX_SEND_BUFFER = 0;
 long long unsigned int _1GB = 1024*1024*1024;
+struct tagbstring _1GB_CHUNK = bsStatic("40000000\r\n");
 
 struct tagbstring ETAG_PATTERN = bsStatic("[a-e0-9]+-[a-e0-9]+");
 
@@ -156,6 +157,44 @@ static inline int Dir_send_header(FileRecord *file, Connection *conn)
     return IOBuf_send(conn->iob, bdata(file->header), blength(file->header));
 }
 
+static inline int Dir_stream_huge_file(FileRecord *file, Connection *conn)
+{
+    long long int sent = 0;
+    int to_send = 0;
+    long long int total = file->file_size;
+    bstring chunk_data = NULL;
+
+    while (total > 0) {
+        to_send = total > _1GB ? _1GB : total;
+        chunk_data = to_send == _1GB ? &_1GB_CHUNK : bformat("%x\r\n", to_send);
+        debug("sending chunk: size=%d", to_send);
+
+        /* chunk start */
+        sent = IOBuf_send(conn->iob, bdata(chunk_data), blength(chunk_data));
+        check(sent > 0, "Failed sending start of chunk");
+
+        debug("Sending file bytes: %d", to_send);
+        sent = IOBuf_stream_file(conn->iob, file->fd, to_send);
+        check(sent > 0, "Failed sending chunk content: IOBuf_stream_file returned %lld ", sent);
+
+        total -= sent;
+
+        if(&_1GB_CHUNK != chunk_data) {
+            bdestroy(chunk_data);
+        }
+
+        /* chunk end */
+        IOBuf_send(conn->iob, "\r\n", 2);
+    }
+
+    /* Send the last chunk */
+    IOBuf_send(conn->iob, "0\r\n\r\n", 5);
+
+    return 0;
+error:
+    return -1;
+}
+
 long long int Dir_stream_file(FileRecord *file, Connection *conn)
 {
     long long int sent = 0;
@@ -166,34 +205,9 @@ long long int Dir_stream_file(FileRecord *file, Connection *conn)
 
     if (file->file_size <= _1GB){
       sent = IOBuf_stream_file(conn->iob, file->fd, file->file_size);
-    }else {
-      debug("File is bigger than 1GB: %llu", file->file_size);
-      int to_send = 0;
-      bstring chunk_data;
-      total = file->file_size;
-
-      while (total > 0) {
-          to_send = total > _1GB ? _1GB : total;
-          chunk_data = bformat("%x\r\n", to_send);
-          debug("sending chunk: size=%d", to_send);
-
-          /* chunk start */
-          sent = IOBuf_send(conn->iob, bdata(chunk_data), blength(chunk_data));
-          check(sent > 0, "Failed sending start of chunk");
-
-          debug("Sending file bytes: %d", to_send);
-          sent = IOBuf_stream_file(conn->iob, file->fd, to_send);
-          check(sent > 0, "Failed sending chunk content: IOBuf_stream_file returned %d ", sent);
-
-          total -= sent;
-
-          bdestroy(chunk_data);
-          /* chunk end */
-          IOBuf_send(conn->iob, "\r\n", 2);
-      }
-
-      /* Send the last chunk */
-      IOBuf_send(conn->iob, "0\r\n\r\n", 5);
+    } else {
+        debug("File is bigger than 1GB: %llu", file->file_size);
+        check(Dir_stream_huge_file(file, conn) == 0, "Failed to stream giant file.");
     }
 
     check(total == 0,
