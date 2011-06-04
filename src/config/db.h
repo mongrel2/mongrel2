@@ -50,7 +50,7 @@ int DB_counts(tns_value_t *res, int *cols);
 
 int DB_lastid();
 
-#define DB_get_as(RES, ROW, COL, TYPE) (((tns_value_t *)DB_get((RES), (ROW), (COL)))->value.TYPE)
+#define DB_get_as(RES, ROW, COL, TYPE) (DB_get((RES), (ROW), (COL))->value.TYPE)
 
 extern sqlite3 *CONFIG_DB;
 
