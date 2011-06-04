@@ -288,7 +288,7 @@ Server *Config_load_server(const char *uuid)
     int rc = 0;
 
     check(rows == 1, "Wrong number of servers returned, expected 1, got %d.", rows);
-    check(cols == 9, "Wrong number of columns returned, expected 9, got %d.", cols);
+    check(cols == 10, "Wrong number of columns returned, expected 10, got %d.", cols);
 
     int server_id = DB_get_as(res, 0, 0, number); // id
 
@@ -300,9 +300,11 @@ Server *Config_load_server(const char *uuid)
             DB_get_as(res, 0, 5, string), // chroot
             DB_get_as(res, 0, 6, string), // access_log
             DB_get_as(res, 0, 7, string), // error_log
-            DB_get_as(res, 0, 8, string) // pid_file
+            DB_get_as(res, 0, 8, string), // pid_file
+            DB_get_as(res, 0, 9, number) // use_ssl
             );
     check(srv != NULL, "Failed to create server %s", uuid);
+
 
     rc = Config_load_hosts(srv, server_id);
     check(rc == 0, "Failed to load the hosts for server: %s", bdata(srv->uuid));

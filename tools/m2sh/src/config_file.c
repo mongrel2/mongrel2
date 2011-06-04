@@ -236,6 +236,7 @@ error:
 }
 
 struct tagbstring BIND_ADDR = bsStatic("bind_addr");
+struct tagbstring USE_SSL = bsStatic("use_ssl");
 
 int Server_load(tst_t *settings, Value *val)
 {
@@ -244,12 +245,18 @@ int Server_load(tst_t *settings, Value *val)
     tns_value_t *res = NULL;
     struct tagbstring HOSTS_VAR = bsStatic("hosts");
     const char *bind_addr = NULL;
+    const char *use_ssl = NULL;
 
     if(tst_search(cls->params, bdata(&BIND_ADDR), blength(&BIND_ADDR))) {
-        bind_addr = AST_str(settings, cls->params,
-                bdata(&BIND_ADDR), VAL_QSTRING);
+        bind_addr = AST_str(settings, cls->params, bdata(&BIND_ADDR), VAL_QSTRING);
     } else {
         bind_addr = "0.0.0.0";
+    }
+
+    if(tst_search(cls->params, bdata(&USE_SSL), blength(&USE_SSL))) {
+        use_ssl = AST_str(settings, cls->params, bdata(&USE_SSL), VAL_NUMBER);
+    } else {
+        use_ssl = "0";
     }
 
     res = DB_exec(bdata(&SERVER_SQL),
@@ -261,7 +268,9 @@ int Server_load(tst_t *settings, Value *val)
             AST_str(settings, cls->params, "default_host", VAL_QSTRING),
             AST_str(settings, cls->params, "name", VAL_QSTRING),
             bind_addr,
-            AST_str(settings, cls->params, "port", VAL_NUMBER));
+            AST_str(settings, cls->params, "port", VAL_NUMBER),
+            use_ssl
+            );
     check(res != NULL, "Failed to exec SQL: %s", bdata(&SERVER_SQL));
     tns_value_destroy(res);
 

@@ -69,95 +69,99 @@ void host_destroy_cb(Route *r, RouteMap *map)
     }
 }
 
+static int Server_load_ciphers(Server *srv, bstring ssl_ciphers_val)
+{
+    struct bstrList *ssl_cipher_list = bsplit(ssl_ciphers_val, ' ');
+    int i = 0;
+    int max_num_ciphers = 0;
+    int *ciphers = NULL;
+
+    while(ssl_default_ciphers[max_num_ciphers] != 0) {
+        max_num_ciphers++;
+    }
+
+    ciphers = h_calloc(max_num_ciphers + 1, sizeof(int));
+    check_mem(ciphers);
+
+    for(i = 0; i < ssl_cipher_list->qty; i++) {
+        bstring cipher = ssl_cipher_list->entry[i];
+
+        if(biseqcstr(cipher, "SSL_RSA_RC4_128_MD5"))
+            ciphers[i] = SSL_RSA_RC4_128_MD5;
+        else if(biseqcstr(cipher, "SSL_RSA_RC4_128_SHA"))
+            ciphers[i] = SSL_RSA_RC4_128_SHA;
+        else if(biseqcstr(cipher, "SSL_RSA_DES_168_SHA"))
+            ciphers[i] = SSL_RSA_DES_168_SHA;
+        else if(biseqcstr(cipher, "SSL_EDH_RSA_DES_168_SHA"))
+            ciphers[i] = SSL_EDH_RSA_DES_168_SHA;
+        else if(biseqcstr(cipher, "SSL_RSA_AES_128_SHA"))
+            ciphers[i] = SSL_RSA_AES_128_SHA;
+        else if(biseqcstr(cipher, "SSL_EDH_RSA_AES_128_SHA"))
+            ciphers[i] = SSL_EDH_RSA_AES_128_SHA;
+        else if(biseqcstr(cipher, "SSL_RSA_AES_256_SHA"))
+            ciphers[i] = SSL_RSA_AES_256_SHA;
+        else if(biseqcstr(cipher, "SSL_EDH_RSA_AES_256_SHA"))
+            ciphers[i] = SSL_EDH_RSA_AES_256_SHA;
+        else if(biseqcstr(cipher, "SSL_RSA_CAMELLIA_128_SHA"))
+            ciphers[i] = SSL_RSA_CAMELLIA_128_SHA;
+        else if(biseqcstr(cipher, "SSL_EDH_RSA_CAMELLIA_128_SHA"))
+            ciphers[i] = SSL_EDH_RSA_CAMELLIA_128_SHA;
+        else if(biseqcstr(cipher, "SSL_RSA_CAMELLIA_256_SHA"))
+            ciphers[i] = SSL_RSA_CAMELLIA_256_SHA;
+        else if(biseqcstr(cipher, "SSL_EDH_RSA_CAMELLIA_256_SHA"))
+            ciphers[i] = SSL_EDH_RSA_CAMELLIA_256_SHA;
+        else
+            sentinel("Unrecognized cipher: %s", bdata(cipher));
+    }
+
+    check(i > 0, "Must specify at least one cipher "
+          "(or omit the ssl_ciphers field from your settings)");
+    ciphers[i] = 0;
+    srv->ciphers = ciphers;
+
+    hattach(ciphers, srv);
+    bstrListDestroy(ssl_cipher_list);
+
+    return 0;
+error:
+    if(ssl_cipher_list) bstrListDestroy(ssl_cipher_list);
+    if(ciphers != NULL) h_free(ciphers);
+    return -1;
+}
+
+
 static int Server_init_ssl(Server *srv)
 {
-    bstring certdir = NULL;
-    bstring certpath = NULL;
-    bstring keypath = NULL;
     bstring ssl_ciphers_val = NULL;
-    char *cipher_list = NULL;
-    int *ciphers = NULL;
-    int rcode = 0;
+    int rc = 0;
     
-    certdir = Setting_get_str("certdir", NULL);
+    bstring certdir = Setting_get_str("certdir", NULL);
     check(certdir != NULL, "to use ssl, you must specify a certdir");
 
-    certpath = bstrcpy(certdir);
+    bstring certpath = bformat("%s%s.crt", bdata(certdir), bdata(srv->uuid)); 
     check_mem(certpath);
-    bconcat(certpath, srv->uuid);
-    bcatcstr(certpath, ".crt");
 
-    keypath = bstrcpy(certdir);
+    bstring keypath = bformat("%s%s.key", bdata(certdir), bdata(srv->uuid));
     check_mem(keypath);
-    bconcat(keypath, srv->uuid);
-    bcatcstr(keypath, ".key");
 
-    rcode = x509parse_crtfile(&srv->own_cert, bdata(certpath));
-    check(rcode == 0, "Failed to load cert from %s", bdata(certpath));
+    rc = x509parse_crtfile(&srv->own_cert, bdata(certpath));
+    check(rc == 0, "Failed to load cert from %s", bdata(certpath));
 
-    rcode = x509parse_keyfile(&srv->rsa_key, bdata(keypath), NULL);
-    check(rcode == 0, "Failed to load key from %s", bdata(keypath));
+    rc = x509parse_keyfile(&srv->rsa_key, bdata(keypath), NULL);
+    check(rc == 0, "Failed to load key from %s", bdata(keypath));
 
     ssl_ciphers_val = Setting_get_str("ssl_ciphers", NULL);
+
     if(ssl_ciphers_val != NULL) {
-        int i, max_num_ciphers = 0;
-        char *s, *last = NULL;
-        while(ssl_default_ciphers[max_num_ciphers] != 0)
-            max_num_ciphers++;
-        ciphers = h_calloc(max_num_ciphers + 1, sizeof(int));
-        check_mem(ciphers);
-        
-        cipher_list = strdup(bdata(ssl_ciphers_val));
-        check_mem(cipher_list);
-
-        s = strtok_r(cipher_list, ", ", &last);
-        for(i = 0; i < max_num_ciphers && s != NULL; i++) {
-            if(!strcmp("SSL_RSA_RC4_128_MD5", s))
-                ciphers[i] = SSL_RSA_RC4_128_MD5;
-            else if(!strcmp("SSL_RSA_RC4_128_SHA", s))
-                ciphers[i] = SSL_RSA_RC4_128_SHA;
-            else if(!strcmp("SSL_RSA_DES_168_SHA", s))
-                ciphers[i] = SSL_RSA_DES_168_SHA;
-            else if(!strcmp("SSL_EDH_RSA_DES_168_SHA", s))
-                ciphers[i] = SSL_EDH_RSA_DES_168_SHA;
-            else if(!strcmp("SSL_RSA_AES_128_SHA", s))
-                ciphers[i] = SSL_RSA_AES_128_SHA;
-            else if(!strcmp("SSL_EDH_RSA_AES_128_SHA", s))
-                ciphers[i] = SSL_EDH_RSA_AES_128_SHA;
-            else if(!strcmp("SSL_RSA_AES_256_SHA", s))
-                ciphers[i] = SSL_RSA_AES_256_SHA;
-            else if(!strcmp("SSL_EDH_RSA_AES_256_SHA", s))
-                ciphers[i] = SSL_EDH_RSA_AES_256_SHA;
-            else if(!strcmp("SSL_RSA_CAMELLIA_128_SHA", s))
-                ciphers[i] = SSL_RSA_CAMELLIA_128_SHA;
-            else if(!strcmp("SSL_EDH_RSA_CAMELLIA_128_SHA", s))
-                ciphers[i] = SSL_EDH_RSA_CAMELLIA_128_SHA;
-            else if(!strcmp("SSL_RSA_CAMELLIA_256_SHA", s))
-                ciphers[i] = SSL_RSA_CAMELLIA_256_SHA;
-            else if(!strcmp("SSL_EDH_RSA_CAMELLIA_256_SHA", s))
-                ciphers[i] = SSL_EDH_RSA_CAMELLIA_256_SHA;
-            else
-                check(0, "Unrecognized cipher: %s", s);
-            s = strtok_r(NULL, ", ", &last);
-        }
-        check(s == NULL, "Specified too many (or repeated) ciphers. "
-              "If there are no repeats, please file a bug!")
-        check(i > 0, "Must specify at least one cipher "
-              "(or omit the ssl_ciphers field from your settings)");
-        ciphers[i] = 0;
-        
-        free(cipher_list); cipher_list = NULL;
-
-        srv->ciphers = ciphers;
-        hattach(ciphers, srv);
-    }
-    else {
+        rc = Server_load_ciphers(srv, ssl_ciphers_val);
+        check(rc == 0, "Failed to load requested SSL ciphers.");
+    } else {
         srv->ciphers = ssl_default_ciphers;
     }
+
     srv->dhm_P = ssl_default_dhm_P;
     srv->dhm_G = ssl_default_dhm_G;
 
-    srv->use_ssl = 1;
 
     bdestroy(certpath); certpath = NULL;
     bdestroy(keypath); keypath = NULL;
@@ -168,17 +172,15 @@ error:
     // Do not free certfile, as we're pulling it from Settings
     if(certpath != NULL) bdestroy(certpath);
     if(keypath != NULL) bdestroy(keypath);
-    if(ciphers != NULL) h_free(ciphers);
     return -1;
 }
 
 Server *Server_create(bstring uuid, bstring default_host,
         bstring bind_addr, int port, bstring chroot, bstring access_log,
-        bstring error_log, bstring pid_file)
+        bstring error_log, bstring pid_file, int use_ssl)
 {
     Server *srv = NULL;
-    bstring use_ssl_key = NULL;
-    int rcode = 0;
+    int rc = 0;
 
     srv = h_calloc(sizeof(Server), 1);
     check_mem(srv);
@@ -201,25 +203,17 @@ Server *Server_create(bstring uuid, bstring default_host,
     srv->error_log = bstrcpy(error_log); check_mem(srv->error_log);
     srv->pid_file = bstrcpy(pid_file); check_mem(srv->pid_file);
     srv->default_hostname = bstrcpy(default_host);
-    srv->use_ssl = 0;
+    srv->use_ssl = use_ssl;
 
-    use_ssl_key = bstrcpy(uuid);
-    check_mem(use_ssl_key);
-    bcatcstr(use_ssl_key, ".use_ssl");
-
-    if(Setting_get_int(bdata(use_ssl_key), 0)) {
-        rcode = Server_init_ssl(srv);
-        check(rcode == 0, "Failed to initialize ssl for server %s", bdata(uuid));
+    if(srv->use_ssl) {
+        rc = Server_init_ssl(srv);
+        check(rc == 0, "Failed to initialize ssl for server %s", bdata(uuid));
     }
-
-    bdestroy(use_ssl_key); use_ssl_key = NULL;
 
     return srv;
 
 error:
     Server_destroy(srv);
-
-    if(use_ssl_key != NULL) bdestroy(use_ssl_key);
     return NULL;
 }
 
