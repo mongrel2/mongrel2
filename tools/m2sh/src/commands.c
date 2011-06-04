@@ -27,6 +27,30 @@ typedef struct CommandHandler {
 #define check_file(S, N, P) check(access((const char *)(S)->data, (P)) == 0, "Can't access %s '%s' properly.", N, bdata((S)))
 #define check_no_extra(C) check(list_count((C)->extra) == 0, "Commands only take --option style arguments, you have %d extra.", (int)list_count((C)->extra))
 
+static void print_datum(tns_value_t *col)
+{
+    switch(tns_get_type(col)) {
+        case tns_tag_string:
+            printf("%s", bdata(col->value.string));
+            break;
+        case tns_tag_number:
+            printf("%ld", col->value.number);
+            break;
+        case tns_tag_float:
+            printf("%f", col->value.fpoint);
+            break;
+        case tns_tag_null:
+            printf("(null)");
+            break;
+        case tns_tag_bool:
+            printf("%s", col->value.bool ? "true" : "false");
+            break;
+        default:
+            printf("NA");
+    }
+}
+
+
 static inline int log_action(bstring db_file, bstring what, bstring why, bstring where, bstring how)
 {
     int rc = 0;
@@ -178,6 +202,25 @@ static inline int simple_query_print(bstring db_file, const char *sql)
 
     tns_value_t *res = DB_exec(sql);
     check(res != NULL, "Query failed: %s.", bdata(db_file));
+
+    int cols = 0;
+    int rows = DB_counts(res, &cols);
+    check(cols > 0, "Invalid query, it has no columns, which is a bug.");
+    check(rows != -1, "Invalid query result, probably not a table.");
+    
+    if(rows == 0) {
+        log_warn("No results to display.");
+    } else {
+        int col_i = 0;
+        int row_i = 0;
+        for(row_i = 0; row_i < rows; row_i ++) {
+            for(col_i = 0; col_i < cols; col_i++) {
+                print_datum(DB_get(res, row_i, col_i));
+                printf(" ");
+            }
+            printf("\n");
+        }
+    }
 
     DB_close();
     return 0;
@@ -581,42 +624,33 @@ struct tagbstring ERROR_KEY = bsStatic("error");
 struct tagbstring HEADERS_KEY = bsStatic("headers");
 struct tagbstring ROWS_KEY = bsStatic("rows");
 
-static void print_datum(tns_value_t *col)
-{
-    switch(tns_get_type(col)) {
-        case tns_tag_string:
-            printf("%s", bdata(col->value.string));
-            break;
-        case tns_tag_number:
-            printf("%ld", col->value.number);
-            break;
-        case tns_tag_null:
-            printf("(null)");
-            break;
-        case tns_tag_bool:
-            printf("%s", col->value.bool ? "true" : "false");
-            break;
-        default:
-            printf("NA");
-    }
-
-}
-
-static void display_map_style(tns_value_t *headers, tns_value_t *rows)
+static void display_map_style(tns_value_t *headers, tns_value_t *table)
 {
     int i = 0;
-    darray_t *cols = rows->value.list;
-    darray_t *names = rows->value.list;
+    int cols = 0;
+    int rows = DB_counts(table, &cols);
+    check(rows != -1, "Invalid query result, probably not a table.");
+    darray_t *names = headers->value.list;
 
-    check(darray_end(cols) == darray_end(names),
+    check(cols == darray_end(names),
             "Server returned a bad result, names isn't same length as elements.");
 
-    for(i = 0; i < darray_end(cols); i++)
-    {
-        print_datum(darray_get(names, i));
-        printf(":  ");
-        print_datum(darray_get(cols, i));
-        printf("\n");
+    if(rows == 1) {
+        for(i = 0; i < cols; i++)
+        {
+            tns_value_t *h = darray_get(names, i);
+            tns_value_t *val = DB_get(table, 0, i);
+            check(tns_get_type(h) == tns_tag_string, "Headers should be strings.");
+            check(tns_get_type(val) != tns_tag_invalid,
+                    "Invalid value for column %d of result.", i);
+
+            print_datum(h);
+            printf(":  ");
+            print_datum(val);
+            printf("\n");
+        }
+    } else {
+        sentinel("Asked to display something that's not in map style.");
     }
 
 error: // fallthrough
@@ -624,36 +658,32 @@ error: // fallthrough
 }
 
 
-void display_table_style(tns_value_t *headers, tns_value_t *rows)
+void display_table_style(tns_value_t *headers, tns_value_t *table)
 {
-    int i = 0;
-    for(i = 0; i < darray_end(headers->value.list); i++)
+    int col_i = 0;
+    int row_i = 0;
+    for(col_i = 0; col_i < darray_end(headers->value.list); col_i++)
     {
-        tns_value_t *h = darray_get(headers->value.list, i);
+        tns_value_t *h = darray_get(headers->value.list, col_i);
         check(tns_get_type(h) == tns_tag_string,
                 "Headers should be strings, not: %c", tns_get_type(h));
         printf("%s  ", bdata(h->value.string));
     }
-
     printf("\n");
 
-    for(i = 0; i < darray_end(rows->value.list); i++)
-    {
-        int j = 0;
-        tns_value_t *cols = darray_get(rows->value.list, i);
+    int cols = 0;
+    int rows = DB_counts(table, &cols);
+    check(rows != -1, "Invalid query results, probably not in table format.");
 
-        check(tns_get_type(cols) == tns_tag_list,
-                "Rows should be lists, not: %c", tns_get_type(cols));
-
-        for(j = 0; j < darray_end(cols->value.list); j++)
-        {
-            tns_value_t *col = darray_get(cols->value.list, j);
+    for(row_i = 0; row_i < rows; row_i++) {
+        for(col_i = 0; col_i < cols; col_i++) {
+            tns_value_t *col = DB_get(table, row_i, col_i);
             print_datum(col);
             printf("  ");
         }
-
         printf("\n");
     }
+    printf("\n");
 
 error: // fallthrough
     return;
@@ -742,12 +772,23 @@ int control_server(struct ServerRun *r, tns_value_t *res)
 {
     int rc = 0;
     void *socket = NULL;
+    bstring prompt = NULL;
+    bstring control = NULL;
     r->ran = 1;
-    check(tns_get_type(res) == tns_tag_list, "Expected a list but didn't get it.");
-    check(darray_end(res->value.list) == 2, "Wrong length for command callback control_server.");
+    int cols = 0;
+    int rows = DB_counts(res, &cols);
 
-    bstring prompt = bformat("m2 [%s]> ", darray_get(res->value.list, 0));
-    bstring control = bformat("ipc://%s/run/control", darray_get(res->value.list, 1));
+    check(rows != -1, "Invalid data given to internal routine control_server.");
+    check(rows == 1, "Ambiguous server select, expected 1 but got %d.", rows);
+
+    bstring server_name = DB_get_as(res, 0, 0, string);
+    bstring chroot = DB_get_as(res, 0, 1, string);
+
+    check(server_name != NULL && chroot != NULL, 
+            "Somehow didn't get a good server_name and chroot.");
+
+    prompt = bformat("m2 [%s]> ", bdata(server_name));
+    control = bformat("ipc://%s/run/control", bdata(chroot));
     log_info("Connecting to control port %s", bdata(control));
 
     mqinit(1);
@@ -768,8 +809,8 @@ int control_server(struct ServerRun *r, tns_value_t *res)
     return rc;
 
 error:
-    bdestroy(prompt);
-    bdestroy(control);
+    if(prompt) bdestroy(prompt);
+    if(control) bdestroy(control);
     if(socket) zmq_close(socket);
     return -1;
 }
