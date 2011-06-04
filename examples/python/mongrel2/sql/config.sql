@@ -19,7 +19,8 @@ CREATE TABLE server (id INTEGER PRIMARY KEY,
     default_host TEXT,
     name TEXT DEFAULT "",
     bind_addr TEXT DEFAULT "0.0.0.0",
-    port INTEGER);
+    port INTEGER,
+    use_ssl INTEGER DEFAULT 0);
 
 CREATE TABLE host (id INTEGER PRIMARY KEY,
     server_id INTEGER,

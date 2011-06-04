@@ -150,7 +150,6 @@ static inline int Dir_stream_huge_file(FileRecord *file, Connection *conn)
     long long int sent = 0;
     int to_send = 0;
     long long int total = file->file_size;
-    bstring chunk_data = NULL;
 
     while (total > 0) {
         to_send = total > _1GB ? _1GB : total;

@@ -46,7 +46,7 @@ tns_value_t *default_load_hosts(int server_id)
 
 tns_value_t *default_load_server(const char *uuid)
 {
-    const char *SERVER_QUERY = "SELECT id, uuid, default_host, bind_addr, port, chroot, access_log, error_log, pid_file FROM server WHERE uuid=%Q";
+    const char *SERVER_QUERY = "SELECT id, uuid, default_host, bind_addr, port, chroot, access_log, error_log, pid_file, use_ssl FROM server WHERE uuid=%Q";
 
     return DB_exec(SERVER_QUERY, uuid);
 }
