@@ -10,17 +10,14 @@ struct tagbstring GOODPATH = bsStatic("goodpath");
 int config_init(const char *path)
 {
     if(biseqcstr(&GOODPATH, path)) {
-        log_info("Got the good path.");
         return 0;
     } else {
-        log_info("Got the bad path: %s", path);
         return -1;
     }
 }
 
 void config_close()
 {
-    log_info("null module closed down.");
 }
 
 tns_value_t *config_load_handler(int handler_id)
