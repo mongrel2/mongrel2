@@ -45,15 +45,19 @@ sqlite3 *CONFIG_DB = NULL;
 
 int DB_init(const char *path)
 {
-    assert(CONFIG_DB == NULL && "Must close it first.");
+    check(CONFIG_DB == NULL, "Must close the config db first, tell Zed.");
     return sqlite3_open(path, &CONFIG_DB);
+error:
+    return -1;
 }
 
 
 void DB_close()
 {
-    sqlite3_close(CONFIG_DB);
-    CONFIG_DB = NULL;
+    if(CONFIG_DB) {
+        sqlite3_close(CONFIG_DB);
+        CONFIG_DB = NULL;
+    }
 }
 
 
@@ -99,6 +103,40 @@ error:
     if(row) tns_value_destroy(row);
     if(el) tns_value_destroy(el);
     return NULL;
+}
+
+int DB_valid_schema(tns_value_t *res, int row, int ncols, ...)
+{
+    va_list argp;
+    va_start(argp, ncols);
+    int i = 0;
+
+    check(tns_get_type(res) == tns_tag_list, "Invalid result set, must be a list.");
+    int rows = darray_end(res->value.list);
+    check(rows != -1, "Result isn't in a table format.");
+    check(row < rows, "Row is past end of result set: %d > %d", row, rows);
+
+    // get the row they ask for
+    tns_value_t *row_data = darray_get(res->value.list, row);
+
+    // make sure it's got the right number of columns
+    check(tns_get_type(row_data) == tns_tag_list, "Invalid row %d, must be a list.", row);
+    int cols = darray_end(row_data->value.list);
+    check(cols == ncols, "Expected %d columns, but result set has %d.", cols, ncols);
+
+    for(i = 0; i < ncols; i++) {
+        tns_type_tag expecting = va_arg(argp, tns_type_tag);
+        tns_value_t *cell = DB_get(res, row, i);
+        check(tns_get_type(cell) == expecting,
+                "Row %d, Column %d has wrong type.", row, i);
+    }
+
+    va_end(argp);
+    return 1;
+error:
+
+    va_end(argp);
+    return 0;
 }
 
 /**

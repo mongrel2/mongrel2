@@ -48,10 +48,15 @@ tns_value_t *DB_get(tns_value_t *res, int row, int col);
 
 int DB_counts(tns_value_t *res, int *cols);
 
+int DB_valid_schema(tns_value_t *res, int row, int ncols, ...);
+
 int DB_lastid();
 
 #define DB_get_as(RES, ROW, COL, TYPE) (DB_get((RES), (ROW), (COL))->value.TYPE)
 
 extern sqlite3 *CONFIG_DB;
+
+#define DB_check(RES, ROW, COLS, ...) check(DB_valid_schema((RES), (ROW), (COLS), ##__VA_ARGS__), "Invalid schema for row, should be: " #__VA_ARGS__)
+
 
 #endif

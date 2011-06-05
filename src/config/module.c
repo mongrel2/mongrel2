@@ -65,7 +65,7 @@ tns_value_t *default_load_settings()
 }
      
 
-ConfigModule DEFAULT_CONFIG_MODULE = {
+ConfigModule CONFIG_MODULE = {
     .init = default_init,
     .close = default_close,
     .load_handler = default_load_handler,
