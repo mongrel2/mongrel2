@@ -413,9 +413,7 @@ void Control_port_start()
     taskcreate(Control_task, NULL, 32 * 1024);
 }
 
-int Control_port_stop()
+void Control_port_stop()
 {
     CONTROL_RUNNING = 0;
-
-    return 0;
 }

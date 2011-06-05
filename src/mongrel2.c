@@ -125,12 +125,12 @@ Server *load_server(const char *db_file, const char *server_uuid, int reuse_fd)
     rc = Config_load_settings();
     check(rc != -1, "Failed to load global settings.");
 
+    rc = Config_load_mimetypes();
+    check(rc != -1, "Failed to load mime types.");
+
     srv = Config_load_server(server_uuid);
     check(srv, "Failed to load server %s from %s", server_uuid, db_file);
     check(srv->default_host, "No default_host set for server: %s, you need one host named: %s", server_uuid, bdata(srv->default_hostname));
-
-    rc = Config_load_mimetypes();
-    check(rc != -1, "Failed to load mime types.");
 
     if(reuse_fd == -1) {
         srv->listen_fd = netannounce(TCP, bdata(srv->bind_addr), srv->port);
@@ -147,6 +147,7 @@ Server *load_server(const char *db_file, const char *server_uuid, int reuse_fd)
     Config_close_db();
     return srv;
 error:
+
     Server_destroy(srv);
     Config_close_db();
     return NULL;
@@ -174,10 +175,7 @@ void tickertask(void *v)
         THE_CURRENT_TIME_IS = time(NULL);
 
         int min_wait = Setting_get_int("limits.tick_timer", 10);
-        debug("Waiting to do timeout check for: %d", min_wait);
-
         taskdelay(min_wait * 1000);
-        debug("BACK FROM TASK DELAY: signal=%d", task_was_signaled());
 
         // don't bother if these are all 0
         int min_ping = Setting_get_int("limits.min_ping", DEFAULT_MIN_PING);
@@ -222,7 +220,7 @@ int attempt_chroot_drop(Server *srv)
         check(rc == 0, "Failed to drop priv to the owner of %s", bdata(&PRIV_DIR));
 
     } else {
-        log_err("Couldn't chroot too %s, assuming running in test mode.", bdata(srv->chroot));
+        log_warn("Couldn't chroot too %s, assuming running in test mode.", bdata(srv->chroot));
 
         // rewrite the access log to be in the right location
         bstring temp = bformat("%s%s", bdata(srv->chroot), bdata(srv->access_log));
@@ -248,7 +246,6 @@ void final_setup()
     start_terminator();
     Server_init();
     bstring end_point = bfromcstr("inproc://access_log");
-
     Log_init(bstrcpy(SERVER->access_log), end_point);
 }
 
@@ -264,8 +261,7 @@ Server *reload_server(Server *old_srv, const char *db_file, const char *server_u
     Setting_destroy();
 
     Server *srv = load_server(db_file, server_uuid, old_srv->listen_fd);
-    check(srv, "Failed to load new server config.");
-
+    check(srv != NULL, "Failed to load new server config.");
 
     RELOAD = 0;
     return srv;
@@ -279,30 +275,40 @@ void complete_shutdown(Server *srv)
 {
     fdclose(srv->listen_fd);
     int attempts = 0;
-    taskallsignal(SIGTERM);
+    int rc = 0;
+    
+    rc = taskallsignal(SIGTERM);
+    check(rc != -1, "Failed to send the TERM signal to all internal tasks.");
 
+    log_info("Shutting down all running tasks as gracefully as possible.");
+    
     // we will always be the last task, so wait until only 1 is running, us
     for(attempts = 0; tasksrunning() > 1 && attempts < 20; attempts++) {
-        taskallsignal(SIGTERM);
-        log_info("Waiting for connections to die: %d", tasksrunning());
+        rc = taskallsignal(SIGTERM);
+        check(rc != -1, "Failed to send the TERM signal to internal tasks on attempt: %d.", attempts);
     }
 
-    log_info("Tasks now running: %d", tasksrunning());
+    log_info("Tasks now running (including main task): %d", tasksrunning());
 
-    MIME_destroy();
     Control_port_stop();
-    Log_term();
+    rc = Log_term();
+    check(rc != -1, "Failed to shutdown the logging subsystem.");
+
     Setting_destroy();
+    MIME_destroy();
 
     log_info("Removing pid file %s", bdata(srv->pid_file));
-    unlink((const char *)srv->pid_file->data);
+    rc = unlink((const char *)srv->pid_file->data);
+    check(rc != -1, "Failed to unlink pid_file: %s", bdata(srv->pid_file));
 
     Server_destroy(srv);
 
     taskexitall(0);
+error:
+    taskexitall(1);
 }
 
-
+const int TICKER_TASK_STACK = 16 * 1024;
 
 void taskmain(int argc, char **argv)
 {
@@ -310,7 +316,6 @@ void taskmain(int argc, char **argv)
     int rc = 0;
 
     check(argc == 3, "usage: mongrel2 config.sqlite server_uuid");
-
 
     SERVER = load_server(argv[1], argv[2], -1);
     check(SERVER, "Aborting since can't load server.");
@@ -326,7 +331,7 @@ void taskmain(int argc, char **argv)
     final_setup();
 
     Control_port_start();
-    taskcreate(tickertask, NULL, 16 * 1024);
+    taskcreate(tickertask, NULL, TICKER_TASK_STACK);
 
     while(1) {
         log_info("Starting " VERSION ". Copyright (C) Zed A. Shaw. Licensed BSD.");

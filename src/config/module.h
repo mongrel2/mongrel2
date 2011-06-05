@@ -16,5 +16,5 @@ typedef struct ConfigModule {
     tns_value_t *(*load_settings)();
 } ConfigModule;
 
-extern ConfigModule DEFAULT_CONFIG_MODULE;
+extern ConfigModule CONFIG_MODULE;
 #endif

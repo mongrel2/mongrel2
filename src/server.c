@@ -76,6 +76,10 @@ static int Server_load_ciphers(Server *srv, bstring ssl_ciphers_val)
     int max_num_ciphers = 0;
     int *ciphers = NULL;
 
+    check(ssl_cipher_list != NULL && ssl_cipher_list->qty > 0,
+            "Invalid cipher list, it must be separated by space ' ' characters "
+            "and you need at least one.  Or, just leave it out for defaults.");
+
     while(ssl_default_ciphers[max_num_ciphers] != 0) {
         max_num_ciphers++;
     }
@@ -114,13 +118,10 @@ static int Server_load_ciphers(Server *srv, bstring ssl_ciphers_val)
             sentinel("Unrecognized cipher: %s", bdata(cipher));
     }
 
-    check(i > 0, "Must specify at least one cipher "
-          "(or omit the ssl_ciphers field from your settings)");
+    bstrListDestroy(ssl_cipher_list);
     ciphers[i] = 0;
     srv->ciphers = ciphers;
-
     hattach(ciphers, srv);
-    bstrListDestroy(ssl_cipher_list);
 
     return 0;
 error:
@@ -132,7 +133,6 @@ error:
 
 static int Server_init_ssl(Server *srv)
 {
-    bstring ssl_ciphers_val = NULL;
     int rc = 0;
     
     bstring certdir = Setting_get_str("certdir", NULL);
@@ -150,7 +150,7 @@ static int Server_init_ssl(Server *srv)
     rc = x509parse_keyfile(&srv->rsa_key, bdata(keypath), NULL);
     check(rc == 0, "Failed to load key from %s", bdata(keypath));
 
-    ssl_ciphers_val = Setting_get_str("ssl_ciphers", NULL);
+    bstring ssl_ciphers_val = Setting_get_str("ssl_ciphers", NULL);
 
     if(ssl_ciphers_val != NULL) {
         rc = Server_load_ciphers(srv, ssl_ciphers_val);
@@ -162,9 +162,8 @@ static int Server_init_ssl(Server *srv)
     srv->dhm_P = ssl_default_dhm_P;
     srv->dhm_G = ssl_default_dhm_G;
 
-
-    bdestroy(certpath); certpath = NULL;
-    bdestroy(keypath); keypath = NULL;
+    bdestroy(certpath);
+    bdestroy(keypath);
 
     return 0;
 
@@ -186,14 +185,13 @@ Server *Server_create(bstring uuid, bstring default_host,
     check_mem(srv);
 
     srv->hosts = RouteMap_create(host_destroy_cb);
-    check(srv->hosts, "Failed to create host RouteMap.");
+    check(srv->hosts != NULL, "Failed to create host RouteMap.");
 
     srv->handlers = darray_create(sizeof(Handler), 20);
     check_mem(srv->handlers);
 
-    check(port > 0, "Can't bind to the given port: %d", port);
+    check(port > 0, "Invalid port given, must be > 0: %d", port);
     srv->port = port;
-
     srv->listen_fd = 0;
 
     srv->bind_addr = bstrcpy(bind_addr); check_mem(srv->bind_addr);
@@ -227,8 +225,11 @@ void Server_destroy(Server *srv)
             rsa_free(&srv->rsa_key);
             // srv->ciphers freed (if non-default) by h_free
         }
+
         RouteMap_destroy(srv->hosts);
-        h_free(srv->handlers);
+
+        if(srv->handlers) h_free(srv->handlers);
+
         bdestroy(srv->bind_addr);
         bdestroy(srv->uuid);
         bdestroy(srv->chroot);
@@ -236,6 +237,7 @@ void Server_destroy(Server *srv)
         bdestroy(srv->error_log);
         bdestroy(srv->pid_file);
         bdestroy(srv->default_hostname);
+
         fdclose(srv->listen_fd);
         h_free(srv);
     }
@@ -273,6 +275,7 @@ void Server_start(Server *srv)
 
         if(cfd >= 0) {
             Connection *conn = Connection_create(srv, cfd, rport, remote);
+
             if(Connection_accept(conn) != 0) {
                 log_err("Failed to register connection, overloaded.");
                 Connection_destroy(conn);
@@ -281,7 +284,6 @@ void Server_start(Server *srv)
                 accept_good = 1;
             }
         } else {
-            log_err("Failed to accept, probably overloaded, will try clear some dead connections.");
             accept_good = 0;
         }
 
@@ -289,7 +291,6 @@ void Server_start(Server *srv)
             int cleared = Register_cleanout();
 
             if(cleared == 0) {
-                log_err("Couldn't clear out any connections, looks like you're completely overloaded.");
                 taskdelay(1000);
             }
         } // else nothing
@@ -306,6 +307,7 @@ int Server_add_host(Server *srv, Host *host)
 {
     check(host->matching != NULL, "Host's matching can't be NULL.");
     return RouteMap_insert_reversed(srv->hosts, host->matching, host);
+
 error:
     return -1;
 }
@@ -329,26 +331,25 @@ Host *Server_match_backend(Server *srv, bstring target)
     debug("Looking for target host: %s", bdata(target));
     Route *found = RouteMap_match_suffix(srv->hosts, target);
 
-    if(found) {
-        return found->data;
-    } else {
-    	return srv->default_host;
-    }
+    return found != NULL ? found->data : srv->default_host;
 
-error: // fallthrough
+error:
     return NULL;
 }
 
 int Server_start_handlers(Server *srv)
 {
     int i = 0;
+    int rc = 0;
+
     for(i = 0; i < darray_end(srv->handlers); i++) {
         Handler *handler = darray_get(srv->handlers, i);
         check(handler != NULL, "Invalid handler, can't be NULL.");
 
         if(!handler->running) {
-            log_info("LOADING BACKEND %s", bdata(handler->send_spec));
-            taskcreate(Handler_task, handler, HANDLER_STACK);
+            log_info("LOADING Handler %s", bdata(handler->send_spec));
+            rc = taskcreate(Handler_task, handler, HANDLER_STACK);
+            check(rc != -1, "Failed to start handler task.");
             handler->running = 1;
         }
     }

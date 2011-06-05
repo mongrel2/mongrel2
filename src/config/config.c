@@ -54,14 +54,11 @@
 
 Handler *Config_load_handler(int handler_id)
 {
-    tns_value_t *res = DEFAULT_CONFIG_MODULE.load_handler(handler_id);
-    int cols = 0;
-    int rows = DB_counts(res, &cols);
+    tns_value_t *res = CONFIG_MODULE.load_handler(handler_id);
 
-    check(rows == 1, "Expected to get just one row for handler id: %d, but got %d.",
-            handler_id, rows);
-    check(cols == 7, "Expected 7 columns for handler id %d but got %d.",
-            handler_id, cols);
+    DB_check(res, 0, 7,
+            tns_tag_number, tns_tag_string, tns_tag_string, tns_tag_string,
+            tns_tag_string, tns_tag_number, tns_tag_string);
 
     Handler *handler = Handler_create(
             DB_get_as(res, 0, 1, string), // send_spec
@@ -95,14 +92,10 @@ error:
 
 Proxy *Config_load_proxy(int proxy_id)
 {
-    tns_value_t *res = DEFAULT_CONFIG_MODULE.load_proxy(proxy_id);
-    int cols = 0;
-    int rows = DB_counts(res, &cols);
+    tns_value_t *res = CONFIG_MODULE.load_proxy(proxy_id);
 
-    check(rows == 1, "Expected 1 row but got %d rows for proxy id: %d",
-            rows, proxy_id);
-    check(cols == 3, "Expected 3 columns but got %d for proxy id: %d",
-            cols, proxy_id);
+    DB_check(res, 0, 3,
+            tns_tag_number, tns_tag_string, tns_tag_number);
 
     Proxy *proxy = Proxy_create(
             DB_get_as(res, 0, 1, string),
@@ -123,14 +116,11 @@ error:
 
 Dir *Config_load_dir(int dir_id)
 {
-    tns_value_t *res = DEFAULT_CONFIG_MODULE.load_dir(dir_id);
-    int cols = 0;
-    int rows = DB_counts(res, &cols);
+    tns_value_t *res = CONFIG_MODULE.load_dir(dir_id);
 
-    check(rows == 1, "Expected 1 row for dir id %d, but got %d.",
-            dir_id, rows);
-    check(cols == 5, "Expected 5 columns for dir id %d, but got %d.",
-            dir_id, cols);
+    DB_check(res, 0, 5,
+            tns_tag_number, tns_tag_string, tns_tag_string,
+            tns_tag_string, tns_tag_number);
 
     Dir *dir = Dir_create(
             DB_get_as(res, 0, 1, string), // base
@@ -182,17 +172,22 @@ static inline void Config_push_unique_handler(Server *srv, Handler *handler)
 
 int Config_load_routes(Server *srv, Host *host, int host_id, int server_id)
 {
-    tns_value_t *res = DEFAULT_CONFIG_MODULE.load_routes(host_id, server_id);
+    tns_value_t *res = CONFIG_MODULE.load_routes(host_id, server_id);
     int cols = 0;
     int rows = DB_counts(res, &cols);
     int row_i = 0;
     int rc = 0;
 
-    check(rows > 0, "Server has no routes, it won't do anything without at least one.");
-    check(cols == 4, "Expected 6 columns in the routes for host %s, got %d.",
-            bdata(host->name), cols);
- 
+    if(rows == 0) {
+        log_warn("Server has no routes, it won't do anything without at least one.");
+        tns_value_destroy(res);
+        return 0;
+    }
+
     for(row_i = 0; row_i < rows; row_i++) {
+        DB_check(res, row_i, 4, 
+            tns_tag_number, tns_tag_string, tns_tag_number, tns_tag_string);
+ 
         int route_id = DB_get_as(res, row_i, 0, number);
         bstring path = DB_get_as(res, row_i, 1, string);
         int id = DB_get_as(res, row_i, 2, number);
@@ -238,17 +233,22 @@ error:
 
 int Config_load_hosts(Server *srv, int server_id)
 {
-    tns_value_t *res = DEFAULT_CONFIG_MODULE.load_hosts(server_id);
+    tns_value_t *res = CONFIG_MODULE.load_hosts(server_id);
     int cols = 0;
     int rows = DB_counts(res, &cols);
     int row_i = 0; 
     int rc = 0;
 
-    check(rows > 0, "Expected at least one host for server %d:%s but got none.",
-            server_id, bdata(srv->default_hostname));
-    check(cols == 4, "Expected 4 columns for Host, got %d instead.", cols);
+    if(rows == 0) {
+        log_warn("No hosts configured for server, I hope you know what you're doing.");
+        tns_value_destroy(res);
+        return 0;
+    }
 
     for(row_i = 0; row_i < rows; row_i++) {
+        DB_check(res, row_i, 4, 
+            tns_tag_number, tns_tag_string, tns_tag_string, tns_tag_number);
+
         Host *host = Host_create(
                 DB_get_as(res, row_i, 1, string), // name
                 DB_get_as(res, row_i, 2, string) // matching
@@ -282,13 +282,12 @@ error:
 
 Server *Config_load_server(const char *uuid)
 {
-    tns_value_t *res = DEFAULT_CONFIG_MODULE.load_server(uuid);
-    int cols = 0;
-    int rows = DB_counts(res, &cols);
+    tns_value_t *res = CONFIG_MODULE.load_server(uuid);
     int rc = 0;
 
-    check(rows == 1, "Wrong number of servers returned, expected 1, got %d.", rows);
-    check(cols == 10, "Wrong number of columns returned, expected 10, got %d.", cols);
+    DB_check(res, 0, 10,
+            tns_tag_number, tns_tag_string, tns_tag_string, tns_tag_string, tns_tag_number,
+            tns_tag_string, tns_tag_string, tns_tag_string, tns_tag_string, tns_tag_number);
 
     int server_id = DB_get_as(res, 0, 0, number); // id
 
@@ -324,12 +323,13 @@ static int simple_query_run(tns_value_t *res,
     int row_i = 0;
     int cols = 0;
     int rows = DB_counts(res, &cols);
-    check(rows >= 0, "Results are not a table.");
+    check(rows != -1, "Results are not a table.");
 
     if(rows > 0) {
-        check(cols == 3, "Expected 3 columns for key=value style query.");
-
         for(row_i = 0; row_i < rows; row_i++) {
+            DB_check(res, row_i, 3,
+                    tns_tag_number, tns_tag_string, tns_tag_string);
+
             bstring key = DB_get_as(res, row_i, 1, string);
             bstring value = DB_get_as(res, row_i, 2, string);
 
@@ -346,7 +346,7 @@ error:
 int Config_load_mimetypes()
 {
     int rc = -1;
-    tns_value_t *res = DEFAULT_CONFIG_MODULE.load_mimetypes();
+    tns_value_t *res = CONFIG_MODULE.load_mimetypes();
     check(tns_get_type(res) == tns_tag_list, "Wrong type, expected valid rows.");
 
     rc = simple_query_run(res, MIME_add_type);
@@ -360,7 +360,7 @@ error: // fallthrough
 
 int Config_load_settings()
 {
-    tns_value_t *res = DEFAULT_CONFIG_MODULE.load_settings();
+    tns_value_t *res = CONFIG_MODULE.load_settings();
     int rc = -1;
     check(tns_get_type(res) == tns_tag_list, "Wrong type, expected valid rows.");
     rc = simple_query_run(res, Setting_add);
@@ -373,12 +373,12 @@ error: // falthrough
 
 int Config_init_db(const char *path)
 {
-    return DEFAULT_CONFIG_MODULE.init(path);
+    return CONFIG_MODULE.init(path);
 }
 
 void Config_close_db()
 {
-    DEFAULT_CONFIG_MODULE.close();
+    CONFIG_MODULE.close();
 }
 
 
