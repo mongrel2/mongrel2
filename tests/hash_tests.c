@@ -2,8 +2,6 @@
 #include <register.h>
 #include <adt/hash.h>
 
-FILE *LOG_FILE = NULL;
-
 #include <stdio.h>
 #include <ctype.h>
 #include <stdarg.h>

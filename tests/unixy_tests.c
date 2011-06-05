@@ -3,8 +3,6 @@
 #include <unistd.h>
 #include <sys/types.h>
 
-FILE *LOG_FILE = NULL;
-
 char *test_Unixy_getcwd()
 {
     bstring dir = Unixy_getcwd();

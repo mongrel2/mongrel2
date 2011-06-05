@@ -5,7 +5,6 @@
 #include <superpoll.h>
 #include <zmq.h>
 
-FILE *LOG_FILE = NULL;
 SuperPoll *TEST_POLL = NULL;
 
 /* Code for this unit test taken from:  pipetest.c

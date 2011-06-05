@@ -3,8 +3,6 @@
 #include <request.h>
 #include <assert.h>
 
-FILE *LOG_FILE = NULL;
-
 char *test_tnetstring_encode()
 {
     size_t len = 0;

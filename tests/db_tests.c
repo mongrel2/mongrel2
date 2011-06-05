@@ -2,8 +2,6 @@
 #include <config/db.h>
 #include <dbg.h>
 
-FILE *LOG_FILE = NULL;
-
 char *test_DB_init() 
 {
     mu_assert(DB_init("tests/empty.sqlite") == 0, "Database init failed.");

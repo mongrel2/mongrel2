@@ -5,8 +5,6 @@
 #include <bstring.h>
 
 
-FILE *LOG_FILE = NULL;
-
 tst_t *node = NULL;
 char *valueA = "VALUEA";
 char *valueB = "VALUEB";

@@ -134,14 +134,16 @@ error:
 static int Server_init_ssl(Server *srv)
 {
     int rc = 0;
+    bstring certpath = NULL;
+    bstring keypath = NULL;
     
     bstring certdir = Setting_get_str("certdir", NULL);
     check(certdir != NULL, "to use ssl, you must specify a certdir");
 
-    bstring certpath = bformat("%s%s.crt", bdata(certdir), bdata(srv->uuid)); 
+    certpath = bformat("%s%s.crt", bdata(certdir), bdata(srv->uuid)); 
     check_mem(certpath);
 
-    bstring keypath = bformat("%s%s.key", bdata(certdir), bdata(srv->uuid));
+    keypath = bformat("%s%s.key", bdata(certdir), bdata(srv->uuid));
     check_mem(keypath);
 
     rc = x509parse_crtfile(&srv->own_cert, bdata(certpath));

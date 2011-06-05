@@ -4,8 +4,6 @@
 #include <string.h>
 #include <fcntl.h>
 
-FILE *LOG_FILE = NULL;
-
 char *test_Dir_find_file()
 {
     bstring ctype = NULL;

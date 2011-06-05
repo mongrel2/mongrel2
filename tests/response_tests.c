@@ -4,8 +4,6 @@
 #include "register.h"
 #include <fcntl.h>
 
-FILE *LOG_FILE = NULL;
-
 
 char *test_Response_send_status() 
 {

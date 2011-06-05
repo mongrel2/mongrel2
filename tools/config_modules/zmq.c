@@ -3,8 +3,6 @@
 #include <config/module.h>
 #include <config/db.h>
 
-FILE *LOG_FILE = NULL;
-
 
 int config_init(const char *path)
 {

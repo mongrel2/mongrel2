@@ -6,8 +6,6 @@
 #include <ctype.h>
 #include <stdarg.h>
 
-FILE *LOG_FILE = NULL;
-
 typedef char input_t[256];
 
 static int tokenize(char *string, ...)

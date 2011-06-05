@@ -2,8 +2,6 @@
 #include <cache.h>
 #include <assert.h>
 
-FILE *LOG_FILE = NULL;
-
 static long last_evicted;
 void test_evict(void *data) {
     last_evicted = (long) data;

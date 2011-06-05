@@ -207,9 +207,7 @@ static void taskscheduler(void)
 
         check(t != NULL, "No runnable tasks, %d tasks stalled", taskcount);
 
-        if(LOG_FILE) {
-            debug("DELETING TASK: %p", t);
-        }
+        debug("DELETING TASK: %p", t);
         deltask(&taskrunqueue, t);
 
         t->ready = 0;

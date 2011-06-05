@@ -11,7 +11,6 @@
 #include "kegogi_parser.h"
 #include "kegogi_tokens.h"
 
-FILE *LOG_FILE = NULL;
 #define MAX_COMMANDS 1024
 
 struct tagbstring DEFAULT_HOST_KEY = bsStatic("host");
@@ -204,8 +203,7 @@ error:
 
 void taskmain(int argc, char *argv[])
 {
-    LOG_FILE = stderr;
-
+    dbg_set_log(stderr);
     RunKegogiArgs *args = calloc(sizeof(*args), 1);
     check_mem(args);
     args->script_path = NULL;

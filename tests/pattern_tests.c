@@ -2,8 +2,6 @@
 #include <pattern.h>
 #include <string.h>
 
-FILE *LOG_FILE = NULL;
-
 const char *m;
 
 char *test_simple_matches()

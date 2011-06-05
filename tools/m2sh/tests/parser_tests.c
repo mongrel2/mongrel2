@@ -6,7 +6,6 @@
 #include <bstring.h>
 #include <assert.h>
 
-FILE *LOG_FILE = NULL;
 int CB_FIRED = 0;
 
 int check_callback(tst_t *parent, Value *val)
