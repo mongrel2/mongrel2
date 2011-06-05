@@ -4,8 +4,6 @@
 #include <string.h>
 #include <task/task.h>
 
-FILE *LOG_FILE = NULL;
-
 
 char *test_Handler_recv_create()
 {

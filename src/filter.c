@@ -98,7 +98,7 @@ int Filter_load(Server *srv, bstring load_path)
     }
 
     // TODO: probably too aggressive but we'll try this for now
-    void *lib = dlopen(bdata(load_path), RTLD_NOW | RTLD_LOCAL);
+    void *lib = dlopen(bdata(load_path), RTLD_LAZY | RTLD_LOCAL);
     check(lib != NULL, "Failed to load filter %s: %s.", bdata(load_path), dlerror());
 
     // get the Filter_init function and run it to init the filter (duh)

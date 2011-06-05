@@ -1,8 +1,6 @@
 #include "minunit.h"
 #include <adt/darray.h>
 
-FILE *LOG_FILE = NULL;
-
 char *test_darray_operations()
 {
     darray_t *array = darray_create(sizeof(int), 100);

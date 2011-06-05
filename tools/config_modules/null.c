@@ -3,15 +3,15 @@
 #include <config/module.h>
 #include <config/db.h>
 
-FILE *LOG_FILE = NULL;
-
 struct tagbstring GOODPATH = bsStatic("goodpath");
 
 int config_init(const char *path)
 {
     if(biseqcstr(&GOODPATH, path)) {
+        log_info("Got the good path.");
         return 0;
     } else {
+        log_info("Got the bad path: %s", path);
         return -1;
     }
 }

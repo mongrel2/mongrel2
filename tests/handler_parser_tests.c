@@ -2,9 +2,6 @@
 #include <handler_parser.h>
 #include <bstring.h>
 
-FILE *LOG_FILE = NULL;
-
-
 int test_parse(const char *test, int target_count)
 {
     HandlerParser *parser = HandlerParser_create(128);

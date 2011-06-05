@@ -3,8 +3,6 @@
 #include <stdlib.h>
 #include <mem/halloc.h>
 
-FILE *LOG_FILE = NULL;
-
 
 char *test_Proxy_create_destroy()
 {

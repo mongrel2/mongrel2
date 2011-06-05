@@ -7,8 +7,6 @@
 #include "mime.h"
 #include "setting.h"
 
-FILE *LOG_FILE = NULL;
-
 char *test_Config_load_settings()
 {
     Config_init_db("tests/config.sqlite");

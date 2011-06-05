@@ -1,8 +1,6 @@
 #include "minunit.h"
 #include <host.h>
 
-FILE *LOG_FILE = NULL;
-
 char * test_create_destroy() {
     Host *host = Host_create(bfromcstr("zedshaw.com"), bfromcstr("zedshaw.com"));
 

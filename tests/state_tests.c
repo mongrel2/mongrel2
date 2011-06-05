@@ -4,8 +4,6 @@
 #include <stdint.h>
 #include "connection.h"
 
-FILE *LOG_FILE = NULL;
-
 int test_action_cb(Connection *data)
 {
     return 1;

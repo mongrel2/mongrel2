@@ -7,8 +7,6 @@ int V_TEST_CONN_2 = 2;
 Connection *TEST_CONN_1 = NULL;
 Connection *TEST_CONN_2 = NULL;
 
-FILE *LOG_FILE = NULL;
-
 char *test_Register_init() 
 {
     Register_init();

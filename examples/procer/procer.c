@@ -9,8 +9,6 @@
 #include <sys/wait.h>
 #include <sys/stat.h>
 
-FILE *LOG_FILE = NULL;
-
 extern char **environ;
 
 static inline void hardsleep(int sec)
@@ -197,7 +195,7 @@ void Action_start_all(void *value, void *data)
 
 void taskmain(int argc, char *argv[])
 {
-    LOG_FILE = stderr;
+    dbg_set_log(stderr);
     glob_t profile_glob;
     int rc = 0;
     int i = 0;
@@ -223,7 +221,7 @@ void taskmain(int argc, char *argv[])
     FILE *log = fopen("error.log", "a+");
     check(log, "Couldn't open error.log");
     setbuf(log, NULL);
-    LOG_FILE = log;
+    dbg_set_log(log);
 
     bstring dir_glob = bformat("%s/[A-Za-z0-9]*", argv[1]);
     check(dir_glob, "Couldn't make the directory glob.");

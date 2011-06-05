@@ -1,8 +1,6 @@
 #include "minunit.h"
 #include <mime.h>
 
-FILE *LOG_FILE = NULL;
-
 char *test_MIME_failures() 
 {
     int rc = MIME_add_type("txt", "badtype");

@@ -7,8 +7,6 @@
 #include <mem/halloc.h>
 #include <fcntl.h>
 
-FILE *LOG_FILE = NULL;
-
 Connection *fake_conn(const char *file, int mode) {
     Connection *conn = h_calloc(sizeof(Connection), 1);
     assert(conn && "Failed to create connection.");

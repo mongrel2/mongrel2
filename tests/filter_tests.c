@@ -2,8 +2,6 @@
 #include <filter.h>
 #include <connection.h>
 
-FILE *LOG_FILE = NULL;
-
 char *test_Filter_load() 
 {
     Server *srv = NULL;

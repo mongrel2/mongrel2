@@ -3,8 +3,6 @@
 #include <glob.h>
 #include <bstring.h>
 
-FILE *LOG_FILE = NULL;
-
 void debug_element_cb(void *data, const char *at, size_t length)
 {
 }

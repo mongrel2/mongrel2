@@ -3,8 +3,6 @@
 #include <string.h>
 #include <dbg.h>
 
-FILE *LOG_FILE = NULL;
-
 
 int check_routing(list_t *found, Route *route, int expected_count, const char *route_data)
 {

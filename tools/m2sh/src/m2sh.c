@@ -3,12 +3,10 @@
 #include <pattern.h>
 #include "commands.h"
 
-FILE *LOG_FILE = NULL;
-
 
 void taskmain(int argc, char *argv[])
 {
-    LOG_FILE = stderr;
+    dbg_set_log(stderr);
     int i = 0;
 
     bstring arguments = bfromcstr(argv[0]);

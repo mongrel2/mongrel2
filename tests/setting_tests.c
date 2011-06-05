@@ -1,8 +1,6 @@
 #include "minunit.h"
 #include <setting.h>
 
-FILE *LOG_FILE = NULL;
-
 char *test_Setting_add_get()
 {
     int rc = Setting_add("TEST1", "2345");

@@ -4,8 +4,6 @@
 #include <glob.h>
 #include <bstring.h>
 
-FILE *LOG_FILE = NULL;
-
 
 httpclient_parser setup_parser()
 {

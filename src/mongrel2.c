@@ -54,8 +54,6 @@
 #include "log.h"
 #include "register.h"
 
-FILE *LOG_FILE = NULL;
-
 extern int RUNNING;
 extern uint32_t THE_CURRENT_TIME_IS;
 int RELOAD;
@@ -211,7 +209,7 @@ int attempt_chroot_drop(Server *srv)
         check(log, "Couldn't open %s log file.", bdata(srv->error_log));
         setbuf(log, NULL);
 
-        LOG_FILE = log;
+        dbg_set_log(log);
 
         rc = Unixy_pid_file(srv->pid_file);
         check(rc == 0, "Failed to make the PID file %s", bdata(srv->pid_file));
@@ -312,7 +310,7 @@ const int TICKER_TASK_STACK = 16 * 1024;
 
 void taskmain(int argc, char **argv)
 {
-    LOG_FILE = stderr;
+    dbg_set_log(stderr);
     int rc = 0;
 
     check(argc == 3 || argc == 4, "usage: mongrel2 config.sqlite server_uuid [config_module.so]");

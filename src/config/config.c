@@ -388,7 +388,7 @@ void Config_close_db()
 
 int Config_module_load(const char *load_path)
 {
-    void *lib = dlopen(load_path, RTLD_NOW | RTLD_LOCAL);
+    void *lib = dlopen(load_path, RTLD_LAZY | RTLD_LOCAL);
     check(lib != NULL, "Failed to load config module %s: %s.", load_path, dlerror());
 
     SET_MODULE_FUNC(init);

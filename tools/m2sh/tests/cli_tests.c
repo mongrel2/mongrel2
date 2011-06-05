@@ -3,8 +3,6 @@
 #include <stdio.h>
 #include <bstring.h>
 
-FILE *LOG_FILE = NULL;
-
 
 char *test_parser() 
 {

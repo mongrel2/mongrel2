@@ -7,8 +7,6 @@
 #include <task/task.h>
 #include <dir.h>
 
-FILE *LOG_FILE = NULL;
-
 Server *SRV = NULL;
 
 char *test_Connection_create_destroy()

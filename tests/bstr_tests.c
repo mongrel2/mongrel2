@@ -8,9 +8,6 @@
 #include <ctype.h>
 #include <dbg.h>
 
-FILE *LOG_FILE = NULL;
-
-
 static int tWrite (const void * buf, size_t elsize, size_t nelem, void * parm) {
     bstring b = (bstring) parm;
     size_t i;
@@ -3731,8 +3728,9 @@ static int test46 (void) {
 
 int taskmain (int argc, char * argv[]) 
 {
-    LOG_FILE = fopen("tests/tests.log", "a+");
-    setbuf(LOG_FILE, NULL);
+    FILE *log_file = fopen("tests/tests.log", "a+");
+    setbuf(log_file, NULL);
+    dbg_set_log(log_file);
 
     int ret = 0;
 
