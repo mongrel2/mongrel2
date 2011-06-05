@@ -147,6 +147,7 @@ static int netgetsocket(int istcp, char *server, int port,
 
     /* BUG: the lookup is blocking. */
     snprintf(service, sizeof(service), "%d", port);
+    service[sizeof(service) - 1] = '\0'; // make sure it is terminated
 
     rc = getaddrinfo(server, service, &hints, &res);
     check(rc != -1, "Get addrinfo failed for server: %s.", server);

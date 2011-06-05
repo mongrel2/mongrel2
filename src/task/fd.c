@@ -80,7 +80,6 @@ static inline void wake_sleepers()
 static inline void fdtask_shutdown(int signal)
 {
     int i = 0;
-    debug("WE GOT SIGNALED: %d I AM id=%d", taskrunning->signal, taskrunning->id);
 
     for(i = 0; i < SuperPoll_active_hot(POLL); i++) {
         SuperPoll_compact_down(POLL, i);
@@ -230,10 +229,8 @@ int _wait(void *socket, int fd, int rw)
     max = SuperPoll_add(POLL, (void *)taskrunning, socket, fd, rw, hot_add);
     check(max != -1, "Error adding fd: %d or socket: %p to task wait list.", fd, socket);
 
-    debug("ENTER SWITCH!");
     taskswitch();
 
-    debug("WOKE UP IN WAIT");
     if(task_was_signaled()) {
         debug("GOT SIGNAL %d AFTER WAIT", taskrunning->signal);
         SuperPoll_del(POLL, socket, fd, hot_add);

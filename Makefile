@@ -12,8 +12,9 @@ OBJECTS_EXTERNAL+=$(call get_objs,src/polarssl/*.c)
 OBJECTS_NOEXT=$(filter-out ${OBJECTS_EXTERNAL},${OBJECTS})
 LIB_SRC=$(filter-out src/mongrel2.c,${SOURCES})
 LIB_OBJ=$(filter-out src/mongrel2.o,${OBJECTS})
-TEST_SRC=$(wildcard tests/*.c)
+TEST_SRC=$(wildcard tests/*_tests.c)
 TESTS=$(patsubst %.c,%,${TEST_SRC})
+MAKEOPTS=OPTFLAGS="${NOEXTCFLAGS} ${OPTFLAGS}" OPTLIBS="${OPTLIBS}" LIBS="${LIBS}" DESTDIR="${DESTDIR}" PREFIX="${PREFIX}"
 
 all: bin/mongrel2 tests m2sh
 
@@ -21,6 +22,8 @@ dev: CFLAGS=-g -Wall -Isrc -Wall -Wextra $(OPTFLAGS) -D_FILE_OFFSET_BITS=64
 dev: all
 
 ${OBJECTS_NOEXT}: CFLAGS += ${NOEXTCFLAGS}
+
+
 
 bin/mongrel2: build/libm2.a src/mongrel2.o
 	$(CC) $(CFLAGS) src/mongrel2.o -o $@ $< $(LIBS)
@@ -45,6 +48,7 @@ clean:
 	find . -name "*.gc*" -exec rm {} \;
 	${MAKE} -C tools/m2sh OPTLIB=${OPTLIB} clean
 	${MAKE} -C tools/filters OPTLIB=${OPTLIB} clean
+	${MAKE} -C tests/filters OPTLIB=${OPTLIB} clean
 	${MAKE} -C tools/config_modules OPTLIB=${OPTLIB} clean
 
 pristine: clean
@@ -58,7 +62,7 @@ pristine: clean
 	${MAKE} -C tools/m2sh pristine
 
 .PHONY: tests
-tests: build/libm2.a tests/config.sqlite ${TESTS} filters config_modules
+tests: build/libm2.a tests/config.sqlite ${TESTS} test_filters filters config_modules
 	sh ./tests/runtests.sh
 
 tests/config.sqlite: src/config/config.sql src/config/example.sql src/config/mimetypes.sql
@@ -78,25 +82,23 @@ check:
 	@egrep '[^_.>a-zA-Z0-9](str(n?cpy|n?cat|xfrm|n?dup|str|pbrk|tok|_)|stpn?cpy|a?sn?printf|byte_)' $(filter-out src/bstr/bsafe.c,${SOURCES})
 
 m2sh: 
-	${MAKE} OPTFLAGS="${NOEXTCFLAGS} ${OPTFLAGS}" OPTLIBS="${OPTLIBS}" LIBS="${LIBS}" -C tools/m2sh all
+	${MAKE} ${MAKEOPTS} -C tools/m2sh all
+
+test_filters: 
+	${MAKE} ${MAKEOPTS} -C tests/filters all
 
 filters: 
-	${MAKE} OPTFLAGS="${NOEXTCFLAGS} ${OPTFLAGS}" OPTLIBS="${OPTLIBS}" LIBS="${LIBS}" -C tools/filters all
+	${MAKE} ${MAKEOPTS} -C tools/filters all
 
 config_modules: 
-	${MAKE} OPTFLAGS="${NOEXTCFLAGS} ${OPTFLAGS}" OPTLIBS="${OPTLIBS}" LIBS="${LIBS}" -C tools/config_modules all
+	${MAKE} ${MAKEOPTS} -C tools/config_modules all
 
-install: all install-bin install-m2sh install-config-modules
-
-install-bin:
+install: all
 	install -d $(DESTDIR)/$(PREFIX)/bin/
 	install bin/mongrel2 $(DESTDIR)/$(PREFIX)/bin/
-
-install-m2sh:
-	${MAKE} -C tools/m2sh install
-
-install-config-modules:
-	${MAKE} -C tools/config_modules install
+	${MAKE} ${MAKEOPTS} -C tools/m2sh install
+	${MAKE} ${MAKEOPTS} -C tools/config_modules install
+	${MAKE} ${MAKEOPTS} -C tools/filters install
 
 examples/python/mongrel2/sql/config.sql: src/config/config.sql src/config/mimetypes.sql
 	cat src/config/config.sql src/config/mimetypes.sql > $@

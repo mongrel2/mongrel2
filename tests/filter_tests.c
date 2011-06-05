@@ -5,10 +5,10 @@
 char *test_Filter_load() 
 {
     Server *srv = NULL;
-    bstring load_path = bfromcstr("tools/filters/test_filter.so");
+    bstring load_path = bfromcstr("tests/filters/test_filter.so");
 
     int res = Filter_load(srv, load_path);
-    mu_assert(res == 0, "Failed to load tools/filters/test_filter.so");
+    mu_assert(res == 0, "Failed to load tests/filters/test_filter.so");
     mu_assert(Filter_activated(), "Filters not activated.");
 
     return NULL;
@@ -32,11 +32,11 @@ char *test_Filter_run_chain(){
 	Filter_init(); /*We need a fresh new Filter storage*/
 	Connection *conn = Connection_create(NULL, 0, 80, "");
 
-    int res_filter_a = Filter_load(NULL, bfromcstr("tools/filters/test_filter_a.so"));
-    mu_assert(res_filter_a == 0, "Failed to load tools/filters/test_filter_a.so");
+    int res_filter_a = Filter_load(NULL, bfromcstr("tests/filters/test_filter_a.so"));
+    mu_assert(res_filter_a == 0, "Failed to load tests/filters/test_filter_a.so");
 
-    int res_filter_b = Filter_load(NULL, bfromcstr("tools/filters/test_filter_b.so"));
-    mu_assert(res_filter_b == 0, "Failed to load tools/filters/test_filter_b.so");
+    int res_filter_b = Filter_load(NULL, bfromcstr("tests/filters/test_filter_b.so"));
+    mu_assert(res_filter_b == 0, "Failed to load tests/filters/test_filter_b.so");
 
     Filter_run(CONNECT, conn);
 
@@ -50,14 +50,14 @@ char *test_Filter_stop_filter_chain(){
 	Filter_init(); /*We need a fresh new Filter storage*/
 	Connection *conn = Connection_create(NULL, 0, 80, "");
 
-    int res_filter_a = Filter_load(NULL, bfromcstr("tools/filters/test_filter_a.so"));
-    mu_assert(res_filter_a == 0, "Failed to load tools/filters/test_filter_a.so");
+    int res_filter_a = Filter_load(NULL, bfromcstr("tests/filters/test_filter_a.so"));
+    mu_assert(res_filter_a == 0, "Failed to load tests/filters/test_filter_a.so");
 
-    int res_filter_c = Filter_load(NULL, bfromcstr("tools/filters/test_filter_c.so"));
-    mu_assert(res_filter_c == 0, "Failed to load tools/filters/test_filter_c.so");
+    int res_filter_c = Filter_load(NULL, bfromcstr("tests/filters/test_filter_c.so"));
+    mu_assert(res_filter_c == 0, "Failed to load tests/filters/test_filter_c.so");
 
-    int res_filter_b = Filter_load(NULL, bfromcstr("tools/filters/test_filter_b.so"));
-    mu_assert(res_filter_b == 0, "Failed to load tools/filters/test_filter_b.so");
+    int res_filter_b = Filter_load(NULL, bfromcstr("tests/filters/test_filter_b.so"));
+    mu_assert(res_filter_b == 0, "Failed to load tests/filters/test_filter_b.so");
 
     int next = Filter_run(CONNECT, conn);
     mu_assert(next == CLOSE, "Last filter not run correctly");

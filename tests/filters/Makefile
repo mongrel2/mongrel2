@@ -2,7 +2,7 @@ PREFIX?=/usr/local
 CFLAGS=-I../../src $(OPTFLGAS) -fPIC -shared -nostartfiles -L../../build
 LDFLAGS=$(OPTLIBS)
 
-all: null.so zmq.so
+all: test_filter.so test_filter_a.so test_filter_b.so test_filter_c.so
 
 %.so : %.c
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $< ../../build/libm2.a
@@ -10,8 +10,7 @@ all: null.so zmq.so
 clean:
 	rm -f *.so
 
-
 install:
-	install -d $(DESTDIR)/$(PREFIX)/lib/mongrel2/config_modules/
-	install *.so $(DESTDIR)/$(PREFIX)/lib/mongrel2/config_modules/
+	install -d $(DESTDIR)/$(PREFIX)/lib/mongrel2/filters/
+	install *.so $(DESTDIR)/$(PREFIX)/lib/mongrel2/filters/
 
