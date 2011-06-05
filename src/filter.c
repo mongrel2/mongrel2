@@ -18,6 +18,15 @@ error:
     return -1;
 }
 
+/**
+ * Mostly used in testing, reloading filters won't be supported.
+ */
+void Filter_destroy()
+{
+    darray_destroy(REGISTERED_FILTERS);
+    REGISTERED_FILTERS = NULL;
+}
+
 static inline darray_t *Filter_lookup(StateEvent next)
 {
     return darray_get(REGISTERED_FILTERS, next - EVENT_MIN);

@@ -1,11 +1,17 @@
-# quick Makefile to get this going, more advanced one on the way
+PREFIX?=/usr/local
+CFLAGS=-I../../src $(OPTFLGAS) -fPIC -shared -nostartfiles -L../../build
+LDFLAGS=$(OPTLIBS)
 
-all:
-	gcc -I../../src $(OPTFLAGS) -L../../build $(OPTLIBS) -fPIC -shared -nostartfiles -o test_filter.so test_filter.c ../../build/libm2.a
-	gcc -I../../src $(OPTFLAGS) -L../../build $(OPTLIBS) -fPIC -shared -nostartfiles -o test_filter_a.so test_filter_a.c ../../build/libm2.a
-	gcc -I../../src $(OPTFLAGS) -L../../build $(OPTLIBS) -fPIC -shared -nostartfiles -o test_filter_b.so test_filter_b.c ../../build/libm2.a
-	gcc -I../../src $(OPTFLAGS) -L../../build $(OPTLIBS) -fPIC -shared -nostartfiles -o test_filter_c.so test_filter_c.c ../../build/libm2.a
+all: null.so
+
+
+%.so : %.c
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $< ../../build/libm2.a
 
 clean:
-	rm -f test_filter*.so
+	rm -f *.so
+
+install:
+	install -d $(DESTDIR)/$(PREFIX)/lib/mongrel2/filters/
+	install *.so $(DESTDIR)/$(PREFIX)/lib/mongrel2/filters/
 

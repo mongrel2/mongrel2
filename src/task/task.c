@@ -207,7 +207,6 @@ static void taskscheduler(void)
 
         check(t != NULL, "No runnable tasks, %d tasks stalled", taskcount);
 
-        debug("DELETING TASK: %p", t);
         deltask(&taskrunqueue, t);
 
         t->ready = 0;
@@ -225,7 +224,6 @@ static void taskscheduler(void)
             i = t->alltaskslot;
             alltask[i] = alltask[--nalltask];
             alltask[i]->alltaskslot = i;
-            debug("REMOVED EXITING TASK: id=%d at %p", t->id, t);
             free(t);
         }
     }
