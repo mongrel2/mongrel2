@@ -50,6 +50,7 @@
 #include "setting.h"
 #include "config/module.h"
 #include "config/db.h"
+#include <dlfcn.h>
 
 
 Handler *Config_load_handler(int handler_id)
@@ -381,4 +382,28 @@ void Config_close_db()
     CONFIG_MODULE.close();
 }
 
+#define SET_MODULE_FUNC(N)    CONFIG_MODULE.N = dlsym(lib, "config_" #N);\
+    check(CONFIG_MODULE.N != NULL, "Config module %s doesn't have an " #N " function.", load_path);
+
+
+int Config_module_load(const char *load_path)
+{
+    void *lib = dlopen(load_path, RTLD_NOW | RTLD_LOCAL);
+    check(lib != NULL, "Failed to load config module %s: %s.", load_path, dlerror());
+
+    SET_MODULE_FUNC(init);
+    SET_MODULE_FUNC(close);
+    SET_MODULE_FUNC(load_handler);
+    SET_MODULE_FUNC(load_proxy);
+    SET_MODULE_FUNC(load_dir);
+    SET_MODULE_FUNC(load_routes);
+    SET_MODULE_FUNC(load_hosts);
+    SET_MODULE_FUNC(load_server);
+    SET_MODULE_FUNC(load_mimetypes);
+    SET_MODULE_FUNC(load_settings);
+
+    return 0;
+error:
+    return -1;
+}
 

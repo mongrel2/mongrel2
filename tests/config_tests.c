@@ -3,6 +3,7 @@
 #include "server.h"
 #include "config/config.h"
 #include "config/db.h"
+#include "config/module.h"
 #include "mime.h"
 #include "setting.h"
 
@@ -50,6 +51,20 @@ char *test_Config_load()
     return NULL;
 }
 
+char *test_Config_load_module()
+{
+    int rc = Config_module_load("tools/config_modules/null.so");
+    mu_assert(rc == 0, "Failed to load the null module.");
+
+    rc = CONFIG_MODULE.init("goodpath");
+    mu_assert(rc == 0, "The null module should fail init.");
+
+    rc = CONFIG_MODULE.init("badpath");
+    mu_assert(rc == -1, "The null module should fail init.");
+
+    return NULL;
+}
+
 
 char * all_tests() 
 {
@@ -60,6 +75,7 @@ char * all_tests()
     mu_run_test(test_Config_load_mimetypes);
     mu_run_test(test_Config_load_settings);
     mu_run_test(test_Config_load);
+    mu_run_test(test_Config_load_module);
 
     zmq_term(ZMQ_CTX);
 

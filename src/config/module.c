@@ -78,4 +78,3 @@ ConfigModule CONFIG_MODULE = {
     .load_settings = default_load_settings
 };
 
-
