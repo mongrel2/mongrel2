@@ -17,4 +17,5 @@ typedef struct ConfigModule {
 } ConfigModule;
 
 extern ConfigModule CONFIG_MODULE;
+
 #endif

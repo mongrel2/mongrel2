@@ -45,6 +45,7 @@ clean:
 	find . -name "*.gc*" -exec rm {} \;
 	${MAKE} -C tools/m2sh OPTLIB=${OPTLIB} clean
 	${MAKE} -C tools/filters OPTLIB=${OPTLIB} clean
+	${MAKE} -C tools/config_modules OPTLIB=${OPTLIB} clean
 
 pristine: clean
 	sudo rm -rf examples/python/build examples/python/dist examples/python/m2py.egg-info
@@ -57,7 +58,7 @@ pristine: clean
 	${MAKE} -C tools/m2sh pristine
 
 .PHONY: tests
-tests: build/libm2.a tests/config.sqlite ${TESTS} filters
+tests: build/libm2.a tests/config.sqlite ${TESTS} filters config_modules
 	sh ./tests/runtests.sh
 
 tests/config.sqlite: src/config/config.sql src/config/example.sql src/config/mimetypes.sql
@@ -82,7 +83,10 @@ m2sh:
 filters: 
 	${MAKE} OPTFLAGS="${NOEXTCFLAGS} ${OPTFLAGS}" OPTLIBS="${OPTLIBS}" LIBS="${LIBS}" -C tools/filters all
 
-install: all install-bin install-m2sh
+config_modules: 
+	${MAKE} OPTFLAGS="${NOEXTCFLAGS} ${OPTFLAGS}" OPTLIBS="${OPTLIBS}" LIBS="${LIBS}" -C tools/config_modules all
+
+install: all install-bin install-m2sh install-config-modules
 
 install-bin:
 	install -d $(DESTDIR)/$(PREFIX)/bin/
@@ -90,6 +94,9 @@ install-bin:
 
 install-m2sh:
 	${MAKE} -C tools/m2sh install
+
+install-config-modules:
+	${MAKE} -C tools/config_modules install
 
 examples/python/mongrel2/sql/config.sql: src/config/config.sql src/config/mimetypes.sql
 	cat src/config/config.sql src/config/mimetypes.sql > $@

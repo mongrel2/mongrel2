@@ -315,7 +315,14 @@ void taskmain(int argc, char **argv)
     LOG_FILE = stderr;
     int rc = 0;
 
-    check(argc == 3, "usage: mongrel2 config.sqlite server_uuid");
+    check(argc == 3 || argc == 4, "usage: mongrel2 config.sqlite server_uuid [config_module.so]");
+
+    if(argc == 4) {
+        log_info("Using configuration module %s to load configs.",
+                argv[3]);
+        rc = Config_module_load(argv[3]);
+        check(rc != -1, "Failed to load the config module: %s", argv[3]);
+    }
 
     SERVER = load_server(argv[1], argv[2], -1);
     check(SERVER, "Aborting since can't load server.");

@@ -47,5 +47,6 @@ int Config_load_settings();
 
 void Config_close_db();
 
+int Config_module_load(const char *load_path);
 
 #endif

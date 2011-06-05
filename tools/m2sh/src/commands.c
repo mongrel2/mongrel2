@@ -331,6 +331,9 @@ error:
 struct ServerRun {
     int ran;
     bstring db_file;
+    bstring config_url;
+    bstring config_style;
+    bstring uuid;
     const char *sudo;
     int murder;
 };
@@ -342,13 +345,29 @@ static inline int exec_server_operations(Command *cmd,
     int rc = 0;
     tns_value_t *res = NULL;
 
-    bstring db_file = option(cmd, "db", "config.sqlite");
-    check_file(db_file, "config database", R_OK | W_OK);
+    bstring db_file = option(cmd, "db", NULL);
+    bstring conf_url = option(cmd, "url", NULL);
+    bstring conf_style = option(cmd, "style", NULL);
+    bstring uuid = option(cmd, "uuid", NULL);
 
-    struct ServerRun run = {.ran = 0, .db_file = db_file, .sudo = "", .murder = 0};
+    if(conf_url == NULL && db_file == NULL) {
+        db_file = bfromcstr("config.sqlite");
+    }
+
+    check(db_file != NULL || (conf_url != NULL && conf_style != NULL),
+            "You must give either --db or --style and --url.");
+
+    struct ServerRun run = {
+        .ran = 0,
+        .db_file = db_file,
+        .config_url = conf_url,
+        .config_style = conf_style,
+        .sudo = "",
+        .uuid = uuid,
+        .murder = 0
+    };
 
     bstring name = option(cmd, "name", NULL);
-    bstring uuid = option(cmd, "uuid", NULL);
     bstring host = option(cmd, "host", NULL);
     bstring sudo = option(cmd, "sudo", NULL);
     bstring every = option(cmd, "every", NULL);
@@ -362,24 +381,29 @@ static inline int exec_server_operations(Command *cmd,
         run.sudo = "";
     }
 
-    rc = DB_init(bdata(db_file));
-    check(rc == 0, "Failed to open db: %s", bdata(db_file));
+    if(uuid == NULL) {
+        check(db_file != NULL, "There is no uuid, and no database given, need a uuid.");
 
-    if(every) {
-        res = DB_exec("SELECT %s FROM server", select);
-    } else if(name) {
-        res = DB_exec("SELECT %s FROM server where name = %Q", select, bdata(name));
-    } else if(host) {
-        res = DB_exec("SELECT %s FROM server where default_host = %Q", select, bdata(host));
-    } else if(uuid) {
-        // yes, this is necessary, so that the callback runs
-        res = DB_exec("SELECT %s FROM server where uuid = %Q", select, bdata(uuid));
-    } else {
-        sentinel("You must give either -name, -uuid, or -host to start a server.");
+        rc = DB_init(bdata(db_file));
+        check(rc == 0, "Failed to open db: %s", bdata(db_file));
+
+        if(every) {
+            res = DB_exec("SELECT %s FROM server", select);
+        } else if(name) {
+            res = DB_exec("SELECT %s FROM server where name = %Q", select, bdata(name));
+        } else if(host) {
+            res = DB_exec("SELECT %s FROM server where default_host = %Q", select, bdata(host));
+        } else if(uuid) {
+            // yes, this is necessary, so that the callback runs
+            res = DB_exec("SELECT %s FROM server where uuid = %Q", select, bdata(uuid));
+        } else {
+            sentinel("You must give either -name, -uuid, or -host to start a server.");
+        }
+
+        check(tns_get_type(res) == tns_tag_list,
+                "Wrong return type from query, should be list.");
     }
 
-    check(tns_get_type(res) == tns_tag_list,
-            "Wrong return type from query, should be list.");
     check(callback(&run, res) != -1, "Failed to run internal operation.");
 
     if(!run.ran) {
@@ -414,21 +438,31 @@ error:
 static int run_server(struct ServerRun *r, tns_value_t *res)
 {
     r->ran = 0;
-    int cols = 0;
-    int rows = DB_counts(res, &cols);
-    check(rows == 1 && cols == 1, "Failed to find requested record.");
-    tns_value_t *uuid_val = DB_get(res, 0, 0);
+    bstring config = NULL;
+    bstring module = NULL;
+    bstring uuid = NULL;
 
-    check(uuid_val != NULL && tns_get_type(uuid_val) == tns_tag_string,
-            "Invalid value for the server uuid on run.");
+    if(r->db_file) {
+        DB_check(res, 0, 1, tns_tag_string);
+        tns_value_t *uuid_val = DB_get(res, 0, 0);
 
-    bstring command = bformat("%s mongrel2 %s %s", r->sudo,
-            bdata(r->db_file), 
-            bdata(uuid_val->value.string));
+        config = bstrcpy(r->db_file);
+        module = bfromcstr("");
+        uuid = bstrcpy(uuid_val->value.string);
+    } else {
+        config = bstrcpy(r->config_url);
+        module = bstrcpy(r->config_style);
+        uuid = bstrcpy(r->uuid);
+    }
+
+    bstring command = bformat("%s mongrel2 %s %s %s",
+            r->sudo, bdata(config), bdata(uuid), bdata(module));
 
     system(bdata(command));
 
     bdestroy(command);
+    bdestroy(config);
+    bdestroy(module);
 
     r->ran = 1;
     return 0;
