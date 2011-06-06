@@ -46,7 +46,7 @@
 #include <connection.h>
 #include "version.h"
 
-extern long long unsigned int _1GB;
+extern off_t _1GB;
 
 extern int MAX_SEND_BUFFER;
 extern int MAX_DIR_PATH;
