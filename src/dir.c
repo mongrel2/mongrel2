@@ -53,7 +53,7 @@ struct tagbstring ETAG_PATTERN = bsStatic("[a-e0-9]+-[a-e0-9]+");
 const char *RESPONSE_FORMAT = "HTTP/1.1 200 OK\r\n"
     "Date: %s\r\n"
     "Content-Type: %s\r\n"
-    "Content-Length: %llu\r\n"
+    "Content-Length: %zd\r\n"
     "Last-Modified: %s\r\n"
     "ETag: %s\r\n"
     "Server: " VERSION

@@ -51,6 +51,8 @@ int Upload_file(Connection *conn, Handler *handler, int content_len)
     if(UPLOAD_STORE == NULL) {
         UPLOAD_STORE = Setting_get_str("upload.temp_store", NULL);
         error_unless(UPLOAD_STORE, conn, 413, "Request entity is too large: %d, and no upload.temp_store setting for where to put the big files.", content_len);
+
+        UPLOAD_STORE = bstrcpy(UPLOAD_STORE);
     }
 
     tmp_name = bstrcpy(UPLOAD_STORE);

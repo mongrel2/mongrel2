@@ -374,7 +374,9 @@ int Server_stop_handlers(Server *srv)
             tasksignal(handler->task, SIGINT);
             handler->running = 0;
             taskdelay(1);
-            Handler_destroy(handler);
+
+            if(handler->recv_socket) zmq_close(handler->recv_socket);
+            if(handler->send_socket) zmq_close(handler->send_socket);
         }
     }
 
