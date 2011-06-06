@@ -1,6 +1,10 @@
 #ifndef _io_h
 #define _io_h
 
+#ifndef _FILE_OFFSET_BITS
+#define _FILE_OFFSET_BITS 64
+#endif
+
 #include <stdlib.h>
 #include <polarssl/x509.h>
 #include <polarssl/rsa.h>
@@ -18,7 +22,7 @@ extern int MAX_SEND_BUFFER;
 struct IOBuf;
 
 typedef ssize_t (*io_cb)(struct IOBuf *, char *data, int len);
-typedef ssize_t (*io_stream_file_cb)(struct IOBuf *, int fd, int len);
+typedef ssize_t (*io_stream_file_cb)(struct IOBuf *, int fd, off_t len);
 
 typedef enum IOBufType {
     IOBUF_SSL, IOBUF_SOCKET, IOBUF_FILE, IOBUF_NULL
@@ -71,7 +75,7 @@ char *IOBuf_read_all(IOBuf *buf, int len, int retries);
 
 int IOBuf_stream(IOBuf *from, IOBuf *to, int total);
 
-int IOBuf_stream_file(IOBuf *buf, int fd, int len);
+int IOBuf_stream_file(IOBuf *buf, int fd, off_t len);
 
 #define IOBuf_read_some(I,A) IOBuf_read((I), (I)->len, A)
 
