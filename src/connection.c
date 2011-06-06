@@ -175,6 +175,9 @@ int Connection_send_to_handler(Connection *conn, Handler *handler, char *body, i
     int rc = 0;
     bstring payload = NULL;
 
+    error_unless(handler->running, conn, 502, "Handler shutdown while trying to deliver: %s", 
+            bdata(Request_path(conn->req)));
+
     if(handler->protocol == HANDLER_PROTO_TNET) {
         payload = Request_to_tnetstring(conn->req, handler->send_ident, 
                 IOBuf_fd(conn->iob), body, content_len);
