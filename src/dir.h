@@ -35,6 +35,10 @@
 #ifndef _dir_h
 #define _dir_h
 
+#ifndef _FILE_OFFSET_BITS
+#define _FILE_OFFSET_BITS 64
+#endif
+
 #include <stdlib.h>
 
 #include <bstring.h>
@@ -45,8 +49,6 @@
 #include <request.h>
 #include <connection.h>
 #include "version.h"
-
-extern off_t _1GB;
 
 extern int MAX_SEND_BUFFER;
 extern int MAX_DIR_PATH;
@@ -66,7 +68,7 @@ typedef struct FileRecord {
     bstring full_path;
     bstring etag;
     struct stat sb;
-    long long unsigned int file_size;
+    off_t file_size;
 } FileRecord;
 
 typedef struct Dir {

@@ -1,4 +1,5 @@
 #define _XOPEN_SOURCE 500
+#define _FILE_OFFSET_BITS 64
 
 #include "io.h"
 #include "register.h"
@@ -21,7 +22,7 @@ static ssize_t null_recv(IOBuf *iob, char *buffer, int len)
     return len;
 }
 
-static ssize_t null_stream_file(IOBuf *iob, int fd, int len)
+static ssize_t null_stream_file(IOBuf *iob, int fd, off_t len)
 {
     return len;
 }
@@ -46,16 +47,17 @@ static ssize_t file_recv(IOBuf *iob, char *buffer, int len)
     return fdread(iob->fd, buffer, len);
 }
 
-static ssize_t plain_stream_file(IOBuf *iob, int fd, int len)
+static ssize_t plain_stream_file(IOBuf *iob, int fd, off_t len)
 {
     ssize_t sent = 0;
-    ssize_t total = 0;
+    off_t total = 0;
     off_t offset = 0;
-    size_t block_size = MAX_SEND_BUFFER;
+    off_t block_size = MAX_SEND_BUFFER;
     int conn_fd = IOBuf_fd(iob);
 
     for(total = 0; fdwait(conn_fd, 'w') == 0 && total < len; total += sent) {
 
+        block_size = (len - total) > block_size ? block_size : (len - total);
         sent = IOBuf_sendfile(conn_fd, fd, &offset, block_size);
 
         check(Register_write(iob->fd, sent) != -1, "Socket seems to be closed.");
@@ -128,10 +130,10 @@ error:
     return -1;
 }
 
-static ssize_t ssl_stream_file(IOBuf *iob, int fd, int len)
+static ssize_t ssl_stream_file(IOBuf *iob, int fd, off_t len)
 {
     ssize_t sent = 0;
-    ssize_t total = 0;
+    off_t total = 0;
     ssize_t amt = 0;
     ssize_t tosend = 0;
     int conn_fd = IOBuf_fd(iob);
@@ -475,7 +477,7 @@ error:
     return -1;
 }
 
-int IOBuf_stream_file(IOBuf *buf, int fd, int len)
+int IOBuf_stream_file(IOBuf *buf, int fd, off_t len)
 {
     int rc = 0;
 

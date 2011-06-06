@@ -31,7 +31,7 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#define _LARGEFILE64_SOURCE
+#define _FILE_OFFSET_BITS 64
 #include <dir.h>
 #include <cache.h>
 #include <fcntl.h>
@@ -47,7 +47,6 @@
 
 int MAX_DIR_PATH = 0;
 int MAX_SEND_BUFFER = 0;
-off_t _1GB = 1024*1024*1024;
 
 struct tagbstring ETAG_PATTERN = bsStatic("[a-e0-9]+-[a-e0-9]+");
 
@@ -152,7 +151,6 @@ long long int Dir_stream_file(FileRecord *file, Connection *conn)
     int rc = Dir_send_header(file, conn);
     check_debug(rc, "Failed to write header to socket.");
 
-    check(file->file_size < _1GB * 2, "We don't support >2G files yet, wait for 1.8.");
     sent = IOBuf_stream_file(conn->iob, file->fd, file->file_size);
 
     return file->file_size;
