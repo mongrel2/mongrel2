@@ -67,11 +67,11 @@ static ssize_t plain_stream_file(IOBuf *iob, int fd, off_t len)
     }
     
     check(total <= len,
-            "Wrote way too much, wrote %d but size was %d",
+            "Wrote way too much, wrote %d but size was %zd",
             (int)total, len);
 
     check(total == len,
-            "Sent other than expected, sent: %d, but expected: %d", 
+            "Sent other than expected, sent: %d, but expected: %zd", 
             (int)total, len);
 
     return total;
@@ -160,11 +160,11 @@ static ssize_t ssl_stream_file(IOBuf *iob, int fd, off_t len)
     }
     
     check(total <= len,
-            "Wrote way too much, wrote %d but size was %d",
+            "Wrote way too much, wrote %d but size was %zd",
             (int)total, len);
 
     check(total == len,
-            "Sent other than expected, sent: %d, but expected: %d", 
+            "Sent other than expected, sent: %d, but expected: %zd", 
             (int)total, len);
 
     return total;
