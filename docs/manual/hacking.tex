@@ -678,18 +678,14 @@ using in unit testing to make sure that Mongrel2 handles some simple invalid
 inputs to the configuration system.  Here's the code to the module:
 
 \begin{code}{The null Config Module}
-\begin{lstlisting}
-<< d['tools/config_modules/null.c'] >>
-\end{lstlisting}
+<< d['tools/config_modules/null.c|pyg|l'] >>
 \end{code}
 
 You can then get Mongrel2 to load this module directly by passing it as a
 fourth parameter to the \file{mongrel2} executable:
 
 \begin{code}{Loading The null Config}
-\begin{lstlisting}
-<< d['docs/manual/inputs/null_config_run.sh'] >>
-\end{lstlisting}
+<< d['docs/manual/inputs/null_config_run.sh|pyg|l'] >>
 \end{code}
 
 In this run, Mongrel2 detected that you gave it a fourth option and 
