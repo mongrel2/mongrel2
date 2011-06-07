@@ -1,5 +1,5 @@
 PREFIX?=/usr/local
-CFLAGS=-I../../src $(OPTFLGAS) -fPIC -shared -nostartfiles -L../../build
+CFLAGS=-I../../src $(OPTFLAGS) -fPIC -shared -nostartfiles -L../../build
 LDFLAGS=$(OPTLIBS)
 
 all: test_filter.so test_filter_a.so test_filter_b.so test_filter_c.so
