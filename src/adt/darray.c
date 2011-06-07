@@ -7,12 +7,13 @@ darray_t *darray_create(size_t element_size, size_t initial_max)
 {
     darray_t *array = h_malloc(sizeof(darray_t));
     check_mem(array);
+    array->max = initial_max;
+    check(array->max > 0, "You must set an initial_max > 0.");
 
     array->contents = h_calloc(sizeof(void *), initial_max);
     check_mem(array->contents);
     hattach(array->contents, array);
 
-    array->max = initial_max;
     array->end = 0;
     array->element_size = element_size;
     array->expand_rate = DEFAULT_EXPAND_RATE;
@@ -39,6 +40,7 @@ void darray_clear(darray_t *array)
 static inline int darray_resize(darray_t *array, size_t newsize)
 {
     array->max = newsize;
+    check(array->max > 0, "The newsize must be > 0.");
     array->contents = h_realloc(array->contents, array->max * sizeof(void *));
     check_mem(array->contents);
     return 0;
@@ -51,7 +53,7 @@ int darray_expand(darray_t *array)
     size_t old_max = array->max;
     check(darray_resize(array, array->max + array->expand_rate) == 0,
             "Failed to expand array to new size: %d",
-            (int)array->max + (int)array->expand_rate);
+            array->max + (int)array->expand_rate);
 
     memset(array->contents + old_max, 0, array->expand_rate + 1);
     return 0;
@@ -62,7 +64,7 @@ error:
 
 int darray_contract(darray_t *array)
 {
-    int new_size = array->end < array->expand_rate ? array->expand_rate : array->end;
+    int new_size = array->end < (int)array->expand_rate ? (int)array->expand_rate : array->end;
 
     return darray_resize(array, new_size + 1);
 }
@@ -93,7 +95,7 @@ void *darray_pop(darray_t *array)
     void *el = darray_remove(array, array->end - 1);
     array->end--;
 
-    if(darray_end(array) > array->expand_rate && darray_end(array) % array->expand_rate) {
+    if(darray_end(array) > (int)array->expand_rate && darray_end(array) % array->expand_rate) {
         darray_contract(array);
     }
 

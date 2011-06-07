@@ -186,10 +186,6 @@ static inline int handler_recv_parse(Handler *handler, HandlerParser *parser)
     check(parser->target_count > 0, "Message sent had 0 targets: %.*s",
             (int)zmq_msg_size(inmsg), (char *)zmq_msg_data(inmsg));
 
-    debug("Parsed message with %d targets, first: %d, uuid: %s, and body: %d",
-            (int)parser->target_count, parser->targets[0],
-            bdata(parser->uuid), blength(parser->body));
-
     zmq_msg_close(inmsg);
     free(inmsg);
     return 0;
@@ -330,7 +326,7 @@ const int DEFAULT_HANDLER_STACK = 100 * 1024;
 Handler *Handler_create(bstring send_spec, bstring send_ident,
         bstring recv_spec, bstring recv_ident)
 {
-    debug("Creating handler %s:%s", send_spec, send_ident);
+    debug("Creating handler %s:%s", bdata(send_spec), bdata(send_ident));
 
     if(!HANDLER_STACK) {
         HANDLER_STACK = Setting_get_int("limits.handler_stack", DEFAULT_HANDLER_STACK);

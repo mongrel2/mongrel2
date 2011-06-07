@@ -482,7 +482,7 @@ int Dir_serve_file(Dir *dir, Request *req, Connection *conn)
         } else if(is_get) {
             rc = Dir_stream_file(file, conn);
             req->response_size = rc;
-            check_debug(rc == file->file_size, "Didn't send all of the file, sent %ll of %s.", rc, bdata(path));
+            check_debug(rc == file->file_size, "Didn't send all of the file, sent %lld of %s.", rc, bdata(path));
         } else if(is_head) {
             rc = Dir_send_header(file, conn);
             check_debug(rc, "Failed to write header to socket.");

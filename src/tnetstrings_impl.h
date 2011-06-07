@@ -87,15 +87,27 @@ static inline void *tns_parse_string(const char *data, size_t len)
 static inline void *tns_parse_integer(const char *data, size_t len)
 {
     tns_value_t *t = tns_value_create(tns_tag_number);
-    t->value.number = strtol(data, NULL, 10);
+    char *endptr = NULL;
+    t->value.number = strtol(data, &endptr, 10);
+    check(endptr != NULL && endptr - data == (int)len, "Failed to parse integer.");
+    check(errno != ERANGE, "Integer is too large.");
+
     return t;
+error:
+    return NULL;
 }
 
 static inline void *tns_parse_float(const char *data, size_t len)
 {
     tns_value_t *t = tns_value_create(tns_tag_float);
+    char *endptr = NULL;
     t->value.fpoint = strtod(data, NULL);
+    check(endptr != NULL && endptr - data == (int)len, "Failed to parse float.");
+    check(errno != ERANGE, "Float is too large.");
+
     return t;
+error:
+    return NULL;
 }
 
 

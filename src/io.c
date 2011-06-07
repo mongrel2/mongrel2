@@ -152,7 +152,7 @@ static ssize_t ssl_stream_file(IOBuf *iob, int fd, off_t len)
         while(sent < tosend) {
             amt = ssl_send(iob, buff, tosend);
             check_debug(amt > 0, "ssl_send failed in ssl_stream_file with "
-                        "return code %d", amt);
+                        "return code %zd", amt);
             sent += amt;
         }
 

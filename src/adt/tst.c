@@ -64,7 +64,7 @@ list_t *tst_collect(tst_t *root, const char *s, size_t len, tst_collect_test_cb 
     tst_collect_t results = {.values = NULL, .tester = tester, .key = s, .len = len};
     tst_t *p = root;
     tst_t *last = p;
-    int i = 0;
+    size_t i = 0;
     results.values = list_create(LISTCOUNT_T_MAX);
 
     // first we get to where we match the prefix
@@ -127,7 +127,7 @@ void *tst_search_prefix(tst_t *root, const char *s, size_t len)
 
     tst_t *p = root;
     tst_t *last = NULL;
-    int i = 0;
+    size_t i = 0;
 
     while(i < len && p) {
         if (s[i] < p->splitchar) {
@@ -156,7 +156,7 @@ void *tst_search_prefix(tst_t *root, const char *s, size_t len)
 void *tst_search(tst_t *root, const char *s, size_t len)
 {
     tst_t *p = root;
-    int i = 0;
+    size_t i = 0;
 
     while(i < len && p) {
 
