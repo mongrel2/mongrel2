@@ -72,7 +72,7 @@ int Handler_load(tst_t *settings, tst_t *params)
         const char *protocol = AST_str(settings, params, "protocol", VAL_QSTRING);
         protocol = protocol != NULL ? protocol : "json";
 
-        res = DB_exec(bdata(&HANDLER_PROTOCOL_SQL));
+        res = DB_exec(bdata(&HANDLER_PROTOCOL_SQL), protocol);
         check(res != NULL, "Invalid SQL with your protocol setting: '%s'", protocol);
         tns_value_destroy(res);
     }
