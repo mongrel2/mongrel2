@@ -33,24 +33,15 @@ and get a good understanding of the project before you continue.
 
 <h2>How do I get the source code?</h2>
 
-To get the source, first you need to go to fossil_downloads and download a
-static binary for your platform.DO NOT INSTALL THE fossil PACKAGE FROM YOUR OS
-AS IT IS PROBABLY WRONG. DEBIAN ESPECIALLY!!!!!
-Next do this:
+The source code is currently maintained using git and the code itself is hosted
+on github. The project is at https://github.com/zedshaw/mongrel2.
 
-<pre>
-  mkdir ~/fossils
-  fossil clone http://mongrel2.org:44445/ ~/fossils/mongrel2.fossil
-  mkdir -p ~/projects/mongrel2
-  cd ~/projects/mongrel2
-  fossil open ~/fossils/mongrel2.fossil
-  fossil set autosync off
-</pre>
+For information on how to use github see http://help.github.com/
 
 
 <h2>How do I find things to do?</h2>
 
-We have a tickets system built into the fossil DVCS that you can access. You
+We have a tickets system here and also at github that you can access. You
 can get a_ticket_to_do and write code to fix it. Obviously, you'll have to
 probably anonymous_login first if you want to do very much.
 
@@ -63,86 +54,18 @@ aren't smart enough or motivated enough to actually help.
 
 <h2>How do I make a change?</h2>
 
-fossil works like most version control systems in that you make your changes
-and "commit" them. With fossil set autosync off it means you're working more
-like git or hg and are decentralized. With autosync on it's more like
-subversion and you have to have network access and it makes sure you have the
-latest before you can commit.
+Git works like most version control systems in that you make your changes
+and "commit" them.
 Since you are probably not a committer yet, you just have to do this:
 
   #  Edit the files you need and write a test if you can.
-  #  Use fossil status to make sure you are only changing what you think you
+  #  Use git status to make sure you are only changing what you think you
      are changing.
-  #  Use fossil up to make sure you're on the latest.
-  #  Then fossil commit -m "SOME MESSAGE ABOUT WHY." and you're done.
+  #  Pull the latest from Zed's mongrel.git on github.
+  #  Then commit and you're done.
 
-After you do this you just have to serve your repository to a core contributor
-and they can pull your changes.
-
-<h2>How do I serve my repository</h2>
-
-It's pretty easy since fossil has a built-in full web server that will serve
-your changes. You just do this:
-
-<pre>
-  rsync -azv ~/fossils/mongrel2.fossil YOU@yourserver.com:
-  ssh YOU@yourserver.com
-  fossil serve mongrel2.fossil
-</pre>
-
-Fossil should now be running at http://yourserver.com:8080/ or a similar port
-(if it doesn't tell you the port number then it's 8080). You can go to it with
-your browser and make sure that it's good.
-If you're in your source directory on that remote server, then you can just
-type fossil serve and you're done.
-
-<h2>Can I push to my own repository that I just served?</h2>
-
-Definitely. If you want to do that, it'll make your life a lot easier. All you
-do is from your local machine:
-
-<pre>
-  fossil set autosync on
-  fossil remote-url http://YOU@yourserver.com:8080/
-</pre>
-
-It will then prompt you for a password which you should have setup when you
-cloned your fossil repository. If you forgot you can change it on the remote
-machine with
-fossil user -R mongrel2.fossil password YOU
-.
-This tells your local fossil to use your remote fossil as the place to commit
-changes. Incidentally, that's the same thing you do for getting changes into
-mongrel2.org.
-
-<h2>I forgot my password, how do I set it?</h2>
-
-Use fossil user -R mongrel2.fossil password YOU and it'll ask you for a new
-one. You don't need the -R if you are in your source directory.
-
-I just became a committer, how do I setup to make changes to mongrel2.org?
-
-We use autosync in fossil in order to keep everyone straight with the source
-and reduce management overhead. Once you get your account on mongrel2.org you
-just need to flip your repository into "contributor mode" by turning on
-autosync and setting the remote-url:
-
-<pre>
-  cd ~/projects/mongrel2
-  fossil set autosync on
-  fossil remote-url http://YOU@mongrel2.org:44445/
-</pre>
-
-It will then prompt you for a password which you should have setup when you
-were given your account.
-
-<h2>Why do committers need to keep autosync on?</h2>
-
-I don't think of source control as a "code backup system", but rather as a
-"code chat system". When you commit you are sharing your code with everyone
-else, and turning autosync off is like constantly talking out of turn. With
-autosync on you are forced to keep your repository up to date before you
-commit, thus avoiding a lot of merge problems, bad code, and hurt feelings.
+After you do this you just have to send a pull request via github to Zed and
+you are done.
 
 <h2>If I become a contributor how do I get mentioned?</h2>
 
