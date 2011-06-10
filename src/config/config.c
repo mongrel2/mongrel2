@@ -259,7 +259,6 @@ int Config_load_hosts(Server *srv, int server_id)
         int host_id = DB_get_as(res, row_i, 0, number);
         rc = Config_load_routes(srv, host, host_id, server_id);
         check(rc != -1, "Failed to load routes for host %s.", bdata(host->name));
-        check(rc > 0, "There are no routes for host %d:%s.", host_id, bdata(host->name));
 
         rc = Server_add_host(srv, host);
         check(rc == 0, "Failed to add host %s:%s to server.",
