@@ -139,6 +139,12 @@ manual:
 	${MAKE} -C output/docs/manual book-final.pdf
 	${MAKE} -C output/docs/manual draft
 
+release:
+	git archive --format=tar --prefix=mongrel2-${VERSION}/ v${VERSION} | bzip2 -9 > mongrel2-${VERSION}.tar.bz2
+	scp mongrel2-${VERSION}.tar.bz2 ${USER}@mongrel2.org:deployment/files/static/downloads/
+	md5sum mongrel2-${VERSION}.tar.bz2
+	curl http://mongrel2.org/static/downloads/mongrel2-${VERSION}.tar.bz2 | md5sum
+
 netbsd: OPTFLAGS += -I/usr/local/include -I/usr/pkg/include
 netbsd: OPTLIBS += -L/usr/local/lib -L/usr/pkg/lib
 netbsd: dev
