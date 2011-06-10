@@ -32,9 +32,9 @@ Features
 Download
 --------
 
-Mongrel2 is now 1.7 as of *Mon Jun 6 11:15:26 PDT 2011*:
+Mongrel2 is now 1.7.2 as of *Fri Jun 10 08:35:51 PDT 2011*:
 
-* [mongrel2-1.7.tar.bz2](http://mongrel2.org/static/downloads/mongrel2-1.7.tar.bz2) MD5: 3f7ec3fa4cf10d71e6a1ef34b60a8106
+* [mongrel2-1.7.2.tar.bz2](http://mongrel2.org/static/downloads/mongrel2-1.7.2.tar.bz2) MD5: 
 
 Documentation
 -------------
