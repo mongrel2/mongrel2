@@ -107,7 +107,7 @@ int Proxy_read_and_parse(Connection *conn)
     }
 
     check(tries < PROXY_READ_RETRIES, "Backend proxy sends too many small packets, tried %d times to read from it.", tries);
-    check(conn->client->body_start <= avail, "Read too much.");
+    check((int)conn->client->body_start <= avail, "Read too much.");
 
 
     return nparsed;

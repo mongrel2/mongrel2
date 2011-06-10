@@ -6,7 +6,7 @@
 
 typedef struct darray_t {
     int end;
-    size_t max;
+    int max;
     size_t element_size;
     size_t expand_rate;
     void **contents;

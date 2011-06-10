@@ -36,7 +36,7 @@ error:
 int Upload_notify(Connection *conn, Handler *handler, const char *stage, bstring tmp_name)
 {
     bstring key = bformat("x-mongrel2-upload-%s", stage);
-    Request_set(conn->req, key, tmp_name, 1);
+    Request_set(conn->req, key, bstrcpy(tmp_name), 1);
 
     return Connection_send_to_handler(conn, handler, "", 0);
 }
@@ -67,7 +67,7 @@ int Upload_file(Connection *conn, Handler *handler, int content_len)
     rc = stream_to_disk(conn->iob, content_len, tmpfd);
     check(rc == 0, "Failed to stream to disk.");
 
-    rc = Upload_notify(conn, handler, "done", bstrcpy(tmp_name));
+    rc = Upload_notify(conn, handler, "done", tmp_name);
     check(rc == 0, "Failed to notify the end of the upload.");
 
     bdestroy(result);

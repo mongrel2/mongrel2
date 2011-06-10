@@ -77,7 +77,7 @@ static inline void wake_sleepers()
     }
 }
 
-static inline void fdtask_shutdown(int signal)
+static inline void fdtask_shutdown()
 {
     int i = 0;
 
@@ -93,8 +93,7 @@ static inline void fdtask_shutdown(int signal)
     }
 }
 
-void
-fdtask(void *v)
+void fdtask(void *v)
 {
     int i, ms;
     PollResult result;
@@ -119,7 +118,7 @@ fdtask(void *v)
         ms = next_task_sleeptime(500);
 
         if(task_was_signaled()) {
-            fdtask_shutdown(task_was_signaled());
+            fdtask_shutdown();
             task_clear_signal();
             break;
         } else {

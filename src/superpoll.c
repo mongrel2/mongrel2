@@ -477,7 +477,7 @@ static inline int SuperPoll_add_idle_hits(SuperPoll *sp, PollResult *result)
         node = list_delete(sp->idle_active, node);
         list_append(sp->idle_free, node);
 
-        assert(list_count(sp->idle_active) + list_count(sp->idle_free) == sp->max_idle && "We lost one somewhere.");
+        assert(list_count(sp->idle_active) + list_count(sp->idle_free) == (int)sp->max_idle && "We lost one somewhere.");
     }
 
     result->idle_fds = nfds;

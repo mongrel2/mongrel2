@@ -116,7 +116,6 @@ error:
 
 /* Get a bound or connected socket */
 static int netgetsocket(int istcp, char *server, int port, 
-             struct sockaddr_in6 *psa,
              int is_active_open)
 {
     int rc = 0;
@@ -208,9 +207,7 @@ error:
 
 int netannounce(int istcp, char *server, int port)
 {
-    struct sockaddr_in6 sa;
-
-    return netgetsocket(istcp, server, port, &sa, CB_BIND);
+    return netgetsocket(istcp, server, port, CB_BIND);
 }
 
 int netaccept(int fd, char *server, int *port)
@@ -277,7 +274,6 @@ error:
 
 int netdial(int istcp, char *server, int port)
 {
-    struct sockaddr_in6 sa;
-    return netgetsocket(istcp, server, port, &sa, CB_CONNECT);
+    return netgetsocket(istcp, server, port, CB_CONNECT);
 }
 
