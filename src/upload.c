@@ -50,6 +50,7 @@ int Upload_file(Connection *conn, Handler *handler, int content_len)
     int rc = 0;
     int tmpfd = 0;
     bstring tmp_name = NULL;
+    unsigned long tmp_mode = 0;
     bstring result = NULL;
 
     if(UPLOAD_STORE == NULL) {
@@ -71,11 +72,20 @@ int Upload_file(Connection *conn, Handler *handler, int content_len)
 
     tmpfd = mkstemp((char *)tmp_name->data);
     check(tmpfd != -1, "Failed to create secure tempfile, did you end it with XXXXXX?");
+
     log_info("Writing tempfile %s for large upload.", bdata(tmp_name));
+
     log_info("Will set mode to: %s", bdata(UPLOAD_MODE));
-    chmod((char *)tmp_name->data, (mode_t)strtoul(bdata(UPLOAD_MODE), NULL, 0));
+    tmp_mode = strtoul(bdata(UPLOAD_MODE), NULL, 0);
+    check(tmp_mode != 0, "Failed to convert upload.temp_store_mode to a number.");
+    check(tmp_mode != ULONG_MAX, "upload.temp_store_mode is out of range numerically!");
 
-
+    if((tmp_mode == 0) || (tmp_mode == ULONG_MAX)) {
+         log_info("Could not find a sane upload.temp_store_mode to use, skipping chmod");
+    }
+    else {
+         check(chmod((char *)tmp_name->data, (mode_t)tmp_mode) == 0, "Failed to chmod: TODO: WHY?");
+    }
 
     rc = Upload_notify(conn, handler, "start", tmp_name);
     check(rc == 0, "Failed to notify of the start of upload.");
