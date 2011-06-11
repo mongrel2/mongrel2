@@ -141,10 +141,9 @@ error:
     return NULL;
 }
 
-static inline void Config_push_unique_handler(Server *srv, Handler *handler)
+static inline Handler *Config_push_unique_handler(Server *srv, Handler *handler)
 {
     int i = 0;
-    int found = 0;
 
     // roll through the list of handlers and break if we find one
     // this is because, unlike other backends, handlers can't have
@@ -155,8 +154,9 @@ static inline void Config_push_unique_handler(Server *srv, Handler *handler)
         int same_recv = biseq(test->recv_spec, handler->recv_spec);
 
         if(same_send && same_recv) {
-            found = 1;
-            break;
+            Handler_destroy(handler);
+            // WARNING: this breaks out and ends the loop
+            return test;
         } else if(same_send) {
             log_warn("You have two handlers with the same send_spec: %s",
                     bdata(handler->send_spec));
@@ -166,9 +166,10 @@ static inline void Config_push_unique_handler(Server *srv, Handler *handler)
         }
     }
 
-    if(!found) {
-        darray_push(srv->handlers, handler);
-    }
+    // nothing was found since the loop completed, so add this one
+    // and return it as the one the caller should use
+    darray_push(srv->handlers, handler);
+    return handler;
 }
 
 int Config_load_routes(Server *srv, Host *host, int host_id, int server_id)
@@ -203,9 +204,10 @@ int Config_load_routes(Server *srv, Host *host, int host_id, int server_id)
             target = Config_load_proxy(id);
             backend_type = BACKEND_PROXY;
         } else if(biseqcstr(type, "handler")) {
-            target = Config_load_handler(id);
+            Handler *temp = Config_load_handler(id);
+            target = Config_push_unique_handler(srv, temp);
+            check(target != NULL, "Failure pushing handler %d:%s.", id, path);
             backend_type = BACKEND_HANDLER;
-            Config_push_unique_handler(srv, target);
         } else {
             sentinel("Invalid backend type: %s for route %d:%s.",
                     bdata(type), route_id, bdata(path));

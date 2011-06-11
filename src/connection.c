@@ -153,6 +153,7 @@ int connection_msg_to_handler(Connection *conn)
 
         debug("SENT: %s", bdata(payload));
         check(payload != NULL, "Failed to generate payload.");
+        check(handler->send_socket != NULL, "Handler socket is NULL, tell Zed.");
 
         rc = Handler_deliver(handler->send_socket, bdata(payload), blength(payload));
         free(payload);
