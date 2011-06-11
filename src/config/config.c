@@ -206,7 +206,7 @@ int Config_load_routes(Server *srv, Host *host, int host_id, int server_id)
         } else if(biseqcstr(type, "handler")) {
             Handler *temp = Config_load_handler(id);
             target = Config_push_unique_handler(srv, temp);
-            check(target != NULL, "Failure pushing handler %d:%s.", id, path);
+            check(target != NULL, "Failure pushing handler %d:%s.", id, bdata(path));
             backend_type = BACKEND_HANDLER;
         } else {
             sentinel("Invalid backend type: %s for route %d:%s.",
