@@ -5,6 +5,8 @@
 
 bstring UPLOAD_STORE = NULL;
 bstring UPLOAD_MODE = NULL;
+bstring UPLOAD_MODE_DEFAULT = NULL;
+const char *UPLOAD_MODE_DEFAULT_C = "0666";
 
 
 static inline int stream_to_disk(IOBuf *iob, int content_len, int tmpfd)
@@ -57,7 +59,11 @@ int Upload_file(Connection *conn, Handler *handler, int content_len)
     }
 
     if(UPLOAD_MODE == NULL) {
-         UPLOAD_MODE = Setting_get_str("upload.temp_store_mode", "0666");
+         if(UPLOAD_MODE_DEFAULT == NULL) {
+              UPLOAD_MODE_DEFAULT = bfromcstr(UPLOAD_MODE_DEFAULT_C);
+         }
+
+         UPLOAD_MODE = Setting_get_str("upload.temp_store_mode", UPLOAD_MODE_DEFAULT);
     }
 
     tmp_name = bstrcpy(UPLOAD_STORE);
