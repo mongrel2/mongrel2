@@ -16,14 +16,11 @@ harder to join than your average github project does.
 To get in on Mongrel2 you have to prove you can write code by writing some code
 doing this:
 
-  #  Follow the instructions in this document and get your source from fossil
-     and turn off autosync.
+  #  Follow the instructions in this document.
   #  Commit your changes to your repository when you think they're good.
   #  Then go find a_ticket_to_do and write code to fix it.
   #  Join the mongrel2@librelist.com mailing list or join #mongrel2 on
      irc.freenode.org.
-  #  Put your mongrel2.fossil repository on a server and do a fossil serve
-     mongrel2.fossil so we can pull from it.
   #  Finally, one of us will check out your changes and see if they're good to
      pull. If they are, and you want to get into the project, then just fix a
      few more bugs and we'll let you in.
@@ -38,6 +35,9 @@ on github. The project is at https://github.com/zedshaw/mongrel2.
 
 For information on how to use github see http://help.github.com/
 
+The two branches available are:
+ # master
+ # develop. If you want to hack on this project, clone this branch.
 
 <h2>How do I find things to do?</h2>
 
@@ -58,14 +58,28 @@ Git works like most version control systems in that you make your changes
 and "commit" them.
 Since you are probably not a committer yet, you just have to do this:
 
-  #  Edit the files you need and write a test if you can.
-  #  Use git status to make sure you are only changing what you think you
-     are changing.
-  #  Pull the latest from Zed's mongrel.git on github.
-  #  Then commit and you're done.
 
-After you do this you just have to send a pull request via github to Zed and
-you are done.
+We are also using git-flow to streamline our development efforts. Our model
+of using git-flow is described in:
+
+http://jeffkreeftmeijer.com/2010/why-arent-you-using-git-flow/
+
+And also as shown in:
+
+https://github.com/nvie/gitflow
+
+Here are some quick instructions:
+
+  # Install git-flow as in the README (https://github.com/nvie/gitflow).
+  # In the mongrel2 run: git flow init
+  # Just hit enter for all the defaults. Don't get fancy.
+  # Start your hacking using: git flow feature start BlahBlahBlah
+  # Commit like normal, don't push or tag anything.
+  # End this feature with: git flow feature finish BlahBlahBlah
+  # Finally: git push origin develop 
+
+After you do this you just have to send a pull request via github and you 
+are done.
 
 <h2>If I become a contributor how do I get mentioned?</h2>
 
