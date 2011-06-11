@@ -37,7 +37,7 @@ For information on how to use github see http://help.github.com/
 
 The two branches available are:
  # master
- # develop. If you want to hack on this project, clone this branch.
+ # develop
 
 <h2>How do I find things to do?</h2>
 
