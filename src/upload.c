@@ -4,6 +4,7 @@
 #include "response.h"
 
 bstring UPLOAD_STORE = NULL;
+bstring UPLOAD_MODE = NULL;
 
 
 static inline int stream_to_disk(IOBuf *iob, int content_len, int tmpfd)
@@ -55,11 +56,17 @@ int Upload_file(Connection *conn, Handler *handler, int content_len)
         UPLOAD_STORE = bstrcpy(UPLOAD_STORE);
     }
 
+    if(UPLOAD_MODE == NULL) {
+         UPLOAD_MODE = Setting_get_str("upload.temp_store_mode", "0666");
+    }
+
     tmp_name = bstrcpy(UPLOAD_STORE);
 
     tmpfd = mkstemp((char *)tmp_name->data);
     check(tmpfd != -1, "Failed to create secure tempfile, did you end it with XXXXXX?");
     log_info("Writing tempfile %s for large upload.", bdata(tmp_name));
+    log_info("Will set mode to: %s", bdata(UPLOAD_MODE));
+
 
     rc = Upload_notify(conn, handler, "start", tmp_name);
     check(rc == 0, "Failed to notify of the start of upload.");
