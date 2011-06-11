@@ -84,7 +84,7 @@ int Upload_file(Connection *conn, Handler *handler, int content_len)
          log_info("Could not find a sane upload.temp_store_mode to use, skipping chmod");
     }
     else {
-         check(chmod((char *)tmp_name->data, (mode_t)tmp_mode) == 0, "Failed to chmod: TODO: WHY?");
+         check(chmod((char *)tmp_name->data, (mode_t)tmp_mode) == 0, "Failed to chmod.");
     }
 
     rc = Upload_notify(conn, handler, "start", tmp_name);
