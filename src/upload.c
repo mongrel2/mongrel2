@@ -71,7 +71,7 @@ int Upload_file(Connection *conn, Handler *handler, int content_len)
     tmpfd = mkstemp((char *)tmp_name->data);
     check(tmpfd != -1, "Failed to create secure tempfile, did you end it with XXXXXX?");
     log_info("Writing tempfile %s for large upload.", bdata(tmp_name));
-    log_info("Will set mode to: %s", bdata(UPLOAD_MODE));
+    log_info("Will set mode to: %s %lu", bdata(UPLOAD_MODE), strtoul(bdata(UPLOAD_MODE), NULL, 0));
 
 
     rc = Upload_notify(conn, handler, "start", tmp_name);
