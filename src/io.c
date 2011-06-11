@@ -49,7 +49,7 @@ static ssize_t file_recv(IOBuf *iob, char *buffer, int len)
 
 static ssize_t plain_stream_file(IOBuf *iob, int fd, off_t len)
 {
-    ssize_t sent = 0;
+    off_t sent = 0;
     off_t total = 0;
     off_t offset = 0;
     off_t block_size = MAX_SEND_BUFFER;

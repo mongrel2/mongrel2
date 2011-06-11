@@ -38,6 +38,7 @@
 #include <time.h>
 #include <stdint.h>
 #include <bstring.h>
+#include <sys/types.h>
 
 #define MAX_REGISTERED_FDS  64 * 1024
 #define DEFAULT_MIN_PING 120
@@ -53,10 +54,10 @@ typedef struct Registration {
     uint16_t fd;
     uint16_t id;
     uint32_t last_ping;
-    uint32_t last_read;
-    uint32_t last_write;
-    uint32_t bytes_read;
-    uint32_t bytes_written;
+    off_t last_read;
+    off_t last_write;
+    off_t bytes_read;
+    off_t bytes_written;
 } Registration;
 
 int Register_connect(int fd, struct Connection *data);
@@ -65,9 +66,9 @@ int Register_disconnect(int fd);
 
 int Register_ping(int fd);
 
-int Register_read(int fd, uint32_t bytes);
+int Register_read(int fd, off_t bytes);
 
-int Register_write(int fd, uint32_t bytes);
+int Register_write(int fd, off_t bytes);
 
 void Register_init();
 
