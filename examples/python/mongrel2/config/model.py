@@ -69,10 +69,11 @@ class Server(object):
     pid_file = Unicode()
     port = Int()
     bind_addr = Unicode(default=unicode('0.0.0.0'))
+    use_ssl = Bool(default = 0)
 
     def __init__(self, uuid=None, access_log=None, error_log=None,
                  chroot=None, default_host=None, name=None, pid_file=None,
-                 port=None, hosts=None, bind_addr='0.0.0.0'):
+                 port=None, hosts=None, bind_addr='0.0.0.0', use_ssl=False):
         super(Server, self).__init__()
         self.uuid = unicode(uuid)
         self.access_log = unicode(access_log)
@@ -83,6 +84,7 @@ class Server(object):
         self.pid_file = unicode(pid_file)
         self.port = port
         self.bind_addr = unicode(bind_addr)
+        self.use_ssl = use_ssl
 
         for h in hosts or []:
             self.hosts.add(h)
