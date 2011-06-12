@@ -1,4 +1,3 @@
-#undef DEBUG
 /**
  *
  * Copyright (c) 2010, Zed A. Shaw and Mongrel2 Project Contributors.

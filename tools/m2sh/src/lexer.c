@@ -1,5 +1,39 @@
 
 #line 1 "src/lexer.rl"
+/**
+ *
+ * Copyright (c) 2010, Zed A. Shaw and Mongrel2 Project Contributors.
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are
+ * met:
+ * 
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ * 
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ * 
+ *     * Neither the name of the Mongrel2 Project, Zed A. Shaw, nor the names
+ *       of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written
+ *       permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+ * IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 #include "config_file.h"
 #include "parser.h"
 
@@ -28,11 +62,11 @@ void Parse(
 #define TKSTR(N) TKBASE(N, ts+1, te-3)
 
 
-#line 65 "src/lexer.rl"
+#line 99 "src/lexer.rl"
 
 
 
-#line 36 "src/lexer.c"
+#line 70 "src/lexer.c"
 static const int m2sh_lexer_start = 8;
 static const int m2sh_lexer_first_final = 8;
 static const int m2sh_lexer_error = 0;
@@ -40,7 +74,7 @@ static const int m2sh_lexer_error = 0;
 static const int m2sh_lexer_en_main = 8;
 
 
-#line 68 "src/lexer.rl"
+#line 102 "src/lexer.rl"
 
 void Parse_print_error(const char *message, bstring content, int at, int line_number)
 {
@@ -76,7 +110,7 @@ tst_t *Parse_config_string(bstring content)
     char *te = NULL;
 
     
-#line 80 "src/lexer.c"
+#line 114 "src/lexer.c"
 	{
 	cs = m2sh_lexer_start;
 	ts = 0;
@@ -84,76 +118,76 @@ tst_t *Parse_config_string(bstring content)
 	act = 0;
 	}
 
-#line 103 "src/lexer.rl"
+#line 137 "src/lexer.rl"
     
-#line 90 "src/lexer.c"
+#line 124 "src/lexer.c"
 	{
 	if ( p == pe )
 		goto _test_eof;
 	switch ( cs )
 	{
 tr1:
-#line 44 "src/lexer.rl"
+#line 78 "src/lexer.rl"
 	{te = p+1;{ TKSTR(QSTRING) }}
 	goto st8;
 tr4:
-#line 59 "src/lexer.rl"
+#line 93 "src/lexer.rl"
 	{te = p+1;}
 	goto st8;
 tr9:
-#line 45 "src/lexer.rl"
+#line 79 "src/lexer.rl"
 	{te = p+1;{ TKSTR(PATTERN) }}
 	goto st8;
 tr10:
-#line 57 "src/lexer.rl"
+#line 91 "src/lexer.rl"
 	{te = p+1;}
 	goto st8;
 tr12:
-#line 56 "src/lexer.rl"
+#line 90 "src/lexer.rl"
 	{te = p+1;{ state.line_number++; }}
 	goto st8;
 tr13:
-#line 51 "src/lexer.rl"
+#line 85 "src/lexer.rl"
 	{te = p+1;{ TK(LPAREN) }}
 	goto st8;
 tr14:
-#line 52 "src/lexer.rl"
+#line 86 "src/lexer.rl"
 	{te = p+1;{ TK(RPAREN) }}
 	goto st8;
 tr15:
-#line 53 "src/lexer.rl"
+#line 87 "src/lexer.rl"
 	{te = p+1;{ TK(COMMA) }}
 	goto st8;
 tr17:
-#line 54 "src/lexer.rl"
+#line 88 "src/lexer.rl"
 	{te = p+1;{ TK(COLON) }}
 	goto st8;
 tr18:
-#line 46 "src/lexer.rl"
+#line 80 "src/lexer.rl"
 	{te = p+1;{ TK(EQ) }}
 	goto st8;
 tr20:
-#line 49 "src/lexer.rl"
+#line 83 "src/lexer.rl"
 	{te = p+1;{ TK(LBRACE) }}
 	goto st8;
 tr21:
-#line 50 "src/lexer.rl"
+#line 84 "src/lexer.rl"
 	{te = p+1;{ TK(RBRACE) }}
 	goto st8;
 tr23:
-#line 47 "src/lexer.rl"
+#line 81 "src/lexer.rl"
 	{te = p+1;{ TK(LBRACKET) }}
 	goto st8;
 tr24:
-#line 48 "src/lexer.rl"
+#line 82 "src/lexer.rl"
 	{te = p+1;{ TK(RBRACKET) }}
 	goto st8;
 tr25:
-#line 61 "src/lexer.rl"
+#line 95 "src/lexer.rl"
 	{te = p;p--;{ TK(NUMBER) }}
 	goto st8;
 tr26:
-#line 1 "src/lexer.rl"
+#line 1 "NONE"
 	{	switch( act ) {
 	case 16:
 	{{p = ((te))-1;} TK(CLASS) }
@@ -165,18 +199,18 @@ tr26:
 	}
 	goto st8;
 tr28:
-#line 63 "src/lexer.rl"
+#line 97 "src/lexer.rl"
 	{te = p;p--;{ TK(IDENT) }}
 	goto st8;
 st8:
-#line 1 "src/lexer.rl"
+#line 1 "NONE"
 	{ts = 0;}
 	if ( ++p == pe )
 		goto _test_eof8;
 case 8:
-#line 1 "src/lexer.rl"
+#line 1 "NONE"
 	{ts = p;}
-#line 180 "src/lexer.c"
+#line 214 "src/lexer.c"
 	switch( (*p) ) {
 		case 10: goto tr12;
 		case 32: goto tr10;
@@ -252,22 +286,22 @@ case 9:
 		goto st9;
 	goto tr25;
 tr19:
-#line 1 "src/lexer.rl"
+#line 1 "NONE"
 	{te = p+1;}
-#line 63 "src/lexer.rl"
+#line 97 "src/lexer.rl"
 	{act = 17;}
 	goto st10;
 tr27:
-#line 1 "src/lexer.rl"
+#line 1 "NONE"
 	{te = p+1;}
-#line 62 "src/lexer.rl"
+#line 96 "src/lexer.rl"
 	{act = 16;}
 	goto st10;
 st10:
 	if ( ++p == pe )
 		goto _test_eof10;
 case 10:
-#line 271 "src/lexer.c"
+#line 305 "src/lexer.c"
 	if ( (*p) == 95 )
 		goto st11;
 	if ( (*p) < 65 ) {
@@ -334,23 +368,23 @@ case 7:
 	_out: {}
 	}
 
-#line 104 "src/lexer.rl"
+#line 138 "src/lexer.rl"
 
 
     if(state.error) {
         Parse_print_error("SYNTAX ERROR", content, 
                 (int)(ts - bdata(content)), ++state.line_number);
     } else if( cs == 
-#line 345 "src/lexer.c"
+#line 379 "src/lexer.c"
 0
-#line 109 "src/lexer.rl"
+#line 143 "src/lexer.rl"
  ) {
         Parse_print_error("INVALID CHARACTER", content,
                 (int)(ts - bdata(content)), ++state.line_number);
     } else if( cs >= 
-#line 352 "src/lexer.c"
+#line 386 "src/lexer.c"
 8
-#line 112 "src/lexer.rl"
+#line 146 "src/lexer.rl"
  ) {
         Parse(parser, TKEOF, NULL, &state);
     } else {
