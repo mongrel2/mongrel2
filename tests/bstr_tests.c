@@ -1,3 +1,4 @@
+#undef NDEBUG
 #include <stdio.h>
 #include <bstr/bstrlib.h>
 #include <bstr/bstraux.h>
