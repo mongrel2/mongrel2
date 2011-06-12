@@ -34,7 +34,7 @@ Download
 
 Mongrel2 is now 1.7.2 as of *Fri Jun 10 08:35:51 PDT 2011*:
 
-* [mongrel2-1.7.3.tar.bz2](http://mongrel2.org/static/downloads/mongrel2-1.7.3.tar.bz2) MD5: 
+* [mongrel2-1.7.3.tar.bz2](http://mongrel2.org/static/downloads/mongrel2-1.7.3.tar.bz2) MD5: bb0f85fdd2bc7c83286be5335a10c743
 
 Documentation
 -------------
