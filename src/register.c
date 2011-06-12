@@ -128,7 +128,7 @@ int Register_disconnect(int fd)
     }
 
     Register_clear(reg);
-    fdclose(reg->fd);
+    close(reg->fd);
 
     // tracking the number of things we're processing
     NUM_REG_FD--;

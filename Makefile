@@ -1,4 +1,4 @@
-CFLAGS=-g -O2 -Wall -Isrc -pthread -rdynamic -DNDEBUG $(OPTFLAGS) -D_FILE_OFFSET_BITS=64
+CFLAGS=-g -O2 -Wall -Wextra -Isrc -pthread -rdynamic -DNDEBUG $(OPTFLAGS) -D_FILE_OFFSET_BITS=64
 LIBS=-lzmq -ldl -lsqlite3 $(OPTLIBS)
 PREFIX?=/usr/local
 
