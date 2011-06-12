@@ -5,10 +5,8 @@
 #include "response.h"
 
 bstring UPLOAD_STORE = NULL;
-bstring UPLOAD_MODE = NULL;
-bstring UPLOAD_MODE_DEFAULT = NULL;
-const char *UPLOAD_MODE_DEFAULT_C = "0666";
-
+mode_t UPLOAD_MODE = 0;
+struct tagbstring UPLOAD_MODE_DEFAULT = bsStatic("0600");
 
 static inline int stream_to_disk(IOBuf *iob, int content_len, int tmpfd)
 {
@@ -50,7 +48,6 @@ int Upload_file(Connection *conn, Handler *handler, int content_len)
     int rc = 0;
     int tmpfd = 0;
     bstring tmp_name = NULL;
-    unsigned long tmp_mode = 0;
     bstring result = NULL;
 
     if(UPLOAD_STORE == NULL) {
@@ -60,12 +57,13 @@ int Upload_file(Connection *conn, Handler *handler, int content_len)
         UPLOAD_STORE = bstrcpy(UPLOAD_STORE);
     }
 
-    if(UPLOAD_MODE == NULL) {
-         if(UPLOAD_MODE_DEFAULT == NULL) {
-              UPLOAD_MODE_DEFAULT = bfromcstr(UPLOAD_MODE_DEFAULT_C);
-         }
+    if(UPLOAD_MODE == 0) {
+        bstring mode = Setting_get_str("upload.temp_store_mode", &UPLOAD_MODE_DEFAULT);
+        log_info("Will set mode for upload temp store to: %s", bdata(mode));
 
-         UPLOAD_MODE = Setting_get_str("upload.temp_store_mode", UPLOAD_MODE_DEFAULT);
+        UPLOAD_MODE = strtoul((const char *)mode->data, NULL, 0);
+        check(UPLOAD_MODE > 0, "Failed to convert upload.temp_store_mode to a number.");
+        check(UPLOAD_MODE < 066666, "Invalid mode that's way too big: %s.", bdata(mode));
     }
 
     tmp_name = bstrcpy(UPLOAD_STORE);
@@ -75,18 +73,8 @@ int Upload_file(Connection *conn, Handler *handler, int content_len)
 
     log_info("Writing tempfile %s for large upload.", bdata(tmp_name));
 
-    log_info("Will set mode to: %s", bdata(UPLOAD_MODE));
-    tmp_mode = strtoul(bdata(UPLOAD_MODE), NULL, 0);
-    check(tmp_mode != 0, "Failed to convert upload.temp_store_mode to a number.");
-    check(tmp_mode != ULONG_MAX, "upload.temp_store_mode is out of range numerically!");
-
-    if((tmp_mode == 0) || (tmp_mode == ULONG_MAX)) {
-         log_info("Could not find a sane upload.temp_store_mode to use, skipping chmod");
-    }
-    else {
-         rc = chmod((char *)tmp_name->data, (mode_t)tmp_mode);
-         check(rc == 0, "Failed to chmod.");
-    }
+    rc = chmod((char *)tmp_name->data, UPLOAD_MODE);
+    check(rc == 0, "Failed to chmod.");
 
     rc = Upload_notify(conn, handler, "start", tmp_name);
     check(rc == 0, "Failed to notify of the start of upload.");
@@ -98,6 +86,7 @@ int Upload_file(Connection *conn, Handler *handler, int content_len)
     check(rc == 0, "Failed to notify the end of the upload.");
 
     bdestroy(result);
+    bdestroy(tmp_name);
     fdclose(tmpfd);
     return 0;
 
@@ -105,7 +94,7 @@ error:
     bdestroy(result);
     fdclose(tmpfd);
 
-    if(tmp_name) {
+    if(tmp_name != NULL) {
         unlink((char *)tmp_name->data);
         bdestroy(tmp_name);
     }
