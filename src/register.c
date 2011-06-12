@@ -36,6 +36,7 @@
 #include <errno.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/types.h>
 #include "tnetstrings.h"
 #include "tnetstrings_impl.h"
 
@@ -127,7 +128,7 @@ int Register_disconnect(int fd)
     }
 
     Register_clear(reg);
-    fdclose(reg->fd);
+    close(reg->fd);
 
     // tracking the number of things we're processing
     NUM_REG_FD--;
@@ -154,7 +155,7 @@ error:
 }
 
 
-int Register_read(int fd, uint32_t bytes)
+int Register_read(int fd, off_t bytes)
 {
     check(fd < MAX_REGISTERED_FDS, "FD given to register is greater than max.");
     check(fd >= 0, "Invalid FD given for Register_read: %d", fd);
@@ -173,7 +174,7 @@ error:
 }
 
 
-int Register_write(int fd, uint32_t bytes)
+int Register_write(int fd, off_t bytes)
 {
     check(fd < MAX_REGISTERED_FDS, "FD given to register is greater than max.");
     check(fd >= 0, "Invalid FD given for Register_write: %d", fd);
@@ -282,8 +283,8 @@ int Register_cleanout()
             nscanned++; // avoid scanning the whole array if we've found them all
 
             int last_ping = ZERO_OR_DELTA(now, reg->last_ping);
-            int read_rate = reg->bytes_read / (ZERO_OR_DELTA(now, reg->last_read) + 1);
-            int write_rate = reg->bytes_written / (ZERO_OR_DELTA(now, reg->last_write) + 1);
+            off_t read_rate = reg->bytes_read / (ZERO_OR_DELTA(now, reg->last_read) + 1);
+            off_t write_rate = reg->bytes_written / (ZERO_OR_DELTA(now, reg->last_write) + 1);
             int should_kill = 0;
 
             debug("Checking fd=%d:conn_id=%d against last_ping: %d, read_rate: %d, write_rate: %d",

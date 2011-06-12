@@ -153,6 +153,7 @@ int connection_msg_to_handler(Connection *conn)
 
         debug("SENT: %s", bdata(payload));
         check(payload != NULL, "Failed to generate payload.");
+        check(handler->send_socket != NULL, "Handler socket is NULL, tell Zed.");
 
         rc = Handler_deliver(handler->send_socket, bdata(payload), blength(payload));
         free(payload);
@@ -195,12 +196,11 @@ int Connection_send_to_handler(Connection *conn, Handler *handler, char *body, i
     debug("HTTP TO HANDLER: %.*s", blength(payload) - content_len, bdata(payload));
 
     rc = Handler_deliver(handler->send_socket, bdata(payload), blength(payload));
-    payload=NULL;
+    free(payload);
 
     error_unless(rc != -1, conn, 502, "Failed to deliver to handler: %s", 
             bdata(Request_path(conn->req)));
 
-    free(payload);
     return 0;
 
 error:

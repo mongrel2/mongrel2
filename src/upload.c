@@ -1,10 +1,12 @@
+#include <sys/stat.h>
 #include "upload.h"
 #include "dbg.h"
 #include "setting.h"
 #include "response.h"
 
 bstring UPLOAD_STORE = NULL;
-
+mode_t UPLOAD_MODE = 0;
+struct tagbstring UPLOAD_MODE_DEFAULT = bsStatic("0600");
 
 static inline int stream_to_disk(IOBuf *iob, int content_len, int tmpfd)
 {
@@ -55,11 +57,24 @@ int Upload_file(Connection *conn, Handler *handler, int content_len)
         UPLOAD_STORE = bstrcpy(UPLOAD_STORE);
     }
 
+    if(UPLOAD_MODE == 0) {
+        bstring mode = Setting_get_str("upload.temp_store_mode", &UPLOAD_MODE_DEFAULT);
+        log_info("Will set mode for upload temp store to: %s", bdata(mode));
+
+        UPLOAD_MODE = strtoul((const char *)mode->data, NULL, 0);
+        check(UPLOAD_MODE > 0, "Failed to convert upload.temp_store_mode to a number.");
+        check(UPLOAD_MODE < 066666, "Invalid mode that's way too big: %s.", bdata(mode));
+    }
+
     tmp_name = bstrcpy(UPLOAD_STORE);
 
     tmpfd = mkstemp((char *)tmp_name->data);
     check(tmpfd != -1, "Failed to create secure tempfile, did you end it with XXXXXX?");
+
     log_info("Writing tempfile %s for large upload.", bdata(tmp_name));
+
+    rc = chmod((char *)tmp_name->data, UPLOAD_MODE);
+    check(rc == 0, "Failed to chmod.");
 
     rc = Upload_notify(conn, handler, "start", tmp_name);
     check(rc == 0, "Failed to notify of the start of upload.");
@@ -71,6 +86,7 @@ int Upload_file(Connection *conn, Handler *handler, int content_len)
     check(rc == 0, "Failed to notify the end of the upload.");
 
     bdestroy(result);
+    bdestroy(tmp_name);
     fdclose(tmpfd);
     return 0;
 
@@ -78,7 +94,7 @@ error:
     bdestroy(result);
     fdclose(tmpfd);
 
-    if(tmp_name) {
+    if(tmp_name != NULL) {
         unlink((char *)tmp_name->data);
         bdestroy(tmp_name);
     }

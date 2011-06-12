@@ -49,7 +49,7 @@ static ssize_t file_recv(IOBuf *iob, char *buffer, int len)
 
 static ssize_t plain_stream_file(IOBuf *iob, int fd, off_t len)
 {
-    ssize_t sent = 0;
+    off_t sent = 0;
     off_t total = 0;
     off_t offset = 0;
     off_t block_size = MAX_SEND_BUFFER;
@@ -174,8 +174,9 @@ error:
 }
 
 void ssl_debug(void *p, int level, const char *msg) {
-    if(level < 2)
+    if(level < 2) {
         debug("polarssl: %s", msg);
+    }
 }
 
 IOBuf *IOBuf_create(size_t len, int fd, IOBufType type)

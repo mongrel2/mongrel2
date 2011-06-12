@@ -109,7 +109,7 @@ char *test_Dir_serve_file()
             bfromcstr("test/plain"),
             0);
 
-    Connection conn = {0};
+    Connection conn = {.iob = NULL};
     int zero_fd = open("/dev/null", O_WRONLY);
     conn.iob = IOBuf_create(1024, zero_fd, IOBUF_NULL);
 
