@@ -88,6 +88,13 @@ int tns_render_request_start(tns_outbuf *outbuf);
 
 int tns_render_request_end(tns_outbuf *outbuf, int header_start, bstring uuid, int id, bstring path);
 
+int tns_render_log_start(tns_outbuf *outbuf);
+
+void tns_render_log_end(tns_outbuf *outbuf);
+
+void tns_render_string_prepend(tns_outbuf *outbuf, bstring value);
+void tns_render_number_prepend(tns_outbuf *outbuf, long value);
+
 tns_value_t *tns_standard_table(bstring header_data, tns_value_t *rows);
 
 #define tns_get_type(T) (((tns_value_t *)(T)) == NULL ? tns_tag_invalid : ((tns_value_t *)(T))->type)
