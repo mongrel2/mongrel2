@@ -54,13 +54,13 @@ static inline int tns_render_number(void *val, tns_outbuf *outbuf)
     long number = t->value.number;
     int negative = number < 0;
 
+    assert(number != LONG_MIN && "LONG_MIN cannot be handled");
+
     while (outbuf->alloc_size < outbuf->used_size + MAX_NUM_LEN) {
         check(tns_outbuf_extend(outbuf) != -1, "Failed to extend buffer.");
     }
 
     if (negative) {
-        outbuf->buffer[outbuf->used_size++] = '0' - (number%10);
-        number /= 10;
         number = -number;
     }
 
