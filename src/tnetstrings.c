@@ -271,7 +271,6 @@ char *tns_render(void *val, size_t *len)
   check(output != NULL, "Failed to render tnetstring.");
 
   tns_inplace_reverse(output, *len);
-
   output[*len] = '\0';
 
   return output;
@@ -412,6 +411,12 @@ char *tns_render_reversed(void *val, size_t *len)
 
   check(tns_render_value(val, &outbuf) != -1, "Failed to render value.");
   *len = outbuf.used_size;
+
+  if(outbuf.used_size == outbuf.alloc_size) {
+      // need to extend it just a bit for the \0 terminator
+      outbuf.buffer = realloc(outbuf.buffer, outbuf.used_size + 1);
+      check_mem(outbuf.buffer);
+  }
 
   return outbuf.buffer;
 
