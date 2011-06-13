@@ -37,6 +37,7 @@
 #include "request.h"
 #include "headers.h"
 #include "setting.h"
+#include "tnetstrings.h"
 #include <stdio.h>
 #include <zmq.h>
 #include <pthread.h>
@@ -196,12 +197,12 @@ error:
     return -1;
 }
 
-static inline bstring make_log_message(Request *req, const char *remote_addr, 
+static inline bstring make_log_message(Request *req, const char *remote_addr,
         int remote_port, int status, int size)
 {
     bstring request_method = NULL;
 
-    if(Request_is_json(req)) {
+    if (Request_is_json(req)) {
         request_method = &JSON_METHOD;
     } else if (Request_is_xml(req)) {
         request_method = &XML_METHOD;
@@ -209,19 +210,40 @@ static inline bstring make_log_message(Request *req, const char *remote_addr,
         request_method = req->request_method;
     }
 
-    bstring log_data = bformat("%s,%.*s,%d,%d,%s,%s,%s,%d,%d\n",
-            bdata(req->target_host->name),
-            IPADDR_SIZE,
-            remote_addr,
-            remote_port,
-            (int)time(NULL),
-            bdata(request_method),
-            bdata(Request_path(req)),
-            Request_is_json(req) ? "" : bdata(req->version),
-            status,
-            size);
+    tns_outbuf outbuf = {.buffer = NULL};
+    bstring b_temp;
+
+    check(tns_render_log_start(&outbuf), "Could not initialize buffer");
+
+    tns_render_number_prepend(&outbuf, size);
+    tns_render_number_prepend(&outbuf, status);
+
+    b_temp = bfromcstr(Request_is_json(req) ? "" : bdata(req->version));
+    tns_render_string_prepend(&outbuf, b_temp);
+    bdestroy(b_temp);
+
+    tns_render_string_prepend(&outbuf, Request_path(req));
+    tns_render_string_prepend(&outbuf, request_method);
+    tns_render_number_prepend(&outbuf, (int) time(NULL));
+    tns_render_number_prepend(&outbuf, remote_port);
+
+    b_temp = bfromcstr(remote_addr);
+    tns_render_string_prepend(&outbuf, b_temp);
+    bdestroy(b_temp);
+
+    tns_render_string_prepend(&outbuf, req->target_host->name);
+
+    tns_render_log_end(&outbuf);
+
+    // log_data now owns the outbuf buffer
+    bstring log_data = tns_outbuf_to_bstring(&outbuf);
+    bconchar(log_data, '\n');
 
     return log_data;
+
+error:
+
+    return NULL;
 }
 
 static void free_log_msg(void *data, void *hint)
