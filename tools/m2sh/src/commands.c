@@ -300,6 +300,46 @@ error: // fallthrough
 }
 
 
+static int Command_access_logs(Command *cmd)
+{
+    bstring log_filename = option(cmd, "log", "logs/access.log");
+
+    FILE *log_file = fopen(bdata(log_filename), "r");
+
+    bstring line;
+    while (line = bgets((bNgetc) fgetc, log_file, '\n')) {
+        tns_value_t *log_item = tns_parse(bdata(line), blength(line), NULL);
+
+        assert(log_item.type == tns_tag_list && "Malformed log line.");
+
+        darray_t *entries = log_item->value.list;
+
+        bstring hostname = ((tns_value_t *)darray_get(entries, 0))->value.string;
+        bstring remote_addr = ((tns_value_t *)darray_get(entries, 1))->value.string;
+        long remote_port = ((tns_value_t *)darray_get(entries, 2))->value.number;
+        long timestamp = ((tns_value_t *)darray_get(entries, 3))->value.string;
+        bstring request_method = ((tns_value_t *)darray_get(entries, 4))->value.string;
+        bstring request_path = ((tns_value_t *)darray_get(entries, 5))->value.string;
+        bstring version = ((tns_value_t *)darray_get(entries, 6))->value.string;
+        long status = ((tns_value_t *)darray_get(entries, 7))->value.number;
+        long size = ((tns_value_t *)darray_get(entries, 8))->value.number;
+
+        printf("[%ld] %s:%ld %s %s %s%s %ld %ld\n",
+               timestamp,
+               bdata(remote_addr),
+               remote_port,
+               bdata(version),
+               bdata(request_method),
+               bdata(hostname),
+               bdata(request_path),
+               status,
+               size);
+    }
+
+    return 0;
+}
+
+
 static int Command_routes(Command *cmd)
 {
     bstring db_file = option(cmd, "db", "config.sqlite");
@@ -912,6 +952,8 @@ static CommandHandler COMMAND_MAPPING[] = {
         .help = "Alias for load." },
     {.name = "shell", .cb = Command_shell,
         .help = "Starts an interactive shell." },
+    {.name = "access", .cb = Command_access_logs,
+        .help = "Prints the access log."},
     {.name = "servers", .cb = Command_servers,
         .help = "Lists the servers in a config database." },
     {.name = "hosts", .cb = Command_hosts,
