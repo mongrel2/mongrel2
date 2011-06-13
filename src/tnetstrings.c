@@ -4,6 +4,7 @@
 #include <assert.h>
 #include "mem/halloc.h"
 
+#define MAX_NUM_LEN 22 // ceil(log_10 2^64) + 2
 
 static inline int
 tns_parse_dict(void *dict, const char *data, size_t len);
@@ -45,20 +46,33 @@ static inline int tns_render_string(void *val, tns_outbuf *outbuf)
     return tns_outbuf_rputs(outbuf, bdata(t->value.string), blength(t->value.string));
 }
 
-
 static inline int tns_render_number(void *val, tns_outbuf *outbuf)
 {
     tns_value_t *t = (tns_value_t *)val;
-    char out[120] = {0};
-
     assert(t->type == tns_tag_number && "Value is not a number.");
 
-    int rc = snprintf(out, 119, "%ld", t->value.number);
-    check(rc != -1 && rc <= 119, "Failed to generate number.");
+    long number = t->value.number;
+    int negative = number < 0;
 
-    out[119] = '\0'; // safety since snprintf might not do this
+    while (outbuf->alloc_size < outbuf->used_size + MAX_NUM_LEN) {
+        check(tns_outbuf_extend(outbuf) != -1, "Failed to extend buffer.");
+    }
 
-    return tns_outbuf_rputs(outbuf, out, rc);
+    if (negative) {
+        outbuf->buffer[outbuf->used_size++] = '0' - (number%10);
+        number /= 10;
+        number = -number;
+    }
+
+    do {
+        outbuf->buffer[outbuf->used_size++] = '0' + (number%10);
+    } while (number /= 10);
+
+    if (negative) {
+        outbuf->buffer[outbuf->used_size++] = '-';
+    }
+
+    return 0;
 
 error:
     return -1;
@@ -257,6 +271,8 @@ char *tns_render(void *val, size_t *len)
   check(output != NULL, "Failed to render tnetstring.");
 
   tns_inplace_reverse(output, *len);
+
+  output[*len] = '\0';
 
   return output;
 
