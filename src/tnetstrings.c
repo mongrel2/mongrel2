@@ -290,6 +290,18 @@ void tns_render_hash_pair(tns_outbuf *outbuf, bstring key, bstring value)
     tns_render_value(&val, outbuf);
 }
 
+void tns_render_number_prepend(tns_outbuf *outbuf, long value)
+{
+    tns_value_t val = {.type = tns_tag_number, .value.number = value};
+    tns_render_value(&val, outbuf);
+}
+
+void tns_render_string_prepend(tns_outbuf *outbuf, bstring value)
+{
+    tns_value_t val = {.type = tns_tag_string, .value.string = value};
+    tns_render_value(&val, outbuf);
+}
+
 int tns_render_request_start(tns_outbuf *outbuf)
 {
     check(tns_outbuf_init(outbuf) != -1, "Failed to init buffer.");
@@ -319,6 +331,22 @@ int tns_render_request_end(tns_outbuf *outbuf, int header_start, bstring uuid, i
 
 error:
     return -1;
+}
+
+int tns_render_log_start(tns_outbuf *outbuf)
+{
+    check(tns_outbuf_init(outbuf) != -1, "Failed to init buffer.");
+
+    check(tns_outbuf_putc(outbuf, ']') != -1, "Failed ending request.");
+
+    return outbuf->used_size;
+error:
+    return -1;
+}
+
+void tns_render_log_end(tns_outbuf *outbuf)
+{
+    tns_outbuf_clamp(outbuf, 1);
 }
 
 int tns_render_request_headers(tns_outbuf *outbuf, hash_t *headers)
