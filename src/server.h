@@ -85,7 +85,7 @@ void Server_set_default_host(Server *srv, Host *host);
 
 Host *Server_match_backend(Server *srv, bstring target);
 
-int Server_start_handlers(Server *srv);
+int Server_start_handlers(Server *srv, Server *copy_from);
 
 int Server_stop_handlers(Server *srv);
 

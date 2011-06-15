@@ -224,6 +224,7 @@ static void taskscheduler(void)
             i = t->alltaskslot;
             alltask[i] = alltask[--nalltask];
             alltask[i]->alltaskslot = i;
+            debug("FREEING TASK: %p", t);
             free(t);
         }
     }

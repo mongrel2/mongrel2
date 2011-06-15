@@ -1,3 +1,5 @@
+#undef NDEBUG
+
 /**
  *
  * Copyright (c) 2010, Zed A. Shaw and Mongrel2 Project Contributors.
@@ -178,7 +180,7 @@ static inline int handler_recv_parse(Handler *handler, HandlerParser *parser)
 
     rc = mqrecv(handler->recv_socket, inmsg, 0);
     check(rc == 0, "Receive on handler socket failed.");
-    check(handler->running, "Received shutdown notification, goodbye.");
+    check(handler->running, "Handler marked as not running.");
 
     rc = HandlerParser_execute(parser, zmq_msg_data(inmsg), zmq_msg_size(inmsg));
     check(rc == 1, "Failed to parse message from handler.");
@@ -236,13 +238,18 @@ void Handler_task(void *v)
         HandlerParser_reset(parser);
     }
 
+    debug("############################### HANDLER EXITED: %p, running: %d, task: %p",
+            handler, handler->running, handler->task);
+    handler->running = 0;
+    handler->task = NULL;
     HandlerParser_destroy(parser);
-    debug("HANDLER EXITED.");
     taskexit(0);
 
 error:
+    handler->running = 0;
+    handler->task = NULL;
     HandlerParser_destroy(parser);
-    log_err("HANDLER TASK DIED");
+    log_err("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! HANDLER TASK DIED");
     taskexit(1);
 }
 

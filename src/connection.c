@@ -625,7 +625,7 @@ void Connection_task(void *v)
 error: // fallthrough
     State_exec(&conn->state, CLOSE, (void *)conn);
     Connection_destroy(conn);
-    return;
+    taskexit(0);
 }
 
 int Connection_deliver_raw(Connection *conn, bstring buf)
