@@ -305,12 +305,18 @@ static int Command_access_logs(Command *cmd)
     bstring log_filename = option(cmd, "log", "logs/access.log");
 
     FILE *log_file = fopen(bdata(log_filename), "r");
-
+    int line_number = 0;
     bstring line;
-    while (line = bgets((bNgetc) fgetc, log_file, '\n')) {
+
+    while ((line = bgets((bNgetc) fgetc, log_file, '\n')) != NULL) {
+        line_number++;
+
         tns_value_t *log_item = tns_parse(bdata(line), blength(line), NULL);
 
-        assert(log_item.type == tns_tag_list && "Malformed log line.");
+        if (!log_item || log_item->type != tns_tag_list) {
+            fprintf(stderr, "Malformed log line: %d.\n", line_number);
+            continue;
+        }
 
         darray_t *entries = log_item->value.list;
 
@@ -334,6 +340,8 @@ static int Command_access_logs(Command *cmd)
                bdata(request_path),
                status,
                size);
+
+        tns_value_destroy(log_item);
     }
 
     return 0;
