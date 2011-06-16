@@ -189,13 +189,12 @@ int Connection_send_to_handler(Connection *conn, Handler *handler, char *body, i
     }
 
     debug("SENT: %s", bdata(payload));
-
     check(payload, "Failed to create payload for request.");
 
     debug("HTTP TO HANDLER: %.*s", blength(payload) - content_len, bdata(payload));
 
     rc = Handler_deliver(handler->send_socket, bdata(payload), blength(payload));
-    free(payload);
+    free(payload); payload = NULL;
 
     error_unless(rc != -1, conn, 502, "Failed to deliver to handler: %s", 
             bdata(Request_path(conn->req)));
