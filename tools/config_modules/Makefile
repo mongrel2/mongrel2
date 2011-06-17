@@ -1,5 +1,5 @@
 PREFIX?=/usr/local
-CFLAGS=-I../../src $(OPTFLAGS) -fPIC -shared -nostartfiles -L../../build
+CFLAGS=-I../../src $(shell pkg-config --cflags libzmq) $(OPTFLAGS) -fPIC -shared -nostartfiles -L../../build
 LDFLAGS=$(OPTLIBS)
 
 all: null.so zmq.so

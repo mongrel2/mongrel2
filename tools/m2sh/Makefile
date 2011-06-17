@@ -1,5 +1,5 @@
-CFLAGS=-DNDEBUG -DNO_LINENOS -pthread -g -I../../src -Isrc -Wall $(OPTFLAGS)
-LIBS=-lzmq -lsqlite3 ../../build/libm2.a $(OPTLIBS)
+CFLAGS=-DNDEBUG -DNO_LINENOS -pthread -g -I../../src -Isrc $(shell pkg-config --cflags libzmq) -Wall $(OPTFLAGS)
+LIBS=$(shell pkg-config --libs libzmq) -lsqlite3 ../../build/libm2.a $(OPTLIBS)
 
 PREFIX?=/usr/local
 SOURCES=$(wildcard src/*.c)
