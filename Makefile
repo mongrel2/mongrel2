@@ -1,5 +1,5 @@
-CFLAGS=-g -O2 -Wall -Wextra -Isrc -pthread -rdynamic -DNDEBUG $(OPTFLAGS) -D_FILE_OFFSET_BITS=64
-LIBS=-lzmq -ldl -lsqlite3 $(OPTLIBS)
+CFLAGS=-g -O2 -Wall -Wextra -Isrc $(shell pkg-config --cflags libzmq) -pthread -rdynamic -DNDEBUG $(OPTFLAGS) -D_FILE_OFFSET_BITS=64
+LIBS=$(shell pkg-config --libs libzmq) -ldl -lsqlite3 $(OPTLIBS)
 PREFIX?=/usr/local
 
 get_objs = $(addsuffix .o,$(basename $(wildcard $(1))))
