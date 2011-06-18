@@ -28,7 +28,7 @@ ${OBJECTS_NOEXT}: CFLAGS += ${NOEXTCFLAGS}
 bin/mongrel2: build/libm2.a src/mongrel2.o
 	$(CC) $(CFLAGS) src/mongrel2.o -o $@ $< $(LIBS)
 
-build/libm2.a: OPTFLAGS += -fPIC
+build/libm2.a: CFLAGS += -fPIC
 build/libm2.a: build ${LIB_OBJ}
 	ar rcs $@ ${LIB_OBJ}
 	ranlib $@
