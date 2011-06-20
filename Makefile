@@ -62,7 +62,7 @@ pristine: clean
 	${MAKE} -C tools/m2sh pristine
 
 .PHONY: tests
-tests: build/libm2.a tests/config.sqlite ${TESTS} test_filters filters config_modules
+tests: tests/config.sqlite ${TESTS} test_filters filters config_modules
 	sh ./tests/runtests.sh
 
 tests/config.sqlite: src/config/config.sql src/config/example.sql src/config/mimetypes.sql
@@ -84,13 +84,13 @@ check:
 m2sh: 
 	${MAKE} ${MAKEOPTS} -C tools/m2sh all
 
-test_filters: 
+test_filters: build/libm2.a
 	${MAKE} ${MAKEOPTS} -C tests/filters all
 
-filters: 
+filters: build/libm2.a
 	${MAKE} ${MAKEOPTS} -C tools/filters all
 
-config_modules: 
+config_modules: build/libm2.a
 	${MAKE} ${MAKEOPTS} -C tools/config_modules all
 
 install: all
