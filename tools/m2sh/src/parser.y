@@ -16,6 +16,9 @@
 %extra_argument {ParserState *state}
 
 %syntax_error {
+    if( !TOKEN ) {
+      log_err("Reached the end of file so it seems like you are missing a ')'");
+    }
     state->error = 1;
 }
 

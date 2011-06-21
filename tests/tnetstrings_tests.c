@@ -1,7 +1,33 @@
 #include "minunit.h"
 #include <tnetstrings.h>
 #include <request.h>
+#include <limits.h>
 #include <assert.h>
+
+
+char *test_tnetstring_numbers()
+{
+    char *result;
+    size_t len;
+
+    tns_value_t max = {.type = tns_tag_number, .value.number = LONG_MAX};
+    result = tns_render(&max, &len);
+    mu_assert(len == 23, "Wrong length on LONG_MAX");
+    free(result);
+
+    // WARNING: LONG_MIN is an edge case
+    //tns_value_t min = {.type = tns_tag_number, .value.number = LONG_MIN};
+    //result = tns_render(&min, &len);
+    //mu_assert(len == 24, "Wrong length on LONG_MIN");
+    //free(result);
+
+    tns_value_t minus_one = {.type = tns_tag_number, .value.number = -1};
+    result = tns_render(&minus_one, &len);
+    mu_assert(len == 5, "Wrong length on -1");
+    free(result);
+
+    return NULL;
+}
 
 char *test_tnetstring_encode()
 {
@@ -133,6 +159,7 @@ char * all_tests() {
 
     mu_run_test(test_tnetstring_encode);
     mu_run_test(test_tnetstring_decode);
+    mu_run_test(test_tnetstring_numbers);
     mu_run_test(test_complex_types);
 
     return NULL;

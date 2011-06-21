@@ -1,3 +1,4 @@
+#undef NDEBUG
 /**
  *
  * Copyright (c) 2010, Zed A. Shaw and Mongrel2 Project Contributors.
@@ -339,10 +340,74 @@ error:
     return NULL;
 }
 
-int Server_start_handlers(Server *srv)
+static inline int same_handler(Handler *from, Handler *to)
+{
+    return biseq(from->send_ident, to->send_ident) && 
+        biseq(from->recv_ident, to->recv_ident) &&
+        biseq(from->recv_spec, to->recv_spec) &&
+        biseq(from->send_spec, to->send_spec);
+}
+
+typedef struct RouteUpdater {
+    Handler *original;
+    Handler *replacement;
+} RouteUpdater;
+
+static void update_routes(void *value, void *data)
+{
+    RouteUpdater *update = data;
+    Backend *backend = ((Route *)value)->data;
+
+    if(backend->type == BACKEND_HANDLER && backend->target.handler == update->original) {
+        debug("Found backend that needs replacing: %p replaced with %p",
+                update->original, update->replacement);
+        backend->target.handler = update->replacement;
+    }
+}
+
+static void update_host_routes(void *value, void *data)
+{
+    Host *host = ((Route *)value)->data;
+    tst_traverse(host->routes->routes, update_routes, data);
+}
+
+static inline int Server_copy_active_handlers(Server *srv, Server *copy_from)
+{
+    int i = 0;
+    for(i = 0; i < darray_end(copy_from->handlers); i++) {
+        Handler *from = darray_get(copy_from->handlers, i);
+
+        int j = 0;
+        for(j = 0; j < darray_end(srv->handlers); j++) {
+            Handler *to = darray_get(srv->handlers, j);
+
+            if(same_handler(from, to))
+            {
+                debug("Swapping %p original for %p replacement", to, from);
+                RouteUpdater update = {.original = to, .replacement = from};
+                tst_traverse(srv->hosts->routes, update_host_routes, &update);
+
+                darray_set(srv->handlers, j, from);
+                // swap them around so that the darrays stay full
+                darray_set(copy_from->handlers, i, to);
+                to->running = 0;
+                break;
+            }
+        }
+    }
+
+    return 0;
+}
+
+int Server_start_handlers(Server *srv, Server *copy_from)
 {
     int i = 0;
     int rc = 0;
+
+    if(copy_from != NULL) {
+        rc = Server_copy_active_handlers(srv, copy_from);
+        check(rc != -1, "Failed to copy old handlers to new server config.");
+    }
 
     for(i = 0; i < darray_end(srv->handlers); i++) {
         Handler *handler = darray_get(srv->handlers, i);
@@ -369,15 +434,21 @@ int Server_stop_handlers(Server *srv)
         Handler *handler = darray_get(srv->handlers, i);
         check(handler != NULL, "Invalid handler, can't be NULL.");
 
+        debug("############################### HANDLER SHUTDOWN: %p, running: %d, task: %p",
+            handler, handler->running, handler->task);
         if(handler->running) {
             log_info("STOPPING HANDLER %s", bdata(handler->send_spec));
-            tasksignal(handler->task, SIGINT);
-            handler->running = 0;
-            taskdelay(1);
-
-            if(handler->recv_socket) zmq_close(handler->recv_socket);
-            if(handler->send_socket) zmq_close(handler->send_socket);
+            if(handler->task != NULL) {
+                tasksignal(handler->task, SIGINT);
+                handler->running = 0;
+                taskdelay(1);
+            }
         }
+
+        if(handler->recv_socket) zmq_close(handler->recv_socket);
+        if(handler->send_socket) zmq_close(handler->send_socket);
+        handler->recv_socket = NULL;
+        handler->send_socket = NULL;
     }
 
     return 0;

@@ -77,7 +77,7 @@ static int hash_comp_default(const void *key1, const void *key2);
  */
 
 #if 0
-Fixed for our usage -josh
+    Fixed for our usage -josh
 static void compute_bits(void)
 {
     hash_val_t val = HASH_VAL_T_MAX;	/* 1 */
@@ -299,7 +299,7 @@ hash_t *hash_create(hashcount_t maxcount, hash_comp_t compfun,
 
     // Fixed size for our usage
     //if (hash_val_t_bit == 0)	/* 1 */
-	//compute_bits();
+    //compute_bits();
 
     hash = malloc(sizeof *hash);	/* 2 */
 
@@ -406,7 +406,7 @@ hash_t *hash_init(hash_t *hash, hashcount_t maxcount,
 {
     // Fixed size for our usage.
     //if (hash_val_t_bit == 0)	/* 1 */
-	//compute_bits();
+    //compute_bits();
 
     assert (is_power_of_two(nchains));
 

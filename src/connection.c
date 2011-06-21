@@ -1,4 +1,3 @@
-#undef DEBUG
 /**
  *
  * Copyright (c) 2010, Zed A. Shaw and Mongrel2 Project Contributors.
@@ -190,13 +189,12 @@ int Connection_send_to_handler(Connection *conn, Handler *handler, char *body, i
     }
 
     debug("SENT: %s", bdata(payload));
-
     check(payload, "Failed to create payload for request.");
 
     debug("HTTP TO HANDLER: %.*s", blength(payload) - content_len, bdata(payload));
 
     rc = Handler_deliver(handler->send_socket, bdata(payload), blength(payload));
-    free(payload);
+    free(payload); payload = NULL;
 
     error_unless(rc != -1, conn, 502, "Failed to deliver to handler: %s", 
             bdata(Request_path(conn->req)));
@@ -626,7 +624,7 @@ void Connection_task(void *v)
 error: // fallthrough
     State_exec(&conn->state, CLOSE, (void *)conn);
     Connection_destroy(conn);
-    return;
+    taskexit(0);
 }
 
 int Connection_deliver_raw(Connection *conn, bstring buf)

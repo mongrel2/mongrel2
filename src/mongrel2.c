@@ -112,7 +112,7 @@ void start_terminator()
 }
 
 
-Server *load_server(const char *db_file, const char *server_uuid, int reuse_fd)
+Server *load_server(const char *db_file, const char *server_uuid, Server *old_srv)
 {
     int rc = 0;
     Server *srv =  NULL;
@@ -130,17 +130,17 @@ Server *load_server(const char *db_file, const char *server_uuid, int reuse_fd)
     check(srv, "Failed to load server %s from %s", server_uuid, db_file);
     check(srv->default_host, "No default_host set for server: %s, you need one host named: %s", server_uuid, bdata(srv->default_hostname));
 
-    if(reuse_fd == -1) {
+    if(old_srv == NULL || old_srv->listen_fd == -1) {
         srv->listen_fd = netannounce(TCP, bdata(srv->bind_addr), srv->port);
         check(srv->listen_fd >= 0, "Can't announce on TCP port %d", srv->port);
         check(fdnoblock(srv->listen_fd) == 0, "Failed to set listening port %d nonblocking.", srv->port);
     } else {
-        srv->listen_fd = dup(reuse_fd);
+        srv->listen_fd = dup(old_srv->listen_fd);
         check(srv->listen_fd != -1, "Failed to dup the socket from the running server.");
-        fdclose(reuse_fd);
+        fdclose(old_srv->listen_fd);
     }
 
-    check(Server_start_handlers(srv) == 0, "Failed to start handlers.");
+    check(Server_start_handlers(srv, old_srv) == 0, "Failed to start handlers.");
 
     Config_close_db();
     return srv;
@@ -253,13 +253,14 @@ Server *reload_server(Server *old_srv, const char *db_file, const char *server_u
 {
     RUNNING = 1;
 
-    Server_stop_handlers(old_srv);
-
+    log_info("------------------------ RELOAD %s -----------------------------------", server_uuid);
     MIME_destroy();
     Setting_destroy();
 
-    Server *srv = load_server(db_file, server_uuid, old_srv->listen_fd);
+    Server *srv = load_server(db_file, server_uuid, old_srv);
     check(srv != NULL, "Failed to load new server config.");
+
+    Server_stop_handlers(old_srv);
 
     RELOAD = 0;
     return srv;
@@ -322,7 +323,7 @@ void taskmain(int argc, char **argv)
         check(rc != -1, "Failed to load the config module: %s", argv[3]);
     }
 
-    SERVER = load_server(argv[1], argv[2], -1);
+    SERVER = load_server(argv[1], argv[2], NULL);
     check(SERVER, "Aborting since can't load server.");
 
     SuperPoll_get_max_fd();

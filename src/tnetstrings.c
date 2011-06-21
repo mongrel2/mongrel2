@@ -4,6 +4,7 @@
 #include <assert.h>
 #include "mem/halloc.h"
 
+#define MAX_NUM_LEN 22 // ceil(log_10 2^64) + 2
 
 static inline int
 tns_parse_dict(void *dict, const char *data, size_t len);
@@ -45,20 +46,33 @@ static inline int tns_render_string(void *val, tns_outbuf *outbuf)
     return tns_outbuf_rputs(outbuf, bdata(t->value.string), blength(t->value.string));
 }
 
-
 static inline int tns_render_number(void *val, tns_outbuf *outbuf)
 {
     tns_value_t *t = (tns_value_t *)val;
-    char out[120] = {0};
-
     assert(t->type == tns_tag_number && "Value is not a number.");
 
-    int rc = snprintf(out, 119, "%ld", t->value.number);
-    check(rc != -1 && rc <= 119, "Failed to generate number.");
+    long number = t->value.number;
+    int negative = number < 0;
 
-    out[119] = '\0'; // safety since snprintf might not do this
+    assert(number != LONG_MIN && "LONG_MIN cannot be handled");
 
-    return tns_outbuf_rputs(outbuf, out, rc);
+    while (outbuf->alloc_size < outbuf->used_size + MAX_NUM_LEN) {
+        check(tns_outbuf_extend(outbuf) != -1, "Failed to extend buffer.");
+    }
+
+    if (negative) {
+        number = -number;
+    }
+
+    do {
+        outbuf->buffer[outbuf->used_size++] = '0' + (number%10);
+    } while (number /= 10);
+
+    if (negative) {
+        outbuf->buffer[outbuf->used_size++] = '-';
+    }
+
+    return 0;
 
 error:
     return -1;
@@ -257,6 +271,7 @@ char *tns_render(void *val, size_t *len)
   check(output != NULL, "Failed to render tnetstring.");
 
   tns_inplace_reverse(output, *len);
+  output[*len] = '\0';
 
   return output;
 
@@ -290,6 +305,18 @@ void tns_render_hash_pair(tns_outbuf *outbuf, bstring key, bstring value)
     tns_render_value(&val, outbuf);
 }
 
+void tns_render_number_prepend(tns_outbuf *outbuf, long value)
+{
+    tns_value_t val = {.type = tns_tag_number, .value.number = value};
+    tns_render_value(&val, outbuf);
+}
+
+void tns_render_string_prepend(tns_outbuf *outbuf, bstring value)
+{
+    tns_value_t val = {.type = tns_tag_string, .value.string = value};
+    tns_render_value(&val, outbuf);
+}
+
 int tns_render_request_start(tns_outbuf *outbuf)
 {
     check(tns_outbuf_init(outbuf) != -1, "Failed to init buffer.");
@@ -319,6 +346,22 @@ int tns_render_request_end(tns_outbuf *outbuf, int header_start, bstring uuid, i
 
 error:
     return -1;
+}
+
+int tns_render_log_start(tns_outbuf *outbuf)
+{
+    check(tns_outbuf_init(outbuf) != -1, "Failed to init buffer.");
+
+    check(tns_outbuf_putc(outbuf, ']') != -1, "Failed ending request.");
+
+    return outbuf->used_size;
+error:
+    return -1;
+}
+
+void tns_render_log_end(tns_outbuf *outbuf)
+{
+    tns_outbuf_clamp(outbuf, 1);
 }
 
 int tns_render_request_headers(tns_outbuf *outbuf, hash_t *headers)
@@ -368,6 +411,12 @@ char *tns_render_reversed(void *val, size_t *len)
 
   check(tns_render_value(val, &outbuf) != -1, "Failed to render value.");
   *len = outbuf.used_size;
+
+  if(outbuf.used_size == outbuf.alloc_size) {
+      // need to extend it just a bit for the \0 terminator
+      outbuf.buffer = realloc(outbuf.buffer, outbuf.used_size + 1);
+      check_mem(outbuf.buffer);
+  }
 
   return outbuf.buffer;
 

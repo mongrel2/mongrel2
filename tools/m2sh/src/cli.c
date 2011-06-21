@@ -1,5 +1,39 @@
 
 #line 1 "src/cli.rl"
+/**
+ *
+ * Copyright (c) 2010, Zed A. Shaw and Mongrel2 Project Contributors.
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are
+ * met:
+ * 
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ * 
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ * 
+ *     * Neither the name of the Mongrel2 Project, Zed A. Shaw, nor the names
+ *       of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written
+ *       permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+ * IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 
 /*
  * Parse command line arguments.
@@ -20,11 +54,11 @@
 #define TKOPT(C) TKBASE(OPTION, fsm->ts+(C), fsm->te-(C*2))
 
 
-#line 42 "src/cli.rl"
+#line 76 "src/cli.rl"
 
 
 
-#line 28 "src/cli.c"
+#line 62 "src/cli.c"
 static const int params_start = 4;
 static const int params_first_final = 4;
 static const int params_error = -1;
@@ -32,7 +66,7 @@ static const int params_error = -1;
 static const int params_en_main = 4;
 
 
-#line 45 "src/cli.rl"
+#line 79 "src/cli.rl"
 
 void cli_params_init( struct params *fsm )
 {
@@ -40,7 +74,7 @@ void cli_params_init( struct params *fsm )
     fsm->token_count = 0;
     fsm->curtk = 0;
 	
-#line 44 "src/cli.c"
+#line 78 "src/cli.c"
 	{
 	 fsm->cs = params_start;
 	 fsm->ts = 0;
@@ -48,7 +82,7 @@ void cli_params_init( struct params *fsm )
 	 fsm->act = 0;
 	}
 
-#line 52 "src/cli.rl"
+#line 86 "src/cli.rl"
 }
 
 void cli_params_execute( struct params *fsm, bstring data)
@@ -59,22 +93,22 @@ void cli_params_execute( struct params *fsm, bstring data)
     Token *temp = NULL;
 
 	
-#line 63 "src/cli.c"
+#line 97 "src/cli.c"
 	{
 	if ( p == pe )
 		goto _test_eof;
 	switch (  fsm->cs )
 	{
 tr0:
-#line 39 "src/cli.rl"
+#line 73 "src/cli.rl"
 	{{p = (( fsm->te))-1;}{ TK(BLOB); }}
 	goto st4;
 tr2:
-#line 33 "src/cli.rl"
+#line 67 "src/cli.rl"
 	{ fsm->te = p+1;{ TKSTR(QSTRING); }}
 	goto st4;
 tr7:
-#line 36 "src/cli.rl"
+#line 70 "src/cli.rl"
 	{ fsm->te = p+1;}
 	goto st4;
 tr13:
@@ -90,23 +124,23 @@ tr13:
 	}
 	goto st4;
 tr14:
-#line 39 "src/cli.rl"
+#line 73 "src/cli.rl"
 	{ fsm->te = p;p--;{ TK(BLOB); }}
 	goto st4;
 tr21:
-#line 32 "src/cli.rl"
+#line 66 "src/cli.rl"
 	{ fsm->te = p;p--;{  TKOPT(2); }}
 	goto st4;
 tr22:
-#line 31 "src/cli.rl"
+#line 65 "src/cli.rl"
 	{ fsm->te = p;p--;{  TKOPT(1); }}
 	goto st4;
 tr23:
-#line 35 "src/cli.rl"
+#line 69 "src/cli.rl"
 	{ fsm->te = p;p--;{ TK(IDENT); }}
 	goto st4;
 tr24:
-#line 34 "src/cli.rl"
+#line 68 "src/cli.rl"
 	{ fsm->te = p;p--;{ TK(NUMBER); }}
 	goto st4;
 st4:
@@ -117,7 +151,7 @@ st4:
 case 4:
 #line 1 "NONE"
 	{ fsm->ts = p;}
-#line 121 "src/cli.c"
+#line 155 "src/cli.c"
 	switch( (*p) ) {
 		case 32: goto tr7;
 		case 34: goto tr8;
@@ -141,20 +175,20 @@ case 4:
 tr6:
 #line 1 "NONE"
 	{ fsm->te = p+1;}
-#line 39 "src/cli.rl"
+#line 73 "src/cli.rl"
 	{ fsm->act = 7;}
 	goto st5;
 tr15:
 #line 1 "NONE"
 	{ fsm->te = p+1;}
-#line 33 "src/cli.rl"
+#line 67 "src/cli.rl"
 	{ fsm->act = 3;}
 	goto st5;
 st5:
 	if ( ++p == pe )
 		goto _test_eof5;
 case 5:
-#line 158 "src/cli.c"
+#line 192 "src/cli.c"
 	if ( (*p) == 32 )
 		goto tr13;
 	if ( 9 <= (*p) && (*p) <= 13 )
@@ -168,7 +202,7 @@ st6:
 	if ( ++p == pe )
 		goto _test_eof6;
 case 6:
-#line 172 "src/cli.c"
+#line 206 "src/cli.c"
 	switch( (*p) ) {
 		case 32: goto st0;
 		case 34: goto tr15;
@@ -199,7 +233,7 @@ st7:
 	if ( ++p == pe )
 		goto _test_eof7;
 case 7:
-#line 203 "src/cli.c"
+#line 237 "src/cli.c"
 	if ( (*p) == 32 )
 		goto st0;
 	if ( 9 <= (*p) && (*p) <= 13 )
@@ -213,7 +247,7 @@ st8:
 	if ( ++p == pe )
 		goto _test_eof8;
 case 8:
-#line 217 "src/cli.c"
+#line 251 "src/cli.c"
 	switch( (*p) ) {
 		case 32: goto st2;
 		case 39: goto tr15;
@@ -244,7 +278,7 @@ st9:
 	if ( ++p == pe )
 		goto _test_eof9;
 case 9:
-#line 248 "src/cli.c"
+#line 282 "src/cli.c"
 	if ( (*p) == 32 )
 		goto st2;
 	if ( 9 <= (*p) && (*p) <= 13 )
@@ -404,7 +438,7 @@ case 15:
 
 	}
 
-#line 62 "src/cli.rl"
+#line 96 "src/cli.rl"
 }
 
 int cli_params_finish( struct params *fsm )
