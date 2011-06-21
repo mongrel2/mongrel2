@@ -1,3 +1,3 @@
-#define VERSION "Mongrel2/1.7.3"
+#define VERSION "Mongrel2/1.7.4"
 
 

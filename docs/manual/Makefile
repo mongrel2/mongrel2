@@ -1,6 +1,6 @@
 JUNK_FILES=book-final.* *.aux *.log styles/*.aux
 SOURCE=book
-WEBSITE=$(USER)@mongrel2.org:deployment/files/static
+WEBSITE=$(USER)@mongrel2.org:/var/www/mongrel2.org/static/
 FINAL=book-final
 
 draft: book-final.dvi
