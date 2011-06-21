@@ -141,7 +141,7 @@ manual:
 
 release:
 	git archive --format=tar --prefix=mongrel2-${VERSION}/ v${VERSION} | bzip2 -9 > mongrel2-${VERSION}.tar.bz2
-	scp mongrel2-${VERSION}.tar.bz2 ${USER}@mongrel2.org:deployment/files/static/downloads/
+	scp mongrel2-${VERSION}.tar.bz2 ${USER}@mongrel2.org:/var/www/mongrel2.org/static/downloads/
 	md5sum mongrel2-${VERSION}.tar.bz2
 	curl http://mongrel2.org/static/downloads/mongrel2-${VERSION}.tar.bz2 | md5sum
 
