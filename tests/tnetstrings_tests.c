@@ -12,7 +12,8 @@ char *test_tnetstring_numbers()
 
     tns_value_t max = {.type = tns_tag_number, .value.number = LONG_MAX};
     result = tns_render(&max, &len);
-    mu_assert(len == 23, "Wrong length on LONG_MAX");
+    debug("Got a length from LONG_MAX of: %d", len);
+    mu_assert(len == 23 || len == 14, "Wrong length on LONG_MAX");
     free(result);
 
     // WARNING: LONG_MIN is an edge case
