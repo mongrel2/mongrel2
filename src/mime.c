@@ -77,9 +77,25 @@ error:
 
 bstring MIME_match_ext(bstring path, bstring def)
 {
-    bstring type = tst_search_suffix(MIME_MAP, bdata(path), blength(path));
+    bstring lower_path = NULL;
+    bstring type = NULL;
+    int rc = 0;
+
+    lower_path = bstrcpy(path);
+    check(lower_path != NULL, "failed to create lower_path");
+    rc = btolower(lower_path);
+    check(rc == 0, "failed to lower case lower_path");
+
+    type = tst_search_suffix(MIME_MAP, bdata(lower_path), blength(lower_path));
+    
+    bdestroy(lower_path);
+    lower_path = NULL;
 
     return type == NULL ? def : type;
+error:
+    if(lower_path != NULL)
+        bdestroy(lower_path);
+    return def;
 }
 
 void MIME_traverse_destroy(void *value, void *data)
