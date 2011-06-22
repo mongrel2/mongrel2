@@ -441,7 +441,7 @@ char *IOBuf_read_all(IOBuf *buf, int len, int retries)
     debug("ATTEMPTS: %d, RETRIES: %d", attempts, retries);
 
     if(attempts > retries) {
-        log_err("Read of %d length attempted %d times which is over %d retry limit..", len, attempts, retries);
+        log_warn("Read of %d length attempted %d times which is over %d retry limit..", len, attempts, retries);
     }
 
     check(IOBuf_read_commit(buf, len) != -1, "Final commit failed of read_all.");
