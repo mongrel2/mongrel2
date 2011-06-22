@@ -28,10 +28,10 @@ technologies. <img src="http://mongrel2.org/static/logo.png" align="right"></p>
 
 <h2><a name="download">Download</a></h2>
 
-<p>Mongrel2 is now 1.7.4:</p>
+<p>Mongrel2 is now 1.7.5:</p>
 
 <ul>
-    <li><a href="/static/downloads/mongrel2-1.7.4.tar.bz2">mongrel2-1.7.4.tar.bz2</a></li>
+    <li><a href="/static/downloads/mongrel2-1.7.5.tar.bz2">mongrel2-1.7.5.tar.bz2</a></li>
 </ul>
 
 
