@@ -125,7 +125,7 @@ int Upload_file(Connection *conn, Handler *handler, int content_len)
     return 0;
 
 error:
-    bdestroy(result);
+    if(result) bdestroy(result);
     fdclose(tmpfd);
 
     if(tmp_name != NULL) {
