@@ -337,7 +337,20 @@ UUID ID PATH SIZE:HEADERS,SIZE:BODY,
 
 That's obviously a much simpler way to specify the request than all those
 rules, but it also doesn't tell you why.  The above description, while
-boring as hell, tells you why each of these pieces exist.
+boring as hell, tells you why each of these pieces exist.  Also remember
+that this is a \emph{strict} format, so to be more precise it's:
+
+\begin{Verbatim}
+Identifier = digit+ ' '?;
+IdentList = (Identifier)**;
+Length = digit+;
+UUID = (alpha | digit | '-')+;
+Targets = Length ':' IdentList ",";
+Request = UUID ' ' Targets ' ';
+\end{Verbatim}
+
+Mongrel2 will strictly enforce this grammar and reject any 0mq messages that
+don't follow it.
 
 To parse this in Python we simply do this:
 
