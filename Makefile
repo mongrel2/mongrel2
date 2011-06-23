@@ -152,6 +152,7 @@ netbsd: dev
 
 freebsd: OPTFLAGS += -I/usr/local/include
 freebsd: OPTLIBS += -L/usr/local/lib -pthread
+freebsd: LIBS=-lzmq -lsqlite3 $(OPTLIBS)
 freebsd: all
 
 openbsd: OPTFLAGS += -I/usr/local/include
