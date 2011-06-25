@@ -147,6 +147,7 @@ release:
 
 netbsd: OPTFLAGS += -I/usr/local/include -I/usr/pkg/include
 netbsd: OPTLIBS += -L/usr/local/lib -L/usr/pkg/lib
+netbsd: LIBS=-lzmq -lsqlite3 $(OPTLIBS)
 netbsd: dev
 
 
