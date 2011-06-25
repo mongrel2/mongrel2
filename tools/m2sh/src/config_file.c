@@ -52,8 +52,12 @@ struct tagbstring CACHE_TTL = bsStatic("cache_ttl");
 int Dir_load(tst_t *settings, tst_t *params)
 {
     const char *base = AST_str(settings, params, "base", VAL_QSTRING);
+    tns_value_t *res = NULL;
 
-    tns_value_t *res = DB_exec(bdata(&DIR_SQL), base, 
+    check(base[0] != '/', "Don't start the base with / in %s; it will fail when not in chroot.", base);
+    check(base[strlen(base) - 1] == '/', "End directory base with / in %s or it won't work right.'", base);
+
+    res = DB_exec(bdata(&DIR_SQL), base,
             AST_str(settings, params, "index_file", VAL_QSTRING),
             AST_str(settings, params, "default_ctype", VAL_QSTRING));
     check(res != NULL, "Invalid database, couldn't query for directory: %s", base);
