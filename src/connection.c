@@ -464,6 +464,11 @@ int connection_error(Connection *conn)
     return close_or_error(conn, CLOSE);
 }
 
+static int Request_is_websocket(Request *req)
+{
+    debug("FLAGS: %x",req->ws_flags);
+    return req->ws_flags == 31 && biseqcstr(req->version, "HTTP/1.1");
+}
 
 int connection_identify_request(Connection *conn)
 {
@@ -486,6 +491,11 @@ int connection_identify_request(Connection *conn)
         conn->type = CONN_TYPE_MSG;
         taskname("MSG");
         next = MSG_REQ;
+    } else if(Request_is_websocket(conn->req)) {
+        debug("WEBSOCKET MESSAGE");
+        conn->type = MSG_REQ;
+        taskname("WS");
+        next = WS_HANDSHAKE;
     } else if(Request_is_http(conn->req)) {
         debug("HTTP MESSAGE");
         conn->type = CONN_TYPE_HTTP;
