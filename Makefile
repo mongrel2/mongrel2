@@ -158,6 +158,7 @@ freebsd: all
 
 openbsd: OPTFLAGS += -I/usr/local/include
 openbsd: OPTLIBS += -L/usr/local/lib -pthread
+openbsd: LIBS=-lzmq -lsqlite3 $(OPTLIBS)
 openbsd: all
 
 solaris: OPTFLAGS += -I/usr/local/include
