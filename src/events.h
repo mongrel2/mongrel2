@@ -53,7 +53,7 @@ typedef enum StateEvent {
     RESP_SENT=112,
     SOCKET_REQ=113,
     TIMEOUT=114,
-    WS_HANDSHAKE=115,
+    WS_REQ=115,
     EVENT_END=116
 } StateEvent ;
 

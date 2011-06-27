@@ -495,7 +495,7 @@ int connection_identify_request(Connection *conn)
         debug("WEBSOCKET MESSAGE");
         conn->type = MSG_REQ;
         taskname("WS");
-        next = WS_HANDSHAKE;
+        next = WS_REQ;
     } else if(Request_is_http(conn->req)) {
         debug("HTTP MESSAGE");
         conn->type = CONN_TYPE_HTTP;
@@ -522,6 +522,12 @@ int connection_parse(Connection *conn)
     }
 }
 
+int connection_websocket_established(Connection *conn)
+{
+    debug("WS Established");
+    return 0;
+}
+
 StateActions CONN_ACTIONS = {
     .error = connection_error,
     .close = connection_close,
@@ -538,7 +544,8 @@ StateActions CONN_ACTIONS = {
     .proxy_failed = connection_proxy_failed,
     .proxy_reply_parse = connection_proxy_reply_parse,
     .proxy_req_parse = connection_proxy_req_parse,
-    .proxy_close = connection_proxy_close
+    .proxy_close = connection_proxy_close,
+    .websocket_established = connection_websocket_established
 };
 
 
