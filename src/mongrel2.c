@@ -327,6 +327,7 @@ void servertask(void *data)
         log_info("Starting " VERSION ". Copyright (C) Zed A. Shaw. Licensed BSD.");
         Server_start(SERVER);
         task_clear_signal();
+
         if(RELOAD) {
             log_info("Reload requested, will load %s from %s", bdata(srv->db_file), bdata(srv->server_id));
             Server *new_srv = reload_server(SERVER, bdata(srv->db_file), bdata(srv->server_id));
