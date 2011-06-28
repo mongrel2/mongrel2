@@ -141,7 +141,8 @@ const char *EVENT_NAMES[] = {
     "REQ_SENT",
     "RESP_SENT",
     "SOCKET_REQ",
-    "TIMEOUT"};
+    "TIMEOUT",
+    "WS_REQ"};
 
 const char *State_event_name(int event)
 {
