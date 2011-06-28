@@ -1,4 +1,6 @@
 #include <websocket.h>
+
+struct tagbstring WS_REQ_METHOD = bsStatic("HYBI");
 struct tagbstring WS_CONNECTION = bsStatic("connection");
 struct tagbstring WS_UPGRADE = bsStatic("upgrade");
 struct tagbstring WS_WEBSOCKET = bsStatic("websocket");

@@ -3,12 +3,47 @@
 
 #include <bstring.h>
 
+extern struct tagbstring WS_REQ_METHOD;
 extern struct tagbstring WS_CONNECTION;
 extern struct tagbstring WS_UPGRADE;
 extern struct tagbstring WS_WEBSOCKET;
 extern struct tagbstring WS_HOST;
 extern struct tagbstring WS_SEC_WS_KEY;
 extern struct tagbstring WS_SEC_WS_VER;
+
+static inline int64_t Websocket_packet_length(const unsigned char *data, int avail) {
+    uint64_t len;
+    unsigned mask;
+
+    if (avail < 2) return -1;
+    len = (data[1] & 0x7f);
+    mask = ((data[1] & 0x80) != 0);
+
+    if (len<126) {
+        len = len+2;
+    }
+    else if (len == 126) {
+       if (avail < 4) return -1;
+       len = (data[2] << 8) | data[3];
+       len +=4;
+    }
+    else {
+        if (avail < 10) return -1;
+        if (data[2]&0x80) return -2;
+        len  = ((uint64_t) data[2]) << 56 |
+            ((uint64_t) data[3]) << 48 |
+            ((uint64_t) data[4]) << 40 |
+            ((uint64_t) data[5]) << 32 |
+            ((uint64_t) data[6]) << 24 |
+            ((uint64_t) data[7]) << 16 |
+            ((uint64_t) data[8]) << 8  |
+            ((uint64_t) data[9]);
+        len +=10;
+    }
+    if(mask) len+=4;
+    if(len&0x8000000000000000ULL) return -2;
+    return len;
+}
 
 enum Ws_Flags {
  WSFLAG_CONN=1,

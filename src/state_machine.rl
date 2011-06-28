@@ -95,7 +95,10 @@ Connection = (
 
         WSRouting: ( HANDLER @http_to_handler -> WSEstablished ),
 
-        WSEstablished: ( REQ_SENT @websocket_established -> WSEstablished ),
+        WSEstablished: (
+            REQ_SENT @websocket_established -> WSEstablished |
+            CLOSE @close -> final
+        ),
 
         HTTPRouting: (
             HANDLER @http_to_handler -> Queueing |

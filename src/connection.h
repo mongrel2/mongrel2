@@ -66,6 +66,7 @@ typedef struct Connection {
     int type;
     hash_t *filter_state;
     char remote[IPADDR_SIZE+1];
+    Handler *handler;
 } Connection;
 
 void Connection_destroy(Connection *conn);
