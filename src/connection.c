@@ -232,7 +232,9 @@ int connection_http_to_handler(Connection *conn)
     // WebSocket detection
     if(is_websocket(conn)) {
         content_len = IOBuf_avail(conn->iob);
-        check(content_len == WEBSOCKET_ARBITRARY_BODY_SIZE, "Purported websocket but body does not have 8 bytes");
+        //TODO check for websocket here instead?
+        //We can return something other than REQ_SENT and pollute the state
+        //machine less
     }
 
     if(content_len == 0) {
@@ -493,7 +495,7 @@ int connection_identify_request(Connection *conn)
         next = MSG_REQ;
     } else if(Request_is_websocket(conn->req)) {
         debug("WEBSOCKET MESSAGE");
-        conn->type = MSG_REQ;
+        conn->type = CONN_TYPE_MSG;
         taskname("WS");
         next = WS_REQ;
     } else if(Request_is_http(conn->req)) {
