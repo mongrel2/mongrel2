@@ -271,7 +271,7 @@ void Server_start(Server *srv)
 
     log_info("Starting server on port %d", srv);
 
-    while(RUNNING || !task_was_signaled()) {
+    while(RUNNING) {
         cfd = netaccept(srv->listen_fd, remote, &rport);
         int accept_good = 0;
 
