@@ -230,6 +230,9 @@ int connection_http_to_handler(Connection *conn)
     // we don't need the header anymore, so commit the buffer and deal with the body
     check(IOBuf_read_commit(conn->iob, Request_header_length(conn->req)) != -1, "Finaly commit failed streaming the connection to http handlers.");
 
+    if(is_websocket(conn)) {
+        content_len=0;
+    }
 
     if(content_len == 0) {
         body = "";
@@ -499,7 +502,7 @@ int connection_identify_request(Connection *conn)
         next = MSG_REQ;
     } else if(Request_is_websocket(conn->req)) {
         debug("WEBSOCKET MESSAGE");
-        conn->type = CONN_TYPE_MSG;
+        conn->type = CONN_TYPE_SOCKET;
         taskname("WS");
         next = WS_REQ;
     } else if(Request_is_http(conn->req)) {
