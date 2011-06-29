@@ -497,8 +497,6 @@ int connection_identify_request(Connection *conn)
 {
     int next = CLOSE;
 
-    debug("Identify Request");
-
     if(Request_is_xml(conn->req)) {
         if(biseq(Request_path(conn->req), &POLICY_XML_REQUEST)) {
             debug("XML POLICY CONNECTION");
