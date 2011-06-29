@@ -208,14 +208,35 @@ error:
 }
 
 
-static struct tagbstring UPGRADE = bsStatic("upgrade");
-static struct tagbstring CONNECTION = bsStatic("connection");
-const int WEBSOCKET_ARBITRARY_BODY_SIZE = 8;
+static int Request_is_websocket(Request *req)
+{
+    bstring upgrade,connection;
+
+    if(req->ws_flags != 0)
+    {
+        return req->ws_flags == 1;
+    }
+
+    if (Request_get(req, &WS_SEC_WS_KEY) !=NULL &&
+        Request_get(req, &WS_SEC_WS_VER) !=NULL &&
+        Request_get(req, &WS_HOST) !=NULL &&
+        (upgrade = Request_get(req, &WS_UPGRADE)) != NULL &&
+        (connection = Request_get(req, &WS_CONNECTION)) != NULL)
+    {
+        if (BSTR_ERR != binstrcaseless(connection,0,&WS_UPGRADE) &&
+                !bstrcmp(upgrade,&WS_WEBSOCKET))
+        {
+            req->ws_flags =1;
+            return 1;
+        }
+    }
+    req->ws_flags =2;
+    return 0;
+}
 
 static inline int is_websocket(Connection *conn)
 {
-    return Request_get(conn->req, &UPGRADE) != NULL && 
-        Request_get(conn->req, &CONNECTION) != NULL;
+    return Request_is_websocket(conn->req);
 }
 
 int connection_http_to_handler(Connection *conn)
@@ -255,11 +276,10 @@ int connection_http_to_handler(Connection *conn)
     if(is_websocket(conn)) {
         conn->handler = handler;
         bdestroy(conn->req->request_method);
+        //We set this *after* passing the handshake to the handler so that the
+        //handshake has the actual request method (hopefully GET) sent to
+        //the handler
         conn->req->request_method=bfromcstr("WEBSOCKET");
-        //TODO check for websocket here instead?
-        //We can return something other than REQ_SENT and pollute the state
-        //machine less
-        //BUG must do above now or Bad Things will happen
     }
     Log_request(conn, 200, content_len);
 
@@ -473,15 +493,11 @@ int connection_error(Connection *conn)
     return close_or_error(conn, CLOSE);
 }
 
-static int Request_is_websocket(Request *req)
-{
-    debug("FLAGS: %x",req->ws_flags);
-    return req->ws_flags == 31 && biseqcstr(req->version, "HTTP/1.1");
-}
-
 int connection_identify_request(Connection *conn)
 {
     int next = CLOSE;
+
+    debug("Identify Request");
 
     if(Request_is_xml(conn->req)) {
         if(biseq(Request_path(conn->req), &POLICY_XML_REQUEST)) {

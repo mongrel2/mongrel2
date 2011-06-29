@@ -139,32 +139,6 @@ static void header_field_cb(void *data, const char *field, size_t flen,
         bstring fstr = blk2bstr(field, flen);
         btolower(fstr);
 
-        /*
-        {
-            char *f=bstr2cstr(fstr,1);
-            char *v=bstr2cstr(vstr,1);
-            debug("F: %s V: %s\n",f,v);
-            bcstrfree(f);
-            bcstrfree(v);
-        } */
-        /*I can do it this way, or I can check the hash table later
-         * TODO which is better? bstrcmp is fast if the lengths are different
-         */
-        if(0 == bstrcmp(fstr,&WS_CONNECTION)
-                /* BUG this doesn't do the right thing */
-                && BSTR_ERR != binstrcaseless(vstr,0,&WS_UPGRADE)) {
-            req->ws_flags |= WSFLAG_CONN;
-        } else if (0 == bstrcmp(fstr,&WS_UPGRADE) &&
-                 0 == bstrcmp(vstr,&WS_WEBSOCKET)) {
-            req->ws_flags |= WSFLAG_UPGRADE;
-        } else if (0 == bstrcmp(fstr,&WS_HOST)) {
-            req->ws_flags |= WSFLAG_HOST;
-        } else if (0 == bstrcmp(fstr,&WS_SEC_WS_KEY)){
-            req->ws_flags |= WSFLAG_SEC_KEY;
-        } else if (0 == bstrcmp(fstr,&WS_SEC_WS_VER)){
-            req->ws_flags |= WSFLAG_SEC_VER;
-        }
-
         Request_set(req, fstr, vstr, 0);
     }
 }
