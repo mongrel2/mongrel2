@@ -35,6 +35,7 @@
 #include <assert.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <limits.h>
 
 #include "connection.h"
 #include "http11/httpclient_parser.h"
@@ -49,7 +50,7 @@
 #include "log.h"
 #include "upload.h"
 #include "filter.h"
-
+#include "websocket.h"
 struct tagbstring PING_PATTERN = bsStatic("@[a-z/]- {\"type\":\\s*\"ping\"}");
 
 struct tagbstring POLICY_XML_REQUEST = bsStatic("<policy-file-request");
@@ -207,14 +208,35 @@ error:
 }
 
 
-static struct tagbstring UPGRADE = bsStatic("upgrade");
-static struct tagbstring CONNECTION = bsStatic("connection");
-const int WEBSOCKET_ARBITRARY_BODY_SIZE = 8;
+static int Request_is_websocket(Request *req)
+{
+    bstring upgrade,connection;
+
+    if(req->ws_flags != 0)
+    {
+        return req->ws_flags == 1;
+    }
+
+    if (Request_get(req, &WS_SEC_WS_KEY) !=NULL &&
+        Request_get(req, &WS_SEC_WS_VER) !=NULL &&
+        Request_get(req, &WS_HOST) !=NULL &&
+        (upgrade = Request_get(req, &WS_UPGRADE)) != NULL &&
+        (connection = Request_get(req, &WS_CONNECTION)) != NULL)
+    {
+        if (BSTR_ERR != binstrcaseless(connection,0,&WS_UPGRADE) &&
+                !bstrcmp(upgrade,&WS_WEBSOCKET))
+        {
+            req->ws_flags =1;
+            return 1;
+        }
+    }
+    req->ws_flags =2;
+    return 0;
+}
 
 static inline int is_websocket(Connection *conn)
 {
-    return Request_get(conn->req, &UPGRADE) != NULL && 
-        Request_get(conn->req, &CONNECTION) != NULL;
+    return Request_is_websocket(conn->req);
 }
 
 int connection_http_to_handler(Connection *conn)
@@ -229,10 +251,8 @@ int connection_http_to_handler(Connection *conn)
     // we don't need the header anymore, so commit the buffer and deal with the body
     check(IOBuf_read_commit(conn->iob, Request_header_length(conn->req)) != -1, "Finaly commit failed streaming the connection to http handlers.");
 
-    // WebSocket detection
     if(is_websocket(conn)) {
-        content_len = IOBuf_avail(conn->iob);
-        check(content_len == WEBSOCKET_ARBITRARY_BODY_SIZE, "Purported websocket but body does not have 8 bytes");
+        content_len=0;
     }
 
     if(content_len == 0) {
@@ -252,6 +272,15 @@ int connection_http_to_handler(Connection *conn)
         check_debug(rc == 0, "Failed to deliver to the handler.");
     }
 
+    // WebSocket detection
+    if(is_websocket(conn)) {
+        conn->handler = handler;
+        bdestroy(conn->req->request_method);
+        //We set this *after* passing the handshake to the handler so that the
+        //handshake has the actual request method (hopefully GET) sent to
+        //the handler
+        conn->req->request_method=bfromcstr("WEBSOCKET");
+    }
     Log_request(conn, 200, content_len);
 
     return REQ_SENT;
@@ -464,7 +493,6 @@ int connection_error(Connection *conn)
     return close_or_error(conn, CLOSE);
 }
 
-
 int connection_identify_request(Connection *conn)
 {
     int next = CLOSE;
@@ -486,6 +514,11 @@ int connection_identify_request(Connection *conn)
         conn->type = CONN_TYPE_MSG;
         taskname("MSG");
         next = MSG_REQ;
+    } else if(Request_is_websocket(conn->req)) {
+        debug("WEBSOCKET MESSAGE");
+        conn->type = CONN_TYPE_SOCKET;
+        taskname("WS");
+        next = WS_REQ;
     } else if(Request_is_http(conn->req)) {
         debug("HTTP MESSAGE");
         conn->type = CONN_TYPE_HTTP;
@@ -512,6 +545,59 @@ int connection_parse(Connection *conn)
     }
 }
 
+
+
+int Connection_read_wspacket(Connection *conn)
+{
+    char *body=NULL;
+    char *data = IOBuf_start(conn->iob);
+    int avail = IOBuf_avail(conn->iob);
+    int64_t packet_length=-1;
+    int smaller_packet_length;
+    int tries = 0;
+    int rc=0;
+
+    for(tries = 0; packet_length == -1 && tries < CLIENT_READ_RETRIES; tries++) {
+        if(avail > 0) {
+            packet_length = Websocket_packet_length((unsigned char *)data, avail);
+        }
+
+        if(packet_length == -1) {
+            data = IOBuf_read_some(conn->iob, &avail);
+            check_debug(!IOBuf_closed(conn->iob), "Client closed during read.");
+        }
+    }
+    check(packet_length > 0,"Error receiving websocket packet header.")
+    check(packet_length <= MAX_CONTENT_LENGTH,"Received too-large websocket packet.");
+
+    check_debug(packet_length <= INT_MAX,"Websocket packet longer than MAXINT.");
+
+    smaller_packet_length = (int)packet_length;
+
+    body = IOBuf_read_all(conn->iob,packet_length,CLIENT_READ_RETRIES);
+    check(body != NULL, "Client closed the connection during websocket packet.");
+
+    rc = Connection_send_to_handler(conn, conn->handler, body, smaller_packet_length);
+    check_debug(rc == 0, "Failed to deliver to the handler.");
+
+    return packet_length;
+
+error:
+    return -1;
+
+}
+int connection_websocket_established(Connection *conn)
+{
+    if(Connection_read_wspacket(conn) > 0) {
+        return REQ_SENT;
+    } else {
+        return CLOSE;
+    }
+
+    debug("WS Established");
+    return 0;
+}
+
 StateActions CONN_ACTIONS = {
     .error = connection_error,
     .close = connection_close,
@@ -528,7 +614,8 @@ StateActions CONN_ACTIONS = {
     .proxy_failed = connection_proxy_failed,
     .proxy_reply_parse = connection_proxy_reply_parse,
     .proxy_req_parse = connection_proxy_req_parse,
-    .proxy_close = connection_proxy_close
+    .proxy_close = connection_proxy_close,
+    .websocket_established = connection_websocket_established
 };
 
 

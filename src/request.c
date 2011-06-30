@@ -46,6 +46,7 @@
 #include "dbg.h"
 #include "request.h"
 #include "tnetstrings.h"
+#include "websocket.h"
 
 int MAX_HEADER_COUNT=0;
 int MAX_DUPE_HEADERS=5;
@@ -229,6 +230,7 @@ static inline void Request_nuke_parts(Request *req)
     req->response_size = 0;
     req->parser.json_sent = 0;
     req->parser.xml_sent = 0;
+    req->ws_flags=0;
 }
 
 void Request_destroy(Request *req)
