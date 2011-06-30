@@ -62,7 +62,7 @@ int MURDER;
 struct tagbstring PRIV_DIR = bsStatic("/");
 
 Server *SERVER = NULL;
-
+Task *SERVER_TASK = NULL;
 
 void terminate(int s)
 {
@@ -70,9 +70,13 @@ void terminate(int s)
     switch(s)
     {
         case SIGHUP:
-            RELOAD = 1;
-            RUNNING = 0;
-            log_info("RELOAD REQUESTED, I'll do it on the next request.");
+            if(!RELOAD) {
+                RELOAD = 1;
+                RUNNING = 0;
+                if(SERVER_TASK) {
+                    tasksignal(SERVER_TASK, s);
+                }
+            }
             break;
         default:
             if(!RUNNING) {
@@ -309,6 +313,41 @@ error:
 
 const int TICKER_TASK_STACK = 16 * 1024;
 
+struct ServerTask {
+    bstring db_file;
+    bstring server_id;
+};
+
+void servertask(void *data)
+{
+    SERVER_TASK = taskself();
+    struct ServerTask *srv = data;
+
+    while(1) {
+        log_info("Starting " VERSION ". Copyright (C) Zed A. Shaw. Licensed BSD.");
+        Server_start(SERVER);
+        task_clear_signal();
+
+        if(RELOAD) {
+            log_info("Reload requested, will load %s from %s", bdata(srv->db_file), bdata(srv->server_id));
+            Server *new_srv = reload_server(SERVER, bdata(srv->db_file), bdata(srv->server_id));
+            check(new_srv, "Failed to load the new configuration, exiting.");
+
+            // for this to work handlers need to die more gracefully
+            SERVER = new_srv;
+        } else {
+            log_info("Shutdown requested, goodbye.");
+            break;
+        }
+    }
+
+    complete_shutdown(SERVER);
+
+    taskexit(0);
+error:
+    taskexit(1);
+}
+
 void taskmain(int argc, char **argv)
 {
     dbg_set_log(stderr);
@@ -338,25 +377,11 @@ void taskmain(int argc, char **argv)
 
     Control_port_start();
     taskcreate(tickertask, NULL, TICKER_TASK_STACK);
+    struct ServerTask *srv_data = calloc(1, sizeof(struct ServerTask));
+    srv_data->db_file = bfromcstr(argv[1]);
+    srv_data->server_id = bfromcstr(argv[2]);
+    taskcreate(servertask, srv_data, 100 * 1024);
 
-    while(1) {
-        log_info("Starting " VERSION ". Copyright (C) Zed A. Shaw. Licensed BSD.");
-        Server_start(SERVER);
-
-        if(RELOAD) {
-            log_info("Reload requested, will load %s from %s", argv[2], argv[1]);
-            Server *new_srv = reload_server(SERVER, argv[1], argv[2]);
-            check(new_srv, "Failed to load the new configuration, exiting.");
-
-            // for this to work handlers need to die more gracefully
-            SERVER = new_srv;
-        } else {
-            log_info("Shutdown requested, goodbye.");
-            break;
-        }
-    }
-
-    complete_shutdown(SERVER);
     return;
 
 error:

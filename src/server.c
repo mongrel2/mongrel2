@@ -269,7 +269,7 @@ void Server_start(Server *srv)
     char remote[IPADDR_SIZE];
     taskname("SERVER");
 
-    log_info("Starting server on port %d", srv->port);
+    log_info("Starting server on port %d", srv);
 
     while(RUNNING) {
         cfd = netaccept(srv->listen_fd, remote, &rport);
