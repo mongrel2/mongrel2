@@ -143,9 +143,7 @@ Server *load_server(const char *db_file, const char *server_uuid, Server *old_sr
         check(srv->listen_fd >= 0, "Can't announce on TCP port %d", srv->port);
         check(fdnoblock(srv->listen_fd) == 0, "Failed to set listening port %d nonblocking.", srv->port);
     } else {
-        srv->listen_fd = dup(old_srv->listen_fd);
-        check(srv->listen_fd != -1, "Failed to dup the socket from the running server.");
-        fdclose(old_srv->listen_fd);
+        srv->listen_fd = old_srv->listen_fd;
     }
 
     check(Server_start_handlers(srv, old_srv) == 0, "Failed to start handlers.");

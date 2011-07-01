@@ -262,7 +262,7 @@ void Server_init()
 }
 
 
-static inline int Server_accept(Server *srv)
+static inline int Server_accept(int listen_fd, darray_t *server_stack)
 {
     int cfd = -1;
     int rport = -1;
@@ -270,8 +270,11 @@ static inline int Server_accept(Server *srv)
     int rc = 0;
     Connection *conn = NULL;
 
-    cfd = netaccept(srv->listen_fd, remote, &rport);
+    cfd = netaccept(listen_fd, remote, &rport);
     check(cfd >= 0, "Failed to accept on listening socket.");
+
+    Server *srv = darray_last(server_stack);
+    check(srv != NULL, "Failed to get a server from the configured queue.");
 
     conn = Connection_create(srv, cfd, rport, remote);
     check(conn != NULL, "Failed to create connection after accept.");
@@ -290,18 +293,16 @@ error:
 
 int Server_run(darray_t *server_stack)
 {
-    Server *srv = darray_last(server_stack);
-    check(srv != NULL, "Last element of server stack was NULL, tell Zed.");
     int rc = 0;
+    Server *srv = darray_last(server_stack);
+    check(srv != NULL, "Failed to get a server from the configured queue.");
+    // TODO: this shouldn't change so let's assert that to be true
+    int listen_fd = srv->listen_fd;
 
     taskname("SERVER");
-    log_info("Starting server on port %d", srv->port);
 
     while(RUNNING) {
-        srv = darray_last(server_stack);
-        check(srv != NULL, "Last element of server stack was NULL, tell Zed.");
-
-        rc = Server_accept(srv);
+        rc = Server_accept(listen_fd, server_stack);
 
         if(rc == -1 && RUNNING) {
             log_err("Server accept failed, attempting to clear out dead weight: %d", RUNNING);
@@ -314,7 +315,6 @@ int Server_run(darray_t *server_stack)
     }
 
     return 0;
-
 error:
     return -1;
 }
