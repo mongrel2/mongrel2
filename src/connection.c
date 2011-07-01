@@ -691,14 +691,17 @@ void Connection_task(void *v)
     State_init(&conn->state, &CONN_ACTIONS);
 
     for(i = 0, next = OPEN; next != CLOSE; i++) {
-
         if(Filter_activated()) {
             next = Filter_run(next, conn);
             check(next >= CLOSE && next < EVENT_END,
                     "!!! Invalid next event[%d]: %d from filter!", i, next);
         }
 
+        log_info(">>>>>> EXECUTE STATE: state=%d, conn=%p, server=%p, conn->fd=%d, server->listen_fd=%d",
+                next, conn, conn->server, conn->iob->fd, conn->server->listen_fd);
         next = State_exec(&conn->state, next, (void *)conn);
+        log_info("<<<<<< EXIT STATE: state=%d, conn=%p, server=%p, conn->fd=%d, server->listen_fd=%d",
+                next, conn, conn->server, conn->iob->fd, conn->server->listen_fd);
 
         check(next >= CLOSE && next < EVENT_END,
                 "!!! Invalid next event[%d]: %d, Tell ZED!", i, next);
