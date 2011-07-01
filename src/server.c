@@ -262,47 +262,62 @@ void Server_init()
 }
 
 
-void Server_start(Server *srv)
+static inline int Server_accept(Server *srv)
 {
     int cfd = -1;
     int rport = -1;
     char remote[IPADDR_SIZE];
-    taskname("SERVER");
+    int rc = 0;
+    Connection *conn = NULL;
 
-    log_info("Starting server on port %d", srv);
+    cfd = netaccept(srv->listen_fd, remote, &rport);
+    check(cfd >= 0, "Failed to accept on listening socket.");
+
+    conn = Connection_create(srv, cfd, rport, remote);
+    check(conn != NULL, "Failed to create connection after accept.");
+
+    rc = Connection_accept(conn);
+    check(rc == 0, "Failed to register connection, overloaded.");
+
+    return 0;
+
+error:
+
+    if(conn != NULL) Connection_destroy(conn);
+    return -1;
+}
+
+
+int Server_run(darray_t *server_stack)
+{
+    Server *srv = darray_last(server_stack);
+    check(srv != NULL, "Last element of server stack was NULL, tell Zed.");
+    int rc = 0;
+
+    taskname("SERVER");
+    log_info("Starting server on port %d", srv->port);
 
     while(RUNNING) {
-        cfd = netaccept(srv->listen_fd, remote, &rport);
-        int accept_good = 0;
+        srv = darray_last(server_stack);
+        check(srv != NULL, "Last element of server stack was NULL, tell Zed.");
 
-        if(cfd >= 0) {
-            Connection *conn = Connection_create(srv, cfd, rport, remote);
+        rc = Server_accept(srv);
 
-            if(Connection_accept(conn) != 0) {
-                log_err("Failed to register connection, overloaded.");
-                Connection_destroy(conn);
-                accept_good = 0;
-            } else {
-                accept_good = 1;
-            }
-        } else {
-            accept_good = 0;
-        }
-
-        if(!accept_good) {
+        if(rc == -1 && RUNNING) {
+            log_err("Server accept failed, attempting to clear out dead weight: %d", RUNNING);
             int cleared = Register_cleanout();
 
             if(cleared == 0) {
                 taskdelay(1000);
             }
-        } // else nothing
+        }
     }
 
-    debug("SERVER EXITED with error: %s and return value: %d", strerror(errno), cfd);
+    return 0;
 
-    return;
+error:
+    return -1;
 }
-
 
 
 int Server_add_host(Server *srv, Host *host)

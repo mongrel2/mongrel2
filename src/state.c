@@ -294,8 +294,10 @@ st11:
 		goto _test_eof11;
 case 11:
 #line 297 "src/state.c"
-	if ( (*p) == 111 )
-		goto tr14;
+	switch( (*p) ) {
+		case 100: goto tr1;
+		case 111: goto tr14;
+	}
 	goto tr0;
 st12:
 	if ( ++p == pe )
@@ -314,7 +316,7 @@ st13:
 	if ( ++p == pe )
 		goto _test_eof13;
 case 13:
-#line 318 "src/state.c"
+#line 320 "src/state.c"
 	switch( (*p) ) {
 		case 109: goto tr18;
 		case 111: goto tr19;
@@ -332,7 +334,7 @@ st14:
 	if ( ++p == pe )
 		goto _test_eof14;
 case 14:
-#line 336 "src/state.c"
+#line 338 "src/state.c"
 	if ( (*p) == 100 )
 		goto tr20;
 	goto tr0;
@@ -355,7 +357,7 @@ st15:
 	if ( ++p == pe )
 		goto _test_eof15;
 case 15:
-#line 359 "src/state.c"
+#line 361 "src/state.c"
 	goto tr0;
 tr19:
 #line 70 "src/state.rl"
@@ -365,7 +367,7 @@ st16:
 	if ( ++p == pe )
 		goto _test_eof16;
 case 16:
-#line 369 "src/state.c"
+#line 371 "src/state.c"
 	switch( (*p) ) {
 		case 109: goto tr18;
 		case 110: goto tr21;
@@ -379,7 +381,7 @@ st17:
 	if ( ++p == pe )
 		goto _test_eof17;
 case 17:
-#line 383 "src/state.c"
+#line 385 "src/state.c"
 	switch( (*p) ) {
 		case 102: goto tr22;
 		case 104: goto tr22;
@@ -431,7 +433,7 @@ case 17:
 #line 51 "src/state.rl"
 	{ CALL(error, (*p)); }
 	break;
-#line 435 "src/state.c"
+#line 437 "src/state.c"
 	}
 	}
 

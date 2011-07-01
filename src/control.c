@@ -46,7 +46,6 @@
 #include "tnetstrings_impl.h"
 #include "version.h"
 
-extern Server *SERVER;
 
 static void cstr_free(void *data, void *hint)
 {
@@ -301,21 +300,23 @@ struct tagbstring INFO_HEADERS = bsStatic("92:4:port,9:bind_addr,4:uuid,6:chroot
 
 tns_value_t *info_cb(bstring name, hash_t *args)
 {
+    Server *srv = darray_last(SERVER_QUEUE);
+
     if(biseqcstr(name, "time")) {
         return basic_response(bfromcstr("time"), bformat("%d", (int)time(NULL)));
     } else if(biseqcstr(name, "uuid")) {
-        return basic_response(bfromcstr("uuid"), bstrcpy(SERVER->uuid));
+        return basic_response(bfromcstr("uuid"), bstrcpy(srv->uuid));
     } else {
         tns_value_t *rows = tns_new_list();
         tns_value_t *cols = tns_new_list();
-        tns_add_to_list(cols, tns_new_integer(SERVER->port));
-        tns_list_addstr(cols, SERVER->bind_addr);
-        tns_list_addstr(cols, SERVER->uuid);
-        tns_list_addstr(cols, SERVER->chroot);
-        tns_list_addstr(cols, SERVER->access_log);
-        tns_list_addstr(cols, SERVER->error_log);
-        tns_list_addstr(cols, SERVER->pid_file);
-        tns_list_addstr(cols, SERVER->default_hostname);
+        tns_add_to_list(cols, tns_new_integer(srv->port));
+        tns_list_addstr(cols, srv->bind_addr);
+        tns_list_addstr(cols, srv->uuid);
+        tns_list_addstr(cols, srv->chroot);
+        tns_list_addstr(cols, srv->access_log);
+        tns_list_addstr(cols, srv->error_log);
+        tns_list_addstr(cols, srv->pid_file);
+        tns_list_addstr(cols, srv->default_hostname);
 
         tns_add_to_list(rows, cols);
         return tns_standard_table(&INFO_HEADERS, rows);

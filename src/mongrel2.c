@@ -44,7 +44,7 @@
 #include "task/task.h"
 #include "config/config.h"
 #include "config/db.h"
-#include "adt/list.h"
+#include "adt/darray.h"
 #include "unixy.h"
 #include "mime.h"
 #include "superpoll.h"
@@ -61,7 +61,7 @@ int MURDER;
 
 struct tagbstring PRIV_DIR = bsStatic("/");
 
-Server *SERVER = NULL;
+darray_t *SERVER_QUEUE = NULL;
 Task *SERVER_TASK = NULL;
 
 void terminate(int s)
@@ -85,7 +85,11 @@ void terminate(int s)
             } else {
                 RUNNING = 0;
                 log_info("SHUTDOWN REQUESTED: %s", MURDER ? "MURDER" : "GRACEFUL (SIGINT again to EXIT NOW)");
-                fdclose(SERVER->listen_fd);
+                Server *srv = darray_last(SERVER_QUEUE);
+
+                if(srv != NULL) {
+                    fdclose(srv->listen_fd);
+                }
             }
             break;
     }
@@ -248,7 +252,8 @@ void final_setup()
     start_terminator();
     Server_init();
     bstring end_point = bfromcstr("inproc://access_log");
-    Log_init(bstrcpy(SERVER->access_log), end_point);
+    Server *srv = darray_last(SERVER_QUEUE);
+    Log_init(bstrcpy(srv->access_log), end_point);
 }
 
 
@@ -324,24 +329,23 @@ void servertask(void *data)
     struct ServerTask *srv = data;
 
     while(1) {
+        taskswitch();
         log_info("Starting " VERSION ". Copyright (C) Zed A. Shaw. Licensed BSD.");
-        Server_start(SERVER);
         task_clear_signal();
 
         if(RELOAD) {
             log_info("Reload requested, will load %s from %s", bdata(srv->db_file), bdata(srv->server_id));
-            Server *new_srv = reload_server(SERVER, bdata(srv->db_file), bdata(srv->server_id));
+            Server *old_srv = darray_last(SERVER_QUEUE);
+            Server *new_srv = reload_server(old_srv, bdata(srv->db_file), bdata(srv->server_id));
             check(new_srv, "Failed to load the new configuration, exiting.");
 
             // for this to work handlers need to die more gracefully
-            SERVER = new_srv;
+            darray_push(SERVER_QUEUE, new_srv);
         } else {
             log_info("Shutdown requested, goodbye.");
             break;
         }
     }
-
-    complete_shutdown(SERVER);
 
     taskexit(0);
 error:
@@ -356,31 +360,43 @@ void taskmain(int argc, char **argv)
     check(argc == 3 || argc == 4, "usage: mongrel2 config.sqlite server_uuid [config_module.so]");
 
     if(argc == 4) {
-        log_info("Using configuration module %s to load configs.",
-                argv[3]);
+        log_info("Using configuration module %s to load configs.", argv[3]);
         rc = Config_module_load(argv[3]);
         check(rc != -1, "Failed to load the config module: %s", argv[3]);
     }
 
-    SERVER = load_server(argv[1], argv[2], NULL);
-    check(SERVER, "Aborting since can't load server.");
+    SERVER_QUEUE = darray_create(sizeof(Server), 100);
+    check_mem(SERVER_QUEUE);
+
+    Server *srv = load_server(argv[1], argv[2], NULL);
+    check(srv != NULL, "Aborting since can't load server.");
+    darray_push(SERVER_QUEUE, srv);
 
     SuperPoll_get_max_fd();
 
-    rc = clear_pid_file(SERVER);
+    rc = clear_pid_file(srv);
     check(rc == 0, "PID file failure, aborting rather than trying to start.");
 
-    rc = attempt_chroot_drop(SERVER);
+    rc = attempt_chroot_drop(srv);
     check(rc == 0, "Major failure in chroot/droppriv, aborting."); 
 
     final_setup();
 
     Control_port_start();
+
     taskcreate(tickertask, NULL, TICKER_TASK_STACK);
+
     struct ServerTask *srv_data = calloc(1, sizeof(struct ServerTask));
     srv_data->db_file = bfromcstr(argv[1]);
     srv_data->server_id = bfromcstr(argv[2]);
+
     taskcreate(servertask, srv_data, 100 * 1024);
+
+    Server_run(SERVER_QUEUE);
+    log_info("Server run exited, goodbye.");
+
+    srv = darray_last(SERVER_QUEUE);
+    complete_shutdown(srv);
 
     return;
 
