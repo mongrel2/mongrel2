@@ -61,7 +61,6 @@ int MURDER;
 
 struct tagbstring PRIV_DIR = bsStatic("/");
 
-darray_t *SERVER_QUEUE = NULL;
 Task *SERVER_TASK = NULL;
 
 void terminate(int s)

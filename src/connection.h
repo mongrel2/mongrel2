@@ -53,7 +53,6 @@ enum {
 };
 
 typedef struct Connection {
-    Server *server;
     Request *req;
 
     IOBuf *iob;

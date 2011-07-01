@@ -47,6 +47,7 @@
 #include "config/config.h"
 #include <signal.h>
 
+darray_t *SERVER_QUEUE = NULL;
 int RUNNING=1;
 
 static char *ssl_default_dhm_P = 

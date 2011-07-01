@@ -51,6 +51,8 @@
 #include "upload.h"
 #include "filter.h"
 #include "websocket.h"
+#include "adt/darray.h"
+
 struct tagbstring PING_PATTERN = bsStatic("@[a-z/]- {\"type\":\\s*\"ping\"}");
 
 struct tagbstring POLICY_XML_REQUEST = bsStatic("<policy-file-request");
@@ -96,11 +98,13 @@ int connection_route_request(Connection *conn)
     Route *route = NULL;
 
     bstring path = Request_path(conn->req);
+    Server *server = darray_last(SERVER_QUEUE);
+    check(server != NULL, "No server in the server queue, tell Zed.");
 
     if(conn->req->host_name) {
-        host = Server_match_backend(conn->server, conn->req->host_name);
+        host = Server_match_backend(server, conn->req->host_name);
     } else {
-        host = conn->server->default_host;
+        host = server->default_host;
     }
 
     error_unless(host, conn, 404, "Request for a host we don't have registered: %s", bdata(conn->req->host_name));
@@ -638,8 +642,6 @@ Connection *Connection_create(Server *srv, int fd, int rport,
     Connection *conn = h_calloc(sizeof(Connection), 1);
     check_mem(conn);
 
-    conn->server = srv;
-
     conn->rport = rport;
     memcpy(conn->remote, remote, IPADDR_SIZE);
     conn->remote[IPADDR_SIZE] = '\0';
@@ -697,11 +699,7 @@ void Connection_task(void *v)
                     "!!! Invalid next event[%d]: %d from filter!", i, next);
         }
 
-        log_info(">>>>>> EXECUTE STATE: state=%d, conn=%p, server=%p, conn->fd=%d, server->listen_fd=%d",
-                next, conn, conn->server, conn->iob->fd, conn->server->listen_fd);
         next = State_exec(&conn->state, next, (void *)conn);
-        log_info("<<<<<< EXIT STATE: state=%d, conn=%p, server=%p, conn->fd=%d, server->listen_fd=%d",
-                next, conn, conn->server, conn->iob->fd, conn->server->listen_fd);
 
         check(next >= CLOSE && next < EVENT_END,
                 "!!! Invalid next event[%d]: %d, Tell ZED!", i, next);
