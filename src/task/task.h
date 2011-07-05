@@ -122,6 +122,7 @@ int fdsend(int, void*, int);
 int fdrecv(int, void*, int);
 int fdwait(int, int);
 int fdnoblock(int);
+void fdshutdown();
 
 extern Task *FDTASK;
 

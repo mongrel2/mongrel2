@@ -325,6 +325,7 @@ void complete_shutdown(Server *srv)
     check(rc == 0, "Failed cleaning up the server run queue.");
 
     Register_destroy();
+    fdshutdown();
 
     taskexitall(0);
 error:

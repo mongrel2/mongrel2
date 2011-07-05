@@ -422,4 +422,7 @@ static uvlong nsec(void)
 }
 
 
-
+void fdshutdown()
+{
+    SuperPoll_destroy(POLL);
+}
