@@ -299,6 +299,7 @@ error: // fallthrough
     return rc;
 }
 
+#define darray_get_as(E, I, T) ((tns_value_t *)darray_get((E), (I)))->value.T;
 
 static int Command_access_logs(Command *cmd)
 {
@@ -313,22 +314,26 @@ static int Command_access_logs(Command *cmd)
 
         tns_value_t *log_item = tns_parse(bdata(line), blength(line), NULL);
 
-        if (!log_item || log_item->type != tns_tag_list) {
+        if (log_item == NULL ||
+                tns_get_type(log_item) != tns_tag_list || 
+                darray_end(log_item->value.list) < 9
+                )
+        {
             log_warn("Malformed log line: %d.", line_number);
             continue;
         }
 
         darray_t *entries = log_item->value.list;
 
-        bstring hostname = ((tns_value_t *)darray_get(entries, 0))->value.string;
-        bstring remote_addr = ((tns_value_t *)darray_get(entries, 1))->value.string;
-        long remote_port = ((tns_value_t *)darray_get(entries, 2))->value.number;
-        long timestamp = ((tns_value_t *)darray_get(entries, 3))->value.number;
-        bstring request_method = ((tns_value_t *)darray_get(entries, 4))->value.string;
-        bstring request_path = ((tns_value_t *)darray_get(entries, 5))->value.string;
-        bstring version = ((tns_value_t *)darray_get(entries, 6))->value.string;
-        long status = ((tns_value_t *)darray_get(entries, 7))->value.number;
-        long size = ((tns_value_t *)darray_get(entries, 8))->value.number;
+        bstring hostname = darray_get_as(entries, 0, string);
+        bstring remote_addr = darray_get_as(entries, 1, string);
+        long remote_port = darray_get_as(entries, 2, number);
+        long timestamp = darray_get_as(entries, 3, number);
+        bstring request_method = darray_get_as(entries, 4, string);
+        bstring request_path = darray_get_as(entries, 5, string);
+        bstring version = darray_get_as(entries, 6, string);
+        long status = darray_get_as(entries, 7, number);
+        long size = darray_get_as(entries, 8, number);
 
         printf("[%ld] %s:%ld %s \"%s %s %s\" %ld %ld\n",
                timestamp,
