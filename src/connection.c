@@ -98,7 +98,7 @@ int connection_route_request(Connection *conn)
     Route *route = NULL;
 
     bstring path = Request_path(conn->req);
-    Server *server = darray_last(SERVER_QUEUE);
+    Server *server = Server_queue_latest();
     check(server != NULL, "No server in the server queue, tell Zed.");
 
     if(conn->req->host_name) {
@@ -180,8 +180,8 @@ int Connection_send_to_handler(Connection *conn, Handler *handler, char *body, i
     int rc = 0;
     bstring payload = NULL;
 
-    error_unless(handler->running, conn, 404, "Handler shutdown while trying to deliver: %s", 
-            bdata(Request_path(conn->req)));
+    error_unless(handler->running, conn, 404,
+            "Handler shutdown while trying to deliver: %s", bdata(Request_path(conn->req)));
 
     if(handler->protocol == HANDLER_PROTO_TNET) {
         payload = Request_to_tnetstring(conn->req, handler->send_ident, 
@@ -193,9 +193,7 @@ int Connection_send_to_handler(Connection *conn, Handler *handler, char *body, i
         sentinel("Invalid protocol type: %d", handler->protocol);
     }
 
-    debug("SENT: %s", bdata(payload));
     check(payload, "Failed to create payload for request.");
-
     debug("HTTP TO HANDLER: %.*s", blength(payload) - content_len, bdata(payload));
 
     rc = Handler_deliver(handler->send_socket, bdata(payload), blength(payload));

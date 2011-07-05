@@ -26,13 +26,13 @@ char *test_darray_operations()
     mu_assert(val_check != NULL, "Should not get NULL.");
     mu_assert(*val_check == *val1, "Should get the first value.");
     mu_assert(darray_get(array, 0) == NULL, "Should be gone.");
-    free(val_check);
+    darray_free(val_check);
 
     val_check = darray_remove(array, 1);
     mu_assert(val_check != NULL, "Should not get NULL.");
     mu_assert(*val_check == *val2, "Should get the first value.");
     mu_assert(darray_get(array, 1) == NULL, "Should be gone.");
-    free(val_check);
+    darray_free(val_check);
 
     int old_max = array->max;
     darray_expand(array);
@@ -47,6 +47,7 @@ char *test_darray_operations()
     int i = 0;
     for(i = 0; i < 1000; i++) {
         int *val = darray_new(array);
+        darray_attach(array, val); 
         *val = i * 333;
         darray_push(array, val);
     }
@@ -57,7 +58,7 @@ char *test_darray_operations()
         int *val = darray_pop(array);
         mu_assert(val != NULL, "Shouldn't get a NULL.");
         mu_assert(*val == i * 333, "Wrong value.");
-        free(val);
+        darray_free(val);
     }
 
     darray_destroy(array);

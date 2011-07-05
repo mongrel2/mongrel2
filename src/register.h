@@ -80,6 +80,8 @@ int Register_fd_for_id(int id);
 
 int Register_cleanout();
 
+void Register_destroy();
+
 struct tns_value_t *Register_info();
 
 #define Register_valid(R) ((R) != NULL && (R)->data != NULL)

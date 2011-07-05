@@ -79,7 +79,7 @@ void Server_destroy(Server *srv);
 
 void Server_init();
 
-int Server_run(darray_t *server_stack);
+int Server_run();
 
 int Server_add_host(Server *srv, Host *host);
 
@@ -90,5 +90,13 @@ Host *Server_match_backend(Server *srv, bstring target);
 int Server_start_handlers(Server *srv, Server *copy_from);
 
 int Server_stop_handlers(Server *srv);
+
+int Server_queue_init();
+
+int Server_queue_push(Server *srv);
+
+#define Server_queue_latest() darray_last(SERVER_QUEUE)
+
+int Server_queue_destroy();
 
 #endif

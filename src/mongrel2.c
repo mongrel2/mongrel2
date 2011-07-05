@@ -56,24 +56,33 @@
 
 extern int RUNNING;
 extern uint32_t THE_CURRENT_TIME_IS;
-int RELOAD;
-int MURDER;
+int RELOAD = 0;
+int MURDER = 0;
+
+const int TICKER_TASK_STACK = 16 * 1024;
+const int RELOAD_TASK_STACK = 100 * 1024;
+
+struct ServerTask {
+    bstring db_file;
+    bstring server_id;
+};
 
 struct tagbstring PRIV_DIR = bsStatic("/");
 
-Task *SERVER_TASK = NULL;
+Task *RELOAD_TASK = NULL;
+
 
 void terminate(int s)
 {
     MURDER = s == SIGTERM;
+
     switch(s)
     {
         case SIGHUP:
             if(!RELOAD) {
                 RELOAD = 1;
-                RUNNING = 0;
-                if(SERVER_TASK) {
-                    tasksignal(SERVER_TASK, s);
+                if(RELOAD_TASK) {
+                    tasksignal(RELOAD_TASK, s);
                 }
             }
             break;
@@ -84,7 +93,7 @@ void terminate(int s)
             } else {
                 RUNNING = 0;
                 log_info("SHUTDOWN REQUESTED: %s", MURDER ? "MURDER" : "GRACEFUL (SIGINT again to EXIT NOW)");
-                Server *srv = darray_last(SERVER_QUEUE);
+                Server *srv = Server_queue_latest();
 
                 if(srv != NULL) {
                     fdclose(srv->listen_fd);
@@ -180,22 +189,26 @@ void tickertask(void *v)
         int min_wait = Setting_get_int("limits.tick_timer", 10);
         taskdelay(min_wait * 1000);
 
-        // don't bother if these are all 0
-        int min_ping = Setting_get_int("limits.min_ping", DEFAULT_MIN_PING);
-        int min_write_rate = Setting_get_int("limits.min_write_rate", DEFAULT_MIN_READ_RATE);
-        int min_read_rate = Setting_get_int("limits.min_read_rate", DEFAULT_MIN_WRITE_RATE);
+        // avoid doing this during a reload attempt
+        if(!RELOAD) {
+            // don't bother if these are all 0
+            int min_ping = Setting_get_int("limits.min_ping", DEFAULT_MIN_PING);
+            int min_write_rate = Setting_get_int("limits.min_write_rate", DEFAULT_MIN_READ_RATE);
+            int min_read_rate = Setting_get_int("limits.min_read_rate", DEFAULT_MIN_WRITE_RATE);
 
-        if(min_ping > 0 || min_write_rate > 0 || min_read_rate > 0) {
-            int cleared = Register_cleanout();
+            if(min_ping > 0 || min_write_rate > 0 || min_read_rate > 0) {
+                int cleared = Register_cleanout();
 
-            if(cleared > 0) {
-                log_warn("Timeout task killed %d tasks, waiting %d seconds for more.", cleared, min_wait);
-            } else {
-                debug("No connections timed out.");
+                if(cleared > 0) {
+                    log_warn("Timeout task killed %d tasks, waiting %d seconds for more.", cleared, min_wait);
+                } else {
+                    debug("No connections timed out.");
+                }
             }
         }
     }
 }
+
 
 int attempt_chroot_drop(Server *srv)
 {
@@ -244,21 +257,21 @@ error:
     return -1;
 }
 
+
 void final_setup()
 {
     start_terminator();
     Server_init();
     bstring end_point = bfromcstr("inproc://access_log");
-    Server *srv = darray_last(SERVER_QUEUE);
+    Server *srv = Server_queue_latest();
     Log_init(bstrcpy(srv->access_log), end_point);
+    Control_port_start();
 }
 
 
 
 Server *reload_server(Server *old_srv, const char *db_file, const char *server_uuid)
 {
-    RUNNING = 1;
-
     log_info("------------------------ RELOAD %s -----------------------------------", server_uuid);
     MIME_destroy();
     Setting_destroy();
@@ -302,27 +315,26 @@ void complete_shutdown(Server *srv)
     Setting_destroy();
     MIME_destroy();
 
-    log_info("Removing pid file %s", bdata(srv->pid_file));
-    rc = unlink((const char *)srv->pid_file->data);
-    check(rc != -1, "Failed to unlink pid_file: %s", bdata(srv->pid_file));
+    if(access((char *)srv->pid_file->data, F_OK) == 0) {
+        log_info("Removing pid file %s", bdata(srv->pid_file));
+        rc = unlink((const char *)srv->pid_file->data);
+        check(rc != -1, "Failed to unlink pid_file: %s", bdata(srv->pid_file));
+    }
 
-    Server_destroy(srv);
+    rc = Server_queue_destroy();
+    check(rc == 0, "Failed cleaning up the server run queue.");
+
+    Register_destroy();
 
     taskexitall(0);
 error:
     taskexitall(1);
 }
 
-const int TICKER_TASK_STACK = 16 * 1024;
 
-struct ServerTask {
-    bstring db_file;
-    bstring server_id;
-};
-
-void servertask(void *data)
+void reload_task(void *data)
 {
-    SERVER_TASK = taskself();
+    RELOAD_TASK = taskself();
     struct ServerTask *srv = data;
 
     while(1) {
@@ -332,12 +344,12 @@ void servertask(void *data)
 
         if(RELOAD) {
             log_info("Reload requested, will load %s from %s", bdata(srv->db_file), bdata(srv->server_id));
-            Server *old_srv = darray_last(SERVER_QUEUE);
+            Server *old_srv = Server_queue_latest();
             Server *new_srv = reload_server(old_srv, bdata(srv->db_file), bdata(srv->server_id));
             check(new_srv, "Failed to load the new configuration, exiting.");
 
             // for this to work handlers need to die more gracefully
-            darray_push(SERVER_QUEUE, new_srv);
+            Server_queue_push(new_srv);
         } else {
             log_info("Shutdown requested, goodbye.");
             break;
@@ -362,12 +374,11 @@ void taskmain(int argc, char **argv)
         check(rc != -1, "Failed to load the config module: %s", argv[3]);
     }
 
-    SERVER_QUEUE = darray_create(sizeof(Server), 100);
-    check_mem(SERVER_QUEUE);
+    Server_queue_init();
 
     Server *srv = load_server(argv[1], argv[2], NULL);
     check(srv != NULL, "Aborting since can't load server.");
-    darray_push(SERVER_QUEUE, srv);
+    Server_queue_push(srv);
 
     SuperPoll_get_max_fd();
 
@@ -379,20 +390,19 @@ void taskmain(int argc, char **argv)
 
     final_setup();
 
-    Control_port_start();
-
     taskcreate(tickertask, NULL, TICKER_TASK_STACK);
 
     struct ServerTask *srv_data = calloc(1, sizeof(struct ServerTask));
     srv_data->db_file = bfromcstr(argv[1]);
     srv_data->server_id = bfromcstr(argv[2]);
 
-    taskcreate(servertask, srv_data, 100 * 1024);
+    taskcreate(reload_task, srv_data, RELOAD_TASK_STACK);
 
-    Server_run(SERVER_QUEUE);
+    rc = Server_run();
+    check(rc != -1, "Server had a failure and exited early.");
     log_info("Server run exited, goodbye.");
 
-    srv = darray_last(SERVER_QUEUE);
+    srv = Server_queue_latest();
     complete_shutdown(srv);
 
     return;
