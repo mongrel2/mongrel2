@@ -1,0 +1,10 @@
+{ 
+    'template': 'features.html',
+    "top": { "prev": "Home", "cur": "Features" },
+
+    "contents": {
+        "root": { "link": "/features/", "name": "Features" },
+        "template": "features-post.html",
+        "top": { "prev": "Features"},
+    }
+}
