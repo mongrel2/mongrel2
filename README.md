@@ -39,7 +39,6 @@ Mongrel2 is now 1.7.5 as of *Wed Jun 22 09:23:16 PDT 2011*:
 Documentation
 -------------
 
-There is a full manual available at [mongrel2.org](http://mongrel2.org/static/mongrel2-manual.html)
-covering every aspect of Mongrel2, with more as we write features.
+Go to [http://mongrel2.org](http://mongrel2.org) for more information.
 
 
