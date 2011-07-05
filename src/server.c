@@ -47,6 +47,7 @@
 #include "config/config.h"
 #include <signal.h>
 
+darray_t *SERVER_QUEUE = NULL;
 int RUNNING=1;
 
 static char *ssl_default_dhm_P = 
@@ -262,47 +263,62 @@ void Server_init()
 }
 
 
-void Server_start(Server *srv)
+static inline int Server_accept(int listen_fd, darray_t *server_stack)
 {
     int cfd = -1;
     int rport = -1;
     char remote[IPADDR_SIZE];
+    int rc = 0;
+    Connection *conn = NULL;
+
+    cfd = netaccept(listen_fd, remote, &rport);
+    check(cfd >= 0, "Failed to accept on listening socket.");
+
+    Server *srv = darray_last(server_stack);
+    check(srv != NULL, "Failed to get a server from the configured queue.");
+
+    conn = Connection_create(srv, cfd, rport, remote);
+    check(conn != NULL, "Failed to create connection after accept.");
+
+    rc = Connection_accept(conn);
+    check(rc == 0, "Failed to register connection, overloaded.");
+
+    return 0;
+
+error:
+
+    if(conn != NULL) Connection_destroy(conn);
+    return -1;
+}
+
+
+int Server_run(darray_t *server_stack)
+{
+    int rc = 0;
+    Server *srv = darray_last(server_stack);
+    check(srv != NULL, "Failed to get a server from the configured queue.");
+    // TODO: this shouldn't change so let's assert that to be true
+    int listen_fd = srv->listen_fd;
+
     taskname("SERVER");
 
-    log_info("Starting server on port %d", srv);
-
     while(RUNNING) {
-        cfd = netaccept(srv->listen_fd, remote, &rport);
-        int accept_good = 0;
+        rc = Server_accept(listen_fd, server_stack);
 
-        if(cfd >= 0) {
-            Connection *conn = Connection_create(srv, cfd, rport, remote);
-
-            if(Connection_accept(conn) != 0) {
-                log_err("Failed to register connection, overloaded.");
-                Connection_destroy(conn);
-                accept_good = 0;
-            } else {
-                accept_good = 1;
-            }
-        } else {
-            accept_good = 0;
-        }
-
-        if(!accept_good) {
+        if(rc == -1 && RUNNING) {
+            log_err("Server accept failed, attempting to clear out dead weight: %d", RUNNING);
             int cleared = Register_cleanout();
 
             if(cleared == 0) {
                 taskdelay(1000);
             }
-        } // else nothing
+        }
     }
 
-    debug("SERVER EXITED with error: %s and return value: %d", strerror(errno), cfd);
-
-    return;
+    return 0;
+error:
+    return -1;
 }
-
 
 
 int Server_add_host(Server *srv, Host *host)

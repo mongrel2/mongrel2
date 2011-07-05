@@ -48,6 +48,8 @@ enum {
     IPADDR_SIZE = 40
 };
 
+extern darray_t *SERVER_QUEUE;
+
 typedef struct Server {
     int port;
     int listen_fd;
@@ -77,7 +79,7 @@ void Server_destroy(Server *srv);
 
 void Server_init();
 
-void Server_start(Server *srv);
+int Server_run(darray_t *server_stack);
 
 int Server_add_host(Server *srv, Host *host);
 
