@@ -314,7 +314,7 @@ static int Command_access_logs(Command *cmd)
         tns_value_t *log_item = tns_parse(bdata(line), blength(line), NULL);
 
         if (!log_item || log_item->type != tns_tag_list) {
-            fprintf(stderr, "Malformed log line: %d.\n", line_number);
+            log_warn("Malformed log line: %d.", line_number);
             continue;
         }
 
@@ -323,7 +323,7 @@ static int Command_access_logs(Command *cmd)
         bstring hostname = ((tns_value_t *)darray_get(entries, 0))->value.string;
         bstring remote_addr = ((tns_value_t *)darray_get(entries, 1))->value.string;
         long remote_port = ((tns_value_t *)darray_get(entries, 2))->value.number;
-        long timestamp = ((tns_value_t *)darray_get(entries, 3))->value.string;
+        long timestamp = ((tns_value_t *)darray_get(entries, 3))->value.number;
         bstring request_method = ((tns_value_t *)darray_get(entries, 4))->value.string;
         bstring request_path = ((tns_value_t *)darray_get(entries, 5))->value.string;
         bstring version = ((tns_value_t *)darray_get(entries, 6))->value.string;
