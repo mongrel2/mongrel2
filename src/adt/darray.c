@@ -106,8 +106,13 @@ int darray_contract(darray_t *array)
 
 void darray_destroy(darray_t *array)
 {
-    darray_clear(array);
     h_free(array);
+}
+
+void darray_clear_destroy(darray_t *array)
+{
+    darray_clear(array);
+    darray_destroy(array);
 }
 
 int darray_push(darray_t *array, void *el)

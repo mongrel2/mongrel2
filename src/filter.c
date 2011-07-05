@@ -114,15 +114,14 @@ int Filter_add(StateEvent state, filter_cb cb, bstring load_path)
     check(filters != NULL, "Invalid filter state: %d given for filter %s",
             state, bdata(load_path));
 
-    Filter *filter = h_calloc(sizeof(Filter), 1);
+    Filter *filter = darray_new(filters);
     check_mem(filter);
-
-    hattach(filters->contents, filter);
 
     filter->state = state;
     filter->cb = cb;
     filter->load_path = bstrcpy(load_path);
 
+    darray_attach(filters, filter);
     darray_push(filters, filter);
 
     return 0;

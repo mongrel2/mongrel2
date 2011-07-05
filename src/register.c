@@ -62,6 +62,13 @@ void Register_init()
     REG_ID_TO_FD = darray_create(0, MAX_REGISTERED_FDS);
 }
 
+
+void Register_destroy()
+{
+    darray_destroy(REGISTRATIONS);
+    darray_destroy(REG_ID_TO_FD);
+}
+
 static inline void Register_clear(Registration *reg)
 {
     reg->data = NULL;
@@ -83,9 +90,11 @@ int Register_connect(int fd, Connection* data)
 
     if(reg == NULL) {
         reg = darray_new(REGISTRATIONS);
+        check(reg != NULL, "Failed to allocate a new registration.");
+
         // we only set this here since they stay in list forever rather than recycle
         darray_set(REGISTRATIONS, fd, reg);
-        check(reg != NULL, "Failed to allocate a new registration.");
+        darray_attach(REGISTRATIONS, reg);
     }
 
     if(Register_valid(reg)) {

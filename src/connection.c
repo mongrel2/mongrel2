@@ -98,7 +98,7 @@ int connection_route_request(Connection *conn)
     Route *route = NULL;
 
     bstring path = Request_path(conn->req);
-    Server *server = darray_last(SERVER_QUEUE);
+    Server *server = Server_queue_latest();
     check(server != NULL, "No server in the server queue, tell Zed.");
 
     if(conn->req->host_name) {

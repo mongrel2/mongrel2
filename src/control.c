@@ -300,7 +300,7 @@ struct tagbstring INFO_HEADERS = bsStatic("92:4:port,9:bind_addr,4:uuid,6:chroot
 
 tns_value_t *info_cb(bstring name, hash_t *args)
 {
-    Server *srv = darray_last(SERVER_QUEUE);
+    Server *srv = Server_queue_latest();
 
     if(biseqcstr(name, "time")) {
         return basic_response(bfromcstr("time"), bformat("%d", (int)time(NULL)));
