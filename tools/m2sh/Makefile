@@ -2,7 +2,7 @@ CFLAGS=-DNDEBUG -DNO_LINENOS -pthread -g -I../../src -Isrc -Wall $(OPTFLAGS)
 LIBS=-lzmq -lsqlite3 ../../build/libm2.a $(OPTLIBS)
 
 PREFIX?=/usr/local
-SOURCES=$(wildcard src/*.c)
+SOURCES=$(wildcard src/*.c src/**/*.c)
 OBJECTS=$(patsubst %.c,%.o,${SOURCES})
 TEST_SRC=$(wildcard tests/*.c)
 TESTS=$(patsubst %.c,%,${TEST_SRC})
