@@ -205,6 +205,7 @@ Server *Server_create(bstring uuid, bstring default_host,
     srv->pid_file = bstrcpy(pid_file); check_mem(srv->pid_file);
     srv->default_hostname = bstrcpy(default_host);
     srv->use_ssl = use_ssl;
+    srv->created_on = time(NULL);
 
     if(srv->use_ssl) {
         rc = Server_init_ssl(srv);
@@ -219,6 +220,17 @@ error:
 }
 
 
+static inline void Server_destroy_handlers(Server *srv)
+{
+    int i = 0;
+    for(i = 0; i < darray_end(srv->handlers); i++) {
+        Handler *handler = darray_get(srv->handlers, i);
+        Handler_destroy(handler);
+    }
+
+    darray_destroy(srv->handlers);
+}
+
 
 void Server_destroy(Server *srv)
 {
@@ -230,8 +242,7 @@ void Server_destroy(Server *srv)
         }
 
         RouteMap_destroy(srv->hosts);
-
-        if(srv->handlers) h_free(srv->handlers);
+        Server_destroy_handlers(srv);
 
         bdestroy(srv->bind_addr);
         bdestroy(srv->uuid);
@@ -241,7 +252,7 @@ void Server_destroy(Server *srv)
         bdestroy(srv->pid_file);
         bdestroy(srv->default_hostname);
 
-        fdclose(srv->listen_fd);
+        if(srv->listen_fd >= 0) fdclose(srv->listen_fd);
         h_free(srv);
     }
 }
@@ -479,9 +490,45 @@ error:
     return -1;
 }
 
+const int SERVER_TTL = 10;
+const int SERVER_ACTIVE = 5;
 
-int Server_queue_push(Server *srv)
+void Server_queue_cleanup()
 {
+    if(darray_end(SERVER_QUEUE) < SERVER_ACTIVE) {
+        // skip it, not enough to care about
+        return;
+    }
+
+    // pop the last one off to make sure it's never deleted
+    Server *cur_srv = darray_pop(SERVER_QUEUE);
+    uint32_t too_old = time(NULL) - SERVER_TTL;
+    int i = 0;
+
+    // TODO: kind of a dumb way to do this since it reorders the list
+    // go through all but the max we want to keep
+    for(i = 0; i < darray_end(SERVER_QUEUE) - SERVER_ACTIVE; i++) {
+        Server *srv = darray_get(SERVER_QUEUE, i);
+
+        if(srv->created_on < too_old) {
+            Server *replace = darray_pop(SERVER_QUEUE);
+            darray_set(SERVER_QUEUE, i, replace);
+
+            srv->listen_fd = -1; // don't close it
+            Server_destroy(srv);
+        }
+    }
+
+    // put the sacred server back on the end
+    darray_push(SERVER_QUEUE, cur_srv);
+
+    return;
+}
+
+
+void Server_queue_push(Server *srv)
+{
+    Server_queue_cleanup();
     darray_push(SERVER_QUEUE, srv);
     hattach(srv, SERVER_QUEUE);
 }
