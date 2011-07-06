@@ -32,4 +32,11 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <stdlib.h>
+#include "../commands.h"
+
+int Command_uuid(Command *cmd)
+{
+    return system("uuidgen");
+}
 

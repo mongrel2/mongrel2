@@ -84,12 +84,6 @@ static int Command_version(Command *cmd)
     return 0;
 }
 
-static int Command_uuid(Command *cmd)
-{
-    return system("uuidgen");
-}
-
-
 static int Command_help(Command *cmd);
 
 static CommandHandler COMMAND_MAPPING[] = {
