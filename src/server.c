@@ -219,6 +219,17 @@ error:
 }
 
 
+static inline void Server_destroy_handlers(Server *srv)
+{
+    int i = 0;
+    for(i = 0; i < darray_end(srv->handlers); i++) {
+        Handler *handler = darray_get(srv->handlers, i);
+        Handler_destroy(handler);
+    }
+
+    darray_destroy(srv->handlers);
+}
+
 
 void Server_destroy(Server *srv)
 {
@@ -230,8 +241,7 @@ void Server_destroy(Server *srv)
         }
 
         RouteMap_destroy(srv->hosts);
-
-        if(srv->handlers) h_free(srv->handlers);
+        Server_destroy_handlers(srv);
 
         bdestroy(srv->bind_addr);
         bdestroy(srv->uuid);
@@ -480,7 +490,7 @@ error:
 }
 
 
-int Server_queue_push(Server *srv)
+void Server_queue_push(Server *srv)
 {
     darray_push(SERVER_QUEUE, srv);
     hattach(srv, SERVER_QUEUE);

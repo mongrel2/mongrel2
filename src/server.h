@@ -93,7 +93,7 @@ int Server_stop_handlers(Server *srv);
 
 int Server_queue_init();
 
-int Server_queue_push(Server *srv);
+void Server_queue_push(Server *srv);
 
 #define Server_queue_latest() darray_last(SERVER_QUEUE)
 
