@@ -234,6 +234,7 @@ void FileRecord_destroy(FileRecord *file)
             bdestroy(file->last_mod);
             bdestroy(file->header);
             bdestroy(file->etag);
+            bdestroy(file->request_path);
         }
         bdestroy(file->full_path);
         // file->content_type is not owned by us

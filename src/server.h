@@ -63,6 +63,7 @@ typedef struct Server {
     bstring error_log;
     bstring pid_file;
     bstring default_hostname;
+    uint32_t created_on;
     int use_ssl;
     x509_cert own_cert;
     rsa_context rsa_key;
@@ -93,7 +94,9 @@ int Server_stop_handlers(Server *srv);
 
 int Server_queue_init();
 
-int Server_queue_push(Server *srv);
+void Server_queue_cleanup();
+
+void Server_queue_push(Server *srv);
 
 #define Server_queue_latest() darray_last(SERVER_QUEUE)
 
