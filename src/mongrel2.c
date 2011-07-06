@@ -205,6 +205,9 @@ void tickertask(void *v)
                     debug("No connections timed out.");
                 }
             }
+
+            // do a server queue cleanup to get rid of dead servers
+            Server_queue_cleanup();
         }
     }
 }
