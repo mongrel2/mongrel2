@@ -22,7 +22,7 @@ list of currently supported languages and platforms, in alphabetical order:
 * .NET: <a href="http://github.com/AustinWise/m2net">m2net</a>
 * PHP: <a href="http://github.com/winks/m2php">m2php</a>
 * Perl: <a href="http://github.com/lestrrat/Plack-Handler-Mongrel2">Plack-Handler-Mongrel2</a> and <a href="https://github.com/jrockway/anyevent-mongrel2/">AnyEvent-Mongrel2</a>
-* Python: <a href="http://github.com/berry/Mongrel2-WSGI-Handler">Mongrel2-WSGI-Handler</a> and <a href="http://wsgid.com">wsgid</a>
+* Python: <a href="http://wsgid.com">wsgid</a> and <a href="http://github.com/berry/Mongrel2-WSGI-Handler">Mongrel2-WSGI-Handler (old?)</a>
 * Ruby: <a href="http://github.com/perplexes/m2r">m2r</a> and <a href="http://github.com/darkhelmet/rack-mongrel2">rack-mongrel2</a>
 * Node.js: <a href="https://github.com/dan-manges/m2node">m2node</a>.
 
