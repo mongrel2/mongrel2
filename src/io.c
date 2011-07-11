@@ -147,7 +147,16 @@ static ssize_t ssl_send(IOBuf *iob, char *buffer, int len)
         int rcode = ssl_do_handshake(iob);
         check(rcode == 0, "handshake failed");
     }
-    return ssl_write(&iob->ssl, (const unsigned char*) buffer, len);
+    int sent = 0;
+    while (len > 0) {
+        sent = ssl_write(&iob->ssl, (const unsigned char*) buffer, len);
+        check(sent != -1, "Error sending SSL data.");
+        check(sent <= len, "Buffer overflow. Too much data sent by ssl_write");
+
+        buffer += sent;
+        len -= sent;
+    };
+    return 0;
 error:
     return -1;
 }
