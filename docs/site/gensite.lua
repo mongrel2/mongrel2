@@ -2,6 +2,7 @@ local tir = require 'tir.view'
 local markdown = require 'markdown'
 local posix = require 'posix'
 local json = require 'json'
+require 'tir.util'
 
 
 local Generator = {
