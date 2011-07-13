@@ -137,6 +137,8 @@
   uchar = (unreserved | escape);
   pchar = (uchar | ":" | "@" | "&" | "=" | "+");
   tspecials = ("(" | ")" | "<" | ">" | "@" | "," | ";" | ":" | "\\" | "\"" | "/" | "[" | "]" | "?" | "=" | "{" | "}" | " " | "\t");
+  lws = (" " | "\t");
+  content = ((any -- CTL) | lws);
 
 # elements
   token = (ascii -- (CTL | tspecials));
@@ -162,9 +164,9 @@
 
   field_name = ( token -- ":" )+ >start_field %write_field;
 
-  field_value = any* >start_value %write_value;
+  field_value = content* >start_value %write_value;
 
-  message_header = field_name ":" " "* field_value :> CRLF;
+  message_header = field_name ":" lws* field_value :> CRLF;
 
   Request = Request_Line ( message_header )* ( CRLF );
 
