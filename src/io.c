@@ -35,16 +35,17 @@
 #define _XOPEN_SOURCE 500
 #define _FILE_OFFSET_BITS 64
 
+#include <stdlib.h>
+#include <assert.h>
+#include <unistd.h>
 #include "io.h"
 #include "register.h"
 #include "mem/halloc.h"
 #include "dbg.h"
-#include <stdlib.h>
-#include <assert.h>
-#include <unistd.h>
-#include <polarssl/havege.h>
-#include <polarssl/ssl.h>
-#include <task/task.h>
+#include "polarssl/havege.h"
+#include "polarssl/ssl.h"
+#include "task/task.h"
+#include "adt/darray.h"
 
 static ssize_t null_send(IOBuf *iob, char *buffer, int len)
 {
@@ -238,76 +239,90 @@ void ssl_debug(void *p, int level, const char *msg) {
  * These session callbacks use a simple chained list
  * to store and retrieve the session information.
  */
-ssl_session *s_list_1st = NULL;
+static darray_t *SSL_SESSION_CACHE = NULL;
+const int SSL_INITIAL_CACHE_SIZE = 300;
+
+static inline int setup_ssl_session_cache()
+{
+    if(SSL_SESSION_CACHE == NULL) {
+        SSL_SESSION_CACHE = darray_create(SSL_INITIAL_CACHE_SIZE, sizeof(ssl_session));
+        check_mem(SSL_SESSION_CACHE);
+    }
+    return 0;
+error:
+    return -1;
+}
+
 
 static int simple_get_session( ssl_context *ssl )
 {
-    time_t t = time( NULL );
+    time_t t = THE_CURRENT_TIME_IS;
+    int i = 0;
 
-    if( ssl->resume == 0 )
-        return( 1 );
+    check(setup_ssl_session_cache() == 0, "Failed to initialize SSL session cache.");
 
-    ssl_session *cur, *prv;
-    cur = s_list_1st;
-    prv = NULL;
+    if( ssl->resume == 0 ) return 1;
+    ssl_session *cur = NULL;
 
-    while( cur != NULL )
-    {
-        prv = cur;
-        cur = cur->next;
+    for(i = 0; i < darray_end(SSL_SESSION_CACHE); i++) {
+        cur = darray_get(SSL_SESSION_CACHE, i);
 
-        if( ssl->timeout != 0 && t - prv->start > ssl->timeout )
+        if( ssl->timeout != 0 && t - cur->start > ssl->timeout ) {
             continue;
+        }
 
-        if( ssl->session->ciphersuite != prv->ciphersuite ||
-            ssl->session->length != prv->length )
+        if( ssl->session->ciphersuite != cur->ciphersuite ||
+            ssl->session->length != cur->length ) 
+        {
             continue;
+        }
 
-        if( memcmp( ssl->session->id, prv->id, prv->length ) != 0 )
+        if( memcmp( ssl->session->id, cur->id, cur->length ) != 0 ) {
             continue;
+        }
 
-        // odd, why 48?
-        memcpy( ssl->session->master, prv->master, 48 );
-        return( 0 );
+        // TODO: odd, why 48? this is from polarssl
+        memcpy( ssl->session->master, cur->master, 48 );
+        return 0;
     }
 
-    return( 1 );
+error: // fallthrough
+    return 1;
 }
 
 static int simple_set_session( ssl_context *ssl )
 {
-    time_t t = time( NULL );
+    time_t t = THE_CURRENT_TIME_IS;
+    int i = 0;
+    ssl_session *cur = NULL;
+    int make_new = 1;
+    check(setup_ssl_session_cache() == 0, "Failed to initialize SSL session cache.");
 
-    ssl_session *cur, *prv;
-    cur = s_list_1st;
-    prv = NULL;
+    for(i = 0; i < darray_end(SSL_SESSION_CACHE); i++) {
+        cur = darray_get(SSL_SESSION_CACHE, i);
 
-    while( cur != NULL )
-    {
-        if( ssl->timeout != 0 && t - cur->start > ssl->timeout )
+        if( ssl->timeout != 0 && t - cur->start > ssl->timeout ) {
+            make_new = 0;
             break; /* expired, reuse this slot */
+        }
 
-        if( memcmp( ssl->session->id, cur->id, cur->length ) == 0 )
+        if( memcmp( ssl->session->id, cur->id, cur->length ) == 0 ) {
+            make_new = 0;
             break; /* client reconnected */
-
-        prv = cur;
-        cur = cur->next;
+        }
     }
 
-    if( cur == NULL )
-    {
-        cur = (ssl_session *) malloc( sizeof( ssl_session ) );
-        if( cur == NULL )
-            return( 1 );
-
-        if( prv == NULL )
-              s_list_1st = cur;
-        else  prv->next  = cur;
+    if(make_new) {
+        cur = (ssl_session *) darray_new(SSL_SESSION_CACHE);
+        check_mem(cur);
+        darray_push(SSL_SESSION_CACHE, cur);
     }
 
     *cur = *ssl->session;
 
-    return( 0 );
+    return 0;
+error:
+    return 1;
 }
 
 
