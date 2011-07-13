@@ -114,13 +114,13 @@ error:
     return -1;
 }
 
-static int ssl_fdsend_wrapper(void *p_iob, unsigned char *ubuffer, int len)
+static int ssl_fdsend_wrapper(void *p_iob, unsigned char *ubuffer, size_t len)
 {
     IOBuf *iob = (IOBuf *) p_iob;
     return fdsend(iob->fd, (char *) ubuffer, len);
 }
 
-static int ssl_fdrecv_wrapper(void *p_iob, unsigned char *ubuffer, int len)
+static int ssl_fdrecv_wrapper(void *p_iob, unsigned char *ubuffer, size_t len)
 {
     IOBuf *iob = (IOBuf *) p_iob;
     return fdrecv1(iob->fd, (char *) ubuffer, len);
@@ -131,8 +131,9 @@ static int ssl_do_handshake(IOBuf *iob)
     int rcode;
     check(!iob->handshake_performed, "ssl_do_handshake called unnecessarily");
     while((rcode = ssl_handshake(&iob->ssl)) != 0) {
-        check(rcode == POLARSSL_ERR_NET_TRY_AGAIN,
-              "handshake failed with error code %d", rcode);
+
+        check(rcode == 0 || rcode == POLARSSL_ERR_NET_WANT_READ
+                || rcode == POLARSSL_ERR_NET_WANT_WRITE, "Handshake failed with error code: %d", rcode);
     }
     iob->handshake_performed = 1;
     return 0;
@@ -231,6 +232,119 @@ void ssl_debug(void *p, int level, const char *msg) {
     }
 }
 
+// -- quick hack taken from the polar ssl server code to see how it will work
+//
+/*
+ * These session callbacks use a simple chained list
+ * to store and retrieve the session information.
+ */
+ssl_session *s_list_1st = NULL;
+
+static int simple_get_session( ssl_context *ssl )
+{
+    time_t t = time( NULL );
+
+    if( ssl->resume == 0 )
+        return( 1 );
+
+    ssl_session *cur, *prv;
+    cur = s_list_1st;
+    prv = NULL;
+
+    while( cur != NULL )
+    {
+        prv = cur;
+        cur = cur->next;
+
+        if( ssl->timeout != 0 && t - prv->start > ssl->timeout )
+            continue;
+
+        if( ssl->session->ciphersuite != prv->ciphersuite ||
+            ssl->session->length != prv->length )
+            continue;
+
+        if( memcmp( ssl->session->id, prv->id, prv->length ) != 0 )
+            continue;
+
+        // odd, why 48?
+        memcpy( ssl->session->master, prv->master, 48 );
+        return( 0 );
+    }
+
+    return( 1 );
+}
+
+static int simple_set_session( ssl_context *ssl )
+{
+    time_t t = time( NULL );
+
+    ssl_session *cur, *prv;
+    cur = s_list_1st;
+    prv = NULL;
+
+    while( cur != NULL )
+    {
+        if( ssl->timeout != 0 && t - cur->start > ssl->timeout )
+            break; /* expired, reuse this slot */
+
+        if( memcmp( ssl->session->id, cur->id, cur->length ) == 0 )
+            break; /* client reconnected */
+
+        prv = cur;
+        cur = cur->next;
+    }
+
+    if( cur == NULL )
+    {
+        cur = (ssl_session *) malloc( sizeof( ssl_session ) );
+        if( cur == NULL )
+            return( 1 );
+
+        if( prv == NULL )
+              s_list_1st = cur;
+        else  prv->next  = cur;
+    }
+
+    *cur = *ssl->session;
+
+    return( 0 );
+}
+
+
+
+static inline int iobuf_ssl_setup(IOBuf *buf)
+{
+    int rc = 0;
+
+    buf->use_ssl = 1;
+    buf->handshake_performed = 0;
+
+    rc = ssl_init(&buf->ssl);
+    check(rc == 0, "Failed to initialize SSL structure.");
+
+    ssl_set_endpoint(&buf->ssl, SSL_IS_SERVER);
+    ssl_set_authmode(&buf->ssl, SSL_VERIFY_NONE);
+
+    havege_init(&buf->hs);
+    ssl_set_rng(&buf->ssl, havege_rand, &buf->hs);
+
+#ifndef DEBUG
+    ssl_set_dbg(&buf->ssl, ssl_debug, NULL);
+#endif
+
+    ssl_set_bio(&buf->ssl, ssl_fdrecv_wrapper, buf, 
+                ssl_fdsend_wrapper, buf);
+    ssl_set_session(&buf->ssl, 1, 0, &buf->ssn);
+
+    ssl_set_scb(&buf->ssl, simple_get_session, simple_set_session);
+
+    memset(&buf->ssn, 0, sizeof(buf->ssn));
+
+    return 0;
+error:
+    return -1;
+}
+
 IOBuf *IOBuf_create(size_t len, int fd, IOBufType type)
 {
     IOBuf *buf = h_calloc(sizeof(IOBuf), 1);
@@ -247,19 +361,7 @@ IOBuf *IOBuf_create(size_t len, int fd, IOBufType type)
     buf->type = type;
 
     if(type == IOBUF_SSL) {
-        buf->use_ssl = 1;
-        buf->handshake_performed = 0;
-        ssl_init(&buf->ssl);
-        ssl_set_endpoint(&buf->ssl, SSL_IS_SERVER);
-        ssl_set_authmode(&buf->ssl, SSL_VERIFY_NONE);
-        havege_init(&buf->hs);
-        ssl_set_rng(&buf->ssl, havege_rand, &buf->hs);
-        ssl_set_dbg(&buf->ssl, ssl_debug, NULL);
-        ssl_set_bio(&buf->ssl, ssl_fdrecv_wrapper, buf, 
-                    ssl_fdsend_wrapper, buf);
-        ssl_set_session(&buf->ssl, 1, 0, &buf->ssn);
-        memset(&buf->ssn, 0, sizeof(buf->ssn));
-
+        check(iobuf_ssl_setup(buf) != -1, "Failed to setup SSL.");
         buf->send = ssl_send;
         buf->recv = ssl_recv;
         buf->stream_file = ssl_stream_file;

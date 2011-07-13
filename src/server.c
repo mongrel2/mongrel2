@@ -81,7 +81,7 @@ static int Server_load_ciphers(Server *srv, bstring ssl_ciphers_val)
             "Invalid cipher list, it must be separated by space ' ' characters "
             "and you need at least one.  Or, just leave it out for defaults.");
 
-    while(ssl_default_ciphers[max_num_ciphers] != 0) {
+    while(ssl_default_ciphersuites[max_num_ciphers] != 0) {
         max_num_ciphers++;
     }
 
@@ -159,7 +159,7 @@ static int Server_init_ssl(Server *srv)
         rc = Server_load_ciphers(srv, ssl_ciphers_val);
         check(rc == 0, "Failed to load requested SSL ciphers.");
     } else {
-        srv->ciphers = ssl_default_ciphers;
+        srv->ciphers = ssl_default_ciphersuites;
     }
 
     srv->dhm_P = ssl_default_dhm_P;

@@ -1,7 +1,9 @@
 /**
- * \file timing.h
+ * \file md_wrap.h
+ * 
+ * \brief Message digest wrappers.
  *
- * \brief Portable interface to the CPU cycle counter
+ * \author Adriaan de Jong <dejong@fox-it.com>
  *
  *  Copyright (C) 2006-2010, Brainspark B.V.
  *
@@ -24,52 +26,40 @@
  *  with this program; if not, write to the Free Software Foundation, Inc.,
  *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef POLARSSL_TIMING_H
-#define POLARSSL_TIMING_H
 
-/**
- * \brief          timer structure
- */
-struct hr_time
-{
-    unsigned char opaque[32];
-};
+#include "polarssl/config.h"
+#include "polarssl/md.h"
+
+#ifndef POLARSSL_MD_WRAP_H
+#define POLARSSL_MD_WRAP_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-extern volatile int alarmed;
-
-/**
- * \brief          Return the CPU cycle counter value
- */
-unsigned long hardclock( void );
-
-/**
- * \brief          Return the elapsed time in milliseconds
- *
- * \param val      points to a timer structure
- * \param reset    if set to 1, the timer is restarted
- */
-unsigned long get_timer( struct hr_time *val, int reset );
-
-/**
- * \brief          Setup an alarm clock
- *
- * \param seconds  delay before the "alarmed" flag is set
- */
-void set_alarm( int seconds );
-
-/**
- * \brief          Sleep for a certain amount of time
- *
- * \param milliseconds  delay in milliseconds
- */
-void m_sleep( int milliseconds );
+#if defined(POLARSSL_MD2_C)
+extern const md_info_t md2_info;
+#endif
+#if defined(POLARSSL_MD4_C)
+extern const md_info_t md4_info;
+#endif
+#if defined(POLARSSL_MD5_C)
+extern const md_info_t md5_info;
+#endif
+#if defined(POLARSSL_SHA1_C)
+extern const md_info_t sha1_info;
+#endif
+#if defined(POLARSSL_SHA2_C)
+extern const md_info_t sha224_info;
+extern const md_info_t sha256_info;
+#endif
+#if defined(POLARSSL_SHA4_C)
+extern const md_info_t sha384_info;
+extern const md_info_t sha512_info;
+#endif
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* timing.h */
+#endif /* POLARSSL_MD_WRAP_H */

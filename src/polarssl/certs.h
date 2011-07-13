@@ -1,6 +1,8 @@
 /**
  * \file certs.h
  *
+ * \brief Sample certificates and DHM parameters for testing
+ *
  *  Copyright (C) 2006-2010, Brainspark B.V.
  *
  *  This file is part of PolarSSL (http://www.polarssl.org)
@@ -36,6 +38,7 @@ extern const char test_srv_crt[];
 extern const char test_srv_key[];
 extern const char test_cli_crt[];
 extern const char test_cli_key[];
+extern const char test_dhm_params[];
 
 #ifdef __cplusplus
 }

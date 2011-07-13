@@ -1,7 +1,9 @@
 /**
- * \file timing.h
+ * \file cipher_wrap.h
+ * 
+ * \brief Cipher wrappers.
  *
- * \brief Portable interface to the CPU cycle counter
+ * \author Adriaan de Jong <dejong@fox-it.com>
  *
  *  Copyright (C) 2006-2010, Brainspark B.V.
  *
@@ -24,52 +26,43 @@
  *  with this program; if not, write to the Free Software Foundation, Inc.,
  *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef POLARSSL_TIMING_H
-#define POLARSSL_TIMING_H
 
-/**
- * \brief          timer structure
- */
-struct hr_time
-{
-    unsigned char opaque[32];
-};
+#include "polarssl/config.h"
+#include "polarssl/cipher.h"
+
+#ifndef POLARSSL_CIPHER_WRAP_H
+#define POLARSSL_CIPHER_WRAP_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-extern volatile int alarmed;
+#if defined(POLARSSL_AES_C)
 
-/**
- * \brief          Return the CPU cycle counter value
- */
-unsigned long hardclock( void );
+extern const cipher_info_t aes_128_cbc_info;
+extern const cipher_info_t aes_192_cbc_info;
+extern const cipher_info_t aes_256_cbc_info;
 
-/**
- * \brief          Return the elapsed time in milliseconds
- *
- * \param val      points to a timer structure
- * \param reset    if set to 1, the timer is restarted
- */
-unsigned long get_timer( struct hr_time *val, int reset );
+#endif /* defined(POLARSSL_AES_C) */
 
-/**
- * \brief          Setup an alarm clock
- *
- * \param seconds  delay before the "alarmed" flag is set
- */
-void set_alarm( int seconds );
+#if defined(POLARSSL_CAMELLIA_C)
 
-/**
- * \brief          Sleep for a certain amount of time
- *
- * \param milliseconds  delay in milliseconds
- */
-void m_sleep( int milliseconds );
+extern const cipher_info_t camellia_128_cbc_info;
+extern const cipher_info_t camellia_192_cbc_info;
+extern const cipher_info_t camellia_256_cbc_info;
+
+#endif /* defined(POLARSSL_CAMELLIA_C) */
+
+#if defined(POLARSSL_DES_C)
+
+extern const cipher_info_t des_cbc_info;
+extern const cipher_info_t des_ede_cbc_info;
+extern const cipher_info_t des_ede3_cbc_info;
+
+#endif /* defined(POLARSSL_DES_C) */
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* timing.h */
+#endif /* POLARSSL_CIPHER_WRAP_H */

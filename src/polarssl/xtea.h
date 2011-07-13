@@ -1,6 +1,8 @@
 /**
  * \file xtea.h
  *
+ * \brief XTEA block cipher (32-bit)
+ *
  *  Copyright (C) 2006-2010, Brainspark B.V.
  *
  *  This file is part of PolarSSL (http://www.polarssl.org)
@@ -25,6 +27,8 @@
 #ifndef POLARSSL_XTEA_H
 #define POLARSSL_XTEA_H
 
+#include <string.h>
+
 #ifdef _MSC_VER
 #include <basetsd.h>
 typedef UINT32 uint32_t;
@@ -35,6 +39,7 @@ typedef UINT32 uint32_t;
 #define XTEA_ENCRYPT     1
 #define XTEA_DECRYPT     0
 
+#define POLARSSL_ERR_XTEA_INVALID_INPUT_LENGTH             -0x0028  /**< The data input has an invalid length. */
 
 /**
  * \brief          XTEA context structure
@@ -68,9 +73,29 @@ void xtea_setup( xtea_context *ctx, unsigned char key[16] );
  * \return         0 if successful
  */
 int xtea_crypt_ecb( xtea_context *ctx,
-		 int mode,
-		 unsigned char input[8],
-		 unsigned char output[8] );
+                    int mode,
+                    unsigned char input[8],
+                    unsigned char output[8] );
+
+/**
+ * \brief          XTEA CBC cipher function
+ *
+ * \param ctx      XTEA context
+ * \param mode     XTEA_ENCRYPT or XTEA_DECRYPT
+ * \param length   the length of input, multiple of 8
+ * \param iv       initialization vector for CBC mode
+ * \param input    input block
+ * \param output   output block
+ *
+ * \return         0 if successful,
+ *                 POLARSSL_ERR_XTEA_INVALID_INPUT_LENGTH if the length % 8 != 0
+ */
+int xtea_crypt_cbc( xtea_context *ctx,
+                    int mode,
+                    size_t length,
+                    unsigned char iv[8],
+                    unsigned char *input,
+                    unsigned char *output);
 
 /*
  * \brief          Checkup routine

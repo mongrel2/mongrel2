@@ -654,7 +654,7 @@ Connection *Connection_create(Server *srv, int fd, int rport,
 
         ssl_set_own_cert(&conn->iob->ssl, &srv->own_cert, &srv->rsa_key);
         ssl_set_dh_param(&conn->iob->ssl, srv->dhm_P, srv->dhm_G);
-        ssl_set_ciphers(&conn->iob->ssl, srv->ciphers);
+        ssl_set_ciphersuites(&conn->iob->ssl, srv->ciphers);
     } else {
         conn->iob = IOBuf_create(BUFFER_SIZE, fd, IOBUF_SOCKET);
     }
