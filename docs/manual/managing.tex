@@ -744,6 +744,8 @@ PID file run/mongrel2.pid not found for server localhost XXX
 > m2sh stop -db config.sqlite -every
 \end{lstlisting}
 
+
+
 \section{Tweakable Expert Settings}
 
 Many of Mongrel2's internal settings are configurable using the settings system.
@@ -805,4 +807,62 @@ You can also update your \ident{mimetypes} in the same way, just set a variable 
 << d['docs/manual/inputs/changing_settings.conf|dexy'] >>
 \end{lstlisting}
 \end{code}
+
+
+\section{SSL Configuration}
+
+Mongrel2 now support SSL, with preliminary support for SSL session caching.  As of 
+1.8.0 (actually earlier) you can enable SSL very easily for your Mongrel2 server.
+How Mongrel2 configures SSL certs is with two options in \verb|setttings| and then
+a directory of .crt and .key files named after the UUID of the servers that need them.
+
+To get started, you can make a simple self-signed certificate with some weak encryption
+and setup your certs directory:
+
+\begin{code}{Making A Self-Signed Certificate}
+\begin{lstlisting}
+<< d['docs/manual/inputs/makecert.sh|dexy'] >>
+\end{lstlisting}
+\end{code}
+
+I actually have a shell script kind of like this since I can never remember how 
+to set this stuff up with openssl.  Also, you should really adjust the RSA key
+strength from 512 to something you're comfortable with.  I'm using a weak
+key here so you can do performance testing and thrashing and then compare with
+your real key later.
+
+Once you have that done, you just have to add three little settings to your
+mongrel2 conf:
+
+\begin{enumerate}
+\item Add the settings "certsdir" pointed at "./certs/", make sure it has the trailing slash.
+\item Add the \verb|Server.use\_ssl = 1| value to the Server that has this UUID
+    you just created a cert for.
+\item Optionally, set the settings "ssl\_ciphers" to "SSL\_RSA\_RC4\_128\_SHA" so you can
+    play with the performance of a weak cipher.  If you unset this then Mongrel2 will
+    use the best one a browser wants.
+\end{enumerate}
+
+After you have those changes your config should look something like this:
+
+\begin{code}{Minimal SSL Configuration}
+\begin{lstlisting}
+<< d['docs/manual/inputs/mini_ssl_settings.conf|dexy'] >>
+\end{lstlisting}
+\end{code}
+
+Get that written, rerun \verb|m2sh config| to make the new config, restart
+Mongrel2 (you can't reload to enable SSL), and it should be working.
+
+After you get this working you just have to get your own certificate, put it
+in the certs directory with the right filename, and you should be good to go.
+
+\subsection{Experimental SSL Caching}
+
+We've got experimental SSL caching working, which will try to reuse the 
+browser's SSL session if it's there.  This is meant to be a trade-off between
+memory and performance, so it can chew a bunch of RAM if you have a lot of
+SSL traffic over a short period of time.  We'll be making the caching more
+configurable, but for now, it's working and does speed up SSL clients that
+do it properly.
 
