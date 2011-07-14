@@ -37,14 +37,11 @@
 #include <dbg.h>
 #include <assert.h>
 
-
 Value *Value_create(ValueType type, void *data) {
     Value *val = malloc(sizeof(Value));
     val->type = type;
     switch(val->type) {
         case VAL_QSTRING: val->as.string = data;
-            break;
-        case VAL_PATTERN: val->as.pattern = data;
             break;
         case VAL_NUMBER: val->as.number = data;
             break;
@@ -69,7 +66,7 @@ error:
 }
 
 const char *VALUE_NAMES[] = {
-    "QSTRING", "PATTERN", "NUMBER", "CLASS", "LIST", "HASH", 
+    "QSTRING", "NUMBER", "CLASS", "LIST", "HASH", 
     "IDENT", "REF"
 };
 
@@ -231,8 +228,6 @@ static void AST_destroy_value(Value *val)
 {
     switch(val->type) {
         case VAL_QSTRING: Token_destroy(val->as.string);
-            break;
-        case VAL_PATTERN: Token_destroy(val->as.pattern);
             break;
         case VAL_NUMBER: Token_destroy(val->as.number);
             break;

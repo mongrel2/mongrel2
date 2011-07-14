@@ -46,7 +46,6 @@ vars(V) ::= vars(A) EOF. { V = A; }
 
 %type expr { Value * }
 expr(E) ::= QSTRING(A). { E = Value_create(VAL_QSTRING, A); }
-expr(E) ::= PATTERN(A). { E = Value_create(VAL_PATTERN, A); }
 expr(E) ::= NUMBER(A). { E = Value_create(VAL_NUMBER, A); }
 expr(E) ::= class(A). { E = Value_create(VAL_CLASS, A); }
 expr(E) ::= list(A). { E = Value_create(VAL_LIST, A); }
@@ -110,8 +109,4 @@ hash_elements(H) ::= .
 hash_pair(P) ::= QSTRING(A) COLON expr(B).  { 
         P = malloc(sizeof(Pair)); P->key = A; P->value = B; 
     }
-hash_pair(P) ::= PATTERN(A) COLON expr(B).  {
-        P = malloc(sizeof(Pair)); P->key = A; P->value = B; 
-    }
-
 
