@@ -37,8 +37,6 @@
 #include <bstring.h>
 #include "config_file.h"
 #include "ast.h"
-#include <tnetstrings.h>
-#include <tnetstrings_impl.h>
 #include <dbg.h>
 #include <stdlib.h>
 
@@ -240,99 +238,6 @@ error:
 }
 
 struct tagbstring MATCHING_PARAM = bsStatic("matching");
-struct FilterScanData {
-    tst_t *settings;
-    tns_value_t *data;
-    int error;
-};
-
-void FilterSetting_convert_cb(void *v, void *data);
-
-tns_value_t *FilterSetting_convert_hash(tst_t *settings, Value *filter_settings)
-{
-    tns_value_t *filter_tns = tns_new_dict();
-    struct FilterScanData data = {
-        .settings = settings,
-        .data = filter_tns,
-        .error = 0
-    };
-
-    tst_traverse(filter_settings->as.hash, FilterSetting_convert_cb, &data);
-    check(!data.error, "Failed to convert hash in filter settings.");
-
-    return filter_tns;
-error:
-
-    if(filter_tns) tns_value_destroy(filter_tns);
-    return NULL;
-}
-
-static inline tns_value_t *convert_setting(tst_t *settings, Value *val)
-{
-    lnode_t *cur = NULL;
-    tns_value_t *res = NULL;
-
-    switch(val->type) {
-        case VAL_QSTRING:
-            res = tns_value_create(tns_tag_string);
-            res->value.string = bstrcpy(val->as.string->data);
-            break;
-
-        case VAL_NUMBER:
-            res = tns_new_integer(strtol(
-                        bdatae(val->as.number->data, "0"), NULL, 10));
-            break;
-
-        case VAL_LIST:
-            res = tns_new_list();
-            for(cur = list_first(val->as.list); cur != NULL; cur = list_next(val->as.list, cur)) {
-                tns_value_t *el = convert_setting(settings, (Value *)lnode_get(cur));
-                check(el != NULL, "Failed to convert an element of the list.");
-                tns_add_to_list(res, el);
-            }
-            break;
-
-        case VAL_REF:
-            val = Value_resolve(settings, val);
-            res = convert_setting(settings, val);
-            break;
-
-        case VAL_HASH:
-            res = FilterSetting_convert_hash(settings, val);
-            break;
-        default:
-            sentinel("Unsupported type in Filter settings: %d", val->type);
-    }
-
-    return res;
-
-error: // fallthrough
-    return NULL;
-}
-
-void FilterSetting_convert_cb(void *v, void *data)
-{
-    Pair *pair = v;
-    struct FilterScanData *scan = data;
-    bstring name = Pair_key(pair);
-    Value *val = Pair_value(pair);
-    check(val, "Error loading filter Setting %s", bdata(Pair_key(pair)));
-
-    tns_value_t *value = convert_setting(scan->settings, val);
-    check(value != NULL, "Failed to convert filter setting value.");
-
-    tns_value_t *key = tns_value_create(tns_tag_string);
-    key->value.string = bstrcpy(name);
-
-    tns_add_to_dict(scan->data, key, value);
-
-    return;
-
-error:
-    scan->error = 1;
-    tns_value_destroy(scan->data);
-    scan->data = NULL;
-}
 
 int Filter_load(tst_t *settings, Value *val)
 {
@@ -340,30 +245,38 @@ int Filter_load(tst_t *settings, Value *val)
     Class *cls = val->as.cls;
     tns_value_t *res = NULL;
     struct tagbstring SETTINGS_VAR = bsStatic("settings");
-    char *converted_settings = "";
+    char *converted_settings = NULL;
+    tns_value_t *filter_tns = NULL;
 
     const char *name = AST_str(settings, cls->params, "name", VAL_QSTRING);
     check(name != NULL, "You must set a name for the filter.");
 
     Value *filter_settings = AST_get(settings, cls->params, &SETTINGS_VAR, VAL_HASH);
+    check(filter_settings != NULL, "Invalid or missing settings for Filter '%s'", name);
 
-    if(filter_settings) {
-        tns_value_t *filter_tns = FilterSetting_convert_hash(settings, filter_settings);
-        check(filter_tns, "Failed to convert settings for filter %s", name);
+    filter_tns = AST_tns_convert_value(settings, filter_settings);
+    check(filter_tns, "Failed to convert settings for filter '%s'", name);
+    check(tns_get_type(filter_tns) == tns_tag_dict,
+            "Settings for Filter '%s' must be a dict type.", name);
 
-        size_t len = 0;
-        converted_settings = tns_render(filter_tns, &len);
-        tns_value_destroy(filter_tns);
-    }
+    size_t len = 0;
+    converted_settings = tns_render(filter_tns, &len);
+    tns_value_destroy(filter_tns);
+
+    check(converted_settings != NULL && len > 0,
+            "Failed to convert final Filter settings to tnetstring for Filter '%s'",
+            name);
 
     res = DB_exec(bdata(&FILTER_SQL), SERVER_ID, name, converted_settings);
-    check(res != NULL, "Failed to store Filter: %s", name);
+    check(res != NULL, "Failed to store Filter: '%s'", name);
     tns_value_destroy(res);
 
     free(converted_settings);
 
     return 0;
 error:
+    if(converted_settings) free(converted_settings);
+    if(filter_tns) tns_value_destroy(filter_tns);
     return -1;
 }
 

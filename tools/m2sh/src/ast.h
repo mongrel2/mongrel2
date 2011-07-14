@@ -5,6 +5,7 @@
 #include <adt/tst.h>
 #include "parser.h"
 #include "config_file.h"
+#include <tnetstrings.h>
 
 struct Value;
 
@@ -61,5 +62,8 @@ bstring AST_get_bstr(tst_t *settings, tst_t *fr, bstring name, ValueType type);
 const char *AST_str(tst_t *settings, tst_t *fr, const char *name, TokenType type);
 
 void AST_destroy(tst_t *settings);
+
+tns_value_t *AST_tns_convert_hash(tst_t *settings, Value *filter_settings);
+tns_value_t *AST_tns_convert_value(tst_t *settings, Value *val);
 
 #endif
