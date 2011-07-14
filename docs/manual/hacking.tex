@@ -620,6 +620,50 @@ to look:
 Hopefully, you can figure it out from the code, but if not, let me know.
 
 
+\section{Writing A Filter (BETA)}
+
+In Mongrel2 v1.8.0 there was a new addition of the Filter system, which
+lets you intercept the Mongrel2 state machine and fully control how it 
+operates.  It's still a very new feature, but there's a simple piece of
+demo code you can look at to see how they work.  You should also check
+out how to configure them in the Managing section.
+
+Let's just take a look at the code to the \file{tools/filters/null.c}
+filter.
+
+
+\begin{code}{The Basic null Filter}
+<< d['tools/filters/null.c|pyg|l'] >>
+\end{code}
+
+In this code you are basically creating a .so file that Mongrel2 
+will load on the fly when told to.  How it works is you make
+two functions, always named \ident{filter\_init} and \ident{filter\_transition}.
+
+The \ident{filter\_init} function sets up a simple array that lists all
+of the events (found in \ident{src/events.h}) that you want to have your
+filter triggered on.  It's important that you use the \ident{Filter\_state\_list}
+function to return the actual list or else you'll get the memory allocation
+wrong.
+
+Mongrel2 will load this null.so and call the \ident{filter\_init} function
+and wire it up for each of the events you indicate.  Next, when a request
+comes in, the server will go through each event that triggers, and
+call your \ident{filter\_transition} function.  This function will
+get the \ident{StateEvent} that is about to happen, the \ident{Connection}
+it's happening on, and finally, the \ident{config} that the user
+set in their \file{config.sqlite} database.
+
+All your \ident{filter\_transition} function has to do is use the
+Mongrel2 APIs to do what it needs, alter the \ident{Connection} and
+work with the \ident{config} to get its work done.  When it's done,
+it can then return the next state event that Mongrel2 should work
+with instead of what you were handed (or, just return the same one
+if you aren't changing how Mongrel2 works).
+
+That's all there is to it for now.  Later releases will start having
+more filters that you can load and look at the example code to try.
+
 \section{Other Language APIs}
 
 There's at least 10 langauges available for Mongrel2, so check out the

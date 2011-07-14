@@ -812,7 +812,7 @@ You can also update your \ident{mimetypes} in the same way, just set a variable 
 \section{SSL Configuration}
 
 Mongrel2 now support SSL, with preliminary support for SSL session caching.  As of 
-1.8.0 (actually earlier) you can enable SSL very easily for your Mongrel2 server.
+v1.8.0 (actually earlier) you can enable SSL very easily for your Mongrel2 server.
 How Mongrel2 configures SSL certs is with two options in \verb|setttings| and then
 a directory of .crt and .key files named after the UUID of the servers that need them.
 
@@ -863,4 +863,43 @@ memory and performance, so it can chew a bunch of RAM if you have a lot of
 SSL traffic over a short period of time.  We'll be making the caching more
 configurable, but for now, it's working and does speed up SSL clients that
 do it properly.
+
+
+\section{Configuring Filters (BETA)}
+
+The Mongrel2 v1.8.0 release also included working filters that you can 
+configure and load dynamically.  The filters are very fresh, and the
+only one available is the null filter found in \file{tools/filters/null.c}
+but it does work and you can configure it.  It's also currently not
+hooked into the reload gear that we've recently done, so don't expect
+it to work if you do frequently hot reloading.
+
+Configuring a filter is fairly easy, take a look at this example:
+
+\begin{code}{Minimal Filter Configuration}
+\begin{lstlisting}
+<< d['docs/manual/inputs/filters.conf|dexy'] >>
+\end{lstlisting}
+\end{code}
+
+First you can see that we setup the \ident{null} filter with some arbitrary
+settings and point to where the .so file is.  Filters can be configured 
+with any arbitrarily nested data structure that can fit into a tnetstring,
+so you can pass them pretty much anything that matters.  Lists, dicts, numbers,
+strings, are the main ones.  You can also use variables in the config file,
+so you could create different servers and share config options for Filters
+and other parts of the files.
+
+After that, there's simply a \ident{Server.filters} which takes a list of
+filters to load.  If you don't set this variable, then the filter gear isn't
+even loaded and your server behaves as normal.  If you do set this variable,
+then the filters are installed and will work.
+
+If you run this config, you'll see the filter printing out it's config
+as a tnetstring, and then closing the connection, but only if you go
+to \ident{/nulltest/}.  If you go to \ident{/tests/sample.html} to
+get at a directory, it'll not even run.
+
+We'll have more documentation on actually writing filters in the 
+Hacking section.
 

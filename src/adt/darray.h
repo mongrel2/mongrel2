@@ -47,8 +47,10 @@ error:
 
 static inline void *darray_get(darray_t *array, int i)
 {
-    assert(i < array->max && "darray attempt to get past max");
+    check(i < array->max, "darray attempt to get past max");
     return array->contents[i];
+error:
+    return NULL;
 }
 
 static inline void *darray_remove(darray_t *array, int i)

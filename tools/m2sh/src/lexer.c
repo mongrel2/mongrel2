@@ -62,19 +62,19 @@ void Parse(
 #define TKSTR(N) TKBASE(N, ts+1, te-3)
 
 
-#line 99 "src/lexer.rl"
+#line 97 "src/lexer.rl"
 
 
 
 #line 70 "src/lexer.c"
-static const int m2sh_lexer_start = 8;
-static const int m2sh_lexer_first_final = 8;
+static const int m2sh_lexer_start = 6;
+static const int m2sh_lexer_first_final = 6;
 static const int m2sh_lexer_error = 0;
 
-static const int m2sh_lexer_en_main = 8;
+static const int m2sh_lexer_en_main = 6;
 
 
-#line 102 "src/lexer.rl"
+#line 100 "src/lexer.rl"
 
 void Parse_print_error(const char *message, bstring content, int at, int line_number)
 {
@@ -118,7 +118,7 @@ tst_t *Parse_config_string(bstring content)
 	act = 0;
 	}
 
-#line 137 "src/lexer.rl"
+#line 135 "src/lexer.rl"
     
 #line 124 "src/lexer.c"
 	{
@@ -127,118 +127,114 @@ tst_t *Parse_config_string(bstring content)
 	switch ( cs )
 	{
 tr1:
-#line 78 "src/lexer.rl"
+#line 77 "src/lexer.rl"
 	{te = p+1;{ TKSTR(QSTRING) }}
-	goto st8;
+	goto st6;
 tr4:
-#line 93 "src/lexer.rl"
-	{te = p+1;}
-	goto st8;
-tr9:
-#line 79 "src/lexer.rl"
-	{te = p+1;{ TKSTR(PATTERN) }}
-	goto st8;
-tr10:
 #line 91 "src/lexer.rl"
 	{te = p+1;}
-	goto st8;
-tr12:
-#line 90 "src/lexer.rl"
+	goto st6;
+tr7:
+#line 89 "src/lexer.rl"
+	{te = p+1;}
+	goto st6;
+tr9:
+#line 88 "src/lexer.rl"
 	{te = p+1;{ state.line_number++; }}
-	goto st8;
-tr13:
-#line 85 "src/lexer.rl"
+	goto st6;
+tr10:
+#line 83 "src/lexer.rl"
 	{te = p+1;{ TK(LPAREN) }}
-	goto st8;
+	goto st6;
+tr11:
+#line 84 "src/lexer.rl"
+	{te = p+1;{ TK(RPAREN) }}
+	goto st6;
+tr12:
+#line 85 "src/lexer.rl"
+	{te = p+1;{ TK(COMMA) }}
+	goto st6;
 tr14:
 #line 86 "src/lexer.rl"
-	{te = p+1;{ TK(RPAREN) }}
-	goto st8;
-tr15:
-#line 87 "src/lexer.rl"
-	{te = p+1;{ TK(COMMA) }}
-	goto st8;
-tr17:
-#line 88 "src/lexer.rl"
 	{te = p+1;{ TK(COLON) }}
-	goto st8;
-tr18:
-#line 80 "src/lexer.rl"
+	goto st6;
+tr15:
+#line 78 "src/lexer.rl"
 	{te = p+1;{ TK(EQ) }}
-	goto st8;
-tr20:
-#line 83 "src/lexer.rl"
-	{te = p+1;{ TK(LBRACE) }}
-	goto st8;
-tr21:
-#line 84 "src/lexer.rl"
-	{te = p+1;{ TK(RBRACE) }}
-	goto st8;
-tr23:
+	goto st6;
+tr17:
 #line 81 "src/lexer.rl"
-	{te = p+1;{ TK(LBRACKET) }}
-	goto st8;
-tr24:
+	{te = p+1;{ TK(LBRACE) }}
+	goto st6;
+tr18:
 #line 82 "src/lexer.rl"
+	{te = p+1;{ TK(RBRACE) }}
+	goto st6;
+tr20:
+#line 79 "src/lexer.rl"
+	{te = p+1;{ TK(LBRACKET) }}
+	goto st6;
+tr21:
+#line 80 "src/lexer.rl"
 	{te = p+1;{ TK(RBRACKET) }}
-	goto st8;
-tr25:
-#line 95 "src/lexer.rl"
+	goto st6;
+tr22:
+#line 93 "src/lexer.rl"
 	{te = p;p--;{ TK(NUMBER) }}
-	goto st8;
-tr26:
+	goto st6;
+tr23:
 #line 1 "NONE"
 	{	switch( act ) {
-	case 16:
+	case 15:
 	{{p = ((te))-1;} TK(CLASS) }
 	break;
-	case 17:
+	case 16:
 	{{p = ((te))-1;} TK(IDENT) }
 	break;
 	}
 	}
-	goto st8;
-tr28:
-#line 97 "src/lexer.rl"
+	goto st6;
+tr25:
+#line 95 "src/lexer.rl"
 	{te = p;p--;{ TK(IDENT) }}
-	goto st8;
-st8:
+	goto st6;
+st6:
 #line 1 "NONE"
 	{ts = 0;}
 	if ( ++p == pe )
-		goto _test_eof8;
-case 8:
+		goto _test_eof6;
+case 6:
 #line 1 "NONE"
 	{ts = p;}
-#line 214 "src/lexer.c"
+#line 210 "src/lexer.c"
 	switch( (*p) ) {
-		case 10: goto tr12;
-		case 32: goto tr10;
+		case 10: goto tr9;
+		case 32: goto tr7;
 		case 34: goto st1;
 		case 35: goto st3;
 		case 39: goto st4;
-		case 40: goto tr13;
-		case 41: goto tr14;
-		case 44: goto tr15;
-		case 58: goto tr17;
-		case 61: goto tr18;
-		case 91: goto tr20;
-		case 93: goto tr21;
-		case 96: goto st6;
-		case 123: goto tr23;
-		case 125: goto tr24;
+		case 40: goto tr10;
+		case 41: goto tr11;
+		case 44: goto tr12;
+		case 58: goto tr14;
+		case 61: goto tr15;
+		case 91: goto tr17;
+		case 93: goto tr18;
+		case 95: goto st9;
+		case 123: goto tr20;
+		case 125: goto tr21;
 	}
 	if ( (*p) < 48 ) {
 		if ( 9 <= (*p) && (*p) <= 13 )
-			goto tr10;
+			goto tr7;
 	} else if ( (*p) > 57 ) {
 		if ( (*p) > 90 ) {
-			if ( 95 <= (*p) && (*p) <= 122 )
-				goto st11;
+			if ( 97 <= (*p) && (*p) <= 122 )
+				goto st9;
 		} else if ( (*p) >= 65 )
-			goto tr19;
+			goto tr16;
 	} else
-		goto st9;
+		goto st7;
 	goto st0;
 st0:
 cs = 0;
@@ -278,113 +274,97 @@ st5:
 		goto _test_eof5;
 case 5:
 	goto st4;
-st9:
-	if ( ++p == pe )
-		goto _test_eof9;
-case 9:
-	if ( 48 <= (*p) && (*p) <= 57 )
-		goto st9;
-	goto tr25;
-tr19:
-#line 1 "NONE"
-	{te = p+1;}
-#line 97 "src/lexer.rl"
-	{act = 17;}
-	goto st10;
-tr27:
-#line 1 "NONE"
-	{te = p+1;}
-#line 96 "src/lexer.rl"
-	{act = 16;}
-	goto st10;
-st10:
-	if ( ++p == pe )
-		goto _test_eof10;
-case 10:
-#line 305 "src/lexer.c"
-	if ( (*p) == 95 )
-		goto st11;
-	if ( (*p) < 65 ) {
-		if ( 48 <= (*p) && (*p) <= 57 )
-			goto st11;
-	} else if ( (*p) > 90 ) {
-		if ( 97 <= (*p) && (*p) <= 122 )
-			goto tr27;
-	} else
-		goto tr27;
-	goto tr26;
-st11:
-	if ( ++p == pe )
-		goto _test_eof11;
-case 11:
-	if ( (*p) == 95 )
-		goto st11;
-	if ( (*p) < 65 ) {
-		if ( 48 <= (*p) && (*p) <= 57 )
-			goto st11;
-	} else if ( (*p) > 90 ) {
-		if ( 97 <= (*p) && (*p) <= 122 )
-			goto st11;
-	} else
-		goto st11;
-	goto tr28;
-st6:
-	if ( ++p == pe )
-		goto _test_eof6;
-case 6:
-	switch( (*p) ) {
-		case 92: goto st7;
-		case 96: goto tr9;
-	}
-	goto st6;
 st7:
 	if ( ++p == pe )
 		goto _test_eof7;
 case 7:
-	goto st6;
+	if ( 48 <= (*p) && (*p) <= 57 )
+		goto st7;
+	goto tr22;
+tr16:
+#line 1 "NONE"
+	{te = p+1;}
+#line 95 "src/lexer.rl"
+	{act = 16;}
+	goto st8;
+tr24:
+#line 1 "NONE"
+	{te = p+1;}
+#line 94 "src/lexer.rl"
+	{act = 15;}
+	goto st8;
+st8:
+	if ( ++p == pe )
+		goto _test_eof8;
+case 8:
+#line 301 "src/lexer.c"
+	if ( (*p) == 95 )
+		goto st9;
+	if ( (*p) < 65 ) {
+		if ( 48 <= (*p) && (*p) <= 57 )
+			goto st9;
+	} else if ( (*p) > 90 ) {
+		if ( 97 <= (*p) && (*p) <= 122 )
+			goto tr24;
+	} else
+		goto tr24;
+	goto tr23;
+st9:
+	if ( ++p == pe )
+		goto _test_eof9;
+case 9:
+	if ( (*p) == 95 )
+		goto st9;
+	if ( (*p) < 65 ) {
+		if ( 48 <= (*p) && (*p) <= 57 )
+			goto st9;
+	} else if ( (*p) > 90 ) {
+		if ( 97 <= (*p) && (*p) <= 122 )
+			goto st9;
+	} else
+		goto st9;
+	goto tr25;
 	}
-	_test_eof8: cs = 8; goto _test_eof; 
+	_test_eof6: cs = 6; goto _test_eof; 
 	_test_eof1: cs = 1; goto _test_eof; 
 	_test_eof2: cs = 2; goto _test_eof; 
 	_test_eof3: cs = 3; goto _test_eof; 
 	_test_eof4: cs = 4; goto _test_eof; 
 	_test_eof5: cs = 5; goto _test_eof; 
-	_test_eof9: cs = 9; goto _test_eof; 
-	_test_eof10: cs = 10; goto _test_eof; 
-	_test_eof11: cs = 11; goto _test_eof; 
-	_test_eof6: cs = 6; goto _test_eof; 
 	_test_eof7: cs = 7; goto _test_eof; 
+	_test_eof8: cs = 8; goto _test_eof; 
+	_test_eof9: cs = 9; goto _test_eof; 
 
 	_test_eof: {}
 	if ( p == eof )
 	{
 	switch ( cs ) {
+	case 7: goto tr22;
+	case 8: goto tr23;
 	case 9: goto tr25;
-	case 10: goto tr26;
-	case 11: goto tr28;
 	}
 	}
 
 	_out: {}
 	}
 
-#line 138 "src/lexer.rl"
+#line 136 "src/lexer.rl"
 
 
     if(state.error) {
         Parse_print_error("SYNTAX ERROR", content, 
                 (int)(ts - bdata(content)), ++state.line_number);
     } else if( cs == 
-#line 379 "src/lexer.c"
+#line 359 "src/lexer.c"
 0
-#line 143 "src/lexer.rl"
+#line 141 "src/lexer.rl"
  ) {
         Parse_print_error("INVALID CHARACTER", content,
                 (int)(ts - bdata(content)), ++state.line_number);
     } else if( cs >= 
-#line 386 "src/lexer.c"
-8
-#line 146 "src/lexer.rl"
+#line 366 "src/lexer.c"
+6
+#line 144 "src/lexer.rl"
  ) {
         Parse(parser, TKEOF, NULL, &state);
     } else {
