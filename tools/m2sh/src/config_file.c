@@ -270,41 +270,41 @@ error:
 static inline tns_value_t *convert_setting(tst_t *settings, Value *val)
 {
     lnode_t *cur = NULL;
+    tns_value_t *res = NULL;
 
     switch(val->type) {
         case VAL_QSTRING:
-            tns_value_t *str = tns_value_create(tns_tag_string);
-            str->value.string = bstrcpy(val->as.string->data);
-
-            return str;
+            res = tns_value_create(tns_tag_string);
+            res->value.string = bstrcpy(val->as.string->data);
             break;
 
         case VAL_NUMBER:
-            return tns_new_integer(strtol(
+            res = tns_new_integer(strtol(
                         bdatae(val->as.number->data, "0"), NULL, 10));
             break;
 
         case VAL_LIST:
-            tns_value_t *list = tns_new_list();
+            res = tns_new_list();
             for(cur = list_first(val->as.list); cur != NULL; cur = list_next(val->as.list, cur)) {
                 tns_value_t *el = convert_setting(settings, (Value *)lnode_get(cur));
                 check(el != NULL, "Failed to convert an element of the list.");
-                tns_add_to_list(list, el);
+                tns_add_to_list(res, el);
             }
-
-            return list;
             break;
 
         case VAL_REF:
             val = Value_resolve(settings, val);
-            return convert_setting(settings, val);
+            res = convert_setting(settings, val);
+            break;
 
         case VAL_HASH:
-            return FilterSetting_convert_hash(settings, val);
+            res = FilterSetting_convert_hash(settings, val);
             break;
         default:
             sentinel("Unsupported type in Filter settings: %d", val->type);
     }
+
+    return res;
 
 error: // fallthrough
     return NULL;
@@ -346,7 +346,7 @@ int Filter_load(tst_t *settings, Value *val)
     check(name != NULL, "You must set a name for the filter.");
 
     Value *filter_settings = AST_get(settings, cls->params, &SETTINGS_VAR, VAL_HASH);
-    // TODO: convert the settings to a tnetstring
+
     if(filter_settings) {
         tns_value_t *filter_tns = FilterSetting_convert_hash(settings, filter_settings);
         check(filter_tns, "Failed to convert settings for filter %s", name);
