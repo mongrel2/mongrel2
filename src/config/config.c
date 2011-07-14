@@ -50,6 +50,7 @@
 #include "setting.h"
 #include "config/module.h"
 #include "config/db.h"
+#include "filter.h"
 #include <dlfcn.h>
 
 
@@ -234,6 +235,43 @@ error:
     return -1;
 }
 
+
+int Config_load_filters(Server *srv, int server_id)
+{
+    tns_value_t *res = CONFIG_MODULE.load_filters(server_id);
+    int cols = 0;
+    int rows = DB_counts(res, &cols);
+    int row_i = 0;
+    int rc = 0;
+
+    for(row_i = 0; row_i < rows; row_i++) {
+        DB_check(res, row_i, 3, 
+            tns_tag_number, tns_tag_string, tns_tag_string);
+
+        int id = DB_get_as(res, row_i, 0, number);
+        bstring filter_name = DB_get_as(res, row_i, 1, string);
+        bstring raw_settings = DB_get_as(res, row_i, 2, string);
+
+        char *remain = NULL;
+        tns_value_t *config = tns_parse(bdata(raw_settings), blength(raw_settings), &remain);
+
+        check(config != NULL, "Failed to parse the settings for Filter '%s' id='%d'",
+                bdata(filter_name), id);
+        check(tns_get_type(config) == tns_tag_dict,
+                "Settings for a filter must be a dict.");
+
+        rc = Filter_load(srv, filter_name, config);
+        check(rc == 0, "Failed to load filter '%s' id='%d'", bdata(filter_name), id);
+    }
+
+    tns_value_destroy(res);
+    return 0;
+
+error:
+    if(res) tns_value_destroy(res);
+    return 1;
+}
+
 int Config_load_hosts(Server *srv, int server_id)
 {
     tns_value_t *res = CONFIG_MODULE.load_hosts(server_id);
@@ -309,6 +347,9 @@ Server *Config_load_server(const char *uuid)
 
     rc = Config_load_hosts(srv, server_id);
     check(rc == 0, "Failed to load the hosts for server: %s", bdata(srv->uuid));
+
+    rc = Config_load_filters(srv, server_id);
+    check(rc == 0, "Failed to load the filters for server: %s", bdata(srv->uuid));
 
     tns_value_destroy(res);
     return srv;

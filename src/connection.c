@@ -695,6 +695,8 @@ void Connection_task(void *v)
             next = Filter_run(next, conn);
             check(next >= CLOSE && next < EVENT_END,
                     "!!! Invalid next event[%d]: %d from filter!", i, next);
+
+            if(next == CLOSE) break;
         }
 
         next = State_exec(&conn->state, next, (void *)conn);
