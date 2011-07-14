@@ -45,6 +45,8 @@ StateEvent filter_transition(StateEvent state, Connection *conn, tns_value_t *co
         log_info("CONFIG: %.*s", (int)len, data);
     }
 
+    free(data);
+
     return CLOSE;
 }
 
