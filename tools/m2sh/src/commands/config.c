@@ -45,7 +45,6 @@ int Command_load(Command *cmd)
     bstring why = NULL;
 
     check_file(conf_file, "config file", R_OK);
-
     Config_load(bdata(conf_file), bdata(db_file));
 
     what = bfromcstr("load");

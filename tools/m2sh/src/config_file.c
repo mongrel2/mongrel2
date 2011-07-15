@@ -380,12 +380,11 @@ error:
 
 static inline int Config_setup(const char *db_file)
 {
+    char *zErrMsg = NULL;
     DB_init(db_file);
     tns_value_t *res = DB_exec("begin");
     check(res != NULL, "Couldn't start transaction.");
     tns_value_destroy(res);
-
-    char *zErrMsg = NULL;
 
     int rc = sqlite3_exec(CONFIG_DB, bdata(&CONFIG_SCHEMA), NULL, NULL, &zErrMsg);
     check(rc == SQLITE_OK, "Failed to load initial schema: %s", zErrMsg);
