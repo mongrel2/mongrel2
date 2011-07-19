@@ -98,6 +98,25 @@ The end result of this should be:
 If any of these stages fail, then you can simply try to fix them and then
 run:  \shell{make clean all \&\& sudo make install} which will do everything all over again.
 
+\subsection{Other platforms than Linux}
+
+If you aren't running Linux chances are good this standard procedure will not work for you.
+
+The ``Makefile`` lists several targets for various platforms, as of writing this there are:
+
+\begin{itemize}
+\item freebsd
+\item netbsd
+\item openbsd
+\item macports
+\end{itemize}
+
+So for example you would probably install zeromq and sqlite3 as ports and then compile it like so:
+
+\begin{code}{Installing Mongrel2 on FreeNSD}
+<< d['docs/manual/inputs/install_freebsd.sh|pyg|l'] >>
+\end{code}
+
 \section{Testing The Installation}
 
 When you are done, you probably want to make sure that it installed correctly.
