@@ -34,9 +34,61 @@
 
 #include <stdlib.h>
 #include "../commands.h"
+#include <routing.h>
+#include <dbg.h>
 
 int Command_uuid(Command *cmd)
 {
     return system("uuidgen");
 }
 
+static void null_destroy(Route *route, struct RouteMap *map)
+{
+
+}
+
+
+int Command_route(Command *cmd)
+{
+    int rc = 0;
+    RouteMap *map = RouteMap_create(null_destroy);
+    check(map != NULL, "Error, can't create the RouteMap.");
+
+    bstring match = option(cmd, "match", NULL);
+    bstring pattern = option(cmd, "pattern", NULL);
+    bstring reversed = option(cmd, "reversed", NULL);
+    bstring sfxmatch = option(cmd, "suffix", NULL);
+
+    check(match != NULL, "You have to give something to match against with --match.");
+    check(pattern != NULL, "You have to give a pattern to use with --pattern.");
+
+    if(reversed == NULL) {
+        rc = RouteMap_insert(map, bstrcpy(pattern), NULL);
+        check(rc == 0, "Failed to insert pattern into routing table.");
+    } else {
+        rc = RouteMap_insert_reversed(map, bstrcpy(pattern), NULL);
+        check(rc == 0, "Failed to insert REVERSED pattern into routing table.");
+    }
+
+    Route *route = NULL;
+
+    if(sfxmatch != NULL) {
+        route = RouteMap_match_suffix(map, match);
+    } else {
+        route = RouteMap_simple_prefix_match(map, match);
+    }
+
+    if(route != NULL) {
+        printf("Match passed on '%s' against '%s'.\n", bdata(match), bdata(pattern));
+        printf("ROUTE: pattern='%s', prefix='%s'\n", bdata(route->pattern), bdata(route->prefix));
+    } else {
+        printf("Match FAILED on '%s' against '%s'.\n", bdata(match), bdata(pattern));
+    }
+
+    RouteMap_destroy(map);
+    return 0;
+error:
+
+    RouteMap_destroy(map);
+    return -1;
+}

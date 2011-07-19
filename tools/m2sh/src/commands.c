@@ -115,6 +115,8 @@ static CommandHandler COMMAND_MAPPING[] = {
         .help = "Tells you what's running." },
     {.name = "control", .cb = Command_control,
         .help = "Connects to the control port." },
+    {.name = "route", .cb = Command_route,
+        .help = "Tests out routing patterns." },
     {.name = "version", .cb = Command_version,
         .help = "Prints the Mongrel2 and m2sh version." },
     {.name = "help", .cb = Command_help,
