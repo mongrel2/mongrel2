@@ -286,16 +286,23 @@ static int check_server(struct ServerRun *r, tns_value_t *res)
         return 0;
     }
 
+    errno = 0;
     rc = kill(pid, 0);
 
-    if(rc != 0) {
+    if((rc != 0) && (errno == ESRCH)) {
         printf("mongrel2 at PID %d is NOT running.\n", pid);
-    } else {
+    } else if ((rc == 0) || (errno == EPERM)) {
         printf("mongrel2 at PID %d running.\n", pid);
+    } else {
+        sentinel("Could not send signal to mongrel2 at PID %d", pid);
     }
 
     r->ran = 1;
     return 0;
+
+error:
+    r->ran = 0;
+    return -1;
 }
 
 int Command_running(Command *cmd)
