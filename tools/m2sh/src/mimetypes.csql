@@ -668,6 +668,7 @@ struct tagbstring MIMETYPES_DEFAULT_SQL = bsStatic(
 "insert into mimetype (extension, mimetype) values ('.flo', 'application/vnd.micrografx.flo');\n"
 "insert into mimetype (extension, mimetype) values ('.tgf', 'chemical/x-mdl-tgf');\n"
 "insert into mimetype (extension, mimetype) values ('.tgz', 'application/x-gtar');\n"
+"insert into mimetype (extension, mimetype) values ('.gz', 'application/x-gzip');\n"
 "insert into mimetype (extension, mimetype) values ('.lhs', 'text/x-literate-haskell');\n"
 "insert into mimetype (extension, mimetype) values ('.msl', 'application/vnd.mobius.msl');\n"
 "insert into mimetype (extension, mimetype) values ('.qxd', 'application/vnd.quark.quarkxpress');\n"
