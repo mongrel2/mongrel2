@@ -1,4 +1,4 @@
-var wsUri="ws://home.jasonmmiller.org:6767/chatsocket"
+var wsUri="ws://localhost:6767/chatsocket"
 var Chat = {
 	socket: null,
 
