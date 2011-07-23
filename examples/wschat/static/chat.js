@@ -46,7 +46,7 @@ var Chat = {
         }
         Chat.communicate=false;
         if (Chat.socket.readyState == Chat.socket.OPEN) {
-            window.setTimeout(Chat.ping,15000)
+            window.setTimeout(Chat.ping,45000)
         }
     }
 }
