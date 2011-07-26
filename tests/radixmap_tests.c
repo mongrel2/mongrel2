@@ -179,6 +179,7 @@ static char *test_RadixMap_simulate()
 
 char * all_tests() {
     mu_suite_start();
+    srand(time());
 
     mu_run_test(test_RadixMap_operations);
     mu_run_test(test_RadixMap_simulate);
