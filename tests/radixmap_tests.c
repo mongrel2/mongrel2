@@ -1,5 +1,6 @@
 #include "minunit.h"
 #include <adt/radixmap.h>
+#include <time.h>
 
 static int make_random(RadixMap *map)
 {
@@ -179,7 +180,7 @@ static char *test_RadixMap_simulate()
 
 char * all_tests() {
     mu_suite_start();
-    srand(time());
+    srand(time(NULL));
 
     mu_run_test(test_RadixMap_operations);
     mu_run_test(test_RadixMap_simulate);
