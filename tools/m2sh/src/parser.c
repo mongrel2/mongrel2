@@ -13,9 +13,8 @@
 #include "ast.h"
 #include <task/task.h>
 
-#define assert(S) if(!(S)) { log_err("PARSER ASSERT FAILED: " #S); taskexitall(-1); }
 
-#line 19 "src/parser.c"
+#line 18 "src/parser.c"
 /* Next is all token values, in a form suitable for use by makeheaders.
 ** This section will be null unless lemon is run with the -m switch.
 */
@@ -157,38 +156,38 @@ static const YYMINORTYPE yyzerominor = { 0 };
 **  yy_default[]       Default action for each state.
 */
 static const YYACTIONTYPE yy_action[] = {
- /*     0 */    18,   19,   23,   13,   14,   16,   27,    3,   11,   28,
- /*    10 */    12,   18,   19,   23,   26,   14,   61,    5,   35,   11,
- /*    20 */    33,   12,   34,   20,   21,   22,   15,   24,   20,   21,
- /*    30 */    22,   29,   20,   21,   22,   32,   20,   21,   22,   36,
- /*    40 */    17,   13,   15,   13,   31,   25,    8,    1,    6,    9,
- /*    50 */     2,    7,    4,   30,   10,
+ /*     0 */    24,   25,   29,   32,   13,    6,   15,    3,   12,   34,
+ /*    10 */    11,   24,   25,   29,    7,   13,   61,    5,   21,   12,
+ /*    20 */     1,   11,   30,   26,   27,   28,   10,   18,   26,   27,
+ /*    30 */    28,   20,   26,   27,   28,   35,   26,   27,   28,   36,
+ /*    40 */    23,   15,   14,   15,    2,   31,    9,    4,   19,    8,
+ /*    50 */    22,   33,   14,   16,   17,
 };
 static const YYCODETYPE yy_lookahead[] = {
- /*     0 */     2,    3,    4,    4,    6,   18,   18,    9,   10,   11,
- /*    10 */    12,    2,    3,    4,   18,    6,   16,   17,   18,   10,
- /*    20 */    26,   12,   19,   20,   21,   22,    2,   19,   20,   21,
+ /*     0 */     2,    3,    4,   18,    6,   23,    4,    9,   10,   11,
+ /*    10 */    12,    2,    3,    4,   25,    6,   16,   17,   18,   10,
+ /*    20 */    24,   12,   19,   20,   21,   22,    7,   19,   20,   21,
  /*    30 */    22,   19,   20,   21,   22,   19,   20,   21,   22,    0,
- /*    40 */     1,    4,    2,    4,   26,    8,    9,   24,   23,    9,
- /*    50 */     5,   25,   14,   13,    7,
+ /*    40 */     1,    4,    2,    4,   14,    8,    9,    5,   26,    9,
+ /*    50 */    18,   18,    2,   13,   26,
 };
 #define YY_SHIFT_USE_DFLT (-3)
 #define YY_SHIFT_MAX 15
 static const signed char yy_shift_ofst[] = {
- /*     0 */    -1,   -2,    9,    9,    9,   39,   37,   40,   -1,   24,
- /*    10 */    -3,   -3,   -3,   45,   47,   38,
+ /*     0 */     2,   -2,    9,    9,    9,   39,   37,   40,   50,    2,
+ /*    10 */    -3,   -3,   -3,   19,   30,   42,
 };
-#define YY_REDUCE_USE_DFLT (-14)
+#define YY_REDUCE_USE_DFLT (-19)
 #define YY_REDUCE_MAX 12
 static const signed char yy_reduce_ofst[] = {
- /*     0 */     0,    3,    8,   12,   16,  -13,  -12,   -6,   -4,   18,
- /*    10 */    25,   23,   26,
+ /*     0 */     0,   12,    8,   16,    3,   32,   33,   22,   28,  -15,
+ /*    10 */   -18,  -11,   -4,
 };
 static const YYACTIONTYPE yy_default[] = {
  /*     0 */    60,   60,   60,   60,   60,   60,   60,   60,   60,   60,
- /*    10 */    50,   54,   58,   60,   60,   60,   37,   39,   40,   41,
- /*    20 */    42,   43,   44,   45,   46,   47,   48,   49,   51,   52,
- /*    30 */    55,   56,   59,   57,   53,   38,
+ /*    10 */    50,   58,   54,   60,   60,   60,   55,   56,   59,   57,
+ /*    20 */    53,   38,   37,   39,   40,   41,   42,   43,   44,   45,
+ /*    30 */    46,   47,   48,   49,   51,   52,
 };
 #define YY_SZ_ACTTAB (int)(sizeof(yy_action)/sizeof(yy_action[0]))
 
@@ -414,30 +413,30 @@ static void yy_destructor(
     case 13: /* RBRACKET */
     case 14: /* COLON */
 {
-#line 29 "src/parser.y"
+#line 28 "src/parser.y"
  Token_destroy((yypminor->yy0)); 
-#line 420 "src/parser.c"
+#line 419 "src/parser.c"
 }
       break;
     case 18: /* assignment */
 {
-#line 57 "src/parser.y"
+#line 56 "src/parser.y"
  free((yypminor->yy7)); 
-#line 427 "src/parser.c"
+#line 426 "src/parser.c"
 }
       break;
     case 23: /* parameters */
 {
-#line 68 "src/parser.y"
+#line 67 "src/parser.y"
  AST_destroy((yypminor->yy13)); 
-#line 434 "src/parser.c"
+#line 433 "src/parser.c"
 }
       break;
     case 26: /* hash_pair */
 {
-#line 108 "src/parser.y"
+#line 107 "src/parser.y"
  free((yypminor->yy17)); 
-#line 441 "src/parser.c"
+#line 440 "src/parser.c"
 }
       break;
     default:  break;   /* If no destructor action specified: do nothing */
@@ -610,10 +609,10 @@ static void yyStackOverflow(yyParser *yypParser, YYMINORTYPE *yypMinor){
    while( yypParser->yyidx>=0 ) yy_pop_parser_stack(yypParser);
    /* Here code is inserted which will execute if the parser
    ** stack every overflows */
-#line 25 "src/parser.y"
+#line 24 "src/parser.y"
 
     log_err("There was a stack overflow at line: %d", state->line_number);
-#line 617 "src/parser.c"
+#line 616 "src/parser.c"
    ParseARG_STORE; /* Suppress warning about unused %extra_argument var */
 }
 
@@ -749,140 +748,140 @@ static void yy_reduce(
   **     break;
   */
       case 0: /* config ::= vars */
-#line 31 "src/parser.y"
+#line 30 "src/parser.y"
 { state->settings = yymsp[0].minor.yy13; }
-#line 755 "src/parser.c"
+#line 754 "src/parser.c"
         break;
       case 1: /* vars ::= vars assignment */
-#line 35 "src/parser.y"
+#line 34 "src/parser.y"
 { 
         yygotominor.yy13 = tst_insert(yymsp[-1].minor.yy13, bdata(yymsp[0].minor.yy7->key->data), blength(yymsp[0].minor.yy7->key->data), yymsp[0].minor.yy7);
     }
-#line 762 "src/parser.c"
+#line 761 "src/parser.c"
         break;
       case 2: /* vars ::= assignment */
-#line 40 "src/parser.y"
+#line 39 "src/parser.y"
 {
         yygotominor.yy13 = tst_insert(yygotominor.yy13, bdata(yymsp[0].minor.yy7->key->data), blength(yymsp[0].minor.yy7->key->data), yymsp[0].minor.yy7);
     }
-#line 769 "src/parser.c"
+#line 768 "src/parser.c"
         break;
       case 3: /* vars ::= vars EOF */
-#line 44 "src/parser.y"
+#line 43 "src/parser.y"
 { yygotominor.yy13 = yymsp[-1].minor.yy13;   yy_destructor(yypParser,1,&yymsp[0].minor);
 }
-#line 775 "src/parser.c"
+#line 774 "src/parser.c"
         break;
       case 4: /* expr ::= QSTRING */
-#line 48 "src/parser.y"
+#line 47 "src/parser.y"
 { yygotominor.yy8 = Value_create(VAL_QSTRING, yymsp[0].minor.yy0); }
-#line 780 "src/parser.c"
+#line 779 "src/parser.c"
         break;
       case 5: /* expr ::= NUMBER */
-#line 49 "src/parser.y"
+#line 48 "src/parser.y"
 { yygotominor.yy8 = Value_create(VAL_NUMBER, yymsp[0].minor.yy0); }
-#line 785 "src/parser.c"
+#line 784 "src/parser.c"
         break;
       case 6: /* expr ::= class */
-#line 50 "src/parser.y"
+#line 49 "src/parser.y"
 { yygotominor.yy8 = Value_create(VAL_CLASS, yymsp[0].minor.yy11); }
-#line 790 "src/parser.c"
+#line 789 "src/parser.c"
         break;
       case 7: /* expr ::= list */
-#line 51 "src/parser.y"
+#line 50 "src/parser.y"
 { yygotominor.yy8 = Value_create(VAL_LIST, yymsp[0].minor.yy46); }
-#line 795 "src/parser.c"
+#line 794 "src/parser.c"
         break;
       case 8: /* expr ::= hash */
-#line 52 "src/parser.y"
+#line 51 "src/parser.y"
 { yygotominor.yy8 = Value_create(VAL_HASH, yymsp[0].minor.yy13); }
-#line 800 "src/parser.c"
+#line 799 "src/parser.c"
         break;
       case 9: /* expr ::= IDENT */
-#line 53 "src/parser.y"
+#line 52 "src/parser.y"
 { yygotominor.yy8 = Value_create(VAL_REF, yymsp[0].minor.yy0); }
-#line 805 "src/parser.c"
+#line 804 "src/parser.c"
         break;
       case 10: /* assignment ::= IDENT EQ expr */
-#line 58 "src/parser.y"
+#line 57 "src/parser.y"
 { 
         yygotominor.yy7 = malloc(sizeof(Pair)); yygotominor.yy7->key = yymsp[-2].minor.yy0; yygotominor.yy7->value = yymsp[0].minor.yy8; 
       yy_destructor(yypParser,5,&yymsp[-1].minor);
 }
-#line 813 "src/parser.c"
+#line 812 "src/parser.c"
         break;
       case 11: /* class ::= CLASS LPAREN parameters RPAREN */
-#line 65 "src/parser.y"
+#line 64 "src/parser.y"
 { yygotominor.yy11 = calloc(sizeof(Class), 1); yygotominor.yy11->id = -1; yygotominor.yy11->ident = yymsp[-3].minor.yy0; yygotominor.yy11->params = yymsp[-1].minor.yy13;   yy_destructor(yypParser,7,&yymsp[-2].minor);
   yy_destructor(yypParser,8,&yymsp[0].minor);
 }
-#line 820 "src/parser.c"
+#line 819 "src/parser.c"
         break;
       case 12: /* parameters ::= parameters COMMA assignment */
-#line 70 "src/parser.y"
+#line 69 "src/parser.y"
 { yygotominor.yy13 = tst_insert(yymsp[-2].minor.yy13, bdata(yymsp[0].minor.yy7->key->data), blength(yymsp[0].minor.yy7->key->data), yymsp[0].minor.yy7);   yy_destructor(yypParser,9,&yymsp[-1].minor);
 }
-#line 826 "src/parser.c"
+#line 825 "src/parser.c"
         break;
       case 13: /* parameters ::= parameters assignment */
-#line 73 "src/parser.y"
+#line 72 "src/parser.y"
 { yygotominor.yy13 = tst_insert(yymsp[-1].minor.yy13, bdata(yymsp[0].minor.yy7->key->data), blength(yymsp[0].minor.yy7->key->data), yymsp[0].minor.yy7); }
-#line 831 "src/parser.c"
+#line 830 "src/parser.c"
         break;
       case 14: /* parameters ::= */
       case 22: /* hash_elements ::= */ yytestcase(yyruleno==22);
-#line 76 "src/parser.y"
+#line 75 "src/parser.y"
 { yygotominor.yy13 = NULL; }
-#line 837 "src/parser.c"
+#line 836 "src/parser.c"
         break;
       case 15: /* list ::= LBRACE list_elements RBRACE */
-#line 80 "src/parser.y"
+#line 79 "src/parser.y"
 { yygotominor.yy46 = yymsp[-1].minor.yy46;   yy_destructor(yypParser,10,&yymsp[-2].minor);
   yy_destructor(yypParser,11,&yymsp[0].minor);
 }
-#line 844 "src/parser.c"
+#line 843 "src/parser.c"
         break;
       case 16: /* list_elements ::= list_elements COMMA expr */
-#line 84 "src/parser.y"
+#line 83 "src/parser.y"
 { yygotominor.yy46 = yymsp[-2].minor.yy46; list_append(yygotominor.yy46, lnode_create(yymsp[0].minor.yy8));   yy_destructor(yypParser,9,&yymsp[-1].minor);
 }
-#line 850 "src/parser.c"
+#line 849 "src/parser.c"
         break;
       case 17: /* list_elements ::= list_elements expr */
-#line 87 "src/parser.y"
+#line 86 "src/parser.y"
 { yygotominor.yy46 = yymsp[-1].minor.yy46; list_append(yygotominor.yy46, lnode_create(yymsp[0].minor.yy8)); }
-#line 855 "src/parser.c"
+#line 854 "src/parser.c"
         break;
       case 18: /* list_elements ::= */
-#line 90 "src/parser.y"
+#line 89 "src/parser.y"
 { yygotominor.yy46 = list_create(LISTCOUNT_T_MAX); }
-#line 860 "src/parser.c"
+#line 859 "src/parser.c"
         break;
       case 19: /* hash ::= LBRACKET hash_elements RBRACKET */
-#line 94 "src/parser.y"
+#line 93 "src/parser.y"
 { yygotominor.yy13 = yymsp[-1].minor.yy13;   yy_destructor(yypParser,12,&yymsp[-2].minor);
   yy_destructor(yypParser,13,&yymsp[0].minor);
 }
-#line 867 "src/parser.c"
+#line 866 "src/parser.c"
         break;
       case 20: /* hash_elements ::= hash_elements COMMA hash_pair */
-#line 98 "src/parser.y"
+#line 97 "src/parser.y"
 { yygotominor.yy13 = tst_insert(yymsp[-2].minor.yy13, bdata(yymsp[0].minor.yy17->key->data), blength(yymsp[0].minor.yy17->key->data), yymsp[0].minor.yy17);   yy_destructor(yypParser,9,&yymsp[-1].minor);
 }
-#line 873 "src/parser.c"
+#line 872 "src/parser.c"
         break;
       case 21: /* hash_elements ::= hash_elements hash_pair */
-#line 101 "src/parser.y"
+#line 100 "src/parser.y"
 { yygotominor.yy13 = tst_insert(yymsp[-1].minor.yy13, bdata(yymsp[0].minor.yy17->key->data), blength(yymsp[0].minor.yy17->key->data), yymsp[0].minor.yy17); }
-#line 878 "src/parser.c"
+#line 877 "src/parser.c"
         break;
       case 23: /* hash_pair ::= QSTRING COLON expr */
-#line 109 "src/parser.y"
+#line 108 "src/parser.y"
 { 
         yygotominor.yy17 = malloc(sizeof(Pair)); yygotominor.yy17->key = yymsp[-2].minor.yy0; yygotominor.yy17->value = yymsp[0].minor.yy8; 
       yy_destructor(yypParser,14,&yymsp[-1].minor);
 }
-#line 886 "src/parser.c"
+#line 885 "src/parser.c"
         break;
       default:
         break;
@@ -944,13 +943,13 @@ static void yy_syntax_error(
 ){
   ParseARG_FETCH;
 #define TOKEN (yyminor.yy0)
-#line 18 "src/parser.y"
+#line 17 "src/parser.y"
 
     if( !TOKEN ) {
       log_err("Reached the end of file so it seems like you are missing a ')'");
     }
     state->error = 1;
-#line 954 "src/parser.c"
+#line 953 "src/parser.c"
   ParseARG_STORE; /* Suppress warning about unused %extra_argument variable */
 }
 

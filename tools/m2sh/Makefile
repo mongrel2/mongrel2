@@ -22,9 +22,9 @@ build/libm2sh.a: ${LIB_OBJ}
 	ar rcs $@ ${LIB_OBJ}
 	ranlib $@
 
-build/m2sh: ../lemon/lemon ../../build/libm2.a build/libm2sh.a src/m2sh.o
+build/m2sh: ../lemon/lemon ../../build/libm2.a ${OBJECTS}
 	mkdir -p build
-	$(CC) $(CFLAGS) -o build/m2sh src/m2sh.o build/libm2sh.a ../../build/libm2.a $(LIBS)
+	$(CC) $(CFLAGS) -o build/m2sh ${OBJECTS} ../../build/libm2.a $(LIBS)
 
 ../lemon/lemon: ../lemon/lemon.c
 	$(CC) -O2 ../lemon/lemon.c -o ../lemon/lemon

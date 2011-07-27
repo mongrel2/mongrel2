@@ -6,7 +6,6 @@
 #include "ast.h"
 #include <task/task.h>
 
-#define assert(S) if(!(S)) { log_err("PARSER ASSERT FAILED: " #S); taskexitall(-1); }
 
 }
 
