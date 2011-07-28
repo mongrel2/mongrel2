@@ -9,6 +9,8 @@
 #include "adt/radixmap.h"
 #include "dbg.h"
 
+// undefine this to run the more correct but slower sort
+#define FAST_OPS
 
 #define ByteOf(x,y) (((uint8_t *)x)[(y)])
 
@@ -52,6 +54,91 @@ void RadixMap_sort(RadixMap *map)
     radix_sort(3, map->end, temp, source);
 }
 
+/**
+ * This is primarily used by the tail sorted version to find the
+ * lowest place to start sorting.  It's a quick binary search
+ * of the data elements and returns whatever lowest value was
+ * hit.
+ */
+RMElement *RadixMap_find_lowest(RadixMap *map, uint32_t to_find)
+{
+    int low = 0;
+    int high = map->end - 1;
+    RMElement *data = map->contents;
+
+    while (low <= high) {
+        int middle = low + (high - low)/2;
+        uint32_t key = data[middle].data.key;
+
+        if (to_find < key) {
+            high = middle - 1;
+        } else if (to_find > key) {
+            low = middle + 1;
+        } else {
+            return &data[middle];
+        }
+    }
+
+    return &data[low];
+}
+
+/**
+ * A special version useful for things like add and delete that
+ * takes a "hint", and then avoid sorting the whole array depending
+ * on where the hint might fall.
+ */
+static inline void RadixMap_sort_tail(RadixMap *map, RMElement *hint)
+{
+    uint64_t *source = &map->contents[0].raw;
+    uint64_t *temp = &map->temp[0].raw;
+    size_t count = map->end;
+    uint32_t max = 0;
+
+    // if we only have to sort the top part then only do that
+    if(count > 2) {
+        if(hint->data.key == UINT32_MAX) {
+            // this is a delete, so the hint is moving to the end,
+            // only sort from the hint on
+            source = &hint->raw;
+            // we can just swap out the last one and drop the end by one
+            *hint = map->contents[map->end - 1];
+            count = map->contents + map->end - hint - 1;
+
+            // that used to be the max
+            max = hint->data.key;
+        } else {
+            // looks like this one is an add at the end
+            // this is a simple optimization that gets decent performance
+            RMElement *middle = RadixMap_find_lowest(map, hint->data.key);
+
+            // middle is the bottom of the possible range
+            count = map->contents + map->end - middle;
+            source = &middle->raw;
+
+            max = map->contents[map->end - 1].data.key;
+        }
+
+        // always have to sort the first two bytes worth
+        radix_sort(0, count, source, temp);
+        radix_sort(1, count, temp, source);
+
+        if(max > UINT16_MAX) {
+            // only sort if the max possible number is outside the first 2 bytes
+            radix_sort(2, count, source, temp);
+            radix_sort(3, count, temp, source);
+        }
+    } else {
+        // shouldn't be a super common case, but if there's only
+        // 2 elements then just a single comparison is best
+        if(map->contents[0].data.key > map->contents[1].data.key) {
+            map->temp[0] = map->contents[0];
+            map->contents[0] = map->contents[1];
+            map->contents[1] = map->temp[0];
+        } else {
+            // pass, there's only 2 elements, and they're already sorted
+        }
+    }
+}
 
 
 RMElement *RadixMap_find(RadixMap *map, uint32_t to_find)
@@ -79,16 +166,14 @@ RMElement *RadixMap_find(RadixMap *map, uint32_t to_find)
 
 RadixMap *RadixMap_create(size_t max)
 {
-    RadixMap *map = h_calloc(sizeof(RadixMap), 1);
+    RadixMap *map = calloc(sizeof(RadixMap), 1);
     check_mem(map);
 
-    map->contents = h_calloc(sizeof(RMElement), max + 1);
+    map->contents = calloc(sizeof(RMElement), max + 1);
     check_mem(map->contents);
-    hattach(map->contents, map);
 
-    map->temp = h_calloc(sizeof(RMElement), max + 1);
+    map->temp = calloc(sizeof(RMElement), max + 1);
     check_mem(map->temp);
-    hattach(map->temp, map);
 
     map->max = max;
     map->end = 0;
@@ -100,7 +185,11 @@ error:
 
 void RadixMap_destroy(RadixMap *map)
 {
-    h_free(map);
+    if(map) {
+        free(map->contents);
+        free(map->temp);
+        free(map);
+    }
 }
 
 
@@ -112,7 +201,12 @@ int RadixMap_add(RadixMap *map, uint32_t key, uint32_t value)
     check(map->end + 1 < map->max, "RadixMap is full.");
 
     map->contents[map->end++] = element;
+
+#ifdef FAST_OPS
+    RadixMap_sort_tail(map, map->contents + map->end - 1);
+#else
     RadixMap_sort(map);
+#endif
 
     return 0;
 
@@ -126,7 +220,16 @@ int RadixMap_delete(RadixMap *map, RMElement *el)
     check(el != NULL, "Can't delete a NULL element.");
 
     el->data.key = UINT32_MAX;
-    RadixMap_sort(map);
+
+    if(map->end > 1) {
+        // don't bother resorting a map of 1 length
+#ifdef FAST_OPS
+        RadixMap_sort_tail(map, el);
+#else
+        RadixMap_sort(map);
+#endif
+    }
+
     map->end--;
 
     return 0;
@@ -145,7 +248,7 @@ uint32_t RadixMap_push(RadixMap *map, uint32_t value)
         map->counter = 0;
     }
 
-    if(map->contents[map->end-1].data.key < map->counter) {
+    if(map->end == 0 || map->contents[map->end-1].data.key < map->counter) {
         // this one already fits on the end so we're done
         RMElement element = {.data = {.key = map->counter, .value = value}};
         map->contents[map->end++] = element;
