@@ -46,27 +46,26 @@
 #include "task/task.h"
 #include "adt/darray.h"
 #include "setting.h"
-
+#include "adt/radixmap.h"
 
 uint32_t THE_CURRENT_TIME_IS = 0;
 
 static darray_t *REGISTRATIONS = NULL;
-static darray_t *REG_ID_TO_FD = NULL;
-static uint16_t REG_COUNT = 0;
+static RadixMap *REG_ID_TO_FD = NULL;
 static int NUM_REG_FD = 0;
 
 void Register_init()
 {
     THE_CURRENT_TIME_IS = time(NULL);
     REGISTRATIONS = darray_create(sizeof(Registration), MAX_REGISTERED_FDS);
-    REG_ID_TO_FD = darray_create(0, MAX_REGISTERED_FDS);
+    REG_ID_TO_FD = RadixMap_create(MAX_REGISTERED_FDS * 10);
 }
 
 
 void Register_destroy()
 {
     darray_destroy(REGISTRATIONS);
-    darray_destroy(REG_ID_TO_FD);
+    RadixMap_destroy(REG_ID_TO_FD);
 }
 
 static inline void Register_clear(Registration *reg)
@@ -77,7 +76,12 @@ static inline void Register_clear(Registration *reg)
     reg->bytes_written = 0;
     reg->last_read = 0;
     reg->last_write = 0;
-    darray_remove(REG_ID_TO_FD, reg->id);
+
+    RMElement *el = RadixMap_find(REG_ID_TO_FD, reg->id);
+
+    if(el != NULL) {
+        RadixMap_delete(REG_ID_TO_FD, el);
+    }
 }
 
 int Register_connect(int fd, Connection* data)
@@ -109,8 +113,8 @@ int Register_connect(int fd, Connection* data)
     reg->fd = fd;
     
     // purposefully want overflow on these
-    reg->id = REG_COUNT++;
-    darray_set(REG_ID_TO_FD, reg->id, reg);
+    reg->id = RadixMap_push(REG_ID_TO_FD, reg->fd);
+    check(reg->id != UINT32_MAX, "Failed to register new conn_id.");
 
     // keep track of the number of registered things we're tracking
     NUM_REG_FD++;
@@ -215,11 +219,14 @@ error:
 }
 
 
-int Register_fd_for_id(int id)
+int Register_fd_for_id(uint32_t id)
 {
     check(id < MAX_REGISTERED_FDS, "Ident (id) given to register is greater than max.");
-    Registration *reg = darray_get(REG_ID_TO_FD, id);
+    RMElement *el = RadixMap_find(REG_ID_TO_FD, id);
 
+    check(el != NULL, "Id %d not registered.", id);
+
+    Registration *reg = darray_get(REGISTRATIONS, el->data.value);
     check(Register_valid(reg), "Nothing registered under id %d.", id);
 
     return reg->fd;

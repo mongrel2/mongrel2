@@ -52,7 +52,7 @@ extern uint32_t THE_CURRENT_TIME_IS;
 typedef struct Registration {
     struct Connection *data;
     uint16_t fd;
-    uint16_t id;
+    uint32_t id;
     uint32_t last_ping;
     off_t last_read;
     off_t last_write;
@@ -76,7 +76,7 @@ struct Connection *Register_fd_exists(int fd);
 
 int Register_id_for_fd(int fd);
 
-int Register_fd_for_id(int id);
+int Register_fd_for_id(uint32_t id);
 
 int Register_cleanout();
 

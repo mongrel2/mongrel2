@@ -165,7 +165,7 @@ char *test_Request_create()
 }
 
 struct tagbstring COOKIE_HEADER = bsStatic("cookie");
-struct tagbstring EXPECTED_COOKIE_HEADER = bsStatic("JSON 0 / 97:{\"PATH\":\"/\",\"cookie\":[\"foo=bar\",\"test=yes; go=no\"],\"METHOD\":\"GET\",\"VERSION\":\"HTTP/1.0\",\"URI\":\"/\"},0:,");
+struct tagbstring EXPECTED_COOKIE_HEADER = bsStatic("JSON 1 / 97:{\"PATH\":\"/\",\"cookie\":[\"foo=bar\",\"test=yes; go=no\"],\"METHOD\":\"GET\",\"VERSION\":\"HTTP/1.0\",\"URI\":\"/\"},0:,");
 
 char *test_Multiple_Header_Request() 
 {

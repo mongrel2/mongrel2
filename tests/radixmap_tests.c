@@ -179,11 +179,12 @@ static char *test_RadixMap_simulate()
    return NULL;
 }
 
-char * all_tests() {
+char *all_tests() 
+{
     mu_suite_start();
     srand(time(NULL));
 
-    // mu_run_test(test_RadixMap_operations);
+    mu_run_test(test_RadixMap_operations);
     mu_run_test(test_RadixMap_simulate);
 
     return NULL;
