@@ -164,9 +164,10 @@ error:
 
 static inline int handler_recv_parse(Handler *handler, HandlerParser *parser)
 {
+    zmq_msg_t *inmsg = NULL;
     check(handler->running, "Called while handler wasn't running, that's not good.");
 
-    zmq_msg_t *inmsg = calloc(sizeof(zmq_msg_t), 1);
+    inmsg = calloc(sizeof(zmq_msg_t), 1);
     int rc = 0;
 
     check_mem(inmsg);
