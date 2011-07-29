@@ -1,7 +1,10 @@
 from mongrel2 import handler
 import json
+from uuid import uuid4
 
-sender_id = "82209006-86FF-4982-B5EA-D1E29E55D481"
+# ZMQ 2.1.x broke how PUSH/PULL round-robin works so each process
+# needs it's own id for it to work
+sender_id = uuid4().hex
 
 conn = handler.Connection(sender_id, "tcp://127.0.0.1:9997",
                           "tcp://127.0.0.1:9996")
