@@ -218,27 +218,27 @@ void Handler_task(void *v)
         taskstate("delivering");
 
         rc = handler_recv_parse(handler, parser);
-        if(task_was_signaled()) {
+
+        if(task_was_signaled() || rc == -1 || parser->target_count <= 0) {
+            debug("Skipped invalid message from handler: %s", bdata(handler->send_spec));
             break;
         }
 
-        if(rc != -1 && parser->target_count > 0) {
-            for(i = 0; i < (int)parser->target_count; i++) {
-                int id = (int)parser->targets[i];
-                int fd = Register_fd_for_id(id);
-                Connection *conn = (Connection *)Register_fd_exists(fd);
+        for(i = 0; i < (int)parser->target_count; i++) {
+            int id = (int)parser->targets[i];
+            int fd = Register_fd_for_id(id);
 
+            if(fd != -1) {
+                Connection *conn = (Connection *)Register_fd_exists(fd);
                 handler_process_request(handler, id, fd, conn, parser->body);
+            } else {
+                // at this point we should kill the connection or signal it
             }
-        } else {
-            debug("Skipped invalid message from handler: %s", bdata(handler->send_spec));
         }
 
         HandlerParser_reset(parser);
     }
 
-    debug("############################### HANDLER EXITED: %p, running: %d, task: %p",
-            handler, handler->running, handler->task);
     handler->running = 0;
     handler->task = NULL;
     HandlerParser_destroy(parser);
@@ -248,7 +248,7 @@ error:
     handler->running = 0;
     handler->task = NULL;
     HandlerParser_destroy(parser);
-    log_err("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! HANDLER TASK DIED");
+    log_err("HANDLER TASK DIED");
     taskexit(1);
 }
 

@@ -74,7 +74,7 @@ void Register_init();
 
 struct Connection *Register_fd_exists(int fd);
 
-int Register_id_for_fd(int fd);
+uint32_t Register_id_for_fd(int fd);
 
 int Register_fd_for_id(uint32_t id);
 

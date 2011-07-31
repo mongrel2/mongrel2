@@ -101,7 +101,6 @@ static char *test_RadixMap_operations()
         mu_assert(el != NULL, "Should get a result.");
 
         size_t old_end = map->end;
-        size_t old_value = el->data.value;
 
         mu_assert(RadixMap_delete(map, el) == 0, "Didn't delete it.");
         mu_assert(old_end - 1 == map->end, "Wrong size after delete.");
@@ -171,9 +170,6 @@ static char *test_RadixMap_simulate()
            RadixMap_push(map, fd++);
        }
    }
-
-   debug("AT END OF TEST: %u left, connects: %d, disconnects: %d, activities: %d", map->end, 
-           connects, disconnects, activities);
 
    RadixMap_destroy(map);
    return NULL;

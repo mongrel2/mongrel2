@@ -362,18 +362,17 @@ error:
 
 IOBuf *IOBuf_create(size_t len, int fd, IOBufType type)
 {
-    IOBuf *buf = h_calloc(sizeof(IOBuf), 1);
+    IOBuf *buf = malloc(sizeof(IOBuf));
     check_mem(buf);
 
-    buf->fd = fd;
     buf->len = len;
-
-    buf->buf = h_malloc(len + 1);
-    check_mem(buf->buf);
-
-    hattach(buf->buf, buf);
-
+    buf->avail = 0;
+    buf->cur = 0;
+    buf->closed = 0;
+    buf->buf = malloc(len + 1);
     buf->type = type;
+    buf->fd = fd;
+    buf->use_ssl = 0;
 
     if(type == IOBUF_SSL) {
         check(iobuf_ssl_setup(buf) != -1, "Failed to setup SSL.");
@@ -412,13 +411,14 @@ void IOBuf_destroy(IOBuf *buf)
         }
         
         fdclose(buf->fd);
-        h_free(buf);
+        free(buf);
+        free(buf->buf);
     }
 }
 
 void IOBuf_resize(IOBuf *buf, size_t new_size)
 {
-    buf->buf = h_realloc(buf->buf, new_size);
+    buf->buf = realloc(buf->buf, new_size);
     buf->len = new_size;
 }
 
