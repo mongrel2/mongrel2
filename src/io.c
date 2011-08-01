@@ -411,8 +411,8 @@ void IOBuf_destroy(IOBuf *buf)
         }
         
         fdclose(buf->fd);
-        free(buf);
         free(buf->buf);
+        free(buf);
     }
 }
 
