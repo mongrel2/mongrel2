@@ -178,7 +178,7 @@ void *tst_search(tst_t *root, const char *s, size_t len)
 }
 
 
-tst_t *tst_insert_base(tst_t *root, tst_t *p, const char *s, size_t len, void *value)
+static inline tst_t *tst_insert_base(tst_t *root, tst_t *p, const char *s, size_t len, void *value)
 {
     if (p == NULL) { 
         p = (tst_t *) h_calloc(sizeof(tst_t), 1);

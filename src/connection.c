@@ -629,7 +629,7 @@ void Connection_destroy(Connection *conn)
         conn->req = NULL;
         IOBuf_destroy(conn->iob);
         IOBuf_destroy(conn->proxy_iob);
-        h_free(conn);
+        free(conn);
     }
 }
 
@@ -637,15 +637,22 @@ void Connection_destroy(Connection *conn)
 Connection *Connection_create(Server *srv, int fd, int rport,
                               const char *remote)
 {
-    Connection *conn = h_calloc(sizeof(Connection), 1);
+    Connection *conn = malloc(sizeof(Connection));
     check_mem(conn);
 
+    conn->req = Request_create();
+    conn->proxy_iob = NULL;
     conn->rport = rport;
+    conn->client = NULL;
+    conn->close = 0;
+    conn->type = 0;
+    conn->filter_state = NULL;
+
     memcpy(conn->remote, remote, IPADDR_SIZE);
     conn->remote[IPADDR_SIZE] = '\0';
-    conn->type = 0;
 
-    conn->req = Request_create();
+    conn->handler = NULL;
+
     check_mem(conn->req);
 
     if(srv != NULL && srv->use_ssl) {

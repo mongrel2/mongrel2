@@ -8,7 +8,7 @@
 #include <fcntl.h>
 
 Connection *fake_conn(const char *file, int mode) {
-    Connection *conn = h_calloc(sizeof(Connection), 1);
+    Connection *conn = calloc(sizeof(Connection), 1);
     assert(conn && "Failed to create connection.");
 
     int fd = open(file, mode);
