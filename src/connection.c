@@ -335,9 +335,8 @@ int connection_http_to_proxy(Connection *conn)
     }
 
     if(!conn->client) {
-        conn->client = h_calloc(sizeof(httpclient_parser), 1);
+        conn->client = calloc(sizeof(httpclient_parser), 1);
         check_mem(conn->client);
-        hattach(conn->client, conn);
     }
 
     return CONNECT;
@@ -627,6 +626,7 @@ void Connection_destroy(Connection *conn)
     if(conn) {
         Request_destroy(conn->req);
         conn->req = NULL;
+        if(conn->client) free(conn->client);
         IOBuf_destroy(conn->iob);
         IOBuf_destroy(conn->proxy_iob);
         free(conn);
