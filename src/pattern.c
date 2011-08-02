@@ -26,7 +26,7 @@ typedef struct MatchState {
 #define L_ESC        '\\'
 
 
-const char *classend (MatchState *ms, const char *p) {
+const char *classend (const char *p) {
   switch (*p++) {
     case L_ESC: {
       if (*p == '\0')
@@ -102,9 +102,6 @@ int singlematch (int c, const char *p, const char *ep) {
 }
 
 
-const char *match (MatchState *ms, const char *s, const char *p);
-
-
 const char *matchbalance (MatchState *ms, const char *s,
                                    const char *p) {
   if (*p == 0 || *(p+1) == 0)
@@ -124,8 +121,9 @@ const char *matchbalance (MatchState *ms, const char *s,
   return NULL;  /* string ends out of balance */
 }
 
+static const char *match (MatchState *ms, const char *s, const char *p);
 
-const char *max_expand (MatchState *ms, const char *s,
+static inline const char *max_expand (MatchState *ms, const char *s,
                                  const char *p, const char *ep) {
   int i = 0;  /* counts maximum expand for item */
   while ((s+i) < ms->src_end && singlematch(uchar(*(s+i)), p, ep))
@@ -140,7 +138,7 @@ const char *max_expand (MatchState *ms, const char *s,
 }
 
 
-const char *min_expand (MatchState *ms, const char *s,
+static inline const char *min_expand (MatchState *ms, const char *s,
                                  const char *p, const char *ep) {
   for (;;) {
     const char *res = match(ms, s, ep+1);
@@ -152,21 +150,7 @@ const char *min_expand (MatchState *ms, const char *s,
   }
 }
 
-
-const char *pattern_match(const char *s, size_t len, const char *p)
-{
-    MatchState ms = {.src_init = s, .src_end = s + len};
-    return match(&ms, s, p);
-}
-
-
-const char *bstring_match(bstring s, bstring pattern)
-{
-    MatchState ms = {.src_init = bdata(s), .src_end = bdata(s) + blength(s)};
-    return match(&ms, bdata(s), bdata(pattern));
-}
-
-const char *match(MatchState *ms, const char *s, const char *p) {
+static inline const char *match(MatchState *ms, const char *s, const char *p) {
   init: /* using goto's to optimize tail recursion */
   switch (*p) {
     case '(':
@@ -187,7 +171,7 @@ const char *match(MatchState *ms, const char *s, const char *p) {
           p += 2;
           if (*p != '[')
             log_err("missing '[' after \\\\f in pattern");
-          ep = classend(ms, p);  /* points to what is next */
+          ep = classend(p);  /* points to what is next */
           previous = (s == ms->src_init) ? '\0' : *(s-1);
           if (matchbracketclass(uchar(previous), p, ep-1) ||
              !matchbracketclass(uchar(*s), p, ep-1)) return NULL;
@@ -207,7 +191,7 @@ const char *match(MatchState *ms, const char *s, const char *p) {
       else goto dflt;
     }
     default: dflt: {  /* it is a pattern item */
-      const char *ep = classend(ms, p);  /* points to what is next */
+      const char *ep = classend(p);  /* points to what is next */
       int m = s<ms->src_end && singlematch(uchar(*s), p, ep);
       switch (*ep) {
         case '?': {  /* optional */
@@ -233,4 +217,18 @@ const char *match(MatchState *ms, const char *s, const char *p) {
     }
   }
 }
+
+const char *pattern_match(const char *s, size_t len, const char *p)
+{
+    MatchState ms = {.src_init = s, .src_end = s + len};
+    return match(&ms, s, p);
+}
+
+
+const char *bstring_match(bstring s, bstring pattern)
+{
+    MatchState ms = {.src_init = bdata(s), .src_end = bdata(s) + blength(s)};
+    return match(&ms, bdata(s), bdata(pattern));
+}
+
 
