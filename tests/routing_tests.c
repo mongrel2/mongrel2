@@ -176,7 +176,7 @@ char *test_routing_match_reversed()
     char *route_data1 = "route1";
     char *route_data2 = "route2";
     char *route_data3 = "route3";
-    bstring route1 = bfromcstr("foo");
+    bstring route1 = bfromcstr("(X+)foo");
     bstring route2 = bfromcstr("moo");
     bstring route3 = bfromcstr("fio");
 
@@ -186,9 +186,13 @@ char *test_routing_match_reversed()
     RouteMap_insert_reversed(routes, route2, route_data2);
     RouteMap_insert_reversed(routes, route3, route_data3);
 
-    bstring path1 = bfromcstr("foo");
+    bstring path1 = bfromcstr("Xfoo");
     bstring path2 = bfromcstr("moo");
     bstring path3 = bfromcstr("fio");
+    bstring path4 = bfromcstr("XXXXXXXXXfoo");
+    bstring path5 = bfromcstr("YYYfoo");
+    bstring path6 = bfromcstr("XXXoo");
+    bstring path7 = bfromcstr("XXX.stuff.foo");
 
     route = RouteMap_match_suffix(routes, path1);
     mu_assert(route != NULL, "Pattern match failed.");
@@ -202,9 +206,25 @@ char *test_routing_match_reversed()
     mu_assert(route != NULL, "Pattern match failed.");
     mu_assert(route->data == route_data3, "Pattern matched wrong route.");
 
+    route = RouteMap_match_suffix(routes, path4);
+    mu_assert(route != NULL, "Pattern match failed.");
+    mu_assert(route->data == route_data1, "Pattern matched wrong route.");
+
+    route = RouteMap_match_suffix(routes, path5);
+    mu_assert(route == NULL, "Pattern match failed.");
+
+    route = RouteMap_match_suffix(routes, path6);
+    mu_assert(route == NULL, "Pattern match failed.");
+
+    route = RouteMap_match_suffix(routes, path7);
+    mu_assert(route == NULL, "Pattern match failed.");
+
     bdestroy(path1);
     bdestroy(path2);
     bdestroy(path3);
+    bdestroy(path4);
+    bdestroy(path5);
+    bdestroy(path6);
 
     RouteMap_destroy(routes);
 

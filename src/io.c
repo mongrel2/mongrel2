@@ -369,7 +369,8 @@ IOBuf *IOBuf_create(size_t len, int fd, IOBufType type)
     buf->avail = 0;
     buf->cur = 0;
     buf->closed = 0;
-    buf->buf = calloc(1, len + 1);
+    buf->buf = malloc(len + 1);
+    check_mem(buf->buf);
     buf->type = type;
     buf->fd = fd;
     buf->use_ssl = 0;

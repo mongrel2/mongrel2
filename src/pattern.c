@@ -167,7 +167,6 @@ const char *bstring_match(bstring s, bstring pattern)
 }
 
 const char *match(MatchState *ms, const char *s, const char *p) {
-    
   init: /* using goto's to optimize tail recursion */
   switch (*p) {
     case '(':

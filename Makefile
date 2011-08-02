@@ -110,7 +110,7 @@ ragel:
 	ragel -G2 src/http11/httpclient_parser.rl
 
 valgrind:
-	valgrind --leak-check=full --show-reachable=yes --log-file=valgrind.log --suppressions=tests/valgrind.sup ./bin/mongrel2 tests/config.sqlite localhost
+	VALGRIND="valgrind --log-file=/tmp/valgrind-%p.log" ${MAKE}
 
 %.o: %.S
 	$(CC) $(CFLAGS) -c $< -o $@
