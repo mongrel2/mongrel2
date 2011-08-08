@@ -13,6 +13,7 @@ bin/
 *.la
 *.a
 .*.sw*
+tests/*_tests
 tests/config.sqlite
 tests/empty.sqlite
 *.log
