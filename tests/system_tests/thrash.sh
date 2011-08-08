@@ -17,4 +17,7 @@ do
 
     echo "XML TESTS"
     ./tests/system_tests/xml_tests >> xml_tests.log
+
+    echo "AND SUITE"
+    ./tests/system_tests/and_tests >> and_tests.log
 done

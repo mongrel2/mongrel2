@@ -319,6 +319,9 @@ FileRecord *Dir_resolve_file(Dir *dir, bstring prefix, bstring path)
     FileRecord *file = NULL;
     bstring target = NULL;
 
+    check(blength(prefix) <= blength(path), 
+            "Path '%s' is shorter than prefix '%s', not allowed.", bdata(path), bdata(prefix));
+
     check(Dir_lazy_normalize_base(dir) == 0, "Failed to normalize base path when requesting %s",
             bdata(path));
 
@@ -347,7 +350,6 @@ FileRecord *Dir_resolve_file(Dir *dir, bstring prefix, bstring path)
                          bdata(dir->index_file));
     } else if(biseq(prefix, path)) {
         target = bformat("%s%s", bdata(dir->normalized_base), bdata(path));
-
     } else {
         target = bformat("%s/%s", bdata(dir->normalized_base), bdataofs(path, blength(prefix)));
     }
@@ -482,6 +484,11 @@ int Dir_serve_file(Dir *dir, Request *req, Connection *conn)
         req->status_code = 405;
         rc = Response_send_status(conn, &HTTP_405);
         check_debug(rc == blength(&HTTP_405), "Failed to send 405 to client.");
+        return -1;
+    } else if (blength(prefix) > blength(path)) {
+        req->status_code = 404;
+        rc = Response_send_status(conn, &HTTP_404);
+        check_debug(rc == blength(&HTTP_404), "Failed to send 404 to client.");
         return -1;
     } else {
         file = Dir_resolve_file(dir, prefix, path);

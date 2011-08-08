@@ -55,6 +55,9 @@ char *test_Dir_resolve_file()
     rec = Dir_resolve_file(test, bfromcstr("/"), bfromcstr("/../../../../../etc/passwd"));
     mu_assert(rec == NULL, "HACK! should not find this.");
 
+    rec = Dir_resolve_file(test, bfromcstr("/tests/"), bfromcstr("/test"));
+    mu_assert(rec == NULL, "Should NOT find short paths.");
+
     Dir_destroy(test);
 
     test = Dir_create(
@@ -125,6 +128,12 @@ char *test_Dir_serve_file()
     req = fake_req("POST", "/", "/sample.json");
     rc = Dir_serve_file(test, req, &conn);
     mu_assert(rc == -1, "POST should pass through but send an error.");
+    mu_assert(req->status_code == 405, "POST to file should 405.");
+
+    req = fake_req("GET", "/tests/", "/test");
+    rc = Dir_serve_file(test, req, &conn);
+    mu_assert(rc == -1, "GET of path shorter than prefix should 404");
+    mu_assert(req->status_code == 404, "GET shortpath should 404.");
 
     return NULL;
 }

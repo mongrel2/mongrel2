@@ -138,20 +138,16 @@ static inline void handler_process_request(Handler *handler, int id, int fd,
         Connection *conn, bstring payload)
 {
     int rc = 0;
+    check(conn != NULL, "You can't pass NULL conn to this anymore.");
 
-    if(conn == NULL) {
-        debug("Ident %d (fd %d) is no longer connected.", id, fd);
-        Handler_notify_leave(handler, id);
+    if(blength(payload) == 0) {
+        rc = Register_disconnect(fd);
+        check(rc != -1, "Register disconnect failed for: %d", fd);
     } else {
-        if(blength(payload) == 0) {
-            rc = Register_disconnect(fd);
-            check(rc != -1, "Register disconnect failed for: %d", fd);
-        } else {
-            int raw = conn->type != CONN_TYPE_MSG || handler->raw;
+        int raw = conn->type != CONN_TYPE_MSG || handler->raw;
 
-            rc = deliver_payload(raw, fd, conn, payload);
-            check(rc != -1, "Failed to deliver to connection %d on socket %d", id, fd);
-        }
+        rc = deliver_payload(raw, fd, conn, payload);
+        check(rc != -1, "Failed to deliver to connection %d on socket %d", id, fd);
     }
 
     return;
@@ -219,20 +215,25 @@ void Handler_task(void *v)
 
         rc = handler_recv_parse(handler, parser);
 
-        if(task_was_signaled() || rc == -1 || parser->target_count <= 0) {
-            debug("Skipped invalid message from handler: %s", bdata(handler->send_spec));
+        if(task_was_signaled()) {
+            log_warn("Handler task signaled, exiting.");
             break;
-        }
+        } else if( rc == -1 || parser->target_count <= 0) {
+            log_warn("Skipped invalid message from handler: %s", bdata(handler->send_spec));
+            continue;
+        } else {
+            for(i = 0; i < (int)parser->target_count; i++) {
+                int id = (int)parser->targets[i];
+                int fd = Register_fd_for_id(id);
+                Connection *conn = fd == -1 ? NULL : Register_fd_exists(fd);
 
-        for(i = 0; i < (int)parser->target_count; i++) {
-            int id = (int)parser->targets[i];
-            int fd = Register_fd_for_id(id);
-
-            if(fd != -1) {
-                Connection *conn = (Connection *)Register_fd_exists(fd);
-                handler_process_request(handler, id, fd, conn, parser->body);
-            } else {
-                // at this point we should kill the connection or signal it
+                // don't bother calling process request if there's nothing to handle
+                if(conn && fd >= 0) {
+                    handler_process_request(handler, id, fd, conn, parser->body);
+                } else {
+                    // TODO: I believe we need to notify the connection that it is dead too
+                    Handler_notify_leave(handler, id);
+                }
             }
         }
 
@@ -245,10 +246,10 @@ void Handler_task(void *v)
     taskexit(0);
 
 error:
+    log_err("HANDLER TASK DIED: %s", bdata(handler->send_spec));
     handler->running = 0;
     handler->task = NULL;
     HandlerParser_destroy(parser);
-    log_err("HANDLER TASK DIED");
     taskexit(1);
 }
 
