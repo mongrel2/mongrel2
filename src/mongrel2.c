@@ -219,6 +219,8 @@ int attempt_chroot_drop(Server *srv)
 
     if(Unixy_chroot(srv->chroot) == 0) {
         log_info("All loaded up, time to turn into a server.");
+        log_info("-- Starting " VERSION ". Copyright (C) Zed A. Shaw. Licensed BSD.\n");
+        log_info("-- Look in %s for startup messages and errors.", bdata(srv->error_log));
 
         check(access("/run", F_OK) == 0, "/run directory doesn't exist in %s or isn't owned right.", bdata(srv->chroot));
         check(access("/tmp", F_OK) == 0, "/tmp directory doesn't exist in %s or isn't owned right.", bdata(srv->chroot));
@@ -269,6 +271,8 @@ void final_setup()
     Server *srv = Server_queue_latest();
     Log_init(bstrcpy(srv->access_log), end_point);
     Control_port_start();
+    taskdelay(500);
+    log_info("-- " VERSION " Running. Copyright (C) Zed A. Shaw. Licensed BSD.");
 }
 
 
@@ -343,7 +347,6 @@ void reload_task(void *data)
 
     while(1) {
         taskswitch();
-        log_info("Starting " VERSION ". Copyright (C) Zed A. Shaw. Licensed BSD.");
         task_clear_signal();
 
         if(RELOAD) {
