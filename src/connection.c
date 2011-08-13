@@ -98,6 +98,8 @@ int connection_route_request(Connection *conn)
     Route *route = NULL;
 
     bstring path = Request_path(conn->req);
+    check_debug(path != NULL, "No path given, in request, ignoring.");
+
     Server *server = Server_queue_latest();
     check(server != NULL, "No server in the server queue, tell Zed.");
 
