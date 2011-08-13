@@ -403,16 +403,31 @@ error:
     return NULL;
 }
 
-void IOBuf_destroy(IOBuf *buf)
+int IOBuf_close(IOBuf *buf)
 {
+    int rc = 0;
+
     if(buf) {
         if(buf->use_ssl) {
-            ssl_close_notify(&buf->ssl);
-            ssl_free(&buf->ssl);
+            rc = ssl_close_notify(&buf->ssl);
         }
         
         fdclose(buf->fd);
-        free(buf->buf);
+    }
+
+    return rc;
+}
+
+void IOBuf_destroy(IOBuf *buf)
+{
+    if(buf) {
+        IOBuf_close(buf); // ignore return
+
+        if(buf->use_ssl) {
+            ssl_free(&buf->ssl);
+        }
+        
+        if(buf->buf) free(buf->buf);
         free(buf);
     }
 }
