@@ -54,6 +54,10 @@ char *test_Register_ping()
 
     rc = Register_disconnect(12232);
     mu_assert(rc != -1, "Didn't disconnect after some pings.");
+    mu_assert(task_was_signaled(), "Should be signaled for attempting a double reg.");
+
+    task_clear_signal();
+
     mu_assert(Register_fd_exists(12232) == 0, "Disconnect didn't work.");
 
     mu_assert(Register_ping(12) == -1, "Should get error on ping of disconnect.");
