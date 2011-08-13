@@ -32,11 +32,14 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#undef NDEBUG
+
 #include <assert.h>
 #include <errno.h>
 #include <string.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include <signal.h>
 #include "tnetstrings.h"
 #include "tnetstrings_impl.h"
 
@@ -88,7 +91,6 @@ static inline void Register_clear(Registration *reg)
 
 int Register_connect(int fd, Connection* data)
 {
-    int rc = 0;
     check(fd < MAX_REGISTERED_FDS, "FD given to register is greater than max.");
     check(data != NULL, "data can't be NULL");
 
@@ -104,15 +106,16 @@ int Register_connect(int fd, Connection* data)
     }
 
     if(Register_valid(reg)) {
-        debug("Looks like stale registration in %d, kill it before it gets out.", fd);
-        // a new Register_connect came in, but we haven't disconnected the previous
-        rc = Register_disconnect(fd);
-        check(rc != -1, "Weird error, tried to disconnect something that exists then got an error: %d", fd);
+        // force them to exit
+        int rc = Register_disconnect(fd);
+        check(rc != -1, "Weird error trying to disconnect. Tell Zed.");
+        tasksignal(reg->task, SIGINT);
     }
 
     reg->data = data;
     reg->last_ping = THE_CURRENT_TIME_IS;
     reg->fd = fd;
+    reg->task = taskself();
 
     reg->id = UINT32_MAX; // start off with an invalid conn_id
     
@@ -135,13 +138,11 @@ int Register_disconnect(int fd)
     check_debug(Register_valid(reg), "Attempt to unregister FD %d which is already gone.", fd);
     check(reg->fd == fd, "Asked to disconnect fd %d but register had %d", fd, reg->fd);
 
-    // TODO: actually do this somewhere else
-    if (reg->data->iob != NULL) {
-        reg->data->iob->closed=1;
-    }
+    check(IOBuf_close(reg->data->iob) == 0, "Failed to close IOBuffer, probably SSL error.");
+
+    fdclose(fd);
 
     Register_clear(reg);
-    close(reg->fd);
 
     // tracking the number of things we're processing
     NUM_REG_FD--;

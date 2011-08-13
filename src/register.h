@@ -39,6 +39,7 @@
 #include <stdint.h>
 #include <bstring.h>
 #include <sys/types.h>
+#include "task/task.h"
 
 #define MAX_REGISTERED_FDS  64 * 1024
 #define DEFAULT_MIN_PING 120
@@ -51,6 +52,7 @@ extern uint32_t THE_CURRENT_TIME_IS;
 
 typedef struct Registration {
     struct Connection *data;
+    Task *task;
     uint16_t fd;
     uint32_t id;
     uint32_t last_ping;
