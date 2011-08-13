@@ -6,7 +6,7 @@
 #include "register.h"
 #include "connection.h"
 
-const char *RFC_822_TIME = "%a, %d %b %y %T";
+static const char *RFC_822_TIME = "%a, %d %b %y %T";
 
 char *test_Request_payloads()
 {
