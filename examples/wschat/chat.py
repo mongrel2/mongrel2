@@ -110,7 +110,8 @@ while True:
         continue
 
     if data["type"] == "join":
-        conn.deliver_json(req.sender, users.keys(), data)
+        if len(users.keys()) > 0:
+            conn.deliver(req.sender, users.keys(), wsframe(json.dumps(data)))
         users[req.conn_id] = data['user']
         user_list = [u[1] for u in users.items()]
         conn.reply(req, wsframe(json.dumps({'type': 'userList', 'users': user_list})))
