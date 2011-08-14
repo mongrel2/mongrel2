@@ -84,11 +84,10 @@ error:
 
 int connection_send_socket_response(Connection *conn)
 {
-    if(Response_send_socket_policy(conn) > 0) {
-        return RESP_SENT;
-    } else {
-        return CLOSE;
-    }
+    check(Response_send_socket_policy(conn) > 0, "Failed to send Flash cross domain policy.");
+
+error: // fallthrough, because flash expects it to close
+    return CLOSE;
 }
 
 
@@ -502,7 +501,7 @@ int connection_identify_request(Connection *conn)
 
     if(Request_is_xml(conn->req)) {
         if(biseq(Request_path(conn->req), &POLICY_XML_REQUEST)) {
-            debug("XML POLICY CONNECTION");
+            log_info("XML POLICY CONNECTION: %s", bdata(Request_path(conn->req)));
             conn->type = CONN_TYPE_SOCKET;
             taskname("XML");
             next = SOCKET_REQ;
@@ -734,8 +733,8 @@ int Connection_deliver(Connection *conn, bstring buf)
     int rc = 0;
 
     bstring b64_buf = bBase64Encode(buf);
-    assert(b64_buf != NULL && "WTF!");
-    assert(conn->iob != NULL && "WTF! NO IOBUF!");
+    check(b64_buf != NULL, "Failed to base64 encode data.");
+    check(conn->iob != NULL, "There's no IOBuffer to send to, Tell Zed.");
     rc = IOBuf_send(conn->iob, bdata(b64_buf), blength(b64_buf)+1);
     check_debug(rc == blength(b64_buf)+1, "Failed to write entire message to conn %d", IOBuf_fd(conn->iob));
 
