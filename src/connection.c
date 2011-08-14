@@ -501,7 +501,7 @@ int connection_identify_request(Connection *conn)
 
     if(Request_is_xml(conn->req)) {
         if(biseq(Request_path(conn->req), &POLICY_XML_REQUEST)) {
-            log_info("XML POLICY CONNECTION: %s", bdata(Request_path(conn->req)));
+            debug("XML POLICY CONNECTION: %s", bdata(Request_path(conn->req)));
             conn->type = CONN_TYPE_SOCKET;
             taskname("XML");
             next = SOCKET_REQ;
