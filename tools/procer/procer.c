@@ -11,10 +11,29 @@
 
 extern char **environ;
 
-static inline void hardsleep(int sec)
+static int RUNNING = 1;
+
+void terminate(int s)
 {
-    taskyield();
-    sleep(sec);
+    switch(s) {
+        case SIGHUP:
+            // TODO: do a reload
+            break;
+        case SIGINT:
+            // TODO: do a graceful stop
+            RUNNING = 0;
+            break;
+        case SIGTERM:
+            RUNNING = 0;
+            break;
+        default:
+            break;
+    }
+}
+
+static inline void Action_sleep(int sec)
+{
+    Action_sleep(sec * (1000 + rand() % 1000));
 }
 
 
@@ -49,7 +68,7 @@ int Action_exec(Action *action, Profile *prof)
 
         redirect_output("run.log");
 
-        rc = execle(bdata(prof->command), bdata(prof->command), NULL, environ);
+        rc = execle(bdatae(prof->command, ""), bdatae(prof->command, ""), NULL, environ);
         check(rc != -1, "Failed to exec command: %s", bdata(prof->command));
     } else {
         int status = 0;
@@ -82,7 +101,7 @@ void Action_task(void *v)
     taskstate("ready");
     debug("STARTED %s", bdata(action->name));
 
-    while(1) {
+    while(RUNNING) {
         taskstate("starting");
 
         if(Unixy_still_running(prof->pid_file, &child)) {
@@ -92,12 +111,15 @@ void Action_task(void *v)
             Action_exec(action, prof);
         }
 
-        check(access(bdata(prof->pid_file), R_OK) == 0, "%s didn't make pidfile %s.", 
+        if(access(bdatae(prof->pid_file, ""), R_OK) != 0) {
+            log_warn("%s didn't make pidfile %s. Waiting then trying again.", 
                 bdata(action->name), bdata(prof->pid_file));
+            Action_sleep(2);
+        }
 
         taskstate("waiting");
-        while(Unixy_still_running(prof->pid_file, &child)) {
-            hardsleep(1);
+        while(Unixy_still_running(prof->pid_file, &child) && RUNNING) {
+            Action_sleep(1);
         }
 
         if(!prof->restart) {
@@ -105,7 +127,7 @@ void Action_task(void *v)
         }
 
         taskstate("restarting");
-        hardsleep(1);
+        Action_sleep(1);
     }
 
     debug("ACTION %s exited.", bdata(action->name));
@@ -192,6 +214,17 @@ void Action_start_all(void *value, void *data)
     Action_start(action);
 }
 
+void start_terminator()
+{
+    struct sigaction sa, osa;
+    memset(&sa, 0, sizeof sa);
+
+    sa.sa_handler = terminate;
+    sa.sa_flags = SA_RESTART;
+    sigaction(SIGINT, &sa, &osa);
+    sigaction(SIGTERM, &sa, &osa);
+    sigaction(SIGHUP, &sa, &osa);
+}
 
 void taskmain(int argc, char *argv[])
 {
@@ -205,6 +238,8 @@ void taskmain(int argc, char *argv[])
 
     check(argc == 3, "USAGE: procer <profile_dir> <procer_pid_file>");
     pid_file = bfromcstr(argv[2]);
+
+    srand(time(NULL)); // simple randomness
 
     rc = Unixy_remove_dead_pidfile(pid_file);
     check(rc == 0, "Failed to remove %s, procer is probably already running.", bdata(pid_file));
@@ -231,19 +266,29 @@ void taskmain(int argc, char *argv[])
 
     struct stat sb;
     debug("Loading %zu actions.", profile_glob.gl_pathc);
-    for(i = 0; i < profile_glob.gl_pathc; i++) {
-        rc = lstat(profile_glob.gl_pathv[i], &sb);
-        check(rc == 0, "Failed to stat file or directory: %s", profile_glob.gl_pathv[i]);
 
-        if (sb.st_mode & S_IFDIR) {
-            action = Action_create(profile_glob.gl_pathv[i]);
-            targets = tst_insert(targets, bdata(action->name), blength(action->name), action);
+    start_terminator();
+
+    while(RUNNING) {
+        for(i = 0; i < profile_glob.gl_pathc; i++) {
+            rc = lstat(profile_glob.gl_pathv[i], &sb);
+            check(rc == 0, "Failed to stat file or directory: %s", profile_glob.gl_pathv[i]);
+
+            if (sb.st_mode & S_IFDIR) {
+                action = Action_create(profile_glob.gl_pathv[i]);
+                targets = tst_insert(targets, bdata(action->name), blength(action->name), action);
+            }
         }
+
+        // now we setup the dependencies from the settings they've got
+        tst_traverse(targets, Action_dependency_assign, targets);
+        tst_traverse(targets, Action_start_all, NULL);
+
+        log_warn("All tasks exited, assuming things are screwed up and will wait a bit.");
+        taskdelay(3);
     }
 
-    // now we setup the dependencies from the settings they've got
-    tst_traverse(targets, Action_dependency_assign, targets);
-    tst_traverse(targets, Action_start_all, NULL);
+    log_warn("EXiting as requested from procer.");
 
     taskexit(0);
 

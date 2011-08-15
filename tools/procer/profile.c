@@ -26,7 +26,7 @@ error:
 int Profile_check_setting(bstring path, const char *file)
 {
     bstring target = bformat("%s/%s", bdata(path), file);
-    int rc = access(bdata(target), R_OK);
+    int rc = access(bdatae(target, ""), R_OK);
     bdestroy(target);
 
     return rc == 0;

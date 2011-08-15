@@ -16,7 +16,7 @@ TEST_SRC=$(wildcard tests/*_tests.c)
 TESTS=$(patsubst %.c,%,${TEST_SRC})
 MAKEOPTS=OPTFLAGS="${NOEXTCFLAGS} ${OPTFLAGS}" OPTLIBS="${OPTLIBS}" LIBS="${LIBS}" DESTDIR="${DESTDIR}" PREFIX="${PREFIX}"
 
-all: bin/mongrel2 tests m2sh
+all: bin/mongrel2 tests m2sh procer
 
 dev: CFLAGS=-g -Wall -Isrc -Wall -Wextra $(OPTFLAGS) -D_FILE_OFFSET_BITS=64
 dev: all
@@ -50,6 +50,7 @@ clean:
 	${MAKE} -C tools/filters OPTLIB=${OPTLIB} clean
 	${MAKE} -C tests/filters OPTLIB=${OPTLIB} clean
 	${MAKE} -C tools/config_modules OPTLIB=${OPTLIB} clean
+	${MAKE} -C tools/procer OPTLIB=${OPTLIB} clean
 
 pristine: clean
 	sudo rm -rf examples/python/build examples/python/dist examples/python/m2py.egg-info
@@ -60,6 +61,7 @@ pristine: clean
 	rm -f logs/*
 	rm -f run/*
 	${MAKE} -C tools/m2sh pristine
+	${MAKE} -C tools/procer pristine
 
 .PHONY: tests
 tests: tests/config.sqlite ${TESTS} test_filters filters config_modules
@@ -83,6 +85,9 @@ check:
 
 m2sh: 
 	${MAKE} ${MAKEOPTS} -C tools/m2sh all
+
+procer: 
+	${MAKE} ${MAKEOPTS} -C tools/procer all
 
 test_filters: build/libm2.a
 	${MAKE} ${MAKEOPTS} -C tests/filters all
