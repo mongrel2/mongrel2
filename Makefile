@@ -104,6 +104,7 @@ install: all
 	${MAKE} ${MAKEOPTS} -C tools/m2sh install
 	${MAKE} ${MAKEOPTS} -C tools/config_modules install
 	${MAKE} ${MAKEOPTS} -C tools/filters install
+	${MAKE} ${MAKEOPTS} -C tools/procer install
 
 examples/python/mongrel2/sql/config.sql: src/config/config.sql src/config/mimetypes.sql
 	cat src/config/config.sql src/config/mimetypes.sql > $@

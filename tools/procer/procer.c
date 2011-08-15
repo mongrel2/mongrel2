@@ -33,7 +33,7 @@ void terminate(int s)
 
 static inline void Action_sleep(int sec)
 {
-    Action_sleep(sec * (1000 + rand() % 1000));
+    taskdelay(sec * (1000 + rand() % 1000));
 }
 
 
@@ -284,11 +284,12 @@ void taskmain(int argc, char *argv[])
         tst_traverse(targets, Action_dependency_assign, targets);
         tst_traverse(targets, Action_start_all, NULL);
 
-        log_warn("All tasks exited, assuming things are screwed up and will wait a bit.");
-        taskdelay(3);
+        while(RUNNING) {
+            Action_sleep(1);
+        }
     }
 
-    log_warn("EXiting as requested from procer.");
+    log_warn("Exiting as requested from procer.");
 
     taskexit(0);
 
