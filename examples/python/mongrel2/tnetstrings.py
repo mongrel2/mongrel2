@@ -5,6 +5,9 @@ def dump(data):
     if type(data) is long or type(data) is int:
         out = str(data)
         return '%d:%s#' % (len(out), out)
+    if type(data) is float:
+        out = '%f' % data
+        return '%d:%s^' % (len(out), out)
     elif type(data) is str:
         return '%d:' % len(data) + data + ',' 
     elif type(data) is dict:
@@ -31,6 +34,8 @@ def parse(data):
         value = parse_list(payload)
     elif payload_type == '!':
         value = payload == 'true'
+    elif payload_type == '^':
+        value = float(payload)
     elif payload_type == '~':
         assert len(payload) == 0, "Payload must be 0 length for null."
         value = None
