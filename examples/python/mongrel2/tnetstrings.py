@@ -5,7 +5,7 @@ def dump(data):
     if type(data) is long or type(data) is int:
         out = str(data)
         return '%d:%s#' % (len(out), out)
-    if type(data) is float:
+    elif type(data) is float:
         out = '%f' % data
         return '%d:%s^' % (len(out), out)
     elif type(data) is str:
