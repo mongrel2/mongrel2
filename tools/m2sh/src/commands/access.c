@@ -41,12 +41,13 @@
 int Command_access_logs(Command *cmd)
 {
     bstring log_filename = option(cmd, "log", "logs/access.log");
+    check(log_filename, "Invalid log file given.");
 
     FILE *log_file = fopen(bdata(log_filename), "r");
+    check(log_file != NULL, "Failed to open log file: %s", bdata(log_filename));
+
     int line_number = 0;
     bstring line;
-
-    check(log_file, "Failed to open access log: %s", bdata(log_filename));
 
     while ((line = bgets((bNgetc) fgetc, log_file, '\n')) != NULL) {
         line_number++;
@@ -88,7 +89,9 @@ int Command_access_logs(Command *cmd)
         tns_value_destroy(log_item);
     }
 
-error: // fallthrough
     return 0;
+
+error:
+    return -1;
 }
 
