@@ -46,6 +46,8 @@ int Command_access_logs(Command *cmd)
     int line_number = 0;
     bstring line;
 
+    check(log_file, "Failed to open access log: %s", bdata(log_filename));
+
     while ((line = bgets((bNgetc) fgetc, log_file, '\n')) != NULL) {
         line_number++;
 
@@ -86,6 +88,7 @@ int Command_access_logs(Command *cmd)
         tns_value_destroy(log_item);
     }
 
+error: // fallthrough
     return 0;
 }
 
