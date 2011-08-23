@@ -319,6 +319,9 @@ testing has been done with TCP transports.
 \item[recv\_ident] This is another UUID if you want the receive socket to subscribe to its messages.
     Handlers properly mention the send\_ident on all returned messages, so you should either set this
     to nothing and don't subscribe, or set it to the same as send\_ident.
+\item[protocol] This determines which message protocol will be used when sending requests to the
+    handler.  The default is to use netstring-encoded JSON; you may instead set this to
+    ``tnetstring'', which will cause Mongrel to use TNetStrings.
 \end{description}
 
 The interesting thing about the \ident{Handler} configuration is that you don't have to say where the
