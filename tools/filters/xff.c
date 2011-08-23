@@ -13,7 +13,7 @@ StateEvent filter_transition(StateEvent state, Connection *conn, tns_value_t *co
     int req_len = Request_header_length(conn->req);
     int cont_len = Request_content_length(conn->req);
     int total_len = req_len+cont_len;
-    bstring xff;
+    bstring xff=NULL;
 
     /* This is a Hack, it appears valid though,
      * as this buffer is allocated when entering proxy
@@ -47,6 +47,9 @@ StateEvent filter_transition(StateEvent state, Connection *conn, tns_value_t *co
     next = State_exec(&conn->state, REQ_SENT, (void *)conn);
 
 error:
+    if(xff != NULL) {
+        bdestroy(xff);
+    }
     next = State_exec(&conn->state, REMOTE_CLOSE, (void *)conn);
     return next;
 }   
