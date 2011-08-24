@@ -2,15 +2,12 @@ local tir = require 'tir.view'
 local markdown = require 'markdown'
 local posix = require 'posix'
 local json = require 'json'
-require 'tir.util'
+local util = require 'tir.util'
 
 
-local Generator = {
+Generator = {
     output = 'output/',
     source = 'src/',
-    header = Tir.view('header.html'),
-    footer = Tir.view('footer.html'),
-    top = Tir.view('top.html')
 }
 
 
@@ -34,14 +31,7 @@ end
 
 function Generator:write(data, body, out_name)
     local out = assert(io.open(self.output .. out_name, 'w'))
-
-    out:write(self.header(data))
-
-    if data.top then
-        out:write(self.top(data.top))
-    end
-
-    out:write(body(data) .. self.footer(data))
+    out:write(body(data))
 end
 
 
@@ -62,11 +52,13 @@ function Generator:extract_meta(stat, out_name, md)
         date = posix.strftime("%b-%d-%Y", stat.ctime)
     end
 
+    local intro = markdown(md:match("=+\n(.-)\n\n"))
+
     local meta = {
         date = date,
         link = out_name,
         title = md:match("(.-)%s==") or "NO TITLE",
-        intro = markdown(md:match("=+\n(.-)\n\n"))
+        intro = intro or ""
     }
 
     return meta
@@ -80,6 +72,7 @@ function Generator:render_contents(data, source, output)
     local mdfiles = posix.glob(source .. "*.md")
 
     if mdfiles then
+        table.sort(mdfiles, function(a,b) return a>b end)
         for _, path in ipairs(mdfiles) do
             local target = path:gsub(base_strip, "")
             local template, out_name = self:load_template(data, target)
@@ -106,19 +99,23 @@ function Generator:run(dirs)
         local output = self.output .. dir
 
         posix.mkdir(output)
+        local configs = posix.glob(source .. '*.json')
 
-        for _, path in ipairs(posix.glob(source .. '*.json')) do
-            local target = path:gsub(base_strip, "")
-            local data = self:load_data(target)
-            
-            if data.contents then
-                data.contents = self:render_contents(data.contents, source, output)
+        if configs then
+            for _, path in ipairs(configs) do
+                local target = path:gsub(base_strip, "")
+                local data = self:load_data(target)
+                
+                if data.contents then
+                    data.contents = self:render_contents(data.contents, source, output)
+                end
+
+                self:render(data, target)
             end
-
-            self:render(data, target)
         end
     end
 end
+
 
 
 local input = assert(Tir.load_file("./", "config.json"))
