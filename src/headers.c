@@ -62,5 +62,6 @@ struct tagbstring HTTP_IF_MODIFIED_SINCE = bsStatic("if-modified-since");
 struct tagbstring HTTP_IF_UNMODIFIED_SINCE = bsStatic("if-unmodified-since");
 struct tagbstring HTTP_USER_AGENT = bsStatic("user-agent");
 struct tagbstring HTTP_CONNECTION = bsStatic("connection");
+struct tagbstring HTTP_EXPECT = bsStatic("expect");
 
 struct tagbstring HTTP_X_FORWARDED_FOR = bsStatic("x-forwarded-for");

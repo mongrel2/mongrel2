@@ -38,6 +38,7 @@
 #include <bstring.h>
 #include <connection.h>
 
+extern struct tagbstring HTTP_100;
 extern struct tagbstring HTTP_304;
 extern struct tagbstring HTTP_400;
 extern struct tagbstring HTTP_404;
