@@ -110,6 +110,14 @@ struct tagbstring HTTP_412 = bsStatic("HTTP/1.1 412 Precondition Failed\r\n"
     "\r\n\r\n"
     "Precondition Failed");
 
+struct tagbstring HTTP_417 = bsStatic("HTTP/1.1 417 Expectation Failed\r\n"
+                                      "Content-Type: text/plain\r\n"
+                                      "Connection: close\r\n"
+                                      "Content-Length: 18\r\n"
+                                      "Server: " VERSION "\r\n"
+                                      "\r\n"
+                                      "Expectation Failed");
+
 
 struct tagbstring HTTP_304 = bsStatic("HTTP/1.1 304 Not Modified\r\n"
     "Connection: close\r\n"

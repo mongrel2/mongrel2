@@ -45,6 +45,7 @@ extern struct tagbstring HTTP_404;
 extern struct tagbstring HTTP_405;
 extern struct tagbstring HTTP_412;
 extern struct tagbstring HTTP_413;
+extern struct tagbstring HTTP_417;
 extern struct tagbstring HTTP_500;
 extern struct tagbstring HTTP_501;
 extern struct tagbstring HTTP_502;

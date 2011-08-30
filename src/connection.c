@@ -254,8 +254,14 @@ int connection_http_to_handler(Connection *conn)
 
     bstring expects = Request_get(conn->req, &HTTP_EXPECT);
 
-    if (expects != NULL && biseqcstr(expects, "100-continue")) {
-        Response_send_status(conn, &HTTP_100);
+    if (expects != NULL) {
+        if (biseqcstr(expects, "100-continue")) {
+            Response_send_status(conn, &HTTP_100);
+        } else {
+            Response_send_status(conn, &HTTP_417);
+            log_info("Client requested unsupported expectation: %s.", bdata(expects));
+            goto error;
+        }
     }
 
     // we don't need the header anymore, so commit the buffer and deal with the body
