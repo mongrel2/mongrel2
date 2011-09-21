@@ -61,7 +61,7 @@ CREATE TABLE setting (id INTEGER PRIMARY KEY, key TEXT, value TEXT);
 CREATE TABLE statistic (id SERIAL,
     other_type TEXT,
     other_id INTEGER,
-    name text,
+    name TEXT,
     sum REAL,
     sumsq REAL,
     n INTEGER,
