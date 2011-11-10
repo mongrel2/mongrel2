@@ -95,3 +95,8 @@ tns_value_t *config_load_settings()
     return NULL;
 }
 
+tns_value_t *config_load_filters(int server_id)
+{
+    return NULL;
+}
+
