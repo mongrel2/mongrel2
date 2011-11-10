@@ -443,6 +443,7 @@ int Config_module_load(const char *load_path)
     SET_MODULE_FUNC(load_server);
     SET_MODULE_FUNC(load_mimetypes);
     SET_MODULE_FUNC(load_settings);
+    SET_MODULE_FUNC(load_filters);
 
     return 0;
 error:
