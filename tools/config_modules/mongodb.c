@@ -32,66 +32,435 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <filter.h>
 #include <dbg.h>
 #include <config/module.h>
-#include <config/db.h>
+#include "tnetstrings_impl.h"
 
-struct tagbstring GOODPATH = bsStatic("goodpath");
+#include "mongo.h"
 
+static mongo connexion;
+static mongo *conn = NULL;
+static bstring dbname;
+
+
+/*
+ *  Init the config system from a path string.
+ *  Some example of mongodb description to server or shard cluster:
+ *      server:localhost:mongrel2_collection
+ *      server:localhost@27017:mongrel2
+ *      shard:srv1;srv2:mongrel2
+ *      shard:srv1@27017;srv2@27018:mongrel2
+ *      shard:srv1;srv2;srv3;srv4:mongrel2
+ */
 int config_init(const char *path)
 {
-    if(biseqcstr(&GOODPATH, path)) {
-        log_info("Got the good path.");
-        return 0;
-    } else {
-        log_info("Got the bad path: %s", path);
+    int status;
+    
+    // Parsing of path
+    // TODO
+    char host[] = "127.0.0.1";
+    int port = 27017;
+    dbname = bfromcstr("mongrel2");
+    
+    status = bconchar(dbname, '.');
+    if (status != BSTR_OK) {
+        log_err("bconchar failed");
         return -1;
+    }
+    
+    // Connect to mongo
+    status = mongo_connect(&connexion, host, port);
+    if (status != MONGO_OK) {
+        log_err("Connection fail to mongoDB configuration server (%s:%d).", host, port);
+        return -1;
+    }
+    conn = &connexion;
+    log_info("Connected to mongoDB configuration server (%s:%d).", host, port);
+
+    return 0;
+}
+
+/*
+ *  Close the connection with the configuration server
+ */
+void config_close()
+{
+    if (conn) {
+        debug("Destroy mongoDB configuration server connection.");
+        mongo_destroy(conn);
     }
 }
 
-void config_close()
+tns_value_t *mongo_cursor_to_tns_value(mongo_cursor *cursor, bson *fields)
 {
+    tns_value_t *ret = NULL;
+
+    ret = tns_new_list();
+    
+    // For each rows
+    while (mongo_cursor_next(cursor) == MONGO_OK) {
+        bson_iterator fields_iterator[1];
+        
+        //debug ("create row list");
+        tns_value_t *row = tns_new_list();
+        bson_iterator_init(fields_iterator, fields);
+        
+        // For each fields in the query
+        do {
+            bson_iterator cursor_iterator[1];
+            bson_type type;
+            const char *string_data;
+            int int_data;
+            int bool_data;
+            tns_value_t *el = NULL;
+            
+            type = bson_iterator_next(fields_iterator);
+            if (type == BSON_EOO) {
+                break;
+            }
+            
+            type = bson_find(cursor_iterator, mongo_cursor_bson(cursor), bson_iterator_key(fields_iterator));
+            switch (type) {
+                case BSON_STRING:
+                    debug ("add string");
+                    string_data = bson_iterator_string(cursor_iterator);
+                    el = tns_parse_string(string_data, strlen(string_data));
+                    break;
+                    
+                case BSON_BOOL:
+                    debug ("add bool");
+                    bool_data = bson_iterator_bool(cursor_iterator);
+                    el = (bool_data) ? tns_get_true() : tns_get_false();
+                    break;
+                    
+                case BSON_INT:
+                    debug ("add int");
+                    int_data = bson_iterator_int(cursor_iterator);
+                    el = tns_new_integer(int_data);
+                    break;
+                   
+                // convert double to int, to fix later 
+                case BSON_DOUBLE:
+                    debug ("add fake double");
+                    int_data = (int)bson_iterator_double(cursor_iterator);
+                    el = tns_new_integer(int_data);
+                    break;
+
+                case BSON_EOO:
+                    debug ("End of object.");
+                    break;
+                    
+                default:
+                    log_err("Not supported BSON type (%d)", type);
+            }
+            
+            if (el) {
+                tns_add_to_list(row, el);
+                el = NULL;
+            } else {
+                // Go to next row
+                break;
+            }
+        } while (1);
+        
+        debug ("add row");
+        tns_add_to_list(ret, row);
+    }
+    
+    return ret;
+}
+
+tns_value_t *fetch_data(bstring collection_name, bson *fields, bson *query)
+{
+    int i, status;
+    tns_value_t *ret = NULL;
+    char *mongo_collection_name;
+    mongo_cursor cursor[1];
+
+    bstring collection = bstrcpy(dbname);
+    status = bconcat(collection, collection_name);
+    if (status != BSTR_OK) {
+        log_err("bconcat failed");
+        return NULL;
+    }
+    mongo_collection_name = bstr2cstr(collection, '\0');
+    
+    printf("%s\n", mongo_collection_name);
+    
+    mongo_cursor_init(cursor, conn, mongo_collection_name);
+    mongo_cursor_set_query(cursor, query);
+    mongo_cursor_set_fields(cursor, fields);
+    bcstrfree (mongo_collection_name);
+
+    ret = mongo_cursor_to_tns_value(cursor, fields);
+
+    mongo_cursor_destroy(cursor);
+  
+    return ret;
 }
 
 tns_value_t *config_load_handler(int handler_id)
 {
-    return NULL;
+    tns_value_t *res = NULL;
+    bson query[1], fields[1];
+
+    debug("Loading handler");
+
+    bstring collection = bfromcstr("handler");
+
+    bson_init(query);
+    bson_append_int(query, "id", handler_id);
+    bson_finish(query);
+    
+    bson_init(fields);
+    bson_append_int(fields, "id", 1);
+    bson_append_int(fields, "send_spec", 1);
+    bson_append_int(fields, "send_ident", 1);
+    bson_append_int(fields, "recv_spec", 1);
+    bson_append_int(fields, "recv_ident", 1);
+    bson_append_int(fields, "raw_payload", 1);
+    bson_append_int(fields, "protocol", 1);
+    bson_finish(fields);
+    
+    res = fetch_data(collection, fields, query);
+    
+    bdestroy(collection);
+    bson_destroy(fields);
+    bson_destroy(query);
+    
+    return res;
 }
 
 tns_value_t *config_load_proxy(int proxy_id)
 {
-    return NULL;
+    tns_value_t *res = NULL;
+    bson query[1], fields[1];
+
+    debug("Loading proxy");
+
+    bstring collection = bfromcstr("proxy");
+
+    bson_init(query);
+    bson_append_int(query, "id", proxy_id);
+    bson_finish(query);
+    
+    bson_init(fields);
+    bson_append_int(fields, "id", 1);
+    bson_append_int(fields, "addr", 1);
+    bson_append_int(fields, "port", 1);
+    bson_finish(fields);
+    
+    res = fetch_data(collection, fields, query);
+    
+    bdestroy(collection);
+    bson_destroy(fields);
+    bson_destroy(query);
+    
+    return res;
 }
 
 tns_value_t *config_load_dir(int dir_id)
 {
-    return NULL;
+    tns_value_t *res = NULL;
+    bson query[1], fields[1];
+
+    debug("Loading directory");
+
+    bstring collection = bfromcstr("directory");
+
+    bson_init(query);
+    bson_append_int(query, "id", dir_id);
+    bson_finish(query);
+    
+    bson_init(fields);
+    bson_append_int(fields, "id", 1);
+    bson_append_int(fields, "base", 1);
+    bson_append_int(fields, "index_file", 1);
+    bson_append_int(fields, "default_ctype", 1);
+    bson_append_int(fields, "cache_ttl", 1);
+    bson_finish(fields);
+    
+    res = fetch_data(collection, fields, query);
+    
+    bdestroy(collection);
+    bson_destroy(fields);
+    bson_destroy(query);
+    
+    return res;
 }
 
 tns_value_t *config_load_routes(int host_id, int server_id)
 {
-    return NULL;
+    tns_value_t *res = NULL;
+    bson query[1], fields[1];
+
+    debug("Loading route");
+
+    bstring collection = bfromcstr("route");
+
+    bson_init(query);
+    bson_append_int(query, "host_id", host_id);
+    bson_finish(query);
+    
+    bson_init(fields);
+    bson_append_int(fields, "id", 1);
+    bson_append_int(fields, "path", 1);
+    bson_append_int(fields, "target_id", 1);
+    bson_append_int(fields, "target_type", 1);
+    bson_finish(fields);
+    
+    res = fetch_data(collection, fields, query);
+    
+    bdestroy(collection);
+    bson_destroy(fields);
+    bson_destroy(query);
+    
+    return res;
 }
 
 tns_value_t *config_load_hosts(int server_id)
 {
-    return NULL;
+    tns_value_t *res = NULL;
+    bson query[1], fields[1];
+
+    debug("Loading host");
+
+    bstring collection = bfromcstr("host");
+
+    bson_init(query);
+    bson_append_int(query, "server_id", server_id);
+    bson_finish(query);
+    
+    bson_init(fields);
+    bson_append_int(fields, "id", 1);
+    bson_append_int(fields, "name", 1);
+    bson_append_int(fields, "matching", 1);
+    bson_append_int(fields, "server_id", 1);
+    bson_finish(fields);
+    
+    res = fetch_data(collection, fields, query);
+    
+    bdestroy(collection);
+    bson_destroy(fields);
+    bson_destroy(query);
+    
+    return res;
 }
 
 tns_value_t *config_load_server(const char *uuid)
 {
-    return NULL;
-}
+    tns_value_t *res = NULL;
+    bson query[1], fields[1];
 
+    debug("Loading server");
+
+    bstring collection = bfromcstr("server");
+
+    bson_init(query);
+    bson_append_string(query, "uuid", uuid);
+    bson_finish(query);
+    
+    bson_init(fields);
+    bson_append_int(fields, "id", 1);
+    bson_append_int(fields, "uuid", 1);
+    bson_append_int(fields, "default_host", 1);
+    bson_append_int(fields, "bind_addr", 1);
+    bson_append_int(fields, "port", 1);
+    bson_append_int(fields, "chroot", 1);
+    bson_append_int(fields, "access_log", 1);
+    bson_append_int(fields, "error_log", 1);
+    bson_append_int(fields, "pid_file", 1);
+    bson_append_int(fields, "use_ssl", 1);
+    bson_finish(fields);
+    
+    res = fetch_data(collection, fields, query);
+    
+    bdestroy(collection);
+    bson_destroy(fields);
+    bson_destroy(query);
+    
+    return res;
+}
 
 tns_value_t *config_load_mimetypes()
 {
-    return NULL;
+    tns_value_t *res = NULL;
+    bson query[1], fields[1];
+
+    debug("Loading mimetypes");
+
+    bstring collection = bfromcstr("mimetype");
+
+    bson_init(query);
+    bson_finish(query);
+    
+    bson_init(fields);
+    bson_append_int(fields, "id", 1);
+    bson_append_int(fields, "extension", 1);
+    bson_append_int(fields, "mimetype", 1);
+    bson_finish(fields);
+    
+    res = fetch_data(collection, fields, query);
+    
+    bdestroy(collection);
+    bson_destroy(fields);
+    bson_destroy(query);
+    
+    return res;
 }
 
 tns_value_t *config_load_settings()
 {
-    return NULL;
+    tns_value_t *res = NULL;
+    bson query[1], fields[1];
+
+    debug("Loading setting");
+
+    bstring collection = bfromcstr("setting");
+
+    bson_init(query);
+    bson_finish(query);
+    
+    bson_init(fields);
+    bson_append_int(fields, "id", 1);
+    bson_append_int(fields, "key", 1);
+    bson_append_int(fields, "value", 1);
+    bson_finish(fields);
+    
+    res = fetch_data(collection, fields, query);
+    
+    bdestroy(collection);
+    bson_destroy(fields);
+    bson_destroy(query);
+    
+    return res;
+}
+
+tns_value_t *config_load_filters(int server_id)
+{
+    tns_value_t *res = NULL;
+    bson query[1], fields[1];
+
+    debug("Loading filter");
+
+    bstring collection = bfromcstr("filter");
+
+    bson_init(query);
+    bson_append_int(query, "server_id", server_id);
+    bson_finish(query);
+    
+    bson_init(fields);
+    bson_append_int(fields, "id", 1);
+    bson_append_int(fields, "filter", 1);
+    bson_append_int(fields, "settings", 1);
+    bson_finish(fields);
+    
+    res = fetch_data(collection, fields, query);
+    
+    bdestroy(collection);
+    bson_destroy(fields);
+    bson_destroy(query);
+    
+    return res;
 }
 
