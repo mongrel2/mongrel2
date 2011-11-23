@@ -169,6 +169,7 @@ openbsd: all
 
 solaris: OPTFLAGS += -I/usr/local/include
 solaris: OPTLIBS += -L/usr/local/lib -R/usr/local/lib -lsocket -lnsl -lsendfile
+solaris: OPTLIBS += -L/lib -R/lib
 solaris: all
 
 
