@@ -94,6 +94,7 @@ static inline void *tns_parse_integer(const char *data, size_t len)
 
     return t;
 error:
+    tns_value_destroy(t);
     return NULL;
 }
 
@@ -107,6 +108,7 @@ static inline void *tns_parse_float(const char *data, size_t len)
 
     return t;
 error:
+    tns_value_destroy(t);
     return NULL;
 }
 

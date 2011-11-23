@@ -32,8 +32,6 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#undef NDEBUG
-
 #include <assert.h>
 #include <errno.h>
 #include <string.h>

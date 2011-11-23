@@ -52,6 +52,7 @@
 #include "filter.h"
 #include "websocket.h"
 #include "adt/darray.h"
+#include "headers.h"
 
 struct tagbstring PING_PATTERN = bsStatic("@[a-z/]- {\"type\":\\s*\"ping\"}");
 
@@ -270,6 +271,18 @@ int connection_http_to_handler(Connection *conn)
 
     Handler *handler = Request_get_action(conn->req, handler);
     error_unless(handler, conn, 404, "No action for request: %s", bdata(Request_path(conn->req)));
+
+    bstring expects = Request_get(conn->req, &HTTP_EXPECT);
+
+    if (expects != NULL) {
+        if (biseqcstr(expects, "100-continue")) {
+            Response_send_status(conn, &HTTP_100);
+        } else {
+            Response_send_status(conn, &HTTP_417);
+            log_info("Client requested unsupported expectation: %s.", bdata(expects));
+            goto error;
+        }
+    }
 
     // we don't need the header anymore, so commit the buffer and deal with the body
     check(IOBuf_read_commit(conn->iob, Request_header_length(conn->req)) != -1, "Finaly commit failed streaming the connection to http handlers.");
