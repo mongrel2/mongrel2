@@ -83,10 +83,8 @@ error:
 
 static inline int Connection_deliver_enqueue(Connection *conn, bstring b)
 {
-    check(conn->deliverPost-conn->deliverAck < DELIVER_OUTSTANDING_MSGS, "Too many outstanding messages, contact jasom") ;
-    check_debug(b != NULL,"Tried to deliver NULL to connection");
-    conn->deliverRing[conn->deliverPost%DELIVER_OUTSTANDING_MSGS]=b;
-    conn->deliverPost++;
+    check_debug(conn->deliverPost-conn->deliverAck < DELIVER_OUTSTANDING_MSGS, "Too many outstanding messages") ;
+    conn->deliverRing[conn->deliverPost++%DELIVER_OUTSTANDING_MSGS]=b;
     taskwakeup(&conn->deliverRendez);
     return 0;
 
@@ -795,8 +793,8 @@ void Connection_deliver_task(void *v)
         msg=NULL;
     }
 error:
-    Register_disconnect(IOBuf_fd(conn->iob));
     bdestroy(msg);
+    taskexit(0);
 }
 
 static inline void check_should_close(Connection *conn, Request *req)
