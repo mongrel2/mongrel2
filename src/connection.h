@@ -41,6 +41,12 @@
 #include "proxy.h"
 #include "io.h"
 #include "adt/hash.h"
+/* This must be a power of 2  or else sending more than MAX_UINT msgs is a fail*/
+#define DELIVER_OUTSTANDING_MSGS 16
+
+#if DELIVER_OUTSTANDING_MSGS & (DELIVER_OUTSTANDING_MSGS-1)
+#error DELIVER_OUTSTANDING_MSGS must be a ower of 2
+#endif
 
 extern int CONNECTION_STACK;
 extern int BUFFER_SIZE;
@@ -66,6 +72,9 @@ typedef struct Connection {
     hash_t *filter_state;
     char remote[IPADDR_SIZE+1];
     Handler *handler;
+    volatile bstring deliverRing[DELIVER_OUTSTANDING_MSGS];
+    volatile unsigned deliverPost,deliverAck;
+    Rendez deliverRendez;
 } Connection;
 
 void Connection_destroy(Connection *conn);
@@ -87,5 +96,7 @@ int Connection_deliver(Connection *conn, bstring buf);
 int Connection_read_header(Connection *conn, Request *req);
 
 void Connection_init();
+
+void Connection_deliver_task(void *v);
 
 #endif

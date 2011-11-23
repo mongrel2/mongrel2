@@ -81,6 +81,26 @@ error:
 }
 
 
+static inline int Connection_deliver_enqueue(Connection *conn, bstring b)
+{
+    check_debug(conn->deliverPost-conn->deliverAck < DELIVER_OUTSTANDING_MSGS, "Too many outstanding messages") ;
+    conn->deliverRing[conn->deliverPost++%DELIVER_OUTSTANDING_MSGS]=b;
+    taskwakeup(&conn->deliverRendez);
+    return 0;
+
+error:
+    return -1;
+}
+
+static inline bstring Connection_deliver_dequeue(Connection *conn)
+{
+    while(1) {
+        if(conn->deliverPost-conn->deliverAck) {
+            return conn->deliverRing[conn->deliverAck++%DELIVER_OUTSTANDING_MSGS];
+        }
+        tasksleep(&conn->deliverRendez);
+    }
+}
 
 int connection_send_socket_response(Connection *conn)
 {
@@ -628,6 +648,12 @@ void Connection_destroy(Connection *conn)
         Request_destroy(conn->req);
         conn->req = NULL;
         if(conn->client) free(conn->client);
+        while(conn->deliverAck<conn->deliverPost)
+        {
+            bdestroy(Connection_deliver_dequeue(conn));
+        }
+        Connection_deliver_enqueue(conn,NULL);
+        taskyield();
         IOBuf_destroy(conn->iob);
         IOBuf_destroy(conn->proxy_iob);
         free(conn);
@@ -638,7 +664,7 @@ void Connection_destroy(Connection *conn)
 Connection *Connection_create(Server *srv, int fd, int rport,
                               const char *remote)
 {
-    Connection *conn = malloc(sizeof(Connection));
+    Connection *conn = calloc(sizeof(Connection),1);
     check_mem(conn);
 
     conn->req = Request_create();
@@ -683,8 +709,11 @@ int Connection_accept(Connection *conn)
     check(taskcreate(Connection_task, conn, CONNECTION_STACK) != -1,
             "Failed to create connection task.");
     
+    check(taskcreate(Connection_deliver_task, conn, CONNECTION_STACK) != -1,
+            "Failed to create connection task.");
     return 0;
 error:
+    Register_disconnect(IOBuf_fd(conn->iob));
     return -1;
 }
 
@@ -723,9 +752,14 @@ error: // fallthrough
     taskexit(0);
 }
 
-int Connection_deliver_raw(Connection *conn, bstring buf)
+int Connection_deliver_raw_internal(Connection *conn, bstring buf)
 {
     return IOBuf_send(conn->iob, bdata(buf), blength(buf));
+}
+
+int Connection_deliver_raw(Connection *conn, bstring buf)
+{
+    return Connection_deliver_enqueue(conn, bstrcpy(buf));
 }
 
 int Connection_deliver(Connection *conn, bstring buf)
@@ -735,10 +769,10 @@ int Connection_deliver(Connection *conn, bstring buf)
     bstring b64_buf = bBase64Encode(buf);
     check(b64_buf != NULL, "Failed to base64 encode data.");
     check(conn->iob != NULL, "There's no IOBuffer to send to, Tell Zed.");
-    rc = IOBuf_send(conn->iob, bdata(b64_buf), blength(b64_buf)+1);
+    /* The deliver task will free the buffer */
+    rc = Connection_deliver_enqueue(conn,b64_buf);
     check_debug(rc == blength(b64_buf)+1, "Failed to write entire message to conn %d", IOBuf_fd(conn->iob));
 
-    bdestroy(b64_buf);
     return 0;
 
 error:
@@ -746,6 +780,22 @@ error:
     return -1;
 }
 
+
+void Connection_deliver_task(void *v)
+{
+    Connection *conn=v;
+    bstring msg=NULL;
+    while(1) {
+        msg = Connection_deliver_dequeue(conn);
+        check_debug(msg,"Received NULL msg on FD %d, exiting deliver task",IOBuf_fd(conn->iob));
+        check(-1 != Connection_deliver_raw_internal(conn,msg),"Error delivering to MSG listener on FD %d, closing them.", IOBuf_fd(conn->iob));
+        bdestroy(msg);
+        msg=NULL;
+    }
+error:
+    bdestroy(msg);
+    taskexit(0);
+}
 
 static inline void check_should_close(Connection *conn, Request *req)
 {
