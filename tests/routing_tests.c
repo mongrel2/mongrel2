@@ -85,7 +85,29 @@ char *test_simple_prefix_matching()
 
     return NULL;
 }
+char *test_simple_prefix_pattern_matching() 
+{
+    RouteMap *routes = RouteMap_create(NULL);
+    mu_assert(routes != NULL, "Failed to make the route map.");
+    char *route_data0 = "route0";
+    char *route_data1 = "route1";
+    char *route_data2 = "route2";
+    bstring route0 = bfromcstr("/");
+    bstring route1 = bfromcstr("/img/(.*).jpg$");
+    bstring route2 = bfromcstr("/img/(.*).png$");
 
+    RouteMap_insert(routes, route0, route_data0);
+    RouteMap_insert(routes, route1, route_data1);
+    RouteMap_insert(routes, route2, route_data2);
+
+    mu_assert(check_simple_prefix(routes, "/img/foo.jpg", route_data1), "Failed 1.");
+    mu_assert(check_simple_prefix(routes, "/img/foo.png", route_data2), "Failed 2.");  
+    mu_assert(check_simple_prefix(routes, "/img/foo.bmp", NULL), "Failed 3.");  
+
+    RouteMap_destroy(routes);
+
+    return NULL;
+}
 char *test_routing_match() 
 {
     RouteMap *routes = RouteMap_create(NULL);
@@ -238,6 +260,7 @@ char * all_tests() {
     mu_run_test(test_routing_match);
     mu_run_test(test_simple_prefix_matching);
     mu_run_test(test_routing_match_reversed);
+    mu_run_test(test_simple_prefix_pattern_matching);
 
     return NULL;
 }

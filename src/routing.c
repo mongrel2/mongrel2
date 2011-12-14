@@ -81,6 +81,7 @@ void RouteMap_destroy(RouteMap *map)
 Route *RouteMap_insert_base(RouteMap *map, bstring prefix, bstring pattern)
 {
     Route *route = h_malloc(sizeof(Route));
+    Route *route2;
     check_mem(route);
 
     route->pattern = pattern;
@@ -88,10 +89,18 @@ Route *RouteMap_insert_base(RouteMap *map, bstring prefix, bstring pattern)
 
     route->prefix = prefix;
     check(route->prefix, "Prefix is required.");
+    route->next = NULL;
 
     debug("ADDING prefix: %s, pattern: %s", bdata(prefix), bdata(pattern));
-
-    map->routes = tst_insert(map->routes, bdata(prefix), blength(prefix), route);
+    route2= tst_search(map->routes, bdata(prefix), blength(prefix));
+    
+    if (route2 != NULL) {
+        route->next=route2->next;
+        route2->next=route;
+    }
+    else {
+        map->routes = tst_insert(map->routes, bdata(prefix), blength(prefix), route);
+    }
 
     hattach(route, map);
 
@@ -225,12 +234,20 @@ Route *RouteMap_simple_prefix_match(RouteMap *map, bstring target)
 { 
     debug("Searching for route: %s in map: %p", bdata(target), map);
     Route *route = tst_search_prefix(map->routes, bdata(target), blength(target));
+    Route *matched;
 
     if(route) {
         debug("Found simple prefix: %s", bdata(route->pattern));
 
         if(route->has_pattern) {
-            return match_route_pattern(target, route, 0);
+            while(route != NULL)
+            {
+                Route *matched = match_route_pattern(target, route, 0);
+                if(matched != NULL) {
+                    return matched;
+                }
+                route=route->next;
+            }
         } else {
             return route;
         }
