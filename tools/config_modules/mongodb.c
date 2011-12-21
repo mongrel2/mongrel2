@@ -42,7 +42,14 @@ static mongo connexion;
 static mongo *conn = NULL;
 static bstring dbname;
 
+const struct tagbstring server_token = bsStatic("srv");
+const struct tagbstring shard_token = bsStatic("shard");
 
+typedef enum {
+    MONGO_CONNECTION_UNKNOWN,
+    MONGO_CONNECTION_SERVER,
+    MONGO_CONNECTION_SHARD
+} mongo_connection_method_t;
 /*
  *  Init the config system from a path string.
  *  Some example of mongodb description to server or shard cluster:
@@ -55,28 +62,74 @@ static bstring dbname;
 int config_init(const char *path)
 {
     int status;
+    struct bstrList *tokens;
+    struct bstrList *ips;
+    mongo_connection_method_t conn_type = MONGO_CONNECTION_UNKNOWN;
     
-    // Parsing of path
-    // TODO
-    char host[] = "127.0.0.1";
-    int port = 27017;
-    dbname = bfromcstr("mongrel2");
+    // Explode the path
+    bstring dbspec = bfromcstr(path);
+    tokens = bsplit(dbspec, ':');
+    if (tokens->qty != 3) {
+        log_err("Invalid database specification format.");
+        bdestroy(dbspec);
+        bstrListDestroy(tokens);
+        return -1;
+    }
     
+    // Get connection type
+    // use biseqcstr ??
+    if (bstrcmp(tokens->entry[0], &server_token)) {
+        conn_type = MONGO_CONNECTION_SERVER;
+    } else if (bstrcmp(tokens->entry[0], &shard_token)) {
+        conn_type = MONGO_CONNECTION_SHARD;
+    }
+    if (conn_type == MONGO_CONNECTION_UNKNOWN) {
+        log_err("Unknown connection type.");
+        bdestroy(dbspec);
+        bstrListDestroy(tokens);
+        return -1;
+    }
+    
+    // Get database name
+    dbname = tokens->entry[2];
     status = bconchar(dbname, '.');
-    if (status != BSTR_OK) {
-        log_err("bconchar failed");
+    
+    // Get host:port
+    ips = bsplit(tokens->entry[1], ';');
+    if ((tokens->qty != 1 && conn_type == MONGO_CONNECTION_SERVER) ||
+        (tokens->qty < 2 && conn_type == MONGO_CONNECTION_SHARD))
+    {
+        log_err("Invalid number of mongoDB host definition.");
+        bdestroy(dbspec);
+        bstrListDestroy(tokens);
+        bdestroy(dbname);
+        bstrListDestroy(ips);
         return -1;
     }
     
+    bdestroy(dbspec);
+    bstrListDestroy(tokens);
+         
     // Connect to mongo
-    status = mongo_connect(&connexion, host, port);
-    if (status != MONGO_OK) {
-        log_err("Connection fail to mongoDB configuration server (%s:%d).", host, port);
-        return -1;
+    if (conn_type == MONGO_CONNECTION_SERVER) {
+        struct bstrList *host_port = bsplit(ips->entry[0], ':');
+        char *ip = bstr2cstr (host_port->entry[0], '\0');
+        char *sPort = bstr2cstr (host_port->entry[0], '\0');
+        int iPort = atoi(sPort);
+    
+        status = mongo_connect(&connexion, ip, iPort);
+        bcstrfree(ip);
+        bcstrfree(sPort);
+        if (status != MONGO_OK) {
+            log_err("Connection fail to mongoDB configuration server.");
+            return -1;
+        }
+        conn = &connexion;
+    } else if (conn_type == MONGO_CONNECTION_SHARD) {
+    
     }
-    conn = &connexion;
-    log_info("Connected to mongoDB configuration server (%s:%d).", host, port);
-
+    
+    
     return 0;
 }
 
@@ -172,7 +225,7 @@ tns_value_t *mongo_cursor_to_tns_value(mongo_cursor *cursor, bson *fields)
 
 tns_value_t *fetch_data(bstring collection_name, bson *fields, bson *query)
 {
-    int i, status;
+    int status;
     tns_value_t *ret = NULL;
     char *mongo_collection_name;
     mongo_cursor cursor[1];
