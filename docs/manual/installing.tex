@@ -37,14 +37,13 @@ install required packages for your OS, but here's how I did it on my computer:
 
 If you run into parts that your OS is missing, which is likely on
 Debian and SuSE systems, then you'll have to go and figure out
-how to install it. 
+how to install it.
 
-A simple example are distributions that splits "dev" and "runtime" 
-packages (like ubuntu). In order to build mongrel2 on these
-ditros you must install libsqlite3-dev. This is the package that contains
-sqlite3.h, that is needed by mongrel2 during compilation.
+Some distributions (like Ubuntu) split ``dev'' and ``runtime'' packages.
+In order to build mongrel2 on these distros, you must install libsqlite3-dev:
+this package contains sqlite3.h, which Mongrel2 needs during compilation.
 
-For the lazy, this is the command: \shell{sudo apt-get install libsqlite3-dev}
+For the lazy, the command is: \shell{sudo apt-get install libsqlite3-dev}
 
 \section{Building Mongrel2}
 
