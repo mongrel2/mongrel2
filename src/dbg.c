@@ -46,3 +46,9 @@ FILE *dbg_get_log()
 {
     return LOG_FILE != NULL ? LOG_FILE : stderr;
 }
+
+char *dbg_get_timestamp()
+{
+  time_t now = time(NULL);
+  return bStrfTime("%a, %d %b %Y %H:%M:%S GMT", gmtime(&now))->data;
+}

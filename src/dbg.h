@@ -38,9 +38,11 @@
 #include <stdio.h>
 #include <errno.h>
 #include <string.h>
+#include <bstring.h>
 
 void dbg_set_log(FILE *log_file);
 FILE *dbg_get_log();
+char *dbg_get_timestamp();
 
 #ifdef NDEBUG
 #define debug(M, ...)
@@ -58,13 +60,13 @@ FILE *dbg_get_log();
 
 #ifdef NO_LINENOS
 // versions that don't feature line numbers
-#define log_err(M, ...) fprintf(dbg_get_log(), "[ERROR] (errno: %s) " M "\n", clean_errno(), ##__VA_ARGS__)
-#define log_warn(M, ...) fprintf(dbg_get_log(), "[WARN] (errno: %s) " M "\n", clean_errno(), ##__VA_ARGS__)
-#define log_info(M, ...) fprintf(dbg_get_log(), "[INFO] " M "\n", ##__VA_ARGS__)
+#define log_err(M, ...) fprintf(dbg_get_log(), "%s [ERROR] (errno: %s) " M "\n", dbg_get_timestamp(), clean_errno(), ##__VA_ARGS__)
+#define log_warn(M, ...) fprintf(dbg_get_log(), "%s [WARN] (errno: %s) " M "\n", dbg_get_timestamp(), clean_errno(), ##__VA_ARGS__)
+#define log_info(M, ...) fprintf(dbg_get_log(), "%s [INFO] " M "\n", dbg_get_timestamp(), ##__VA_ARGS__)
 #else
-#define log_err(M, ...) fprintf(dbg_get_log(), "[ERROR] (%s:%d: errno: %s) " M "\n", __FILE__, __LINE__, clean_errno(), ##__VA_ARGS__)
-#define log_warn(M, ...) fprintf(dbg_get_log(), "[WARN] (%s:%d: errno: %s) " M "\n", __FILE__, __LINE__, clean_errno(), ##__VA_ARGS__)
-#define log_info(M, ...) fprintf(dbg_get_log(), "[INFO] (%s:%d) " M "\n", __FILE__, __LINE__, ##__VA_ARGS__)
+#define log_err(M, ...) fprintf(dbg_get_log(), "%s [ERROR] (%s:%d: errno: %s) " M "\n", dbg_get_timestamp(), __FILE__, __LINE__, clean_errno(), ##__VA_ARGS__)
+#define log_warn(M, ...) fprintf(dbg_get_log(), "%s [WARN] (%s:%d: errno: %s) " M "\n", dbg_get_timestamp(), __FILE__, __LINE__, clean_errno(), ##__VA_ARGS__)
+#define log_info(M, ...) fprintf(dbg_get_log(), "%s [INFO] (%s:%d) " M "\n", dbg_get_timestamp(), __FILE__, __LINE__, ##__VA_ARGS__)
 #endif
 
 #define check(A, M, ...) if(!(A)) { log_err(M, ##__VA_ARGS__); errno=0; goto error; }
