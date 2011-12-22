@@ -58,7 +58,6 @@ static void tst_collect_build(void *value, tst_collect_t *results)
     }
 }
 
-// TODO: give this a reversed parameter for reversed collects, similar to reversed search
 list_t *tst_collect(tst_t *root, const char *s, size_t len, tst_collect_test_cb tester)
 {
     tst_collect_t results = {.values = NULL, .tester = tester, .key = s, .len = len};
@@ -178,7 +177,7 @@ void *tst_search(tst_t *root, const char *s, size_t len)
 }
 
 
-tst_t *tst_insert_base(tst_t *root, tst_t *p, const char *s, size_t len, void *value)
+static inline tst_t *tst_insert_base(tst_t *root, tst_t *p, const char *s, size_t len, void *value)
 {
     if (p == NULL) { 
         p = (tst_t *) h_calloc(sizeof(tst_t), 1);
@@ -243,7 +242,6 @@ void tst_traverse(tst_t *p, tst_traverse_cb cb, void *data)
     int q_size = 0;
     int q_max = MAX_TRAVERSE_SIZE;
     tst_t **queue = calloc(sizeof(tst_t *), MAX_TRAVERSE_SIZE);
-
     check(queue, "Failed to malloc queue for traverse");
 
     queue[q_start] = p;

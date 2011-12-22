@@ -29,8 +29,6 @@
 
 #include "polarssl/xtea.h"
 
-#include <string.h>
-
 /*
  * 32-bit integer manipulation macros (big endian)
  */
@@ -38,9 +36,9 @@
 #define GET_ULONG_BE(n,b,i)                             \
 {                                                       \
     (n) = ( (unsigned long) (b)[(i)    ] << 24 )        \
-	    | ( (unsigned long) (b)[(i) + 1] << 16 )        \
-	    | ( (unsigned long) (b)[(i) + 2] <<  8 )        \
-	    | ( (unsigned long) (b)[(i) + 3]       );       \
+        | ( (unsigned long) (b)[(i) + 1] << 16 )        \
+        | ( (unsigned long) (b)[(i) + 2] <<  8 )        \
+        | ( (unsigned long) (b)[(i) + 3]       );       \
 }
 #endif
 
@@ -65,7 +63,7 @@ void xtea_setup( xtea_context *ctx, unsigned char key[16] )
 
     for( i = 0; i < 4; i++ )
     {
-    	GET_ULONG_BE( ctx->k[i], key, i << 2 );
+        GET_ULONG_BE( ctx->k[i], key, i << 2 );
     }
 }
 
@@ -84,29 +82,81 @@ int xtea_crypt_ecb( xtea_context *ctx, int mode, unsigned char input[8],
 
     if( mode == XTEA_ENCRYPT )
     {
-	    uint32_t sum = 0, delta = 0x9E3779B9;
+        uint32_t sum = 0, delta = 0x9E3779B9;
 
-	    for( i = 0; i < 32; i++ )
-	    {
-		    v0 += (((v1 << 4) ^ (v1 >> 5)) + v1) ^ (sum + k[sum & 3]);
-		    sum += delta;
-		    v1 += (((v0 << 4) ^ (v0 >> 5)) + v0) ^ (sum + k[(sum>>11) & 3]);
-	    }
+        for( i = 0; i < 32; i++ )
+        {
+            v0 += (((v1 << 4) ^ (v1 >> 5)) + v1) ^ (sum + k[sum & 3]);
+            sum += delta;
+            v1 += (((v0 << 4) ^ (v0 >> 5)) + v0) ^ (sum + k[(sum>>11) & 3]);
+        }
     }
     else /* XTEA_DECRYPT */
     {
-	    uint32_t delta = 0x9E3779B9, sum = delta * 32;
+        uint32_t delta = 0x9E3779B9, sum = delta * 32;
 
-	    for( i = 0; i < 32; i++ )
-	    {
-		    v1 -= (((v0 << 4) ^ (v0 >> 5)) + v0) ^ (sum + k[(sum>>11) & 3]);
-		    sum -= delta;
-		    v0 -= (((v1 << 4) ^ (v1 >> 5)) + v1) ^ (sum + k[sum & 3]);
-	    }
+        for( i = 0; i < 32; i++ )
+        {
+            v1 -= (((v0 << 4) ^ (v0 >> 5)) + v0) ^ (sum + k[(sum>>11) & 3]);
+            sum -= delta;
+            v0 -= (((v1 << 4) ^ (v1 >> 5)) + v1) ^ (sum + k[sum & 3]);
+        }
     }
 
     PUT_ULONG_BE( v0, output, 0 );
     PUT_ULONG_BE( v1, output, 4 );
+
+    return( 0 );
+}
+
+/*
+ * XTEA-CBC buffer encryption/decryption
+ */
+int xtea_crypt_cbc( xtea_context *ctx,
+                    int mode,
+                    size_t length,
+                    unsigned char iv[8],
+                    unsigned char *input,
+                    unsigned char *output)
+{
+    int i;
+    unsigned char temp[8];
+
+    if(length % 8)
+        return( POLARSSL_ERR_XTEA_INVALID_INPUT_LENGTH );
+
+    if( mode == XTEA_DECRYPT ) 
+    {
+        while( length > 0 )
+        {
+            memcpy( temp, input, 8 );
+            xtea_crypt_ecb( ctx, mode, input, output );
+
+            for(i = 0; i < 8; i++) 
+                output[i] = (unsigned char)( output[i] ^ iv[i] );
+
+            memcpy( iv, temp, 8 );
+
+            input  += 8;
+            output += 8;
+            length -= 8;
+        }
+    } 
+    else 
+    {
+        while( length > 0 )
+        {
+            for( i = 0; i < 8; i++ )
+                output[i] = (unsigned char)( input[i] ^ iv[i] );
+
+            xtea_crypt_ecb( ctx, mode, output, output );
+            memcpy( iv, output, 8 );
+            
+            input  += 8;
+            output += 8;
+            length -= 8;
+        }
+    }
 
     return( 0 );
 }

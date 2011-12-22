@@ -1,6 +1,8 @@
 /**
  * \file debug.h
  *
+ * \brief Debug functions
+ *
  *  Copyright (C) 2006-2010, Brainspark B.V.
  *
  *  This file is part of PolarSSL (http://www.polarssl.org)
@@ -28,7 +30,7 @@
 #include "polarssl/config.h"
 #include "polarssl/ssl.h"
 
-#if defined(POLARSSL_DEBUG_MSG)
+#if defined(POLARSSL_DEBUG_MSG) && defined(POLARSSL_DEBUG_C)
 
 #define SSL_DEBUG_MSG( level, args )                    \
     debug_print_msg( ssl, level, __FILE__, __LINE__, debug_fmt args );
@@ -70,7 +72,7 @@ void debug_print_ret( const ssl_context *ssl, int level,
 
 void debug_print_buf( const ssl_context *ssl, int level,
                       const char *file, int line, const char *text,
-                      unsigned char *buf, int len );
+                      unsigned char *buf, size_t len );
 
 void debug_print_mpi( const ssl_context *ssl, int level,
                       const char *file, int line,

@@ -42,7 +42,10 @@ class Connection(object):
         reqs.connect(sub_addr)
 
         resp = CTX.socket(zmq.PUB)
-        resp.setsockopt(zmq.IDENTITY, sender_id)
+
+        if sender_id:
+            resp.setsockopt(zmq.IDENTITY, sender_id)
+
         resp.connect(pub_addr)
 
         self.sub_addr = sub_addr

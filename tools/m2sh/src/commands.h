@@ -20,5 +20,9 @@ typedef struct Command {
     int token_count;
 } Command;
 
+bstring option(Command *cmd, const char *name, const char *def);
+int log_action(bstring db_file, bstring what, bstring why, bstring where, bstring how);
+
+#define check_file(S, N, P) check(access((const char *)(S)->data, (P)) == 0, "Can't access %s '%s' properly.", N, bdata((S)))
 
 #endif

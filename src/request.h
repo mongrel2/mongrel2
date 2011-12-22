@@ -62,6 +62,7 @@ typedef struct Request {
     struct Backend *action;
     int status_code;
     int response_size;
+    unsigned ws_flags;
     http_parser parser;
 } Request;
 

@@ -1,6 +1,8 @@
 /**
  * \file net.h
  *
+ * \brief MD5 message digest algorithm (hash function)
+ *
  *  Copyright (C) 2006-2010, Brainspark B.V.
  *
  *  This file is part of PolarSSL (http://www.polarssl.org)
@@ -25,16 +27,21 @@
 #ifndef POLARSSL_NET_H
 #define POLARSSL_NET_H
 
-#define POLARSSL_ERR_NET_UNKNOWN_HOST                      -0x0F00
-#define POLARSSL_ERR_NET_SOCKET_FAILED                     -0x0F10
-#define POLARSSL_ERR_NET_CONNECT_FAILED                    -0x0F20
-#define POLARSSL_ERR_NET_BIND_FAILED                       -0x0F30
-#define POLARSSL_ERR_NET_LISTEN_FAILED                     -0x0F40
-#define POLARSSL_ERR_NET_ACCEPT_FAILED                     -0x0F50
-#define POLARSSL_ERR_NET_RECV_FAILED                       -0x0F60
-#define POLARSSL_ERR_NET_SEND_FAILED                       -0x0F70
-#define POLARSSL_ERR_NET_CONN_RESET                        -0x0F80
-#define POLARSSL_ERR_NET_TRY_AGAIN                         -0x0F90
+#include <string.h>
+
+#define POLARSSL_ERR_NET_UNKNOWN_HOST                      -0x0040  /**< Failed to get an IP address for the given hostname. */
+#define POLARSSL_ERR_NET_SOCKET_FAILED                     -0x0042  /**< Failed to open a socket. */
+#define POLARSSL_ERR_NET_CONNECT_FAILED                    -0x0044  /**< The connection to the given server / port failed. */
+#define POLARSSL_ERR_NET_BIND_FAILED                       -0x0046  /**< Binding of the socket failed. */
+#define POLARSSL_ERR_NET_LISTEN_FAILED                     -0x0048  /**< Could not listen on the socket. */
+#define POLARSSL_ERR_NET_ACCEPT_FAILED                     -0x004A  /**< Could not accept the incoming connection. */
+#define POLARSSL_ERR_NET_RECV_FAILED                       -0x004C  /**< Reading information from the socket failed. */
+#define POLARSSL_ERR_NET_SEND_FAILED                       -0x004E  /**< Sending information through the socket failed. */
+#define POLARSSL_ERR_NET_CONN_RESET                        -0x0050  /**< Connection was reset by peer. */
+#define POLARSSL_ERR_NET_WANT_READ                         -0x0052  /**< Connection requires a read call. */
+#define POLARSSL_ERR_NET_WANT_WRITE                        -0x0054  /**< Connection requires a write call. */
+
+#define POLARSSL_NET_LISTEN_BACKLOG         10 /**< The backlog that listen() should use. */
 
 #ifdef __cplusplus
 extern "C" {
@@ -119,10 +126,10 @@ void net_usleep( unsigned long usec );
  * \param len      Maximum length of the buffer
  *
  * \return         This function returns the number of bytes received,
- *                 or a non-zero error code; POLARSSL_ERR_NET_TRY_AGAIN
+ *                 or a non-zero error code; POLARSSL_ERR_NET_WANT_READ
  *                 indicates read() is blocking.
  */
-int net_recv( void *ctx, unsigned char *buf, int len );
+int net_recv( void *ctx, unsigned char *buf, size_t len );
 
 /**
  * \brief          Write at most 'len' characters. If no error occurs,
@@ -133,10 +140,10 @@ int net_recv( void *ctx, unsigned char *buf, int len );
  * \param len      The length of the buffer
  *
  * \return         This function returns the number of bytes sent,
- *                 or a non-zero error code; POLARSSL_ERR_NET_TRY_AGAIN
+ *                 or a non-zero error code; POLARSSL_ERR_NET_WANT_WRITE
  *                 indicates write() is blocking.
  */
-int net_send( void *ctx, unsigned char *buf, int len );
+int net_send( void *ctx, unsigned char *buf, size_t len );
 
 /**
  * \brief          Gracefully shutdown the connection

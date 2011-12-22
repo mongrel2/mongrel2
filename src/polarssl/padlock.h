@@ -1,6 +1,8 @@
 /**
  * \file padlock.h
  *
+ * \brief VIA PadLock ACE for HW encryption/decryption supported by some processors
+ *
  *  Copyright (C) 2006-2010, Brainspark B.V.
  *
  *  This file is part of PolarSSL (http://www.polarssl.org)
@@ -27,6 +29,8 @@
 
 #include "polarssl/aes.h"
 
+#define POLARSSL_ERR_PADLOCK_DATA_MISALIGNED               -0x0030  /**< Input data should be aligned. */
+
 #if defined(POLARSSL_HAVE_ASM) && defined(__GNUC__) && defined(__i386__)
 
 #ifndef POLARSSL_HAVE_X86
@@ -39,8 +43,6 @@
 #define PADLOCK_PMM 0x3000
 
 #define PADLOCK_ALIGN16(x) (unsigned long *) (16 + ((long) x & ~15))
-
-#define POLARSSL_ERR_PADLOCK_DATA_MISALIGNED                    -0x08E0
 
 #ifdef __cplusplus
 extern "C" {
@@ -84,7 +86,7 @@ int padlock_xcryptecb( aes_context *ctx,
  */
 int padlock_xcryptcbc( aes_context *ctx,
                        int mode,
-                       int length,
+                       size_t length,
                        unsigned char iv[16],
                        const unsigned char *input,
                        unsigned char *output );

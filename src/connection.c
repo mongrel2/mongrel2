@@ -35,6 +35,7 @@
 #include <assert.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <limits.h>
 
 #include "connection.h"
 #include "http11/httpclient_parser.h"
@@ -49,6 +50,9 @@
 #include "log.h"
 #include "upload.h"
 #include "filter.h"
+#include "websocket.h"
+#include "adt/darray.h"
+#include "headers.h"
 
 struct tagbstring PING_PATTERN = bsStatic("@[a-z/]- {\"type\":\\s*\"ping\"}");
 
@@ -78,14 +82,33 @@ error:
 }
 
 
+static inline int Connection_deliver_enqueue(Connection *conn, bstring b)
+{
+    check_debug(conn->deliverPost-conn->deliverAck < DELIVER_OUTSTANDING_MSGS, "Too many outstanding messages") ;
+    conn->deliverRing[conn->deliverPost++%DELIVER_OUTSTANDING_MSGS]=b;
+    taskwakeup(&conn->deliverRendez);
+    return 0;
+
+error:
+    return -1;
+}
+
+static inline bstring Connection_deliver_dequeue(Connection *conn)
+{
+    while(1) {
+        if(conn->deliverPost-conn->deliverAck) {
+            return conn->deliverRing[conn->deliverAck++%DELIVER_OUTSTANDING_MSGS];
+        }
+        tasksleep(&conn->deliverRendez);
+    }
+}
 
 int connection_send_socket_response(Connection *conn)
 {
-    if(Response_send_socket_policy(conn) > 0) {
-        return RESP_SENT;
-    } else {
-        return CLOSE;
-    }
+    check(Response_send_socket_policy(conn) > 0, "Failed to send Flash cross domain policy.");
+
+error: // fallthrough, because flash expects it to close
+    return CLOSE;
 }
 
 
@@ -95,11 +118,15 @@ int connection_route_request(Connection *conn)
     Route *route = NULL;
 
     bstring path = Request_path(conn->req);
+    check_debug(path != NULL, "No path given, in request, ignoring.");
+
+    Server *server = Server_queue_latest();
+    check(server != NULL, "No server in the server queue, tell Zed.");
 
     if(conn->req->host_name) {
-        host = Server_match_backend(conn->server, conn->req->host_name);
+        host = Server_match_backend(server, conn->req->host_name);
     } else {
-        host = conn->server->default_host;
+        host = server->default_host;
     }
 
     error_unless(host, conn, 404, "Request for a host we don't have registered: %s", bdata(conn->req->host_name));
@@ -175,8 +202,8 @@ int Connection_send_to_handler(Connection *conn, Handler *handler, char *body, i
     int rc = 0;
     bstring payload = NULL;
 
-    error_unless(handler->running, conn, 502, "Handler shutdown while trying to deliver: %s", 
-            bdata(Request_path(conn->req)));
+    error_unless(handler->running, conn, 404,
+            "Handler shutdown while trying to deliver: %s", bdata(Request_path(conn->req)));
 
     if(handler->protocol == HANDLER_PROTO_TNET) {
         payload = Request_to_tnetstring(conn->req, handler->send_ident, 
@@ -188,9 +215,7 @@ int Connection_send_to_handler(Connection *conn, Handler *handler, char *body, i
         sentinel("Invalid protocol type: %d", handler->protocol);
     }
 
-    debug("SENT: %s", bdata(payload));
     check(payload, "Failed to create payload for request.");
-
     debug("HTTP TO HANDLER: %.*s", blength(payload) - content_len, bdata(payload));
 
     rc = Handler_deliver(handler->send_socket, bdata(payload), blength(payload));
@@ -207,14 +232,35 @@ error:
 }
 
 
-static struct tagbstring UPGRADE = bsStatic("upgrade");
-static struct tagbstring CONNECTION = bsStatic("connection");
-const int WEBSOCKET_ARBITRARY_BODY_SIZE = 8;
+static int Request_is_websocket(Request *req)
+{
+    bstring upgrade,connection;
+
+    if(req->ws_flags != 0)
+    {
+        return req->ws_flags == 1;
+    }
+
+    if (Request_get(req, &WS_SEC_WS_KEY) !=NULL &&
+        Request_get(req, &WS_SEC_WS_VER) !=NULL &&
+        Request_get(req, &WS_HOST) !=NULL &&
+        (upgrade = Request_get(req, &WS_UPGRADE)) != NULL &&
+        (connection = Request_get(req, &WS_CONNECTION)) != NULL)
+    {
+        if (BSTR_ERR != binstrcaseless(connection,0,&WS_UPGRADE) &&
+                !bstrcmp(upgrade,&WS_WEBSOCKET))
+        {
+            req->ws_flags =1;
+            return 1;
+        }
+    }
+    req->ws_flags =2;
+    return 0;
+}
 
 static inline int is_websocket(Connection *conn)
 {
-    return Request_get(conn->req, &UPGRADE) != NULL && 
-        Request_get(conn->req, &CONNECTION) != NULL;
+    return Request_is_websocket(conn->req);
 }
 
 int connection_http_to_handler(Connection *conn)
@@ -226,13 +272,23 @@ int connection_http_to_handler(Connection *conn)
     Handler *handler = Request_get_action(conn->req, handler);
     error_unless(handler, conn, 404, "No action for request: %s", bdata(Request_path(conn->req)));
 
+    bstring expects = Request_get(conn->req, &HTTP_EXPECT);
+
+    if (expects != NULL) {
+        if (biseqcstr(expects, "100-continue")) {
+            Response_send_status(conn, &HTTP_100);
+        } else {
+            Response_send_status(conn, &HTTP_417);
+            log_info("Client requested unsupported expectation: %s.", bdata(expects));
+            goto error;
+        }
+    }
+
     // we don't need the header anymore, so commit the buffer and deal with the body
     check(IOBuf_read_commit(conn->iob, Request_header_length(conn->req)) != -1, "Finaly commit failed streaming the connection to http handlers.");
 
-    // WebSocket detection
     if(is_websocket(conn)) {
-        content_len = IOBuf_avail(conn->iob);
-        check(content_len == WEBSOCKET_ARBITRARY_BODY_SIZE, "Purported websocket but body does not have 8 bytes");
+        content_len=0;
     }
 
     if(content_len == 0) {
@@ -252,6 +308,15 @@ int connection_http_to_handler(Connection *conn)
         check_debug(rc == 0, "Failed to deliver to the handler.");
     }
 
+    // WebSocket detection
+    if(is_websocket(conn)) {
+        conn->handler = handler;
+        bdestroy(conn->req->request_method);
+        //We set this *after* passing the handshake to the handler so that the
+        //handshake has the actual request method (hopefully GET) sent to
+        //the handler
+        conn->req->request_method=bfromcstr("WEBSOCKET");
+    }
     Log_request(conn, 200, content_len);
 
     return REQ_SENT;
@@ -304,9 +369,8 @@ int connection_http_to_proxy(Connection *conn)
     }
 
     if(!conn->client) {
-        conn->client = h_calloc(sizeof(httpclient_parser), 1);
+        conn->client = calloc(sizeof(httpclient_parser), 1);
         check_mem(conn->client);
-        hattach(conn->client, conn);
     }
 
     return CONNECT;
@@ -464,14 +528,13 @@ int connection_error(Connection *conn)
     return close_or_error(conn, CLOSE);
 }
 
-
 int connection_identify_request(Connection *conn)
 {
     int next = CLOSE;
 
     if(Request_is_xml(conn->req)) {
         if(biseq(Request_path(conn->req), &POLICY_XML_REQUEST)) {
-            debug("XML POLICY CONNECTION");
+            debug("XML POLICY CONNECTION: %s", bdata(Request_path(conn->req)));
             conn->type = CONN_TYPE_SOCKET;
             taskname("XML");
             next = SOCKET_REQ;
@@ -486,6 +549,11 @@ int connection_identify_request(Connection *conn)
         conn->type = CONN_TYPE_MSG;
         taskname("MSG");
         next = MSG_REQ;
+    } else if(Request_is_websocket(conn->req)) {
+        debug("WEBSOCKET MESSAGE");
+        conn->type = CONN_TYPE_SOCKET;
+        taskname("WS");
+        next = WS_REQ;
     } else if(Request_is_http(conn->req)) {
         debug("HTTP MESSAGE");
         conn->type = CONN_TYPE_HTTP;
@@ -512,6 +580,59 @@ int connection_parse(Connection *conn)
     }
 }
 
+
+
+int Connection_read_wspacket(Connection *conn)
+{
+    char *body=NULL;
+    char *data = IOBuf_start(conn->iob);
+    int avail = IOBuf_avail(conn->iob);
+    int64_t packet_length=-1;
+    int smaller_packet_length;
+    int tries = 0;
+    int rc=0;
+
+    for(tries = 0; packet_length == -1 && tries < CLIENT_READ_RETRIES; tries++) {
+        if(avail > 0) {
+            packet_length = Websocket_packet_length((unsigned char *)data, avail);
+        }
+
+        if(packet_length == -1) {
+            data = IOBuf_read_some(conn->iob, &avail);
+            check_debug(!IOBuf_closed(conn->iob), "Client closed during read.");
+        }
+    }
+    check(packet_length > 0,"Error receiving websocket packet header.")
+    check(packet_length <= MAX_CONTENT_LENGTH,"Received too-large websocket packet.");
+
+    check_debug(packet_length <= INT_MAX,"Websocket packet longer than MAXINT.");
+
+    smaller_packet_length = (int)packet_length;
+
+    body = IOBuf_read_all(conn->iob,packet_length,CLIENT_READ_RETRIES);
+    check(body != NULL, "Client closed the connection during websocket packet.");
+
+    rc = Connection_send_to_handler(conn, conn->handler, body, smaller_packet_length);
+    check_debug(rc == 0, "Failed to deliver to the handler.");
+
+    return packet_length;
+
+error:
+    return -1;
+
+}
+int connection_websocket_established(Connection *conn)
+{
+    if(Connection_read_wspacket(conn) > 0) {
+        return REQ_SENT;
+    } else {
+        return CLOSE;
+    }
+
+    debug("WS Established");
+    return 0;
+}
+
 StateActions CONN_ACTIONS = {
     .error = connection_error,
     .close = connection_close,
@@ -528,7 +649,8 @@ StateActions CONN_ACTIONS = {
     .proxy_failed = connection_proxy_failed,
     .proxy_reply_parse = connection_proxy_reply_parse,
     .proxy_req_parse = connection_proxy_req_parse,
-    .proxy_close = connection_proxy_close
+    .proxy_close = connection_proxy_close,
+    .websocket_established = connection_websocket_established
 };
 
 
@@ -538,9 +660,16 @@ void Connection_destroy(Connection *conn)
     if(conn) {
         Request_destroy(conn->req);
         conn->req = NULL;
+        if(conn->client) free(conn->client);
+        while(conn->deliverAck<conn->deliverPost)
+        {
+            bdestroy(Connection_deliver_dequeue(conn));
+        }
+        Connection_deliver_enqueue(conn,NULL);
+        taskyield();
         IOBuf_destroy(conn->iob);
         IOBuf_destroy(conn->proxy_iob);
-        h_free(conn);
+        free(conn);
     }
 }
 
@@ -548,17 +677,22 @@ void Connection_destroy(Connection *conn)
 Connection *Connection_create(Server *srv, int fd, int rport,
                               const char *remote)
 {
-    Connection *conn = h_calloc(sizeof(Connection), 1);
+    Connection *conn = calloc(sizeof(Connection),1);
     check_mem(conn);
 
-    conn->server = srv;
-
+    conn->req = Request_create();
+    conn->proxy_iob = NULL;
     conn->rport = rport;
+    conn->client = NULL;
+    conn->close = 0;
+    conn->type = 0;
+    conn->filter_state = NULL;
+
     memcpy(conn->remote, remote, IPADDR_SIZE);
     conn->remote[IPADDR_SIZE] = '\0';
-    conn->type = 0;
 
-    conn->req = Request_create();
+    conn->handler = NULL;
+
     check_mem(conn->req);
 
     if(srv != NULL && srv->use_ssl) {
@@ -567,7 +701,7 @@ Connection *Connection_create(Server *srv, int fd, int rport,
 
         ssl_set_own_cert(&conn->iob->ssl, &srv->own_cert, &srv->rsa_key);
         ssl_set_dh_param(&conn->iob->ssl, srv->dhm_P, srv->dhm_G);
-        ssl_set_ciphers(&conn->iob->ssl, srv->ciphers);
+        ssl_set_ciphersuites(&conn->iob->ssl, srv->ciphers);
     } else {
         conn->iob = IOBuf_create(BUFFER_SIZE, fd, IOBUF_SOCKET);
     }
@@ -588,8 +722,11 @@ int Connection_accept(Connection *conn)
     check(taskcreate(Connection_task, conn, CONNECTION_STACK) != -1,
             "Failed to create connection task.");
     
+    check(taskcreate(Connection_deliver_task, conn, CONNECTION_STACK) != -1,
+            "Failed to create connection task.");
     return 0;
 error:
+    Register_disconnect(IOBuf_fd(conn->iob));
     return -1;
 }
 
@@ -604,11 +741,12 @@ void Connection_task(void *v)
     State_init(&conn->state, &CONN_ACTIONS);
 
     for(i = 0, next = OPEN; next != CLOSE; i++) {
-
         if(Filter_activated()) {
             next = Filter_run(next, conn);
             check(next >= CLOSE && next < EVENT_END,
                     "!!! Invalid next event[%d]: %d from filter!", i, next);
+
+            if(next == CLOSE) break;
         }
 
         next = State_exec(&conn->state, next, (void *)conn);
@@ -627,9 +765,14 @@ error: // fallthrough
     taskexit(0);
 }
 
-int Connection_deliver_raw(Connection *conn, bstring buf)
+int Connection_deliver_raw_internal(Connection *conn, bstring buf)
 {
     return IOBuf_send(conn->iob, bdata(buf), blength(buf));
+}
+
+int Connection_deliver_raw(Connection *conn, bstring buf)
+{
+    return Connection_deliver_enqueue(conn, bstrcpy(buf));
 }
 
 int Connection_deliver(Connection *conn, bstring buf)
@@ -637,12 +780,12 @@ int Connection_deliver(Connection *conn, bstring buf)
     int rc = 0;
 
     bstring b64_buf = bBase64Encode(buf);
-    assert(b64_buf != NULL && "WTF!");
-    assert(conn->iob != NULL && "WTF! NO IOBUF!");
-    rc = IOBuf_send(conn->iob, bdata(b64_buf), blength(b64_buf)+1);
+    check(b64_buf != NULL, "Failed to base64 encode data.");
+    check(conn->iob != NULL, "There's no IOBuffer to send to, Tell Zed.");
+    /* The deliver task will free the buffer */
+    rc = Connection_deliver_enqueue(conn,b64_buf);
     check_debug(rc == blength(b64_buf)+1, "Failed to write entire message to conn %d", IOBuf_fd(conn->iob));
 
-    bdestroy(b64_buf);
     return 0;
 
 error:
@@ -650,6 +793,22 @@ error:
     return -1;
 }
 
+
+void Connection_deliver_task(void *v)
+{
+    Connection *conn=v;
+    bstring msg=NULL;
+    while(1) {
+        msg = Connection_deliver_dequeue(conn);
+        check_debug(msg,"Received NULL msg on FD %d, exiting deliver task",IOBuf_fd(conn->iob));
+        check(-1 != Connection_deliver_raw_internal(conn,msg),"Error delivering to MSG listener on FD %d, closing them.", IOBuf_fd(conn->iob));
+        bdestroy(msg);
+        msg=NULL;
+    }
+error:
+    bdestroy(msg);
+    taskexit(0);
+}
 
 static inline void check_should_close(Connection *conn, Request *req)
 {

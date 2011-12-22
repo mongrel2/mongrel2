@@ -57,6 +57,7 @@ typedef struct StateActions {
     state_action_cb proxy_reply_parse;
     state_action_cb proxy_req_parse;
     state_action_cb proxy_close;
+    state_action_cb websocket_established;
 } StateActions;
 
 typedef struct State {

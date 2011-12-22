@@ -42,6 +42,8 @@
 
 // TODO: for now these are full error responses, but let people change them
 
+struct tagbstring HTTP_100 = bsStatic("HTTP/1.1 100 Continue\r\n\r\n");
+
 struct tagbstring HTTP_400 = bsStatic("HTTP/1.1 400 Bad Request\r\n"
     "Content-Type: text/plain\r\n"
     "Connection: close\r\n"
@@ -108,6 +110,14 @@ struct tagbstring HTTP_412 = bsStatic("HTTP/1.1 412 Precondition Failed\r\n"
     "\r\n\r\n"
     "Precondition Failed");
 
+struct tagbstring HTTP_417 = bsStatic("HTTP/1.1 417 Expectation Failed\r\n"
+                                      "Content-Type: text/plain\r\n"
+                                      "Connection: close\r\n"
+                                      "Content-Length: 18\r\n"
+                                      "Server: " VERSION "\r\n"
+                                      "\r\n"
+                                      "Expectation Failed");
+
 
 struct tagbstring HTTP_304 = bsStatic("HTTP/1.1 304 Not Modified\r\n"
     "Connection: close\r\n"
@@ -119,7 +129,6 @@ struct tagbstring HTTP_304 = bsStatic("HTTP/1.1 304 Not Modified\r\n"
 struct tagbstring FLASH_RESPONSE = bsStatic("<?xml version=\"1.0\"?>"
         "<!DOCTYPE cross-domain-policy SYSTEM \"http://www.macromedia.com/xml/dtds/cross-domain-policy.dtd\">"
         "<cross-domain-policy> <allow-access-from domain=\"*\" to-ports=\"*\" /></cross-domain-policy>");
-
 
 int Response_send_status(Connection *conn, bstring error)
 {

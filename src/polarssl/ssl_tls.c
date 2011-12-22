@@ -42,19 +42,22 @@
 #include "polarssl/debug.h"
 #include "polarssl/ssl.h"
 
-#include <string.h>
 #include <stdlib.h>
 #include <time.h>
+
+#if defined _MSC_VER && !defined strcasecmp
+#define strcasecmp _stricmp
+#endif
 
 /*
  * Key material generation
  */
-static int tls1_prf( unsigned char *secret, int slen, char *label,
-                     unsigned char *random, int rlen,
-                     unsigned char *dstbuf, int dlen )
+static int tls1_prf( unsigned char *secret, size_t slen, char *label,
+                     unsigned char *random, size_t rlen,
+                     unsigned char *dstbuf, size_t dlen )
 {
-    int nb, hs;
-    int i, j, k;
+    size_t nb, hs;
+    size_t i, j, k;
     unsigned char *S1, *S2;
     unsigned char tmp[128];
     unsigned char h_i[20];
@@ -135,7 +138,7 @@ int ssl_derive_keys( ssl_context *ssl )
      */
     if( ssl->resume == 0 )
     {
-        int len = ssl->pmslen;
+        size_t len = ssl->pmslen;
 
         SSL_DEBUG_BUF( 3, "premaster secret", ssl->premaster, len );
 
@@ -214,7 +217,7 @@ int ssl_derive_keys( ssl_context *ssl )
         tls1_prf( ssl->session->master, 48, "key expansion",
                   ssl->randbytes, 64, keyblk, 256 );
 
-    SSL_DEBUG_MSG( 3, ( "cipher = %s", ssl_get_cipher( ssl ) ) );
+    SSL_DEBUG_MSG( 3, ( "ciphersuite = %s", ssl_get_ciphersuite( ssl ) ) );
     SSL_DEBUG_BUF( 3, "master secret", ssl->session->master, 48 );
     SSL_DEBUG_BUF( 4, "random bytes", ssl->randbytes, 64 );
     SSL_DEBUG_BUF( 4, "key block", keyblk, 256 );
@@ -224,7 +227,7 @@ int ssl_derive_keys( ssl_context *ssl )
     /*
      * Determine the appropriate key, IV and MAC length.
      */
-    switch( ssl->session->cipher )
+    switch( ssl->session->ciphersuite )
     {
 #if defined(POLARSSL_ARC4_C)
         case SSL_RSA_RC4_128_MD5:
@@ -275,8 +278,8 @@ int ssl_derive_keys( ssl_context *ssl )
 #endif
 
         default:
-            SSL_DEBUG_MSG( 1, ( "cipher %s is not available",
-                           ssl_get_cipher( ssl ) ) );
+            SSL_DEBUG_MSG( 1, ( "ciphersuite %s is not available",
+                           ssl_get_ciphersuite( ssl ) ) );
             return( POLARSSL_ERR_SSL_FEATURE_UNAVAILABLE );
     }
 
@@ -317,7 +320,7 @@ int ssl_derive_keys( ssl_context *ssl )
                 ssl->ivlen );
     }
 
-    switch( ssl->session->cipher )
+    switch( ssl->session->ciphersuite )
     {
 #if defined(POLARSSL_ARC4_C)
         case SSL_RSA_RC4_128_MD5:
@@ -427,7 +430,7 @@ void ssl_calc_verify( ssl_context *ssl, unsigned char hash[36] )
  * SSLv3.0 MAC functions
  */
 static void ssl_mac_md5( unsigned char *secret,
-                         unsigned char *buf, int len,
+                         unsigned char *buf, size_t len,
                          unsigned char *ctr, int type )
 {
     unsigned char header[11];
@@ -456,7 +459,7 @@ static void ssl_mac_md5( unsigned char *secret,
 }
 
 static void ssl_mac_sha1( unsigned char *secret,
-                          unsigned char *buf, int len,
+                          unsigned char *buf, size_t len,
                           unsigned char *ctr, int type )
 {
     unsigned char header[11];
@@ -489,7 +492,7 @@ static void ssl_mac_sha1( unsigned char *secret,
  */ 
 static int ssl_encrypt_buf( ssl_context *ssl )
 {
-    int i, padlen;
+    size_t i, padlen;
 
     SSL_DEBUG_MSG( 2, ( "=> encrypt buf" ) );
 
@@ -526,8 +529,8 @@ static int ssl_encrypt_buf( ssl_context *ssl )
 
     ssl->out_msglen += ssl->maclen;
 
-    for( i = 7; i >= 0; i-- )
-        if( ++ssl->out_ctr[i] != 0 )
+    for( i = 8; i > 0; i-- )
+        if( ++ssl->out_ctr[i - 1] != 0 )
             break;
 
     if( ssl->ivlen == 0 )
@@ -552,7 +555,7 @@ static int ssl_encrypt_buf( ssl_context *ssl )
     else
     {
         unsigned char *enc_msg;
-        int enc_msglen;
+        size_t enc_msglen;
 
         padlen = ssl->ivlen - ( ssl->out_msglen + 1 ) % ssl->ivlen;
         if( padlen == ssl->ivlen )
@@ -611,29 +614,29 @@ static int ssl_encrypt_buf( ssl_context *ssl )
 
             case 16:
 #if defined(POLARSSL_AES_C)
-		if ( ssl->session->cipher == SSL_RSA_AES_128_SHA ||
-		     ssl->session->cipher == SSL_EDH_RSA_AES_128_SHA ||
-		     ssl->session->cipher == SSL_RSA_AES_256_SHA ||
-		     ssl->session->cipher == SSL_EDH_RSA_AES_256_SHA)
-		{
+        if ( ssl->session->ciphersuite == SSL_RSA_AES_128_SHA ||
+             ssl->session->ciphersuite == SSL_EDH_RSA_AES_128_SHA ||
+             ssl->session->ciphersuite == SSL_RSA_AES_256_SHA ||
+             ssl->session->ciphersuite == SSL_EDH_RSA_AES_256_SHA)
+        {
                     aes_crypt_cbc( (aes_context *) ssl->ctx_enc,
                         AES_ENCRYPT, enc_msglen,
                         ssl->iv_enc, enc_msg, enc_msg);
                     break;
-		}
+        }
 #endif
 
 #if defined(POLARSSL_CAMELLIA_C)
-		if ( ssl->session->cipher == SSL_RSA_CAMELLIA_128_SHA ||
-		     ssl->session->cipher == SSL_EDH_RSA_CAMELLIA_128_SHA ||
-		     ssl->session->cipher == SSL_RSA_CAMELLIA_256_SHA ||
-		     ssl->session->cipher == SSL_EDH_RSA_CAMELLIA_256_SHA)
-		{
+        if ( ssl->session->ciphersuite == SSL_RSA_CAMELLIA_128_SHA ||
+             ssl->session->ciphersuite == SSL_EDH_RSA_CAMELLIA_128_SHA ||
+             ssl->session->ciphersuite == SSL_RSA_CAMELLIA_256_SHA ||
+             ssl->session->ciphersuite == SSL_EDH_RSA_CAMELLIA_256_SHA)
+        {
                     camellia_crypt_cbc( (camellia_context *) ssl->ctx_enc,
                         CAMELLIA_ENCRYPT, enc_msglen,
                         ssl->iv_enc, enc_msg, enc_msg );
                     break;
-		}
+        }
 #endif
 
             default:
@@ -648,7 +651,7 @@ static int ssl_encrypt_buf( ssl_context *ssl )
 
 static int ssl_decrypt_buf( ssl_context *ssl )
 {
-    int i, padlen;
+    size_t i, padlen;
     unsigned char tmp[20];
 
     SSL_DEBUG_MSG( 2, ( "=> decrypt buf" ) );
@@ -675,7 +678,7 @@ static int ssl_decrypt_buf( ssl_context *ssl )
     {
         unsigned char *dec_msg;
         unsigned char *dec_msg_result;
-        int dec_msglen;
+        size_t dec_msglen;
 
         /*
          * Decrypt and check the padding
@@ -716,29 +719,29 @@ static int ssl_decrypt_buf( ssl_context *ssl )
 
             case 16:
 #if defined(POLARSSL_AES_C)
-		if ( ssl->session->cipher == SSL_RSA_AES_128_SHA ||
-		     ssl->session->cipher == SSL_EDH_RSA_AES_128_SHA ||
-		     ssl->session->cipher == SSL_RSA_AES_256_SHA ||
-		     ssl->session->cipher == SSL_EDH_RSA_AES_256_SHA)
-		{
+        if ( ssl->session->ciphersuite == SSL_RSA_AES_128_SHA ||
+             ssl->session->ciphersuite == SSL_EDH_RSA_AES_128_SHA ||
+             ssl->session->ciphersuite == SSL_RSA_AES_256_SHA ||
+             ssl->session->ciphersuite == SSL_EDH_RSA_AES_256_SHA)
+        {
                     aes_crypt_cbc( (aes_context *) ssl->ctx_dec,
                        AES_DECRYPT, dec_msglen,
                        ssl->iv_dec, dec_msg, dec_msg_result );
                     break;
-		}
+        }
 #endif
 
 #if defined(POLARSSL_CAMELLIA_C)
-		if ( ssl->session->cipher == SSL_RSA_CAMELLIA_128_SHA ||
-		     ssl->session->cipher == SSL_EDH_RSA_CAMELLIA_128_SHA ||
-		     ssl->session->cipher == SSL_RSA_CAMELLIA_256_SHA ||
-		     ssl->session->cipher == SSL_EDH_RSA_CAMELLIA_256_SHA)
-		{
+        if ( ssl->session->ciphersuite == SSL_RSA_CAMELLIA_128_SHA ||
+             ssl->session->ciphersuite == SSL_EDH_RSA_CAMELLIA_128_SHA ||
+             ssl->session->ciphersuite == SSL_RSA_CAMELLIA_256_SHA ||
+             ssl->session->ciphersuite == SSL_EDH_RSA_CAMELLIA_256_SHA)
+        {
                     camellia_crypt_cbc( (camellia_context *) ssl->ctx_dec,
                        CAMELLIA_DECRYPT, dec_msglen,
                        ssl->iv_dec, dec_msg, dec_msg_result );
                     break;
-		}
+        }
 #endif
 
             default:
@@ -847,8 +850,8 @@ static int ssl_decrypt_buf( ssl_context *ssl )
     else
         ssl->nb_zero = 0;
             
-    for( i = 7; i >= 0; i-- )
-        if( ++ssl->in_ctr[i] != 0 )
+    for( i = 8; i > 0; i-- )
+        if( ++ssl->in_ctr[i - 1] != 0 )
             break;
 
     SSL_DEBUG_MSG( 2, ( "<= decrypt buf" ) );
@@ -859,9 +862,10 @@ static int ssl_decrypt_buf( ssl_context *ssl )
 /*
  * Fill the input message buffer
  */
-int ssl_fetch_input( ssl_context *ssl, int nb_want )
+int ssl_fetch_input( ssl_context *ssl, size_t nb_want )
 {
-    int ret, len;
+    int ret;
+    size_t len;
 
     SSL_DEBUG_MSG( 2, ( "=> fetch input" ) );
 
@@ -873,6 +877,9 @@ int ssl_fetch_input( ssl_context *ssl, int nb_want )
         SSL_DEBUG_MSG( 2, ( "in_left: %d, nb_want: %d",
                        ssl->in_left, nb_want ) );
         SSL_DEBUG_RET( 2, "ssl->f_recv", ret );
+
+        if( ret == 0 )
+            return( POLARSSL_ERR_SSL_CONN_EOF );
 
         if( ret < 0 )
             return( ret );
@@ -920,7 +927,8 @@ int ssl_flush_output( ssl_context *ssl )
  */
 int ssl_write_record( ssl_context *ssl )
 {
-    int ret, len = ssl->out_msglen;
+    int ret;
+    size_t len = ssl->out_msglen;
 
     SSL_DEBUG_MSG( 2, ( "=> write record" ) );
 
@@ -1154,7 +1162,11 @@ int ssl_read_record( ssl_context *ssl )
         if( ssl->in_msg[0] == SSL_ALERT_LEVEL_FATAL )
         {
             SSL_DEBUG_MSG( 1, ( "is a fatal alert message" ) );
-            return( POLARSSL_ERR_SSL_FATAL_ALERT_MESSAGE | ssl->in_msg[1] );
+            /**
+             * Subtract from error code as ssl->in_msg[1] is 7-bit positive
+             * error identifier.
+             */
+            return( POLARSSL_ERR_SSL_FATAL_ALERT_MESSAGE - ssl->in_msg[1] );
         }
 
         if( ssl->in_msg[0] == SSL_ALERT_LEVEL_WARNING &&
@@ -1177,7 +1189,8 @@ int ssl_read_record( ssl_context *ssl )
  */
 int ssl_write_certificate( ssl_context *ssl )
 {
-    int ret, i, n;
+    int ret;
+    size_t i, n;
     const x509_cert *crt;
 
     SSL_DEBUG_MSG( 2, ( "=> write certificate" ) );
@@ -1273,13 +1286,15 @@ write_msg:
 
 int ssl_parse_certificate( ssl_context *ssl )
 {
-    int ret, i, n;
+    int ret;
+    size_t i, n;
 
     SSL_DEBUG_MSG( 2, ( "=> parse certificate" ) );
 
     if( ssl->endpoint == SSL_IS_SERVER &&
         ssl->authmode == SSL_VERIFY_NONE )
     {
+        ssl->verify_result = BADCERT_SKIP_VERIFY;
         SSL_DEBUG_MSG( 2, ( "<= skip parse certificate" ) );
         ssl->state++;
         return( 0 );
@@ -1306,6 +1321,7 @@ int ssl_parse_certificate( ssl_context *ssl )
         {
             SSL_DEBUG_MSG( 1, ( "SSLv3 client has no certificate" ) );
 
+            ssl->verify_result = BADCERT_MISSING;
             if( ssl->authmode == SSL_VERIFY_OPTIONAL )
                 return( 0 );
             else
@@ -1323,6 +1339,7 @@ int ssl_parse_certificate( ssl_context *ssl )
         {
             SSL_DEBUG_MSG( 1, ( "TLSv1 client has no certificate" ) );
 
+            ssl->verify_result = BADCERT_MISSING;
             if( ssl->authmode == SSL_VERIFY_REQUIRED )
                 return( POLARSSL_ERR_SSL_NO_CLIENT_CERTIFICATE );
             else
@@ -1404,7 +1421,8 @@ int ssl_parse_certificate( ssl_context *ssl )
         }
 
         ret = x509parse_verify( ssl->peer_cert, ssl->ca_chain, ssl->ca_crl,
-                                ssl->peer_cn,  &ssl->verify_result );
+                                ssl->peer_cn,  &ssl->verify_result,
+                                ssl->f_vrfy, ssl->p_vrfy );
 
         if( ret != 0 )
             SSL_DEBUG_RET( 1, "x509_verify_cert", ret );
@@ -1613,10 +1631,11 @@ int ssl_write_finished( ssl_context *ssl )
 
 int ssl_parse_finished( ssl_context *ssl )
 {
-    int ret, hash_len;
-     md5_context  md5;
-    sha1_context sha1;
+    int ret;
+    unsigned int hash_len;
     unsigned char buf[36];
+    md5_context  md5;
+    sha1_context sha1;
 
     SSL_DEBUG_MSG( 2, ( "=> parse finished" ) );
 
@@ -1725,6 +1744,14 @@ void ssl_set_authmode( ssl_context *ssl, int authmode )
     ssl->authmode   = authmode;
 }
 
+void ssl_set_verify( ssl_context *ssl,
+                     int (*f_vrfy)(void *, x509_cert *, int, int),
+                     void *p_vrfy )
+{
+    ssl->f_vrfy      = f_vrfy;
+    ssl->p_vrfy      = p_vrfy;
+}
+
 void ssl_set_rng( ssl_context *ssl,
                   int (*f_rng)(void *),
                   void *p_rng )
@@ -1742,8 +1769,8 @@ void ssl_set_dbg( ssl_context *ssl,
 }
 
 void ssl_set_bio( ssl_context *ssl,
-            int (*f_recv)(void *, unsigned char *, int), void *p_recv,
-            int (*f_send)(void *, unsigned char *, int), void *p_send )
+            int (*f_recv)(void *, unsigned char *, size_t), void *p_recv,
+            int (*f_send)(void *, unsigned char *, size_t), void *p_send )
 {
     ssl->f_recv     = f_recv;
     ssl->f_send     = f_send;
@@ -1767,9 +1794,9 @@ void ssl_set_session( ssl_context *ssl, int resume, int timeout,
     ssl->session    = session;
 }
 
-void ssl_set_ciphers( ssl_context *ssl, int *ciphers )
+void ssl_set_ciphersuites( ssl_context *ssl, int *ciphersuites )
 {
-    ssl->ciphers    = ciphers;
+    ssl->ciphersuites    = ciphersuites;
 }
 
 void ssl_set_ca_chain( ssl_context *ssl, x509_cert *ca_chain,
@@ -1787,6 +1814,15 @@ void ssl_set_own_cert( ssl_context *ssl, x509_cert *own_cert,
     ssl->rsa_key    = rsa_key;
 }
 
+#if defined(POLARSSL_PKCS11_C)
+void ssl_set_own_cert_pkcs11( ssl_context *ssl, x509_cert *own_cert,
+                       pkcs11_context *pkcs11_key )
+{
+    ssl->own_cert   = own_cert;
+    ssl->pkcs11_key = pkcs11_key;
+}
+#endif
+
 int ssl_set_dh_param( ssl_context *ssl, const char *dhm_P, const char *dhm_G )
 {
     int ret;
@@ -1800,6 +1836,25 @@ int ssl_set_dh_param( ssl_context *ssl, const char *dhm_P, const char *dhm_G )
     if( ( ret = mpi_read_string( &ssl->dhm_ctx.G, 16, dhm_G ) ) != 0 )
     {
         SSL_DEBUG_RET( 1, "mpi_read_string", ret );
+        return( ret );
+    }
+
+    return( 0 );
+}
+
+int ssl_set_dh_param_ctx( ssl_context *ssl, dhm_context *dhm_ctx )
+{
+    int ret;
+
+    if( ( ret = mpi_copy(&ssl->dhm_ctx.P, &dhm_ctx->P) ) != 0 )
+    {
+        SSL_DEBUG_RET( 1, "mpi_copy", ret );
+        return( ret );
+    }
+
+    if( ( ret = mpi_copy(&ssl->dhm_ctx.G, &dhm_ctx->G) ) != 0 )
+    {
+        SSL_DEBUG_RET( 1, "mpi_copy", ret );
         return( ret );
     }
 
@@ -1825,7 +1880,7 @@ int ssl_set_hostname( ssl_context *ssl, const char *hostname )
 /*
  * SSL get accessors
  */
-int ssl_get_bytes_avail( const ssl_context *ssl )
+size_t ssl_get_bytes_avail( const ssl_context *ssl )
 {
     return( ssl->in_offt == NULL ? 0 : ssl->in_msglen );
 }
@@ -1835,52 +1890,52 @@ int ssl_get_verify_result( const ssl_context *ssl )
     return( ssl->verify_result );
 }
 
-const char *ssl_get_cipher( const ssl_context *ssl )
+const char *ssl_get_ciphersuite_name( const int ciphersuite_id )
 {
-    switch( ssl->session->cipher )
+    switch( ciphersuite_id )
     {
 #if defined(POLARSSL_ARC4_C)
         case SSL_RSA_RC4_128_MD5:
-            return( "SSL_RSA_RC4_128_MD5" );
+            return( "SSL-RSA-RC4-128-MD5" );
 
         case SSL_RSA_RC4_128_SHA:
-            return( "SSL_RSA_RC4_128_SHA" );
+            return( "SSL-RSA-RC4-128-SHA" );
 #endif
 
 #if defined(POLARSSL_DES_C)
         case SSL_RSA_DES_168_SHA:
-            return( "SSL_RSA_DES_168_SHA" );
+            return( "SSL-RSA-DES-168-SHA" );
 
         case SSL_EDH_RSA_DES_168_SHA:
-            return( "SSL_EDH_RSA_DES_168_SHA" );
+            return( "SSL-EDH-RSA-DES-168-SHA" );
 #endif
 
 #if defined(POLARSSL_AES_C)
         case SSL_RSA_AES_128_SHA:
-            return( "SSL_RSA_AES_128_SHA" );
+            return( "SSL-RSA-AES-128-SHA" );
 
         case SSL_EDH_RSA_AES_128_SHA:
-            return( "SSL_EDH_RSA_AES_128_SHA" );
+            return( "SSL-EDH-RSA-AES-128-SHA" );
 
         case SSL_RSA_AES_256_SHA:
-            return( "SSL_RSA_AES_256_SHA" );
+            return( "SSL-RSA-AES-256-SHA" );
 
         case SSL_EDH_RSA_AES_256_SHA:
-            return( "SSL_EDH_RSA_AES_256_SHA" );
+            return( "SSL-EDH-RSA-AES-256-SHA" );
 #endif
 
 #if defined(POLARSSL_CAMELLIA_C)
         case SSL_RSA_CAMELLIA_128_SHA:
-            return( "SSL_RSA_CAMELLIA_128_SHA" );
+            return( "SSL-RSA-CAMELLIA-128-SHA" );
 
         case SSL_EDH_RSA_CAMELLIA_128_SHA:
-            return( "SSL_EDH_RSA_CAMELLIA_128_SHA" );
+            return( "SSL-EDH-RSA-CAMELLIA-128-SHA" );
 
         case SSL_RSA_CAMELLIA_256_SHA:
-            return( "SSL_RSA_CAMELLIA_256_SHA" );
+            return( "SSL-RSA-CAMELLIA-256-SHA" );
 
         case SSL_EDH_RSA_CAMELLIA_256_SHA:
-            return( "SSL_EDH_RSA_CAMELLIA_256_SHA" );
+            return( "SSL-EDH-RSA-CAMELLIA-256-SHA" );
 #endif
 
     default:
@@ -1890,7 +1945,72 @@ const char *ssl_get_cipher( const ssl_context *ssl )
     return( "unknown" );
 }
 
-int ssl_default_ciphers[] =
+int ssl_get_ciphersuite_id( const char *ciphersuite_name )
+{
+#if defined(POLARSSL_ARC4_C)
+    if (0 == strcasecmp(ciphersuite_name, "SSL-RSA-RC4-128-MD5"))
+        return( SSL_RSA_RC4_128_MD5 );
+    if (0 == strcasecmp(ciphersuite_name, "SSL-RSA-RC4-128-SHA"))
+        return( SSL_RSA_RC4_128_SHA );
+#endif
+
+#if defined(POLARSSL_DES_C)
+    if (0 == strcasecmp(ciphersuite_name, "SSL-RSA-DES-168-SHA"))
+        return( SSL_RSA_DES_168_SHA );
+    if (0 == strcasecmp(ciphersuite_name, "SSL-EDH-RSA-DES-168-SHA"))
+        return( SSL_EDH_RSA_DES_168_SHA );
+#endif
+
+#if defined(POLARSSL_AES_C)
+    if (0 == strcasecmp(ciphersuite_name, "SSL-RSA-AES-128-SHA"))
+        return( SSL_RSA_AES_128_SHA );
+    if (0 == strcasecmp(ciphersuite_name, "SSL-EDH-RSA-AES-128-SHA"))
+        return( SSL_EDH_RSA_AES_128_SHA );
+    if (0 == strcasecmp(ciphersuite_name, "SSL-RSA-AES-256-SHA"))
+        return( SSL_RSA_AES_256_SHA );
+    if (0 == strcasecmp(ciphersuite_name, "SSL-EDH-RSA-AES-256-SHA"))
+        return( SSL_EDH_RSA_AES_256_SHA );
+#endif
+
+#if defined(POLARSSL_CAMELLIA_C)
+    if (0 == strcasecmp(ciphersuite_name, "SSL-RSA-CAMELLIA-128-SHA"))
+        return( SSL_RSA_CAMELLIA_128_SHA );
+    if (0 == strcasecmp(ciphersuite_name, "SSL-EDH-RSA-CAMELLIA-128-SHA"))
+        return( SSL_EDH_RSA_CAMELLIA_128_SHA );
+    if (0 == strcasecmp(ciphersuite_name, "SSL-RSA-CAMELLIA-256-SHA"))
+        return( SSL_RSA_CAMELLIA_256_SHA );
+    if (0 == strcasecmp(ciphersuite_name, "SSL-EDH-RSA-CAMELLIA-256-SHA"))
+        return( SSL_EDH_RSA_CAMELLIA_256_SHA );
+#endif
+
+    return( 0 );
+}
+
+const char *ssl_get_ciphersuite( const ssl_context *ssl )
+{
+    return ssl_get_ciphersuite_name( ssl->session->ciphersuite );
+}
+
+const char *ssl_get_version( const ssl_context *ssl )
+{
+    switch( ssl->minor_ver )
+    {
+        case SSL_MINOR_VERSION_0:
+            return( "SSLv3.0" );
+
+        case SSL_MINOR_VERSION_1:
+            return( "TLSv1.0" );
+
+        case SSL_MINOR_VERSION_2:
+            return( "TLSv1.1" );
+
+        default:
+            break;
+    }
+    return( "unknown" );
+}
+
+int ssl_default_ciphersuites[] =
 {
 #if defined(POLARSSL_DHM_C)
 #if defined(POLARSSL_AES_C)
@@ -1955,9 +2075,10 @@ int ssl_handshake( ssl_context *ssl )
 /*
  * Receive application data decrypted from the SSL layer
  */
-int ssl_read( ssl_context *ssl, unsigned char *buf, int len )
+int ssl_read( ssl_context *ssl, unsigned char *buf, size_t len )
 {
-    int ret, n;
+    int ret;
+    size_t n;
 
     SSL_DEBUG_MSG( 2, ( "=> read" ) );
 
@@ -1974,6 +2095,9 @@ int ssl_read( ssl_context *ssl, unsigned char *buf, int len )
     {
         if( ( ret = ssl_read_record( ssl ) ) != 0 )
         {
+            if( ret == POLARSSL_ERR_SSL_CONN_EOF )
+                return( 0 );
+
             SSL_DEBUG_RET( 1, "ssl_read_record", ret );
             return( ret );
         }
@@ -1986,6 +2110,9 @@ int ssl_read( ssl_context *ssl, unsigned char *buf, int len )
              */
             if( ( ret = ssl_read_record( ssl ) ) != 0 )
             {
+                if( ret == POLARSSL_ERR_SSL_CONN_EOF )
+                    return( 0 );
+
                 SSL_DEBUG_RET( 1, "ssl_read_record", ret );
                 return( ret );
             }
@@ -2015,15 +2142,16 @@ int ssl_read( ssl_context *ssl, unsigned char *buf, int len )
 
     SSL_DEBUG_MSG( 2, ( "<= read" ) );
 
-    return( n );
+    return( (int) n );
 }
 
 /*
  * Send application data to be encrypted by the SSL layer
  */
-int ssl_write( ssl_context *ssl, const unsigned char *buf, int len )
+int ssl_write( ssl_context *ssl, const unsigned char *buf, size_t len )
 {
-    int ret, n;
+    int ret;
+    size_t n;
 
     SSL_DEBUG_MSG( 2, ( "=> write" ) );
 
@@ -2036,9 +2164,6 @@ int ssl_write( ssl_context *ssl, const unsigned char *buf, int len )
         }
     }
 
-    n = ( len < SSL_MAX_CONTENT_LEN )
-        ? len : SSL_MAX_CONTENT_LEN;
-
     if( ssl->out_left != 0 )
     {
         if( ( ret = ssl_flush_output( ssl ) ) != 0 )
@@ -2047,22 +2172,23 @@ int ssl_write( ssl_context *ssl, const unsigned char *buf, int len )
             return( ret );
         }
     }
-    else
-    {
-        ssl->out_msglen  = n;
-        ssl->out_msgtype = SSL_MSG_APPLICATION_DATA;
-        memcpy( ssl->out_msg, buf, n );
 
-        if( ( ret = ssl_write_record( ssl ) ) != 0 )
-        {
-            SSL_DEBUG_RET( 1, "ssl_write_record", ret );
-            return( ret );
-        }
+    n = ( len < SSL_MAX_CONTENT_LEN )
+        ? len : SSL_MAX_CONTENT_LEN;
+
+    ssl->out_msglen  = n;
+    ssl->out_msgtype = SSL_MSG_APPLICATION_DATA;
+    memcpy( ssl->out_msg, buf, n );
+
+    if( ( ret = ssl_write_record( ssl ) ) != 0 )
+    {
+        SSL_DEBUG_RET( 1, "ssl_write_record", ret );
+        return( ret );
     }
 
     SSL_DEBUG_MSG( 2, ( "<= write" ) );
 
-    return( n );
+    return( (int) n );
 }
 
 /*

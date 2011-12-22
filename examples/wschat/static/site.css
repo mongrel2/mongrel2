@@ -1,0 +1,64 @@
+body {
+    font-family:Gill Sans,sans-serif;
+}
+#header {
+    font-family:monospace;
+}
+#header h1 {
+    font-size:2em;
+}
+#sidebar {
+    display:none;
+    text-align:right;
+}
+#sidebar dt {
+    font-family:monospace;
+    font-size:1.25em;
+}
+a {
+    color:#999999;
+    text-decoration:none;
+}
+h1 {
+    font-size:2.5em;
+}
+h1 a {
+    color:#333333;
+}
+h2 a {
+    color:#333333;
+}
+h3 a {
+    color:#333333;
+}
+a:hover {
+    color:#333333;
+}
+em {
+    color:red;
+}
+
+#chatlog {
+    background:none repeat scroll 0 0 #FFFFFF;
+    border:1px solid black;
+    font-family:helvetica;
+    font-size:14px;
+    height:543px;
+    margin-bottom:0.5em;
+    overflow-y: auto;
+    padding:5px;
+}
+
+#msginput {
+    border:1px solid gray;
+    margin-left:-10px;
+    padding:7px;
+    width:923px;
+}
+
+#chat {
+    float:left;
+    height:100%;
+    margin-right:15px;
+}
+

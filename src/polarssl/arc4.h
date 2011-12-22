@@ -1,6 +1,8 @@
 /**
  * \file arc4.h
  *
+ * \brief The ARCFOUR stream cipher
+ *
  *  Copyright (C) 2006-2010, Brainspark B.V.
  *
  *  This file is part of PolarSSL (http://www.polarssl.org)
@@ -25,6 +27,8 @@
 #ifndef POLARSSL_ARC4_H
 #define POLARSSL_ARC4_H
 
+#include <string.h>
+
 /**
  * \brief          ARC4 context structure
  */
@@ -47,7 +51,7 @@ extern "C" {
  * \param key      the secret key
  * \param keylen   length of the key
  */
-void arc4_setup( arc4_context *ctx, const unsigned char *key, int keylen );
+void arc4_setup( arc4_context *ctx, const unsigned char *key, unsigned int keylen );
 
 /**
  * \brief          ARC4 cipher function
@@ -59,7 +63,7 @@ void arc4_setup( arc4_context *ctx, const unsigned char *key, int keylen );
  *
  * \return         0 if successful
  */
-int arc4_crypt( arc4_context *ctx, int length, const unsigned char *input,
+int arc4_crypt( arc4_context *ctx, size_t length, const unsigned char *input,
                 unsigned char *output );
 
 /*

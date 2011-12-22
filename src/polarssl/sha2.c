@@ -34,8 +34,9 @@
 
 #include "polarssl/sha2.h"
 
-#include <string.h>
+#if defined(POLARSSL_FS_IO) || defined(POLARSSL_SELF_TEST)
 #include <stdio.h>
+#endif
 
 /*
  * 32-bit integer manipulation macros (big endian)
@@ -230,9 +231,9 @@ static void sha2_process( sha2_context *ctx, const unsigned char data[64] )
 /*
  * SHA-256 process buffer
  */
-void sha2_update( sha2_context *ctx, const unsigned char *input, int ilen )
+void sha2_update( sha2_context *ctx, const unsigned char *input, size_t ilen )
 {
-    int fill;
+    size_t fill;
     unsigned long left;
 
     if( ilen <= 0 )
@@ -241,7 +242,7 @@ void sha2_update( sha2_context *ctx, const unsigned char *input, int ilen )
     left = ctx->total[0] & 0x3F;
     fill = 64 - left;
 
-    ctx->total[0] += ilen;
+    ctx->total[0] += (unsigned long) ilen;
     ctx->total[0] &= 0xFFFFFFFF;
 
     if( ctx->total[0] < (unsigned long) ilen )
@@ -316,7 +317,7 @@ void sha2_finish( sha2_context *ctx, unsigned char output[32] )
 /*
  * output = SHA-256( input buffer )
  */
-void sha2( const unsigned char *input, int ilen,
+void sha2( const unsigned char *input, size_t ilen,
            unsigned char output[32], int is224 )
 {
     sha2_context ctx;
@@ -328,6 +329,7 @@ void sha2( const unsigned char *input, int ilen,
     memset( &ctx, 0, sizeof( sha2_context ) );
 }
 
+#if defined(POLARSSL_FS_IO)
 /*
  * output = SHA-256( file contents )
  */
@@ -359,14 +361,15 @@ int sha2_file( const char *path, unsigned char output[32], int is224 )
     fclose( f );
     return( 0 );
 }
+#endif /* POLARSSL_FS_IO */
 
 /*
  * SHA-256 HMAC context setup
  */
-void sha2_hmac_starts( sha2_context *ctx, const unsigned char *key, int keylen,
+void sha2_hmac_starts( sha2_context *ctx, const unsigned char *key, size_t keylen,
                        int is224 )
 {
-    int i;
+    size_t i;
     unsigned char sum[32];
 
     if( keylen > 64 )
@@ -394,7 +397,7 @@ void sha2_hmac_starts( sha2_context *ctx, const unsigned char *key, int keylen,
 /*
  * SHA-256 HMAC process buffer
  */
-void sha2_hmac_update( sha2_context *ctx, const unsigned char *input, int ilen )
+void sha2_hmac_update( sha2_context *ctx, const unsigned char *input, size_t ilen )
 {
     sha2_update( ctx, input, ilen );
 }
@@ -431,8 +434,8 @@ void sha2_hmac_reset( sha2_context *ctx )
 /*
  * output = HMAC-SHA-256( hmac key, input buffer )
  */
-void sha2_hmac( const unsigned char *key, int keylen,
-                const unsigned char *input, int ilen,
+void sha2_hmac( const unsigned char *key, size_t keylen,
+                const unsigned char *input, size_t ilen,
                 unsigned char output[32], int is224 )
 {
     sha2_context ctx;

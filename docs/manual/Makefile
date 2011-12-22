@@ -5,7 +5,6 @@ FINAL=book-final
 
 draft: book-final.dvi
 	htlatex book-final.tex
-	tidy -quiet -ashtml -omit -ic -m book-final.html || true
 
 book-final.dvi:
 	cp $(SOURCE).tex book-final.tex

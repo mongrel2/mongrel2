@@ -1,6 +1,8 @@
 /**
  * \file dhm.h
  *
+ * \brief Diffie-Hellman-Merkle key exchange
+ *
  *  Copyright (C) 2006-2010, Brainspark B.V.
  *
  *  This file is part of PolarSSL (http://www.polarssl.org)
@@ -27,16 +29,22 @@
 
 #include "polarssl/bignum.h"
 
-#define POLARSSL_ERR_DHM_BAD_INPUT_DATA                    0x0480
-#define POLARSSL_ERR_DHM_READ_PARAMS_FAILED                0x0490
-#define POLARSSL_ERR_DHM_MAKE_PARAMS_FAILED                0x04A0
-#define POLARSSL_ERR_DHM_READ_PUBLIC_FAILED                0x04B0
-#define POLARSSL_ERR_DHM_MAKE_PUBLIC_FAILED                0x04C0
-#define POLARSSL_ERR_DHM_CALC_SECRET_FAILED                0x04D0
+/*
+ * DHM Error codes
+ */
+#define POLARSSL_ERR_DHM_BAD_INPUT_DATA                    -0x3080  /**< Bad input parameters to function. */
+#define POLARSSL_ERR_DHM_READ_PARAMS_FAILED                -0x3100  /**< Reading of the DHM parameters failed. */
+#define POLARSSL_ERR_DHM_MAKE_PARAMS_FAILED                -0x3180  /**< Making of the DHM parameters failed. */
+#define POLARSSL_ERR_DHM_READ_PUBLIC_FAILED                -0x3200  /**< Reading of the public values failed. */
+#define POLARSSL_ERR_DHM_MAKE_PUBLIC_FAILED                -0x3280  /**< Makeing of the public value failed. */
+#define POLARSSL_ERR_DHM_CALC_SECRET_FAILED                -0x3300  /**< Calculation of the DHM secret failed. */
 
+/**
+ * \brief          DHM context structure
+ */
 typedef struct
 {
-    int len;    /*!<  size(P) in chars  */
+    size_t len; /*!<  size(P) in chars  */
     mpi P;      /*!<  prime modulus     */
     mpi G;      /*!<  generator         */
     mpi X;      /*!<  secret value      */
@@ -81,7 +89,7 @@ int dhm_read_params( dhm_context *ctx,
  * \return         0 if successful, or an POLARSSL_ERR_DHM_XXX error code
  */
 int dhm_make_params( dhm_context *ctx, int x_size,
-                     unsigned char *output, int *olen,
+                     unsigned char *output, size_t *olen,
                      int (*f_rng)(void *), void *p_rng );
 
 /**
@@ -94,7 +102,7 @@ int dhm_make_params( dhm_context *ctx, int x_size,
  * \return         0 if successful, or an POLARSSL_ERR_DHM_XXX error code
  */
 int dhm_read_public( dhm_context *ctx,
-                     const unsigned char *input, int ilen );
+                     const unsigned char *input, size_t ilen );
 
 /**
  * \brief          Create own private value X and export G^X
@@ -108,8 +116,8 @@ int dhm_read_public( dhm_context *ctx,
  *
  * \return         0 if successful, or an POLARSSL_ERR_DHM_XXX error code
  */
-int dhm_make_public( dhm_context *ctx, int s_size,
-                     unsigned char *output, int olen,
+int dhm_make_public( dhm_context *ctx, int x_size,
+                     unsigned char *output, size_t olen,
                      int (*f_rng)(void *), void *p_rng );
 
 /**
@@ -122,7 +130,7 @@ int dhm_make_public( dhm_context *ctx, int s_size,
  * \return         0 if successful, or an POLARSSL_ERR_DHM_XXX error code
  */
 int dhm_calc_secret( dhm_context *ctx,
-                     unsigned char *output, int *olen );
+                     unsigned char *output, size_t *olen );
 
 /*
  * \brief          Free the components of a DHM key

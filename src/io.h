@@ -63,6 +63,7 @@ IOBuf *IOBuf_create(size_t len, int fd, IOBufType type);
 void IOBuf_resize(IOBuf *buf, size_t new_size);
 
 void IOBuf_destroy(IOBuf *buf);
+int IOBuf_close(IOBuf *buf);
 
 char *IOBuf_read(IOBuf *buf, int need, int *out_len);
 int IOBuf_read_commit(IOBuf *buf, int need);

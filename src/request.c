@@ -46,6 +46,7 @@
 #include "dbg.h"
 #include "request.h"
 #include "tnetstrings.h"
+#include "websocket.h"
 
 int MAX_HEADER_COUNT=0;
 int MAX_DUPE_HEADERS=5;
@@ -229,6 +230,7 @@ static inline void Request_nuke_parts(Request *req)
     req->response_size = 0;
     req->parser.json_sent = 0;
     req->parser.xml_sent = 0;
+    req->ws_flags=0;
 }
 
 void Request_destroy(Request *req)
@@ -361,8 +363,8 @@ bstring Request_to_tnetstring(Request *req, bstring uuid, int fd, const char *bu
     bstring method = request_determine_method(req);
     check(method, "Impossible, got an invalid request method.");
 
-    int id = Register_id_for_fd(fd);
-    check(id != -1, "Asked to generate a payload for a fd that doesn't exist: %d", fd);
+    uint32_t id = Register_id_for_fd(fd);
+    check_debug(id != UINT32_MAX, "Asked to generate a payload for a fd that doesn't exist: %d", fd);
 
     int header_start = tns_render_request_start(&outbuf);
     check(header_start != -1, "Failed to initialize outbuf.");
@@ -398,8 +400,8 @@ bstring Request_to_payload(Request *req, bstring uuid, int fd, const char *buf, 
     bstring headers = NULL;
     bstring result = NULL;
 
-    int id = Register_id_for_fd(fd);
-    check(id != -1, "Asked to generate a payload for a fd that doesn't exist: %d", fd);
+    uint32_t id = Register_id_for_fd(fd);
+    check_debug(id != UINT32_MAX, "Asked to generate a payload for a fd that doesn't exist: %d", fd);
 
     headers = bfromcstralloc(PAYLOAD_GUESS, "{\"");
     bconcat(headers, &HTTP_PATH);

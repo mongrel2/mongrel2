@@ -1,6 +1,8 @@
 /**
  * \file bignum.h
  *
+ * \brief  Multi-precision integer library
+ *
  *  Copyright (C) 2006-2010, Brainspark B.V.
  *
  *  This file is part of PolarSSL (http://www.polarssl.org)
@@ -26,39 +28,48 @@
 #define POLARSSL_BIGNUM_H
 
 #include <stdio.h>
+#include <string.h>
 
-#define POLARSSL_ERR_MPI_FILE_IO_ERROR                     0x0002
-#define POLARSSL_ERR_MPI_BAD_INPUT_DATA                    0x0004
-#define POLARSSL_ERR_MPI_INVALID_CHARACTER                 0x0006
-#define POLARSSL_ERR_MPI_BUFFER_TOO_SMALL                  0x0008
-#define POLARSSL_ERR_MPI_NEGATIVE_VALUE                    0x000A
-#define POLARSSL_ERR_MPI_DIVISION_BY_ZERO                  0x000C
-#define POLARSSL_ERR_MPI_NOT_ACCEPTABLE                    0x000E
+#define POLARSSL_ERR_MPI_FILE_IO_ERROR                     -0x0002  /**< An error occurred while reading from or writing to a file. */
+#define POLARSSL_ERR_MPI_BAD_INPUT_DATA                    -0x0004  /**< Bad input parameters to function. */
+#define POLARSSL_ERR_MPI_INVALID_CHARACTER                 -0x0006  /**< There is an invalid character in the digit string. */
+#define POLARSSL_ERR_MPI_BUFFER_TOO_SMALL                  -0x0008  /**< The output buffer is too small to write too. */
+#define POLARSSL_ERR_MPI_NEGATIVE_VALUE                    -0x000A  /**< The input arguments are negative or result in illegal output. */
+#define POLARSSL_ERR_MPI_DIVISION_BY_ZERO                  -0x000C  /**< The input argument for division is zero, which is not allowed. */
+#define POLARSSL_ERR_MPI_NOT_ACCEPTABLE                    -0x000E  /**< The input arguments are not acceptable. */
 
 #define MPI_CHK(f) if( ( ret = f ) != 0 ) goto cleanup
+
+/*
+ * Maximum size MPIs are allowed to grow to in number of limbs.
+ */
+#define POLARSSL_MPI_MAX_LIMBS                             10000
 
 /*
  * Define the base integer type, architecture-wise
  */
 #if defined(POLARSSL_HAVE_INT8)
-typedef unsigned char  t_int;
-typedef unsigned short t_dbl;
+typedef   signed char  t_sint;
+typedef unsigned char  t_uint;
+typedef unsigned short t_udbl;
 #else
 #if defined(POLARSSL_HAVE_INT16)
-typedef unsigned short t_int;
-typedef unsigned long  t_dbl;
+typedef   signed short t_sint;
+typedef unsigned short t_uint;
+typedef unsigned long  t_udbl;
 #else
-  typedef unsigned long t_int;
+  typedef   signed long t_sint;
+  typedef unsigned long t_uint;
   #if defined(_MSC_VER) && defined(_M_IX86)
-  typedef unsigned __int64 t_dbl;
+  typedef unsigned __int64 t_udbl;
   #else
     #if defined(__amd64__) || defined(__x86_64__)    || \
         defined(__ppc64__) || defined(__powerpc64__) || \
         defined(__ia64__)  || defined(__alpha__)
-    typedef unsigned int t_dbl __attribute__((mode(TI)));
+    typedef unsigned int t_udbl __attribute__((mode(TI)));
     #else
       #if defined(POLARSSL_HAVE_LONGLONG)
-      typedef unsigned long long t_dbl;
+      typedef unsigned long long t_udbl;
       #endif
     #endif
   #endif
@@ -71,8 +82,8 @@ typedef unsigned long  t_dbl;
 typedef struct
 {
     int s;              /*!<  integer sign      */
-    int n;              /*!<  total # of limbs  */
-    t_int *p;           /*!<  pointer to limbs  */
+    size_t n;           /*!<  total # of limbs  */
+    t_uint *p;          /*!<  pointer to limbs  */
 }
 mpi;
 
@@ -81,14 +92,18 @@ extern "C" {
 #endif
 
 /**
- * \brief          Initialize one or more mpi
+ * \brief           Initialize one MPI
+ *
+ * \param X         One MPI to initialize.
  */
-void mpi_init( mpi *X, ... );
+void mpi_init( mpi *X );
 
 /**
- * \brief          Unallocate one or more mpi
+ * \brief          Unallocate one MPI
+ *
+ * \param X        One MPI to unallocate.
  */
-void mpi_free( mpi *X, ... );
+void mpi_free( mpi *X );
 
 /**
  * \brief          Enlarge to the specified number of limbs
@@ -99,7 +114,7 @@ void mpi_free( mpi *X, ... );
  * \return         0 if successful,
  *                 1 if memory allocation failed
  */
-int mpi_grow( mpi *X, int nblimbs );
+int mpi_grow( mpi *X, size_t nblimbs );
 
 /**
  * \brief          Copy the contents of Y into X
@@ -129,28 +144,54 @@ void mpi_swap( mpi *X, mpi *Y );
  * \return         0 if successful,
  *                 1 if memory allocation failed
  */
-int mpi_lset( mpi *X, int z );
+int mpi_lset( mpi *X, t_sint z );
+
+/*
+ * \brief          Get a specific bit from X
+ *
+ * \param X        MPI to use
+ * \param pos      Zero-based index of the bit in X
+ *
+ * \return         Either a 0 or a 1
+ */
+int mpi_get_bit( mpi *X, size_t pos );
+
+/*
+ * \brief          Set a bit of X to a specific value of 0 or 1
+ *
+ * \note           Will grow X if necessary to set a bit to 1 in a not yet
+ *                 existing limb. Will not grow if bit should be set to 0
+ *
+ * \param X        MPI to use
+ * \param pos      Zero-based index of the bit in X
+ * \param val      The value to set the bit to (0 or 1)
+ *
+ * \return         0 if successful,
+ *                 1 if memory allocation failed,
+ *                 POLARSSL_ERR_MPI_BAD_INPUT_DATA if val is not 0 or 1
+ */
+int mpi_set_bit( mpi *X, size_t pos, unsigned char val );
 
 /**
  * \brief          Return the number of least significant bits
  *
  * \param X        MPI to use
  */
-int mpi_lsb( const mpi *X );
+size_t mpi_lsb( const mpi *X );
 
 /**
  * \brief          Return the number of most significant bits
  *
  * \param X        MPI to use
  */
-int mpi_msb( const mpi *X );
+size_t mpi_msb( const mpi *X );
 
 /**
  * \brief          Return the total size in bytes
  *
  * \param X        MPI to use
  */
-int mpi_size( const mpi *X );
+size_t mpi_size( const mpi *X );
 
 /**
  * \brief          Import from an ASCII string
@@ -178,7 +219,7 @@ int mpi_read_string( mpi *X, int radix, const char *s );
  * \note           Call this function with *slen = 0 to obtain the
  *                 minimum required buffer size in *slen.
  */
-int mpi_write_string( const mpi *X, int radix, char *s, int *slen );
+int mpi_write_string( const mpi *X, int radix, char *s, size_t *slen );
 
 /**
  * \brief          Read X from an opened file
@@ -215,7 +256,7 @@ int mpi_write_file( const char *p, const mpi *X, int radix, FILE *fout );
  * \return         0 if successful,
  *                 1 if memory allocation failed
  */
-int mpi_read_binary( mpi *X, const unsigned char *buf, int buflen );
+int mpi_read_binary( mpi *X, const unsigned char *buf, size_t buflen );
 
 /**
  * \brief          Export X into unsigned binary data, big endian
@@ -227,7 +268,7 @@ int mpi_read_binary( mpi *X, const unsigned char *buf, int buflen );
  * \return         0 if successful,
  *                 POLARSSL_ERR_MPI_BUFFER_TOO_SMALL if buf isn't large enough
  */
-int mpi_write_binary( const mpi *X, unsigned char *buf, int buflen );
+int mpi_write_binary( const mpi *X, unsigned char *buf, size_t buflen );
 
 /**
  * \brief          Left-shift: X <<= count
@@ -238,7 +279,7 @@ int mpi_write_binary( const mpi *X, unsigned char *buf, int buflen );
  * \return         0 if successful,
  *                 1 if memory allocation failed
  */
-int mpi_shift_l( mpi *X, int count );
+int mpi_shift_l( mpi *X, size_t count );
 
 /**
  * \brief          Right-shift: X >>= count
@@ -249,7 +290,7 @@ int mpi_shift_l( mpi *X, int count );
  * \return         0 if successful,
  *                 1 if memory allocation failed
  */
-int mpi_shift_r( mpi *X, int count );
+int mpi_shift_r( mpi *X, size_t count );
 
 /**
  * \brief          Compare unsigned values
@@ -285,7 +326,7 @@ int mpi_cmp_mpi( const mpi *X, const mpi *Y );
  *                -1 if X is lesser  than z or
  *                 0 if X is equal to z
  */
-int mpi_cmp_int( const mpi *X, int z );
+int mpi_cmp_int( const mpi *X, t_sint z );
 
 /**
  * \brief          Unsigned addition: X = |A| + |B|
@@ -345,7 +386,7 @@ int mpi_sub_mpi( mpi *X, const mpi *A, const mpi *B );
  * \return         0 if successful,
  *                 1 if memory allocation failed
  */
-int mpi_add_int( mpi *X, const mpi *A, int b );
+int mpi_add_int( mpi *X, const mpi *A, t_sint b );
 
 /**
  * \brief          Signed substraction: X = A - b
@@ -357,7 +398,7 @@ int mpi_add_int( mpi *X, const mpi *A, int b );
  * \return         0 if successful,
  *                 1 if memory allocation failed
  */
-int mpi_sub_int( mpi *X, const mpi *A, int b );
+int mpi_sub_int( mpi *X, const mpi *A, t_sint b );
 
 /**
  * \brief          Baseline multiplication: X = A * B
@@ -383,7 +424,7 @@ int mpi_mul_mpi( mpi *X, const mpi *A, const mpi *B );
  * \return         0 if successful,
  *                 1 if memory allocation failed
  */
-int mpi_mul_int( mpi *X, const mpi *A, t_int b );
+int mpi_mul_int( mpi *X, const mpi *A, t_sint b );
 
 /**
  * \brief          Division by mpi: A = Q * B + R
@@ -415,7 +456,7 @@ int mpi_div_mpi( mpi *Q, mpi *R, const mpi *A, const mpi *B );
  *
  * \note           Either Q or R can be NULL.
  */
-int mpi_div_int( mpi *Q, mpi *R, const mpi *A, int b );
+int mpi_div_int( mpi *Q, mpi *R, const mpi *A, t_sint b );
 
 /**
  * \brief          Modulo: R = A mod B
@@ -434,7 +475,7 @@ int mpi_mod_mpi( mpi *R, const mpi *A, const mpi *B );
 /**
  * \brief          Modulo: r = A mod b
  *
- * \param r        Destination t_int
+ * \param r        Destination t_uint
  * \param A        Left-hand MPI
  * \param b        Integer to divide by
  *
@@ -443,7 +484,7 @@ int mpi_mod_mpi( mpi *R, const mpi *A, const mpi *B );
  *                 POLARSSL_ERR_MPI_DIVISION_BY_ZERO if b == 0,
  *                 POLARSSL_ERR_MPI_NEGATIVE_VALUE if b < 0
  */
-int mpi_mod_int( t_int *r, const mpi *A, int b );
+int mpi_mod_int( t_uint *r, const mpi *A, t_sint b );
 
 /**
  * \brief          Sliding-window exponentiation: X = A^E mod N
@@ -463,6 +504,19 @@ int mpi_mod_int( t_int *r, const mpi *A, int b );
  *                 be set to NULL if the extra performance is unneeded.
  */
 int mpi_exp_mod( mpi *X, const mpi *A, const mpi *E, const mpi *N, mpi *_RR );
+
+/**
+ * \brief          Fill an MPI X with size bytes of random
+ *
+ * \param X        Destination MPI
+ * \param size     Size in bytes
+ * \param f_rng    RNG function
+ * \param p_rng    RNG parameter
+ *
+ * \return         0 if successful,
+ *                 1 if memory allocation failed
+ */
+int mpi_fill_random( mpi *X, size_t size, int (*f_rng)(void *), void *p_rng );
 
 /**
  * \brief          Greatest common divisor: G = gcd(A, B)
@@ -507,7 +561,7 @@ int mpi_is_prime( mpi *X, int (*f_rng)(void *), void *p_rng );
  * \brief          Prime number generation
  *
  * \param X        Destination MPI
- * \param nbits    Required size of X in bits
+ * \param nbits    Required size of X in bits ( 3 <= nbits <= 4096 )
  * \param dh_flag  If 1, then (X-1)/2 will be prime too
  * \param f_rng    RNG function
  * \param p_rng    RNG parameter
@@ -516,7 +570,7 @@ int mpi_is_prime( mpi *X, int (*f_rng)(void *), void *p_rng );
  *                 1 if memory allocation failed,
  *                 POLARSSL_ERR_MPI_BAD_INPUT_DATA if nbits is < 3
  */
-int mpi_gen_prime( mpi *X, int nbits, int dh_flag,
+int mpi_gen_prime( mpi *X, size_t nbits, int dh_flag,
                    int (*f_rng)(void *), void *p_rng );
 
 /**

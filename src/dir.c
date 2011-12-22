@@ -67,7 +67,7 @@ const char *DIR_REDIRECT_FORMAT = "HTTP/1.1 301 Moved Permanently\r\n"
     "\r\n\r\n";
 
 // TODO: confirm that we are actually doing the GMT time right
-const char *RFC_822_TIME = "%a, %d %b %Y %H:%M:%S GMT";
+static const char *RFC_822_TIME = "%a, %d %b %Y %H:%M:%S GMT";
 
 static int filerecord_cache_lookup(void *data, void *key) {
     bstring request_path = (bstring) key;
@@ -234,6 +234,7 @@ void FileRecord_destroy(FileRecord *file)
             bdestroy(file->last_mod);
             bdestroy(file->header);
             bdestroy(file->etag);
+            bdestroy(file->request_path);
         }
         bdestroy(file->full_path);
         // file->content_type is not owned by us
@@ -291,7 +292,16 @@ FileRecord *FileRecord_cache_check(Dir *dir, bstring path)
         if(difftime(now, file->loaded) > dir->cache_ttl) {
             int rcstat = stat(p, &sb);
 
-            if(rcstat != 0 || file->sb.st_mtime != sb.st_mtime || file->sb.st_size != sb.st_size) {
+            if(rcstat != 0 ||
+                    file->sb.st_mtime != sb.st_mtime ||
+                    file->sb.st_ctime != sb.st_ctime ||
+                    file->sb.st_uid != sb.st_uid ||
+                    file->sb.st_gid != sb.st_gid ||
+                    file->sb.st_mode != sb.st_mode ||
+                    file->sb.st_size != sb.st_size ||
+                    file->sb.st_ino != sb.st_ino ||
+                    file->sb.st_dev != sb.st_dev 
+            ) {
                 Cache_evict_object(dir->fr_cache, file);
                 file = NULL;
             } else {
@@ -308,6 +318,9 @@ FileRecord *Dir_resolve_file(Dir *dir, bstring prefix, bstring path)
 {
     FileRecord *file = NULL;
     bstring target = NULL;
+
+    check(blength(prefix) <= blength(path), 
+            "Path '%s' is shorter than prefix '%s', not allowed.", bdata(path), bdata(prefix));
 
     check(Dir_lazy_normalize_base(dir) == 0, "Failed to normalize base path when requesting %s",
             bdata(path));
@@ -337,7 +350,6 @@ FileRecord *Dir_resolve_file(Dir *dir, bstring prefix, bstring path)
                          bdata(dir->index_file));
     } else if(biseq(prefix, path)) {
         target = bformat("%s%s", bdata(dir->normalized_base), bdata(path));
-
     } else {
         target = bformat("%s/%s", bdata(dir->normalized_base), bdataofs(path, blength(prefix)));
     }
@@ -472,6 +484,11 @@ int Dir_serve_file(Dir *dir, Request *req, Connection *conn)
         req->status_code = 405;
         rc = Response_send_status(conn, &HTTP_405);
         check_debug(rc == blength(&HTTP_405), "Failed to send 405 to client.");
+        return -1;
+    } else if (blength(prefix) > blength(path)) {
+        req->status_code = 404;
+        rc = Response_send_status(conn, &HTTP_404);
+        check_debug(rc == blength(&HTTP_404), "Failed to send 404 to client.");
         return -1;
     } else {
         file = Dir_resolve_file(dir, prefix, path);
