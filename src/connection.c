@@ -661,7 +661,7 @@ void Connection_destroy(Connection *conn)
         Request_destroy(conn->req);
         conn->req = NULL;
         if(conn->client) free(conn->client);
-        while(conn->deliverAck<conn->deliverPost)
+        while(conn->deliverAck!=conn->deliverPost)
         {
             bdestroy(Connection_deliver_dequeue(conn));
         }
