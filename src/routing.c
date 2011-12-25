@@ -251,7 +251,7 @@ Route *RouteMap_simple_prefix_match(RouteMap *map, bstring target)
         } else {
             return route;
         }
-    } else {
-        return NULL;
     }
+
+	return NULL;
 }
