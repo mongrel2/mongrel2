@@ -34,3 +34,6 @@ tests/coverage
 *.gcno
 *.gcda
 *.dSYM
+
+#OSX garbage
+.DS_Store
