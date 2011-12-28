@@ -38,99 +38,222 @@
 
 #include "mongo.h"
 
-static mongo connexion;
-static mongo *conn = NULL;
+static mongo connexion[1];
 static bstring dbname;
 
-const struct tagbstring server_token = bsStatic("srv");
-const struct tagbstring shard_token = bsStatic("shard");
+#define MONGODB_HOST_PORT_SEPARATOR '@'
+#define MONGODB_IP_SEPARATOR        ';'
+#define MONGODB_TOKEN_SEPARATOR     ':'
+#define MONGODB_TOKEN_SHARD         "shard"
+#define MONGODB_TOKEN_SERVER        "srtv"
 
-typedef enum {
-    MONGO_CONNECTION_UNKNOWN,
-    MONGO_CONNECTION_SERVER,
-    MONGO_CONNECTION_SHARD
-} mongo_connection_method_t;
+static int config_init_index(void)
+{
+    bson key[1];
+    debug ("Ensure that the database have index");
+
+    bson_init(key);
+    bson_append_int(key, "id", 1);
+    bson_finish(key);
+    mongo_create_index(connexion, "mongrel2.handler", key, MONGO_INDEX_BACKGROUND, NULL);
+    bson_destroy(key);
+
+    bson_init(key);
+    bson_append_int(key, "id", 1);
+    bson_finish(key);
+    mongo_create_index(connexion, "mongrel2.proxy", key, MONGO_INDEX_BACKGROUND, NULL);
+    bson_destroy(key);
+
+    bson_init(key);
+    bson_append_int(key, "id", 1);
+    bson_finish(key);
+    mongo_create_index(connexion, "mongrel2.directory", key, MONGO_INDEX_BACKGROUND, NULL);
+    bson_destroy(key);
+
+    bson_init(key);
+    bson_append_int(key, "host_id", 1);
+    bson_finish(key);
+    mongo_create_index(connexion, "mongrel2.route", key, MONGO_INDEX_BACKGROUND, NULL);
+    bson_destroy(key);
+
+    bson_init(key);
+    bson_append_int(key, "server_id", 1);
+    bson_finish(key);
+    mongo_create_index(connexion, "mongrel2.host", key, MONGO_INDEX_BACKGROUND, NULL);
+    bson_destroy(key);
+
+    bson_init(key);
+    bson_append_int(key, "uuid", 1);
+    bson_finish(key);
+    mongo_create_index(connexion, "mongrel2.server", key, MONGO_INDEX_BACKGROUND, NULL);
+    bson_destroy(key);
+
+    bson_init(key);
+    bson_append_int(key, "server_id", 1);
+    bson_finish(key);
+    mongo_create_index(connexion, "mongrel2.filter", key, MONGO_INDEX_BACKGROUND, NULL);
+    bson_destroy(key);
+
+    return 0;
+}
+
+static int config_init_server(struct bstrList *tokens)
+{
+    int ret = -1;
+    int status, port = MONGO_DEFAULT_PORT;
+    char *ip, *sport;
+    struct bstrList *host = NULL;
+    struct bstrList *ips = NULL;
+
+    log_info("Connecting to server");
+
+    dbname = bstrcpy(tokens->entry[2]);
+    check (dbname->mlen > 0, "Database name can't be empty");
+
+    ips = bsplit(tokens->entry[1], MONGODB_IP_SEPARATOR);
+    check (ips->qty == 1, "In server connection mode, you must provide only one host."); 
+
+    host = bsplit(ips->entry[0], MONGODB_HOST_PORT_SEPARATOR);
+    check (host != NULL, "Error on bsplit"); 
+
+    switch (host->qty) {
+        case 2:
+            sport = bstr2cstr (host->entry[1], '\0');
+            check (sport != NULL, "Error on bstr2cstr");
+            port = atoi(sport);
+
+        case 1:
+            ip = bstr2cstr (host->entry[0], '\0');
+            check (ip != NULL, "Error on bstr2cstr");
+            break;           
+
+        default:
+            sentinel("Something is cooking.");
+    }
+
+    log_info ("Connecting to %s:%d", ip, port);
+    status = mongo_connect(connexion, ip, port);
+    check(status == MONGO_OK, "Connection fail to mongoDB configuration server.");
+
+    ret = 0;
+
+error:
+    bstrListDestroy(host);
+    bstrListDestroy(ips);
+    bcstrfree(ip);
+    bcstrfree(sport);
+    return ret;
+}
+
+static int config_init_shard(struct bstrList *tokens)
+{
+    int ret = -1;
+    int i, status, port = MONGO_DEFAULT_PORT;
+    bstring shardname;
+    char *shard = NULL;
+    char *ip = NULL, *sport = NULL;
+    struct bstrList *host = NULL;
+    struct bstrList *ips = NULL;
+
+    log_info("Connecting to shard");
+
+    shardname = tokens->entry[1];
+    check(shardname->slen > 0, "Shard name can't be empty");
+
+    dbname = bstrcpy(tokens->entry[3]);
+    check (dbname->mlen > 0, "Database name can't be empty");
+
+    ips = bsplit(tokens->entry[2], MONGODB_IP_SEPARATOR);
+    check (ips->qty > 1, "In server connection mode, you must provide only one host."); 
+
+    host = bsplit(ips->entry[0], ':');
+    check (host != NULL, "Error on bsplit"); 
+
+    shard = bstr2cstr (shardname, '\0');
+    check (shard != NULL, "Error on bstr2cstr");
+    mongo_replset_init(connexion, shard);
+    
+    i = ips->qty;
+    while(--i >= 0) {
+        host = bsplit(ips->entry[0], MONGODB_HOST_PORT_SEPARATOR);
+        check (host != NULL, "Error on bsplit"); 
+
+        switch (host->qty) {
+            case 2:
+                sport = bstr2cstr (host->entry[1], '\0');
+                check (sport != NULL, "Error on bstr2cstr");
+                port = atoi(sport);
+
+            case 1:
+                ip = bstr2cstr (host->entry[0], '\0');
+                check (ip != NULL, "Error on bstr2cstr");
+                break;           
+
+            default:
+                sentinel("Something is cooking.");
+        }
+        mongo_replset_add_seed(connexion, ip, port);
+        bcstrfree(ip), ip = NULL;
+        bcstrfree(sport), sport = NULL;
+    }
+
+    status = mongo_replset_connect(connexion);
+    check(status == MONGO_OK, "Connection fail to mongoDB configuration shard.");
+
+    ret = 0;
+
+error:
+    bstrListDestroy(host);
+    bstrListDestroy(ips);
+    bcstrfree(shard);
+    bcstrfree(ip);
+    bcstrfree(sport);
+    return ret;  
+}
+
 /*
  *  Init the config system from a path string.
  *  Some example of mongodb description to server or shard cluster:
  *      server:localhost:mongrel2_collection
  *      server:localhost@27017:mongrel2
- *      shard:srv1;srv2:mongrel2
- *      shard:srv1@27017;srv2@27018:mongrel2
- *      shard:srv1;srv2;srv3;srv4:mongrel2
+ *      shard:shardName:srv1;srv2:mongrel2
+ *      shard:shardName:srv1@27017;srv2@27018:mongrel2
+ *      shard:shardName:srv1;srv2;srv3;srv4:m2
  */
 int config_init(const char *path)
 {
-    int status;
-    struct bstrList *tokens;
-    struct bstrList *ips;
-    mongo_connection_method_t conn_type = MONGO_CONNECTION_UNKNOWN;
-    
-    // Explode the path
+    int status, ret = -1;
+    struct bstrList *tokens = NULL;
+
+    log_info("Init mongoDB configuration module");
+
     bstring dbspec = bfromcstr(path);
-    tokens = bsplit(dbspec, ':');
-    if (tokens->qty != 3) {
-        log_err("Invalid database specification format.");
-        bdestroy(dbspec);
-        bstrListDestroy(tokens);
-        return -1;
+    check(dbspec != NULL, "Can't read path.");
+
+    tokens = bsplit(dbspec, MONGODB_TOKEN_SEPARATOR);
+    check(tokens != NULL, "Can't split the path.");
+
+    if (biseqcstr(tokens->entry[0], MONGODB_TOKEN_SERVER) == 1) {
+        check(tokens->qty == 3, "Invalid database specification format.");
+        ret = config_init_server(tokens);
+    } else if (biseqcstr(tokens->entry[0], MONGODB_TOKEN_SHARD) == 1) {
+        check(tokens->qty == 4, "Invalid database specification format.");
+        ret = config_init_shard(tokens);
+    } else {
+        sentinel("Unknown connection type.");
     }
-    
-    // Get connection type
-    // use biseqcstr ??
-    if (bstrcmp(tokens->entry[0], &server_token)) {
-        conn_type = MONGO_CONNECTION_SERVER;
-    } else if (bstrcmp(tokens->entry[0], &shard_token)) {
-        conn_type = MONGO_CONNECTION_SHARD;
-    }
-    if (conn_type == MONGO_CONNECTION_UNKNOWN) {
-        log_err("Unknown connection type.");
-        bdestroy(dbspec);
-        bstrListDestroy(tokens);
-        return -1;
-    }
-    
-    // Get database name
-    dbname = tokens->entry[2];
+    check(ret == 0, "Error during connection.");
+
     status = bconchar(dbname, '.');
-    
-    // Get host:port
-    ips = bsplit(tokens->entry[1], ';');
-    if ((tokens->qty != 1 && conn_type == MONGO_CONNECTION_SERVER) ||
-        (tokens->qty < 2 && conn_type == MONGO_CONNECTION_SHARD))
-    {
-        log_err("Invalid number of mongoDB host definition.");
-        bdestroy(dbspec);
-        bstrListDestroy(tokens);
-        bdestroy(dbname);
-        bstrListDestroy(ips);
-        return -1;
-    }
-    
+    check (status != BSTR_ERR, "Error on bconchar");
+
+    ret = config_init_index();    
+    check(ret == 0, "Error during setup index.");
+
+error:
     bdestroy(dbspec);
     bstrListDestroy(tokens);
-         
-    // Connect to mongo
-    if (conn_type == MONGO_CONNECTION_SERVER) {
-        struct bstrList *host_port = bsplit(ips->entry[0], ':');
-        char *ip = bstr2cstr (host_port->entry[0], '\0');
-        char *sPort = bstr2cstr (host_port->entry[0], '\0');
-        int iPort = atoi(sPort);
-    
-        status = mongo_connect(&connexion, ip, iPort);
-        bcstrfree(ip);
-        bcstrfree(sPort);
-        if (status != MONGO_OK) {
-            log_err("Connection fail to mongoDB configuration server.");
-            return -1;
-        }
-        conn = &connexion;
-    } else if (conn_type == MONGO_CONNECTION_SHARD) {
-    
-    }
-    
-    
-    return 0;
+    return ret;
 }
 
 /*
@@ -138,10 +261,9 @@ int config_init(const char *path)
  */
 void config_close()
 {
-    if (conn) {
-        debug("Destroy mongoDB configuration server connection.");
-        mongo_destroy(conn);
-    }
+    log_info("Close mongoDB configuration module");
+    mongo_destroy(connexion);
+    bdestroy(dbname);
 }
 
 tns_value_t *mongo_cursor_to_tns_value(mongo_cursor *cursor, bson *fields)
@@ -150,11 +272,9 @@ tns_value_t *mongo_cursor_to_tns_value(mongo_cursor *cursor, bson *fields)
 
     ret = tns_new_list();
     
-    // For each rows
     while (mongo_cursor_next(cursor) == MONGO_OK) {
         bson_iterator fields_iterator[1];
         
-        //debug ("create row list");
         tns_value_t *row = tns_new_list();
         bson_iterator_init(fields_iterator, fields);
         
@@ -168,41 +288,27 @@ tns_value_t *mongo_cursor_to_tns_value(mongo_cursor *cursor, bson *fields)
             tns_value_t *el = NULL;
             
             type = bson_iterator_next(fields_iterator);
-            if (type == BSON_EOO) {
+            if (type == BSON_EOO) { // EOO: End of object
                 break;
             }
             
             type = bson_find(cursor_iterator, mongo_cursor_bson(cursor), bson_iterator_key(fields_iterator));
             switch (type) {
                 case BSON_STRING:
-                    debug ("add string");
                     string_data = bson_iterator_string(cursor_iterator);
                     el = tns_parse_string(string_data, strlen(string_data));
                     break;
                     
                 case BSON_BOOL:
-                    debug ("add bool");
                     bool_data = bson_iterator_bool(cursor_iterator);
                     el = (bool_data) ? tns_get_true() : tns_get_false();
                     break;
                     
                 case BSON_INT:
-                    debug ("add int");
                     int_data = bson_iterator_int(cursor_iterator);
                     el = tns_new_integer(int_data);
                     break;
-                   
-                // convert double to int, to fix later 
-                case BSON_DOUBLE:
-                    debug ("add fake double");
-                    int_data = (int)bson_iterator_double(cursor_iterator);
-                    el = tns_new_integer(int_data);
-                    break;
 
-                case BSON_EOO:
-                    debug ("End of object.");
-                    break;
-                    
                 default:
                     log_err("Not supported BSON type (%d)", type);
             }
@@ -216,7 +322,6 @@ tns_value_t *mongo_cursor_to_tns_value(mongo_cursor *cursor, bson *fields)
             }
         } while (1);
         
-        debug ("add row");
         tns_add_to_list(ret, row);
     }
     
@@ -227,39 +332,38 @@ tns_value_t *fetch_data(bstring collection_name, bson *fields, bson *query)
 {
     int status;
     tns_value_t *ret = NULL;
-    char *mongo_collection_name;
+    char *mongo_collection_name = NULL;
     mongo_cursor cursor[1];
 
+    errno = 0;
+
     bstring collection = bstrcpy(dbname);
+    check_mem(collection);
+
     status = bconcat(collection, collection_name);
-    if (status != BSTR_OK) {
-        log_err("bconcat failed");
-        return NULL;
-    }
+    check(status == BSTR_OK, "Error on bconcat");
+
     mongo_collection_name = bstr2cstr(collection, '\0');
+    check_mem(mongo_collection_name);
     
-    printf("%s\n", mongo_collection_name);
-    
-    mongo_cursor_init(cursor, conn, mongo_collection_name);
+    mongo_cursor_init(cursor, connexion, mongo_collection_name);
     mongo_cursor_set_query(cursor, query);
     mongo_cursor_set_fields(cursor, fields);
-    bcstrfree (mongo_collection_name);
 
     ret = mongo_cursor_to_tns_value(cursor, fields);
 
+error:
+    bdestroy(collection);
+    bcstrfree(mongo_collection_name);
     mongo_cursor_destroy(cursor);
-  
     return ret;
 }
-
 tns_value_t *config_load_handler(int handler_id)
 {
     tns_value_t *res = NULL;
     bson query[1], fields[1];
 
     debug("Loading handler");
-
-    bstring collection = bfromcstr("handler");
 
     bson_init(query);
     bson_append_int(query, "id", handler_id);
@@ -274,9 +378,13 @@ tns_value_t *config_load_handler(int handler_id)
     bson_append_int(fields, "raw_payload", 1);
     bson_append_int(fields, "protocol", 1);
     bson_finish(fields);
-    
+
+    bstring collection = bfromcstr("handler");
+    check_mem(collection);
+
     res = fetch_data(collection, fields, query);
-    
+
+error: 
     bdestroy(collection);
     bson_destroy(fields);
     bson_destroy(query);
@@ -291,8 +399,6 @@ tns_value_t *config_load_proxy(int proxy_id)
 
     debug("Loading proxy");
 
-    bstring collection = bfromcstr("proxy");
-
     bson_init(query);
     bson_append_int(query, "id", proxy_id);
     bson_finish(query);
@@ -302,9 +408,13 @@ tns_value_t *config_load_proxy(int proxy_id)
     bson_append_int(fields, "addr", 1);
     bson_append_int(fields, "port", 1);
     bson_finish(fields);
+
+    bstring collection = bfromcstr("proxy");
+    check_mem(collection);
     
     res = fetch_data(collection, fields, query);
-    
+
+error:   
     bdestroy(collection);
     bson_destroy(fields);
     bson_destroy(query);
@@ -319,8 +429,6 @@ tns_value_t *config_load_dir(int dir_id)
 
     debug("Loading directory");
 
-    bstring collection = bfromcstr("directory");
-
     bson_init(query);
     bson_append_int(query, "id", dir_id);
     bson_finish(query);
@@ -332,9 +440,13 @@ tns_value_t *config_load_dir(int dir_id)
     bson_append_int(fields, "default_ctype", 1);
     bson_append_int(fields, "cache_ttl", 1);
     bson_finish(fields);
-    
+
+    bstring collection = bfromcstr("directory");
+    check_mem(collection);
+   
     res = fetch_data(collection, fields, query);
-    
+
+error:    
     bdestroy(collection);
     bson_destroy(fields);
     bson_destroy(query);
@@ -347,9 +459,10 @@ tns_value_t *config_load_routes(int host_id, int server_id)
     tns_value_t *res = NULL;
     bson query[1], fields[1];
 
-    debug("Loading route");
+    // server_id is useless
+    (void)server_id;
 
-    bstring collection = bfromcstr("route");
+    debug("Loading route");
 
     bson_init(query);
     bson_append_int(query, "host_id", host_id);
@@ -361,9 +474,13 @@ tns_value_t *config_load_routes(int host_id, int server_id)
     bson_append_int(fields, "target_id", 1);
     bson_append_int(fields, "target_type", 1);
     bson_finish(fields);
+
+    bstring collection = bfromcstr("route");
+    check_mem(collection);
     
     res = fetch_data(collection, fields, query);
-    
+
+error:    
     bdestroy(collection);
     bson_destroy(fields);
     bson_destroy(query);
@@ -378,8 +495,6 @@ tns_value_t *config_load_hosts(int server_id)
 
     debug("Loading host");
 
-    bstring collection = bfromcstr("host");
-
     bson_init(query);
     bson_append_int(query, "server_id", server_id);
     bson_finish(query);
@@ -390,9 +505,13 @@ tns_value_t *config_load_hosts(int server_id)
     bson_append_int(fields, "matching", 1);
     bson_append_int(fields, "server_id", 1);
     bson_finish(fields);
+
+    bstring collection = bfromcstr("host");
+    check_mem(collection);
     
     res = fetch_data(collection, fields, query);
-    
+
+error:    
     bdestroy(collection);
     bson_destroy(fields);
     bson_destroy(query);
@@ -406,8 +525,6 @@ tns_value_t *config_load_server(const char *uuid)
     bson query[1], fields[1];
 
     debug("Loading server");
-
-    bstring collection = bfromcstr("server");
 
     bson_init(query);
     bson_append_string(query, "uuid", uuid);
@@ -425,9 +542,13 @@ tns_value_t *config_load_server(const char *uuid)
     bson_append_int(fields, "pid_file", 1);
     bson_append_int(fields, "use_ssl", 1);
     bson_finish(fields);
-    
+
+    bstring collection = bfromcstr("server");
+    check_mem(collection);
+
     res = fetch_data(collection, fields, query);
-    
+
+error:    
     bdestroy(collection);
     bson_destroy(fields);
     bson_destroy(query);
@@ -442,8 +563,6 @@ tns_value_t *config_load_mimetypes()
 
     debug("Loading mimetypes");
 
-    bstring collection = bfromcstr("mimetype");
-
     bson_init(query);
     bson_finish(query);
     
@@ -452,9 +571,13 @@ tns_value_t *config_load_mimetypes()
     bson_append_int(fields, "extension", 1);
     bson_append_int(fields, "mimetype", 1);
     bson_finish(fields);
-    
+
+    bstring collection = bfromcstr("mimetype");
+    check_mem(collection);
+
     res = fetch_data(collection, fields, query);
-    
+
+error:
     bdestroy(collection);
     bson_destroy(fields);
     bson_destroy(query);
@@ -469,8 +592,6 @@ tns_value_t *config_load_settings()
 
     debug("Loading setting");
 
-    bstring collection = bfromcstr("setting");
-
     bson_init(query);
     bson_finish(query);
     
@@ -479,9 +600,13 @@ tns_value_t *config_load_settings()
     bson_append_int(fields, "key", 1);
     bson_append_int(fields, "value", 1);
     bson_finish(fields);
-    
+
+    bstring collection = bfromcstr("setting");
+    check_mem(collection);
+
     res = fetch_data(collection, fields, query);
-    
+
+error:
     bdestroy(collection);
     bson_destroy(fields);
     bson_destroy(query);
@@ -496,8 +621,6 @@ tns_value_t *config_load_filters(int server_id)
 
     debug("Loading filter");
 
-    bstring collection = bfromcstr("filter");
-
     bson_init(query);
     bson_append_int(query, "server_id", server_id);
     bson_finish(query);
@@ -507,9 +630,13 @@ tns_value_t *config_load_filters(int server_id)
     bson_append_int(fields, "filter", 1);
     bson_append_int(fields, "settings", 1);
     bson_finish(fields);
-    
+
+    bstring collection = bfromcstr("filter");
+    check_mem(collection);
+
     res = fetch_data(collection, fields, query);
-    
+
+error:
     bdestroy(collection);
     bson_destroy(fields);
     bson_destroy(query);
