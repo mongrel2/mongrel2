@@ -35,6 +35,7 @@
 #include "dbg.h"
 
 FILE *LOG_FILE = NULL;
+bstring TIME_STAMP = NULL;
 
 void dbg_set_log(FILE *log_file)
 {
@@ -45,4 +46,21 @@ void dbg_set_log(FILE *log_file)
 FILE *dbg_get_log()
 {
     return LOG_FILE != NULL ? LOG_FILE : stderr;
+}
+
+bstring dbg_get_timestamp()
+{
+  time_t now = time(NULL);
+  TIME_STAMP = bStrfTime("%a, %d %b %Y %H:%M:%S GMT", gmtime(&now));
+  if( TIME_STAMP == NULL ) {
+    TIME_STAMP = "None";
+  }
+  return TIME_STAMP;
+}
+
+void dbg_destroy_timestamp()
+{
+  if( TIME_STAMP != NULL ) {
+    bdestroy(TIME_STAMP);
+  }
 }
