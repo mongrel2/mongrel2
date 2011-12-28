@@ -50,7 +50,7 @@ static bstring dbname;
 static int config_init_index(void)
 {
     bson key[1];
-    debug ("Ensure that the database have index");
+    log_info ("Ensure that the database have index");
 
     bson_init(key);
     bson_append_int(key, "id", 1);
@@ -105,8 +105,6 @@ static int config_init_server(struct bstrList *tokens)
     struct bstrList *host = NULL;
     struct bstrList *ips = NULL;
 
-    log_info("Connecting to server");
-
     dbname = bstrcpy(tokens->entry[2]);
     check (dbname->mlen > 0, "Database name can't be empty");
 
@@ -131,7 +129,7 @@ static int config_init_server(struct bstrList *tokens)
             sentinel("Something is cooking.");
     }
 
-    log_info ("Connecting to %s:%d", ip, port);
+    log_info ("Connecting to server %s:%d", ip, port);
     status = mongo_connect(connexion, ip, port);
     check(status == MONGO_OK, "Connection fail to mongoDB configuration server.");
 
@@ -155,8 +153,6 @@ static int config_init_shard(struct bstrList *tokens)
     struct bstrList *host = NULL;
     struct bstrList *ips = NULL;
 
-    log_info("Connecting to shard");
-
     shardname = tokens->entry[1];
     check(shardname->slen > 0, "Shard name can't be empty");
 
@@ -172,10 +168,11 @@ static int config_init_shard(struct bstrList *tokens)
     shard = bstr2cstr (shardname, '\0');
     check (shard != NULL, "Error on bstr2cstr");
     mongo_replset_init(connexion, shard);
+    log_info("Connecting to shard \"%s\"", shard);
     
     i = ips->qty;
     while(--i >= 0) {
-        host = bsplit(ips->entry[0], MONGODB_HOST_PORT_SEPARATOR);
+        host = bsplit(ips->entry[i], MONGODB_HOST_PORT_SEPARATOR);
         check (host != NULL, "Error on bsplit"); 
 
         switch (host->qty) {
@@ -193,6 +190,7 @@ static int config_init_shard(struct bstrList *tokens)
                 sentinel("Something is cooking.");
         }
         mongo_replset_add_seed(connexion, ip, port);
+        log_info("Add seed %s:%d", ip, port);
         bcstrfree(ip), ip = NULL;
         bcstrfree(sport), sport = NULL;
     }
