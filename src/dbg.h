@@ -38,14 +38,16 @@
 #include <stdio.h>
 #include <errno.h>
 #include <string.h>
+#include <stdarg.h>
 
 void dbg_set_log(FILE *log_file);
 FILE *dbg_get_log();
+void fprintf_with_timestamp(FILE *log_file, const char *format, ...);
 
 #ifdef NDEBUG
 #define debug(M, ...)
 #else
-#define debug(M, ...) fprintf(dbg_get_log(), "DEBUG %s:%d: " M "\n", __FILE__, __LINE__, ##__VA_ARGS__)
+#define debug(M, ...) fprintf_with_timestamp(dbg_get_log(), "DEBUG %s:%d: " M "\n", __FILE__, __LINE__, ##__VA_ARGS__)
 #endif
 
 
@@ -58,13 +60,13 @@ FILE *dbg_get_log();
 
 #ifdef NO_LINENOS
 // versions that don't feature line numbers
-#define log_err(M, ...) fprintf(dbg_get_log(), "[ERROR] (errno: %s) " M "\n", clean_errno(), ##__VA_ARGS__)
-#define log_warn(M, ...) fprintf(dbg_get_log(), "[WARN] (errno: %s) " M "\n", clean_errno(), ##__VA_ARGS__)
-#define log_info(M, ...) fprintf(dbg_get_log(), "[INFO] " M "\n", ##__VA_ARGS__)
+#define log_err(M, ...) fprintf_with_timestamp(dbg_get_log(), "[ERROR] (errno: %s) " M "\n", clean_errno(), ##__VA_ARGS__)
+#define log_warn(M, ...) fprintf_with_timestamp(dbg_get_log(), "[WARN] (errno: %s) " M "\n", clean_errno(), ##__VA_ARGS__)
+#define log_info(M, ...) fprintf_with_timestamp(dbg_get_log(), "[INFO] " M "\n", ##__VA_ARGS__)
 #else
-#define log_err(M, ...) fprintf(dbg_get_log(), "[ERROR] (%s:%d: errno: %s) " M "\n", __FILE__, __LINE__, clean_errno(), ##__VA_ARGS__)
-#define log_warn(M, ...) fprintf(dbg_get_log(), "[WARN] (%s:%d: errno: %s) " M "\n", __FILE__, __LINE__, clean_errno(), ##__VA_ARGS__)
-#define log_info(M, ...) fprintf(dbg_get_log(), "[INFO] (%s:%d) " M "\n", __FILE__, __LINE__, ##__VA_ARGS__)
+#define log_err(M, ...) fprintf_with_timestamp(dbg_get_log(), "[ERROR] (%s:%d: errno: %s) " M "\n", __FILE__, __LINE__, clean_errno(), ##__VA_ARGS__)
+#define log_warn(M, ...) fprintf_with_timestamp(dbg_get_log(), "[WARN] (%s:%d: errno: %s) " M "\n", __FILE__, __LINE__, clean_errno(), ##__VA_ARGS__)
+#define log_info(M, ...) fprintf_with_timestamp(dbg_get_log(), "[INFO] (%s:%d) " M "\n", __FILE__, __LINE__, ##__VA_ARGS__)
 #endif
 
 #define check(A, M, ...) if(!(A)) { log_err(M, ##__VA_ARGS__); errno=0; goto error; }
