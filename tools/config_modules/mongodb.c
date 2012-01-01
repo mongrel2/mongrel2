@@ -45,7 +45,7 @@ static bstring dbname;
 #define MONGODB_IP_SEPARATOR        ';'
 #define MONGODB_TOKEN_SEPARATOR     ':'
 #define MONGODB_TOKEN_SHARD         "shard"
-#define MONGODB_TOKEN_SERVER        "srtv"
+#define MONGODB_TOKEN_SERVER        "srv"
 
 static int config_init_index(void)
 {
@@ -101,7 +101,7 @@ static int config_init_server(struct bstrList *tokens)
 {
     int ret = -1;
     int status, port = MONGO_DEFAULT_PORT;
-    char *ip, *sport;
+    char *ip = NULL, *sport = NULL;
     struct bstrList *host = NULL;
     struct bstrList *ips = NULL;
 
@@ -206,7 +206,7 @@ error:
     bcstrfree(shard);
     bcstrfree(ip);
     bcstrfree(sport);
-    return ret;  
+    return ret;
 }
 
 /*
