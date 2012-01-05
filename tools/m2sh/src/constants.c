@@ -94,7 +94,7 @@ struct tagbstring CONFIG_SCHEMA = bsStatic(
 "CREATE TABLE statistic (id SERIAL, \n"
 "    other_type TEXT,\n"
 "    other_id INTEGER,\n"
-"    name text,\n"
+"    name TEXT,\n"
 "    sum REAL,\n"
 "    sumsq REAL,\n"
 "    n INTEGER,\n"
