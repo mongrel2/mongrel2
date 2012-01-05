@@ -33,6 +33,7 @@
  */
 
 #include "dbg.h"
+#include "bstring.h"
 
 FILE *LOG_FILE = NULL;
 
@@ -45,4 +46,16 @@ void dbg_set_log(FILE *log_file)
 FILE *dbg_get_log()
 {
     return LOG_FILE != NULL ? LOG_FILE : stderr;
+}
+
+void fprintf_with_timestamp(FILE *log_file, const char *format, ...)
+{
+  va_list args;
+  time_t now = time(NULL);
+  bstring time_stamp = bStrfTime("%a, %d %b %Y %H:%M:%S GMT", gmtime(&now));
+  va_start(args, format);
+  fprintf(log_file, "%s ", time_stamp->data);
+  vfprintf(log_file, format, args);
+  bdestroy(time_stamp);
+  va_end(args);
 }
