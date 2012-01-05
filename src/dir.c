@@ -80,32 +80,41 @@ static void filerecord_cache_evict(void *data) {
     FileRecord_release((FileRecord *) data);
 }
 
+static inline int setup_file_record(FileRecord *fr)
+{
+    fr->fd = open(bdata(fr->full_path), O_RDONLY);
+    check(fr->fd >= 0, "Failed to open file but stat worked: %s", bdata(fr->full_path));
+
+    fr->file_size = lseek(fr->fd, 0L, SEEK_END);
+    check(fr->file_size >= 0, "Failed to seek end of file: %s", bdata(fr->full_path));
+    lseek(fr->fd, 0L, SEEK_SET);
+
+    return 0;
+error:
+    return -1;
+}
+
+
 
 FileRecord *Dir_find_file(bstring path, bstring default_type)
 {
     FileRecord *fr = calloc(sizeof(FileRecord), 1);
-    const char *p = bdata(path);
 
     check_mem(fr);
 
     // We set the number of users here.  If we cache it, we can add one later
     fr->users = 1;
+    fr->full_path = path;
 
-    int rc = stat(p, &fr->sb);
-    check(rc == 0, "File stat failed: %s", bdata(path));
+    int rc = stat(bdata(fr->full_path), &fr->sb);
+    check(rc == 0, "File stat failed: %s", bdata(fr->full_path));
 
     if(S_ISDIR(fr->sb.st_mode)) {
-        fr->full_path = path;
         fr->is_dir = 1;
         return fr;
     }
 
-    fr->fd = open(p, O_RDONLY);
-    check(fr->fd >= 0, "Failed to open file but stat worked: %s", bdata(path));
-
-    fr->file_size = lseek(fr->fd, 0L, SEEK_END);
-    lseek(fr->fd, 0L, SEEK_SET);
-
+    check(setup_file_record(fr) == 0, "Failed to setup the file record for %s", bdata(fr->full_path));
     fr->loaded = time(NULL);
 
     fr->last_mod = bStrfTime(RFC_822_TIME, gmtime(&fr->sb.st_mtime));
@@ -217,6 +226,11 @@ void FileRecord_release(FileRecord *file)
 {
     if(file) {
         file->users--;
+
+        // close the fd and clear it so that we don't accidentally reuse it
+        fdclose(file->fd);
+        file->fd = -1;
+
         check(file->users >= 0, "User count on file record somehow fell below 0");
         if(file->users <= 0) FileRecord_destroy(file);
     }
@@ -329,6 +343,7 @@ FileRecord *Dir_resolve_file(Dir *dir, bstring prefix, bstring path)
 
     if(file) {
         // TODO: double check this gives the right users count
+        check(setup_file_record(file) == 0, "Failed to setup file record coming from cache: %s", bdata(file->full_path));
         file->users++;
         return file;
     }
