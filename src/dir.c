@@ -80,17 +80,22 @@ static void filerecord_cache_evict(void *data) {
     FileRecord_release((FileRecord *) data);
 }
 
-static inline int setup_file_record(FileRecord *fr)
+static inline int get_file_real_size(FileRecord *fr)
 {
-    fr->fd = open(bdata(fr->full_path), O_RDONLY);
-    check(fr->fd >= 0, "Failed to open file but stat worked: %s", bdata(fr->full_path));
+    // TODO: this is the total suck we'll redesign this away
+    int fd = open(bdata(fr->full_path), O_RDONLY);
+    check(fd >= 0, "Failed to open file but stat worked: %s", bdata(fr->full_path));
 
-    fr->file_size = lseek(fr->fd, 0L, SEEK_END);
+    fr->file_size = lseek(fd, 0L, SEEK_END);
     check(fr->file_size >= 0, "Failed to seek end of file: %s", bdata(fr->full_path));
-    lseek(fr->fd, 0L, SEEK_SET);
+    lseek(fd, 0L, SEEK_SET);
+
+    fdclose(fd);
 
     return 0;
 error:
+
+    fdclose(fd);
     return -1;
 }
 
@@ -114,7 +119,7 @@ FileRecord *Dir_find_file(bstring path, bstring default_type)
         return fr;
     }
 
-    check(setup_file_record(fr) == 0, "Failed to setup the file record for %s", bdata(fr->full_path));
+    check(get_file_real_size(fr) == 0, "Failed to setup the file record for %s", bdata(fr->full_path));
     fr->loaded = time(NULL);
 
     fr->last_mod = bStrfTime(RFC_822_TIME, gmtime(&fr->sb.st_mtime));
@@ -157,15 +162,21 @@ static inline int Dir_send_header(FileRecord *file, Connection *conn)
 long long int Dir_stream_file(FileRecord *file, Connection *conn)
 {
     long long int sent = 0;
+    int fd = -1;
 
     int rc = Dir_send_header(file, conn);
     check_debug(rc, "Failed to write header to socket.");
 
-    sent = IOBuf_stream_file(conn->iob, file->fd, file->file_size);
+    fd = open(bdata(file->full_path), O_RDONLY);
+    check(fd >= 0, "Failed to open file: %s", bdata(file->full_path));
 
+    sent = IOBuf_stream_file(conn->iob, fd, file->file_size);
+
+    fdclose(fd);
     return file->file_size;
 
 error:
+    if(fd >= 0) fdclose(fd);
     return -1;
 }
 
@@ -226,11 +237,6 @@ void FileRecord_release(FileRecord *file)
 {
     if(file) {
         file->users--;
-
-        // close the fd and clear it so that we don't accidentally reuse it
-        fdclose(file->fd);
-        file->fd = -1;
-
         check(file->users >= 0, "User count on file record somehow fell below 0");
         if(file->users <= 0) FileRecord_destroy(file);
     }
@@ -243,7 +249,6 @@ void FileRecord_destroy(FileRecord *file)
 {
     if(file) {
         if(!file->is_dir) {
-            fdclose(file->fd);
             bdestroy(file->date);
             bdestroy(file->last_mod);
             bdestroy(file->header);
@@ -343,7 +348,6 @@ FileRecord *Dir_resolve_file(Dir *dir, bstring prefix, bstring path)
 
     if(file) {
         // TODO: double check this gives the right users count
-        check(setup_file_record(file) == 0, "Failed to setup file record coming from cache: %s", bdata(file->full_path));
         file->users++;
         return file;
     }
