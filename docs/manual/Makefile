@@ -25,5 +25,5 @@ release: clean book-final.pdf draft book-final.pdf sync
 sync:
 	rsync -vz $(FINAL).pdf $(WEBSITE)/mongrel2-manual.pdf
 	rsync -vz $(FINAL).html $(WEBSITE)/mongrel2-manual.html
-	rsync -vz $(FINAL).css $(FINAL)[0-9]*.html $(WEBSITE)/ 
+	rsync -vz $(FINAL).css $(FINAL)*.html $(WEBSITE)/ 
 
