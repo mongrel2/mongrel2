@@ -8,7 +8,7 @@ all: null.so zmq.so mongodb.so
 
 mongodb.so:
 	$(CC) $(CFLAGS) -c -Wall -DMONGO_HAVE_STDINT -I${MONGO_SRC}/src mongodb.c ${MONGO_SRC}/src/*.c
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $< ../../build/libm2.a bson.o encoding.o gridfs.o md5.o mongo.o net.o numbers.o mongodb.o
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $< bson.o encoding.o gridfs.o md5.o mongo.o net.o numbers.o mongodb.o ../../build/libm2.a
 
 %.so : %.c
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $< ../../build/libm2.a
