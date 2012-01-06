@@ -4,7 +4,7 @@ WEBSITE=$(USER)@mongrel2.org:/var/www/mongrel2.org/static/
 FINAL=book-final
 
 draft: book-final.dvi
-	htlatex book-final.tex
+	htlatex book-final.tex "book,index=1,2,next,fn-in"
 
 book-final.dvi:
 	cp $(SOURCE).tex book-final.tex
