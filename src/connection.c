@@ -914,6 +914,9 @@ void Connection_init()
 
     log_info("MAX limits.proxy_read_retries=%d, limits.proxy_read_retry_warn=%d",
             PROXY_READ_RETRIES, PROXY_READ_RETRY_WARN);
+
+    IO_SSL_VERIFY_METHOD = Setting_get_int("ssl.verify_optional", 0) ? SSL_VERIFY_OPTIONAL : SSL_VERIFY_NONE;
+
 }
 
 

@@ -47,6 +47,8 @@
 #include "task/task.h"
 #include "adt/darray.h"
 
+int IO_SSL_VERIFY_METHOD = SSL_VERIFY_NONE;
+
 static ssize_t null_send(IOBuf *iob, char *buffer, int len)
 {
     return len;
@@ -338,7 +340,7 @@ static inline int iobuf_ssl_setup(IOBuf *buf)
     check(rc == 0, "Failed to initialize SSL structure.");
 
     ssl_set_endpoint(&buf->ssl, SSL_IS_SERVER);
-    ssl_set_authmode(&buf->ssl, SSL_VERIFY_OPTIONAL);
+    ssl_set_authmode(&buf->ssl, IO_SSL_VERIFY_METHOD);
 
     havege_init(&buf->hs);
     ssl_set_rng(&buf->ssl, havege_rand, &buf->hs);
