@@ -150,7 +150,7 @@ static ssize_t ssl_send(IOBuf *iob, char *buffer, int len)
 
     if(!iob->handshake_performed) {
         int rcode = ssl_do_handshake(iob);
-        check(rcode == 0, "SSL handshake failed.");
+        check(rcode == 0, "SSL handshake failed: %d", rcode);
     }
 
     for(sent = 0; len > 0; buffer += sent, len -= sent, total += sent) {
@@ -176,7 +176,7 @@ static ssize_t ssl_recv(IOBuf *iob, char *buffer, int len)
 
     if(!iob->handshake_performed) {
         int rcode = ssl_do_handshake(iob);
-        check(rcode == 0, "SSL handshake failed.");
+        check(rcode == 0, "SSL handshake failed: %d", rcode);
     }
 
     return ssl_read(&iob->ssl, (unsigned char*) buffer, len);
@@ -338,7 +338,7 @@ static inline int iobuf_ssl_setup(IOBuf *buf)
     check(rc == 0, "Failed to initialize SSL structure.");
 
     ssl_set_endpoint(&buf->ssl, SSL_IS_SERVER);
-    ssl_set_authmode(&buf->ssl, SSL_VERIFY_NONE);
+    ssl_set_authmode(&buf->ssl, SSL_VERIFY_OPTIONAL);
 
     havege_init(&buf->hs);
     ssl_set_rng(&buf->ssl, havege_rand, &buf->hs);
