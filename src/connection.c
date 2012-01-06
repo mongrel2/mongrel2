@@ -196,38 +196,32 @@ error:
     return CLOSE;
 }
 
-void Connection_fingerprint_from_cert(Connection *conn) {
+const int CERT_FINGERPRINT_SIZE = 20;
+
+void Connection_fingerprint_from_cert(Connection *conn) 
+{
     x509_cert* _x509P  = conn->iob->ssl.peer_cert;
 
     debug("Connection_send_to_handler: peer_cert: %016lX: tag=%d length=%ld",
-	(unsigned long) _x509P,
-	_x509P ? _x509P->raw.tag : -1,
-	_x509P ? _x509P->raw.len : -1);
+            (unsigned long) _x509P,
+            _x509P ? _x509P->raw.tag : -1,
+            _x509P ? _x509P->raw.len : -1);
 
-    if (_x509P && _x509P->raw.len) {
-	sha1_context	ctx;
-	unsigned char	sha1sum[20];
-	char		hex[2*sizeof(sha1sum)+1];
+    if (_x509P != NULL && _x509P->raw.len > 0) {
+        sha1_context	ctx;
+        unsigned char sha1sum[CERT_FINGERPRINT_SIZE + 1] = {0};
+        int i = 0;
 
-	sha1_starts(&ctx);
-	sha1_update(&ctx, _x509P->raw.p, _x509P->raw.len);
-	sha1_finish(&ctx, sha1sum);
+        sha1_starts(&ctx);
+        sha1_update(&ctx, _x509P->raw.p, _x509P->raw.len);
+        sha1_finish(&ctx, sha1sum);
 
-	int i;
+        bstring hex = bfromcstr("");
+        for (i = sizeof(sha1sum) - 1; i > 0; ++i) {
+            bformata(hex, "%02X", sha1sum[i]);
+        }
 
-	for (i=0; i != sizeof(sha1sum); i++) {
-	    int	v,d;
-
-	    v		= sha1sum[i];
-	    d		= v >> 4;
-	    hex[i*2]	= d < 10 ? '0'+d : 'A'+d-10;
-	    d		= v & 0x0F;
-	    hex[i*2+1]	= d < 10 ? '0'+d : 'A'+d-10;
-	}
-
-	hex[sizeof(hex)-1]  = 0;
-
-	Request_set(conn->req, bfromcstr("PEER_CERT_SHA1"), bfromcstr(hex), 1);
+        Request_set(conn->req, bfromcstr("PEER_CERT_SHA1"), hex, 1);
     }
 }
 
