@@ -1,5 +1,7 @@
 
 bin/
+tools/config_modules/mongo-c-driver/
+
 # Compiled Object files
 *.slo
 *.lo
