@@ -10,6 +10,7 @@ extern struct tagbstring WS_WEBSOCKET;
 extern struct tagbstring WS_HOST;
 extern struct tagbstring WS_SEC_WS_KEY;
 extern struct tagbstring WS_SEC_WS_VER;
+extern struct tagbstring WS_FLAGS;
 
 static inline int64_t Websocket_packet_length(const unsigned char *data, int avail)
 {

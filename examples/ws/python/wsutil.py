@@ -17,29 +17,6 @@ def challenge(v):
     except:
         return ""
 
-def deframe(data):
-    #We rely on mongrel2 to have done the length calculation and read
-    #Just the header and payload
-    fin=(ord(data[0])&0x80)!=0
-    rsvd=ord(data[0])&0x70
-    opcode=ord(data[0])&0xf
-    masked=(ord(data[1])&0x80)!=0
-    leng=ord(data[1])&0x7f
-    if not masked:
-        raise Exception("Packet not masked!")
-    payloadStart=6
-    if leng == 126:
-        payloadStart +=2
-    elif leng == 127:
-        payloadStart += 8
-    maskKey=map(ord,data[payloadStart-4:payloadStart])
-    dataOut=[]
-    index=0
-    for byte in data[payloadStart:]:
-        dataOut.append(chr(ord(byte)^maskKey[index%4]))
-        index+=1
-    return (fin,rsvd,opcode,"".join(dataOut))
-
 def frame(data,opcode=1,rsvd=0):
     header=''
     header+=chr(0x80|opcode|rsvd<<4)

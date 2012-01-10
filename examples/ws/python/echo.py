@@ -16,6 +16,7 @@ closingMessages={}
 
 #logf=open('echo.log','wb')
 logf=open('/dev/null','wb')
+#logf=sys.stdout
 
 def abortConnection(conn,req,reason='none'):
     if req.conn_id in incomingMessages:
@@ -45,8 +46,8 @@ while True:
         continue
 
 
-    print "ID", req.conn_id
-    print incomingMessages.keys()
+    #print "ID", req.conn_id
+    #print incomingMessages.keys()
     if req.headers.get('METHOD') == 'GET':
         responseCode=wsutil.challenge(req.headers.get('sec-websocket-key'))
         response="HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: %s\r\n\r\n"%responseCode
@@ -67,15 +68,18 @@ while True:
         continue
 
     try:
-        fin,rsvd,opcode,wsdata = wsutil.deframe(req.body)
-        #logf.write('packet %s %s %s:\n'%(fin,rsvd,opcode))
-        #hexdump(req.body,logf)
+        #print 'headers',req.headers
+        flags = int(req.headers.get('FLAGS'),16)
+        fin = flags&0x80==0x80
+        rsvd=flags & 0x70
+        opcode=flags & 0xf
+        wsdata = req.body
+        #print fin,rsvd,opcode,len(wsdata)
         #logf.write('\n')
     except:
-        #hexdump(req.body[:14])
-        #print "WS Frame decode failed"
+        #print "Unable to decode FLAGS"
         abortConnection(conn,req,'WS decode failed')
-        continue
+        #continue
 
     if rsvd != 0:
         abortConnection(conn,req,'reserved non-zero')

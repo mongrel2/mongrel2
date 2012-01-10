@@ -617,11 +617,15 @@ int connection_parse(Connection *conn)
 
 int Connection_read_wspacket(Connection *conn)
 {
-    uint8_t *body=NULL;
+    uint8_t *dataU=NULL;
     char *data = IOBuf_start(conn->iob);
     int avail = IOBuf_avail(conn->iob);
     int64_t packet_length=-1;
     int smaller_packet_length;
+    int header_length;
+    char key[4];
+    int i;
+    int payload_length;
     int tries = 0;
     int rc=0;
     bstring payload=NULL;
@@ -642,46 +646,27 @@ int Connection_read_wspacket(Connection *conn)
     /* TODO properly terminate WS connection */
 
     smaller_packet_length = (int)packet_length;
-    if (smaller_packet_length > MAX_WS_LENGTH)
-    {
-        /* TODO too many constants need #defines */
-        int header_length;
-        uint8_t flags;
-        int masked;
-        uint8_t key[4];
-        int send_length;
+    
+    /* TODO check for maximum length */
 
-        header_length=Websocket_header_length((uint8_t *) data, avail);
-        body = (uint8_t *)IOBuf_read_all(conn->iob,header_length,8*CLIENT_READ_RETRIES);
-        flags=*body;
-        masked=(body[1]&0x80);
-        memcpy(key,body+header_length-4,4); /* if masked is false, this is bogus, but make_header will ignore it then */
-        smaller_packet_length -= header_length;
-        do {
-            send_length=smaller_packet_length<MAX_WS_LENGTH ? smaller_packet_length : MAX_WS_LENGTH;
-            if(smaller_packet_length==send_length) {
-                payload=websocket_make_header(flags,send_length, masked,key);
-            }
-            else {
-                payload=websocket_make_header(flags&(~0x80),send_length, masked,key);
-            }
-            body=(uint8_t *)IOBuf_read_all(conn->iob,send_length,8*CLIENT_READ_RETRIES);
-            check(body != NULL, "Client closed the connection during websocket packet.");
-            bcatblk(payload,body,send_length);
-            rc = Connection_send_to_handler(conn, conn->handler, bdata(payload), blength(payload));
-            check_debug(rc == 0, "Failed to deliver to the handler.");
-            bdestroy(payload);
-            payload=NULL;
-            smaller_packet_length-=send_length;
-            flags &= 0xf0;
-        } while(smaller_packet_length > 0);
-        return 1;
+    header_length=Websocket_header_length((uint8_t *) data, avail);
+    payload_length=smaller_packet_length-header_length;
+    dataU = (uint8_t *)IOBuf_read_all(conn->iob,header_length,8*CLIENT_READ_RETRIES);
+    memcpy(key,dataU+header_length-4,4);
+    Request_set(conn->req,bfromcstr("FLAGS"),bformat("0x%X",dataU[0]),1);
+
+    check_debug((dataU[1]&0x80) != 0, "Received unmasked WS packet.");
+
+    data = IOBuf_read_all(conn->iob,payload_length, 8*CLIENT_READ_RETRIES);
+    check(data != NULL, "Client closed the connection during websocket packet.");
+
+    dataU=(uint8_t *)data;
+
+    for(i=0;i<payload_length;++i) {
+        dataU[i]^=key[i%4];
     }
 
-    body = (uint8_t *)IOBuf_read_all(conn->iob,packet_length,8*CLIENT_READ_RETRIES);
-    check(body != NULL, "Client closed the connection during websocket packet.");
-
-    rc = Connection_send_to_handler(conn, conn->handler, (void *)body, smaller_packet_length);
+    rc = Connection_send_to_handler(conn, conn->handler, (void *)dataU,payload_length);
     check_debug(rc == 0, "Failed to deliver to the handler.");
 
     return packet_length;
@@ -691,6 +676,7 @@ error:
     return -1;
 
 }
+
 int connection_websocket_established(Connection *conn)
 {
     if(Connection_read_wspacket(conn) > 0) {

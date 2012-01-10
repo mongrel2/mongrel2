@@ -7,6 +7,7 @@ struct tagbstring WS_WEBSOCKET = bsStatic("websocket");
 struct tagbstring WS_HOST = bsStatic("host");
 struct tagbstring WS_SEC_WS_KEY = bsStatic("sec-websocket-key");
 struct tagbstring WS_SEC_WS_VER = bsStatic("sec-websocket-version");
+struct tagbstring WS_FLAGS = bsStatic("FLAGS");
 
 bstring websocket_make_header(unsigned char flags,uint64_t length, int masked,unsigned char key[])
 {
