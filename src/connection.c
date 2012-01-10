@@ -196,7 +196,7 @@ error:
     return CLOSE;
 }
 
-const int CERT_FINGERPRINT_SIZE = 20;
+#define CERT_FINGERPRINT_SIZE 20
 
 void Connection_fingerprint_from_cert(Connection *conn) 
 {
