@@ -355,7 +355,7 @@ don't follow it.
 To parse this in Python we simply do this:
 
 \begin{code}{Parsing Mongrel2 Requests In Python}
-<< d['docs/manual/inputs/parsing_mongrel2_reqs.py|pyg|l'] >>
+<< d['inputs/parsing_mongrel2_reqs.py|pyg|l'] >>
 \end{code}
 
 This is actually all of the code needed to parse a request, and is
@@ -374,7 +374,7 @@ Notice I've got three IDs here, but you can do anywhere from 1 up to 128.  Gener
 this is very easy in Python:
 
 \begin{code}{Generating Responses}
-<< d['docs/manual/inputs/generating_responses.py|pyg|l'] >>
+<< d['inputs/generating_responses.py|pyg|l'] >>
 \end{code}
 
 That, again, is all there is to it.  The \ident{send} method is the
@@ -419,7 +419,7 @@ To demonstrate this, here's the new code for parsing a request in Python:
 
 
 \begin{code}{Parsing TNetStrings Requests In Python}
-<< d['docs/manual/inputs/parsing_reqs_tnetstrings.py|pyg|l'] >>
+<< d['inputs/parsing_reqs_tnetstrings.py|pyg|l'] >>
 \end{code}
 
 Our tests also show that TNetStrings are a good compromise between
@@ -453,7 +453,7 @@ and it just the simplest thing possible:\footnote{This is the same code as the o
 file, but with extraneous prints removed for simplicity.}
 
 \begin{code}{http.py example}
- << d['examples/http_0mq/http.py|pyg|l'] >>
+ << d['/examples/http_0mq/http.py|pyg|l'] >>
 \end{code}
 
 All this code does is print back a simple little dump of what it received, and
@@ -481,7 +481,7 @@ This is all you need at first to do simple HTTP handlers.  In reality, the \iden
 just syntactic sugar on crafting a decent HTTP response.  Here's the actual method that is crafting these replies:
 
 \begin{code}{HTTP Response Python Code}
-<< d['docs/manual/inputs/http_response_python_code.py|pyg|l'] >>
+<< d['inputs/http_response_python_code.py|pyg|l'] >>
 \end{code}
 
 Which is then used by \ident{Connection.reply\_http} and
@@ -517,7 +517,7 @@ Here's an example handler in \file{examples/http\_0mq/upload.py} that shows
 you how to do it:
 
 \begin{code}{Async Upload Example}
-<< d['examples/http_0mq/upload.py|pyg|l'] >>
+<< d['/examples/http_0mq/upload.py|pyg|l'] >>
 \end{code}
 
 You can test this with something like
@@ -561,7 +561,7 @@ at the main file and see how simple it is once you get the
 streaming thread right:
 
 \begin{code}{Base mp3stream Code}
-<< d['examples/mp3stream/handler.py|pyg|l'] >>
+<< d['/examples/mp3stream/handler.py|pyg|l'] >>
 \end{code}
 
 Walking through this example is fairly easy, assuming you just trust
@@ -607,10 +607,10 @@ tired of leading you by the hand, so you go read the code.  Here's where
 to look:
 
 \begin{description}
-\item [JavaScript] Look at \file{examples/chat/static/*.js} for the goodies.
+\item [JavaScript] Look at \file{/examples/chat/static/*.js} for the goodies.
     The key is to see how \file{chat.js} works with the JSSocket stuff,
     and then look at how I did \file{app.js} using \file{fsm.js}.
-\item [Python] Look at the \file{examples/chat/chat.py} file to see how
+\item [Python] Look at the \file{/examples/chat/chat.py} file to see how
     the chat states are maintained and how messages are sent around.
 \item [config] The configuration you created in the last chapter
     actually works with the demo, and if you've been following along
@@ -633,7 +633,7 @@ filter.
 
 
 \begin{code}{The Basic null Filter}
-<< d['tools/filters/null.c|pyg|l'] >>
+<< d['/tools/filters/null.c|pyg|l'] >>
 \end{code}
 
 In this code you are basically creating a .so file that Mongrel2 
@@ -735,14 +735,14 @@ using in unit testing to make sure that Mongrel2 handles some simple invalid
 inputs to the configuration system.  Here's the code to the module:
 
 \begin{code}{The null Config Module}
-<< d['tools/config_modules/null.c|pyg|l'] >>
+<< d['/tools/config_modules/null.c|pyg|l'] >>
 \end{code}
 
 You can then get Mongrel2 to load this module directly by passing it as a
 fourth parameter to the \file{mongrel2} executable:
 
 \begin{code}{Loading The null Config}
-<< d['docs/manual/inputs/null_config_run.sh|pyg|l'] >>
+<< d['inputs/null_config_run.sh|pyg|l'] >>
 \end{code}
 
 In this run, Mongrel2 detected that you gave it a fourth option and 

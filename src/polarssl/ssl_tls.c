@@ -1417,6 +1417,11 @@ int ssl_parse_certificate( ssl_context *ssl )
         if( ssl->ca_chain == NULL )
         {
             SSL_DEBUG_MSG( 1, ( "got no CA chain" ) );
+
+	    /* Make certificate optional to allow self-signed certificate. */
+	    if( ssl->authmode != SSL_VERIFY_REQUIRED )
+		return 0;
+
             return( POLARSSL_ERR_SSL_CA_CHAIN_REQUIRED );
         }
 

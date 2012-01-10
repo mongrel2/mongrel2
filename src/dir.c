@@ -80,32 +80,46 @@ static void filerecord_cache_evict(void *data) {
     FileRecord_release((FileRecord *) data);
 }
 
+static inline int get_file_real_size(FileRecord *fr)
+{
+    // TODO: this is the total suck we'll redesign this away
+    int fd = open(bdata(fr->full_path), O_RDONLY);
+    check(fd >= 0, "Failed to open file but stat worked: %s", bdata(fr->full_path));
+
+    fr->file_size = lseek(fd, 0L, SEEK_END);
+    check(fr->file_size >= 0, "Failed to seek end of file: %s", bdata(fr->full_path));
+    lseek(fd, 0L, SEEK_SET);
+
+    fdclose(fd);
+
+    return 0;
+error:
+
+    fdclose(fd);
+    return -1;
+}
+
+
 
 FileRecord *Dir_find_file(bstring path, bstring default_type)
 {
     FileRecord *fr = calloc(sizeof(FileRecord), 1);
-    const char *p = bdata(path);
 
     check_mem(fr);
 
     // We set the number of users here.  If we cache it, we can add one later
     fr->users = 1;
+    fr->full_path = path;
 
-    int rc = stat(p, &fr->sb);
-    check(rc == 0, "File stat failed: %s", bdata(path));
+    int rc = stat(bdata(fr->full_path), &fr->sb);
+    check(rc == 0, "File stat failed: %s", bdata(fr->full_path));
 
     if(S_ISDIR(fr->sb.st_mode)) {
-        fr->full_path = path;
         fr->is_dir = 1;
         return fr;
     }
 
-    fr->fd = open(p, O_RDONLY);
-    check(fr->fd >= 0, "Failed to open file but stat worked: %s", bdata(path));
-
-    fr->file_size = lseek(fr->fd, 0L, SEEK_END);
-    lseek(fr->fd, 0L, SEEK_SET);
-
+    check(get_file_real_size(fr) == 0, "Failed to setup the file record for %s", bdata(fr->full_path));
     fr->loaded = time(NULL);
 
     fr->last_mod = bStrfTime(RFC_822_TIME, gmtime(&fr->sb.st_mtime));
@@ -148,15 +162,21 @@ static inline int Dir_send_header(FileRecord *file, Connection *conn)
 long long int Dir_stream_file(FileRecord *file, Connection *conn)
 {
     long long int sent = 0;
+    int fd = -1;
 
     int rc = Dir_send_header(file, conn);
     check_debug(rc, "Failed to write header to socket.");
 
-    sent = IOBuf_stream_file(conn->iob, file->fd, file->file_size);
+    fd = open(bdata(file->full_path), O_RDONLY);
+    check(fd >= 0, "Failed to open file: %s", bdata(file->full_path));
 
+    sent = IOBuf_stream_file(conn->iob, fd, file->file_size);
+
+    fdclose(fd);
     return file->file_size;
 
 error:
+    if(fd >= 0) fdclose(fd);
     return -1;
 }
 
@@ -229,7 +249,6 @@ void FileRecord_destroy(FileRecord *file)
 {
     if(file) {
         if(!file->is_dir) {
-            fdclose(file->fd);
             bdestroy(file->date);
             bdestroy(file->last_mod);
             bdestroy(file->header);

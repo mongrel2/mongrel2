@@ -198,11 +198,42 @@ error:
     return CLOSE;
 }
 
+const int CERT_FINGERPRINT_SIZE = 20;
+
+void Connection_fingerprint_from_cert(Connection *conn) 
+{
+    x509_cert* _x509P  = conn->iob->ssl.peer_cert;
+
+    debug("Connection_send_to_handler: peer_cert: %016lX: tag=%d length=%ld",
+            (unsigned long) _x509P,
+            _x509P ? _x509P->raw.tag : -1,
+            _x509P ? _x509P->raw.len : -1);
+
+    if (_x509P != NULL && _x509P->raw.len > 0) {
+        sha1_context	ctx;
+        unsigned char sha1sum[CERT_FINGERPRINT_SIZE + 1] = {0};
+        int i = 0;
+
+        sha1_starts(&ctx);
+        sha1_update(&ctx, _x509P->raw.p, _x509P->raw.len);
+        sha1_finish(&ctx, sha1sum);
+
+        bstring hex = bfromcstr("");
+        for (i = sizeof(sha1sum) - 1; i > 0; ++i) {
+            bformata(hex, "%02X", sha1sum[i]);
+        }
+
+        Request_set(conn->req, bfromcstr("PEER_CERT_SHA1"), hex, 1);
+    }
+}
 
 int Connection_send_to_handler(Connection *conn, Handler *handler, char *body, int content_len)
 {
     int rc = 0;
     bstring payload = NULL;
+
+    if(conn->iob->use_ssl)
+	Connection_fingerprint_from_cert(conn);
 
     error_unless(handler->running, conn, 404,
             "Handler shutdown while trying to deliver: %s", bdata(Request_path(conn->req)));
@@ -922,6 +953,9 @@ void Connection_init()
 
     log_info("MAX limits.proxy_read_retries=%d, limits.proxy_read_retry_warn=%d",
             PROXY_READ_RETRIES, PROXY_READ_RETRY_WARN);
+
+    IO_SSL_VERIFY_METHOD = Setting_get_int("ssl.verify_optional", 0) ? SSL_VERIFY_OPTIONAL : SSL_VERIFY_NONE;
+
 }
 
 

@@ -203,7 +203,7 @@ void Handler_task(void *v)
     Handler *handler = (Handler *)v;
     HandlerParser *parser = NULL;
     int max_targets = Setting_get_int("limits.handler_targets", 128);
-    log_info("MAX allowing limits.handler_targets=%d", 128);
+    log_info("MAX allowing limits.handler_targets=%d", max_targets);
 
     parser = HandlerParser_create(max_targets);
     check_mem(parser);

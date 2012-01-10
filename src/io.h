@@ -18,6 +18,7 @@
 #endif
 
 extern int MAX_SEND_BUFFER;
+extern int IO_SSL_VERIFY_METHOD;
 
 struct IOBuf;
 

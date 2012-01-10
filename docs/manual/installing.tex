@@ -32,12 +32,25 @@ Since every system is different, it is difficult to tell you exactly how to
 install required packages for your OS, but here's how I did it on my computer:
 
 \begin{code}{Installing Dependencies on ArchLinux}
-<< d['docs/manual/inputs/install_dependencies.sh|pyg|l'] >>
+<< d['inputs/install_dependencies.sh|pyg|l'] >>
 \end{code}
 
 If you run into parts that your OS is missing, which is likely on
 Debian and SuSE systems, then you'll have to go and figure out
 how to install it.
+
+Some distributions (like Ubuntu) split ``dev'' and ``runtime'' packages.
+In order to build mongrel2 on these distros, you must install libsqlite3-dev:
+this package contains sqlite3.h, which Mongrel2 needs during compilation.
+
+For the lazy, the command is: \shell{sudo apt-get install libsqlite3-dev}
+
+Other pieces known to be missing on ubuntu-like systems: 
+
+\begin{itemize}
+\item uuid-runtime: Needed by m2sh uuid command
+\end{itemize}
+
 
 \section{Building Mongrel2}
 
@@ -68,7 +81,7 @@ the proper sources or binaries from the \href{http://git-scm.com/download}{Git D
 Once you have git you can then get the Mongrel2 source and open it up:
 
 \begin{code}{Cloning the Mongrel2 Source}
-<< d['docs/manual/inputs/cloning_mongrel2_source.sh|pyg|l'] >>
+<< d['inputs/cloning_mongrel2_source.sh|pyg|l'] >>
 \end{code}
 
 Make sure you do this in order (just like with every set of instructions you follow)
@@ -114,7 +127,7 @@ The ``Makefile`` lists several targets for various platforms, as of writing this
 So for example you would probably install zeromq and sqlite3 as ports and then compile it like so:
 
 \begin{code}{Installing Mongrel2 on FreeNSD}
-<< d['docs/manual/inputs/install_freebsd.sh|pyg|l'] >>
+<< d['inputs/install_freebsd.sh|pyg|l'] >>
 \end{code}
 
 \section{Testing The Installation}
@@ -124,7 +137,7 @@ There's a test configuration file in \file{tests/config.sqlite} that you can
 use to try it out:
 
 \begin{code}{First Test Run}
-<< d['docs/manual/inputs/first_mongrel2_run.sh|pyg|l'] >>
+<< d['inputs/first_mongrel2_run.sh|pyg|l'] >>
 \end{code}
 
 That's it.  Just hit CTRL-c for now and we'll get into playing with this
@@ -132,7 +145,7 @@ setup later.
 
 \section{Upgrading from trunk}
 \begin{code}{Update your checkout}
-<< d['docs/manual/inputs/updating_your_checkout.sh|pyg|l'] >>
+<< d['inputs/updating_your_checkout.sh|pyg|l'] >>
 \end{code}
 
 

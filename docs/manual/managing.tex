@@ -80,7 +80,7 @@ First, make sure you are in the mongrel2 source and you've ran the build so that
 After you have that, do this:
 
 \begin{code}{Sample m2sh Commands}
-<< d['docs/manual/inputs/sample_m2sh_commands.sh|pyg|l'] >>
+<< d['inputs/sample_m2sh_commands.sh|pyg|l'] >>
 \end{code}
 
 At this point, you should have seen lists of servers and hosts, seen that mongrel2 is
@@ -91,7 +91,7 @@ You can now try doing some simple starting, stopping and reloading using sudo (m
 to exit from the previous start command):
 
 \begin{code}{Starting, Stopping, Reloading}
-<< d['docs/manual/inputs/starting_stopping_reloading.sh|pyg|l'] >>
+<< d['inputs/starting_stopping_reloading.sh|pyg|l'] >>
 \end{code}
 
 Awesome, right?  Using just this one little management tool you
@@ -142,7 +142,7 @@ load}.  For our example, we'll use the example configuration from
 
 \begin{code}{Simple Little Config Example}
 \begin{lstlisting}
-<< d['examples/configs/sample.conf|dexy'] >>
+<< d['/examples/configs/sample.conf|dexy'] >>
 \end{lstlisting}
 \end{code}
 
@@ -151,7 +151,7 @@ simple.  We'll get into how its structured in a second, but to load this file
 we would just do this:
 
 \begin{code}{Loading The Simple Config}
-<< d['docs/manual/inputs/load_simple_config.sh|pyg|l'] >>
+<< d['inputs/load_simple_config.sh|pyg|l'] >>
 \end{code}
 
 Notice that we didn't have to tell m2sh that the database was \file{config.sqlite}.
@@ -345,7 +345,7 @@ going on, and you try to match what I'm saying to the code.  Here's the \file{ex
 
 \begin{code}{Mongrel2.org Config Script}
 \begin{lstlisting}
-<< d['examples/configs/mongrel2.conf|dexy'] >>
+<< d['/examples/configs/mongrel2.conf|dexy'] >>
 \end{lstlisting}
 \end{code}
 
@@ -577,7 +577,7 @@ of the browser.  Look at \verb|examples/bbs/client.py| to see how that works in
 full, but the meat of it is:
 
 \begin{code}{BBS Client JSON Socket Handling}
-<< d['docs/manual/inputs/bbs_client_socket.py|pyg|l'] >>
+<< d['inputs/bbs_client_socket.py|pyg|l'] >>
 \end{code}
 
 In that code, notice how (for historical reasons due to Flash sucking) the
@@ -589,7 +589,7 @@ to messages to backend handlers for processing.
 Finally, here's the grammar rules in the parser for handling these messages:
 
 \begin{code}{JSON/XML Message Grammar}
-<< d['docs/manual/inputs/json_xml_socket_grammar.py|pyg|l'] >>
+<< d['inputs/json_xml_socket_grammar.py|pyg|l'] >>
 \end{code}
 
 If you read that carefully, you'll see you can actually pass query strings
@@ -686,14 +686,14 @@ The list of commands you can issue are:
 
 You then use the control port by running \ident{m2sh}:
 
-<< d['docs/manual/inputs/sample_m2sh_run.sh|pyg|l'] >>
+<< d['inputs/sample_m2sh_run.sh|pyg|l'] >>
 
 The protocol to and from the control socket is a simple tnetstring in and out that
 any langauge can read.  Here's a nearly complete Python client that is using
 the control port:
 
 \begin{code}{Python Control Port Example}
-<< d['docs/manual/inputs/python_control_port.py|pyg|l'] >>
+<< d['inputs/python_control_port.py|pyg|l'] >>
 \end{code}
 
 You obviously don't need to do this, but should you want to do
@@ -759,7 +759,7 @@ To configure your settings, you set the variable \ident{settings} and you're don
 
 \begin{code}{Changing Settings}
 \begin{lstlisting}
-<< d['docs/manual/inputs/changing_settings.conf|dexy'] >>
+<< d['inputs/changing_settings.conf|dexy'] >>
 \end{lstlisting}
 \end{code}
 
@@ -804,7 +804,7 @@ You can also update your \ident{mimetypes} in the same way, just set a variable 
 
 \begin{code}{Changing Mimetypes}
 \begin{lstlisting}
-<< d['docs/manual/inputs/changing_settings.conf|dexy'] >>
+<< d['inputs/changing_mimetypes.conf|dexy'] >>
 \end{lstlisting}
 \end{code}
 
@@ -820,7 +820,7 @@ To get started, you can make a simple self-signed certificate with some weak enc
 and setup your certs directory:
 
 \begin{code}{Making A Self-Signed Certificate}
-<< d['docs/manual/inputs/makecert.sh|pyg|l'] >>
+<< d['inputs/makecert.sh|pyg|l'] >>
 \end{code}
 
 I actually have a shell script kind of like this since I can never remember how 
@@ -845,7 +845,7 @@ After you have those changes your config should look something like this:
 
 \begin{code}{Minimal SSL Configuration}
 \begin{lstlisting}
-<< d['docs/manual/inputs/mini_ssl_settings.conf|dexy'] >>
+<< d['inputs/mini_ssl_settings.conf|dexy'] >>
 \end{lstlisting}
 \end{code}
 
@@ -878,7 +878,7 @@ Configuring a filter is fairly easy, take a look at this example:
 
 \begin{code}{Minimal Filter Configuration}
 \begin{lstlisting}
-<< d['docs/manual/inputs/filters.conf|dexy'] >>
+<< d['inputs/filters.conf|dexy'] >>
 \end{lstlisting}
 \end{code}
 
