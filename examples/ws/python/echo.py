@@ -11,16 +11,13 @@ conn = handler.Connection(sender_id, "tcp://127.0.0.1:9990",
 
 CONNECTION_TIMEOUT=5
 
-incomingMessages = {}
 closingMessages={}
 
 #logf=open('echo.log','wb')
-logf=open('/dev/null','wb')
-#logf=sys.stdout
+#logf=open('/dev/null','wb')
+logf=sys.stdout
 
 def abortConnection(conn,req,reason='none'):
-    if req.conn_id in incomingMessages:
-        del incomingMessages[req.conn_id]
     conn.reply(req,'')
     print >>logf,'abort',reason
 
@@ -36,6 +33,7 @@ def hexdump(s,f=sys.stdout):
 
 while True:
     now=time.time()
+    logf.flush()
     for k,(t,uuid) in closingMessages.items():
         if now > t+CONNECTION_TIMEOUT:
             conn.send(uuid,k,'')
@@ -47,7 +45,6 @@ while True:
 
 
     #print "ID", req.conn_id
-    #print incomingMessages.keys()
     if req.headers.get('METHOD') == 'GET':
         responseCode=wsutil.challenge(req.headers.get('sec-websocket-key'))
         response="HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: %s\r\n\r\n"%responseCode
@@ -58,8 +55,6 @@ while True:
     if req.is_disconnect():
         #print "DISCONNECTED", req.conn_id
 
-        if req.conn_id in incomingMessages:
-            del incomingMessages[req.conn_id]
         continue
 
     if req.headers.get('METHOD') != 'WEBSOCKET':
@@ -74,7 +69,7 @@ while True:
         rsvd=flags & 0x70
         opcode=flags & 0xf
         wsdata = req.body
-        #print fin,rsvd,opcode,len(wsdata)
+        #print fin,rsvd,opcode,len(wsdata),wsdata
         #logf.write('\n')
     except:
         #print "Unable to decode FLAGS"
@@ -84,24 +79,12 @@ while True:
     if rsvd != 0:
         abortConnection(conn,req,'reserved non-zero')
         continue
-    if opcode == 0 and req.conn_id not in incomingMessages:
-        abortConnection(conn,req,'continuation of nonexistant message')
-        #print req.conn_id
-        #print incomingMessages
-        continue
 
     if opcode not in wsutil.opcodes:
         abortConnection(conn,req,'Unknown opcode')
         continue
         
     if (opcode & 0x8) != 0:
-#Control frames
-        if not fin:
-            abortConnection(conn,req,'fragmented control packet')
-            continue
-        if len(wsdata) > 125:
-            abortConnection(conn,req,'too long control packet')
-            continue
         if opcode ==wsutil.OP_PING:
             opcode = wsutil.OP_PONG
             conn.reply(req,wsutil.frame(wsdata,opcode))
@@ -114,32 +97,12 @@ while True:
                 conn.reply(req,'')
         continue
 
-    #print "FRAME:"
-    #hexdump(req.body[:14])
-    #print "DATA:",wsdata
-    wsdata=[wsdata]
-    start=[]
-    if req.conn_id in incomingMessages:
-        if opcode != 0:
-            abortConnection(conn,req,"Non-control frame is not continuation")
+    if opcode == wsutil.OP_PONG:
+        continue # We don't send pings, so ignore pongs
+    if(opcode == wsutil.OP_TEXT):
+        try:
+            wsdata.decode('utf-8')
+        except:
+            abortConnection(conn,req,'invalid UTF')
             continue
-        start,opcode=incomingMessages[req.conn_id]
-        del incomingMessages[req.conn_id]
-    wsdata = start+wsdata
-    if fin:
-        if opcode == wsutil.OP_PONG:
-            continue # We don't send pings, so ignore pongs
-        if(opcode == wsutil.OP_TEXT):
-            try:
-                ''.join(wsdata).decode('utf-8')
-            except:
-                abortConnection(conn,req,'invalid UTF')
-                continue
-        #print 'Message complete: '
-        #print ''.join(wsdata)
-        #print
-        #hexdump(wsutil.frame(''.join(wsdata))[:14])
-        conn.reply(req,wsutil.frame(''.join(wsdata),opcode))
-    else:
-        #print 'got chunk for',req.conn_id
-        incomingMessages[req.conn_id]=wsdata,opcode
+    conn.reply(req,wsutil.frame(wsdata,opcode))

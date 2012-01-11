@@ -81,6 +81,39 @@ static inline int Websocket_header_length(const unsigned char *data, int avail)
     if(mask) header_size+=4;
     return header_size;
 }
+
+static inline int WS_mask(const unsigned char *header) {
+    return (header[1] & 0x80) != 0;
+}
+
+static inline int WS_fin(const unsigned char *header) {
+    return (header[0] & 0x80) != 0;
+}
+
+static inline int WS_is_control(const unsigned char *header) {
+    return (header[0] & 0x8) != 0;
+}
+
+static inline int WS_is_continuation(const unsigned char *header) {
+    return (header[0] & 0xf) == 0;
+}
+
+/* TODO This is a bit long for inline, move to websocket.c*/
+static inline const char * WS_validate_packet(const unsigned char * header,int continuationExpected) {
+
+    if (continuationExpected && !(WS_is_control(header)|WS_is_continuation(header)))
+        return "Received websocket data packet in middle of fragmented message.";
+    if (WS_is_continuation(header) && !continuationExpected)
+        return "Received spurious continuation message.";
+    if (!WS_mask(header))
+        return "Received unmasked WS packet.";
+    if (!WS_fin(header) && WS_is_control(header))
+        return "Received fragmented control packet.";
+    if(WS_is_control(header) && ((header[1]&0x7f) >= 126))
+        return "Too long control packet.";
+    return NULL;
+}
+
 bstring websocket_make_header(unsigned char flags,uint64_t length, int masked,unsigned char key[]);
 
 enum Ws_Flags {
