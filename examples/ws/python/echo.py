@@ -21,16 +21,6 @@ def abortConnection(conn,req,reason='none'):
     conn.reply(req,'')
     print >>logf,'abort',reason
 
-def hexdump(s,f=sys.stdout):
-    count=0
-    for i in s:
-        f.write(hex(ord(i)))
-        f.write(' ')
-        count+=1
-        if(count==20):
-            count=0
-            f.write('\n')
-
 while True:
     now=time.time()
     logf.flush()
