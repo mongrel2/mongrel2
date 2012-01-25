@@ -138,12 +138,17 @@ static void header_field_cb(void *data, const char *field, size_t flen,
         bstring vstr = blk2bstr(value, vlen);
         bstring fstr = blk2bstr(field, flen);
         btolower(fstr);
-
         Request_set(req, fstr, vstr, 0);
+
+        bdestroy(fstr); // we still own the key
     }
 }
 
-
+/**
+ * The caller owns the key, and this function will duplicate it
+ * if needed.  This function owns the value and will destroy it
+ * if there's an error.
+ */
 void Request_set(Request *req, bstring key, bstring val, int replace)
 {
     hnode_t *n = hash_lookup(req->headers, key);
@@ -159,10 +164,10 @@ void Request_set(Request *req, bstring key, bstring val, int replace)
 
         val_list->entry[0] = val;
         val_list->qty = 1;
-        hash_alloc_insert(req->headers, key, val_list);
+        hash_alloc_insert(req->headers, bstrcpy(key), val_list);
     } else {
         val_list = hnode_get(n);
-        bdestroy(key); // don't need the key anymore since we already have it
+        check(val_list != NULL, "Malformed request, missing bstrlist in node. Tell Zed: %s=%s", bdata(key), bdata(val));
 
         if(replace) {
             // destroy ALL old ones and put this in their place
@@ -181,7 +186,11 @@ void Request_set(Request *req, bstring key, bstring val, int replace)
         }
     }
 
-error: return;
+    return;
+
+error:
+    bdestroy(val);
+    return;
 }
 
 Request *Request_create()
