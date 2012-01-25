@@ -1,11 +1,10 @@
 PREFIX?=/usr/local
 CFLAGS=-I../../src $(OPTFLAGS) -fPIC -shared -nostartfiles -L../../build
-CFLAGS+= -Imongo-c-driver/src -DMONGO_HAVE_STDINT 
 LDFLAGS=$(OPTLIBS)
 
 MONGO_SRC = mongo-c-driver
 
-all: null.so zmq.so mongodb.so
+all: null.so zmq.so
 
 .PHONY: fetch_mongo_c_driver
 fetch_mongo_c_driver:
@@ -13,6 +12,7 @@ fetch_mongo_c_driver:
 	cd mongo-c-driver && git checkout v0.4
 	gcc -fPIC -c mongo-c-driver/src/*.c -Imongo-c-driver/src/ -DMONGO_HAVE_STDINT
 
+mongodb.so: CFLAGS+= -Imongo-c-driver/src -DMONGO_HAVE_STDINT 
 mongodb.so: fetch_mongo_c_driver
 mongodb.so: mongodb.c
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $< bson.o encoding.o gridfs.o md5.o mongo.o net.o numbers.o ../../build/libm2.a
