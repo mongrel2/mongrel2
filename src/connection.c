@@ -197,11 +197,14 @@ error:
     return CLOSE;
 }
 
-const int CERT_FINGERPRINT_SIZE = 20;
+#define CERT_FINGERPRINT_SIZE 20
+
+struct tagbstring PEER_CERT_SHA1_KEY = bsStatic("PEER_CERT_SHA1");
 
 void Connection_fingerprint_from_cert(Connection *conn) 
 {
     x509_cert* _x509P  = conn->iob->ssl.peer_cert;
+    int i = 0;
 
     debug("Connection_send_to_handler: peer_cert: %016lX: tag=%d length=%ld",
             (unsigned long) _x509P,
@@ -211,18 +214,17 @@ void Connection_fingerprint_from_cert(Connection *conn)
     if (_x509P != NULL && _x509P->raw.len > 0) {
         sha1_context	ctx;
         unsigned char sha1sum[CERT_FINGERPRINT_SIZE + 1] = {0};
-        int i = 0;
 
         sha1_starts(&ctx);
         sha1_update(&ctx, _x509P->raw.p, _x509P->raw.len);
         sha1_finish(&ctx, sha1sum);
 
         bstring hex = bfromcstr("");
-        for (i = sizeof(sha1sum) - 1; i > 0; ++i) {
+        for (i = 0; i < (int)sizeof(sha1sum); i++) {
             bformata(hex, "%02X", sha1sum[i]);
         }
 
-        Request_set(conn->req, bfromcstr("PEER_CERT_SHA1"), hex, 1);
+        Request_set(conn->req, &PEER_CERT_SHA1_KEY, hex, 1);
     }
 }
 
@@ -966,8 +968,7 @@ int Connection_read_header(Connection *conn, Request *req)
     error_unless(rc == 1, conn, 400, "Error parsing request.");
 
     // add the x-forwarded-for header
-    Request_set(conn->req, bstrcpy(&HTTP_X_FORWARDED_FOR),
-            bfromcstr(conn->remote), 1);
+    Request_set(conn->req, &HTTP_X_FORWARDED_FOR, bfromcstr(conn->remote), 1);
 
     check_should_close(conn, conn->req);
 
