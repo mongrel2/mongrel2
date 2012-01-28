@@ -116,6 +116,8 @@ static inline const char * WS_validate_packet(const unsigned char * header,int c
 
 bstring websocket_make_header(unsigned char flags,uint64_t length, int masked,unsigned char key[]);
 
+bstring websocket_challenge(bstring input);
+
 enum Ws_Flags {
  WSFLAG_CONN=1,
  WSFLAG_UPGRADE=2,

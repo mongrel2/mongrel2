@@ -322,7 +322,16 @@ int connection_http_to_handler(Connection *conn)
     check(IOBuf_read_commit(conn->iob, Request_header_length(conn->req)) != -1, "Finaly commit failed streaming the connection to http handlers.");
 
     if(is_websocket(conn)) {
-        content_len=0;
+        bstring wsKey = Request_get(conn->req, &WS_SEC_WS_KEY);
+        bstring response= websocket_challenge(wsKey);
+
+        Response_send_status(conn,response);
+        bdestroy(response);
+
+        conn->handler = handler;
+        bdestroy(conn->req->request_method);
+        conn->req->request_method=bfromcstr("WEBSOCKET");
+        return REQ_SENT;
     }
 
     if(content_len == 0) {
@@ -342,15 +351,6 @@ int connection_http_to_handler(Connection *conn)
         check_debug(rc == 0, "Failed to deliver to the handler.");
     }
 
-    // WebSocket detection
-    if(is_websocket(conn)) {
-        conn->handler = handler;
-        bdestroy(conn->req->request_method);
-        //We set this *after* passing the handshake to the handler so that the
-        //handshake has the actual request method (hopefully GET) sent to
-        //the handler
-        conn->req->request_method=bfromcstr("WEBSOCKET");
-    }
     Log_request(conn, 200, content_len);
 
     return REQ_SENT;

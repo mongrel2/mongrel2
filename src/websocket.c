@@ -1,4 +1,5 @@
 #include <websocket.h>
+#include <polarssl/sha1.h>
 
 struct tagbstring WS_REQ_METHOD = bsStatic("HYBI");
 struct tagbstring WS_CONNECTION = bsStatic("connection");
@@ -8,6 +9,8 @@ struct tagbstring WS_HOST = bsStatic("host");
 struct tagbstring WS_SEC_WS_KEY = bsStatic("sec-websocket-key");
 struct tagbstring WS_SEC_WS_VER = bsStatic("sec-websocket-version");
 struct tagbstring WS_FLAGS = bsStatic("FLAGS");
+
+#define WS_GUID "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
 
 bstring websocket_make_header(unsigned char flags,uint64_t length, int masked,unsigned char key[])
 {
@@ -41,4 +44,26 @@ bstring websocket_make_header(unsigned char flags,uint64_t length, int masked,un
         buf[where++]=key[3];
     }
     return blk2bstr(buf,where);
+}
+
+bstring websocket_challenge(bstring input)
+{
+    bstring buf=bfromcstralloc(20,"");
+    bstring tmpstring=bstrcpy(input);
+    bstring encodedSha1=NULL;
+
+    bcatcstr(tmpstring, WS_GUID);
+    sha1((unsigned char *)bdata(tmpstring),blength(tmpstring),(unsigned char *)bdata(buf));
+    buf->slen=20;
+    encodedSha1=bBase64Encode(buf);
+
+    bdestroy(tmpstring);
+    bdestroy(buf);
+
+    tmpstring = bformat("HTTP/1.1 101 Switching Protocols\r\n"
+            "Upgrade: websocket\r\n"
+            "Connection: Upgrade\r\n"
+            "Sec-WebSocket-Accept: %s\r\n\r\n",bdata(encodedSha1));
+    bdestroy(encodedSha1);
+    return tmpstring;
 }
