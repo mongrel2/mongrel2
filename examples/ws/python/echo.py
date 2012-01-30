@@ -43,22 +43,12 @@ while True:
         continue
 
 
-    #print "ID", req.conn_id
-    if req.headers.get('METHOD') == 'GET':
-        #print req.headers
-        responseCode=wsutil.challenge(req.headers.get('sec-websocket-key'))
-        response="HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: %s\r\n\r\n"%responseCode
-        #print response
-        conn.reply(req,response)
-        continue
-
     if req.is_disconnect():
         #print "DISCONNECTED", req.conn_id
-
         continue
 
     if req.headers.get('METHOD') != 'WEBSOCKET':
-        print 'METHOD is Not GET or WEBSOCKET',req.headers.get('METHOD')
+        print 'METHOD is Not WEBSOCKET',req.headers.get('METHOD')
         conn.reply(req,'')
         continue
 
