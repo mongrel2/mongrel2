@@ -49,6 +49,7 @@ Other pieces known to be missing on ubuntu-like systems:
 
 \begin{itemize}
 \item uuid-runtime: Needed by m2sh uuid command
+\item You may need to run: \shell{sudo ldconfig -v} 
 \end{itemize}
 
 
@@ -126,7 +127,7 @@ The ``Makefile`` lists several targets for various platforms, as of writing this
 
 So for example you would probably install zeromq and sqlite3 as ports and then compile it like so:
 
-\begin{code}{Installing Mongrel2 on FreeNSD}
+\begin{code}{Installing Mongrel2 on FreeBSD}
 << d['inputs/install_freebsd.sh|pyg|l'] >>
 \end{code}
 
