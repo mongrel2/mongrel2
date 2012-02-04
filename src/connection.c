@@ -373,7 +373,10 @@ int connection_http_to_directory(Connection *conn)
     Dir *dir = Request_get_action(conn->req, dir);
 
     int rc = Dir_serve_file(dir, conn->req, conn);
-    check_debug(rc == 0, "Failed to serve file: %s", bdata(Request_path(conn->req)));
+    
+    if(rc == -1) {
+        return HTTP_ERROR;
+    }
 
     check(IOBuf_read_commit(conn->iob,
             Request_header_length(conn->req) + Request_content_length(conn->req)) != -1, "Finaly commit failed sending from directory.");
@@ -391,7 +394,44 @@ error:
     return CLOSE;
 }
 
+int connection_http_error(Connection *conn)
+{
+  int http_error_code = conn->req->status_code;
+  int rc = -1;
+  bstring resp = NULL;
 
+  switch(http_error_code) {
+  case 404:
+    resp = &HTTP_404;
+    break;
+  case 405:
+    resp = &HTTP_405;
+    break;
+  case 412:
+    resp = &HTTP_412;
+    break;
+  case 500:
+    resp = &HTTP_500;
+    break;
+  case 304:
+    resp = &HTTP_304;
+    break;
+  default:
+    return CLOSE;
+  }
+
+  rc = Response_send_status(conn, resp);
+  check_debug(rc == blength(resp), "Failed to send error response.");
+  
+  if(conn->close) {
+    return CLOSE;
+  } else {
+    return RESP_SENT;
+  }
+
+ error:
+  return CLOSE;
+}
 
 
 int connection_http_to_proxy(Connection *conn)
@@ -789,7 +829,8 @@ StateActions CONN_ACTIONS = {
     .proxy_reply_parse = connection_proxy_reply_parse,
     .proxy_req_parse = connection_proxy_req_parse,
     .proxy_close = connection_proxy_close,
-    .websocket_established = connection_websocket_established
+    .websocket_established = connection_websocket_established,
+    .http_error = connection_http_error
 };
 
 

@@ -110,6 +110,7 @@ Connection = (
         Queueing: ( REQ_SENT @parse -> Idle ),
 
         Responding: (
+            HTTP_ERROR @http_error -> Responding |
             RESP_SENT @parse -> Idle |
             CLOSE @close -> final
         )
