@@ -430,7 +430,7 @@ static inline bstring Dir_none_match(Request *req, FileRecord *file, int if_modi
     return &HTTP_500;
 }
 
-static inline bstring Dir_calculate_response(Request *req, FileRecord *file)
+static inline int Dir_calculate_response(Request *req, FileRecord *file)
 {
     int if_unmodified_since = 0;
     int if_modified_since = 0;
@@ -455,7 +455,7 @@ static inline bstring Dir_calculate_response(Request *req, FileRecord *file)
             if(if_unmodified_since) {
                 if(file->sb.st_mtime > if_unmodified_since) {
                     req->status_code = 412;
-                    return &HTTP_412;
+                    return 412;
                 } else if(if_none_match) {
                     return Dir_none_match(req, file, if_modified_since, if_none_match);
                 } else if(if_modified_since) {
@@ -468,19 +468,19 @@ static inline bstring Dir_calculate_response(Request *req, FileRecord *file)
             } else {
                 // they've got nothing, 200
                 req->status_code = 200;
-                return NULL;
+                return 200;
             }
         } else {
             req->status_code = 412;
-            return &HTTP_412;
+            return 412;
         }
     } else {
         req->status_code = 404;
-        return &HTTP_404;
+        return 404;
     }
 
     req->status_code = 500;
-    return &HTTP_500;
+    return 500;
 }
 
 int Dir_serve_file(Dir *dir, Request *req, Connection *conn)
@@ -501,21 +501,16 @@ int Dir_serve_file(Dir *dir, Request *req, Connection *conn)
 
     if(!(is_get || is_head)) {
         req->status_code = 405;
-        rc = Response_send_status(conn, &HTTP_405);
-        check_debug(rc == blength(&HTTP_405), "Failed to send 405 to client.");
         return -1;
     } else if (blength(prefix) > blength(path)) {
         req->status_code = 404;
-        rc = Response_send_status(conn, &HTTP_404);
-        check_debug(rc == blength(&HTTP_404), "Failed to send 404 to client.");
         return -1;
     } else {
         file = Dir_resolve_file(dir, prefix, path);
         resp = Dir_calculate_response(req, file);
 
-        if(resp) {
-            rc = Response_send_status(conn, resp);
-            check_debug(rc == blength(resp), "Failed to send error response on file serving.");
+        if(resp != 200) {
+            return -1;
         } else if(is_get) {
             rc = Dir_stream_file(file, conn);
             req->response_size = rc;

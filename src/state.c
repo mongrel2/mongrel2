@@ -44,7 +44,7 @@
 #define CALL(A, C) TRACE(A,C); if(state->actions && state->actions->A) next = state->actions->A(conn)
 
 
-#line 87 "src/state.rl"
+#line 88 "src/state.rl"
 
 
 
@@ -59,7 +59,7 @@ static const int StateActions_en_main_Connection_Idle = 5;
 static const int StateActions_en_main_Connection_HTTPRouting = 3;
 
 
-#line 90 "src/state.rl"
+#line 91 "src/state.rl"
 
 int State_init(State *state, StateActions *actions)
 {
@@ -71,7 +71,7 @@ int State_init(State *state, StateActions *actions)
 	 state->cs = StateActions_start;
 	}
 
-#line 96 "src/state.rl"
+#line 97 "src/state.rl"
     return 1;
 }
 
@@ -80,7 +80,7 @@ int State_invariant(State *state)
     if ( state->cs == 
 #line 82 "src/state.c"
 0
-#line 101 "src/state.rl"
+#line 102 "src/state.rl"
  ) {
         return -1;
     }
@@ -88,7 +88,7 @@ int State_invariant(State *state)
     if ( state->cs >= 
 #line 90 "src/state.c"
 18
-#line 105 "src/state.rl"
+#line 106 "src/state.rl"
  ) {
         return 1;
     }
@@ -115,7 +115,7 @@ int State_exec(State *state, int event, struct Connection *conn)
 	{
 case 18:
 	if ( (*p) == 107 )
-		goto tr23;
+		goto tr24;
 	goto st0;
 tr0:
 #line 51 "src/state.rl"
@@ -125,7 +125,7 @@ tr0:
 st0:
  state->cs = 0;
 	goto _out;
-tr23:
+tr24:
 #line 53 "src/state.rl"
 	{ CALL(parse, (*p)); }
 	goto st1;
@@ -149,7 +149,7 @@ st19:
 case 19:
 #line 151 "src/state.c"
 	if ( (*p) == 107 )
-		goto tr23;
+		goto tr24;
 	goto tr0;
 tr2:
 #line 54 "src/state.rl"
@@ -192,14 +192,19 @@ tr7:
 #line 63 "src/state.rl"
 	{ CALL(http_to_directory, (*p)); }
 	goto st4;
+tr11:
+#line 64 "src/state.rl"
+	{ CALL(http_error, (*p)); }
+	goto st4;
 st4:
 	if ( ++p == pe )
 		goto _test_eof4;
 case 4:
-#line 200 "src/state.c"
+#line 204 "src/state.c"
 	switch( (*p) ) {
 		case 100: goto tr1;
 		case 112: goto tr10;
+		case 116: goto tr11;
 	}
 	goto tr0;
 tr10:
@@ -210,13 +215,13 @@ st5:
 	if ( ++p == pe )
 		goto _test_eof5;
 case 5:
-#line 214 "src/state.c"
+#line 219 "src/state.c"
 	switch( (*p) ) {
 		case 100: goto tr1;
-		case 110: goto tr11;
+		case 110: goto tr12;
 	}
 	goto tr0;
-tr11:
+tr12:
 #line 55 "src/state.rl"
 	{ CALL(identify_request, (*p)); }
 	goto st6;
@@ -224,7 +229,7 @@ st6:
 	if ( ++p == pe )
 		goto _test_eof6;
 case 6:
-#line 228 "src/state.c"
+#line 233 "src/state.c"
 	switch( (*p) ) {
 		case 105: goto tr3;
 		case 106: goto tr4;
@@ -239,15 +244,15 @@ st7:
 	if ( ++p == pe )
 		goto _test_eof7;
 case 7:
-#line 243 "src/state.c"
+#line 248 "src/state.c"
 	if ( (*p) == 104 )
-		goto tr12;
+		goto tr13;
 	goto tr0;
 tr8:
 #line 60 "src/state.rl"
 	{ CALL(http_to_handler, (*p)); }
 	goto st8;
-tr12:
+tr13:
 #line 58 "src/state.rl"
 	{ CALL(msg_to_handler, (*p)); }
 	goto st8;
@@ -255,7 +260,7 @@ st8:
 	if ( ++p == pe )
 		goto _test_eof8;
 case 8:
-#line 259 "src/state.c"
+#line 264 "src/state.c"
 	if ( (*p) == 111 )
 		goto tr10;
 	goto tr0;
@@ -267,7 +272,7 @@ st9:
 	if ( ++p == pe )
 		goto _test_eof9;
 case 9:
-#line 271 "src/state.c"
+#line 276 "src/state.c"
 	goto tr0;
 tr6:
 #line 57 "src/state.rl"
@@ -277,15 +282,15 @@ st10:
 	if ( ++p == pe )
 		goto _test_eof10;
 case 10:
-#line 281 "src/state.c"
+#line 286 "src/state.c"
 	if ( (*p) == 104 )
-		goto tr13;
+		goto tr14;
 	goto tr0;
-tr13:
+tr14:
 #line 60 "src/state.rl"
 	{ CALL(http_to_handler, (*p)); }
 	goto st11;
-tr14:
+tr15:
 #line 61 "src/state.rl"
 	{ CALL(websocket_established, (*p)); }
 	goto st11;
@@ -293,10 +298,10 @@ st11:
 	if ( ++p == pe )
 		goto _test_eof11;
 case 11:
-#line 297 "src/state.c"
+#line 302 "src/state.c"
 	switch( (*p) ) {
 		case 100: goto tr1;
-		case 111: goto tr14;
+		case 111: goto tr15;
 	}
 	goto tr0;
 st12:
@@ -304,49 +309,49 @@ st12:
 		goto _test_eof12;
 case 12:
 	switch( (*p) ) {
-		case 101: goto tr15;
-		case 103: goto tr17;
+		case 101: goto tr16;
+		case 103: goto tr18;
 	}
 	goto st0;
-tr15:
-#line 66 "src/state.rl"
+tr16:
+#line 67 "src/state.rl"
 	{ CALL(proxy_deliver, (*p)); }
 	goto st13;
 st13:
 	if ( ++p == pe )
 		goto _test_eof13;
 case 13:
-#line 320 "src/state.c"
+#line 325 "src/state.c"
 	switch( (*p) ) {
-		case 109: goto tr18;
-		case 111: goto tr19;
+		case 109: goto tr19;
+		case 111: goto tr20;
 	}
 	goto tr0;
-tr17:
-#line 67 "src/state.rl"
+tr18:
+#line 68 "src/state.rl"
 	{ CALL(proxy_failed, (*p)); }
 	goto st14;
-tr18:
-#line 72 "src/state.rl"
+tr19:
+#line 73 "src/state.rl"
 	{ CALL(proxy_close, (*p)); }
 	goto st14;
 st14:
 	if ( ++p == pe )
 		goto _test_eof14;
 case 14:
-#line 338 "src/state.c"
+#line 343 "src/state.c"
 	if ( (*p) == 100 )
-		goto tr20;
+		goto tr21;
 	goto tr0;
-tr20:
-#line 76 "src/state.rl"
+tr21:
+#line 77 "src/state.rl"
 	{
         p--;
         {goto st5;} 
     }
 	goto st15;
-tr22:
-#line 80 "src/state.rl"
+tr23:
+#line 81 "src/state.rl"
 	{
         CALL(proxy_close, (*p));
         p--;
@@ -357,37 +362,37 @@ st15:
 	if ( ++p == pe )
 		goto _test_eof15;
 case 15:
-#line 361 "src/state.c"
+#line 366 "src/state.c"
 	goto tr0;
-tr19:
-#line 70 "src/state.rl"
+tr20:
+#line 71 "src/state.rl"
 	{ CALL(proxy_reply_parse, (*p)); }
 	goto st16;
 st16:
 	if ( ++p == pe )
 		goto _test_eof16;
 case 16:
-#line 371 "src/state.c"
+#line 376 "src/state.c"
 	switch( (*p) ) {
-		case 109: goto tr18;
-		case 110: goto tr21;
+		case 109: goto tr19;
+		case 110: goto tr22;
 	}
 	goto tr0;
-tr21:
-#line 71 "src/state.rl"
+tr22:
+#line 72 "src/state.rl"
 	{ CALL(proxy_req_parse, (*p)); }
 	goto st17;
 st17:
 	if ( ++p == pe )
 		goto _test_eof17;
 case 17:
-#line 385 "src/state.c"
+#line 390 "src/state.c"
 	switch( (*p) ) {
-		case 102: goto tr22;
-		case 104: goto tr22;
-		case 105: goto tr15;
-		case 108: goto tr22;
-		case 109: goto tr18;
+		case 102: goto tr23;
+		case 104: goto tr23;
+		case 105: goto tr16;
+		case 108: goto tr23;
+		case 109: goto tr19;
 	}
 	goto tr0;
 	}
@@ -433,14 +438,14 @@ case 17:
 #line 51 "src/state.rl"
 	{ CALL(error, (*p)); }
 	break;
-#line 437 "src/state.c"
+#line 442 "src/state.c"
 	}
 	}
 
 	_out: {}
 	}
 
-#line 123 "src/state.rl"
+#line 124 "src/state.rl"
 
     return next;
 }
@@ -463,7 +468,8 @@ const char *EVENT_NAMES[] = {
     "RESP_SENT",
     "SOCKET_REQ",
     "TIMEOUT",
-    "WS_REQ"};
+    "WS_REQ",
+    "HTTP_ERROR"};
 
 const char *State_event_name(int event)
 {
