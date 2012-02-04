@@ -1,8 +1,8 @@
 PREFIX?=/usr/local
-CFLAGS=-I../../src $(OPTFLAGS) -fPIC -shared -nostartfiles -L../../build
+CFLAGS=-g -I../../src $(OPTFLAGS) -fPIC -shared -nostartfiles -L../../build
 LDFLAGS=$(OPTLIBS)
 
-all: null.so
+all: null.so errorpages.so
 
 
 %.so : %.c
@@ -14,4 +14,3 @@ clean:
 install:
 	install -d $(DESTDIR)/$(PREFIX)/lib/mongrel2/filters/
 	install *.so $(DESTDIR)/$(PREFIX)/lib/mongrel2/filters/
-
