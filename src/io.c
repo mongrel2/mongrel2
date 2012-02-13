@@ -142,12 +142,20 @@ error:
 
 static ssize_t ssl_send(IOBuf *iob, char *buffer, int len)
 {
+    ssize_t sent = 0;
+
     check(iob->use_ssl, "IOBuf not set up to use ssl");
     if(!iob->handshake_performed) {
         int rcode = ssl_do_handshake(iob);
         check(rcode == 0, "handshake failed");
     }
-    return ssl_write(&iob->ssl, (const unsigned char*) buffer, len);
+
+    do {
+        // must send in chunks of SSL_MAX_CONTENT_LEN
+        sent += ssl_write(&iob->ssl, (const unsigned char*) (buffer + sent), (len - sent));
+    } while (sent < len);	
+
+    return sent;
 error:
     return -1;
 }
