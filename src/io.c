@@ -671,11 +671,9 @@ int IOBuf_register_disconnect(IOBuf *buf)
     int rc=0;
     if(IOBuf_fd(buf)>0) {
         rc= Register_disconnect(IOBuf_fd(buf));
-        assert(!Register_valid(IOBuf_fd(buf)));
         return rc;
     }
-    error:
-        return 0;
+    return 0;
 }
 
 
