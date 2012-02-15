@@ -26,7 +26,7 @@ Connection *fake_conn(const char *file, int mode) {
 void fake_conn_close(Connection *conn)
 {
     assert(conn && conn->iob && "Invalid connection.");
-    Register_disconnect(conn->iob->fd);
+    IOBuf_register_disconnect(conn->iob);
     Connection_destroy(conn);
 }
 

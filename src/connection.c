@@ -759,7 +759,7 @@ int Connection_accept(Connection *conn)
             "Failed to create connection task.");
     return 0;
 error:
-    Register_disconnect(IOBuf_fd(conn->iob));
+    IOBuf_register_disconnect(conn->iob);
     return -1;
 }
 
@@ -800,7 +800,7 @@ error: // fallthrough
 
 int Connection_deliver_raw_internal(Connection *conn, bstring buf)
 {
-    return IOBuf_send(conn->iob, bdata(buf), blength(buf));
+    return IOBuf_send_all(conn->iob, bdata(buf), blength(buf));
 }
 
 int Connection_deliver_raw(Connection *conn, bstring buf)
@@ -839,6 +839,7 @@ void Connection_deliver_task(void *v)
         msg=NULL;
     }
 error:
+    IOBuf_register_disconnect(conn->iob);
     bdestroy(msg);
     taskexit(0);
 }
