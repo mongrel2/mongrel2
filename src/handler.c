@@ -141,7 +141,7 @@ static inline void handler_process_request(Handler *handler, int id, int fd,
     check(conn != NULL, "You can't pass NULL conn to this anymore.");
 
     if(blength(payload) == 0) {
-        rc = Connection_deliver_raw(conn,NULL);
+        rc = Register_disconnect(fd);
         check(rc != -1, "Register disconnect failed for: %d", fd);
     } else {
         int raw = conn->type != CONN_TYPE_MSG || handler->raw;

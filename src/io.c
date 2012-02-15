@@ -415,7 +415,6 @@ int IOBuf_close(IOBuf *buf)
         }
         
         fdclose(buf->fd);
-        buf->fd=-1;
     }
 
     return rc;
@@ -665,19 +664,6 @@ int IOBuf_send_all(IOBuf *buf, char *data, int len)
 error:
     return -1;
 }
-
-int IOBuf_register_disconnect(IOBuf *buf)
-{
-    int rc=0;
-    if(IOBuf_fd(buf)>0) {
-        rc= Register_disconnect(IOBuf_fd(buf));
-        assert(!Register_valid(IOBuf_fd(buf)));
-        return rc;
-    }
-    error:
-        return 0;
-}
-
 
 int IOBuf_stream_file(IOBuf *buf, int fd, off_t len)
 {
