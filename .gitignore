@@ -26,6 +26,7 @@ tools/lemon/lemon
 tools/m2sh/build/
 tools/m2sh/tests/*_tests
 tools/m2sh/tests/tests.log
+tools/procer/procer
 run/*
 logs/*
 tmp/*
