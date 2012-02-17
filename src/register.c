@@ -136,7 +136,9 @@ int Register_disconnect(int fd)
     check_debug(Register_valid(reg), "Attempt to unregister FD %d which is already gone.", fd);
     check(reg->fd == fd, "Asked to disconnect fd %d but register had %d", fd, reg->fd);
 
-    check(IOBuf_close(reg->data->iob) == 0, "Failed to close IOBuffer, probably SSL error.");
+    if(IOBuf_close(reg->data->iob) != 0) {
+        log_err("Failed to close IOBuffer, probably SSL error.");
+    }
 
     fdclose(fd);
 
