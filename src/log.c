@@ -248,6 +248,8 @@ error:
 
 static void free_log_msg(void *data, void *hint)
 {
+    (void)data;
+
     bdestroy((bstring)hint);
 }
 

@@ -64,6 +64,8 @@ static char *ssl_default_dhm_G = "4";
 
 void host_destroy_cb(Route *r, RouteMap *map)
 {
+    (void)map;
+
     if(r->data) {
         Host_destroy((Host *)r->data);
         r->data = NULL;

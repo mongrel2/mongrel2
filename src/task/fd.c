@@ -95,11 +95,13 @@ static inline void fdtask_shutdown()
 
 void fdtask(void *v)
 {
+    (void)v;
+
     int i, ms;
     PollResult result;
     int rc = 0;
     FDTASK = taskself();
-    
+
     rc = PollResult_init(POLL, &result);
     check(rc == 0, "Failed to initialize the poll result.");
 

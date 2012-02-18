@@ -45,6 +45,8 @@ int MAX_URL_PATH = 0;
 
 void backend_destroy_cb(Route *r, RouteMap *map)
 {
+    (void)map;
+
     Backend *backend = (Backend *)r->data;
 
     if(backend) {

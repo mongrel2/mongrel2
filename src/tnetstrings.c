@@ -168,6 +168,8 @@ error: // fallthrough
 
 void tns_hnode_free(hnode_t *node, void *notused)
 {
+    (void)notused;
+
     bdestroy((bstring)hnode_getkey(node));
     tns_value_destroy(hnode_get(node));
     free(node);
@@ -175,6 +177,8 @@ void tns_hnode_free(hnode_t *node, void *notused)
 
 hnode_t *tns_hnode_alloc(void *notused)
 {
+    (void)notused;
+
     return malloc(sizeof(hnode_t));
 }
 

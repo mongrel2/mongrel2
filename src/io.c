@@ -51,16 +51,25 @@ int IO_SSL_VERIFY_METHOD = SSL_VERIFY_NONE;
 
 static ssize_t null_send(IOBuf *iob, char *buffer, int len)
 {
+    (void)iob;
+    (void)buffer;
+
     return len;
 }
 
 static ssize_t null_recv(IOBuf *iob, char *buffer, int len)
 {
+    (void)iob;
+    (void)buffer;
+
     return len;
 }
 
 static ssize_t null_stream_file(IOBuf *iob, int fd, off_t len)
 {
+    (void)iob;
+    (void)fd;
+
     return len;
 }
 
@@ -214,7 +223,7 @@ static ssize_t ssl_stream_file(IOBuf *iob, int fd, off_t len)
 
         check(Register_write(iob->fd, sent) != -1, "Failed to record write, must have died.");
     }
-    
+
     check(total <= len,
             "Wrote way too much, wrote %d but size was %zd",
             (int)total, len);
@@ -229,7 +238,11 @@ error:
     return -1;
 }
 
-void ssl_debug(void *p, int level, const char *msg) {
+void ssl_debug(void *p, int level, const char *msg)
+{
+    (void)p;
+    if (msg) {}
+
     if(level < 2) {
         debug("polarssl: %s", msg);
     }

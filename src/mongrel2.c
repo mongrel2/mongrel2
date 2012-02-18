@@ -173,7 +173,7 @@ int clear_pid_file(Server *srv)
     int rc = Unixy_remove_dead_pidfile(pid_file);
     check(rc == 0, "Failed to remove the dead PID file: %s", bdata(pid_file));
     bdestroy(pid_file);
-    
+
     return 0;
 error:
     return -1;
@@ -181,6 +181,8 @@ error:
 
 void tickertask(void *v)
 {
+    (void)v;
+
     taskname("ticker");
 
     while(!task_was_signaled()) {
