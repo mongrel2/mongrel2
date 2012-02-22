@@ -76,7 +76,9 @@ static inline int Connection_backend_event(Backend *found, Connection *conn)
         case BACKEND_PROXY:
             return PROXY;
         default:
-            error_response(conn, 501, "Invalid backend type: %d", found->type);
+            log_info("Invalid backend type: %d", found->type);
+            conn->req->status_code = 501;
+            return HTTP_ERROR;
     }
 
 error:
@@ -135,10 +137,18 @@ int connection_route_request(Connection *conn)
         host = server->default_host;
     }
 
-    error_unless(host, conn, 404, "Request for a host we don't have registered: %s", bdata(conn->req->host_name));
+    if(!host) {
+      log_err("Request for a host we don't have registered: %s", bdata(conn->req->host_name));
+      conn->req->status_code = 404;
+      return HTTP_ERROR;
+    }
 
     Backend *found = Host_match_backend(host, path, &route);
-    error_unless(found, conn, 404, "Handler not found: %s", bdata(path));
+    if(!found) {
+      log_err("Handler not found: %s", bdata(path));
+      conn->req->status_code = 404;
+      return HTTP_ERROR;
+    }
 
     Request_set_action(conn->req, found);
 
@@ -241,8 +251,11 @@ int Connection_send_to_handler(Connection *conn, Handler *handler, char *body, i
     if(conn->iob->use_ssl)
 	Connection_fingerprint_from_cert(conn);
 
-    error_unless(handler->running, conn, 404,
-            "Handler shutdown while trying to deliver: %s", bdata(Request_path(conn->req)));
+    if(!handler->running) {
+        log_err("Hanlder shutdown while trying to deliver: %s", bdata(Request_path(conn->req)));
+        conn->req->status_code = 404;
+        return HTTP_ERROR;
+    }
 
     if(handler->protocol == HANDLER_PROTO_TNET) {
         payload = Request_to_tnetstring(conn->req, handler->send_ident, 
@@ -260,8 +273,11 @@ int Connection_send_to_handler(Connection *conn, Handler *handler, char *body, i
     rc = Handler_deliver(handler->send_socket, bdata(payload), blength(payload));
     free(payload); payload = NULL;
 
-    error_unless(rc != -1, conn, 502, "Failed to deliver to handler: %s", 
-            bdata(Request_path(conn->req)));
+    if(rc == -1) {
+      log_err("Failed to deliver to handler: %s", bdata(Request_path(conn->req)));
+      conn->req->status_code = 502;
+      return HTTP_ERROR;
+    }
 
     return 0;
 
@@ -309,7 +325,11 @@ int connection_http_to_handler(Connection *conn)
     char *body = NULL;
 
     Handler *handler = Request_get_action(conn->req, handler);
-    error_unless(handler, conn, 404, "No action for request: %s", bdata(Request_path(conn->req)));
+    if(!handler) {
+      log_info("No action for request: %s", bdata(Request_path(conn->req)));
+      conn->req->status_code = 404;
+      return HTTP_ERROR;
+    }
 
     bstring expects = Request_get(conn->req, &HTTP_EXPECT);
 
@@ -317,9 +337,9 @@ int connection_http_to_handler(Connection *conn)
         if (biseqcstr(expects, "100-continue")) {
             Response_send_status(conn, &HTTP_100);
         } else {
-            Response_send_status(conn, &HTTP_417);
             log_info("Client requested unsupported expectation: %s.", bdata(expects));
-            goto error;
+            conn->req->status_code = 417;
+            return HTTP_ERROR;
         }
     }
 
@@ -401,6 +421,9 @@ int connection_http_error(Connection *conn)
   bstring resp = NULL;
 
   switch(http_error_code) {
+  case 304:
+    resp = &HTTP_304;
+    break;
   case 404:
     resp = &HTTP_404;
     break;
@@ -410,11 +433,14 @@ int connection_http_error(Connection *conn)
   case 412:
     resp = &HTTP_412;
     break;
+  case 417:
+    resp = &HTTP_417;
+    break;
   case 500:
     resp = &HTTP_500;
     break;
-  case 304:
-    resp = &HTTP_304;
+  case 502:
+    resp = &HTTP_502;
     break;
   default:
     return CLOSE;
@@ -566,12 +592,18 @@ int connection_proxy_req_parse(Connection *conn)
     rc = Connection_read_header(conn, conn->req);
 
     check_debug(rc > 0, "Failed to read another header.");
-    error_unless(Request_is_http(conn->req), conn, 400,
-            "Someone tried to change the protocol on us from HTTP.");
+    if(!Request_is_http(conn->req)) {
+        log_err("Someone tried to change the protocol on us from HTTP.");
+        conn->req->status_code = 400;
+        return HTTP_ERROR;
+    }
 
-    Backend *found = Host_match_backend(target_host, Request_path(conn->req), &route);
-    error_unless(found, conn, 404, 
-            "Handler not found: %s", bdata(Request_path(conn->req)));
+    Backend *found = Host_match_backend(target_host, Request_path(conn->req), NULL);
+    if(!found) {
+        log_err("Handler not found: %s", bdata(Request_path(conn->req)));
+        conn->req->status_code = 404;
+        return HTTP_ERROR;
+    }
 
     // break out of PROXY if the actions don't match
     if(found != req_action) {
@@ -592,9 +624,8 @@ error:
 
 int connection_proxy_failed(Connection *conn)
 {
-    Response_send_status(conn, &HTTP_502);
-
-    return CLOSE;
+    conn->req->status_code = 502;
+    return HTTP_ERROR;
 }
 
 
