@@ -31,7 +31,6 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 #include <assert.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -62,6 +61,8 @@ int MAX_CONTENT_LENGTH = 20 * 1024;
 int BUFFER_SIZE = 4 * 1024;
 int CONNECTION_STACK = 32 * 1024;
 int CLIENT_READ_RETRIES = 5;
+
+int MAX_WS_LENGTH = 256 * 1024;
 
 
 static inline int Connection_backend_event(Backend *found, Connection *conn)
@@ -321,7 +322,16 @@ int connection_http_to_handler(Connection *conn)
     check(IOBuf_read_commit(conn->iob, Request_header_length(conn->req)) != -1, "Finaly commit failed streaming the connection to http handlers.");
 
     if(is_websocket(conn)) {
-        content_len=0;
+        bstring wsKey = Request_get(conn->req, &WS_SEC_WS_KEY);
+        bstring response= websocket_challenge(wsKey);
+
+        Response_send_status(conn,response);
+        bdestroy(response);
+
+        conn->handler = handler;
+        bdestroy(conn->req->request_method);
+        conn->req->request_method=bfromcstr("WEBSOCKET");
+        return REQ_SENT;
     }
 
     if(content_len == 0) {
@@ -341,15 +351,6 @@ int connection_http_to_handler(Connection *conn)
         check_debug(rc == 0, "Failed to deliver to the handler.");
     }
 
-    // WebSocket detection
-    if(is_websocket(conn)) {
-        conn->handler = handler;
-        bdestroy(conn->req->request_method);
-        //We set this *after* passing the handshake to the handler so that the
-        //handshake has the actual request method (hopefully GET) sent to
-        //the handler
-        conn->req->request_method=bfromcstr("WEBSOCKET");
-    }
     Log_request(conn, 200, content_len);
 
     return REQ_SENT;
@@ -617,17 +618,40 @@ int connection_parse(Connection *conn)
 
 int Connection_read_wspacket(Connection *conn)
 {
-    char *body=NULL;
+    bstring payload=NULL;
+
+    uint8_t *dataU=NULL;
     char *data = IOBuf_start(conn->iob);
     int avail = IOBuf_avail(conn->iob);
     int64_t packet_length=-1;
     int smaller_packet_length;
+    int header_length;
+    char key[4];
+    int i;
+    int data_length;
     int tries = 0;
     int rc=0;
+    int fin;
+    int inprogFlags=0;
+    int isControl;
+    int flags;
 
-    for(tries = 0; packet_length == -1 && tries < CLIENT_READ_RETRIES; tries++) {
+again:
+    dataU=NULL;
+    data = IOBuf_start(conn->iob);
+    avail = IOBuf_avail(conn->iob);
+    packet_length=-1;
+    smaller_packet_length=0;
+    header_length=0;
+    i=0;
+    data_length=0;
+    tries = 0;
+    rc=0;
+    fin=0;
+
+    for(tries = 0; packet_length == -1 && tries < 8*CLIENT_READ_RETRIES; tries++) {
         if(avail > 0) {
-            packet_length = Websocket_packet_length((unsigned char *)data, avail);
+            packet_length = Websocket_packet_length((uint8_t *)data, avail);
         }
 
         if(packet_length == -1) {
@@ -636,24 +660,82 @@ int Connection_read_wspacket(Connection *conn)
         }
     }
     check(packet_length > 0,"Error receiving websocket packet header.")
-    check(packet_length <= MAX_CONTENT_LENGTH,"Received too-large websocket packet.");
 
     check_debug(packet_length <= INT_MAX,"Websocket packet longer than MAXINT.");
+    /* TODO properly terminate WS connection */
 
     smaller_packet_length = (int)packet_length;
+    
+    /* TODO check for maximum length */
 
-    body = IOBuf_read_all(conn->iob,packet_length,CLIENT_READ_RETRIES);
-    check(body != NULL, "Client closed the connection during websocket packet.");
+    header_length=Websocket_header_length((uint8_t *) data, avail);
+    data_length=smaller_packet_length-header_length;
+    dataU = (uint8_t *)IOBuf_read_all(conn->iob,header_length,8*CLIENT_READ_RETRIES);
+    memcpy(key,dataU+header_length-4,4);
 
-    rc = Connection_send_to_handler(conn, conn->handler, body, smaller_packet_length);
-    check_debug(rc == 0, "Failed to deliver to the handler.");
+    flags=dataU[0];
+    if (payload==NULL) {
+        inprogFlags=flags;
+    }
+    
+
+    fin=(WS_fin(dataU));
+    isControl=(WS_is_control(dataU));
+
+{
+    const char *error=WS_validate_packet(dataU,payload!=NULL);
+    check(error==NULL,"%s",error);
+}
+
+    dataU = (uint8_t *)IOBuf_read_all(conn->iob,data_length, 8*CLIENT_READ_RETRIES);
+    check(dataU != NULL, "Client closed the connection during websocket packet.");
+
+    for(i=0;i<data_length;++i) {
+        dataU[i]^=key[i%4];
+    }
+
+    if(isControl) /* Control frames get sent right-away */
+    {
+            Request_set(conn->req,bfromcstr("FLAGS"),bformat("0x%X",flags|0x80),1);
+            rc = Connection_send_to_handler(conn, conn->handler, (void *)dataU,data_length);
+            check_debug(rc == 0, "Failed to deliver to the handler.");
+    }
+    else {
+        if(fin) {
+            Request_set(conn->req,bfromcstr("FLAGS"),bformat("0x%X",inprogFlags|0x80),1);
+        }
+        if (payload == NULL) {
+            if (fin) {
+                rc = Connection_send_to_handler(conn, conn->handler, (void *)dataU,data_length);
+                check_debug(rc == 0, "Failed to deliver to the handler.");
+            }
+            else {
+                payload = blk2bstr(dataU,data_length);
+                check(payload != NULL,"Allocation failed");
+            }
+        } else {
+            check(BSTR_OK == bcatblk(payload,dataU,data_length), "Concatenation failed");
+            if (fin) {
+                rc = Connection_send_to_handler(conn, conn->handler, bdata(payload),blength(payload));
+                check_debug(rc == 0, "Failed to deliver to the handler.");
+                bdestroy(payload);
+                payload=NULL;
+            }
+        }
+    }
+    if (payload != NULL) {
+        goto again;
+    }
+
 
     return packet_length;
 
 error:
+    bdestroy(payload);
     return -1;
 
 }
+
 int connection_websocket_established(Connection *conn)
 {
     if(Connection_read_wspacket(conn) > 0) {
