@@ -218,7 +218,6 @@ error:
 
 int Register_fd_for_id(uint32_t id)
 {
-    check(id < MAX_REGISTERED_FDS, "Ident (id) given to register is greater than max.");
     RMElement *el = RadixMap_find(REG_ID_TO_FD, id);
 
     check_debug(el != NULL, "Id %d not registered.", id);
