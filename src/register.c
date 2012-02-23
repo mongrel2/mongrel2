@@ -140,8 +140,6 @@ int Register_disconnect(int fd)
         log_err("Failed to close IOBuffer, probably SSL error.");
     }
 
-    fdclose(fd);
-
     Register_clear(reg);
 
     // tracking the number of things we're processing
