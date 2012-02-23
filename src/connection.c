@@ -922,8 +922,9 @@ void Connection_deliver_task(void *v)
         msg=NULL;
     }
 error:
-    IOBuf_register_disconnect(conn->iob);
     bdestroy(msg);
+    if (IOBuf_fd(conn->iob) >= 0)
+        shutdown(IOBuf_fd(conn->iob), SHUT_RDWR);
     taskexit(0);
 }
 
