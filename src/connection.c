@@ -541,8 +541,9 @@ static inline int close_or_error(Connection *conn, int next)
     IOBuf_destroy(conn->proxy_iob);
     conn->proxy_iob = NULL;
 
-    check_debug(Register_disconnect(IOBuf_fd(conn->iob)) != -1,
-            "Register disconnect didn't work for %d", IOBuf_fd(conn->iob));
+    if (IOBuf_fd(conn->iob) >= 0)
+        check_debug(Register_disconnect(IOBuf_fd(conn->iob)) != -1,
+                "Register disconnect didn't work for %d", IOBuf_fd(conn->iob));
 
 error:
     // fallthrough on purpose
@@ -921,8 +922,9 @@ void Connection_deliver_task(void *v)
         msg=NULL;
     }
 error:
-    IOBuf_register_disconnect(conn->iob);
     bdestroy(msg);
+    if (IOBuf_fd(conn->iob) >= 0)
+        shutdown(IOBuf_fd(conn->iob), SHUT_RDWR);
     taskexit(0);
 }
 
