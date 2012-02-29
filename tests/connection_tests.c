@@ -39,6 +39,8 @@ char *test_Connection_deliver()
 
 int test_task_with_sample(const char *sample_file)
 {
+    (void)sample_file;
+
     check(SRV, "Server isn't configured.");
 
     Connection *conn = Connection_create(SRV, 12, 1400, "127.0.0.1");

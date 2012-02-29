@@ -34,7 +34,7 @@ char *test_darray_operations()
     mu_assert(darray_get(array, 1) == NULL, "Should be gone.");
     darray_free(val_check);
 
-    int old_max = array->max;
+    signed int old_max = array->max;
     darray_expand(array);
     mu_assert(array->max == old_max + array->expand_rate, "Wrong size after expand.");
 

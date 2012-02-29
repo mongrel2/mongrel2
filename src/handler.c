@@ -54,6 +54,8 @@ int HANDLER_STACK;
 
 static void cstr_free(void *data, void *hint)
 {
+    (void)hint;
+
     free(data);
 }
 

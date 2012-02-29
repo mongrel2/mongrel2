@@ -81,6 +81,8 @@ int Setting_get_int(const char *key, int def)
 
 void Setting_traverse_destroy(void *value, void *data)
 {
+    (void)data;
+
     bdestroy((bstring)value);
 }
 

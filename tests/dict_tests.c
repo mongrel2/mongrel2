@@ -52,6 +52,8 @@ static char *dupstring(char *str)
 
 static dnode_t *new_node(void *c)
 {
+    (void)c;
+
     static dnode_t few[5];
     static int count;
 
@@ -63,6 +65,8 @@ static dnode_t *new_node(void *c)
 
 static void del_node(dnode_t *n, void *c)
 {
+    (void)n;
+    (void)c;
 }
 
 static int prompt = 0;
@@ -138,7 +142,7 @@ char *test_dict_operations()
     dict_t darray[10];
     dict_t *d = &darray[0];
     dnode_t *dn;
-    int i;
+    unsigned int i;
     char *tok1, *tok2, *val;
     const char *key;
     FILE *data = fopen("tests/adt_data.txt", "r");

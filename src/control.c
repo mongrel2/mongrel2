@@ -49,6 +49,8 @@
 
 static void cstr_free(void *data, void *hint)
 {
+    (void)hint;
+
     free(data);
 }
 
@@ -186,6 +188,8 @@ error:
 
 static tns_value_t *signal_server_cb(bstring name, hash_t *args) 
 {
+    (void)args;
+
     int rc = -1;
     tns_value_t *result = NULL;
 
@@ -210,11 +214,17 @@ error: // fallthrough
 
 tns_value_t *version_cb(bstring name, hash_t *args)
 {
+    (void)name;
+    (void)args;
+
     return basic_response(bfromcstr("version"), bfromcstr(VERSION));
 }
 
 tns_value_t *help_cb(bstring name, hash_t *args)
 {
+    (void)name;
+    (void)args;
+
     tns_value_t *result = tns_new_dict();
     tns_value_t *headers = tns_new_list();
     tns_value_t *rows = tns_new_list();
@@ -239,6 +249,9 @@ tns_value_t *help_cb(bstring name, hash_t *args)
 
 tns_value_t *control_stop_cb(bstring name, hash_t *args)
 {
+    (void)name;
+    (void)args;
+
     CONTROL_RUNNING = 0;
 
     return basic_response(bfromcstr("msg"), bfromcstr("stopping the control port"));
@@ -246,6 +259,8 @@ tns_value_t *control_stop_cb(bstring name, hash_t *args)
 
 tns_value_t *kill_cb(bstring name, hash_t *args)
 {
+    (void)name;
+
     tns_value_t *result = tns_new_dict();
 
     tns_value_t *arg = get_arg(args, "id");
@@ -265,7 +280,7 @@ tns_value_t *kill_cb(bstring name, hash_t *args)
     tns_value_destroy(result); // easier to just delete it and return a basic one
 
     return basic_response(bfromcstr("status"), bfromcstr("OK"));
-   
+
 error: // fallthrough
     return result;
 }
@@ -273,6 +288,8 @@ error: // fallthrough
 
 tns_value_t *status_cb(bstring name, hash_t *args)
 {
+    (void)name;
+
     tns_value_t *val = get_arg(args, "what");
     tns_value_t *result = tns_new_dict();
 
@@ -300,6 +317,8 @@ struct tagbstring INFO_HEADERS = bsStatic("92:4:port,9:bind_addr,4:uuid,6:chroot
 
 tns_value_t *info_cb(bstring name, hash_t *args)
 {
+    (void)args;
+
     Server *srv = Server_queue_latest();
 
     if(biseqcstr(name, "time")) {
@@ -393,6 +412,8 @@ struct tagbstring DEFAULT_CONTROL_SPEC = bsStatic("ipc://run/control");
 
 void Control_task(void *v)
 {
+    (void)v;
+
     int rc = 0;
     tns_value_t *req = NULL;
     tns_value_t *rep = NULL;
@@ -409,7 +430,7 @@ void Control_task(void *v)
 
     while(CONTROL_RUNNING) {
         taskstate("waiting");
-        
+
         req = read_message(CONTROL_SOCKET);
         check(req, "Failed to read message: %s.", strerror(errno));
 

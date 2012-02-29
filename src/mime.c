@@ -87,7 +87,7 @@ bstring MIME_match_ext(bstring path, bstring def)
     check(rc == 0, "failed to lower case lower_path");
 
     type = tst_search_suffix(MIME_MAP, bdata(lower_path), blength(lower_path));
-    
+
     bdestroy(lower_path);
     lower_path = NULL;
 
@@ -100,6 +100,8 @@ error:
 
 void MIME_traverse_destroy(void *value, void *data)
 {
+    (void)data;
+
     bdestroy((bstring)value);
 }
 
