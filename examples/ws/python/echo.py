@@ -7,8 +7,8 @@ import re
 
 sender_id = "82209006-86FF-4982-B5EA-D1E29E55D480"
 
-conn = handler.Connection(sender_id, "tcp://127.0.0.1:9990",
-                          "tcp://127.0.0.1:9989")
+conn = handler.Connection(sender_id, "tcp://192.168.0.1:9990",
+                          "tcp://192.168.0.1:9989")
 
 CONNECTION_TIMEOUT=5
 
@@ -24,7 +24,7 @@ def abortConnection(conn,req,reason='none',code=None):
     #print 'abort',conn,req,reason,code
     if code is not None:
         #print "Closing cleanly\n"
-        conn.reply(req,wsutil.frame(code+reason,opcode=wsutil.OP_CLOSE))
+        conn.reply_websocket(req,code+reason,opcode=wsutil.OP_CLOSE)
         closingMessages[req.conn_id]=(time.time(),req.sender)
     else:
         conn.reply(req,'')
@@ -76,7 +76,7 @@ while True:
             del closingMessages[req.conn_id]
             conn.reply(req,'')
         else:
-            conn.reply(req,wsutil.frame(wsdata,opcode))
+            conn.reply_websocket(req,wsdata,opcode)
             conn.reply(req,'')
         continue
     if req.conn_id in closingMessages:
@@ -90,7 +90,7 @@ while True:
     if (opcode & 0x8) != 0:
         if opcode ==wsutil.OP_PING:
             opcode = wsutil.OP_PONG
-            conn.reply(req,wsutil.frame(wsdata,opcode))
+            conn.reply_websocket(req,wsdata,opcode)
 
         continue
 
@@ -108,4 +108,4 @@ while True:
         except:
             abortConnection(conn,req,'invalid UTF', wsutil.CLOSE_BAD_DATA)
             continue
-    conn.reply(req,wsutil.frame(wsdata,opcode))
+    conn.reply_websocket(req,wsdata,opcode)
