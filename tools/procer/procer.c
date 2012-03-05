@@ -50,6 +50,7 @@ static inline void redirect_output(const char *run_log)
 int Action_exec(Action *action, Profile *prof)
 {
     int rc = 0;
+    char *procer_run_log = NULL;
 
     debug("ACTION: command=%s, pid_file=%s, restart=%d, depends=%s",
             bdata(prof->command), bdata(prof->pid_file), prof->restart,
@@ -66,7 +67,9 @@ int Action_exec(Action *action, Profile *prof)
                     bdata(action->name));
         }
 
-        redirect_output("run.log");
+        if( (procer_run_log = getenv("PROCER_RUN_LOG")) == NULL)
+            procer_run_log = "run.log";
+        redirect_output(procer_run_log);
 
         rc = execle(bdatae(prof->command, ""), bdatae(prof->command, ""), NULL, environ);
         check(rc != -1, "Failed to exec command: %s", bdata(prof->command));
@@ -237,6 +240,7 @@ void taskmain(int argc, char *argv[])
     Action *action = NULL;
     tst_t *targets = NULL;
     bstring pid_file = NULL;
+    char *procer_error_log = NULL;
 
     m2program = procer_program;
 
@@ -257,7 +261,9 @@ void taskmain(int argc, char *argv[])
     rc = Unixy_pid_file(pid_file);
     check(rc == 0, "Failed to make the PID file: %s", bdata(pid_file));
 
-    FILE *log = fopen("error.log", "a+");
+    if( (procer_error_log = getenv("PROCER_ERROR_LOG")) == NULL)
+        procer_error_log = "error.log";
+    FILE *log = fopen(procer_error_log, "a+");
     check(log, "Couldn't open error.log");
     setbuf(log, NULL);
     dbg_set_log(log);
