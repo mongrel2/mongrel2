@@ -5,7 +5,7 @@
  *
  * \author Adriaan de Jong <dejong@fox-it.com>
  *
- *  Copyright (C) 2006-2010, Brainspark B.V.
+ *  Copyright (C) 2006-2011, Brainspark B.V.
  *
  *  This file is part of PolarSSL (http://www.polarssl.org)
  *  Lead Maintainer: Paul Bakker <polarssl_maintainer at polarssl.org>
@@ -26,12 +26,11 @@
  *  with this program; if not, write to the Free Software Foundation, Inc.,
  *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-
-#include "polarssl/config.h"
-#include "polarssl/cipher.h"
-
 #ifndef POLARSSL_CIPHER_WRAP_H
 #define POLARSSL_CIPHER_WRAP_H
+
+#include "config.h"
+#include "cipher.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -43,6 +42,18 @@ extern const cipher_info_t aes_128_cbc_info;
 extern const cipher_info_t aes_192_cbc_info;
 extern const cipher_info_t aes_256_cbc_info;
 
+#if defined(POLARSSL_CIPHER_MODE_CFB)
+extern const cipher_info_t aes_128_cfb128_info;
+extern const cipher_info_t aes_192_cfb128_info;
+extern const cipher_info_t aes_256_cfb128_info;
+#endif /* POLARSSL_CIPHER_MODE_CFB */
+
+#if defined(POLARSSL_CIPHER_MODE_CTR)
+extern const cipher_info_t aes_128_ctr_info;
+extern const cipher_info_t aes_192_ctr_info;
+extern const cipher_info_t aes_256_ctr_info;
+#endif /* POLARSSL_CIPHER_MODE_CTR */
+
 #endif /* defined(POLARSSL_AES_C) */
 
 #if defined(POLARSSL_CAMELLIA_C)
@@ -50,6 +61,18 @@ extern const cipher_info_t aes_256_cbc_info;
 extern const cipher_info_t camellia_128_cbc_info;
 extern const cipher_info_t camellia_192_cbc_info;
 extern const cipher_info_t camellia_256_cbc_info;
+
+#if defined(POLARSSL_CIPHER_MODE_CFB)
+extern const cipher_info_t camellia_128_cfb128_info;
+extern const cipher_info_t camellia_192_cfb128_info;
+extern const cipher_info_t camellia_256_cfb128_info;
+#endif /* POLARSSL_CIPHER_MODE_CFB */
+
+#if defined(POLARSSL_CIPHER_MODE_CTR)
+extern const cipher_info_t camellia_128_ctr_info;
+extern const cipher_info_t camellia_192_ctr_info;
+extern const cipher_info_t camellia_256_ctr_info;
+#endif /* POLARSSL_CIPHER_MODE_CTR */
 
 #endif /* defined(POLARSSL_CAMELLIA_C) */
 

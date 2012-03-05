@@ -5,7 +5,7 @@
  *
  * \author Adriaan de Jong <dejong@fox-it.com>
  *
- *  Copyright (C) 2006-2010, Brainspark B.V.
+ *  Copyright (C) 2006-2011, Brainspark B.V.
  *
  *  This file is part of PolarSSL (http://www.polarssl.org)
  *  Lead Maintainer: Paul Bakker <polarssl_maintainer at polarssl.org>
@@ -32,9 +32,19 @@
 
 #include <string.h>
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER) && !defined(inline)
 #define inline _inline
-#endif
+#else
+#if defined(__ARMCC_VERSION) && !defined(inline)
+#define inline __inline
+#endif /* __ARMCC_VERSION */
+#endif /*_MSC_VER */
+
+#define POLARSSL_ERR_CIPHER_FEATURE_UNAVAILABLE            -0x6080  /**< The selected feature is not available. */
+#define POLARSSL_ERR_CIPHER_BAD_INPUT_DATA                 -0x6100  /**< Bad input parameters to function. */
+#define POLARSSL_ERR_CIPHER_ALLOC_FAILED                   -0x6180  /**< Failed to allocate memory. */
+#define POLARSSL_ERR_CIPHER_INVALID_PADDING                -0x6200  /**< Input data contains invalid padding and is rejected. */
+#define POLARSSL_ERR_CIPHER_FULL_BLOCK_EXPECTED            -0x6280  /**< Decryption of block requires a full block. */
 
 typedef enum {
     POLARSSL_CIPHER_ID_NONE = 0,
@@ -46,12 +56,24 @@ typedef enum {
 
 typedef enum {
     POLARSSL_CIPHER_NONE = 0,
-    POLARSSL_CIPHER_CAMELLIA_128_CBC,
-    POLARSSL_CIPHER_CAMELLIA_192_CBC,
-    POLARSSL_CIPHER_CAMELLIA_256_CBC,
     POLARSSL_CIPHER_AES_128_CBC,
     POLARSSL_CIPHER_AES_192_CBC,
     POLARSSL_CIPHER_AES_256_CBC,
+    POLARSSL_CIPHER_AES_128_CFB128,
+    POLARSSL_CIPHER_AES_192_CFB128,
+    POLARSSL_CIPHER_AES_256_CFB128,
+    POLARSSL_CIPHER_AES_128_CTR,
+    POLARSSL_CIPHER_AES_192_CTR,
+    POLARSSL_CIPHER_AES_256_CTR,
+    POLARSSL_CIPHER_CAMELLIA_128_CBC,
+    POLARSSL_CIPHER_CAMELLIA_192_CBC,
+    POLARSSL_CIPHER_CAMELLIA_256_CBC,
+    POLARSSL_CIPHER_CAMELLIA_128_CFB128,
+    POLARSSL_CIPHER_CAMELLIA_192_CFB128,
+    POLARSSL_CIPHER_CAMELLIA_256_CFB128,
+    POLARSSL_CIPHER_CAMELLIA_128_CTR,
+    POLARSSL_CIPHER_CAMELLIA_192_CTR,
+    POLARSSL_CIPHER_CAMELLIA_256_CTR,
     POLARSSL_CIPHER_DES_CBC,
     POLARSSL_CIPHER_DES_EDE_CBC,
     POLARSSL_CIPHER_DES_EDE3_CBC
@@ -60,11 +82,13 @@ typedef enum {
 typedef enum {
     POLARSSL_MODE_NONE = 0,
     POLARSSL_MODE_CBC,
-    POLARSSL_MODE_CFB,
+    POLARSSL_MODE_CFB128,
     POLARSSL_MODE_OFB,
+    POLARSSL_MODE_CTR,
 } cipher_mode_t;
 
 typedef enum {
+    POLARSSL_OPERATION_NONE = -1,
     POLARSSL_DECRYPT = 0,
     POLARSSL_ENCRYPT,
 } operation_t;
@@ -72,44 +96,35 @@ typedef enum {
 enum {
     /** Undefined key length */
     POLARSSL_KEY_LENGTH_NONE = 0,
-    /** Key length, in bits, for DES keys */
-    POLARSSL_KEY_LENGTH_DES  = 56,
-    /** Key length, in bits, for DES in two key EDE */
-    POLARSSL_KEY_LENGTH_DES_EDE = 112,
-    /** Key length, in bits, for DES in three-key EDE */
-    POLARSSL_KEY_LENGTH_DES_EDE3 = 168,
+    /** Key length, in bits (including parity), for DES keys */
+    POLARSSL_KEY_LENGTH_DES  = 64,
+    /** Key length, in bits (including parity), for DES in two key EDE */
+    POLARSSL_KEY_LENGTH_DES_EDE = 128,
+    /** Key length, in bits (including parity), for DES in three-key EDE */
+    POLARSSL_KEY_LENGTH_DES_EDE3 = 192,
     /** Maximum length of any IV, in bytes */
     POLARSSL_MAX_IV_LENGTH = 16,
 };
 
 /**
- * Cipher information. Allows cipher functions to be called in a generic way.
+ * Base cipher information. The non-mode specific functions and values.
  */
 typedef struct {
-    /** Full cipher identifier (e.g. POLARSSL_CIPHER_AES_256_CBC) */
-    cipher_type_t type;
 
     /** Base Cipher type (e.g. POLARSSL_CIPHER_ID_AES) */
     cipher_id_t cipher;
 
-    /** Cipher mode (e.g. POLARSSL_CIPHER_MODE_CBC) */
-    cipher_mode_t mode;
-
-    /** Cipher key length, in bits (default length for variable sized ciphers) */
-    unsigned int key_length;
-
-    /** Name of the cipher */
-    const char * name;
-
-    /** IV size, in bytes */
-    unsigned int iv_size;
-
-    /** block size, in bytes */
-    unsigned int block_size;
-
     /** Encrypt using CBC */
     int (*cbc_func)( void *ctx, operation_t mode, size_t length, unsigned char *iv,
             const unsigned char *input, unsigned char *output );
+
+    /** Encrypt using CFB128 */
+    int (*cfb128_func)( void *ctx, operation_t mode, size_t length, size_t *iv_off,
+            unsigned char *iv, const unsigned char *input, unsigned char *output );
+
+    /** Encrypt using CTR */
+    int (*ctr_func)( void *ctx, size_t length, size_t *nc_off, unsigned char *nonce_counter,
+            unsigned char *stream_block, const unsigned char *input, unsigned char *output );
 
     /** Set key for encryption purposes */
     int (*setkey_enc_func)( void *ctx, const unsigned char *key, unsigned int key_length);
@@ -123,10 +138,38 @@ typedef struct {
     /** Free the given context */
     void (*ctx_free_func)( void *ctx );
 
+} cipher_base_t;
+
+/**
+ * Cipher information. Allows cipher functions to be called in a generic way.
+ */
+typedef struct {
+    /** Full cipher identifier (e.g. POLARSSL_CIPHER_AES_256_CBC) */
+    cipher_type_t type;
+
+    /** Cipher mode (e.g. POLARSSL_MODE_CBC) */
+    cipher_mode_t mode;
+
+    /** Cipher key length, in bits (default length for variable sized ciphers)
+     *  (Includes parity bits for ciphers like DES) */
+    unsigned int key_length;
+
+    /** Name of the cipher */
+    const char * name;
+
+    /** IV size, in bytes */
+    unsigned int iv_size;
+
+    /** block size, in bytes */
+    unsigned int block_size;
+
+    /** Base cipher information and functions */
+    const cipher_base_t *base;
+
 } cipher_info_t;
 
 /**
- * Generic message digest context.
+ * Generic cipher context.
  */
 typedef struct {
     /** Information about the associated cipher */
@@ -144,7 +187,7 @@ typedef struct {
     /** Number of bytes that still need processing */
     size_t unprocessed_len;
 
-    /** Current IV */
+    /** Current IV or NONCE_COUNTER for CTR-mode */
     unsigned char iv[POLARSSL_MAX_IV_LENGTH];
 
     /** Cipher-specific context */
@@ -192,8 +235,10 @@ const cipher_info_t *cipher_info_from_type( const cipher_type_t cipher_type );
  * \param ctx           context to initialise. May not be NULL.
  * \param cipher_info   cipher to use.
  *
- * \return              \c 0 on success, \c 1 on parameter failure, \c 2 if
- *                      allocation of the cipher-specific context failed.
+ * \return              \c 0 on success,
+ *                      \c POLARSSL_ERR_CIPHER_BAD_INPUT_DATA on parameter failure,
+ *                      \c POLARSSL_ERR_CIPHER_ALLOC_FAILED if allocation of the
+ *                      cipher-specific context failed.
  */
 int cipher_init_ctx( cipher_context_t *ctx, const cipher_info_t *cipher_info );
 
@@ -203,7 +248,8 @@ int cipher_init_ctx( cipher_context_t *ctx, const cipher_info_t *cipher_info );
  *
  * \param ctx           Free the cipher-specific context
  *
- * \returns             0 on success, 1 if parameter verification fails.
+ * \returns             0 on success, POLARSSL_ERR_CIPHER_BAD_INPUT_DATA if
+ *                      parameter verification fails.
  */
 int cipher_free_ctx( cipher_context_t *ctx );
 
@@ -221,6 +267,23 @@ static inline unsigned int cipher_get_block_size( const cipher_context_t *ctx )
         return 0;
 
     return ctx->cipher_info->block_size;
+}
+
+/**
+ * \brief               Returns the mode of operation for the cipher.
+ *                      (e.g. POLARSSL_MODE_CBC)
+ *
+ * \param ctx           cipher's context. Must have been initialised.
+ *
+ * \return              mode of operation, or POLARSSL_MODE_NONE if ctx
+ *                      has not been initialised.
+ */
+static inline cipher_mode_t cipher_get_cipher_mode( const cipher_context_t *ctx )
+{
+    if( NULL == ctx || NULL == ctx->cipher_info )
+        return POLARSSL_MODE_NONE;
+
+    return ctx->cipher_info->mode;
 }
 
 /**
@@ -288,6 +351,23 @@ static inline int cipher_get_key_size ( const cipher_context_t *ctx )
 }
 
 /**
+ * \brief               Returns the operation of the given cipher.
+ *
+ * \param ctx           cipher's context. Must have been initialised.
+ *
+ * \return              operation (POLARSSL_ENCRYPT or POLARSSL_DECRYPT),
+ *                      or POLARSSL_OPERATION_NONE if ctx has not been
+ *                      initialised.
+ */
+static inline operation_t cipher_get_operation( const cipher_context_t *ctx )
+{
+    if( NULL == ctx || NULL == ctx->cipher_info )
+        return POLARSSL_OPERATION_NONE;
+
+    return ctx->operation;
+}
+
+/**
  * \brief               Set the key to use with the given context.
  *
  * \param ctx           generic cipher context. May not be NULL. Must have been
@@ -298,7 +378,9 @@ static inline int cipher_get_key_size ( const cipher_context_t *ctx )
  * \param operation     Operation that the key will be used for, either
  *                      POLARSSL_ENCRYPT or POLARSSL_DECRYPT.
  *
- * \returns             0 on success, 1 if parameter verification fails.
+ * \returns             0 on success, POLARSSL_ERR_CIPHER_BAD_INPUT_DATA if
+ *                      parameter verification fails or a cipher specific
+ *                      error code.
  */
 int cipher_setkey( cipher_context_t *ctx, const unsigned char *key, int key_length,
         const operation_t operation );
@@ -307,9 +389,10 @@ int cipher_setkey( cipher_context_t *ctx, const unsigned char *key, int key_leng
  * \brief               Reset the given context, setting the IV to iv
  *
  * \param ctx           generic cipher context
- * \param iv            IV to use
+ * \param iv            IV to use or NONCE_COUNTER in the case of a CTR-mode cipher
  *
- * \returns             0 on success, 1 if parameter verification fails.
+ * \returns             0 on success, POLARSSL_ERR_CIPHER_BAD_INPUT_DATA
+ *                      if parameter verification fails.
  */
 int cipher_reset( cipher_context_t *ctx, const unsigned char *iv );
 
@@ -330,7 +413,11 @@ int cipher_reset( cipher_context_t *ctx, const unsigned char *iv );
  * \param olen          length of the output data, will be filled with the
  *                      actual number of bytes written.
  *
- * \returns             0 on success, 1 if parameter verification fails.
+ * \returns             0 on success, POLARSSL_ERR_CIPHER_BAD_INPUT_DATA if
+ *                      parameter verification fails,
+ *                      POLARSSL_ERR_CIPHER_FEATURE_UNAVAILABLE on an
+ *                      unsupported mode for a cipher or a cipher specific
+ *                      error code.
  */
 int cipher_update( cipher_context_t *ctx, const unsigned char *input, size_t ilen,
         unsigned char *output, size_t *olen );
@@ -341,11 +428,16 @@ int cipher_update( cipher_context_t *ctx, const unsigned char *input, size_t ile
  *                      contained within it will be padded with the size of
  *                      the last block, and written to the output buffer.
  *
- * \param ctx           Generic message digest context
+ * \param ctx           Generic cipher context
  * \param output        buffer to write data to. Needs block_size data available.
  * \param olen          length of the data written to the output buffer.
  *
- * \returns             0 on success, 1 if parameter verification fails.
+ * \returns             0 on success, POLARSSL_ERR_CIPHER_BAD_INPUT_DATA if
+ *                      parameter verification fails,
+ *                      POLARSSL_ERR_CIPHER_FULL_BLOCK_EXPECTED if decryption
+ *                      expected a full block but was not provided one,
+ *                      POLARSSL_ERR_CIPHER_INVALID_PADDING on invalid padding
+ *                      while decrypting or a cipher specific error code.
  */
 int cipher_finish( cipher_context_t *ctx, unsigned char *output, size_t *olen);
 
