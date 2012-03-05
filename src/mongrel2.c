@@ -222,9 +222,6 @@ int attempt_chroot_drop(Server *srv)
         log_info("-- Starting " VERSION ". Copyright (C) Zed A. Shaw. Licensed BSD.\n");
         log_info("-- Look in %s for startup messages and errors.", bdata(srv->error_log));
 
-        check(access("/run", F_OK) == 0, "/run directory doesn't exist in %s or isn't owned right.", bdata(srv->chroot));
-        check(access("/tmp", F_OK) == 0, "/tmp directory doesn't exist in %s or isn't owned right.", bdata(srv->chroot));
-
         rc = Unixy_daemonize();
         check(rc == 0, "Failed to daemonize, looks like you're hosed.");
 
