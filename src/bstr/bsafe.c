@@ -34,7 +34,7 @@ char * strcpy (char *dst, const char *src) {
 char * strcat (char *dst, const char *src) {
 	dst = dst;
 	src = src;
-	fprintf (stderr, "bsafe error: strcat() is not safe, use bstrcat instead.\n");
+	fprintf (stderr, "bsafe error: strcat() is not safe, use bconcat instead.\n");
 	if (bsafeShouldExit) exit (-1);
 	return NULL;
 }
@@ -61,7 +61,7 @@ char * (strncat) (char *dst, const char *src, size_t n) {
 	dst = dst;
 	src = src;
 	n = n;
-	fprintf (stderr, "bsafe error: strncat() is not safe, use bstrcat then btrunc\n\tor cstr2tbstr, btrunc then bstrcat instead.\n");
+	fprintf (stderr, "bsafe error: strncat() is not safe, use bconcat then btrunc\n\tor cstr2tbstr, btrunc then bconcat instead.\n");
 	if (bsafeShouldExit) exit (-1);
 	return NULL;
 }
