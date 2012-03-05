@@ -59,12 +59,10 @@ static int wsa_init_done = 0;
 #include <netdb.h>
 #include <errno.h>
 
-#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
+#if defined(__FreeBSD__) || defined(__OpenBSD__)
 #include <sys/endian.h>
 #elif defined(__APPLE__)
 #include <machine/endian.h>
-#elif defined(__sun__)
-#include <sys/isa_defs.h>
 #else
 #include <endian.h>
 #endif
@@ -229,7 +227,8 @@ int net_accept( int bind_fd, int *client_fd, void *client_ip )
 {
     struct sockaddr_in client_addr;
 
-#if defined(__socklen_t_defined) || defined(_SOCKLEN_T)
+#if defined(__socklen_t_defined) || defined(_SOCKLEN_T) ||  \
+    defined(_SOCKLEN_T_DECLARED)
     socklen_t n = (socklen_t) sizeof( client_addr );
 #else
     int n = (int) sizeof( client_addr );
@@ -319,7 +318,7 @@ int net_recv( void *ctx, unsigned char *buf, size_t len )
 /*
  * Write at most 'len' characters
  */
-int net_send( void *ctx, unsigned char *buf, size_t len )
+int net_send( void *ctx, const unsigned char *buf, size_t len )
 {
     int ret = write( *((int *) ctx), buf, len );
 

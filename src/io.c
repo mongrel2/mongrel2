@@ -343,7 +343,7 @@ static inline int iobuf_ssl_setup(IOBuf *buf)
     ssl_set_authmode(&buf->ssl, IO_SSL_VERIFY_METHOD);
 
     havege_init(&buf->hs);
-    ssl_set_rng(&buf->ssl, havege_rand, &buf->hs);
+    ssl_set_rng(&buf->ssl, havege_random, &buf->hs);
 
 #ifndef DEBUG
     ssl_set_dbg(&buf->ssl, ssl_debug, NULL);

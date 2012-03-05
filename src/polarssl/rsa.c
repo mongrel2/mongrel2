@@ -1,7 +1,7 @@
 /*
  *  The RSA public-key cryptosystem
  *
- *  Copyright (C) 2006-2010, Brainspark B.V.
+ *  Copyright (C) 2006-2011, Brainspark B.V.
  *
  *  This file is part of PolarSSL (http://www.polarssl.org)
  *  Lead Maintainer: Paul Bakker <polarssl_maintainer at polarssl.org>
@@ -58,9 +58,9 @@ void rsa_init( rsa_context *ctx,
  * Generate an RSA keypair
  */
 int rsa_gen_key( rsa_context *ctx,
-        int (*f_rng)(void *),
-        void *p_rng,
-        unsigned int nbits, int exponent )
+                 int (*f_rng)(void *, unsigned char *, size_t),
+                 void *p_rng,
+                 unsigned int nbits, int exponent )
 {
     int ret;
     mpi P1, Q1, H, G;
@@ -142,7 +142,7 @@ int rsa_check_pubkey( const rsa_context *ctx )
         return( POLARSSL_ERR_RSA_KEY_CHECK_FAILED );
 
     if( mpi_msb( &ctx->N ) < 128 ||
-        mpi_msb( &ctx->N ) > 4096 )
+        mpi_msb( &ctx->N ) > POLARSSL_MPI_MAX_BITS )
         return( POLARSSL_ERR_RSA_KEY_CHECK_FAILED );
 
     if( mpi_msb( &ctx->E ) < 2 ||
@@ -307,11 +307,11 @@ cleanup:
 /**
  * Generate and apply the MGF1 operation (from PKCS#1 v2.1) to a buffer.
  *
- * @param dst       buffer to mask
- * @param dlen      length of destination buffer
- * @param src       source of the mask generation
- * @param slen      length of the source buffer
- * @param md_ctx    message digest context to use
+ * \param dst       buffer to mask
+ * \param dlen      length of destination buffer
+ * \param src       source of the mask generation
+ * \param slen      length of the source buffer
+ * \param md_ctx    message digest context to use
  */
 static void mgf_mask( unsigned char *dst, size_t dlen, unsigned char *src, size_t slen,  
                        md_context_t *md_ctx )
@@ -356,16 +356,17 @@ static void mgf_mask( unsigned char *dst, size_t dlen, unsigned char *src, size_
  * Add the message padding, then do an RSA operation
  */
 int rsa_pkcs1_encrypt( rsa_context *ctx,
-                       int (*f_rng)(void *),
+                       int (*f_rng)(void *, unsigned char *, size_t),
                        void *p_rng,
                        int mode, size_t ilen,
                        const unsigned char *input,
                        unsigned char *output )
 {
     size_t nb_pad, olen;
+    int ret;
     unsigned char *p = output;
 #if defined(POLARSSL_PKCS1_V21)
-    unsigned int i, hlen;
+    unsigned int hlen;
     const md_info_t *md_info;
     md_context_t md_ctx;
 #endif
@@ -392,13 +393,13 @@ int rsa_pkcs1_encrypt( rsa_context *ctx,
                 int rng_dl = 100;
 
                 do {
-                    *p = (unsigned char) f_rng( p_rng );
-                } while( *p == 0 && --rng_dl );
+                    ret = f_rng( p_rng, p, 1 );
+                } while( *p == 0 && --rng_dl && ret == 0 );
 
                 // Check if RNG failed to generate data
                 //
-                if( rng_dl == 0 )
-                    return POLARSSL_ERR_RSA_RNG_FAILED;
+                if( rng_dl == 0 || ret != 0)
+                    return POLARSSL_ERR_RSA_RNG_FAILED + ret;
 
                 p++;
             }
@@ -427,8 +428,10 @@ int rsa_pkcs1_encrypt( rsa_context *ctx,
 
             // Generate a random octet string seed
             //
-            for( i = 0; i < hlen; ++i )
-                *p++ = (unsigned char) f_rng( p_rng ); 
+            if( ( ret = f_rng( p_rng, p, hlen ) ) != 0 )
+                return( POLARSSL_ERR_RSA_RNG_FAILED + ret );
+
+            p += hlen;
 
             // Construct DB
             //
@@ -482,7 +485,7 @@ int rsa_pkcs1_decrypt( rsa_context *ctx,
 
     ilen = ctx->len;
 
-    if( ilen < 16 || ilen > (int) sizeof( buf ) )
+    if( ilen < 16 || ilen > sizeof( buf ) )
         return( POLARSSL_ERR_RSA_BAD_INPUT_DATA );
 
     ret = ( mode == RSA_PUBLIC )
@@ -565,10 +568,10 @@ int rsa_pkcs1_decrypt( rsa_context *ctx,
             return( POLARSSL_ERR_RSA_INVALID_PADDING );
     }
 
-    if (ilen - (int)(p - buf) > output_max_len)
+    if (ilen - (p - buf) > output_max_len)
         return( POLARSSL_ERR_RSA_OUTPUT_TOO_LARGE );
 
-    *olen = ilen - (int)(p - buf);
+    *olen = ilen - (p - buf);
     memcpy( output, p, *olen );
 
     return( 0 );
@@ -578,7 +581,7 @@ int rsa_pkcs1_decrypt( rsa_context *ctx,
  * Do an RSA operation to sign the message digest
  */
 int rsa_pkcs1_sign( rsa_context *ctx,
-                    int (*f_rng)(void *),
+                    int (*f_rng)(void *, unsigned char *, size_t),
                     void *p_rng,
                     int mode,
                     int hash_id,
@@ -590,7 +593,8 @@ int rsa_pkcs1_sign( rsa_context *ctx,
     unsigned char *p = sig;
 #if defined(POLARSSL_PKCS1_V21)
     unsigned char salt[POLARSSL_MD_MAX_SIZE];
-    unsigned int i, slen, hlen, offset = 0;
+    unsigned int slen, hlen, offset = 0;
+    int ret;
     size_t msb;
     const md_info_t *md_info;
     md_context_t md_ctx;
@@ -757,8 +761,8 @@ int rsa_pkcs1_sign( rsa_context *ctx,
 
             // Generate salt of length slen
             //
-            for( i = 0; i < slen; ++i )
-                salt[i] = (unsigned char) f_rng( p_rng ); 
+            if( ( ret = f_rng( p_rng, salt, slen ) ) != 0 )
+                return( POLARSSL_ERR_RSA_RNG_FAILED + ret );
 
             // Note: EMSA-PSS encoding is over the length of N - 1 bits
             //
@@ -818,6 +822,7 @@ int rsa_pkcs1_verify( rsa_context *ctx,
     unsigned char *p, c;
     unsigned char buf[1024];
 #if defined(POLARSSL_PKCS1_V21)
+    unsigned char result[POLARSSL_MD_MAX_SIZE];
     unsigned char zeros[8];
     unsigned int hlen;
     size_t slen, msb;
@@ -826,7 +831,7 @@ int rsa_pkcs1_verify( rsa_context *ctx,
 #endif
     siglen = ctx->len;
 
-    if( siglen < 16 || siglen > (int) sizeof( buf ) )
+    if( siglen < 16 || siglen > sizeof( buf ) )
         return( POLARSSL_ERR_RSA_BAD_INPUT_DATA );
 
     ret = ( mode == RSA_PUBLIC )
@@ -853,7 +858,7 @@ int rsa_pkcs1_verify( rsa_context *ctx,
             }
             p++;
 
-            len = siglen - (int)( p - buf );
+            len = siglen - ( p - buf );
 
             if( len == 34 )
             {
@@ -994,13 +999,12 @@ int rsa_pkcs1_verify( rsa_context *ctx,
             md_update( &md_ctx, zeros, 8 );
             md_update( &md_ctx, hash, hashlen );
             md_update( &md_ctx, p, slen );
-            md_finish( &md_ctx, p );
+            md_finish( &md_ctx, result );
 
-            if( memcmp( p, p + slen, hlen ) == 0 )
+            if( memcmp( p + slen, result, hlen ) == 0 )
                 return( 0 );
             else
                 return( POLARSSL_ERR_RSA_VERIFY_FAILED );
-            break;
 #endif
 
         default:
@@ -1080,12 +1084,17 @@ void rsa_free( rsa_context *ctx )
 #define RSA_PT  "\xAA\xBB\xCC\x03\x02\x01\x00\xFF\xFF\xFF\xFF\xFF" \
                 "\x11\x22\x33\x0A\x0B\x0C\xCC\xDD\xDD\xDD\xDD\xDD"
 
-static int myrand( void *rng_state )
+static int myrand( void *rng_state, unsigned char *output, size_t len )
 {
+    size_t i;
+
     if( rng_state != NULL )
         rng_state  = NULL;
 
-    return( rand() );
+    for( i = 0; i < len; ++i )
+        output[i] = rand();
+    
+    return( 0 );
 }
 
 /*

@@ -41,7 +41,7 @@
 #ifndef POLARSSL_BN_MUL_H
 #define POLARSSL_BN_MUL_H
 
-#include "polarssl/config.h"
+#include "bignum.h"
 
 #if defined(POLARSSL_HAVE_ASM)
 
@@ -498,6 +498,8 @@
 
 #if defined(__arm__)
 
+#if !defined(__thumb__)
+
 #define MULADDC_INIT                            \
     asm( "ldr    r0, %0         " :: "m" (s));  \
     asm( "ldr    r1, %0         " :: "m" (d));  \
@@ -518,6 +520,8 @@
     asm( "str    r1, %0         " : "=m" (d));  \
     asm( "str    r0, %0         " : "=m" (s) :: \
     "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7" );
+
+#endif /* Thumb */
 
 #endif /* ARMv3 */
 
@@ -697,7 +701,7 @@
     t_uint r0, r1;
 
 #define MULADDC_CORE                    \
-    r   = *(s++) * (t_dbl) b;           \
+    r   = *(s++) * (t_udbl) b;           \
     r0  = r;                            \
     r1  = r >> biL;                     \
     r0 += c;  r1 += (r0 <  c);          \

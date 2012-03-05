@@ -29,6 +29,8 @@
 
 #include <string.h>
 
+#define POLARSSL_ERR_MD2_FILE_IO_ERROR                 -0x0070  /**< Read/write error in file. */
+
 /**
  * \brief          MD2 context structure
  */
@@ -38,8 +40,8 @@ typedef struct
     unsigned char state[48];    /*!< intermediate digest state  */
     unsigned char buffer[16];   /*!< data block being processed */
 
-    unsigned char ipad[64];     /*!< HMAC: inner padding        */
-    unsigned char opad[64];     /*!< HMAC: outer padding        */
+    unsigned char ipad[16];     /*!< HMAC: inner padding        */
+    unsigned char opad[16];     /*!< HMAC: outer padding        */
     size_t left;                /*!< amount of data in buffer   */
 }
 md2_context;
@@ -87,8 +89,7 @@ void md2( const unsigned char *input, size_t ilen, unsigned char output[16] );
  * \param path     input file name
  * \param output   MD2 checksum result
  *
- * \return         0 if successful, 1 if fopen failed,
- *                 or 2 if fread failed
+ * \return         0 if successful, or POLARSSL_ERR_MD2_FILE_IO_ERROR
  */
 int md2_file( const char *path, unsigned char output[16] );
 
