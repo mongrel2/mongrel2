@@ -226,6 +226,8 @@ void start_terminator()
     sigaction(SIGHUP, &sa, &osa);
 }
 
+char *procer_program = "procer";
+
 void taskmain(int argc, char *argv[])
 {
     dbg_set_log(stderr);
@@ -236,13 +238,15 @@ void taskmain(int argc, char *argv[])
     tst_t *targets = NULL;
     bstring pid_file = NULL;
 
-    check(argc == 3, "USAGE: procer <profile_dir> <procer_pid_file>");
+    m2program = procer_program;
+
+    check(argc == 3, "USAGE: %s <profile_dir> <procer_pid_file>", m2program);
     pid_file = bfromcstr(argv[2]);
 
     srand(time(NULL)); // simple randomness
 
     rc = Unixy_remove_dead_pidfile(pid_file);
-    check(rc == 0, "Failed to remove %s, procer is probably already running.", bdata(pid_file));
+    check(rc == 0, "Failed to remove %s, %s is probably already running.", bdata(pid_file), m2program);
 
     rc = Unixy_daemonize();
     check(rc == 0, "Couldn't daemonize, that's not good.");

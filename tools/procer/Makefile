@@ -1,5 +1,6 @@
 CFLAGS=-DNDEBUG -pthread -g -I../../src -Wall $(OPTFLAGS)
 PREFIX?=/usr/local
+LIBS?=-lzmq 
 SOURCES=$(wildcard *.c)
 OBJECTS=$(patsubst %.c,%.o,${SOURCES})
 
