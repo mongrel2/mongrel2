@@ -42,7 +42,7 @@
 #include <limits.h>
 #include <stdlib.h>
 
-
+char *m2program = "mongrel2";
 
 int Unixy_chroot(bstring path)
 {

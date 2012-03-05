@@ -373,7 +373,7 @@ void taskmain(int argc, char **argv)
     dbg_set_log(stderr);
     int rc = 0;
 
-    check(argc == 3 || argc == 4, "usage: mongrel2 config.sqlite server_uuid [config_module.so]");
+    check(argc == 3 || argc == 4, "usage: %s config.sqlite server_uuid [config_module.so]", m2program);
 
     if(argc == 4) {
         log_info("Using configuration module %s to load configs.", argv[3]);
