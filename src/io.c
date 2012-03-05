@@ -135,7 +135,7 @@ static int ssl_do_handshake(IOBuf *iob)
     check(!iob->handshake_performed, "ssl_do_handshake called unnecessarily");
     while((rcode = ssl_handshake(&iob->ssl)) != 0) {
 
-        check(rcode == 0 || rcode == POLARSSL_ERR_NET_WANT_READ
+        check(rcode == POLARSSL_ERR_NET_WANT_READ
                 || rcode == POLARSSL_ERR_NET_WANT_WRITE, "Handshake failed with error code: %d", rcode);
     }
     iob->handshake_performed = 1;
