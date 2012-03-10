@@ -769,6 +769,7 @@ of available settings are:
 
 \begin{description}
 \item[control\_port=ipc://run/control] This is where Mongrel2 will listen with 0MQ for control messages.  You should use \verb|ipc://| for the spec, so that only a local user with file access can get at it.
+\item[disable.access\_logging=0] Set this to \verb|1| to turn off access logs. You still have to specify log files but they won't be created.
 \item[limits.buffer\_size=2 * 1024] Internal IO buffers, used for things like proxying and handling requests.  This is a \emph{very} conservative setting, so if you get HTTP headers greater than this, you'll want to increase this setting.  You'll also want to shoot whoever is sending you those requests, because the average is 400-600 bytes.
 \item[limits.client\_read\_retries=5] How many times it will attempt to read a complete HTTP header from a client. This prevents attacks where a client trickles an incomplete request at you until you run out of resources.
 \item[limits.connection\_stack\_size=32 * 1024] Size of the stack used for connection coroutines.  If you're trying to cram a ton of connections into very little RAM, see how low this can go.

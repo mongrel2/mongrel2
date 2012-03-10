@@ -19,6 +19,30 @@ def http_response(body, code, status, headers):
 
     return HTTP_FORMAT % payload
 
+def websocket_response(data,opcode=1,rsvd=0):
+    header=''
+    header+=chr(0x80|opcode|rsvd<<4)
+    realLength=len(data)
+    #print 'realLength',realLength
+    if realLength < 126:
+        dummyLength=realLength
+    elif realLength < 2**16:
+        dummyLength = 126
+    else:
+        dummyLength=127
+    header+=chr(dummyLength)
+    if dummyLength == 127:
+        header += chr(realLength >> 56 &0xff)
+        header += chr(realLength >> 48 &0xff)
+        header += chr(realLength >> 40 &0xff)
+        header += chr(realLength >> 32 &0xff)
+        header += chr(realLength >> 24 & 0xff)
+        header += chr(realLength >> 16 & 0xff)
+    if dummyLength == 126 or dummyLength == 127:
+        header += chr(realLength >> 8 & 0xff)
+        header += chr(realLength & 0xff)
+    return header+data
+
 
 class Connection(object):
     """
@@ -111,6 +135,13 @@ class Connection(object):
         self.reply(req, http_response(body, code, status, headers or {}))
 
 
+    def reply_websocket(self, req, body, opcode=1, rsvd=0):
+        """
+        Basic websocket response mechanism which will take your data,
+        and encode it so that the browser gets them.
+        """
+        self.reply(req, websocket_response(body, opcode, rsvd))
+
     def deliver(self, uuid, idents, data):
         """
         This lets you send a single message to many currently
@@ -137,6 +168,14 @@ class Connection(object):
         """
         self.deliver(uuid, idents, http_response(body, code, status, headers or {}))
 
+
+    def deliver_websocket(self, uuid, idents, body, opcode=1,rsvd=0):
+        """
+        Same as deliver, but builds a websocket packet, which means, yes,
+        you can reply to multiple connected clients waiting for a websocket
+        packet from one handler.  Kinda cool.
+        """
+        self.deliver(uuid, idents, websocket_response(body,opcode,rsvd))
 
     def close(self, req):
         """

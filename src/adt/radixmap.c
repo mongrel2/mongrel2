@@ -240,13 +240,20 @@ error:
 
 uint32_t RadixMap_push(RadixMap *map, uint32_t value)
 {
-    check(map->end + 1 < map->max, "RadixMap is full.");
-    map->counter++;
+    RMElement *found = NULL;
 
-    if(map->counter == UINT32_MAX) {
-        // wrap it around so that we skip the ending trigger
-        map->counter = 0;
-    }
+    check(map->end + 1 < map->max, "RadixMap is full.");
+
+    do {
+        map->counter++;
+
+        if(map->counter == UINT32_MAX) {
+            // wrap it around so that we skip the ending trigger
+            map->counter = 0;
+        }
+
+        found = RadixMap_find(map, map->counter);
+    } while (found);
 
     if(map->end == 0 || map->contents[map->end-1].data.key < map->counter) {
         // this one already fits on the end so we're done
