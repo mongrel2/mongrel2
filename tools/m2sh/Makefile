@@ -45,7 +45,7 @@ $(TESTS): %: %.c build/libm2sh.a
 	cd ../.. && make clean all
 
 clean:
-	rm -rf src/*.o build tests/*_tests tests/*.o
+	rm -rf src/*.o src/*/*.o build tests/*_tests tests/*.o
 
 pristine: clean
 	rm -f ../lemon/lemon

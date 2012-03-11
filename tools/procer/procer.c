@@ -50,6 +50,14 @@ static inline void redirect_output(const char *run_log)
 int Action_exec(Action *action, Profile *prof)
 {
     int rc = 0;
+    char *procer_run_log = NULL;
+
+    bstring pidfile_env = bfromcstr("PIDFILE="); 
+    bconcat(pidfile_env, prof->pid_file);
+    putenv(bdata(pidfile_env));
+    bstring action_env = bfromcstr("ACTION="); 
+    bconcat(action_env, action->name);
+    putenv(bdata(action_env));
 
     debug("ACTION: command=%s, pid_file=%s, restart=%d, depends=%s",
             bdata(prof->command), bdata(prof->pid_file), prof->restart,
@@ -66,7 +74,9 @@ int Action_exec(Action *action, Profile *prof)
                     bdata(action->name));
         }
 
-        redirect_output("run.log");
+        if( (procer_run_log = getenv("PROCER_RUN_LOG")) == NULL)
+            procer_run_log = "run.log";
+        redirect_output(procer_run_log);
 
         rc = execle(bdatae(prof->command, ""), bdatae(prof->command, ""), NULL, environ);
         check(rc != -1, "Failed to exec command: %s", bdata(prof->command));
@@ -226,6 +236,8 @@ void start_terminator()
     sigaction(SIGHUP, &sa, &osa);
 }
 
+char *procer_program = "procer";
+
 void taskmain(int argc, char *argv[])
 {
     dbg_set_log(stderr);
@@ -235,14 +247,17 @@ void taskmain(int argc, char *argv[])
     Action *action = NULL;
     tst_t *targets = NULL;
     bstring pid_file = NULL;
+    char *procer_error_log = NULL;
 
-    check(argc == 3, "USAGE: procer <profile_dir> <procer_pid_file>");
+    m2program = procer_program;
+
+    check(argc == 3, "USAGE: %s <profile_dir> <procer_pid_file>", m2program);
     pid_file = bfromcstr(argv[2]);
 
     srand(time(NULL)); // simple randomness
 
     rc = Unixy_remove_dead_pidfile(pid_file);
-    check(rc == 0, "Failed to remove %s, procer is probably already running.", bdata(pid_file));
+    check(rc == 0, "Failed to remove %s, %s is probably already running.", bdata(pid_file), m2program);
 
     rc = Unixy_daemonize();
     check(rc == 0, "Couldn't daemonize, that's not good.");
@@ -253,7 +268,9 @@ void taskmain(int argc, char *argv[])
     rc = Unixy_pid_file(pid_file);
     check(rc == 0, "Failed to make the PID file: %s", bdata(pid_file));
 
-    FILE *log = fopen("error.log", "a+");
+    if( (procer_error_log = getenv("PROCER_ERROR_LOG")) == NULL)
+        procer_error_log = "error.log";
+    FILE *log = fopen(procer_error_log, "a+");
     check(log, "Couldn't open error.log");
     setbuf(log, NULL);
     dbg_set_log(log);

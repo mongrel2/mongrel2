@@ -117,6 +117,10 @@ int camellia_crypt_cbc( camellia_context *ctx,
 /**
  * \brief          CAMELLIA-CFB128 buffer encryption/decryption
  *
+ * Note: Due to the nature of CFB you should use the same key schedule for
+ * both encryption and decryption. So a context initialized with
+ * camellia_setkey_enc() for both CAMELLIA_ENCRYPT and CAMELLIE_DECRYPT.
+ *
  * \param ctx      CAMELLIA context
  * \param mode     CAMELLIA_ENCRYPT or CAMELLIA_DECRYPT
  * \param length   length of the input data
@@ -130,8 +134,37 @@ int camellia_crypt_cbc( camellia_context *ctx,
 int camellia_crypt_cfb128( camellia_context *ctx,
                        int mode,
                        size_t length,
-                       int *iv_off,
+                       size_t *iv_off,
                        unsigned char iv[16],
+                       const unsigned char *input,
+                       unsigned char *output );
+
+/*
+ * \brief               CAMELLIA-CTR buffer encryption/decryption
+ *
+ * Warning: You have to keep the maximum use of your counter in mind!
+ *
+ * Note: Due to the nature of CTR you should use the same key schedule for
+ * both encryption and decryption. So a context initialized with
+ * camellia_setkey_enc() for both CAMELLIA_ENCRYPT and CAMELLIA_DECRYPT.
+ *
+ * \param length        The length of the data
+ * \param nc_off        The offset in the current stream_block (for resuming
+ *                      within current cipher stream). The offset pointer to
+ *                      should be 0 at the start of a stream.
+ * \param nonce_counter The 128-bit nonce and counter.
+ * \param stream_block  The saved stream-block for resuming. Is overwritten
+ *                      by the function.
+ * \param input         The input data stream
+ * \param output        The output data stream
+ *
+ * \return         0 if successful
+ */
+int camellia_crypt_ctr( camellia_context *ctx,
+                       size_t length,
+                       size_t *nc_off,
+                       unsigned char nonce_counter[16],
+                       unsigned char stream_block[16],
                        const unsigned char *input,
                        unsigned char *output );
 

@@ -51,8 +51,11 @@ static int ssl_write_client_hello( ssl_context *ssl )
     ssl->major_ver = SSL_MAJOR_VERSION_3;
     ssl->minor_ver = SSL_MINOR_VERSION_0;
 
-    ssl->max_major_ver = SSL_MAJOR_VERSION_3;
-    ssl->max_minor_ver = SSL_MINOR_VERSION_2;
+    if( ssl->max_major_ver == 0 && ssl->max_minor_ver == 0 )
+    {
+        ssl->max_major_ver = SSL_MAJOR_VERSION_3;
+        ssl->max_minor_ver = SSL_MINOR_VERSION_2;
+    }
 
     /*
      *     0  .   0   handshake type
@@ -78,8 +81,10 @@ static int ssl_write_client_hello( ssl_context *ssl )
 
     SSL_DEBUG_MSG( 3, ( "client hello, current time: %lu", t ) );
 
-    for( i = 28; i > 0; i-- )
-        *p++ = (unsigned char) ssl->f_rng( ssl->p_rng );
+    if( ( ret = ssl->f_rng( ssl->p_rng, p, 28 ) ) != 0 )
+        return( ret );
+
+    p += 28;
 
     memcpy( ssl->randbytes, buf + 6, 32 );
 
@@ -173,7 +178,9 @@ static int ssl_write_client_hello( ssl_context *ssl )
 
 static int ssl_parse_server_hello( ssl_context *ssl )
 {
+#if defined(POLARSSL_DEBUG_MSG) && defined(POLARSSL_DEBUG_C)
     time_t t;
+#endif
     int ret, i;
     size_t n;
     int ext_len;
@@ -221,10 +228,12 @@ static int ssl_parse_server_hello( ssl_context *ssl )
 
     ssl->minor_ver = buf[5];
 
+#if defined(POLARSSL_DEBUG_MSG) && defined(POLARSSL_DEBUG_C)
     t = ( (time_t) buf[6] << 24 )
       | ( (time_t) buf[7] << 16 )
       | ( (time_t) buf[8] <<  8 )
       | ( (time_t) buf[9]       );
+#endif
 
     memcpy( ssl->randbytes + 32, buf + 6, 32 );
 
@@ -390,7 +399,7 @@ static int ssl_parse_server_key_exchange( ssl_context *ssl )
         return( POLARSSL_ERR_SSL_BAD_HS_SERVER_KEY_EXCHANGE );
     }
 
-    if( ssl->dhm_ctx.len < 64 || ssl->dhm_ctx.len > 256 )
+    if( ssl->dhm_ctx.len < 64 || ssl->dhm_ctx.len > 512 )
     {
         SSL_DEBUG_MSG( 1, ( "bad server key exchange message" ) );
         return( POLARSSL_ERR_SSL_BAD_HS_SERVER_KEY_EXCHANGE );
@@ -580,8 +589,9 @@ static int ssl_write_client_key_exchange( ssl_context *ssl )
         ssl->premaster[1] = (unsigned char) ssl->max_minor_ver;
         ssl->pmslen = 48;
 
-        for( i = 2; i < ssl->pmslen; i++ )
-            ssl->premaster[i] = (unsigned char) ssl->f_rng( ssl->p_rng );
+        ret = ssl->f_rng( ssl->p_rng, ssl->premaster + 2, ssl->pmslen - 2 );
+        if( ret != 0 )
+            return( ret );
 
         i = 4;
         n = ssl->peer_cert->rsa.len;
