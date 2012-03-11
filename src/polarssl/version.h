@@ -31,24 +31,24 @@
 #ifndef POLARSSL_VERSION_H
 #define POLARSSL_VERSION_H
 
-#include "polarssl/config.h"
+#include "config.h"
 
 /**
  * The version number x.y.z is split into three parts.
  * Major, Minor, Patchlevel
  */
-#define POLARSSL_VERSION_MAJOR  0
-#define POLARSSL_VERSION_MINOR  99
-#define POLARSSL_VERSION_PATCH  5
+#define POLARSSL_VERSION_MAJOR  1
+#define POLARSSL_VERSION_MINOR  1
+#define POLARSSL_VERSION_PATCH  1
 
 /**
  * The single version number has the following structure:
  *    MMNNPP00
  *    Major version | Minor version | Patch version
  */
-#define POLARSSL_VERSION_NUMBER         0x00630500
-#define POLARSSL_VERSION_STRING         "0.99.5"
-#define POLARSSL_VERSION_STRING_FULL    "PolarSSL 0.99.5"
+#define POLARSSL_VERSION_NUMBER         0x01010100
+#define POLARSSL_VERSION_STRING         "1.1.1"
+#define POLARSSL_VERSION_STRING_FULL    "PolarSSL 1.1.1"
 
 #if defined(POLARSSL_VERSION_C)
 
@@ -58,7 +58,7 @@
  * \return          The constructed version number in the format
  *                  MMNNPP00 (Major, Minor, Patch).
  */
-unsigned int version_get_number();
+unsigned int version_get_number( void );
 
 /**
  * Get the version string ("x.y.z").

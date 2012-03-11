@@ -42,7 +42,7 @@
 #include <limits.h>
 #include <stdlib.h>
 
-
+char *m2program = "mongrel2";
 
 int Unixy_chroot(bstring path)
 {
@@ -135,7 +135,7 @@ int Unixy_remove_dead_pidfile(bstring pid_path)
     check(rc != 1, "Process %d is still running, shut it down first.", pid);
 
     if(pid == -1) {
-        log_info("No previous Mongrel2 running, continuing on.");
+        log_info("No previous %s running, continuing on.", m2program);
     } else {
         log_info("Process %d is not running anymore, so removing PID file %s.", pid, bdata(pid_path));
         rc = unlink((const char *)pid_path->data);
