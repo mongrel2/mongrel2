@@ -52,11 +52,10 @@ int Action_exec(Action *action, Profile *prof)
     int rc = 0;
     char *procer_run_log = NULL;
 
-    bstring pidfile_env = bfromcstr("PIDFILE="); 
-    bconcat(pidfile_env, prof->pid_file);
+    bstring pidfile_env = bformat("PROCER_PIDFILE=%s", bdata(prof->pid_file)); 
     putenv(bdata(pidfile_env));
-    bstring action_env = bfromcstr("ACTION="); 
-    bconcat(action_env, action->name);
+
+    bstring action_env = bformat("PROCER_ACTION=%s", bdata(action->name)); 
     putenv(bdata(action_env));
 
     debug("ACTION: command=%s, pid_file=%s, restart=%d, depends=%s",
