@@ -231,10 +231,9 @@ Route *RouteMap_match_suffix(RouteMap *map, bstring target)
 
 
 Route *RouteMap_simple_prefix_match(RouteMap *map, bstring target)
-{ 
+{
     debug("Searching for route: %s in map: %p", bdata(target), map);
     Route *route = tst_search_prefix(map->routes, bdata(target), blength(target));
-    Route *matched;
 
     if(route) {
         debug("Found simple prefix: %s", bdata(route->pattern));

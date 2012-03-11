@@ -6,6 +6,7 @@
 
 int test_action_cb(Connection *data)
 {
+    (void)data;
     return 1;
 }
 

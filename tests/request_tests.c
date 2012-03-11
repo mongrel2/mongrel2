@@ -14,7 +14,7 @@ char *test_Request_payloads()
     bstring fake_sender = bfromcstr("FAKESENDER");
     Request *req = Request_create();
     size_t nparsed = 0;
-    int i = 0;
+    unsigned int i = 0;
     int rc = glob("tests/and_suite/*", 0, NULL, &test_files);
     mu_assert(rc == 0, "Failed to glob file sin tests/and_suite/*");
     FILE *test_cases = fopen("tests/request_payloads.txt", "w");

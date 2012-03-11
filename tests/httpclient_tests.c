@@ -56,7 +56,7 @@ error:
 char *test_parser_thrashing()
 {
     glob_t test_files;
-    int i = 0;
+    unsigned int i = 0;
     int nparsed = 0;
     int tests_run = 0;
     int execs_run = 0;
@@ -90,7 +90,7 @@ char *test_parser_thrashing()
                     nparsed, httpclient_parser_has_error(&p), 
                     httpclient_parser_is_finished(&p));
         } else if(p.chunked) {
-            int start = p.body_start;
+            unsigned int start = p.body_start;
 
             do {
                 httpclient_parser_init(&p);

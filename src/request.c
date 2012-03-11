@@ -60,11 +60,15 @@ void Request_init()
 
 static hnode_t *req_alloc_hash(void *notused)
 {
+    (void)notused;
+
     return (hnode_t *)malloc(sizeof(hnode_t));
 }
 
 static void req_free_hash(hnode_t *node, void *notused)
 {
+    (void)notused;
+
     bstrListDestroy((struct bstrList *)hnode_get(node));
     bdestroy((bstring)hnode_getkey(node));
     free(node);
@@ -92,6 +96,9 @@ static void http_version_cb(void *data, const char *at, size_t length)
 
 static void header_done_cb(void *data, const char *at, size_t length)
 {
+    (void)at;
+    (void)length;
+
     Request *req = (Request *)data;
 
     // extract content_len
