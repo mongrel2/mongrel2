@@ -129,7 +129,7 @@ int darray_push(darray_t *array, void *el)
 
 void *darray_pop(darray_t *array)
 {
-    check(array->end - 1 > 0, "Attempt to pop from empty array.");
+    check(array->end - 1 >= 0, "Attempt to pop from empty array.");
 
     void *el = darray_remove(array, array->end - 1);
     array->end--;
