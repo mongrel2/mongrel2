@@ -339,12 +339,12 @@ int sha1_file( const char *path, unsigned char output[20] )
     unsigned char buf[1024];
 
     if( ( f = fopen( path, "rb" ) ) == NULL )
-        return( 1 );
+        return( POLARSSL_ERR_SHA1_FILE_IO_ERROR );
 
     sha1_starts( &ctx );
 
     while( ( n = fread( buf, 1, sizeof( buf ), f ) ) > 0 )
-        sha1_update( &ctx, buf, (int) n );
+        sha1_update( &ctx, buf, n );
 
     sha1_finish( &ctx, output );
 
@@ -353,7 +353,7 @@ int sha1_file( const char *path, unsigned char output[20] )
     if( ferror( f ) != 0 )
     {
         fclose( f );
-        return( 2 );
+        return( POLARSSL_ERR_SHA1_FILE_IO_ERROR );
     }
 
     fclose( f );

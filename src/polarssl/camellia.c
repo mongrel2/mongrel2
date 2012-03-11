@@ -68,7 +68,7 @@ static const unsigned char SIGMA_CHARS[6][8] =
     { 0xb0, 0x56, 0x88, 0xc2, 0xb3, 0xe6, 0xc1, 0xfd }
 };
 
-#ifdef POLARSSL_CAMELLIA_SMALL_MEMORY
+#if defined(POLARSSL_CAMELLIA_SMALL_MEMORY)
 
 static const unsigned char FSb[256] =
 {
@@ -580,12 +580,13 @@ int camellia_crypt_cbc( camellia_context *ctx,
 int camellia_crypt_cfb128( camellia_context *ctx,
                        int mode,
                        size_t length,
-                       int *iv_off,
+                       size_t *iv_off,
                        unsigned char iv[16],
                        const unsigned char *input,
                        unsigned char *output )
 {
-    int c, n = *iv_off;
+    int c;
+    size_t n = *iv_off;
 
     if( mode == CAMELLIA_DECRYPT )
     {
@@ -625,14 +626,15 @@ int camellia_crypt_cfb128( camellia_context *ctx,
  * Camellia-CTR buffer encryption/decryption
  */
 int camellia_crypt_ctr( camellia_context *ctx,
-                       int length,
-                       int *nc_off,
+                       size_t length,
+                       size_t *nc_off,
                        unsigned char nonce_counter[16],
                        unsigned char stream_block[16],
                        const unsigned char *input,
                        unsigned char *output )
 {
-    int c, n = *nc_off, i, cb;
+    int c, i, cb;
+    size_t n = *nc_off;
 
     while( length-- )
     {
@@ -867,7 +869,7 @@ int camellia_self_test( int verbose )
     unsigned char dst[16];
     unsigned char iv[16];
 #if defined(POLARSSL_CIPHER_MODE_CTR)
-    int offset, len;
+    size_t offset, len;
     unsigned char nonce_counter[16];
     unsigned char stream_block[16];
 #endif

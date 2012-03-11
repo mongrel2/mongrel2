@@ -1,9 +1,9 @@
 /**
  * \file net.h
  *
- * \brief MD5 message digest algorithm (hash function)
+ * \brief Network communication functions
  *
- *  Copyright (C) 2006-2010, Brainspark B.V.
+ *  Copyright (C) 2006-2011, Brainspark B.V.
  *
  *  This file is part of PolarSSL (http://www.polarssl.org)
  *  Lead Maintainer: Paul Bakker <polarssl_maintainer at polarssl.org>
@@ -143,7 +143,7 @@ int net_recv( void *ctx, unsigned char *buf, size_t len );
  *                 or a non-zero error code; POLARSSL_ERR_NET_WANT_WRITE
  *                 indicates write() is blocking.
  */
-int net_send( void *ctx, unsigned char *buf, size_t len );
+int net_send( void *ctx, const unsigned char *buf, size_t len );
 
 /**
  * \brief          Gracefully shutdown the connection
