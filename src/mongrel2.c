@@ -173,7 +173,7 @@ int clear_pid_file(Server *srv)
     int rc = Unixy_remove_dead_pidfile(pid_file);
     check(rc == 0, "Failed to remove the dead PID file: %s", bdata(pid_file));
     bdestroy(pid_file);
-    
+
     return 0;
 error:
     return -1;
@@ -181,6 +181,8 @@ error:
 
 void tickertask(void *v)
 {
+    (void)v;
+
     taskname("ticker");
 
     while(!task_was_signaled()) {
@@ -221,9 +223,6 @@ int attempt_chroot_drop(Server *srv)
         log_info("All loaded up, time to turn into a server.");
         log_info("-- Starting " VERSION ". Copyright (C) Zed A. Shaw. Licensed BSD.\n");
         log_info("-- Look in %s for startup messages and errors.", bdata(srv->error_log));
-
-        check(access("/run", F_OK) == 0, "/run directory doesn't exist in %s or isn't owned right.", bdata(srv->chroot));
-        check(access("/tmp", F_OK) == 0, "/tmp directory doesn't exist in %s or isn't owned right.", bdata(srv->chroot));
 
         rc = Unixy_daemonize();
         check(rc == 0, "Failed to daemonize, looks like you're hosed.");
@@ -373,7 +372,7 @@ void taskmain(int argc, char **argv)
     dbg_set_log(stderr);
     int rc = 0;
 
-    check(argc == 3 || argc == 4, "usage: mongrel2 config.sqlite server_uuid [config_module.so]");
+    check(argc == 3 || argc == 4, "usage: %s config.sqlite server_uuid [config_module.so]", m2program);
 
     if(argc == 4) {
         log_info("Using configuration module %s to load configs.", argv[3]);

@@ -46,6 +46,8 @@ static char *dupstring(char *str)
 
 static hnode_t *new_node(void *c)
 {
+    (void)c;
+
     static hnode_t few[5];
     static int count;
 
@@ -57,6 +59,8 @@ static hnode_t *new_node(void *c)
 
 static void del_node(hnode_t *n, void *c)
 {
+    (void)n;
+    (void)c;
 }
 
 char *test_hash_operations()

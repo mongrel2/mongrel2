@@ -1,7 +1,7 @@
 
 # Also see "include/polarssl/config.h"
 
-CFLAGS	= -I../include -D_FILE_OFFSET_BITS=64 -Wall -Wdeclaration-after-statement
+CFLAGS	+= -I../include -D_FILE_OFFSET_BITS=64 -Wall -W -Wdeclaration-after-statement
 OFLAGS	= -O
 
 # MicroBlaze specific options:
@@ -13,19 +13,29 @@ OFLAGS	= -O
 # To compile as a shared library:
 # CFLAGS += -fPIC
 
+SONAME=libpolarssl.so.0
+
 DLEXT=so
 # OSX shared library extension:
 # DLEXT=dylib
 
-OBJS=	aes.o		arc4.o		base64.o	\
-	bignum.o	certs.o		debug.o		\
-	des.o		dhm.o		havege.o	\
-	md2.o		md4.o		md5.o		\
-	net.o		padlock.o	rsa.o		\
-	sha1.o		sha2.o		sha4.o		\
-	ssl_cli.o	ssl_srv.o	ssl_tls.o	\
-	timing.o	x509parse.o	xtea.o		\
-	camellia.o  version.o
+# Windows shared library extension:
+# DLEXT=dll
+
+OBJS=	aes.o		arc4.o		asn1parse.o		\
+		base64.o	bignum.o	camellia.o		\
+		certs.o		cipher.o	cipher_wrap.o	\
+		ctr_drbg.o	debug.o		des.o			\
+		dhm.o		entropy.o	entropy_poll.o	\
+		error.o		havege.o					\
+		md.o		md_wrap.o	md2.o			\
+		md4.o		md5.o		net.o			\
+		padlock.o	pem.o		pkcs11.o		\
+		rsa.o		sha1.o		sha2.o			\
+		sha4.o		ssl_cli.o	ssl_srv.o		\
+		ssl_tls.o	timing.o	version.o		\
+		x509parse.o	xtea.o
+	
 
 .SILENT:
 
@@ -37,17 +47,21 @@ shared: libpolarssl.$(DLEXT)
 
 libpolarssl.a: $(OBJS)
 	echo "  AR    $@"
-	ar r $@ $(OBJS)
+	$(AR) r $@ $(OBJS)
 	echo "  RL    $@"
-	ranlib $@
+	$(AR) s $@
 
 libpolarssl.so: libpolarssl.a
 	echo "  LD    $@"
-	$(CC) -shared -Wl,-soname,$@ -o $@ $(OBJS)
+	$(CC) ${LDFLAGS} -shared -Wl,-soname,$(SONAME) -o $@ $(OBJS)
 
 libpolarssl.dylib: libpolarssl.a
 	echo "  LD    $@"
-	$(CC) -dynamiclib -o $@ $(OBJS)
+	$(CC) ${LDFLAGS} -dynamiclib -o $@ $(OBJS)
+
+libpolarssl.dll: libpolarssl.a 
+	echo "  LD    $@" 
+	$(CC) -shared -Wl,-soname,$@ -o $@ $(OBJS) -lws2_32 -lwinmm -lgdi32 
 
 .c.o:
 	echo "  CC    $<"

@@ -578,8 +578,9 @@ static int ssl_encrypt_buf( ssl_context *ssl )
             /*
              * Generate IV
              */
-            for( i = 0; i < ssl->ivlen; i++ )
-                ssl->iv_enc[i] = ssl->f_rng( ssl->p_rng );
+            int ret = ssl->f_rng( ssl->p_rng, ssl->iv_enc, ssl->ivlen );
+            if( ret != 0 )
+                return( ret );
 
             /*
              * Shift message for ivlen bytes and prepend IV
@@ -996,7 +997,7 @@ int ssl_read_record( ssl_context *ssl )
          */
         ssl->in_msglen -= ssl->in_hslen;
 
-        memcpy( ssl->in_msg, ssl->in_msg + ssl->in_hslen,
+        memmove( ssl->in_msg, ssl->in_msg + ssl->in_hslen,
                 ssl->in_msglen );
 
         ssl->in_hslen  = 4;
@@ -1375,7 +1376,7 @@ int ssl_parse_certificate( ssl_context *ssl )
     {
         SSL_DEBUG_MSG( 1, ( "malloc(%d bytes) failed",
                        sizeof( x509_cert ) ) );
-        return( 1 );
+        return( POLARSSL_ERR_SSL_MALLOC_FAILED );
     }
 
     memset( ssl->peer_cert, 0, sizeof( x509_cert ) );
@@ -1417,11 +1418,6 @@ int ssl_parse_certificate( ssl_context *ssl )
         if( ssl->ca_chain == NULL )
         {
             SSL_DEBUG_MSG( 1, ( "got no CA chain" ) );
-
-	    /* Make certificate optional to allow self-signed certificate. */
-	    if( ssl->authmode != SSL_VERIFY_REQUIRED )
-		return 0;
-
             return( POLARSSL_ERR_SSL_CA_CHAIN_REQUIRED );
         }
 
@@ -1710,7 +1706,7 @@ int ssl_init( ssl_context *ssl )
     if( ssl->in_ctr == NULL )
     {
         SSL_DEBUG_MSG( 1, ( "malloc(%d bytes) failed", len ) );
-        return( 1 );
+        return( POLARSSL_ERR_SSL_MALLOC_FAILED );
     }
 
     ssl->out_ctr = (unsigned char *) malloc( len );
@@ -1721,7 +1717,7 @@ int ssl_init( ssl_context *ssl )
     {
         SSL_DEBUG_MSG( 1, ( "malloc(%d bytes) failed", len ) );
         free( ssl-> in_ctr );
-        return( 1 );
+        return( POLARSSL_ERR_SSL_MALLOC_FAILED );
     }
 
     memset( ssl-> in_ctr, 0, SSL_BUFFER_LEN );
@@ -1734,6 +1730,49 @@ int ssl_init( ssl_context *ssl )
     sha1_starts( &ssl->fin_sha1 );
 
     return( 0 );
+}
+
+/*
+ * Reset an initialized and used SSL context for re-use while retaining
+ * all application-set variables, function pointers and data.
+ */
+void ssl_session_reset( ssl_context *ssl )
+{
+    ssl->state = SSL_HELLO_REQUEST;
+    
+    ssl->in_offt = NULL;
+
+    ssl->in_msgtype = 0;
+    ssl->in_msglen = 0;
+    ssl->in_left = 0;
+
+    ssl->in_hslen = 0;
+    ssl->nb_zero = 0;
+
+    ssl->out_msgtype = 0;
+    ssl->out_msglen = 0;
+    ssl->out_left = 0;
+
+    ssl->do_crypt = 0;
+    ssl->pmslen = 0;
+    ssl->keylen = 0;
+    ssl->minlen = 0;
+    ssl->ivlen = 0;
+    ssl->maclen = 0;
+
+    memset( ssl->out_ctr, 0, SSL_BUFFER_LEN );
+    memset( ssl->in_ctr, 0, SSL_BUFFER_LEN );
+    memset( ssl->randbytes, 0, 64 );
+    memset( ssl->premaster, 0, 256 );
+    memset( ssl->iv_enc, 0, 16 );
+    memset( ssl->iv_dec, 0, 16 );
+    memset( ssl->mac_enc, 0, 32 );
+    memset( ssl->mac_dec, 0, 32 );
+    memset( ssl->ctx_enc, 0, 128 );
+    memset( ssl->ctx_dec, 0, 128 );
+
+     md5_starts( &ssl->fin_md5  );
+    sha1_starts( &ssl->fin_sha1 );
 }
 
 /*
@@ -1758,7 +1797,7 @@ void ssl_set_verify( ssl_context *ssl,
 }
 
 void ssl_set_rng( ssl_context *ssl,
-                  int (*f_rng)(void *),
+                  int (*f_rng)(void *, unsigned char *, size_t),
                   void *p_rng )
 {
     ssl->f_rng      = f_rng;
@@ -1775,7 +1814,7 @@ void ssl_set_dbg( ssl_context *ssl,
 
 void ssl_set_bio( ssl_context *ssl,
             int (*f_recv)(void *, unsigned char *, size_t), void *p_recv,
-            int (*f_send)(void *, unsigned char *, size_t), void *p_send )
+            int (*f_send)(void *, const unsigned char *, size_t), void *p_send )
 {
     ssl->f_recv     = f_recv;
     ssl->f_send     = f_send;
@@ -1874,12 +1913,21 @@ int ssl_set_hostname( ssl_context *ssl, const char *hostname )
     ssl->hostname_len = strlen( hostname );
     ssl->hostname = (unsigned char *) malloc( ssl->hostname_len + 1 );
 
+    if( ssl->hostname == NULL )
+        return( POLARSSL_ERR_SSL_MALLOC_FAILED );
+
     memcpy( ssl->hostname, (unsigned char *) hostname,
             ssl->hostname_len );
     
     ssl->hostname[ssl->hostname_len] = '\0';
 
     return( 0 );
+}
+
+void ssl_set_max_version( ssl_context *ssl, int major, int minor )
+{
+    ssl->max_major_ver = major;
+    ssl->max_minor_ver = minor;
 }
 
 /*
@@ -2169,6 +2217,9 @@ int ssl_write( ssl_context *ssl, const unsigned char *buf, size_t len )
         }
     }
 
+    n = ( len < SSL_MAX_CONTENT_LEN )
+        ? len : SSL_MAX_CONTENT_LEN;
+
     if( ssl->out_left != 0 )
     {
         if( ( ret = ssl_flush_output( ssl ) ) != 0 )
@@ -2177,18 +2228,17 @@ int ssl_write( ssl_context *ssl, const unsigned char *buf, size_t len )
             return( ret );
         }
     }
-
-    n = ( len < SSL_MAX_CONTENT_LEN )
-        ? len : SSL_MAX_CONTENT_LEN;
-
-    ssl->out_msglen  = n;
-    ssl->out_msgtype = SSL_MSG_APPLICATION_DATA;
-    memcpy( ssl->out_msg, buf, n );
-
-    if( ( ret = ssl_write_record( ssl ) ) != 0 )
+    else
     {
-        SSL_DEBUG_RET( 1, "ssl_write_record", ret );
-        return( ret );
+        ssl->out_msglen  = n;
+        ssl->out_msgtype = SSL_MSG_APPLICATION_DATA;
+        memcpy( ssl->out_msg, buf, n );
+
+        if( ( ret = ssl_write_record( ssl ) ) != 0 )
+        {
+            SSL_DEBUG_RET( 1, "ssl_write_record", ret );
+            return( ret );
+        }
     }
 
     SSL_DEBUG_MSG( 2, ( "<= write" ) );

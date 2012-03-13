@@ -51,16 +51,25 @@ int IO_SSL_VERIFY_METHOD = SSL_VERIFY_NONE;
 
 static ssize_t null_send(IOBuf *iob, char *buffer, int len)
 {
+    (void)iob;
+    (void)buffer;
+
     return len;
 }
 
 static ssize_t null_recv(IOBuf *iob, char *buffer, int len)
 {
+    (void)iob;
+    (void)buffer;
+
     return len;
 }
 
 static ssize_t null_stream_file(IOBuf *iob, int fd, off_t len)
 {
+    (void)iob;
+    (void)fd;
+
     return len;
 }
 
@@ -135,7 +144,7 @@ static int ssl_do_handshake(IOBuf *iob)
     check(!iob->handshake_performed, "ssl_do_handshake called unnecessarily");
     while((rcode = ssl_handshake(&iob->ssl)) != 0) {
 
-        check(rcode == 0 || rcode == POLARSSL_ERR_NET_WANT_READ
+        check(rcode == POLARSSL_ERR_NET_WANT_READ
                 || rcode == POLARSSL_ERR_NET_WANT_WRITE, "Handshake failed with error code: %d", rcode);
     }
     iob->handshake_performed = 1;
@@ -214,7 +223,7 @@ static ssize_t ssl_stream_file(IOBuf *iob, int fd, off_t len)
 
         check(Register_write(iob->fd, sent) != -1, "Failed to record write, must have died.");
     }
-    
+
     check(total <= len,
             "Wrote way too much, wrote %d but size was %zd",
             (int)total, len);
@@ -229,7 +238,11 @@ error:
     return -1;
 }
 
-void ssl_debug(void *p, int level, const char *msg) {
+void ssl_debug(void *p, int level, const char *msg)
+{
+    (void)p;
+    if (msg) {}
+
     if(level < 2) {
         debug("polarssl: %s", msg);
     }
@@ -343,7 +356,7 @@ static inline int iobuf_ssl_setup(IOBuf *buf)
     ssl_set_authmode(&buf->ssl, IO_SSL_VERIFY_METHOD);
 
     havege_init(&buf->hs);
-    ssl_set_rng(&buf->ssl, havege_rand, &buf->hs);
+    ssl_set_rng(&buf->ssl, havege_random, &buf->hs);
 
 #ifndef DEBUG
     ssl_set_dbg(&buf->ssl, ssl_debug, NULL);

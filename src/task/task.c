@@ -317,6 +317,7 @@ int MAINSTACKSIZE = 96 * 1024;
 
 static void taskmainstart(void *v)
 {
+    (void)v;
     taskname("taskmain");
     taskmain(taskargc, taskargv);
 }
@@ -340,14 +341,14 @@ int main(int argc, char **argv)
  */
 void addtask(Tasklist *l, Task *t)
 {
-    Task *test = NULL;
-
     if(t->prev != NULL || t->next != NULL || l->head == t) {
         log_err("Task is already added, refusing to do it again: %p, %p, %p=%p", t->prev, t->next, l->head, t);
         return;
     }
 
 #ifndef NDEBUG
+    Task *test = NULL;
+
     for(test = taskrunqueue.head; test != NULL; test = test->next)
     {
         assert(test != t && "Fucking double addtask mother fucker!");
