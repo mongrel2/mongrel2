@@ -27,7 +27,7 @@ struct tagbstring FORMAT = bsStatic("%s\r\n"
 
 struct tagbstring CTYPE = bsStatic("text/html");
 
-struct tagbstring CONNECTION_STATUS = bsStatic("keep-alive");
+struct tagbstring CONNECTION_STATUS = bsStatic("close");
 
 static inline bstring get_path(int status_code, tns_value_t *config)
 {
