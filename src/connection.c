@@ -584,7 +584,8 @@ int connection_proxy_req_parse(Connection *conn)
         return HTTP_REQ;
     }
 
-    error_response(conn, 500, "Invalid code branch, tell Zed.");
+    conn->req->status_code = 500;
+    return HTTP_ERROR;
 error:
     return REMOTE_CLOSE;
 }
@@ -666,7 +667,8 @@ int connection_identify_request(Connection *conn)
         taskname("HTTP");
         next = HTTP_REQ;
     } else {
-        error_response(conn, 500, "Invalid code branch, tell Zed.");
+        conn->req->status_code = 500;
+        return HTTP_ERROR;
     }
 
     return next;
@@ -1038,9 +1040,17 @@ int Connection_read_header(Connection *conn, Request *req)
         }
     }
 
-    error_unless(tries < CLIENT_READ_RETRIES, conn, 
-            400, "Too many small packet read attempts.");
-    error_unless(rc == 1, conn, 400, "Error parsing request.");
+    if(tries >= CLIENT_READ_RETRIES) {
+      log_err("Too many small packet read attempts.");
+      conn->req->status_code = 400;
+      return HTTP_ERROR;
+    }
+
+    if(rc != 1) {
+      log_err("Error parsing request.");
+      conn->req->status_code = 400;
+      return HTTP_ERROR;
+    }
 
     // add the x-forwarded-for header
     Request_set(conn->req, &HTTP_X_FORWARDED_FOR, bfromcstr(conn->remote), 1);
