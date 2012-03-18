@@ -17,7 +17,7 @@ Here's how I might do it on ArchLinux:
 
 <pre>
 # install ZeroMQ 
-wget http://www.zeromq.org/local--files/area:download/zeromq-2.1.7.tar.gz 
+wget http://download.zeromq.org/historic/zeromq-2.1.7.tar.gz 
 tar -xzvf zeromq-2.1.7.tar.gz 
 cd zeromq-2.1.7/ 
 ./configure 
