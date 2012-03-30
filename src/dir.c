@@ -261,15 +261,16 @@ void FileRecord_destroy(FileRecord *file)
     }
 }
 
-static inline char *url_decode(char *in, char *out)
+static inline char *url_decode(const char *in, char *out)
 {
   char *cur; /* will seek % in input */
   char d1; /* will contain candidate for 1st digit */
   char d2; /* will contain candidate for 2nd digit */
+  char *res = out; /* just for convienience */
   
   if(!in) {
     *out = '\0';
-    return out;
+    return res;
   }
 
   cur = in;
@@ -282,7 +283,7 @@ static inline char *url_decode(char *in, char *out)
     if(!d1) {
       *out = *cur;
       *(out+1) = '\0';
-      return out;
+      return res;
     }
     
     /* Two characters left in input */
@@ -290,7 +291,7 @@ static inline char *url_decode(char *in, char *out)
       *out = *cur;
       *(out+1) = *(cur+1);
       *(out+2) = '\0';
-      return out;
+      return res;
     }
    
     /* Legal escape sequence */
@@ -319,8 +320,8 @@ static inline char *url_decode(char *in, char *out)
     }
   }
   
-  *(out) = '\0';
-  return out;
+  *out = '\0';
+  return res;
 }
 
 static inline int normalize_path(bstring target)
