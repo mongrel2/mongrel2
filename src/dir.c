@@ -339,7 +339,7 @@ static inline int normalize_path(bstring target)
     bassigncstr(target, path_buf);
 
     char *normalized = realpath((const char *)(bdata(target)), path_buf);
-    check_debug(normalized, "Failed to normalize path: %s", path_buf);
+    check_debug(normalized, "Failed to normalize path: %s", bdata(target));
 
     bassigncstr(target, normalized);
 
