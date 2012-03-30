@@ -261,6 +261,67 @@ void FileRecord_destroy(FileRecord *file)
     }
 }
 
+static inline char *url_decode(char *in, char *out)
+{
+  char *cur; /* will seek % in input */
+  char d1; /* will contain candidate for 1st digit */
+  char d2; /* will contain candidate for 2nd digit */
+  
+  if(!in) {
+    *out = '\0';
+    return out;
+  }
+
+  cur = in;
+  
+  while(*cur) {
+    d1 = *(cur+1);
+    d2 = *(cur+2);
+    
+    /* One character left in input */
+    if(!d1) {
+      *out = *cur;
+      *(out+1) = '\0';
+      return out;
+    }
+    
+    /* Two characters left in input */
+    if(!d2) {
+      *out = *cur;
+      *(out+1) = *(cur+1);
+      *(out+2) = '\0';
+      return out;
+    }
+   
+    /* Legal escape sequence */
+    if(*cur=='%' && isxdigit(d1) && isxdigit(d2)) {
+      d1 = tolower(d1);
+      d2 = tolower(d2);
+        
+      if( d1 <= '9' )
+        d1 = d1 - '0';
+      else
+        d1 = d1 - 'a' + 10;
+      if( d2 <= '9' )
+        d2 = d2 - '0';
+      else
+        d2 = d2 - 'a' + 10;
+  
+      *out = 16 * d1 + d2;
+      
+      out += 1;
+      cur += 3;
+    }
+    else {
+      *out = *cur;
+      out += 1;
+      cur += 1;
+    }
+  }
+  
+  *(out) = '\0';
+  return out;
+}
 
 static inline int normalize_path(bstring target)
 {
@@ -272,9 +333,12 @@ static inline int normalize_path(bstring target)
         path_buf = calloc(PATH_MAX+1, 1);
         check_mem(path_buf);
     }
+    
+    url_decode((const char *)(bdata(target)), path_buf);
+    bassigncstr(target, path_buf);
 
     char *normalized = realpath((const char *)(bdata(target)), path_buf);
-    check_debug(normalized, "Failed to normalize path: %s", bdata(target));
+    check_debug(normalized, "Failed to normalize path: %s", path_buf);
 
     bassigncstr(target, normalized);
 
