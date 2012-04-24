@@ -10,7 +10,7 @@ extern "C" {
 #include <stdarg.h>
 #include <unistd.h>
 #include <inttypes.h>
-#include <zmq.h>
+#include "zmq_compat.h"
 
 struct tns_value_t;
 
@@ -159,4 +159,3 @@ int    netlookup(char*, uint32_t*);  /* blocks entire program! */
 }
 #endif
 #endif
-
