@@ -283,7 +283,7 @@ int mqrecv(void *socket, zmq_msg_t *msg, int flags)
     rc = zmq_msg_recv(socket, msg, ZMQ_DONTWAIT);
 
     // if the send failed because it would block, then wait
-    while(rc < 0 && flags != ZMQ_DONTWAIT && errno == EAGAIN) {}
+    while(rc < 0 && flags != ZMQ_DONTWAIT && errno == EAGAIN) {
         if(mqwait(socket, 'r') == -1) {
             return -1;
         }
