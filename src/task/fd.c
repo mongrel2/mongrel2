@@ -1,5 +1,5 @@
 #include "taskimpl.h"
-#include <zmq.h>
+#include "zmq_compat.h"
 #include <sys/poll.h>
 #include <fcntl.h>
 #include <stdio.h>
@@ -280,18 +280,19 @@ int mqrecv(void *socket, zmq_msg_t *msg, int flags)
     int rc = -1;
 
     // try to recv right away rather than go into the poll
-    rc = zmq_recv(socket, msg, ZMQ_NOBLOCK);
+    rc = zmq_msg_recv(msg, socket, ZMQ_DONTWAIT);
 
     // if the send failed because it would block, then wait
-    while(rc != 0 && flags != ZMQ_NOBLOCK && errno == EAGAIN) {
+    while(rc < 0 && flags != ZMQ_DONTWAIT && errno == EAGAIN) {
         if(mqwait(socket, 'r') == -1) {
             return -1;
         }
 
-        rc = zmq_recv(socket, msg, ZMQ_NOBLOCK);
+        rc = zmq_msg_recv(msg, socket, ZMQ_DONTWAIT);
     }
 
-    return rc;
+    // Retain compatibiltiy with 0MQ 2.1; always returned 0 on success
+    return rc < 0 ? -1 : 0;
 }
 
 int mqsend(void *socket, zmq_msg_t *msg, int flags)
@@ -299,18 +300,19 @@ int mqsend(void *socket, zmq_msg_t *msg, int flags)
     int rc = -1;
 
     // try to send right away rather than go into the poll
-    rc = zmq_send(socket, msg, ZMQ_NOBLOCK);
+    rc = zmq_msg_send(msg, socket, ZMQ_DONTWAIT);
 
-    // if the send failed because it would block, then wait
-    while(rc != 0 && flags != ZMQ_NOBLOCK && errno == EAGAIN) {
+    // if the send failed because it would block, then wait.
+    while(rc < 0 && flags != ZMQ_DONTWAIT && errno == EAGAIN ) {
         if(mqwait(socket, 'w') == -1) {
             return -1;
         }
 
-        rc = zmq_send(socket, msg, ZMQ_NOBLOCK);
+        rc = zmq_msg_send(msg, socket, ZMQ_DONTWAIT);
     }
 
-    return rc;
+    // Retain compatibiltiy with 0MQ 2.1; always returned 0 on success
+    return rc < 0 ? -1 : 0;
 }
 
 

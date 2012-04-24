@@ -39,7 +39,7 @@
 #include "setting.h"
 #include "tnetstrings.h"
 #include <stdio.h>
-#include <zmq.h>
+#include "zmq_compat.h"
 #include <pthread.h>
 
 static void *LOG_SOCKET = NULL;
@@ -90,12 +90,12 @@ static void *Log_internal_thread(void *spec)
        rc = zmq_msg_init(&msg);
        check(rc == 0, "Failed to initialize message.");
 
-       rc = zmq_recv(socket, &msg, 0);
+       rc = zmq_msg_recv(&msg, socket, 0);
        if(rc == -1 && errno == ETERM) {
            // The ZMQ context has been terminated, must be shutting down.
            break;
        }
-       check(rc == 0, "Failed to receive from the zeromq logging socket");
+       check(rc >= 0, "Failed to receive from the zeromq logging socket");
        check(zmq_msg_size(&msg) > 0, "Received poison pill, log thread exiting.");
 
        fprintf(config->log_file, "%.*s", (int)zmq_msg_size(&msg), (char *)zmq_msg_data(&msg));
@@ -185,8 +185,8 @@ int Log_poison_workers()
     int rc = zmq_msg_init_size(&msg, 0);
     check(rc == 0, "Could not create zmq message.");
     
-    rc = zmq_send(LOG_SOCKET, &msg, 0);
-    check(rc == 0, "Could not send message");
+    rc = zmq_msg_send(&msg, LOG_SOCKET, 0);
+    check(rc >= 0, "Could not send message");
 
     rc = zmq_msg_close(&msg);
     check(rc == 0, "Failed to close message object");
@@ -267,8 +267,8 @@ int Log_request(Connection *conn, int status, int size)
             free_log_msg, log_data);
     check(rc == 0, "Could not craft message for log message '%s'.", bdata(log_data));
     
-    rc = zmq_send(LOG_SOCKET, &msg, 0);
-    check(rc == 0, "Could not send log message to socket.");
+    rc = zmq_msg_send(&msg, LOG_SOCKET, 0);
+    check(rc >= 0, "Could not send log message to socket.");
 
     log_data = NULL; // that way errors from above can clean the log_data
     rc = zmq_msg_close(&msg);

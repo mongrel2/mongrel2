@@ -35,7 +35,7 @@
 #include <handler.h>
 #include <handler_parser.h>
 #include <task/task.h>
-#include <zmq.h>
+#include "zmq_compat.h"
 #include <dbg.h>
 #include <stdlib.h>
 #include <string.h>
@@ -374,5 +374,3 @@ void Handler_destroy(Handler *handler)
         free(handler);
     }
 }
-
-

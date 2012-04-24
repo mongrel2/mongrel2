@@ -3,7 +3,7 @@
 #include <mem/halloc.h>
 
 #include <superpoll.h>
-#include <zmq.h>
+#include "zmq_compat.h"
 
 SuperPoll *TEST_POLL = NULL;
 
@@ -403,4 +403,3 @@ char *all_tests() {
 }
 
 RUN_TESTS(all_tests);
-
