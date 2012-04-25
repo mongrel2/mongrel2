@@ -95,7 +95,7 @@ static void *Log_internal_thread(void *spec)
            // The ZMQ context has been terminated, must be shutting down.
            break;
        }
-       check(rc == 0, "Failed to receive from the zeromq logging socket");
+       check(rc >= 0, "Failed to receive from the zeromq logging socket");
        check(zmq_msg_size(&msg) > 0, "Received poison pill, log thread exiting.");
 
        fprintf(config->log_file, "%.*s", (int)zmq_msg_size(&msg), (char *)zmq_msg_data(&msg));
