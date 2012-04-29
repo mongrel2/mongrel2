@@ -131,7 +131,6 @@ int Unixy_remove_dead_pidfile(bstring pid_path)
 
     rc = Unixy_still_running(pid_path, &pid);
 
-    check(rc != -1, "Failed to figure out if process %d is still running.  You probably don't have /proc or a weird one.", pid);
     check(rc != 1, "Process %d is still running, shut it down first.", pid);
 
     if(pid == -1) {
