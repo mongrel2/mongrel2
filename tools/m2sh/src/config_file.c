@@ -53,7 +53,7 @@ int Dir_load(tst_t *settings, tst_t *params)
 {
     const char *base = AST_str(settings, params, "base", VAL_QSTRING);
     tns_value_t *res = NULL;
-
+    
     check(base[0] != '/', "Don't start the base with / in %s; it will fail when not in chroot.", base);
     check(base[strlen(base) - 1] == '/', "End directory base with / in %s or it won't work right.'", base);
 
@@ -61,18 +61,19 @@ int Dir_load(tst_t *settings, tst_t *params)
             AST_str(settings, params, "index_file", VAL_QSTRING),
             AST_str(settings, params, "default_ctype", VAL_QSTRING));
     check(res != NULL, "Invalid database, couldn't query for directory: %s", base);
-    tns_value_destroy(res);
 
     if(tst_search(params, bdata(&CACHE_TTL), blength(&CACHE_TTL))) {
         const char *cache_ttl = AST_str(settings, params, "cache_ttl", VAL_NUMBER);
-
+        
         if(cache_ttl && cache_ttl[0] != '0') {
-            res = DB_exec(bdata(&DIR_CACHE_TTL_SQL), cache_ttl);
-            check(res != NULL, "Invalid database, couldn't set cache_ttl in directory: %s", base);
             tns_value_destroy(res);
+            res = DB_exec(bdata(&DIR_CACHE_TTL_SQL), cache_ttl);
+            check(res != NULL, 
+                  "Invalid database, couldn't set cache_ttl in directory: %s", base);
         }
     }
-
+    
+    tns_value_destroy(res);
     return DB_lastid();
 
 error:
@@ -94,15 +95,14 @@ int Handler_load(tst_t *settings, tst_t *params)
             AST_str(settings, params, "recv_spec", VAL_QSTRING),
             AST_str(settings, params, "recv_ident", VAL_QSTRING));
     check(res != NULL, "Failed to load Handler: %s", send_spec);
-    tns_value_destroy(res);
 
     if(tst_search(params, bdata(&RAW_PAYLOAD), blength(&RAW_PAYLOAD))) {
         const char *raw_payload = AST_str(settings, params, "raw_payload", VAL_NUMBER);
 
         if(raw_payload && raw_payload[0] == '1') {
-            DB_exec(bdata(&HANDLER_RAW_SQL));
-            check(res != NULL, "Invalid database, can't set raw payload.");
             tns_value_destroy(res);
+            res = DB_exec(bdata(&HANDLER_RAW_SQL));
+            check(res != NULL, "Invalid database, can't set raw payload.");
         }
     }
 
@@ -110,10 +110,12 @@ int Handler_load(tst_t *settings, tst_t *params)
         const char *protocol = AST_str(settings, params, "protocol", VAL_QSTRING);
         protocol = protocol != NULL ? protocol : "json";
 
+        tns_value_destroy(res);
         res = DB_exec(bdata(&HANDLER_PROTOCOL_SQL), protocol);
         check(res != NULL, "Invalid SQL with your protocol setting: '%s'", protocol);
-        tns_value_destroy(res);
     }
+
+    tns_value_destroy(res);
 
     return DB_lastid();
 
@@ -131,6 +133,8 @@ int Proxy_load(tst_t *settings, tst_t *params)
 
     tns_value_t *res = DB_exec(bdata(&PROXY_SQL), addr, port);
     check(res != NULL, "Failed to load Proxy: %s:%s", addr, port);
+    tns_value_destroy(res);
+
     return DB_lastid();
 
 error:
@@ -261,16 +265,16 @@ int Filter_load(tst_t *settings, Value *val)
 
     size_t len = 0;
     converted_settings = tns_render(filter_tns, &len);
-    tns_value_destroy(filter_tns);
 
     check(converted_settings != NULL && len > 0,
             "Failed to convert final Filter settings to tnetstring for Filter '%s'",
             name);
-
+    
     res = DB_exec(bdata(&FILTER_SQL), SERVER_ID, name, converted_settings);
     check(res != NULL, "Failed to store Filter: '%s'", name);
-    tns_value_destroy(res);
 
+    tns_value_destroy(res);
+    tns_value_destroy(filter_tns);
     free(converted_settings);
 
     return 0;
@@ -295,10 +299,9 @@ int Host_load(tst_t *settings, Value *val)
         // specified matching so use that
         matching = AST_str(settings, cls->params, bdata(&MATCHING_PARAM), VAL_QSTRING);
     }
-
+    
     res = DB_exec(bdata(&HOST_SQL), SERVER_ID, name, matching);
     check(res != NULL, "Failed to store Host: %s", name);
-    tns_value_destroy(res);
 
     cls->id = HOST_ID = DB_lastid();
 
@@ -307,6 +310,7 @@ int Host_load(tst_t *settings, Value *val)
 
     AST_walk_hash(settings, routes, Route_load);
 
+    tns_value_destroy(res);
     return 0;
 
 error:
@@ -349,18 +353,16 @@ int Server_load(tst_t *settings, Value *val)
             AST_str(settings, cls->params, "name", VAL_QSTRING),
             bind_addr,
             AST_str(settings, cls->params, "port", VAL_NUMBER),
-            use_ssl
-            );
+            use_ssl);
     check(res != NULL, "Failed to exec SQL: %s", bdata(&SERVER_SQL));
-    tns_value_destroy(res);
 
     cls->id = SERVER_ID = DB_lastid();
 
     // setup the hosts
     Value *hosts = AST_get(settings, cls->params, &HOSTS_VAR, VAL_LIST);
     check(hosts != NULL, "Could not find Server.hosts setting in host %s:%s",
-            AST_str(settings, cls->params, "uuid", VAL_QSTRING),
-            AST_str(settings, cls->params, "name", VAL_QSTRING));
+          AST_str(settings, cls->params, "uuid", VAL_QSTRING),
+          AST_str(settings, cls->params, "name", VAL_QSTRING));
 
     AST_walk_list(settings, hosts->as.list, Host_load);
 
@@ -371,6 +373,7 @@ int Server_load(tst_t *settings, Value *val)
         AST_walk_list(settings, filters->as.list, Filter_load);
     }
 
+    tns_value_destroy(res);
     return 0;
 
 error:
@@ -384,11 +387,11 @@ static inline int Config_setup(const char *db_file)
     DB_init(db_file);
     tns_value_t *res = DB_exec("begin");
     check(res != NULL, "Couldn't start transaction.");
-    tns_value_destroy(res);
 
     int rc = sqlite3_exec(CONFIG_DB, bdata(&CONFIG_SCHEMA), NULL, NULL, &zErrMsg);
     check(rc == SQLITE_OK, "Failed to load initial schema: %s", zErrMsg);
 
+    tns_value_destroy(res);
     return 0;
 
 error:
