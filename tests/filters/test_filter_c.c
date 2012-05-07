@@ -8,7 +8,7 @@ StateEvent filter_transition(StateEvent state, Connection *conn)
 }
 
 
-StateEvent *filter_init(Server *srv, bstring load_path, int *out_nstates)
+StateEvent *filter_init(Server *srv, bstring load_path, int *out_nstates, tns_value_t *config)
 {
     StateEvent states[] = {CONNECT};
     *out_nstates = Filter_states_length(states);
