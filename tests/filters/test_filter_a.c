@@ -1,7 +1,7 @@
 #include <filter.h>
 #include <dbg.h>
 
-StateEvent filter_transition(StateEvent state, Connection *conn)
+StateEvent filter_transition(StateEvent state, Connection *conn, tns_value_t *config)
 {
 	conn->rport += 2;
     return state;
