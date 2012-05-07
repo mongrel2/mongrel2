@@ -135,16 +135,6 @@ int Filter_load(Server *srv, bstring load_path, tns_value_t *config)
 {
     int i = 0;
 
-    size_t len = 0;
-    char *data = tns_render(config, &len);
-
-    if(data != NULL) {
-        log_info("CONFIG: %.*s", (int)len, data);
-    }
-
-    free(data);
-      
-
     if(REGISTERED_FILTERS == NULL) {
         check(Filter_init() == 0, "Failed to initialize filter storage.");
         FILTERS_ACTIVATED = 1;

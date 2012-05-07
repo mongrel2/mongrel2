@@ -2,8 +2,7 @@ PREFIX?=/usr/local
 CFLAGS=-I../../src $(OPTFLAGS) -fPIC -shared -nostartfiles -L../../build
 LDFLAGS=$(OPTLIBS)
 
-all: null.so
-
+all: null.so profiler.so
 
 %.so : %.c
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $< ../../build/libm2.a
