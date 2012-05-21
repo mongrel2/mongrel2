@@ -852,18 +852,18 @@ void Connection_task(void *v)
 {
     Connection *conn = (Connection *)v;
     int i = 0;
-    int next = 0;
+    int next = OPEN;
 
     State_init(&conn->state, &CONN_ACTIONS);
 
-    for(i = 0, next = OPEN; next != CLOSE; i++) {
+    while(1) {
         if(Filter_activated()) {
             next = Filter_run(next, conn);
             check(next >= CLOSE && next < EVENT_END,
                     "!!! Invalid next event[%d]: %d from filter!", i, next);
-
-            if(next == CLOSE) break;
         }
+
+        if(next == CLOSE) break;
 
         next = State_exec(&conn->state, next, (void *)conn);
 
@@ -873,6 +873,8 @@ void Connection_task(void *v)
         if(conn->iob && !conn->iob->closed) {
             Register_ping(IOBuf_fd(conn->iob));
         }
+
+        i++;
     }
 
 error: // fallthrough
