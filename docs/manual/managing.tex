@@ -87,8 +87,17 @@ At this point, you should have seen lists of servers and hosts, seen that mongre
 not running, and then started it.  You can find out about all the commands and
 get help for them with \shell{m2sh help} or \shell{ms2h help command}.
 
-You can now try doing some simple starting, stopping and reloading using sudo (make sure you CTRL-c
-to exit from the previous start command):
+You can now try doing some simple starting, stopping and reloading Using
+sudo (make sure you CTRL-c to exit from the previous start command):
+
+\begin{aside}{Warning: contents may be broken}
+If \shell{m2sh start} runs fine, but \shell{m2sh start -sudo}
+fails, you may need to link \file{/proc} in your chroot, using
+\shell{mkdir -p proc \&\& sudo mount --bind /proc proc}. You can also try
+installing ZeroMQ from source, if you'd rather avoid putting your \file{/proc}
+where it might get seen.
+\end{aside}
+
 
 \begin{code}{Starting, Stopping, Reloading}
 << d['inputs/starting_stopping_reloading.sh|pyg|l'] >>
