@@ -948,11 +948,13 @@ int dict_contains(dict_t *dict, dnode_t *node)
 
 static dnode_t *dnode_alloc(void *context)
 {
+    (void)(context); // unused
     return malloc(sizeof *dnode_alloc(NULL));
 }
 
 static void dnode_free(dnode_t *node, void *context)
 {
+    (void)(context); // unused
     free(node);
 }
 

@@ -75,14 +75,12 @@ int nr_pending_tokens;
 
 void really_send_toke(struct token *toke)
 {
-	struct fdinfo *inf;
 	int *fds;
 	int fd;
 	int pipe_idx = nr_pipes - toke->thread - 1;
 
 	fds = pipefds[pipe_idx].fds;
 	fd = fds[WRITE];
-	inf = &fdinfo[fd];
 
 	debug("sending on pipe index %u, fd %d", pipe_idx, fd);
 

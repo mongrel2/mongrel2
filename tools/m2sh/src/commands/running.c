@@ -33,11 +33,16 @@
  */
 
 #include <signal.h>
+
 #include <zmq.h>
+
 #include <tnetstrings.h>
 #include <tnetstrings_impl.h>
 #include <config/db.h>
 #include <handler.h>
+#include <pattern.h>
+#include <register.h>
+
 #include "../linenoise.h"
 #include "../commands.h"
 #include "../query_print.h"

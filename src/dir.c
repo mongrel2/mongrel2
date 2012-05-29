@@ -263,7 +263,7 @@ void FileRecord_destroy(FileRecord *file)
 
 static inline char *url_decode(const char *in, char *out)
 {
-  char *cur; /* will seek % in input */
+  const char *cur; /* will seek % in input */
   char d1; /* will contain candidate for 1st digit */
   char d2; /* will contain candidate for 2nd digit */
   char *res = out; /* just for convienience */
