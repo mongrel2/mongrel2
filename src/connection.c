@@ -900,7 +900,7 @@ int Connection_deliver(Connection *conn, bstring buf)
     check(conn->iob != NULL, "There's no IOBuffer to send to, Tell Zed.");
     /* The deliver task will free the buffer */
     rc = Connection_deliver_enqueue(conn,b64_buf);
-    check_debug(rc == blength(b64_buf)+1, "Failed to write entire message to conn %d", IOBuf_fd(conn->iob));
+    check_debug(rc == 0, "Failed to write message to conn %d", IOBuf_fd(conn->iob));
 
     return 0;
 
