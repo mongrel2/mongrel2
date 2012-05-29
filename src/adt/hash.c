@@ -747,11 +747,13 @@ int hash_isempty(hash_t *hash)
 
 static hnode_t *hnode_alloc(void *context)
 {
+    (void)(context); // unused
     return malloc(sizeof *hnode_alloc(NULL));
 }
 
 static void hnode_free(hnode_t *node, void *context)
 {
+    (void)(context); // unused
     free(node);
 }
 
