@@ -3,7 +3,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <fcntl.h>
-#include <zmq.h>
+#include "zmq_compat.h"
 #include <task/task.h>
 #include <dir.h>
 
@@ -110,4 +110,3 @@ char * all_tests() {
 }
 
 RUN_TESTS(all_tests);
-

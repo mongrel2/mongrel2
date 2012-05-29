@@ -1,5 +1,5 @@
 #include "minunit.h"
-#include <zmq.h>
+#include "zmq_compat.h"
 #include "server.h"
 #include "config/config.h"
 #include "config/db.h"
@@ -81,4 +81,3 @@ char * all_tests()
 }
 
 RUN_TESTS(all_tests);
-
