@@ -56,3 +56,13 @@ class Request(object):
         if self.msg:
             socket.send( self.msg )
         return self.msg
+
+    def encode(self):
+        """
+        Makes a raw message out of the Request object to be forwarded.
+        """
+        self.msg = " ".join([
+            self.sender, self.conn_id, self.path,
+            tnetstrings.dump(json.dumps(self.headers)) + tnetstrings.dump(self.body)
+         ])
+        return self.msg
