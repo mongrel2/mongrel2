@@ -289,7 +289,7 @@ In case you don't know what a netstring is, it is a very simple way to encode a
 block of data such that any language can read the block and know how big it is.
 A netstring is, simply, \verb|SIZE:DATA,|. So, to send ``HI'', you would do
 \verb|2:HI,|, and it is \emph{incredibly} easy to parse in every language, even
-C.  It is also a fast format and you can read it even if you're a human.
+C\@.  It is also a fast format and you can read it even if you're a human.
 
 
 \subsection{Paths Identify Targets}
@@ -549,7 +549,7 @@ in your handlers and find out all this information as well.
 The next example is a very simple and, well, kind of poorly implemented
 MP3 streaming demo that uses the ICY protocol.  ICY is a really lame
 protocol that was obviously designed before HTTP was totally baked
-and probably by people who don't really get HTTP.  It works in an odd
+and probably by people who don't really get HTTP\@.  It works in an odd
 way of having meta-data sent at specific sized intervals so the
 client can display an update to the meta-data.
 

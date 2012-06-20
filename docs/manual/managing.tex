@@ -19,12 +19,12 @@ but with SQL as their only way to access it.  They thought that they'd be stuck 
 configurations with SQL; that SQL couldn't possibly configure a web server.
 
 They were wrong on many levels.  Nobody was \emph{ever} going to make \emph{anyone} use
-SQL.  That was repeated over and over but, again, people don't read and love spreading
-FUD.  The SQLite config database is nothing like the Windows Registry.  No other web
+SQL\@.  That was repeated over and over but, again, people don't read and love spreading
+FUD\@.  The SQLite config database is nothing like the Windows Registry.  No other web
 server really uses a true hierarchy; they just cram a relational model into a weirdo
 configuration format.  The real goal was to make a web server that was easy to manage from
 \emph{any} language, and then give people a nice tool to get their job done without
-having to ever touch SQL.  \emph{EVER!}
+having to ever touch SQL\@.  \emph{EVER!}
 
 In the end, what we got despite all this fear mongering is a bad ass configuration
 tool and a design that is simple, elegant, and works fantastically.  If you read that
@@ -142,7 +142,7 @@ files.  You can now try building your own configuration that matches this one or
 To configure a new config database you'll write a file that looks a lot like
 a configuration file.  It looks like a Python file, because it comes from the
 first m2sh we wrote in Python (living in \file{examples/python}), but now it's
-written in C.  Even though it was rewritten, we managed to keep the same format
+written in C\@.  Even though it was rewritten, we managed to keep the same format
 ---and even make it a little easier by making commas optional in most places.
 
 First you load your configuration into a fresh database using \shell{m2sh
@@ -513,7 +513,7 @@ given it:
     route.  If you wanted this condition to fail, you'd need to be explicit and add on a
     pattern like, \verb|"/users()$"| to say you need an exact match. Another option is
     to give a \verb|"/"| route for a default location (which usually happens).
-\item Finally, a request comes in for /XRAY.  This will match no prefix at all, so it
+\item Finally, a request comes in for /XRAY\@.  This will match no prefix at all, so it
     gets a 404.
 \end{enumerate}
 
