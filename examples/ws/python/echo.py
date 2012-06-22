@@ -7,8 +7,8 @@ import re
 
 sender_id = "82209006-86FF-4982-B5EA-D1E29E55D480"
 
-conn = handler.Connection(sender_id, "tcp://192.168.0.1:9990",
-                          "tcp://192.168.0.1:9989")
+conn = handler.Connection(sender_id, "tcp://127.0.0.1:9990",
+                          "tcp://127.0.0.1:9989")
 
 CONNECTION_TIMEOUT=5
 
@@ -47,8 +47,18 @@ while True:
         #print "DISCONNECTED", req.conn_id
         continue
 
+    if req.headers.get('METHOD') == 'WEBSOCKET_HANDSHAKE':
+        #print "HANDSHAKE"
+        conn.reply(req,
+                '\r\n'.join([
+                    "HTTP/1.1 101 Switching Protocols",
+                    "Upgrade: websocket",
+                    "Connection: Upgrade",
+                    "Sec-WebSocket-Accept: %s\r\n\r\n"])%req.body)
+        continue
+
     if req.headers.get('METHOD') != 'WEBSOCKET':
-        print 'METHOD is Not WEBSOCKET',req.headers.get('METHOD')
+        print 'METHOD is Not WEBSOCKET:',req.headers#,req.body
         conn.reply(req,'')
         continue
 
