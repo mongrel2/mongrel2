@@ -2,23 +2,23 @@
  *
  * Copyright (c) 2010, Zed A. Shaw and Mongrel2 Project Contributors.
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
  * met:
- * 
+ *
  *     * Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimer.
- * 
+ *
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- * 
+ *
  *     * Neither the name of the Mongrel2 Project, Zed A. Shaw, nor the names
  *       of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written
  *       permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
  * IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
  * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
@@ -32,80 +32,41 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _superpoll_h
-#define _superpoll_h
 
-#include <adt/list.h>
-#include "zmq_compat.h"
+#ifndef _ZMQ_COMPAT_H
+#define _ZMQ_COMPAT_H
 
-typedef struct IdleData {
-    int fd;
-    void *data;
-} IdleData;
+#include <zmq.h>
 
-typedef struct SuperPoll {
+/*
+ * Defines the 0MQ 3.1.1 API in terms of the 0MQ 3.1.0 and 2.X APIs, for
+ * backwards compatibility (0MQ 3.0 is not supported, because it broke wire
+ * protocol compatibility, among other things).  Simply include "zmq_compat.h"
+ * after (or instead of) including <zmq.h>.  Then, write all
+ * zmq_{send,recv,poll} calls using the 0MQ 3.1 API.
+ *
+ * However, in 0MQ 3.1, zmq_msg_{send,recv} return -1 on error, and a positive
+ * value on success; 0MQ 2.X zmq_{send,recv} always returned 0 on success.  All
+ * uses of zmq_msg_{send,recv} must test for: < 0 (falure) or: >= 0 (success).
+ *
+ * From http://www.zeromq.org/docs:3-1-upgrade
+ */
 
-    // poll information
-    zmq_pollitem_t *pollfd;
-    // caller's data
-    void **hot_data;
-    int nfd_hot;
-    int max_hot;
-
-    // idle information
-    void *events;
-    int idle_fd;
-
-    int max_idle;
-    IdleData *idle_data;
-    list_t *idle_active;
-    list_t *idle_free;
-} SuperPoll;
-
-
-typedef struct PollEvent {
-    zmq_pollitem_t ev;
-    void *data;
-} PollEvent;
-
-
-typedef struct PollResult {
-    int hot_fds;
-    int hot_atr;
-
-    int idle_fds;
-    int idle_atr;
-
-    int nhits;
-    PollEvent *hits;
-} PollResult;
-
-void SuperPoll_destroy(SuperPoll *sp);
-
-SuperPoll *SuperPoll_create();
-
-int SuperPoll_add(SuperPoll *sp, void *data, void *socket, int fd, int rw, int hot);
-int SuperPoll_del(SuperPoll *sp, void *socket, int fd, int hot);
-
-void SuperPoll_compact_down(SuperPoll *sp, int i);
-
-int SuperPoll_poll(SuperPoll *sp, PollResult *result, int ms);
-
-int SuperPoll_get_max_fd();
-
-#define SuperPoll_active_hot(S) ((S)->nfd_hot)
-
-#define SuperPoll_active_idle(S) ((S)->idle_active ? list_count((S)->idle_active)  :0)
-
-#define SuperPoll_active_count(S) (SuperPoll_active_hot(S) + SuperPoll_active_idle(S))
-
-#define SuperPoll_max_hot(S) ((S)->max_hot)
-#define SuperPoll_max_idle(S) ((S)->max_idle)
-
-#define SuperPoll_data(S, I) ((S)->hot_data[(I)])
-
-int PollResult_init(SuperPoll *p, PollResult *result);
-
-void PollResult_clean(PollResult *result);
-
+#ifndef ZMQ_DONTWAIT
+#   define ZMQ_DONTWAIT     ZMQ_NOBLOCK
 #endif
+#if ZMQ_VERSION_MAJOR == 2
+#  define zmq_msg_send(msg, sock, opt) zmq_send(sock, msg, opt)
+#  define zmq_msg_recv(msg, sock, opt) zmq_recv(sock, msg, opt)
+#  define ZMQ_POLL_MSEC    1000        //  zmq_poll is usec
+#elif ZMQ_VERSION_MAJOR == 3
+#  if ZMQ_VERSION_MINOR < 1
+#    error "0MQ 3.0 not supported"
+#  elif ZMQ_VERSION_MINOR == 1 && ZMQ_VERSION_PATCH == 0
+#     define zmq_msg_send(msg, sock, opt) zmq_sendmsg(sock, msg, opt)
+#     define zmq_msg_recv(msg, sock, opt) zmq_recvmsg(sock, msg, opt)
+#  endif
+#  define ZMQ_POLL_MSEC    1           //  zmq_poll is msec
+#endif
+
+#endif /* ! defined( _ZMQ_COMPAT_H ) */

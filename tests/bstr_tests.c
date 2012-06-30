@@ -2055,7 +2055,7 @@ static int test23_aux_open (struct sbstr * sb, bstring b) {
 static int test23_aux_splitcb (void * parm, int ofs, const struct tagbstring * entry) {
     bstring b = (bstring) parm;
 
-    ofs = ofs;
+    (void)(ofs);
     if (b->slen > 0) bconchar (b, (char) '|');
     bconcat (b, entry);
     return 0;
@@ -2070,7 +2070,7 @@ struct tagBss {
 static int test23_aux_splitcbx (void * parm, int ofs, const struct tagbstring * entry) {
     struct tagBss * p = (struct tagBss *) parm;
 
-    ofs = ofs;
+    (void)(ofs);
     if (!p->first) {
         bconchar (p->b, (char) p->sc);
     } else p->first = 0;
@@ -3735,8 +3735,8 @@ int taskmain (int argc, char * argv[])
 
     int ret = 0;
 
-    argc = argc;
-    argv = argv;
+    (void)(argc);
+    (void)(argv);
 
     debug ("Direct case testing of bstring core functions");
 

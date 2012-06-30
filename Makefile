@@ -98,9 +98,11 @@ filters: build/libm2.a
 config_modules: build/libm2.a
 	${MAKE} ${MAKEOPTS} -C tools/config_modules all
 
+# Try to install first before creating target directory and trying again
 install: all
-	install -d $(DESTDIR)/$(PREFIX)/bin/
-	install bin/mongrel2 $(DESTDIR)/$(PREFIX)/bin/
+	install bin/mongrel2 $(DESTDIR)/$(PREFIX)/bin/ \
+	    || ( install -d $(DESTDIR)/$(PREFIX)/bin/ \
+	        && install bin/mongrel2 $(DESTDIR)/$(PREFIX)/bin/ )
 	${MAKE} ${MAKEOPTS} -C tools/m2sh install
 	${MAKE} ${MAKEOPTS} -C tools/config_modules install
 	${MAKE} ${MAKEOPTS} -C tools/filters install

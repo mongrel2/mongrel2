@@ -3,7 +3,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <fcntl.h>
-#include <zmq.h>
+#include "zmq_compat.h"
 #include <task/task.h>
 #include <dir.h>
 
@@ -16,23 +16,6 @@ char *test_Connection_create_destroy()
     Connection *conn = Connection_create(NULL, 0, 0, remote);
     mu_assert(conn != NULL, "Failed to create a connection.");
     Connection_destroy(conn);
-
-    return NULL;
-}
-
-char *test_Connection_deliver()
-{
-    bstring t1;
-    const char remote[IPADDR_SIZE];
-    Connection *conn = Connection_create(NULL, 1, 0, remote);
-    mu_assert(conn != NULL, "Failed to create a connection.");
-
-    int rc = Connection_deliver(conn, t1 = bfromcstr("TEST"));
-    // depending on the platform this will fail or not if send is allowed on files
-    mu_assert(rc == -1, "Should NOT be able to write.");
-
-    Connection_destroy(conn);
-    bdestroy(t1);
 
     return NULL;
 }
@@ -99,7 +82,6 @@ char * all_tests() {
     Server_set_default_host(SRV, zedshaw_com);
 
     mu_run_test(test_Connection_create_destroy);
-    mu_run_test(test_Connection_deliver);
     mu_run_test(test_Connection_task);
 
     Server_destroy(SRV);
@@ -110,4 +92,3 @@ char * all_tests() {
 }
 
 RUN_TESTS(all_tests);
-

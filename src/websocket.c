@@ -60,10 +60,12 @@ bstring websocket_challenge(bstring input)
     bdestroy(tmpstring);
     bdestroy(buf);
 
+/*
     tmpstring = bformat("HTTP/1.1 101 Switching Protocols\r\n"
             "Upgrade: websocket\r\n"
             "Connection: Upgrade\r\n"
             "Sec-WebSocket-Accept: %s\r\n\r\n",bdata(encodedSha1));
     bdestroy(encodedSha1);
-    return tmpstring;
+    */
+    return encodedSha1;
 }

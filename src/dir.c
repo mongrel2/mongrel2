@@ -61,7 +61,7 @@ const char *RESPONSE_FORMAT = "HTTP/1.1 200 OK\r\n"
     "\r\n\r\n";
 
 const char *DIR_REDIRECT_FORMAT = "HTTP/1.1 301 Moved Permanently\r\n"
-    "Location: http://%s%s/\r\n"
+    "Location: //%s%s/\r\n"
     "Content-Length: 0\r\n"
     "Server: " VERSION
     "\r\n\r\n";
@@ -263,7 +263,7 @@ void FileRecord_destroy(FileRecord *file)
 
 static inline char *url_decode(const char *in, char *out)
 {
-  char *cur; /* will seek % in input */
+  const char *cur; /* will seek % in input */
   char d1; /* will contain candidate for 1st digit */
   char d2; /* will contain candidate for 2nd digit */
   char *res = out; /* just for convienience */
