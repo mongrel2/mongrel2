@@ -222,7 +222,6 @@ void Handler_task(void *v)
             break;
         } else if( rc == -1 || parser->target_count <= 0) {
             log_warn("Skipped invalid message from handler: %s", bdata(handler->send_spec));
-            taskdelay(100);
             continue;
         } else {
             for(i = 0; i < (int)parser->target_count; i++) {
