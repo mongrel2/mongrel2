@@ -596,13 +596,11 @@ char *IOBuf_read_all(IOBuf *buf, int len, int retries)
         data = IOBuf_read(buf, len, &nread);
 
         check_debug(data, "Read error from socket.");
-
         assert(nread <= len && "Invalid nread size (too much) on IOBuf read.");
 
         if(nread == len) {
             break;
         } else {
-            check(!IOBuf_closed(buf), "Socket closed during IOBuf_read_all.")
             fdwait(buf->fd, 'r');
         }
     }
