@@ -146,7 +146,7 @@ error:
 static int config_init_shard(struct bstrList *tokens)
 {
     int ret = -1;
-    int i, status, port = MONGO_DEFAULT_PORT;
+    int i, status, port;
     bstring shardname;
     char *shard = NULL;
     char *ip = NULL, *sport = NULL;
@@ -172,6 +172,7 @@ static int config_init_shard(struct bstrList *tokens)
     
     i = ips->qty;
     while(--i >= 0) {
+        port = MONGO_DEFAULT_PORT;
         host = bsplit(ips->entry[i], MONGODB_HOST_PORT_SEPARATOR);
         check (host != NULL, "Error on bsplit"); 
 
