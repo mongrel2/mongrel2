@@ -224,8 +224,14 @@ int attempt_chroot_drop(Server *srv)
         log_info("-- Starting " VERSION ". Copyright (C) Zed A. Shaw. Licensed BSD.\n");
         log_info("-- Look in %s for startup messages and errors.", bdata(srv->error_log));
 
-        rc = Unixy_daemonize();
-        check(rc == 0, "Failed to daemonize, looks like you're hosed.");
+        if(Setting_get_int("server.daemonize", 1)) {
+            rc = Unixy_daemonize();
+            check(rc == 0, "Failed to daemonize, looks like you're hosed.");
+        }
+        else {
+            rc = chdir("/");
+            check(rc == 0, "Failed to change working directory to '/'.");
+        }
 
         FILE *log = fopen(bdata(srv->error_log), "a+");
         check(log, "Couldn't open %s log file.", bdata(srv->error_log));
