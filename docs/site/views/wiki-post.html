@@ -1,0 +1,35 @@
+{( "header.html" )}
+{( "top.html" )}
+
+<div id="main" class="wiki">
+    <div class="inner-wrap clearfix">
+    
+        <div class="content content-right">
+        
+            <article class="post post-wiki clearfix">
+            {{ contents }}
+            </article><!-- end .post -->
+            
+        </div><!-- end .content -->
+        
+        <div class="sidebar">
+            <ul id="wiki-topics">
+                <li class="current">
+                <a href="/wiki/">Documentation</a>
+                <ul class="children">
+                    <li><a href="{{ root.link }}">{{ root.name }}</a></li>
+                                </ul>
+                </li>
+            </ul>
+        
+        </div><!-- end .sidebar -->
+        
+        
+    </div><!-- end .inner-wrap -->
+</div><!-- end #main -->
+
+
+
+
+{( "footer.html" )}
+

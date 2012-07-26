@@ -57,7 +57,6 @@ extern const char *RESPONSE_FORMAT;
 
 typedef struct FileRecord {
     int is_dir;
-    int fd;
     int users;
     time_t loaded;
     bstring date;

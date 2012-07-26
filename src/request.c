@@ -46,6 +46,7 @@
 #include "dbg.h"
 #include "request.h"
 #include "tnetstrings.h"
+#include "websocket.h"
 
 int MAX_HEADER_COUNT=0;
 int MAX_DUPE_HEADERS=5;
@@ -59,11 +60,15 @@ void Request_init()
 
 static hnode_t *req_alloc_hash(void *notused)
 {
+    (void)notused;
+
     return (hnode_t *)malloc(sizeof(hnode_t));
 }
 
 static void req_free_hash(hnode_t *node, void *notused)
 {
+    (void)notused;
+
     bstrListDestroy((struct bstrList *)hnode_get(node));
     bdestroy((bstring)hnode_getkey(node));
     free(node);
@@ -91,6 +96,9 @@ static void http_version_cb(void *data, const char *at, size_t length)
 
 static void header_done_cb(void *data, const char *at, size_t length)
 {
+    (void)at;
+    (void)length;
+
     Request *req = (Request *)data;
 
     // extract content_len
@@ -137,12 +145,17 @@ static void header_field_cb(void *data, const char *field, size_t flen,
         bstring vstr = blk2bstr(value, vlen);
         bstring fstr = blk2bstr(field, flen);
         btolower(fstr);
-
         Request_set(req, fstr, vstr, 0);
+
+        bdestroy(fstr); // we still own the key
     }
 }
 
-
+/**
+ * The caller owns the key, and this function will duplicate it
+ * if needed.  This function owns the value and will destroy it
+ * if there's an error.
+ */
 void Request_set(Request *req, bstring key, bstring val, int replace)
 {
     hnode_t *n = hash_lookup(req->headers, key);
@@ -158,10 +171,10 @@ void Request_set(Request *req, bstring key, bstring val, int replace)
 
         val_list->entry[0] = val;
         val_list->qty = 1;
-        hash_alloc_insert(req->headers, key, val_list);
+        hash_alloc_insert(req->headers, bstrcpy(key), val_list);
     } else {
         val_list = hnode_get(n);
-        bdestroy(key); // don't need the key anymore since we already have it
+        check(val_list != NULL, "Malformed request, missing bstrlist in node. Tell Zed: %s=%s", bdata(key), bdata(val));
 
         if(replace) {
             // destroy ALL old ones and put this in their place
@@ -180,7 +193,11 @@ void Request_set(Request *req, bstring key, bstring val, int replace)
         }
     }
 
-error: return;
+    return;
+
+error:
+    bdestroy(val);
+    return;
 }
 
 Request *Request_create()
@@ -229,6 +246,7 @@ static inline void Request_nuke_parts(Request *req)
     req->response_size = 0;
     req->parser.json_sent = 0;
     req->parser.xml_sent = 0;
+    req->ws_flags=0;
 }
 
 void Request_destroy(Request *req)
@@ -361,8 +379,8 @@ bstring Request_to_tnetstring(Request *req, bstring uuid, int fd, const char *bu
     bstring method = request_determine_method(req);
     check(method, "Impossible, got an invalid request method.");
 
-    int id = Register_id_for_fd(fd);
-    check(id != -1, "Asked to generate a payload for a fd that doesn't exist: %d", fd);
+    uint32_t id = Register_id_for_fd(fd);
+    check_debug(id != UINT32_MAX, "Asked to generate a payload for a fd that doesn't exist: %d", fd);
 
     int header_start = tns_render_request_start(&outbuf);
     check(header_start != -1, "Failed to initialize outbuf.");
@@ -398,8 +416,8 @@ bstring Request_to_payload(Request *req, bstring uuid, int fd, const char *buf, 
     bstring headers = NULL;
     bstring result = NULL;
 
-    int id = Register_id_for_fd(fd);
-    check(id != -1, "Asked to generate a payload for a fd that doesn't exist: %d", fd);
+    uint32_t id = Register_id_for_fd(fd);
+    check_debug(id != UINT32_MAX, "Asked to generate a payload for a fd that doesn't exist: %d", fd);
 
     headers = bfromcstralloc(PAYLOAD_GUESS, "{\"");
     bconcat(headers, &HTTP_PATH);

@@ -48,6 +48,8 @@ enum {
     IPADDR_SIZE = 40
 };
 
+extern darray_t *SERVER_QUEUE;
+
 typedef struct Server {
     int port;
     int listen_fd;
@@ -61,6 +63,7 @@ typedef struct Server {
     bstring error_log;
     bstring pid_file;
     bstring default_hostname;
+    uint32_t created_on;
     int use_ssl;
     x509_cert own_cert;
     rsa_context rsa_key;
@@ -77,7 +80,7 @@ void Server_destroy(Server *srv);
 
 void Server_init();
 
-void Server_start(Server *srv);
+int Server_run();
 
 int Server_add_host(Server *srv, Host *host);
 
@@ -88,5 +91,15 @@ Host *Server_match_backend(Server *srv, bstring target);
 int Server_start_handlers(Server *srv, Server *copy_from);
 
 int Server_stop_handlers(Server *srv);
+
+int Server_queue_init();
+
+void Server_queue_cleanup();
+
+void Server_queue_push(Server *srv);
+
+#define Server_queue_latest() darray_last(SERVER_QUEUE)
+
+int Server_queue_destroy();
 
 #endif

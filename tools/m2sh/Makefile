@@ -2,7 +2,7 @@ CFLAGS=-DNDEBUG -DNO_LINENOS -pthread -g -I../../src -Isrc -Wall $(OPTFLAGS)
 LIBS=-lzmq -lsqlite3 ../../build/libm2.a $(OPTLIBS)
 
 PREFIX?=/usr/local
-SOURCES=$(wildcard src/*.c)
+SOURCES=$(wildcard src/*.c src/**/*.c)
 OBJECTS=$(patsubst %.c,%.o,${SOURCES})
 TEST_SRC=$(wildcard tests/*.c)
 TESTS=$(patsubst %.c,%,${TEST_SRC})
@@ -22,9 +22,9 @@ build/libm2sh.a: ${LIB_OBJ}
 	ar rcs $@ ${LIB_OBJ}
 	ranlib $@
 
-build/m2sh: ../lemon/lemon ../../build/libm2.a build/libm2sh.a src/m2sh.o
+build/m2sh: ../lemon/lemon ../../build/libm2.a ${OBJECTS}
 	mkdir -p build
-	$(CC) $(CFLAGS) -o build/m2sh src/m2sh.o build/libm2sh.a ../../build/libm2.a $(LIBS)
+	$(CC) $(CFLAGS) -o build/m2sh ${OBJECTS} ../../build/libm2.a $(LIBS)
 
 ../lemon/lemon: ../lemon/lemon.c
 	$(CC) -O2 ../lemon/lemon.c -o ../lemon/lemon
@@ -45,7 +45,7 @@ $(TESTS): %: %.c build/libm2sh.a
 	cd ../.. && make clean all
 
 clean:
-	rm -rf src/*.o build tests/*_tests tests/*.o
+	rm -rf src/*.o src/*/*.o build tests/*_tests tests/*.o
 
 pristine: clean
 	rm -f ../lemon/lemon

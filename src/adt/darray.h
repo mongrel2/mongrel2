@@ -3,6 +3,7 @@
 #include "dbg.h"
 #include <stdlib.h>
 #include <assert.h>
+#include "mem/halloc.h"
 
 typedef struct darray_t {
     int end;
@@ -26,6 +27,8 @@ int darray_push(darray_t *array, void *el);
 
 void *darray_pop(darray_t *array);
 
+void darray_clear_destroy(darray_t *array);
+
 #define darray_last(A) ((A)->contents[(A)->end - 1])
 #define darray_first(A) ((A)->contents[0])
 #define darray_end(A) ((A)->end)
@@ -44,8 +47,10 @@ error:
 
 static inline void *darray_get(darray_t *array, int i)
 {
-    assert(i < array->max && "darray attempt to get past max");
+    check(i < array->max, "darray attempt to get past max");
     return array->contents[i];
+error:
+    return NULL;
 }
 
 static inline void *darray_remove(darray_t *array, int i)
@@ -61,12 +66,13 @@ static inline void *darray_new(darray_t *array)
 {
     check(array->element_size > 0, "Can't use darray_new on 0 size darrays.");
 
-    return calloc(1, array->element_size);
+    return h_calloc(1, array->element_size);
 
 error:
     return NULL;
 }
 
-
+#define darray_free(E) h_free((E))
+#define darray_attach(A, E) hattach((E), (A))
 
 #endif

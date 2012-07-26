@@ -79,6 +79,7 @@ Connection = (
         Registered: (
             HTTP_REQ @route_request -> HTTPRouting |
             MSG_REQ @route_request -> MSGRouting |
+            WS_REQ @route_request -> WSRouting |
             SOCKET_REQ @send_socket_response -> Responding |
             CLOSE @close -> final
         ),
@@ -91,6 +92,13 @@ Connection = (
         ),
 
         MSGRouting: ( HANDLER @msg_to_handler -> Queueing ),
+
+        WSRouting: ( HANDLER @http_to_handler -> WSEstablished ),
+
+        WSEstablished: (
+            REQ_SENT @websocket_established -> WSEstablished |
+            CLOSE @close -> final
+        ),
 
         HTTPRouting: (
             HANDLER @http_to_handler -> Queueing |

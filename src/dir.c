@@ -61,13 +61,13 @@ const char *RESPONSE_FORMAT = "HTTP/1.1 200 OK\r\n"
     "\r\n\r\n";
 
 const char *DIR_REDIRECT_FORMAT = "HTTP/1.1 301 Moved Permanently\r\n"
-    "Location: http://%s%s/\r\n"
+    "Location: //%s%s/\r\n"
     "Content-Length: 0\r\n"
     "Server: " VERSION
     "\r\n\r\n";
 
 // TODO: confirm that we are actually doing the GMT time right
-const char *RFC_822_TIME = "%a, %d %b %Y %H:%M:%S GMT";
+static const char *RFC_822_TIME = "%a, %d %b %Y %H:%M:%S GMT";
 
 static int filerecord_cache_lookup(void *data, void *key) {
     bstring request_path = (bstring) key;
@@ -80,32 +80,46 @@ static void filerecord_cache_evict(void *data) {
     FileRecord_release((FileRecord *) data);
 }
 
+static inline int get_file_real_size(FileRecord *fr)
+{
+    // TODO: this is the total suck we'll redesign this away
+    int fd = open(bdata(fr->full_path), O_RDONLY);
+    check(fd >= 0, "Failed to open file but stat worked: %s", bdata(fr->full_path));
+
+    fr->file_size = lseek(fd, 0L, SEEK_END);
+    check(fr->file_size >= 0, "Failed to seek end of file: %s", bdata(fr->full_path));
+    lseek(fd, 0L, SEEK_SET);
+
+    fdclose(fd);
+
+    return 0;
+error:
+
+    fdclose(fd);
+    return -1;
+}
+
+
 
 FileRecord *Dir_find_file(bstring path, bstring default_type)
 {
     FileRecord *fr = calloc(sizeof(FileRecord), 1);
-    const char *p = bdata(path);
 
     check_mem(fr);
 
     // We set the number of users here.  If we cache it, we can add one later
     fr->users = 1;
+    fr->full_path = path;
 
-    int rc = stat(p, &fr->sb);
-    check(rc == 0, "File stat failed: %s", bdata(path));
+    int rc = stat(bdata(fr->full_path), &fr->sb);
+    check(rc == 0, "File stat failed: %s", bdata(fr->full_path));
 
     if(S_ISDIR(fr->sb.st_mode)) {
-        fr->full_path = path;
         fr->is_dir = 1;
         return fr;
     }
 
-    fr->fd = open(p, O_RDONLY);
-    check(fr->fd >= 0, "Failed to open file but stat worked: %s", bdata(path));
-
-    fr->file_size = lseek(fr->fd, 0L, SEEK_END);
-    lseek(fr->fd, 0L, SEEK_SET);
-
+    check(get_file_real_size(fr) == 0, "Failed to setup the file record for %s", bdata(fr->full_path));
     fr->loaded = time(NULL);
 
     fr->last_mod = bStrfTime(RFC_822_TIME, gmtime(&fr->sb.st_mtime));
@@ -148,15 +162,21 @@ static inline int Dir_send_header(FileRecord *file, Connection *conn)
 long long int Dir_stream_file(FileRecord *file, Connection *conn)
 {
     long long int sent = 0;
+    int fd = -1;
 
     int rc = Dir_send_header(file, conn);
     check_debug(rc, "Failed to write header to socket.");
 
-    sent = IOBuf_stream_file(conn->iob, file->fd, file->file_size);
+    fd = open(bdata(file->full_path), O_RDONLY);
+    check(fd >= 0, "Failed to open file: %s", bdata(file->full_path));
 
+    sent = IOBuf_stream_file(conn->iob, fd, file->file_size);
+
+    fdclose(fd);
     return file->file_size;
 
 error:
+    if(fd >= 0) fdclose(fd);
     return -1;
 }
 
@@ -229,11 +249,11 @@ void FileRecord_destroy(FileRecord *file)
 {
     if(file) {
         if(!file->is_dir) {
-            fdclose(file->fd);
             bdestroy(file->date);
             bdestroy(file->last_mod);
             bdestroy(file->header);
             bdestroy(file->etag);
+            bdestroy(file->request_path);
         }
         bdestroy(file->full_path);
         // file->content_type is not owned by us
@@ -241,6 +261,68 @@ void FileRecord_destroy(FileRecord *file)
     }
 }
 
+static inline char *url_decode(const char *in, char *out)
+{
+  const char *cur; /* will seek % in input */
+  char d1; /* will contain candidate for 1st digit */
+  char d2; /* will contain candidate for 2nd digit */
+  char *res = out; /* just for convienience */
+
+  if(!in) {
+    *out = '\0';
+    return res;
+  }
+
+  cur = in;
+
+  while(*cur) {
+    d1 = *(cur+1);
+    d2 = *(cur+2);
+
+    /* One character left in input */
+    if(!d1) {
+      *out = *cur;
+      *(out+1) = '\0';
+      return res;
+    }
+
+    /* Two characters left in input */
+    if(!d2) {
+      *out = *cur;
+      *(out+1) = *(cur+1);
+      *(out+2) = '\0';
+      return res;
+    }
+
+    /* Legal escape sequence */
+    if(*cur=='%' && isxdigit(d1) && isxdigit(d2)) {
+      d1 = tolower(d1);
+      d2 = tolower(d2);
+
+      if( d1 <= '9' )
+        d1 = d1 - '0';
+      else
+        d1 = d1 - 'a' + 10;
+      if( d2 <= '9' )
+        d2 = d2 - '0';
+      else
+        d2 = d2 - 'a' + 10;
+
+      *out = 16 * d1 + d2;
+
+      out += 1;
+      cur += 3;
+    }
+    else {
+      *out = *cur;
+      out += 1;
+      cur += 1;
+    }
+  }
+
+  *out = '\0';
+  return res;
+}
 
 static inline int normalize_path(bstring target)
 {
@@ -252,6 +334,9 @@ static inline int normalize_path(bstring target)
         path_buf = calloc(PATH_MAX+1, 1);
         check_mem(path_buf);
     }
+
+    url_decode((const char *)(bdata(target)), path_buf);
+    bassigncstr(target, path_buf);
 
     char *normalized = realpath((const char *)(bdata(target)), path_buf);
     check_debug(normalized, "Failed to normalize path: %s", bdata(target));
@@ -291,7 +376,16 @@ FileRecord *FileRecord_cache_check(Dir *dir, bstring path)
         if(difftime(now, file->loaded) > dir->cache_ttl) {
             int rcstat = stat(p, &sb);
 
-            if(rcstat != 0 || file->sb.st_mtime != sb.st_mtime || file->sb.st_size != sb.st_size) {
+            if(rcstat != 0 ||
+                    file->sb.st_mtime != sb.st_mtime ||
+                    file->sb.st_ctime != sb.st_ctime ||
+                    file->sb.st_uid != sb.st_uid ||
+                    file->sb.st_gid != sb.st_gid ||
+                    file->sb.st_mode != sb.st_mode ||
+                    file->sb.st_size != sb.st_size ||
+                    file->sb.st_ino != sb.st_ino ||
+                    file->sb.st_dev != sb.st_dev 
+            ) {
                 Cache_evict_object(dir->fr_cache, file);
                 file = NULL;
             } else {
@@ -308,6 +402,9 @@ FileRecord *Dir_resolve_file(Dir *dir, bstring prefix, bstring path)
 {
     FileRecord *file = NULL;
     bstring target = NULL;
+
+    check(blength(prefix) <= blength(path), 
+            "Path '%s' is shorter than prefix '%s', not allowed.", bdata(path), bdata(prefix));
 
     check(Dir_lazy_normalize_base(dir) == 0, "Failed to normalize base path when requesting %s",
             bdata(path));
@@ -337,7 +434,6 @@ FileRecord *Dir_resolve_file(Dir *dir, bstring prefix, bstring path)
                          bdata(dir->index_file));
     } else if(biseq(prefix, path)) {
         target = bformat("%s%s", bdata(dir->normalized_base), bdata(path));
-
     } else {
         target = bformat("%s/%s", bdata(dir->normalized_base), bdataofs(path, blength(prefix)));
     }
@@ -472,6 +568,11 @@ int Dir_serve_file(Dir *dir, Request *req, Connection *conn)
         req->status_code = 405;
         rc = Response_send_status(conn, &HTTP_405);
         check_debug(rc == blength(&HTTP_405), "Failed to send 405 to client.");
+        return -1;
+    } else if (blength(prefix) > blength(path)) {
+        req->status_code = 404;
+        rc = Response_send_status(conn, &HTTP_404);
+        check_debug(rc == blength(&HTTP_404), "Failed to send 404 to client.");
         return -1;
     } else {
         file = Dir_resolve_file(dir, prefix, path);

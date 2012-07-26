@@ -1,6 +1,8 @@
 /**
  * \file openssl.h
  *
+ * \brief OpenSSL wrapper (definitions, inline functions).
+ *
  *  Copyright (C) 2006-2010, Brainspark B.V.
  *
  *  This file is part of PolarSSL (http://www.polarssl.org)
@@ -28,10 +30,10 @@
 #ifndef POLARSSL_OPENSSL_H
 #define POLARSSL_OPENSSL_H
 
-#include "polarssl/aes.h"
-#include "polarssl/md5.h"
-#include "polarssl/rsa.h"
-#include "polarssl/sha1.h"
+#include "aes.h"
+#include "md5.h"
+#include "rsa.h"
+#include "sha1.h"
 
 #define AES_SIZE                16
 #define AES_BLOCK_SIZE          16

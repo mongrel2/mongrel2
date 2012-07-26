@@ -1,0 +1,10 @@
+#!/bin/bash
+
+set -e
+
+for i in tests/and_suite/*
+do
+    echo "--------------- $i ---------------"
+    sed -e 's/\n/\r\n/g' $i | nc -C localhost 6767
+done
+

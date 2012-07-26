@@ -36,15 +36,13 @@
 #include <stdlib.h>
 #include <dbg.h>
 #include <assert.h>
-
+#include <tnetstrings_impl.h>
 
 Value *Value_create(ValueType type, void *data) {
     Value *val = malloc(sizeof(Value));
     val->type = type;
     switch(val->type) {
         case VAL_QSTRING: val->as.string = data;
-            break;
-        case VAL_PATTERN: val->as.pattern = data;
             break;
         case VAL_NUMBER: val->as.number = data;
             break;
@@ -69,7 +67,7 @@ error:
 }
 
 const char *VALUE_NAMES[] = {
-    "QSTRING", "PATTERN", "NUMBER", "CLASS", "LIST", "HASH", 
+    "QSTRING", "NUMBER", "CLASS", "LIST", "HASH", 
     "IDENT", "REF"
 };
 
@@ -232,8 +230,6 @@ static void AST_destroy_value(Value *val)
     switch(val->type) {
         case VAL_QSTRING: Token_destroy(val->as.string);
             break;
-        case VAL_PATTERN: Token_destroy(val->as.pattern);
-            break;
         case VAL_NUMBER: Token_destroy(val->as.number);
             break;
         case VAL_CLASS: Class_destroy(val->as.cls);
@@ -269,3 +265,99 @@ void AST_destroy(tst_t *settings)
 }
 
 
+struct TNSScanData {
+    tst_t *settings;
+    tns_value_t *data;
+    int error;
+};
+
+void AST_tns_convert_cb(void *v, void *data);
+
+tns_value_t *AST_tns_convert_hash(tst_t *settings, Value *filter_settings)
+{
+    tns_value_t *filter_tns = tns_new_dict();
+
+    struct TNSScanData data = {
+        .settings = settings,
+        .data = filter_tns,
+        .error = 0
+    };
+
+    tst_traverse(filter_settings->as.hash, AST_tns_convert_cb, &data);
+    check(!data.error, "Failed to convert hash in filter settings.");
+
+    return filter_tns;
+error:
+
+    if(filter_tns) tns_value_destroy(filter_tns);
+    return NULL;
+}
+
+tns_value_t *AST_tns_convert_value(tst_t *settings, Value *val)
+{
+    lnode_t *cur = NULL;
+    tns_value_t *res = NULL;
+
+    switch(val->type) {
+        case VAL_QSTRING:
+            res = tns_value_create(tns_tag_string);
+            res->value.string = bstrcpy(val->as.string->data);
+            break;
+
+        case VAL_NUMBER:
+            res = tns_new_integer(strtol(
+                        bdatae(val->as.number->data, "0"), NULL, 10));
+            break;
+
+        case VAL_LIST:
+            res = tns_new_list();
+            for(cur = list_first(val->as.list);
+                    cur != NULL; cur = list_next(val->as.list, cur)) 
+            {
+                tns_value_t *el = AST_tns_convert_value(settings, (Value *)lnode_get(cur));
+                check(el != NULL, "Failed to convert an element of the list.");
+                tns_add_to_list(res, el);
+            }
+            break;
+
+        case VAL_REF:
+            val = Value_resolve(settings, val);
+            res = AST_tns_convert_value(settings, val);
+            break;
+
+        case VAL_HASH:
+            res = AST_tns_convert_hash(settings, val);
+            break;
+        default:
+            sentinel("Unsupported type in Filter settings: %s", Value_type_name(val->type));
+    }
+
+    return res;
+
+error: // fallthrough
+    return NULL;
+}
+
+void AST_tns_convert_cb(void *v, void *data)
+{
+    Pair *pair = v;
+    struct TNSScanData *scan = data;
+    bstring name = Pair_key(pair);
+    Value *val = Pair_value(pair);
+    check(val, "Error loading filter Setting %s", bdata(Pair_key(pair)));
+
+    tns_value_t *value = AST_tns_convert_value(scan->settings, val);
+    check(value != NULL, "Failed to convert filter setting value.");
+
+    tns_value_t *key = tns_value_create(tns_tag_string);
+    key->value.string = bstrcpy(name);
+
+    tns_add_to_dict(scan->data, key, value);
+
+    return;
+
+error:
+    scan->error = 1;
+    tns_value_destroy(scan->data);
+    scan->data = NULL;
+}

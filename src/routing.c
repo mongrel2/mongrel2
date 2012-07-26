@@ -81,6 +81,7 @@ void RouteMap_destroy(RouteMap *map)
 Route *RouteMap_insert_base(RouteMap *map, bstring prefix, bstring pattern)
 {
     Route *route = h_malloc(sizeof(Route));
+    Route *route2;
     check_mem(route);
 
     route->pattern = pattern;
@@ -88,10 +89,18 @@ Route *RouteMap_insert_base(RouteMap *map, bstring prefix, bstring pattern)
 
     route->prefix = prefix;
     check(route->prefix, "Prefix is required.");
+    route->next = NULL;
 
     debug("ADDING prefix: %s, pattern: %s", bdata(prefix), bdata(pattern));
-
-    map->routes = tst_insert(map->routes, bdata(prefix), blength(prefix), route);
+    route2= tst_search(map->routes, bdata(prefix), blength(prefix));
+    
+    if (route2 != NULL) {
+        route->next=route2->next;
+        route2->next=route;
+    }
+    else {
+        map->routes = tst_insert(map->routes, bdata(prefix), blength(prefix), route);
+    }
 
     hattach(route, map);
 
@@ -140,7 +149,10 @@ int RouteMap_insert_reversed(RouteMap *map, bstring pattern, void *data)
     int last_paren = bstrrchr(pattern, ')');
 
     if(last_paren >= 0) {
+        // reversed patterns put the pattern first, so it needs to be checked as a complete whole
         reversed_prefix = bTail(pattern, blength(pattern) - last_paren - 1);
+        btrunc(pattern, last_paren + 1);
+        bconchar(pattern, '$');
     } else {
         reversed_prefix = bstrcpy(pattern);
     }
@@ -148,7 +160,6 @@ int RouteMap_insert_reversed(RouteMap *map, bstring pattern, void *data)
     check_mem(reversed_prefix);
     bReverse(reversed_prefix);
 
-    // we own reversed_prefix, they own pattern
     route = RouteMap_insert_base(map, reversed_prefix, pattern);
     check(route, "Failed to add host.");
 
@@ -169,9 +180,14 @@ int RouteMap_collect_match(void *value, const char *key, size_t len)
     Route *route = (Route *)value;
 
     if(route->has_pattern) {
-        return pattern_match(key + route->first_paren,
-                len - route->first_paren,
-                bdataofs(route->pattern, route->first_paren)) != NULL;
+        if(route->first_paren >= 0 && (size_t)route->first_paren < len) {
+            // it's not possible to match if the pattern paren is after the value we're testing
+            return pattern_match(key + route->first_paren,
+                    len - route->first_paren,
+                    bdataofs(route->pattern, route->first_paren)) != NULL;
+        } else {
+            return 0;
+        }
     } else {
         return 1;
     }
@@ -183,13 +199,17 @@ list_t *RouteMap_match(RouteMap *map, bstring path)
             blength(path), RouteMap_collect_match);
 }
 
-static inline Route *match_route_pattern(bstring target, Route *route)
+static inline Route *match_route_pattern(bstring target, Route *route, int suffix)
 {
-    const char *source = bdataofs(target, blength(route->prefix));
+    const char *source = suffix ? bdata(target) : bdataofs(target, blength(route->prefix));
     int source_length = blength(target) - blength(route->prefix);
-    const char *pattern = bdataofs(route->pattern, route->first_paren);
+    const char *pattern = suffix ? bdata(route->pattern) : bdataofs(route->pattern, route->first_paren);
 
-    return pattern_match(source, source_length, pattern) ? route : NULL;
+    if(source_length >= 0 && source != NULL) {
+        return pattern_match(source, source_length, pattern) ? route : NULL;
+    } else {
+        return NULL;
+    }
 }
 
 Route *RouteMap_match_suffix(RouteMap *map, bstring target)
@@ -197,10 +217,10 @@ Route *RouteMap_match_suffix(RouteMap *map, bstring target)
     Route *route = tst_search_suffix(map->routes, bdata(target), blength(target));
 
     if(route) {
-        debug("Found simple suffix: %s", bdata(route->pattern));
+        debug("Found simple suffix: %s for target: %s", bdata(route->pattern), bdata(target));
 
         if(route->has_pattern) {
-            return match_route_pattern(target, route);
+            return match_route_pattern(target, route, 1);
         } else {
             return route;
         }
@@ -211,7 +231,7 @@ Route *RouteMap_match_suffix(RouteMap *map, bstring target)
 
 
 Route *RouteMap_simple_prefix_match(RouteMap *map, bstring target)
-{ 
+{
     debug("Searching for route: %s in map: %p", bdata(target), map);
     Route *route = tst_search_prefix(map->routes, bdata(target), blength(target));
 
@@ -219,11 +239,18 @@ Route *RouteMap_simple_prefix_match(RouteMap *map, bstring target)
         debug("Found simple prefix: %s", bdata(route->pattern));
 
         if(route->has_pattern) {
-            return match_route_pattern(target, route);
+            while(route != NULL)
+            {
+                Route *matched = match_route_pattern(target, route, 0);
+                if(matched != NULL) {
+                    return matched;
+                }
+                route=route->next;
+            }
         } else {
             return route;
         }
-    } else {
-        return NULL;
     }
+
+    return NULL;
 }

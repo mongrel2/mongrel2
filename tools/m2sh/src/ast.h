@@ -5,6 +5,7 @@
 #include <adt/tst.h>
 #include "parser.h"
 #include "config_file.h"
+#include <tnetstrings.h>
 
 struct Value;
 
@@ -23,7 +24,7 @@ typedef struct Class {
 } Class;
 
 typedef enum ValueType {
-    VAL_QSTRING=0, VAL_PATTERN, VAL_NUMBER, VAL_CLASS, VAL_LIST, VAL_HASH, VAL_IDENT, VAL_REF
+    VAL_QSTRING=0, VAL_NUMBER, VAL_CLASS, VAL_LIST, VAL_HASH, VAL_IDENT, VAL_REF
 } ValueType;
 
 typedef struct Value {
@@ -31,7 +32,6 @@ typedef struct Value {
     union {
         void *data;
         Token *string;
-        Token *pattern;
         Token *number;
         Class *cls;
         list_t *list;
@@ -42,6 +42,7 @@ typedef struct Value {
 } Value;
 
 const char *Value_type_name(ValueType type);
+Value *Value_resolve(tst_t *settings, Value *val);
 
 Value *Value_create(ValueType type, void *data);
 #define Value_is(V, T) ((V)->type == (VAL_##T))
@@ -61,5 +62,8 @@ bstring AST_get_bstr(tst_t *settings, tst_t *fr, bstring name, ValueType type);
 const char *AST_str(tst_t *settings, tst_t *fr, const char *name, TokenType type);
 
 void AST_destroy(tst_t *settings);
+
+tns_value_t *AST_tns_convert_hash(tst_t *settings, Value *filter_settings);
+tns_value_t *AST_tns_convert_value(tst_t *settings, Value *val);
 
 #endif

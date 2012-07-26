@@ -98,12 +98,12 @@ SuperPoll *SuperPoll_create()
         rc = SuperPoll_setup_idle(sp, total_open_fd);
         check(rc == 0, "Failed to configure epoll. Disabling.");
 
-        log_info("Allowing for %d hot and %d idle file descriptors (dividend was %d)",
+        debug("Allowing for %d hot and %d idle file descriptors (dividend was %d)",
                 sp->max_hot, sp->max_idle, hot_dividend);
     } else {
         sp->max_hot = total_open_fd;
 
-        log_info("You do not have epoll support. Allowing for %d file descriptors through poll.", sp->max_hot);
+        debug("You do not have epoll support. Allowing for %d file descriptors through poll.", sp->max_hot);
     }
 
     sp->pollfd = h_calloc(sizeof(zmq_pollitem_t), sp->max_hot);
@@ -225,8 +225,8 @@ int SuperPoll_poll(SuperPoll *sp, PollResult *result, int ms)
 
     result->nhits = 0;
 
-    // do the regular poll, with idlefd inside if available
-    nfound = zmq_poll(sp->pollfd, sp->nfd_hot, ms * 1000);
+    // do the regular poll, with idlefd inside if available; 0MQ 3.1 poll is in ms.
+    nfound = zmq_poll(sp->pollfd, sp->nfd_hot, ms * ZMQ_POLL_MSEC);
     check(nfound >= 0 || errno == EINTR, "zmq_poll failed.");
 
     result->hot_fds = nfound;
@@ -282,7 +282,7 @@ int SuperPoll_get_max_fd()
         MAXFD = rl.rlim_cur;
     }
 
-    log_info("MAX open file descriptors is %d now.", MAXFD);
+    debug("MAX open file descriptors is %d now.", MAXFD);
     return MAXFD;
 
 error:

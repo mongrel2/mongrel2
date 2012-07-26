@@ -35,8 +35,9 @@
 
 #include "polarssl/md4.h"
 
-#include <string.h>
+#if defined(POLARSSL_FS_IO) || defined(POLARSSL_SELF_TEST)
 #include <stdio.h>
+#endif
 
 /*
  * 32-bit integer manipulation macros (little endian)
@@ -181,9 +182,9 @@ static void md4_process( md4_context *ctx, const unsigned char data[64] )
 /*
  * MD4 process buffer
  */
-void md4_update( md4_context *ctx, const unsigned char *input, int ilen )
+void md4_update( md4_context *ctx, const unsigned char *input, size_t ilen )
 {
-    int fill;
+    size_t fill;
     unsigned long left;
 
     if( ilen <= 0 )
@@ -192,7 +193,7 @@ void md4_update( md4_context *ctx, const unsigned char *input, int ilen )
     left = ctx->total[0] & 0x3F;
     fill = 64 - left;
 
-    ctx->total[0] += ilen;
+    ctx->total[0] += (unsigned long) ilen;
     ctx->total[0] &= 0xFFFFFFFF;
 
     if( ctx->total[0] < (unsigned long) ilen )
@@ -261,7 +262,7 @@ void md4_finish( md4_context *ctx, unsigned char output[16] )
 /*
  * output = MD4( input buffer )
  */
-void md4( const unsigned char *input, int ilen, unsigned char output[16] )
+void md4( const unsigned char *input, size_t ilen, unsigned char output[16] )
 {
     md4_context ctx;
 
@@ -272,6 +273,7 @@ void md4( const unsigned char *input, int ilen, unsigned char output[16] )
     memset( &ctx, 0, sizeof( md4_context ) );
 }
 
+#if defined(POLARSSL_FS_IO)
 /*
  * output = MD4( file contents )
  */
@@ -283,12 +285,12 @@ int md4_file( const char *path, unsigned char output[16] )
     unsigned char buf[1024];
 
     if( ( f = fopen( path, "rb" ) ) == NULL )
-        return( 1 );
+        return( POLARSSL_ERR_MD4_FILE_IO_ERROR );
 
     md4_starts( &ctx );
 
     while( ( n = fread( buf, 1, sizeof( buf ), f ) ) > 0 )
-        md4_update( &ctx, buf, (int) n );
+        md4_update( &ctx, buf, n );
 
     md4_finish( &ctx, output );
 
@@ -297,19 +299,20 @@ int md4_file( const char *path, unsigned char output[16] )
     if( ferror( f ) != 0 )
     {
         fclose( f );
-        return( 2 );
+        return( POLARSSL_ERR_MD4_FILE_IO_ERROR );
     }
 
     fclose( f );
     return( 0 );
 }
+#endif /* POLARSSL_FS_IO */
 
 /*
  * MD4 HMAC context setup
  */
-void md4_hmac_starts( md4_context *ctx, const unsigned char *key, int keylen )
+void md4_hmac_starts( md4_context *ctx, const unsigned char *key, size_t keylen )
 {
-    int i;
+    size_t i;
     unsigned char sum[16];
 
     if( keylen > 64 )
@@ -337,7 +340,7 @@ void md4_hmac_starts( md4_context *ctx, const unsigned char *key, int keylen )
 /*
  * MD4 HMAC process buffer
  */
-void md4_hmac_update( md4_context *ctx, const unsigned char *input, int ilen )
+void md4_hmac_update( md4_context *ctx, const unsigned char *input, size_t ilen )
 {
     md4_update( ctx, input, ilen );
 }
@@ -370,8 +373,8 @@ void md4_hmac_reset( md4_context *ctx )
 /*
  * output = HMAC-MD4( hmac key, input buffer )
  */
-void md4_hmac( const unsigned char *key, int keylen,
-               const unsigned char *input, int ilen,
+void md4_hmac( const unsigned char *key, size_t keylen,
+               const unsigned char *input, size_t ilen,
                unsigned char output[16] )
 {
     md4_context ctx;

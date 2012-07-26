@@ -35,29 +35,41 @@
 #define _XOPEN_SOURCE 500
 #define _FILE_OFFSET_BITS 64
 
+#include <stdlib.h>
+#include <assert.h>
+#include <unistd.h>
 #include "io.h"
 #include "register.h"
 #include "mem/halloc.h"
 #include "dbg.h"
-#include <stdlib.h>
-#include <assert.h>
-#include <unistd.h>
-#include <polarssl/havege.h>
-#include <polarssl/ssl.h>
-#include <task/task.h>
+#include "polarssl/havege.h"
+#include "polarssl/ssl.h"
+#include "task/task.h"
+#include "adt/darray.h"
+
+int IO_SSL_VERIFY_METHOD = SSL_VERIFY_NONE;
 
 static ssize_t null_send(IOBuf *iob, char *buffer, int len)
 {
+    (void)iob;
+    (void)buffer;
+
     return len;
 }
 
 static ssize_t null_recv(IOBuf *iob, char *buffer, int len)
 {
+    (void)iob;
+    (void)buffer;
+
     return len;
 }
 
 static ssize_t null_stream_file(IOBuf *iob, int fd, off_t len)
 {
+    (void)iob;
+    (void)fd;
+
     return len;
 }
 
@@ -114,13 +126,13 @@ error:
     return -1;
 }
 
-static int ssl_fdsend_wrapper(void *p_iob, unsigned char *ubuffer, int len)
+static int ssl_fdsend_wrapper(void *p_iob, const unsigned char *ubuffer, size_t len)
 {
     IOBuf *iob = (IOBuf *) p_iob;
     return fdsend(iob->fd, (char *) ubuffer, len);
 }
 
-static int ssl_fdrecv_wrapper(void *p_iob, unsigned char *ubuffer, int len)
+static int ssl_fdrecv_wrapper(void *p_iob, unsigned char *ubuffer, size_t len)
 {
     IOBuf *iob = (IOBuf *) p_iob;
     return fdrecv1(iob->fd, (char *) ubuffer, len);
@@ -131,8 +143,9 @@ static int ssl_do_handshake(IOBuf *iob)
     int rcode;
     check(!iob->handshake_performed, "ssl_do_handshake called unnecessarily");
     while((rcode = ssl_handshake(&iob->ssl)) != 0) {
-        check(rcode == POLARSSL_ERR_NET_TRY_AGAIN,
-              "handshake failed with error code %d", rcode);
+
+        check(rcode == POLARSSL_ERR_NET_WANT_READ
+                || rcode == POLARSSL_ERR_NET_WANT_WRITE, "Handshake failed with error code: %d", rcode);
     }
     iob->handshake_performed = 1;
     return 0;
@@ -142,20 +155,30 @@ error:
 
 static ssize_t ssl_send(IOBuf *iob, char *buffer, int len)
 {
-    ssize_t sent = 0;
+    int sent = 0;
+    int total = 0;
 
     check(iob->use_ssl, "IOBuf not set up to use ssl");
+
     if(!iob->handshake_performed) {
         int rcode = ssl_do_handshake(iob);
-        check(rcode == 0, "handshake failed");
+        check(rcode == 0, "SSL handshake failed: %d", rcode);
     }
 
-    do {
-        // must send in chunks of SSL_MAX_CONTENT_LEN
-        sent += ssl_write(&iob->ssl, (const unsigned char*) (buffer + sent), (len - sent));
-    } while (sent < len);	
+    for(sent = 0; len > 0; buffer += sent, len -= sent, total += sent) {
+        sent = ssl_write(&iob->ssl, (const unsigned char*) buffer, len);
 
-    return sent;
+        check(sent != -1, "Error sending SSL data.");
+        check(sent <= len, "Buffer overflow. Too much data sent by ssl_write");
+
+        // make sure we don't hog the process trying to stream out
+        if(sent < len) {
+            taskyield();
+        }
+    };
+
+    return total;
+
 error:
     return -1;
 }
@@ -163,10 +186,12 @@ error:
 static ssize_t ssl_recv(IOBuf *iob, char *buffer, int len)
 {
     check(iob->use_ssl, "IOBuf not set up to use ssl");
+
     if(!iob->handshake_performed) {
         int rcode = ssl_do_handshake(iob);
-        check(rcode == 0, "handshake failed");
+        check(rcode == 0, "SSL handshake failed: %d", rcode);
     }
+
     return ssl_read(&iob->ssl, (unsigned char*) buffer, len);
 error:
     return -1;
@@ -200,7 +225,7 @@ static ssize_t ssl_stream_file(IOBuf *iob, int fd, off_t len)
 
         check(Register_write(iob->fd, sent) != -1, "Failed to record write, must have died.");
     }
-    
+
     check(total <= len,
             "Wrote way too much, wrote %d but size was %zd",
             (int)total, len);
@@ -215,41 +240,160 @@ error:
     return -1;
 }
 
-void ssl_debug(void *p, int level, const char *msg) {
+void ssl_debug(void *p, int level, const char *msg)
+{
+    (void)p;
+    if (msg) {}
+
     if(level < 2) {
         debug("polarssl: %s", msg);
     }
 }
 
+// -- quick hack taken from the polar ssl server code to see how it will work
+//
+/*
+ * These session callbacks use a simple chained list
+ * to store and retrieve the session information.
+ */
+static darray_t *SSL_SESSION_CACHE = NULL;
+const int SSL_INITIAL_CACHE_SIZE = 300;
+
+static inline int setup_ssl_session_cache()
+{
+    if(SSL_SESSION_CACHE == NULL) {
+        SSL_SESSION_CACHE = darray_create(SSL_INITIAL_CACHE_SIZE, sizeof(ssl_session));
+        check_mem(SSL_SESSION_CACHE);
+    }
+    return 0;
+error:
+    return -1;
+}
+
+
+static int simple_get_session( ssl_context *ssl )
+{
+    time_t t = THE_CURRENT_TIME_IS;
+    int i = 0;
+
+    check(setup_ssl_session_cache() == 0, "Failed to initialize SSL session cache.");
+
+    if( ssl->resume == 0 ) return 1;
+    ssl_session *cur = NULL;
+
+    for(i = 0; i < darray_end(SSL_SESSION_CACHE); i++) {
+        cur = darray_get(SSL_SESSION_CACHE, i);
+
+        if( ssl->timeout != 0 && t - cur->start > ssl->timeout ) {
+            continue;
+        }
+
+        if( ssl->session->ciphersuite != cur->ciphersuite ||
+            ssl->session->length != cur->length ) 
+        {
+            continue;
+        }
+
+        if( memcmp( ssl->session->id, cur->id, cur->length ) != 0 ) {
+            continue;
+        }
+
+        // TODO: odd, why 48? this is from polarssl
+        memcpy( ssl->session->master, cur->master, 48 );
+        return 0;
+    }
+
+error: // fallthrough
+    return 1;
+}
+
+static int simple_set_session( ssl_context *ssl )
+{
+    time_t t = THE_CURRENT_TIME_IS;
+    int i = 0;
+    ssl_session *cur = NULL;
+    int make_new = 1;
+    check(setup_ssl_session_cache() == 0, "Failed to initialize SSL session cache.");
+
+    for(i = 0; i < darray_end(SSL_SESSION_CACHE); i++) {
+        cur = darray_get(SSL_SESSION_CACHE, i);
+
+        if( ssl->timeout != 0 && t - cur->start > ssl->timeout ) {
+            make_new = 0;
+            break; /* expired, reuse this slot */
+        }
+
+        if( memcmp( ssl->session->id, cur->id, cur->length ) == 0 ) {
+            make_new = 0;
+            break; /* client reconnected */
+        }
+    }
+
+    if(make_new) {
+        cur = (ssl_session *) darray_new(SSL_SESSION_CACHE);
+        check_mem(cur);
+        darray_push(SSL_SESSION_CACHE, cur);
+    }
+
+    *cur = *ssl->session;
+
+    return 0;
+error:
+    return 1;
+}
+
+
+
+static inline int iobuf_ssl_setup(IOBuf *buf)
+{
+    int rc = 0;
+
+    buf->use_ssl = 1;
+    buf->handshake_performed = 0;
+
+    rc = ssl_init(&buf->ssl);
+    check(rc == 0, "Failed to initialize SSL structure.");
+
+    ssl_set_endpoint(&buf->ssl, SSL_IS_SERVER);
+    ssl_set_authmode(&buf->ssl, IO_SSL_VERIFY_METHOD);
+
+    havege_init(&buf->hs);
+    ssl_set_rng(&buf->ssl, havege_random, &buf->hs);
+
+#ifndef DEBUG
+    ssl_set_dbg(&buf->ssl, ssl_debug, NULL);
+#endif
+
+    ssl_set_bio(&buf->ssl, ssl_fdrecv_wrapper, buf, 
+                ssl_fdsend_wrapper, buf);
+    ssl_set_session(&buf->ssl, 1, 0, &buf->ssn);
+
+    ssl_set_scb(&buf->ssl, simple_get_session, simple_set_session);
+
+    memset(&buf->ssn, 0, sizeof(buf->ssn));
+
+    return 0;
+error:
+    return -1;
+}
+
 IOBuf *IOBuf_create(size_t len, int fd, IOBufType type)
 {
-    IOBuf *buf = h_calloc(sizeof(IOBuf), 1);
+    IOBuf *buf = malloc(sizeof(IOBuf));
     check_mem(buf);
 
-    buf->fd = fd;
     buf->len = len;
-
-    buf->buf = h_malloc(len + 1);
+    buf->avail = 0;
+    buf->cur = 0;
+    buf->closed = 0;
+    buf->buf = malloc(len + 1);
     check_mem(buf->buf);
-
-    hattach(buf->buf, buf);
-
     buf->type = type;
+    buf->fd = fd;
+    buf->use_ssl = 0;
 
     if(type == IOBUF_SSL) {
-        buf->use_ssl = 1;
-        buf->handshake_performed = 0;
-        ssl_init(&buf->ssl);
-        ssl_set_endpoint(&buf->ssl, SSL_IS_SERVER);
-        ssl_set_authmode(&buf->ssl, SSL_VERIFY_NONE);
-        havege_init(&buf->hs);
-        ssl_set_rng(&buf->ssl, havege_rand, &buf->hs);
-        ssl_set_dbg(&buf->ssl, ssl_debug, NULL);
-        ssl_set_bio(&buf->ssl, ssl_fdrecv_wrapper, buf, 
-                    ssl_fdsend_wrapper, buf);
-        ssl_set_session(&buf->ssl, 1, 0, &buf->ssn);
-        memset(&buf->ssn, 0, sizeof(buf->ssn));
-
+        check(iobuf_ssl_setup(buf) != -1, "Failed to setup SSL.");
         buf->send = ssl_send;
         buf->recv = ssl_recv;
         buf->stream_file = ssl_stream_file;
@@ -276,22 +420,39 @@ error:
     return NULL;
 }
 
-void IOBuf_destroy(IOBuf *buf)
+int IOBuf_close(IOBuf *buf)
 {
+    int rc = 0;
+
     if(buf) {
         if(buf->use_ssl) {
-            ssl_close_notify(&buf->ssl);
-            ssl_free(&buf->ssl);
+            rc = ssl_close_notify(&buf->ssl);
         }
         
         fdclose(buf->fd);
-        h_free(buf);
+        buf->fd=-1;
+    }
+
+    return rc;
+}
+
+void IOBuf_destroy(IOBuf *buf)
+{
+    if(buf) {
+        IOBuf_close(buf); // ignore return
+
+        if(buf->use_ssl) {
+            ssl_free(&buf->ssl);
+        }
+        
+        if(buf->buf) free(buf->buf);
+        free(buf);
     }
 }
 
 void IOBuf_resize(IOBuf *buf, size_t new_size)
 {
-    buf->buf = h_realloc(buf->buf, new_size);
+    buf->buf = realloc(buf->buf, new_size);
     buf->len = new_size;
 }
 
@@ -437,11 +598,13 @@ char *IOBuf_read_all(IOBuf *buf, int len, int retries)
         data = IOBuf_read(buf, len, &nread);
 
         check_debug(data, "Read error from socket.");
+
         assert(nread <= len && "Invalid nread size (too much) on IOBuf read.");
 
         if(nread == len) {
             break;
         } else {
+            check(!IOBuf_closed(buf), "Socket closed during IOBuf_read_all.")
             fdwait(buf->fd, 'r');
         }
     }
@@ -471,14 +634,13 @@ int IOBuf_stream(IOBuf *from, IOBuf *to, int total)
     int remain = total;
     int avail = 0;
     int rc = 0;
-    char *data = NULL;
 
     if(from->len > to->len) IOBuf_resize(to, from->len);
 
     while(remain > 0) {
         need = remain <= from->len ? remain : from->len;
 
-        data = IOBuf_read(from, need, &avail);
+        IOBuf_read(from, need, &avail);
         check_debug(avail > 0, "Nothing in read buffer.");
 
         rc = IOBuf_send_all(to, IOBuf_start(from), avail);
@@ -520,6 +682,17 @@ error:
     return -1;
 }
 
+int IOBuf_register_disconnect(IOBuf *buf)
+{
+    int rc=0;
+    if(IOBuf_fd(buf)>0) {
+        rc= Register_disconnect(IOBuf_fd(buf));
+        return rc;
+    }
+    return 0;
+}
+
+
 int IOBuf_stream_file(IOBuf *buf, int fd, off_t len)
 {
     int rc = 0;
@@ -535,68 +708,3 @@ int IOBuf_stream_file(IOBuf *buf, int fd, off_t len)
 }
 
 
-
-void debug_dump(void *addr, int len)
-{
-#ifdef NDEBUG
-  return;
-#endif
-
-  char tohex[] = "0123456789ABCDEF";
-  int i = 0;
-  unsigned char *pc = addr;
-
-  char buf0[32] = {0};                // offset
-  char buf1[64] = {0};                // hex
-  char buf2[64] = {0};                // literal
-
-  char *pc1 = NULL;
-  char *pc2 = NULL;
-
-  
-
-  while(--len >= 0) {
-
-    if(i % 16 == 0) {
-      sprintf(buf0, "%08x", i);
-      buf1[0] = 0;
-      buf2[0] = 0;
-      pc1 = buf1;
-      pc2 = buf2;
-    }
-
-    *pc1++ = tohex[*pc >> 4];
-    *pc1++ = tohex[*pc & 15];
-    *pc1++ = ' ';
-
-    if(*pc >= 32 && *pc < 127) {
-      *pc2++ = *pc;
-    } else {
-      *pc2++ = '.';
-    }
-
-    i++;
-    pc++;
-
-    if(i % 16 == 0) {
-      *pc1 = 0;
-      *pc2 = 0;
-      debug("%s:   %s  %s", buf0, buf1, buf2);
-    }
-
-  }
-
-  if(i % 16 != 0) {
-    while(i % 16 != 0) {
-      *pc1++ = ' ';
-      *pc1++ = ' ';
-      *pc1++ = ' ';
-      *pc2++ = ' ';
-      i++;
-    }
-
-    *pc1 = 0;
-    *pc2 = 0;
-    debug("%s:   %s  %s", buf0, buf1, buf2);
-  }
-}

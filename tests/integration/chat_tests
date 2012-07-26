@@ -1,0 +1,66 @@
+#!/usr/bin/env python
+
+from subprocess import *
+import sys
+import os
+import re
+import time
+import hashlib
+import socket
+import random
+
+random.seed(time.time())
+
+from base64 import b64decode
+try:
+    import json
+except:
+    import simplejson as json
+
+import getpass
+import os
+from threading import Thread, Condition
+
+print "Connecting..."
+CONN = socket.socket()
+CONN.connect(('localhost', 6767))
+
+def random_close():
+    if random.randint(0,100) == 3:
+        print "CLOSE!"
+        CONN.close()
+        sys.exit(0)
+    elif random.randint(0, 100) == 5:
+        time.sleep(4)
+
+
+def read_msg():
+    reply = ""
+
+    ch = CONN.recv(1)
+    while ch != '\0':
+        random_close()
+        reply += ch
+        ch = CONN.recv(1)
+
+    return json.loads(b64decode(reply))
+
+def join_feed(user):
+    CONN.send('@chat {"type": "join", "user": "%s"}\x00' % user)
+
+def post_msg(user, data):
+    msg = '@chat {"type": "msg", "user": "%s", "msg": "%s"}\x00' % (user, data)
+    print "Sending events:", msg
+
+    random_close()
+    CONN.send(msg)
+
+    print "SENT!"
+
+user = getpass.getuser()
+
+join_feed(user)
+post_msg(user, "HI!")
+print read_msg()
+
+CONN.close()

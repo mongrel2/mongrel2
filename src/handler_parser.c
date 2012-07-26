@@ -178,7 +178,7 @@ tr7:
 tr11:
 #line 60 "src/handler_parser.rl"
 	{
-        check(parser->target_count < parser->target_max, "Request contains too many target listeners.");
+        check(parser->target_count < parser->target_max, "Request contains too many target listeners: %d > %d", parser->target_count, parser->target_max);
         parser->targets[parser->target_count++] = strtoul(mark, NULL, 10); 
     }
 #line 69 "src/handler_parser.rl"
@@ -215,7 +215,7 @@ tr8:
 tr13:
 #line 60 "src/handler_parser.rl"
 	{
-        check(parser->target_count < parser->target_max, "Request contains too many target listeners.");
+        check(parser->target_count < parser->target_max, "Request contains too many target listeners: %d > %d", parser->target_count, parser->target_max);
         parser->targets[parser->target_count++] = strtoul(mark, NULL, 10); 
     }
 #line 48 "src/handler_parser.rl"

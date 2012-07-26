@@ -106,8 +106,13 @@ int darray_contract(darray_t *array)
 
 void darray_destroy(darray_t *array)
 {
-    darray_clear(array);
     h_free(array);
+}
+
+void darray_clear_destroy(darray_t *array)
+{
+    darray_clear(array);
+    darray_destroy(array);
 }
 
 int darray_push(darray_t *array, void *el)
@@ -124,7 +129,7 @@ int darray_push(darray_t *array, void *el)
 
 void *darray_pop(darray_t *array)
 {
-    check(array->end - 1 > 0, "Attempt to pop from empty array.");
+    check(array->end - 1 >= 0, "Attempt to pop from empty array.");
 
     void *el = darray_remove(array, array->end - 1);
     array->end--;

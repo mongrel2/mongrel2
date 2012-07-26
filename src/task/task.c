@@ -313,14 +313,11 @@ tns_value_t *taskgetinfo(void)
 
 static int taskargc;
 static char **taskargv;
-#if defined(__FreeBSD__)
 int MAINSTACKSIZE = 96 * 1024;
-#else
-int MAINSTACKSIZE = 32 * 1024;
-#endif
 
 static void taskmainstart(void *v)
 {
+    (void)v;
     taskname("taskmain");
     taskmain(taskargc, taskargv);
 }
@@ -344,11 +341,19 @@ int main(int argc, char **argv)
  */
 void addtask(Tasklist *l, Task *t)
 {
+    if(t->prev != NULL || t->next != NULL || l->head == t) {
+        log_err("Task is already added, refusing to do it again: %p, %p, %p=%p", t->prev, t->next, l->head, t);
+        return;
+    }
+
+#ifndef NDEBUG
     Task *test = NULL;
+
     for(test = taskrunqueue.head; test != NULL; test = test->next)
     {
         assert(test != t && "Fucking double addtask mother fucker!");
     }
+#endif
 
     if(l->tail) {
         l->tail->next = t;
@@ -401,8 +406,12 @@ int tasksignal(Task *task, int signal)
     check(task != NULL, "Task was NULL, that's really bad.");
     check(signal > 0, "Signal has to be greater than 0.");
 
-    task->signal = signal;
-    taskready(task);
+    if(task->signal == 0) {
+        task->signal = signal;
+        taskready(task);
+    } else {
+        log_info("Task %p is already signaled with %d", task, task->signal);
+    }
 
     return 0;
 error:
@@ -444,7 +453,7 @@ int taskallsignal(int signal)
     }
 
     while((i = taskyield()) > 0) {
-        debug("BACK FROM THE FINAL SWITCH! TASK YIELD: %d", i);
+        // debug("BACK FROM THE FINAL SWITCH! TASK YIELD: %d", i);
     }
 
     return 0;

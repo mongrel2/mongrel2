@@ -2,23 +2,23 @@
  *
  * Copyright (c) 2010, Zed A. Shaw and Mongrel2 Project Contributors.
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
  * met:
- * 
+ *
  *     * Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimer.
- * 
+ *
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- * 
+ *
  *     * Neither the name of the Mongrel2 Project, Zed A. Shaw, nor the names
  *       of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written
  *       permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
  * IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
  * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
@@ -35,7 +35,7 @@
 #include <handler.h>
 #include <handler_parser.h>
 #include <task/task.h>
-#include <zmq.h>
+#include "zmq_compat.h"
 #include <dbg.h>
 #include <stdlib.h>
 #include <string.h>
@@ -54,6 +54,8 @@ int HANDLER_STACK;
 
 static void cstr_free(void *data, void *hint)
 {
+    (void)hint;
+
     free(data);
 }
 
@@ -62,7 +64,7 @@ void Handler_notify_leave(Handler *handler, int id)
     void *socket = handler->send_socket;
     assert(socket && "Socket can't be NULL");
     bstring payload = NULL;
-    
+
     if(handler->protocol == HANDLER_PROTO_TNET) {
         payload = bformat("%s %d @* %s%d:%s,",
                 bdata(handler->send_ident), id,
@@ -138,20 +140,16 @@ static inline void handler_process_request(Handler *handler, int id, int fd,
         Connection *conn, bstring payload)
 {
     int rc = 0;
+    check(conn != NULL, "You can't pass NULL conn to this anymore.");
 
-    if(conn == NULL) {
-        debug("Ident %d (fd %d) is no longer connected.", id, fd);
-        Handler_notify_leave(handler, id);
+    if(blength(payload) == 0) {
+        rc = Connection_deliver_raw(conn,NULL);
+        check(rc != -1, "Register disconnect failed for: %d", fd);
     } else {
-        if(blength(payload) == 0) {
-            rc = Register_disconnect(fd);
-            check(rc != -1, "Register disconnect failed for: %d", fd);
-        } else {
-            int raw = conn->type != CONN_TYPE_MSG || handler->raw;
+        int raw = conn->type != CONN_TYPE_MSG || handler->raw;
 
-            rc = deliver_payload(raw, fd, conn, payload);
-            check(rc != -1, "Failed to deliver to connection %d on socket %d", id, fd);
-        }
+        rc = deliver_payload(raw, fd, conn, payload);
+        check(rc != -1, "Failed to deliver to connection %d on socket %d", id, fd);
     }
 
     return;
@@ -164,9 +162,10 @@ error:
 
 static inline int handler_recv_parse(Handler *handler, HandlerParser *parser)
 {
+    zmq_msg_t *inmsg = NULL;
     check(handler->running, "Called while handler wasn't running, that's not good.");
 
-    zmq_msg_t *inmsg = calloc(sizeof(zmq_msg_t), 1);
+    inmsg = calloc(sizeof(zmq_msg_t), 1);
     int rc = 0;
 
     check_mem(inmsg);
@@ -206,7 +205,7 @@ void Handler_task(void *v)
     Handler *handler = (Handler *)v;
     HandlerParser *parser = NULL;
     int max_targets = Setting_get_int("limits.handler_targets", 128);
-    log_info("MAX allowing limits.handler_targets=%d", 128);
+    log_info("MAX allowing limits.handler_targets=%d", max_targets);
 
     parser = HandlerParser_create(max_targets);
     check_mem(parser);
@@ -217,37 +216,43 @@ void Handler_task(void *v)
         taskstate("delivering");
 
         rc = handler_recv_parse(handler, parser);
-        if(task_was_signaled()) {
-            break;
-        }
 
-        if(rc != -1 && parser->target_count > 0) {
+        if(task_was_signaled()) {
+            log_warn("Handler task signaled, exiting.");
+            break;
+        } else if( rc == -1 || parser->target_count <= 0) {
+            log_warn("Skipped invalid message from handler: %s", bdata(handler->send_spec));
+            taskdelay(100);
+            continue;
+        } else {
             for(i = 0; i < (int)parser->target_count; i++) {
                 int id = (int)parser->targets[i];
                 int fd = Register_fd_for_id(id);
-                Connection *conn = (Connection *)Register_fd_exists(fd);
+                Connection *conn = fd == -1 ? NULL : Register_fd_exists(fd);
 
-                handler_process_request(handler, id, fd, conn, parser->body);
+                // don't bother calling process request if there's nothing to handle
+                if(conn && fd >= 0) {
+                    handler_process_request(handler, id, fd, conn, parser->body);
+                } else {
+                    // TODO: I believe we need to notify the connection that it is dead too
+                    Handler_notify_leave(handler, id);
+                }
             }
-        } else {
-            debug("Skipped invalid message from handler: %s", bdata(handler->send_spec));
         }
 
         HandlerParser_reset(parser);
     }
 
-    debug("############################### HANDLER EXITED: %p, running: %d, task: %p",
-            handler, handler->running, handler->task);
     handler->running = 0;
     handler->task = NULL;
     HandlerParser_destroy(parser);
     taskexit(0);
 
 error:
+    log_err("HANDLER TASK DIED: %s", bdata(handler->send_spec));
     handler->running = 0;
     handler->task = NULL;
     HandlerParser_destroy(parser);
-    log_err("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! HANDLER TASK DIED");
     taskexit(1);
 }
 
@@ -306,7 +311,7 @@ void *Handler_recv_create(const char *recv_spec, const char *uuid)
     void *listener_socket = mqsocket(ZMQ_SUB);
     check(listener_socket, "Can't create ZMQ_SUB socket.");
 
-    int rc = zmq_setsockopt(listener_socket, ZMQ_SUBSCRIBE, uuid, 0);
+    int rc = zmq_setsockopt(listener_socket, ZMQ_SUBSCRIBE, uuid, strlen(uuid));
     check(rc == 0, "Failed to subscribe listener socket: %s", recv_spec);
     log_info("Binding listener SUB socket %s subscribed to: %s", recv_spec, uuid);
 
@@ -370,5 +375,3 @@ void Handler_destroy(Handler *handler)
         free(handler);
     }
 }
-
-

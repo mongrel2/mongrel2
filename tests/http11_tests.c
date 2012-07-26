@@ -5,10 +5,18 @@
 
 void debug_element_cb(void *data, const char *at, size_t length)
 {
+    (void)data;
+    (void)at;
+    (void)length;
 }
 
 void debug_field_cb(void *data, const char *field, size_t flen, const char *value, size_t vlen)
 {
+    (void)data;
+    (void)field;
+    (void)flen;
+    (void)value;
+    (void)vlen;
 }
 
 http_parser setup_parser()
@@ -47,7 +55,7 @@ char *test_http11_parser_basics()
 char *test_parser_thrashing()
 {
     glob_t test_files;
-    int i = 0;
+    unsigned int i = 0;
     int nparsed = 0;
     int delta = 0;
     int tests_run = 0;

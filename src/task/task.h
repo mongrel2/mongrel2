@@ -10,7 +10,7 @@ extern "C" {
 #include <stdarg.h>
 #include <unistd.h>
 #include <inttypes.h>
-#include <zmq.h>
+#include "zmq_compat.h"
 
 struct tns_value_t;
 
@@ -122,6 +122,7 @@ int fdsend(int, void*, int);
 int fdrecv(int, void*, int);
 int fdwait(int, int);
 int fdnoblock(int);
+void fdshutdown();
 
 extern Task *FDTASK;
 
@@ -158,4 +159,3 @@ int    netlookup(char*, uint32_t*);  /* blocks entire program! */
 }
 #endif
 #endif
-

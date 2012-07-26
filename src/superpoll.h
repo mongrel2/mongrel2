@@ -36,7 +36,7 @@
 #define _superpoll_h
 
 #include <adt/list.h>
-#include <zmq.h>
+#include "zmq_compat.h"
 
 typedef struct IdleData {
     int fd;

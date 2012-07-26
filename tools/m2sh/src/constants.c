@@ -44,6 +44,7 @@ struct tagbstring CONFIG_SCHEMA = bsStatic(
 "DROP TABLE IF EXISTS mimetype;\n"
 "DROP TABLE IF EXISTS setting;\n"
 "DROP TABLE IF EXISTS directory;\n"
+"DROP TABLE IF EXISTS filter;\n"
 "\n"
 "CREATE TABLE server (id INTEGER PRIMARY KEY,\n"
 "    uuid TEXT,\n"
@@ -93,7 +94,7 @@ struct tagbstring CONFIG_SCHEMA = bsStatic(
 "CREATE TABLE statistic (id SERIAL, \n"
 "    other_type TEXT,\n"
 "    other_id INTEGER,\n"
-"    name text,\n"
+"    name TEXT,\n"
 "    sum REAL,\n"
 "    sumsq REAL,\n"
 "    n INTEGER,\n"
@@ -104,6 +105,11 @@ struct tagbstring CONFIG_SCHEMA = bsStatic(
 "    primary key (other_type, other_id, name));\n"
 "\n"
 "CREATE TABLE mimetype (id INTEGER PRIMARY KEY, mimetype TEXT, extension TEXT);\n"
+"\n"
+"CREATE TABLE filter (id INTEGER PRIMARY KEY, \n"
+"    server_id INTEGER, \n"
+"    name TEXT, \n"
+"    settings TEXT);\n"
 "\n"
 "CREATE TABLE IF NOT EXISTS log(id INTEGER PRIMARY KEY,\n"
 "    who TEXT,\n"
@@ -118,6 +124,8 @@ struct tagbstring CONFIG_SCHEMA = bsStatic(
 struct tagbstring SERVER_SQL = bsStatic("INSERT INTO server (uuid, access_log, error_log, pid_file, chroot, default_host, name, bind_addr, port, use_ssl) VALUES (%Q, %Q, %Q, %Q, %Q, %Q, %Q, %Q, %s, %s);");
 
 struct tagbstring HOST_SQL = bsStatic("INSERT INTO host (server_id, name, matching) VALUES (%d, %Q, %Q);");
+
+struct tagbstring FILTER_SQL = bsStatic("INSERT INTO filter (server_id, name, settings) VALUES (%d, %Q, %Q);");
 
 struct tagbstring SETTING_SQL = bsStatic("INSERT INTO setting (key, value) VALUES (%Q, %Q);");
 struct tagbstring MIMETYPE_SQL = bsStatic("DELETE from mimetype where extension=%Q; INSERT INTO mimetype (extension, mimetype) VALUES (%Q, %Q);");

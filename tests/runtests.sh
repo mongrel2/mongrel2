@@ -4,7 +4,7 @@ for i in tests/*_tests
 do
     if test -f $i
     then
-        if ./$i 2>&1 > /tmp/mongrel2-test.log
+        if $VALGRIND ./$i 2>&1 > /tmp/mongrel2-test.log
         then
             echo $i PASS
         else

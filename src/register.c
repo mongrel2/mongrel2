@@ -37,6 +37,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include <signal.h>
 #include "tnetstrings.h"
 #include "tnetstrings_impl.h"
 
@@ -46,20 +47,26 @@
 #include "task/task.h"
 #include "adt/darray.h"
 #include "setting.h"
-
+#include "adt/radixmap.h"
 
 uint32_t THE_CURRENT_TIME_IS = 0;
 
 static darray_t *REGISTRATIONS = NULL;
-static darray_t *REG_ID_TO_FD = NULL;
-static uint16_t REG_COUNT = 0;
+static RadixMap *REG_ID_TO_FD = NULL;
 static int NUM_REG_FD = 0;
 
 void Register_init()
 {
     THE_CURRENT_TIME_IS = time(NULL);
     REGISTRATIONS = darray_create(sizeof(Registration), MAX_REGISTERED_FDS);
-    REG_ID_TO_FD = darray_create(0, MAX_REGISTERED_FDS);
+    REG_ID_TO_FD = RadixMap_create(MAX_REGISTERED_FDS * 10);
+}
+
+
+void Register_destroy()
+{
+    darray_destroy(REGISTRATIONS);
+    RadixMap_destroy(REG_ID_TO_FD);
 }
 
 static inline void Register_clear(Registration *reg)
@@ -70,12 +77,18 @@ static inline void Register_clear(Registration *reg)
     reg->bytes_written = 0;
     reg->last_read = 0;
     reg->last_write = 0;
-    darray_remove(REG_ID_TO_FD, reg->id);
+
+    if(reg->id != UINT32_MAX) {
+        RMElement *el = RadixMap_find(REG_ID_TO_FD, reg->id);
+
+        if(el != NULL) {
+            RadixMap_delete(REG_ID_TO_FD, el);
+        }
+    }
 }
 
 int Register_connect(int fd, Connection* data)
 {
-    int rc = 0;
     check(fd < MAX_REGISTERED_FDS, "FD given to register is greater than max.");
     check(data != NULL, "data can't be NULL");
 
@@ -83,30 +96,31 @@ int Register_connect(int fd, Connection* data)
 
     if(reg == NULL) {
         reg = darray_new(REGISTRATIONS);
+        check(reg != NULL, "Failed to allocate a new registration.");
+
         // we only set this here since they stay in list forever rather than recycle
         darray_set(REGISTRATIONS, fd, reg);
-        check(reg != NULL, "Failed to allocate a new registration.");
+        darray_attach(REGISTRATIONS, reg);
     }
 
     if(Register_valid(reg)) {
-        debug("Looks like stale registration in %d, kill it before it gets out.", fd);
-        // a new Register_connect came in, but we haven't disconnected the previous
-        rc = Register_disconnect(fd);
-        check(rc != -1, "Weird error, tried to disconnect something that exists then got an error: %d", fd);
+        // force them to exit
+        int rc = Register_disconnect(fd);
+        check(rc != -1, "Weird error trying to disconnect. Tell Zed.");
+        tasksignal(reg->task, SIGINT);
     }
 
     reg->data = data;
     reg->last_ping = THE_CURRENT_TIME_IS;
     reg->fd = fd;
-    
-    // purposefully want overflow on these
-    reg->id = REG_COUNT++;
-    darray_set(REG_ID_TO_FD, reg->id, reg);
+    reg->task = taskself();
 
+    reg->id = UINT32_MAX; // start off with an invalid conn_id
+    
     // keep track of the number of registered things we're tracking
     NUM_REG_FD++;
 
-    return reg->id;
+    return 0;
 error:
     return -1;
 }
@@ -122,17 +136,15 @@ int Register_disconnect(int fd)
     check_debug(Register_valid(reg), "Attempt to unregister FD %d which is already gone.", fd);
     check(reg->fd == fd, "Asked to disconnect fd %d but register had %d", fd, reg->fd);
 
-    // TODO: actually do this somewhere else
-    if (reg->data->iob != NULL) {
-        reg->data->iob->closed=1;
+    if(IOBuf_close(reg->data->iob) != 0) {
+        log_err("Failed to close IOBuffer, probably SSL error.");
     }
 
     Register_clear(reg);
-    close(reg->fd);
 
     // tracking the number of things we're processing
     NUM_REG_FD--;
-    return reg->id;
+    return 0;
 
 error:
     fdclose(fd);
@@ -165,12 +177,10 @@ int Register_read(int fd, off_t bytes)
         reg->last_read = THE_CURRENT_TIME_IS;
         reg->bytes_read += bytes;
         return reg->last_read;
-    } else {
-        return 0;
     }
 
-error:
-    return -1;
+error: // fallthrough
+    return 0;
 }
 
 
@@ -184,12 +194,10 @@ int Register_write(int fd, off_t bytes)
         reg->last_write = THE_CURRENT_TIME_IS;
         reg->bytes_written += bytes;
         return reg->last_write;
-    } else {
-        return 0;
     }
 
-error:
-    return -1;
+error: // fallthrough
+    return 0;
 }
 
 
@@ -206,23 +214,31 @@ error:
 }
 
 
-int Register_fd_for_id(int id)
+int Register_fd_for_id(uint32_t id)
 {
-    check(id < MAX_REGISTERED_FDS, "Ident (id) given to register is greater than max.");
-    Registration *reg = darray_get(REG_ID_TO_FD, id);
+    RMElement *el = RadixMap_find(REG_ID_TO_FD, id);
 
-    check(Register_valid(reg), "Nothing registered under id %d.", id);
+    check_debug(el != NULL, "Id %d not registered.", id);
+
+    Registration *reg = darray_get(REGISTRATIONS, el->data.value);
+    check_debug(Register_valid(reg), "Nothing registered under id %d.", id);
 
     return reg->fd;
 error:
     return -1;
 }
 
-int Register_id_for_fd(int fd)
+uint32_t Register_id_for_fd(int fd)
 {
     check(fd < MAX_REGISTERED_FDS, "FD given to register is greater than max.");
     Registration *reg = darray_get(REGISTRATIONS, fd);
-    check(Register_valid(reg), "No ID for fd: %d", fd);
+    check_debug(Register_valid(reg), "No ID for fd: %d", fd);
+
+    if(reg->id == UINT32_MAX) {
+        // lazy load the conn_id since we don't always need it
+        reg->id = RadixMap_push(REG_ID_TO_FD, reg->fd);
+        check(reg->id != UINT32_MAX, "Failed to register new conn_id.");
+    }
 
     return reg->id;
 error:
@@ -250,7 +266,7 @@ tns_value_t *Register_info()
             nscanned++;  // stop scaning after we found all of them
 
             tns_value_t *data = tns_new_list();
-            tns_add_to_list(data, tns_new_integer(reg->id));
+            tns_add_to_list(data, tns_new_integer(reg->id == UINT32_MAX ? -1 : (long)reg->id));
             tns_add_to_list(data, tns_new_integer(i)); // fd
             tns_add_to_list(data, tns_new_integer(reg->data->type));
             tns_add_to_list(data, tns_new_integer(ZERO_OR_DELTA(now, reg->last_ping)));

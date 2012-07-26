@@ -45,9 +45,21 @@ int MAX_URL_PATH = 0;
 
 void backend_destroy_cb(Route *r, RouteMap *map)
 {
+    (void)map;
+
     Backend *backend = (Backend *)r->data;
 
     if(backend) {
+        if(backend->type == BACKEND_DIR) {
+            Dir_destroy(backend->target.dir);
+        } else if(backend->type == BACKEND_HANDLER) {
+            // ignore handlers since those are typically shared
+        } else if(backend->type == BACKEND_PROXY) {
+            Proxy_destroy(backend->target.proxy);
+        } else {
+            log_err("Invalid backend type, don't know how to destroy: %d", backend->type);
+        }
+
         free(backend);
         r->data = NULL;
     }

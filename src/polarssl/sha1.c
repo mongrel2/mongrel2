@@ -34,8 +34,9 @@
 
 #include "polarssl/sha1.h"
 
-#include <string.h>
+#if defined(POLARSSL_FS_IO) || defined(POLARSSL_SELF_TEST)
 #include <stdio.h>
+#endif
 
 /*
  * 32-bit integer manipulation macros (big endian)
@@ -234,9 +235,9 @@ static void sha1_process( sha1_context *ctx, const unsigned char data[64] )
 /*
  * SHA-1 process buffer
  */
-void sha1_update( sha1_context *ctx, const unsigned char *input, int ilen )
+void sha1_update( sha1_context *ctx, const unsigned char *input, size_t ilen )
 {
-    int fill;
+    size_t fill;
     unsigned long left;
 
     if( ilen <= 0 )
@@ -245,7 +246,7 @@ void sha1_update( sha1_context *ctx, const unsigned char *input, int ilen )
     left = ctx->total[0] & 0x3F;
     fill = 64 - left;
 
-    ctx->total[0] += ilen;
+    ctx->total[0] += (unsigned long) ilen;
     ctx->total[0] &= 0xFFFFFFFF;
 
     if( ctx->total[0] < (unsigned long) ilen )
@@ -315,7 +316,7 @@ void sha1_finish( sha1_context *ctx, unsigned char output[20] )
 /*
  * output = SHA-1( input buffer )
  */
-void sha1( const unsigned char *input, int ilen, unsigned char output[20] )
+void sha1( const unsigned char *input, size_t ilen, unsigned char output[20] )
 {
     sha1_context ctx;
 
@@ -326,6 +327,7 @@ void sha1( const unsigned char *input, int ilen, unsigned char output[20] )
     memset( &ctx, 0, sizeof( sha1_context ) );
 }
 
+#if defined(POLARSSL_FS_IO)
 /*
  * output = SHA-1( file contents )
  */
@@ -337,12 +339,12 @@ int sha1_file( const char *path, unsigned char output[20] )
     unsigned char buf[1024];
 
     if( ( f = fopen( path, "rb" ) ) == NULL )
-        return( 1 );
+        return( POLARSSL_ERR_SHA1_FILE_IO_ERROR );
 
     sha1_starts( &ctx );
 
     while( ( n = fread( buf, 1, sizeof( buf ), f ) ) > 0 )
-        sha1_update( &ctx, buf, (int) n );
+        sha1_update( &ctx, buf, n );
 
     sha1_finish( &ctx, output );
 
@@ -351,19 +353,20 @@ int sha1_file( const char *path, unsigned char output[20] )
     if( ferror( f ) != 0 )
     {
         fclose( f );
-        return( 2 );
+        return( POLARSSL_ERR_SHA1_FILE_IO_ERROR );
     }
 
     fclose( f );
     return( 0 );
 }
+#endif /* POLARSSL_FS_IO */
 
 /*
  * SHA-1 HMAC context setup
  */
-void sha1_hmac_starts( sha1_context *ctx, const unsigned char *key, int keylen )
+void sha1_hmac_starts( sha1_context *ctx, const unsigned char *key, size_t keylen )
 {
-    int i;
+    size_t i;
     unsigned char sum[20];
 
     if( keylen > 64 )
@@ -391,7 +394,7 @@ void sha1_hmac_starts( sha1_context *ctx, const unsigned char *key, int keylen )
 /*
  * SHA-1 HMAC process buffer
  */
-void sha1_hmac_update( sha1_context *ctx, const unsigned char *input, int ilen )
+void sha1_hmac_update( sha1_context *ctx, const unsigned char *input, size_t ilen )
 {
     sha1_update( ctx, input, ilen );
 }
@@ -424,8 +427,8 @@ void sha1_hmac_reset( sha1_context *ctx )
 /*
  * output = HMAC-SHA-1( hmac key, input buffer )
  */
-void sha1_hmac( const unsigned char *key, int keylen,
-                const unsigned char *input, int ilen,
+void sha1_hmac( const unsigned char *key, size_t keylen,
+                const unsigned char *input, size_t ilen,
                 unsigned char output[20] )
 {
     sha1_context ctx;

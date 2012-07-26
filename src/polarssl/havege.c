@@ -1,5 +1,5 @@
-/*
- *  HAVEGE: HArdware Volatile Entropy Gathering and Expansion
+/**
+ *  \brief HAVEGE: HArdware Volatile Entropy Gathering and Expansion
  *
  *  Copyright (C) 2006-2010, Brainspark B.V.
  *
@@ -30,15 +30,15 @@
  *  Contact: seznec(at)irisa_dot_fr - orocheco(at)irisa_dot_fr
  */
 
-#include <string.h>
-#include <time.h>
-
 #include "polarssl/config.h"
 
 #if defined(POLARSSL_HAVEGE_C)
 
 #include "polarssl/havege.h"
 #include "polarssl/timing.h"
+
+#include <string.h>
+#include <time.h>
 
 /* ------------------------------------------------------------------------
  * On average, one iteration accesses two 8-word blocks in the havege WALK
@@ -200,67 +200,32 @@ void havege_init( havege_state *hs )
 /*
  * HAVEGE rand function
  */
-int havege_rand( void *p_rng )
+int havege_random( void *p_rng, unsigned char *buf, size_t len )
 {
-    int ret;
+    int val;
+    size_t use_len;
     havege_state *hs = (havege_state *) p_rng;
+    unsigned char *p = buf;
 
-    if( hs->offset[1] >= COLLECT_SIZE )
-        havege_fill( hs );
-
-    ret  = hs->pool[hs->offset[0]++];
-    ret ^= hs->pool[hs->offset[1]++];
-
-    return( ret );
-}
-
-#if defined(POLARSSL_RAND_TEST)
-
-#include <stdio.h>
-
-int main( int argc, char *argv[] )
-{
-    FILE *f;
-    time_t t;
-    int i, j, k;
-    havege_state hs;
-    unsigned char buf[1024];
-
-    if( argc < 2 )
+    while( len > 0 )
     {
-        fprintf( stderr, "usage: %s <output filename>\n", argv[0] );
-        return( 1 );
+        use_len = len;
+        if( use_len > sizeof(int) )
+            use_len = sizeof(int);
+
+        if( hs->offset[1] >= COLLECT_SIZE )
+            havege_fill( hs );
+
+        val  = hs->pool[hs->offset[0]++];
+        val ^= hs->pool[hs->offset[1]++];
+
+        memcpy( p, &val, use_len );
+        
+        len -= use_len;
+        p += use_len;
     }
 
-    if( ( f = fopen( argv[1], "wb+" ) ) == NULL )
-    {
-        printf( "failed to open '%s' for writing.\n", argv[0] );
-        return( 1 );
-    }
-
-    havege_init( &hs );
-
-    t = time( NULL );
-
-    for( i = 0, k = 32768; i < k; i++ )
-    {
-        for( j = 0; j < sizeof( buf ); j++ )
-            buf[j] = havege_rand( &hs );
-
-        fwrite( buf, sizeof( buf ), 1, f );
-
-        printf( "Generating 32Mb of data in file '%s'... %04.1f" \
-                "%% done\r", argv[1], (100 * (float) (i + 1)) / k );
-        fflush( stdout );
-    }
-
-    if( t == time( NULL ) )
-        t--;
-
-    fclose( f );
     return( 0 );
 }
-
-#endif
 
 #endif

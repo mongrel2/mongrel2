@@ -4974,7 +4974,7 @@
 
   <p class="noindent">The end result is <span class=
   "pcrro7t-">procer</span>, which lives in <span class=
-  "pcrb7t-">examples/procer</span> and does most of what you need
+  "pcrb7t-">tools/procer</span> and does most of what you need
   in a USPM. It works a lot like daemontools or minit, but is much
   simpler, with these differences: <!--l. 86-->
 
@@ -5076,7 +5076,7 @@
 
   <p class="noindent">Installing procer is very easy. It's a
   single little binary and it lives in <span class=
-  "pcrb7t-">examples/procer</span> in the Mongrel2 source.
+  "pcrb7t-">tools/procer</span> in the Mongrel2 source.
   Here's how you'd install it totally from scratch as
   if you hadn't even build Mongrel2 yet: <!--l. 136-->
 

@@ -58,6 +58,7 @@
     action msg_to_handler { CALL(msg_to_handler, fc); }
 
     action http_to_handler { CALL(http_to_handler, fc); }
+    action websocket_established { CALL(websocket_established, fc); }
     action http_to_proxy { CALL(http_to_proxy, fc); fgoto Proxy; }
     action http_to_directory { CALL(http_to_directory, fc); }
 
@@ -140,7 +141,8 @@ const char *EVENT_NAMES[] = {
     "REQ_SENT",
     "RESP_SENT",
     "SOCKET_REQ",
-    "TIMEOUT"};
+    "TIMEOUT",
+    "WS_REQ"};
 
 const char *State_event_name(int event)
 {

@@ -70,13 +70,11 @@ void Parse(
     sqstring = '\'' (([^\\\'] | ('\\' any))*) '\'';
     qstring = dqstring | sqstring;
 
-    pattern = '`' (([^\\`] | ('\\' any))*) '`';
     ident = (alpha | '_')+ (alpha | digit | '_')*;
     class = [A-Z] alpha+;
 
     main := |*
         qstring { TKSTR(QSTRING) };
-        pattern { TKSTR(PATTERN) };
         '=' { TK(EQ) };
         '{' { TK(LBRACKET) };
         '}' { TK(RBRACKET) };

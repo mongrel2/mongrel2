@@ -80,18 +80,27 @@ First, make sure you are in the mongrel2 source and you've ran the build so that
 After you have that, do this:
 
 \begin{code}{Sample m2sh Commands}
-<< d['/docs/manual/inputs/sample_m2sh_commands.sh|pyg|l'] >>
+<< d['inputs/sample_m2sh_commands.sh|pyg|l'] >>
 \end{code}
 
 At this point, you should have seen lists of servers and hosts, seen that mongrel2 is
 not running, and then started it.  You can find out about all the commands and
 get help for them with \shell{m2sh help} or \shell{ms2h help command}.
 
-You can now try doing some simple starting, stopping and reloading using sudo (make sure you CTRL-c
-to exit from the previous start command):
+You can now try doing some simple starting, stopping and reloading Using
+sudo (make sure you CTRL-c to exit from the previous start command):
+
+\begin{aside}{Warning: contents may be broken}
+If \shell{m2sh start} runs fine, but \shell{m2sh start -sudo}
+fails, you may need to link \file{/proc} in your chroot, using
+\shell{mkdir -p proc \&\& sudo mount --bind /proc proc}. You can also try
+installing ZeroMQ from source, if you'd rather avoid putting your \file{/proc}
+where it might get seen.
+\end{aside}
+
 
 \begin{code}{Starting, Stopping, Reloading}
-<< d['/docs/manual/inputs/starting_stopping_reloading.sh|pyg|l'] >>
+<< d['inputs/starting_stopping_reloading.sh|pyg|l'] >>
 \end{code}
 
 Awesome, right?  Using just this one little management tool you
@@ -151,7 +160,7 @@ simple.  We'll get into how its structured in a second, but to load this file
 we would just do this:
 
 \begin{code}{Loading The Simple Config}
-<< d['/docs/manual/inputs/load_simple_config.sh|pyg|l'] >>
+<< d['inputs/load_simple_config.sh|pyg|l'] >>
 \end{code}
 
 Notice that we didn't have to tell m2sh that the database was \file{config.sqlite}.
@@ -577,7 +586,7 @@ of the browser.  Look at \verb|examples/bbs/client.py| to see how that works in
 full, but the meat of it is:
 
 \begin{code}{BBS Client JSON Socket Handling}
-<< d['/docs/manual/inputs/bbs_client_socket.py|pyg|l'] >>
+<< d['inputs/bbs_client_socket.py|pyg|l'] >>
 \end{code}
 
 In that code, notice how (for historical reasons due to Flash sucking) the
@@ -589,7 +598,7 @@ to messages to backend handlers for processing.
 Finally, here's the grammar rules in the parser for handling these messages:
 
 \begin{code}{JSON/XML Message Grammar}
-<< d['/docs/manual/inputs/json_xml_socket_grammar.py|pyg|l'] >>
+<< d['inputs/json_xml_socket_grammar.py|pyg|l'] >>
 \end{code}
 
 If you read that carefully, you'll see you can actually pass query strings
@@ -686,14 +695,14 @@ The list of commands you can issue are:
 
 You then use the control port by running \ident{m2sh}:
 
-<< d['/docs/manual/inputs/sample_m2sh_run.sh|pyg|l'] >>
+<< d['inputs/sample_m2sh_run.sh|pyg|l'] >>
 
 The protocol to and from the control socket is a simple tnetstring in and out that
 any langauge can read.  Here's a nearly complete Python client that is using
 the control port:
 
 \begin{code}{Python Control Port Example}
-<< d['/docs/manual/inputs/python_control_port.py|pyg|l'] >>
+<< d['inputs/python_control_port.py|pyg|l'] >>
 \end{code}
 
 You obviously don't need to do this, but should you want to do
@@ -744,6 +753,8 @@ PID file run/mongrel2.pid not found for server localhost XXX
 > m2sh stop -db config.sqlite -every
 \end{lstlisting}
 
+
+
 \section{Tweakable Expert Settings}
 
 Many of Mongrel2's internal settings are configurable using the settings system.
@@ -757,7 +768,7 @@ To configure your settings, you set the variable \ident{settings} and you're don
 
 \begin{code}{Changing Settings}
 \begin{lstlisting}
-<< d['/docs/manual/inputs/changing_settings.conf|dexy'] >>
+<< d['inputs/changing_settings.conf|dexy'] >>
 \end{lstlisting}
 \end{code}
 
@@ -767,6 +778,7 @@ of available settings are:
 
 \begin{description}
 \item[control\_port=ipc://run/control] This is where Mongrel2 will listen with 0MQ for control messages.  You should use \verb|ipc://| for the spec, so that only a local user with file access can get at it.
+\item[disable.access\_logging=0] Set this to \verb|1| to turn off access logs. You still have to specify log files but they won't be created.
 \item[limits.buffer\_size=2 * 1024] Internal IO buffers, used for things like proxying and handling requests.  This is a \emph{very} conservative setting, so if you get HTTP headers greater than this, you'll want to increase this setting.  You'll also want to shoot whoever is sending you those requests, because the average is 400-600 bytes.
 \item[limits.client\_read\_retries=5] How many times it will attempt to read a complete HTTP header from a client. This prevents attacks where a client trickles an incomplete request at you until you run out of resources.
 \item[limits.connection\_stack\_size=32 * 1024] Size of the stack used for connection coroutines.  If you're trying to cram a ton of connections into very little RAM, see how low this can go.
@@ -802,7 +814,102 @@ You can also update your \ident{mimetypes} in the same way, just set a variable 
 
 \begin{code}{Changing Mimetypes}
 \begin{lstlisting}
-<< d['/docs/manual/inputs/changing_settings.conf|dexy'] >>
+<< d['inputs/changing_mimetypes.conf|dexy'] >>
 \end{lstlisting}
 \end{code}
+
+
+\section{SSL Configuration}
+
+Mongrel2 now support SSL, with preliminary support for SSL session caching.  As of 
+v1.8.0 (actually earlier) you can enable SSL very easily for your Mongrel2 server.
+How Mongrel2 configures SSL certs is with two options in \verb|setttings| and then
+a directory of .crt and .key files named after the UUID of the servers that need them.
+
+To get started, you can make a simple self-signed certificate with some weak encryption
+and setup your certs directory:
+
+\begin{code}{Making A Self-Signed Certificate}
+<< d['inputs/makecert.sh|pyg|l'] >>
+\end{code}
+
+I actually have a shell script kind of like this since I can never remember how 
+to set this stuff up with openssl.  Also, you should really adjust the RSA key
+strength from 512 to something you're comfortable with.  I'm using a weak
+key here so you can do performance testing and thrashing and then compare with
+your real key later.
+
+Once you have that done, you just have to add three little settings to your
+mongrel2 conf:
+
+\begin{enumerate}
+\item Add the settings "certsdir" pointed at "./certs/", make sure it has the trailing slash.
+\item Add the \verb|Server.use\_ssl = 1| value to the Server that has this UUID
+    you just created a cert for.
+\item Optionally, set the settings "ssl\_ciphers" to "SSL\_RSA\_RC4\_128\_SHA" so you can
+    play with the performance of a weak cipher.  If you unset this then Mongrel2 will
+    use the best one a browser wants.
+\end{enumerate}
+
+After you have those changes your config should look something like this:
+
+\begin{code}{Minimal SSL Configuration}
+\begin{lstlisting}
+<< d['inputs/mini_ssl_settings.conf|dexy'] >>
+\end{lstlisting}
+\end{code}
+
+Get that written, rerun \verb|m2sh config| to make the new config, restart
+Mongrel2 (you can't reload to enable SSL), and it should be working.
+
+After you get this working you just have to get your own certificate, put it
+in the certs directory with the right filename, and you should be good to go.
+
+\subsection{Experimental SSL Caching}
+
+We've got experimental SSL caching working, which will try to reuse the 
+browser's SSL session if it's there.  This is meant to be a trade-off between
+memory and performance, so it can chew a bunch of RAM if you have a lot of
+SSL traffic over a short period of time.  We'll be making the caching more
+configurable, but for now, it's working and does speed up SSL clients that
+do it properly.
+
+
+\section{Configuring Filters (BETA)}
+
+The Mongrel2 v1.8.0 release also included working filters that you can 
+configure and load dynamically.  The filters are very fresh, and the
+only one available is the null filter found in \file{tools/filters/null.c}
+but it does work and you can configure it.  It's also currently not
+hooked into the reload gear that we've recently done, so don't expect
+it to work if you do frequently hot reloading.
+
+Configuring a filter is fairly easy, take a look at this example:
+
+\begin{code}{Minimal Filter Configuration}
+\begin{lstlisting}
+<< d['inputs/filters.conf|dexy'] >>
+\end{lstlisting}
+\end{code}
+
+First you can see that we setup the \ident{null} filter with some arbitrary
+settings and point to where the .so file is.  Filters can be configured 
+with any arbitrarily nested data structure that can fit into a tnetstring,
+so you can pass them pretty much anything that matters.  Lists, dicts, numbers,
+strings, are the main ones.  You can also use variables in the config file,
+so you could create different servers and share config options for Filters
+and other parts of the files.
+
+After that, there's simply a \ident{Server.filters} which takes a list of
+filters to load.  If you don't set this variable, then the filter gear isn't
+even loaded and your server behaves as normal.  If you do set this variable,
+then the filters are installed and will work.
+
+If you run this config, you'll see the filter printing out it's config
+as a tnetstring, and then closing the connection, but only if you go
+to \ident{/nulltest/}.  If you go to \ident{/tests/sample.html} to
+get at a directory, it'll not even run.
+
+We'll have more documentation on actually writing filters in the 
+Hacking section.
 

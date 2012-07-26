@@ -47,6 +47,7 @@
 #include "config/config.h"
 #include <signal.h>
 
+darray_t *SERVER_QUEUE = NULL;
 int RUNNING=1;
 
 static char *ssl_default_dhm_P = 
@@ -63,6 +64,8 @@ static char *ssl_default_dhm_G = "4";
 
 void host_destroy_cb(Route *r, RouteMap *map)
 {
+    (void)map;
+
     if(r->data) {
         Host_destroy((Host *)r->data);
         r->data = NULL;
@@ -80,7 +83,7 @@ static int Server_load_ciphers(Server *srv, bstring ssl_ciphers_val)
             "Invalid cipher list, it must be separated by space ' ' characters "
             "and you need at least one.  Or, just leave it out for defaults.");
 
-    while(ssl_default_ciphers[max_num_ciphers] != 0) {
+    while(ssl_default_ciphersuites[max_num_ciphers] != 0) {
         max_num_ciphers++;
     }
 
@@ -158,7 +161,7 @@ static int Server_init_ssl(Server *srv)
         rc = Server_load_ciphers(srv, ssl_ciphers_val);
         check(rc == 0, "Failed to load requested SSL ciphers.");
     } else {
-        srv->ciphers = ssl_default_ciphers;
+        srv->ciphers = ssl_default_ciphersuites;
     }
 
     srv->dhm_P = ssl_default_dhm_P;
@@ -204,6 +207,7 @@ Server *Server_create(bstring uuid, bstring default_host,
     srv->pid_file = bstrcpy(pid_file); check_mem(srv->pid_file);
     srv->default_hostname = bstrcpy(default_host);
     srv->use_ssl = use_ssl;
+    srv->created_on = time(NULL);
 
     if(srv->use_ssl) {
         rc = Server_init_ssl(srv);
@@ -218,6 +222,17 @@ error:
 }
 
 
+static inline void Server_destroy_handlers(Server *srv)
+{
+    int i = 0;
+    for(i = 0; i < darray_end(srv->handlers); i++) {
+        Handler *handler = darray_get(srv->handlers, i);
+        Handler_destroy(handler);
+    }
+
+    darray_destroy(srv->handlers);
+}
+
 
 void Server_destroy(Server *srv)
 {
@@ -229,8 +244,7 @@ void Server_destroy(Server *srv)
         }
 
         RouteMap_destroy(srv->hosts);
-
-        if(srv->handlers) h_free(srv->handlers);
+        Server_destroy_handlers(srv);
 
         bdestroy(srv->bind_addr);
         bdestroy(srv->uuid);
@@ -240,7 +254,7 @@ void Server_destroy(Server *srv)
         bdestroy(srv->pid_file);
         bdestroy(srv->default_hostname);
 
-        fdclose(srv->listen_fd);
+        if(srv->listen_fd >= 0) fdclose(srv->listen_fd);
         h_free(srv);
     }
 }
@@ -262,47 +276,61 @@ void Server_init()
 }
 
 
-void Server_start(Server *srv)
+static inline int Server_accept(int listen_fd)
 {
     int cfd = -1;
     int rport = -1;
     char remote[IPADDR_SIZE];
+    int rc = 0;
+    Connection *conn = NULL;
+
+    cfd = netaccept(listen_fd, remote, &rport);
+    check(cfd >= 0, "Failed to accept on listening socket.");
+
+    Server *srv = Server_queue_latest();
+    check(srv != NULL, "Failed to get a server from the configured queue.");
+
+    conn = Connection_create(srv, cfd, rport, remote);
+    check(conn != NULL, "Failed to create connection after accept.");
+
+    rc = Connection_accept(conn);
+    check(rc == 0, "Failed to register connection, overloaded.");
+
+    return 0;
+
+error:
+
+    if(conn != NULL) Connection_destroy(conn);
+    return -1;
+}
+
+
+int Server_run()
+{
+    int rc = 0;
+    Server *srv = Server_queue_latest();
+    check(srv != NULL, "Failed to get a server from the configured queue.");
+    int listen_fd = srv->listen_fd;
+
     taskname("SERVER");
 
-    log_info("Starting server on port %d", srv->port);
-
     while(RUNNING) {
-        cfd = netaccept(srv->listen_fd, remote, &rport);
-        int accept_good = 0;
+        rc = Server_accept(listen_fd);
 
-        if(cfd >= 0) {
-            Connection *conn = Connection_create(srv, cfd, rport, remote);
-
-            if(Connection_accept(conn) != 0) {
-                log_err("Failed to register connection, overloaded.");
-                Connection_destroy(conn);
-                accept_good = 0;
-            } else {
-                accept_good = 1;
-            }
-        } else {
-            accept_good = 0;
-        }
-
-        if(!accept_good) {
+        if(rc == -1 && RUNNING) {
+            log_err("Server accept failed, attempting to clear out dead weight: %d", RUNNING);
             int cleared = Register_cleanout();
 
             if(cleared == 0) {
                 taskdelay(1000);
             }
-        } // else nothing
+        }
     }
 
-    debug("SERVER EXITED with error: %s and return value: %d", strerror(errno), cfd);
-
-    return;
+    return 0;
+error:
+    return -1;
 }
-
 
 
 int Server_add_host(Server *srv, Host *host)
@@ -351,6 +379,7 @@ typedef struct RouteUpdater {
     Handler *original;
     Handler *replacement;
 } RouteUpdater;
+
 
 static void update_routes(void *value, void *data)
 {
@@ -433,8 +462,6 @@ int Server_stop_handlers(Server *srv)
         Handler *handler = darray_get(srv->handlers, i);
         check(handler != NULL, "Invalid handler, can't be NULL.");
 
-        debug("############################### HANDLER SHUTDOWN: %p, running: %d, task: %p",
-            handler, handler->running, handler->task);
         if(handler->running) {
             log_info("STOPPING HANDLER %s", bdata(handler->send_spec));
             if(handler->task != NULL) {
@@ -455,3 +482,74 @@ error:
     return -1;
 }
 
+
+int Server_queue_init()
+{
+    SERVER_QUEUE = darray_create(sizeof(Server), 100);
+    check(SERVER_QUEUE != NULL, "Failed to create server management queue.");
+    return 0;
+error:
+    return -1;
+}
+
+const int SERVER_TTL = 10;
+const int SERVER_ACTIVE = 5;
+
+void Server_queue_cleanup()
+{
+    if(darray_end(SERVER_QUEUE) < SERVER_ACTIVE) {
+        // skip it, not enough to care about
+        return;
+    }
+
+    // pop the last one off to make sure it's never deleted
+    Server *cur_srv = darray_pop(SERVER_QUEUE);
+    uint32_t too_old = time(NULL) - SERVER_TTL;
+    int i = 0;
+
+    // TODO: kind of a dumb way to do this since it reorders the list
+    // go through all but the max we want to keep
+    for(i = 0; i < darray_end(SERVER_QUEUE) - SERVER_ACTIVE; i++) {
+        Server *srv = darray_get(SERVER_QUEUE, i);
+
+        if(srv->created_on < too_old) {
+            Server *replace = darray_pop(SERVER_QUEUE);
+            darray_set(SERVER_QUEUE, i, replace);
+
+            srv->listen_fd = -1; // don't close it
+            Server_destroy(srv);
+        }
+    }
+
+    // put the sacred server back on the end
+    darray_push(SERVER_QUEUE, cur_srv);
+
+    return;
+}
+
+
+void Server_queue_push(Server *srv)
+{
+    Server_queue_cleanup();
+    darray_push(SERVER_QUEUE, srv);
+    hattach(srv, SERVER_QUEUE);
+}
+
+
+int Server_queue_destroy()
+{
+    int i = 0;
+    Server *srv = NULL;
+
+    for(i = 0; i < darray_end(SERVER_QUEUE); i++) {
+        srv = darray_get(SERVER_QUEUE, i);
+        check(srv != NULL, "Got a NULL value from the server queue.");
+        Server_destroy(srv);
+    }
+
+    darray_destroy(SERVER_QUEUE);
+
+    return 0;
+error:
+    return -1;
+}

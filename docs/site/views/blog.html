@@ -1,0 +1,57 @@
+{( "header.html" )}
+{( "top.html" )}
+
+<div id="main" class="blog">
+    <div class="inner-wrap clearfix">
+
+        <div class="content content-left">
+
+            {% for _, article in ipairs(contents) do %}
+            <article class="post post-blog clearfix">
+            <h3 class="post-title"><a href="/{{ article.link }}">{{ article.title }}</a></h3>
+                <div class="post-meta">
+                    <span class="date">{{ article.date }}</span>
+                </div><!-- end .post-meta -->
+                <div class="post-content">
+                    {{ article.intro }}
+                </div>
+            </article><!-- end .post -->
+            <hr />
+            {% end %}
+        </div><!-- end .content -->
+
+
+        <div class="sidebar">
+            <div class="widget widget-list">
+                <h6>Browse articles</h6>
+                <div class="widget-content">
+                    <ul>
+                        {% for _, article in ipairs(contents) do %}
+                        <li><a href="/{{ article.link }}">{{ article.title }}</a></li>
+                        {% end %}
+                    </ul>
+                </div><!-- end .widget-content -->
+            </div><!-- end .widget -->
+
+            <div class="widget">
+                <h6>About Mongrel2</h6>
+                <div class="widget-content">
+                    <p>
+                    The Mongrel2 project makes an awesome web server.
+                    </p>
+                </div><!-- end .widget-content -->
+            </div><!-- end .widget -->
+
+            <div class="widget">
+                <h6>Sponsors</h6>
+                <div class="widget-content">
+                    {( "sponsors_side.html" )}
+                </div><!-- end .widget-content -->
+            </div><!-- end .widget -->
+        </div><!-- end .sidebar -->
+
+    </div><!-- end .inner-wrap -->
+</div><!-- end #main -->
+
+{( "footer.html" )}
+

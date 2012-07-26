@@ -1,6 +1,8 @@
 /**
  * \file md4.h
  *
+ * \brief MD4 message digest algorithm (hash function)
+ *
  *  Copyright (C) 2006-2010, Brainspark B.V.
  *
  *  This file is part of PolarSSL (http://www.polarssl.org)
@@ -24,6 +26,10 @@
  */
 #ifndef POLARSSL_MD4_H
 #define POLARSSL_MD4_H
+
+#include <string.h>
+
+#define POLARSSL_ERR_MD4_FILE_IO_ERROR                 -0x0072  /**< Read/write error in file. */
 
 /**
  * \brief          MD4 context structure
@@ -57,7 +63,7 @@ void md4_starts( md4_context *ctx );
  * \param input    buffer holding the  data
  * \param ilen     length of the input data
  */
-void md4_update( md4_context *ctx, const unsigned char *input, int ilen );
+void md4_update( md4_context *ctx, const unsigned char *input, size_t ilen );
 
 /**
  * \brief          MD4 final digest
@@ -74,7 +80,7 @@ void md4_finish( md4_context *ctx, unsigned char output[16] );
  * \param ilen     length of the input data
  * \param output   MD4 checksum result
  */
-void md4( const unsigned char *input, int ilen, unsigned char output[16] );
+void md4( const unsigned char *input, size_t ilen, unsigned char output[16] );
 
 /**
  * \brief          Output = MD4( file contents )
@@ -82,8 +88,7 @@ void md4( const unsigned char *input, int ilen, unsigned char output[16] );
  * \param path     input file name
  * \param output   MD4 checksum result
  *
- * \return         0 if successful, 1 if fopen failed,
- *                 or 2 if fread failed
+ * \return         0 if successful, or POLARSSL_ERR_MD4_FILE_IO_ERROR
  */
 int md4_file( const char *path, unsigned char output[16] );
 
@@ -94,7 +99,7 @@ int md4_file( const char *path, unsigned char output[16] );
  * \param key      HMAC secret key
  * \param keylen   length of the HMAC key
  */
-void md4_hmac_starts( md4_context *ctx, const unsigned char *key, int keylen );
+void md4_hmac_starts( md4_context *ctx, const unsigned char *key, size_t keylen );
 
 /**
  * \brief          MD4 HMAC process buffer
@@ -103,7 +108,7 @@ void md4_hmac_starts( md4_context *ctx, const unsigned char *key, int keylen );
  * \param input    buffer holding the  data
  * \param ilen     length of the input data
  */
-void md4_hmac_update( md4_context *ctx, const unsigned char *input, int ilen );
+void md4_hmac_update( md4_context *ctx, const unsigned char *input, size_t ilen );
 
 /**
  * \brief          MD4 HMAC final digest
@@ -129,8 +134,8 @@ void md4_hmac_reset( md4_context *ctx );
  * \param ilen     length of the input data
  * \param output   HMAC-MD4 result
  */
-void md4_hmac( const unsigned char *key, int keylen,
-               const unsigned char *input, int ilen,
+void md4_hmac( const unsigned char *key, size_t keylen,
+               const unsigned char *input, size_t ilen,
                unsigned char output[16] );
 
 /**

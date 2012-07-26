@@ -8,7 +8,7 @@
 #include <fcntl.h>
 
 Connection *fake_conn(const char *file, int mode) {
-    Connection *conn = h_calloc(sizeof(Connection), 1);
+    Connection *conn = calloc(sizeof(Connection), 1);
     assert(conn && "Failed to create connection.");
 
     int fd = open(file, mode);
@@ -26,7 +26,7 @@ Connection *fake_conn(const char *file, int mode) {
 void fake_conn_close(Connection *conn)
 {
     assert(conn && conn->iob && "Invalid connection.");
-    Register_disconnect(conn->iob->fd);
+    IOBuf_register_disconnect(conn->iob);
     Connection_destroy(conn);
 }
 

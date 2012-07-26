@@ -6,7 +6,7 @@
 #include "register.h"
 #include "connection.h"
 
-const char *RFC_822_TIME = "%a, %d %b %y %T";
+static const char *RFC_822_TIME = "%a, %d %b %y %T";
 
 char *test_Request_payloads()
 {
@@ -14,7 +14,7 @@ char *test_Request_payloads()
     bstring fake_sender = bfromcstr("FAKESENDER");
     Request *req = Request_create();
     size_t nparsed = 0;
-    int i = 0;
+    unsigned int i = 0;
     int rc = glob("tests/and_suite/*", 0, NULL, &test_files);
     mu_assert(rc == 0, "Failed to glob file sin tests/and_suite/*");
     FILE *test_cases = fopen("tests/request_payloads.txt", "w");
@@ -165,7 +165,7 @@ char *test_Request_create()
 }
 
 struct tagbstring COOKIE_HEADER = bsStatic("cookie");
-struct tagbstring EXPECTED_COOKIE_HEADER = bsStatic("JSON 0 / 97:{\"PATH\":\"/\",\"cookie\":[\"foo=bar\",\"test=yes; go=no\"],\"METHOD\":\"GET\",\"VERSION\":\"HTTP/1.0\",\"URI\":\"/\"},0:,");
+struct tagbstring EXPECTED_COOKIE_HEADER = bsStatic("JSON 1 / 97:{\"PATH\":\"/\",\"cookie\":[\"foo=bar\",\"test=yes; go=no\"],\"METHOD\":\"GET\",\"VERSION\":\"HTTP/1.0\",\"URI\":\"/\"},0:,");
 
 char *test_Multiple_Header_Request() 
 {

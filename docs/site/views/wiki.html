@@ -1,0 +1,40 @@
+{( "header.html" )}
+{( "top.html" )}
+
+<div id="main" class="archive">
+    <div class="inner-wrap clearfix">
+    
+        <div class="content content-right">
+            {% for _, article in ipairs(contents) do %}
+            <article class="post post-archive clearfix">
+                <h3 class="post-title">
+                    <a href="/{{ article.link }}">{{ article.title }}</a>
+                </h3>
+                <span class="date">{{ article.date }}</span>
+                <div class="post-content">
+                    {{ article.intro }}
+                </div><!-- end .post-content -->
+                </article><!-- end .post -->
+                <hr />
+            {% end %}
+        </div><!-- end .content -->
+        
+        <div class="sidebar">
+            <ul id="wiki-topics">
+                <li class="current">
+                <a href="/wiki/">Documentation</a>
+                <ul class="children">
+                {% for _, article in ipairs(contents) do %}
+                <li><a href="/{{ article.link }}">{{ article.title }}</a></li>
+                {% end %}
+                </ul>
+                </li>
+            </ul>
+        
+        </div><!-- end .sidebar -->
+        
+    </div><!-- end .inner-wrap -->
+</div><!-- end #main -->
+
+{( "footer.html" )}
+

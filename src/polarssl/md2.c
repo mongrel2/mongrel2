@@ -35,8 +35,9 @@
 
 #include "polarssl/md2.h"
 
-#include <string.h>
+#if defined(POLARSSL_FS_IO) || defined(POLARSSL_SELF_TEST)
 #include <stdio.h>
+#endif
 
 static const unsigned char PI_SUBST[256] =
 {
@@ -116,9 +117,9 @@ static void md2_process( md2_context *ctx )
 /*
  * MD2 process buffer
  */
-void md2_update( md2_context *ctx, const unsigned char *input, int ilen )
+void md2_update( md2_context *ctx, const unsigned char *input, size_t ilen )
 {
-    int fill;
+    size_t fill;
 
     while( ilen > 0 )
     {
@@ -146,7 +147,7 @@ void md2_update( md2_context *ctx, const unsigned char *input, int ilen )
  */
 void md2_finish( md2_context *ctx, unsigned char output[16] )
 {
-    int i;
+    size_t i;
     unsigned char x;
 
     x = (unsigned char)( 16 - ctx->left );
@@ -165,7 +166,7 @@ void md2_finish( md2_context *ctx, unsigned char output[16] )
 /*
  * output = MD2( input buffer )
  */
-void md2( const unsigned char *input, int ilen, unsigned char output[16] )
+void md2( const unsigned char *input, size_t ilen, unsigned char output[16] )
 {
     md2_context ctx;
 
@@ -176,6 +177,7 @@ void md2( const unsigned char *input, int ilen, unsigned char output[16] )
     memset( &ctx, 0, sizeof( md2_context ) );
 }
 
+#if defined(POLARSSL_FS_IO)
 /*
  * output = MD2( file contents )
  */
@@ -187,12 +189,12 @@ int md2_file( const char *path, unsigned char output[16] )
     unsigned char buf[1024];
 
     if( ( f = fopen( path, "rb" ) ) == NULL )
-        return( 1 );
+        return( POLARSSL_ERR_MD2_FILE_IO_ERROR );
 
     md2_starts( &ctx );
 
     while( ( n = fread( buf, 1, sizeof( buf ), f ) ) > 0 )
-        md2_update( &ctx, buf, (int) n );
+        md2_update( &ctx, buf, n );
 
     md2_finish( &ctx, output );
 
@@ -201,30 +203,31 @@ int md2_file( const char *path, unsigned char output[16] )
     if( ferror( f ) != 0 )
     {
         fclose( f );
-        return( 2 );
+        return( POLARSSL_ERR_MD2_FILE_IO_ERROR );
     }
 
     fclose( f );
     return( 0 );
 }
+#endif /* POLARSSL_FS_IO */
 
 /*
  * MD2 HMAC context setup
  */
-void md2_hmac_starts( md2_context *ctx, const unsigned char *key, int keylen )
+void md2_hmac_starts( md2_context *ctx, const unsigned char *key, size_t keylen )
 {
-    int i;
+    size_t i;
     unsigned char sum[16];
 
-    if( keylen > 64 )
+    if( keylen > 16 )
     {
         md2( key, keylen, sum );
         keylen = 16;
         key = sum;
     }
 
-    memset( ctx->ipad, 0x36, 64 );
-    memset( ctx->opad, 0x5C, 64 );
+    memset( ctx->ipad, 0x36, 16 );
+    memset( ctx->opad, 0x5C, 16 );
 
     for( i = 0; i < keylen; i++ )
     {
@@ -233,7 +236,7 @@ void md2_hmac_starts( md2_context *ctx, const unsigned char *key, int keylen )
     }
 
     md2_starts( ctx );
-    md2_update( ctx, ctx->ipad, 64 );
+    md2_update( ctx, ctx->ipad, 16 );
 
     memset( sum, 0, sizeof( sum ) );
 }
@@ -241,7 +244,7 @@ void md2_hmac_starts( md2_context *ctx, const unsigned char *key, int keylen )
 /*
  * MD2 HMAC process buffer
  */
-void md2_hmac_update( md2_context *ctx, const unsigned char *input, int ilen )
+void md2_hmac_update( md2_context *ctx, const unsigned char *input, size_t ilen )
 {
     md2_update( ctx, input, ilen );
 }
@@ -255,7 +258,7 @@ void md2_hmac_finish( md2_context *ctx, unsigned char output[16] )
 
     md2_finish( ctx, tmpbuf );
     md2_starts( ctx );
-    md2_update( ctx, ctx->opad, 64 );
+    md2_update( ctx, ctx->opad, 16 );
     md2_update( ctx, tmpbuf, 16 );
     md2_finish( ctx, output );
 
@@ -268,14 +271,14 @@ void md2_hmac_finish( md2_context *ctx, unsigned char output[16] )
 void md2_hmac_reset( md2_context *ctx )
 {
     md2_starts( ctx );
-    md2_update( ctx, ctx->ipad, 64 );
+    md2_update( ctx, ctx->ipad, 16 );
 }
 
 /*
  * output = HMAC-MD2( hmac key, input buffer )
  */
-void md2_hmac( const unsigned char *key, int keylen,
-               const unsigned char *input, int ilen,
+void md2_hmac( const unsigned char *key, size_t keylen,
+               const unsigned char *input, size_t ilen,
                unsigned char output[16] )
 {
     md2_context ctx;
