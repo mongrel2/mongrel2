@@ -157,6 +157,7 @@ static ssize_t ssl_send(IOBuf *iob, char *buffer, int len)
 {
     int sent = 0;
     int total = 0;
+
     check(iob->use_ssl, "IOBuf not set up to use ssl");
 
     if(!iob->handshake_performed) {
@@ -177,6 +178,7 @@ static ssize_t ssl_send(IOBuf *iob, char *buffer, int len)
     };
 
     return total;
+
 error:
     return -1;
 }
