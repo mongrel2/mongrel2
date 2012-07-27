@@ -54,7 +54,8 @@ typedef enum StateEvent {
     SOCKET_REQ=113,
     TIMEOUT=114,
     WS_REQ=115,
-    EVENT_END=116
+    HTTP_ERROR=116,
+    EVENT_END=117
 } StateEvent ;
 
 

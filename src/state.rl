@@ -61,6 +61,7 @@
     action websocket_established { CALL(websocket_established, fc); }
     action http_to_proxy { CALL(http_to_proxy, fc); fgoto Proxy; }
     action http_to_directory { CALL(http_to_directory, fc); }
+    action http_error { CALL(http_error, fc); }
 
 ### proxy actions
     action proxy_deliver { CALL(proxy_deliver, fc); }
@@ -142,7 +143,8 @@ const char *EVENT_NAMES[] = {
     "RESP_SENT",
     "SOCKET_REQ",
     "TIMEOUT",
-    "WS_REQ"};
+    "WS_REQ",
+    "HTTP_ERROR"};
 
 const char *State_event_name(int event)
 {
