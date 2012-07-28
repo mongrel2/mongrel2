@@ -54,14 +54,17 @@ struct log_rotate_entry {
 static struct log_rotate_entry logs[LOG_MAX];
 static size_t nlogs = 0;
 
-void rotate_logs(void)
+int rotate_logs(void)
 {
     size_t i;
 
     for(i=0;i<nlogs;++i) {
-        freopen(bdata(logs[i].name),"a+",logs[i].f);
+        check(freopen(bdata(logs[i].name),"a+",logs[i].f),"Error reopening log file: %s",bdata(logs[i].name));
         setbuf(logs[i].f, NULL);
     }
+    return 0;
+error:
+    return -1;
 
 }
 
