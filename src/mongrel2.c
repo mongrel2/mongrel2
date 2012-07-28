@@ -52,6 +52,7 @@
 #include "version.h"
 #include "control.h"
 #include "log.h"
+#include "logrotate.h"
 #include "register.h"
 
 extern int RUNNING;
@@ -236,6 +237,7 @@ int attempt_chroot_drop(Server *srv)
         FILE *log = fopen(bdata(srv->error_log), "a+");
         check(log, "Couldn't open %s log file.", bdata(srv->error_log));
         setbuf(log, NULL);
+        check(0==add_log_to_rotate_list(srv->error_log,log),"Unable to add error log to list of files to rotate.");
 
         dbg_set_log(log);
 
@@ -292,6 +294,8 @@ Server *reload_server(Server *old_srv, const char *db_file, const char *server_u
     check(srv != NULL, "Failed to load new server config.");
 
     Server_stop_handlers(old_srv);
+
+    rotate_logs();
 
     RELOAD = 0;
     return srv;
