@@ -9,7 +9,7 @@
 extern int FILTERS_ACTIVATED;
 
 typedef StateEvent (*filter_cb)(int next, Connection *conn, tns_value_t *config);
-typedef StateEvent* (*filter_init_cb)(Server *srv, bstring load_path, int *out_nstates);
+typedef StateEvent* (*filter_init_cb)(Server *srv, bstring load_path, int *out_nstates, tns_value_t *config);
 
 typedef struct Filter {
     int state;

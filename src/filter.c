@@ -149,7 +149,7 @@ int Filter_load(Server *srv, bstring load_path, tns_value_t *config)
     check(init != NULL, "Filter %s doesn't have an init function.", bdata(load_path));
 
     int nstates = 0;
-    StateEvent *states = init(srv, load_path, &nstates);
+    StateEvent *states = init(srv, load_path, &nstates, config);
     check(states != NULL, "Init for %s return NULL failure.", bdata(load_path));
     check(nstates > 0, "Init for %s return <= 0 states, nothing to do.", bdata(load_path));
 
