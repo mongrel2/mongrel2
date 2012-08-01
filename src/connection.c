@@ -491,6 +491,8 @@ error:
 
 int connection_proxy_req_parse(Connection *conn)
 {
+    Route *route = NULL;
+
     int rc = 0;
     Host *target_host = conn->req->target_host;
     Backend *req_action = conn->req->action;
@@ -503,13 +505,15 @@ int connection_proxy_req_parse(Connection *conn)
     error_unless(Request_is_http(conn->req), conn, 400,
             "Someone tried to change the protocol on us from HTTP.");
 
-    Backend *found = Host_match_backend(target_host, Request_path(conn->req), NULL);
+    Backend *found = Host_match_backend(target_host, Request_path(conn->req), &route);
     error_unless(found, conn, 404, 
             "Handler not found: %s", bdata(Request_path(conn->req)));
 
     // break out of PROXY if the actions don't match
     if(found != req_action) {
         Request_set_action(conn->req, found);
+        conn->req->pattern = route->pattern;
+        conn->req->prefix = route->prefix;
         return Connection_backend_event(found, conn);
     } else {
         return HTTP_REQ;
