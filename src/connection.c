@@ -416,26 +416,45 @@ error:
     return FAILED;
 }
 
-
-
 int connection_proxy_deliver(Connection *conn)
 {
     int rc = 0;
     int total_len = Request_header_length(conn->req) + Request_content_length(conn->req);
 
-    char *buf = IOBuf_read_all(conn->iob, total_len, CLIENT_READ_RETRIES);
-    check(buf != NULL, "Failed to read from the client socket to proxy.");
+    char *buf =NULL;
 
-    rc = IOBuf_send(conn->proxy_iob, IOBuf_start(conn->iob), total_len);
-    check(rc > 0, "Failed to send to proxy.");
+
+    if (conn->req->new_header) {
+        log_info("In Proxy.");
+        IOBuf_read_all(conn->iob,Request_header_length(conn->req),CLIENT_READ_RETRIES);
+
+        buf = IOBuf_read_all(conn->iob, Request_content_length(conn->req),
+                CLIENT_READ_RETRIES);
+        check(buf != NULL, "Failed to read from the client socket to proxy.");
+
+        rc = IOBuf_send(conn->proxy_iob, bdata(conn->req->new_header),
+                blength(conn->req->new_header));
+        check(rc > 0, "Failed to send to proxy.");
+
+        if(Request_content_length(conn->req) > 0) {
+            rc = IOBuf_send(conn->proxy_iob, IOBuf_start(conn->iob),
+                    Request_content_length(conn->req));
+            check(rc > 0, "Failed to send to proxy.");
+        }
+    } else {
+
+        buf = IOBuf_read_all(conn->iob, total_len, CLIENT_READ_RETRIES);
+        check(buf != NULL, "Failed to read from the client socket to proxy.");
+
+        rc = IOBuf_send(conn->proxy_iob, IOBuf_start(conn->iob), total_len);
+        check(rc > 0, "Failed to send to proxy.");
+    }
 
     return REQ_SENT;
 
 error:
     return REMOTE_CLOSE;
 }
-
-
 
 int connection_proxy_reply_parse(Connection *conn)
 {
@@ -491,6 +510,8 @@ error:
 
 int connection_proxy_req_parse(Connection *conn)
 {
+    Route *route = NULL;
+
     int rc = 0;
     Host *target_host = conn->req->target_host;
     Backend *req_action = conn->req->action;
@@ -503,13 +524,15 @@ int connection_proxy_req_parse(Connection *conn)
     error_unless(Request_is_http(conn->req), conn, 400,
             "Someone tried to change the protocol on us from HTTP.");
 
-    Backend *found = Host_match_backend(target_host, Request_path(conn->req), NULL);
+    Backend *found = Host_match_backend(target_host, Request_path(conn->req), &route);
     error_unless(found, conn, 404, 
             "Handler not found: %s", bdata(Request_path(conn->req)));
 
     // break out of PROXY if the actions don't match
     if(found != req_action) {
         Request_set_action(conn->req, found);
+        conn->req->pattern = route->pattern;
+        conn->req->prefix = route->prefix;
         return Connection_backend_event(found, conn);
     } else {
         return HTTP_REQ;

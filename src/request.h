@@ -63,6 +63,7 @@ typedef struct Request {
     int status_code;
     int response_size;
     unsigned ws_flags;
+    bstring new_header;
     http_parser parser;
 } Request;
 
