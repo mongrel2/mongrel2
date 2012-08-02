@@ -63,5 +63,8 @@ extern struct tagbstring HTTP_USER_AGENT;
 extern struct tagbstring HTTP_CONNECTION;
 extern struct tagbstring HTTP_X_FORWARDED_FOR;
 extern struct tagbstring HTTP_EXPECT;
+extern struct tagbstring HTTP_URL_SCHEME;
+extern struct tagbstring HTTP_HTTP;
+extern struct tagbstring HTTP_HTTPS;
 
 #endif

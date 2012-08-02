@@ -169,11 +169,11 @@ int connection_msg_to_handler(Connection *conn)
         if(handler->protocol == HANDLER_PROTO_TNET) {
             payload = Request_to_tnetstring(conn->req, handler->send_ident,
                     IOBuf_fd(conn->iob), IOBuf_start(conn->iob) + header_len,
-                    body_len - 1);  // drop \0 on payloads
+                    body_len - 1,conn);  // drop \0 on payloads
         } else if(handler->protocol == HANDLER_PROTO_JSON) {
             payload = Request_to_payload(conn->req, handler->send_ident,
                     IOBuf_fd(conn->iob), IOBuf_start(conn->iob) + header_len,
-                    body_len - 1);  // drop \0 on payloads
+                    body_len - 1,conn);  // drop \0 on payloads
         } else {
             sentinel("Invalid protocol type: %d", handler->protocol);
         }
@@ -241,10 +241,10 @@ int Connection_send_to_handler(Connection *conn, Handler *handler, char *body, i
 
     if(handler->protocol == HANDLER_PROTO_TNET) {
         payload = Request_to_tnetstring(conn->req, handler->send_ident, 
-                IOBuf_fd(conn->iob), body, content_len);
+                IOBuf_fd(conn->iob), body, content_len, conn);
     } else if(handler->protocol == HANDLER_PROTO_JSON) {
         payload = Request_to_payload(conn->req, handler->send_ident, 
-                IOBuf_fd(conn->iob), body, content_len);
+                IOBuf_fd(conn->iob), body, content_len, conn);
     } else {
         sentinel("Invalid protocol type: %d", handler->protocol);
     }
