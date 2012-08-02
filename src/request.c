@@ -247,6 +247,7 @@ static inline void Request_nuke_parts(Request *req)
     req->parser.json_sent = 0;
     req->parser.xml_sent = 0;
     req->ws_flags=0;
+    bdestroy(req->new_header); req->new_header=NULL;
 }
 
 void Request_destroy(Request *req)

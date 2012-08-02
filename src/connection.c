@@ -416,26 +416,45 @@ error:
     return FAILED;
 }
 
-
-
 int connection_proxy_deliver(Connection *conn)
 {
     int rc = 0;
     int total_len = Request_header_length(conn->req) + Request_content_length(conn->req);
 
-    char *buf = IOBuf_read_all(conn->iob, total_len, CLIENT_READ_RETRIES);
-    check(buf != NULL, "Failed to read from the client socket to proxy.");
+    char *buf =NULL;
 
-    rc = IOBuf_send(conn->proxy_iob, IOBuf_start(conn->iob), total_len);
-    check(rc > 0, "Failed to send to proxy.");
+
+    if (conn->req->new_header) {
+        log_info("In Proxy.");
+        IOBuf_read_all(conn->iob,Request_header_length(conn->req),CLIENT_READ_RETRIES);
+
+        buf = IOBuf_read_all(conn->iob, Request_content_length(conn->req),
+                CLIENT_READ_RETRIES);
+        check(buf != NULL, "Failed to read from the client socket to proxy.");
+
+        rc = IOBuf_send(conn->proxy_iob, bdata(conn->req->new_header),
+                blength(conn->req->new_header));
+        check(rc > 0, "Failed to send to proxy.");
+
+        if(Request_content_length(conn->req) > 0) {
+            rc = IOBuf_send(conn->proxy_iob, IOBuf_start(conn->iob),
+                    Request_content_length(conn->req));
+            check(rc > 0, "Failed to send to proxy.");
+        }
+    } else {
+
+        buf = IOBuf_read_all(conn->iob, total_len, CLIENT_READ_RETRIES);
+        check(buf != NULL, "Failed to read from the client socket to proxy.");
+
+        rc = IOBuf_send(conn->proxy_iob, IOBuf_start(conn->iob), total_len);
+        check(rc > 0, "Failed to send to proxy.");
+    }
 
     return REQ_SENT;
 
 error:
     return REMOTE_CLOSE;
 }
-
-
 
 int connection_proxy_reply_parse(Connection *conn)
 {
