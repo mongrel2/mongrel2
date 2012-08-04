@@ -171,6 +171,7 @@ long long int Dir_stream_file(FileRecord *file, Connection *conn)
     check(fd >= 0, "Failed to open file: %s", bdata(file->full_path));
 
     sent = IOBuf_stream_file(conn->iob, fd, file->file_size);
+    check(sent == file->file_size, "Error streaming file. Sent %d of %d bytes.", sent, file->file_size);
 
     fdclose(fd);
     return file->file_size;
