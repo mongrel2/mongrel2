@@ -33,6 +33,7 @@
  */
 
 #include "log.h"
+#include "logrotate.h"
 #include "dbg.h"
 #include "request.h"
 #include "headers.h"
