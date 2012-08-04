@@ -686,7 +686,7 @@ again:
             check_debug(!IOBuf_closed(conn->iob), "Client closed during read.");
         }
     }
-    check(packet_length > 0,"Error receiving websocket packet header.")
+    check(packet_length > 0,"Error receiving websocket packet header.");
 
     check_debug(packet_length <= INT_MAX,"Websocket packet longer than MAXINT.");
     /* TODO properly terminate WS connection */

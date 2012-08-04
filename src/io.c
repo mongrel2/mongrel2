@@ -604,7 +604,7 @@ char *IOBuf_read_all(IOBuf *buf, int len, int retries)
         if(nread == len) {
             break;
         } else {
-            check(!IOBuf_closed(buf), "Socket closed during IOBuf_read_all.")
+            check(!IOBuf_closed(buf), "Socket closed during IOBuf_read_all.");
             fdwait(buf->fd, 'r');
         }
     }
