@@ -36,7 +36,7 @@ int simple_query_print(bstring db_file, const char *sql)
 
     int cols = 0;
     int rows = DB_counts(res, &cols);
-    check(cols > 0, "Invalid query, it has no columns, which is a bug.");
+    if (rows != 0) check(cols > 0, "Invalid query, it has no columns, which is a bug.");
     check(rows != -1, "Invalid query result, probably not a table.");
 
     if(rows == 0) {
