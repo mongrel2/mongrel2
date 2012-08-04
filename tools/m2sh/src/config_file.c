@@ -155,11 +155,10 @@ error:
 int Mimetypes_load(tst_t *settings, Pair *pair)
 {
     const char *ext = bdata(Pair_key(pair));
+    tns_value_t *res = NULL;
     Value *val = Pair_value(pair);
     check(val, "Error loading Mimetype %s", bdata(Pair_key(pair)));
 
-    tns_value_t *res = NULL;
-    
     res = DB_exec(bdata(&MIMETYPE_SQL),
             ext, ext, bdata(val->as.string->data));
 
@@ -177,11 +176,10 @@ error:
 int Settings_load(tst_t *settings, Pair *pair)
 {
     const char *name = bdata(Pair_key(pair));
+    tns_value_t *res = NULL;
     Value *val = Pair_value(pair);
     check(val, "Error loading Setting %s", bdata(Pair_key(pair)));
 
-    tns_value_t *res = NULL;
-    
     res = DB_exec(bdata(&SETTING_SQL), name, bdata(val->as.string->data));
 
     check(res != NULL, "Failed to add setting: %s=%s",
@@ -243,12 +241,13 @@ struct tagbstring MATCHING_PARAM = bsStatic("matching");
 
 int Filter_load(tst_t *settings, Value *val)
 {
-    CONFIRM_TYPE("Filter");
     Class *cls = val->as.cls;
     tns_value_t *res = NULL;
     struct tagbstring SETTINGS_VAR = bsStatic("settings");
     char *converted_settings = NULL;
     tns_value_t *filter_tns = NULL;
+
+    CONFIRM_TYPE("Filter");
 
     const char *name = AST_str(settings, cls->params, "name", VAL_QSTRING);
     check(name != NULL, "You must set a name for the filter.");
@@ -284,9 +283,11 @@ error:
 
 int Host_load(tst_t *settings, Value *val)
 {
-    CONFIRM_TYPE("Host");
-    Class *cls = val->as.cls;
     tns_value_t *res = NULL;
+
+    CONFIRM_TYPE("Host");
+
+    Class *cls = val->as.cls;
     struct tagbstring ROUTES_VAR = bsStatic("routes");
 
     const char *name = AST_str(settings, cls->params, "name", VAL_QSTRING);
@@ -321,9 +322,10 @@ struct tagbstring USE_SSL = bsStatic("use_ssl");
 
 int Server_load(tst_t *settings, Value *val)
 {
+    tns_value_t *res = NULL;
+
     CONFIRM_TYPE("Server");
     Class *cls = val->as.cls;
-    tns_value_t *res = NULL;
     struct tagbstring HOSTS_VAR = bsStatic("hosts");
     struct tagbstring FILTERS_VAR = bsStatic("filters");
     const char *bind_addr = NULL;

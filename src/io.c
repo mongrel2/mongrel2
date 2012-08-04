@@ -95,7 +95,7 @@ static ssize_t file_recv(IOBuf *iob, char *buffer, int len)
 
 static ssize_t plain_stream_file(IOBuf *iob, int fd, off_t len)
 {
-    off_t sent = 0;
+    off_t sent;
     off_t total = 0;
     off_t offset = 0;
     off_t block_size = MAX_SEND_BUFFER;
@@ -155,7 +155,7 @@ error:
 
 static ssize_t ssl_send(IOBuf *iob, char *buffer, int len)
 {
-    int sent = 0;
+    int sent;
     int total = 0;
 
     check(iob->use_ssl, "IOBuf not set up to use ssl");
@@ -165,7 +165,7 @@ static ssize_t ssl_send(IOBuf *iob, char *buffer, int len)
         check(rcode == 0, "SSL handshake failed: %d", rcode);
     }
 
-    for(sent = 0; len > 0; buffer += sent, len -= sent, total += sent) {
+    for(; len > 0; buffer += sent, len -= sent, total += sent) {
         sent = ssl_write(&iob->ssl, (const unsigned char*) buffer, len);
 
         check(sent != -1, "Error sending SSL data.");
@@ -604,7 +604,7 @@ char *IOBuf_read_all(IOBuf *buf, int len, int retries)
         if(nread == len) {
             break;
         } else {
-            check(!IOBuf_closed(buf), "Socket closed during IOBuf_read_all.")
+            check(!IOBuf_closed(buf), "Socket closed during IOBuf_read_all.");
             fdwait(buf->fd, 'r');
         }
     }

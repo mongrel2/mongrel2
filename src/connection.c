@@ -645,36 +645,28 @@ int connection_parse(Connection *conn)
 
 int Connection_read_wspacket(Connection *conn)
 {
-    bstring payload=NULL;
-
-    uint8_t *dataU=NULL;
-    char *data = IOBuf_start(conn->iob);
-    int avail = IOBuf_avail(conn->iob);
-    int64_t packet_length=-1;
-    int smaller_packet_length;
-    int header_length;
+    bstring payload = NULL;
+    int inprogFlags = 0;
     char key[4];
-    int i;
-    int data_length;
-    int tries = 0;
-    int rc=0;
-    int fin;
-    int inprogFlags=0;
     int isControl;
     int flags;
+    uint8_t *dataU;
+    char *data;
+    int avail;
+    int64_t packet_length;
+    int smaller_packet_length;
+    int header_length;
+    int i;
+    int data_length;
+    int tries;
+    int rc;
+    int fin;
 
 again:
-    dataU=NULL;
+    dataU = NULL;
     data = IOBuf_start(conn->iob);
     avail = IOBuf_avail(conn->iob);
-    packet_length=-1;
-    smaller_packet_length=0;
-    header_length=0;
-    i=0;
-    data_length=0;
-    tries = 0;
-    rc=0;
-    fin=0;
+    packet_length = -1;
 
     for(tries = 0; packet_length == -1 && tries < 8*CLIENT_READ_RETRIES; tries++) {
         if(avail > 0) {
@@ -686,13 +678,13 @@ again:
             check_debug(!IOBuf_closed(conn->iob), "Client closed during read.");
         }
     }
-    check(packet_length > 0,"Error receiving websocket packet header.")
+    check(packet_length > 0,"Error receiving websocket packet header.");
 
     check_debug(packet_length <= INT_MAX,"Websocket packet longer than MAXINT.");
     /* TODO properly terminate WS connection */
 
     smaller_packet_length = (int)packet_length;
-    
+
     /* TODO check for maximum length */
 
     header_length=Websocket_header_length((uint8_t *) data, avail);
@@ -704,15 +696,15 @@ again:
     if (payload==NULL) {
         inprogFlags=flags;
     }
-    
 
-    fin=(WS_fin(dataU));
+
+    fin = (WS_fin(dataU));
     isControl=(WS_is_control(dataU));
 
-{
-    const char *error=WS_validate_packet(dataU,payload!=NULL);
-    check(error==NULL,"%s",error);
-}
+    {
+        const char *error=WS_validate_packet(dataU,payload!=NULL);
+        check(error==NULL,"%s",error);
+    }
 
     dataU = (uint8_t *)IOBuf_read_all(conn->iob,data_length, 8*CLIENT_READ_RETRIES);
     check(dataU != NULL, "Client closed the connection during websocket packet.");
@@ -723,9 +715,9 @@ again:
 
     if(isControl) /* Control frames get sent right-away */
     {
-            Request_set(conn->req,bfromcstr("FLAGS"),bformat("0x%X",flags|0x80),1);
-            rc = Connection_send_to_handler(conn, conn->handler, (void *)dataU,data_length);
-            check_debug(rc == 0, "Failed to deliver to the handler.");
+        Request_set(conn->req,bfromcstr("FLAGS"),bformat("0x%X",flags|0x80),1);
+        rc = Connection_send_to_handler(conn, conn->handler, (void *)dataU,data_length);
+        check_debug(rc == 0, "Failed to deliver to the handler.");
     }
     else {
         if(fin) {
