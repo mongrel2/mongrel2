@@ -33,7 +33,6 @@
  */
 
 #define _XOPEN_SOURCE 500
-#define _FILE_OFFSET_BITS 64
 
 #include <stdlib.h>
 #include <assert.h>
