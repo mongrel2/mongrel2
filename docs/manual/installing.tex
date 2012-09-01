@@ -40,10 +40,9 @@ Debian and SuSE systems, then you'll have to go and figure out
 how to install it.
 
 Some distributions (like Ubuntu) split ``dev'' and ``runtime'' packages.
-In order to build mongrel2 on these distros, you must install libsqlite3-dev:
-this package contains sqlite3.h, which Mongrel2 needs during compilation.
-
-For the lazy, the command is: \shell{sudo apt-get install libsqlite3-dev}
+In order to build mongrel2 on these distros, you must install both.
+The package libsqlite3-dev contains sqlite3.h, which Mongrel2 needs during
+compilation, the package sqlite3 is needed for the unit tests.
 
 Other pieces known to be missing on ubuntu-like systems:
 
@@ -51,6 +50,8 @@ Other pieces known to be missing on ubuntu-like systems:
 \item uuid-runtime: Needed by m2sh uuid command
 \item You may need to run: \shell{sudo ldconfig -v}
 \end{itemize}
+
+For the lazy, the command is: \shell{sudo apt-get install uuid-runtime sqlite3 libsqlite3-dev}
 
 
 \section{Getting Mongrel2}
