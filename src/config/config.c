@@ -53,6 +53,7 @@
 #include "filter.h"
 #include <dlfcn.h>
 
+#include "xrequest.h"
 
 Handler *Config_load_handler(int handler_id)
 {
@@ -350,6 +351,12 @@ Server *Config_load_server(const char *uuid)
 
     rc = Config_load_filters(srv, server_id);
     check(rc == 0, "Failed to load the filters for server: %s", bdata(srv->uuid));
+
+    /* TODO Add configuration entry for xrequest plugins */
+    bstring foo = bfromcstr("tools/filters/sendfile.so");
+    rc = Xrequest_load(srv, foo, NULL);
+    bdestroy(foo);
+    check(rc == 0, "Failed to load the sendfile for server: %s", bdata(srv->uuid));
 
     tns_value_destroy(res);
     return srv;
