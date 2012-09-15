@@ -52,6 +52,7 @@ error:
 int dispatch_extended_request(Connection *conn,
         bstring key, tns_value_t *value)
 {
+    check(DISPATCHER_DICT != NULL, "No XREQ dispatchers installed.");
     hnode_t *match = hash_lookup(DISPATCHER_DICT, key);
 
     check(match != NULL, "Couldn't find XREQ for \"%s\".", bdata(key));

@@ -103,6 +103,12 @@ tns_value_t *default_load_filters(int server_id)
     const char *FILTER_QUERY = "SELECT id, name, settings FROM filter WHERE server_id = %d";
     return DB_exec(FILTER_QUERY, server_id);
 }
+     
+tns_value_t *default_load_xrequests(int server_id)
+{
+    const char *FILTER_QUERY = "SELECT id, name, settings FROM xrequest WHERE server_id = %d";
+    return DB_exec(FILTER_QUERY, server_id);
+}
 
 ConfigModule CONFIG_MODULE = {
     .init = default_init,
@@ -115,7 +121,8 @@ ConfigModule CONFIG_MODULE = {
     .load_server = default_load_server,
     .load_mimetypes = default_load_mimetypes,
     .load_settings = default_load_settings,
-    .load_filters = default_load_filters
+    .load_filters = default_load_filters,
+    .load_xrequests = default_load_xrequests
     
 };
 
