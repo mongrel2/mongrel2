@@ -1,8 +1,9 @@
-WEBSITE=$(USER)@mongrel2.org:/var/www/mongrel2.org/
+WEBSITE=~/mongrel2.org/site-root
 
 all:
 	rsync -a --delete assets/ output/
 	lua gensite.lua output
+	bash -c 'cp -a ../../output/docs/manual/*.{html,css} output/manual'
 
 clean:
 	rm -rf output
