@@ -4,41 +4,34 @@
 
     "releases": [
         { 
-            "version": "1.7.5",
-            "md5": "c243efc59e5972fa381bd13a7eeafdc7",
-            "link": "http://mongrel2.org/static/downloads/mongrel2-1.7.5.tar.bz2",
+            "version": "1.8.0",
+            "md5": "4bca0d299e7e77efa4c674bc5877dfd0",
+            "link": "https://github.com/zedshaw/mongrel2/tarball/v1.8.0",
             "date": "Jun 22 2011"
         },
-
+        {
+            "version": "1.7.5",
+            "md5": "923c6403d037dc7d0a016df1b3d14be6",
+            "link": "https://github.com/zedshaw/mongrel2/tarball/v1.7.5",
+            "date": "Jun 22 2011"
+        },
         { 
             "version": "1.7.4",
-            "md5": "a01d1cab2132b44a01837f254ecfb296",
-            "link": "http://mongrel2.org/static/downloads/mongrel2-1.7.4.tar.bz2",
+            "md5": "c9fbb0ee71b3a7ac69907536b991aa31",
+            "link": "https://github.com/zedshaw/mongrel2/tarball/v1.7.4",
             "date": "Jun 14 2011"
         },
         { 
             "version": "1.7.3",
-            "md5": "bb0f85fdd2bc7c83286be5335a10c743",
-            "link": "http://mongrel2.org/static/downloads/mongrel2-1.7.3.tar.bz2",
+            "md5": "2e31b1457c67191608d2f1caceeb0a3d",
+            "link": "https://github.com/zedshaw/mongrel2/tarball/v1.7.3",
             "date": "Jun 01 2011"
         },
         { 
             "version": "1.6",
-            "md5": "4b7467c17dcd192e574d4d2c1455997c",
-            "link": "http://mongrel2.org/static/downloads/mongrel2-1.6.tar.bz2",
+            "md5": "ecdeae16046853bf57fd5aab82bf2d23",
+            "link": "https://github.com/zedshaw/mongrel2/tarball/v1.6",
             "date": "May 01 2011"
         },
-        { 
-            "version": "1.5",
-            "md5": "b699ffc7ef922ad7d703fcd39a897910",
-            "link": "http://mongrel2.org/static/downloads/mongrel2-1.5.tar.bz2",
-            "date": "Apr 01 2011"
-        },
-        { 
-            "version": "1.4",
-            "md5": "d5b917c7cb2fd0527f6824edda37cefb",
-            "link": "http://mongrel2.org/static/downloads/mongrel2-1.4.tar.bz2",
-            "date": "Feb 01 2011"
-        }
     ]
 }
