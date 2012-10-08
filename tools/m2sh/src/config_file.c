@@ -239,7 +239,7 @@ error:
 
 struct tagbstring MATCHING_PARAM = bsStatic("matching");
 
-int Filter_load(tst_t *settings, Value *val)
+int Plugin_load(tst_t *settings, Value *val, bstring sql, const char *type)
 {
     Class *cls = val->as.cls;
     tns_value_t *res = NULL;
@@ -247,7 +247,7 @@ int Filter_load(tst_t *settings, Value *val)
     char *converted_settings = NULL;
     tns_value_t *filter_tns = NULL;
 
-    CONFIRM_TYPE("Filter");
+    CONFIRM_TYPE(type);
 
     const char *name = AST_str(settings, cls->params, "name", VAL_QSTRING);
     check(name != NULL, "You must set a name for the filter.");
@@ -268,7 +268,7 @@ int Filter_load(tst_t *settings, Value *val)
             "Failed to convert final Filter settings to tnetstring for Filter '%s'",
             name);
 
-    res = DB_exec(bdata(&FILTER_SQL), SERVER_ID, name, converted_settings);
+    res = DB_exec(bdata(sql), SERVER_ID, name, converted_settings);
     check(res != NULL, "Failed to store Filter: '%s'", name);
 
     tns_value_destroy(res);
@@ -280,6 +280,15 @@ error:
     if(filter_tns) tns_value_destroy(filter_tns);
     return -1;
 }
+int Filter_load(tst_t *settings, Value *val)
+{
+    return Plugin_load(settings,val,&FILTER_SQL,"Filter");
+}
+int Xrequest_load(tst_t *settings, Value *val)
+{
+    return Plugin_load(settings,val,&XREQUEST_SQL,"Xrequest");
+}
+
 
 int Host_load(tst_t *settings, Value *val)
 {
@@ -328,6 +337,7 @@ int Server_load(tst_t *settings, Value *val)
     Class *cls = val->as.cls;
     struct tagbstring HOSTS_VAR = bsStatic("hosts");
     struct tagbstring FILTERS_VAR = bsStatic("filters");
+    struct tagbstring XREQUESTS_VAR = bsStatic("xrequests");
     const char *bind_addr = NULL;
     const char *use_ssl = NULL;
 
@@ -372,6 +382,12 @@ int Server_load(tst_t *settings, Value *val)
 
     if(filters != NULL) {
         AST_walk_list(settings, filters->as.list, Filter_load);
+    }
+
+    Value *xrequests = AST_get(settings, cls->params, &XREQUESTS_VAR, VAL_LIST);
+
+    if(xrequests != NULL) {
+        AST_walk_list(settings, xrequests->as.list, Xrequest_load);
     }
 
     tns_value_destroy(res);

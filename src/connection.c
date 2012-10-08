@@ -83,10 +83,13 @@ error:
 }
 
 
-static inline int Connection_deliver_enqueue(Connection *conn, bstring b)
+int Connection_deliver_enqueue(Connection *conn, deliver_function f,
+                                             tns_value_t *d)
 {
     check_debug(conn->deliverPost-conn->deliverAck < DELIVER_OUTSTANDING_MSGS, "Too many outstanding messages") ;
-    conn->deliverRing[conn->deliverPost++%DELIVER_OUTSTANDING_MSGS]=b;
+    conn->deliverRing[conn->deliverPost%DELIVER_OUTSTANDING_MSGS].deliver=f;
+    conn->deliverRing[conn->deliverPost%DELIVER_OUTSTANDING_MSGS].data=d;
+    conn->deliverPost++;
     taskwakeup(&conn->deliverRendez);
     return 0;
 
@@ -94,11 +97,12 @@ error:
     return -1;
 }
 
-static inline bstring Connection_deliver_dequeue(Connection *conn)
+static inline void Connection_deliver_dequeue(Connection *conn, Deliver_message *m)
 {
     while(1) {
         if(conn->deliverPost-conn->deliverAck) {
-            return conn->deliverRing[conn->deliverAck++%DELIVER_OUTSTANDING_MSGS];
+            *m = conn->deliverRing[conn->deliverAck++%DELIVER_OUTSTANDING_MSGS];
+            return;
         }
         tasksleep(&conn->deliverRendez);
     }
@@ -797,9 +801,11 @@ void Connection_destroy(Connection *conn)
         if(conn->client) free(conn->client);
         while(conn->deliverAck!=conn->deliverPost)
         {
-            bdestroy(Connection_deliver_dequeue(conn));
+            Deliver_message msg;
+            Connection_deliver_dequeue(conn,&msg);
+            tns_value_destroy(msg.data);
         }
-        Connection_deliver_enqueue(conn,NULL);
+        Connection_deliver_enqueue(conn,NULL,NULL);
         taskyield();
         IOBuf_destroy(conn->iob);
         IOBuf_destroy(conn->proxy_iob);
@@ -901,14 +907,31 @@ error: // fallthrough
     taskexit(0);
 }
 
-int Connection_deliver_raw_internal(Connection *conn, bstring buf)
+int Connection_deliver_raw_internal(Connection *conn, tns_value_t *data)
 {
-    return IOBuf_send_all(conn->iob, bdata(buf), blength(buf));
+    int ret=0;
+    bstring buf;
+    check(data->type==tns_tag_string, "deliver_raw_internal expected a string.");
+    buf=data->value.string;
+    ret= IOBuf_send_all(conn->iob, bdata(buf), blength(buf));
+    return 0;
+
+error:
+    return -1;
 }
 
 int Connection_deliver_raw(Connection *conn, bstring buf)
 {
-    return Connection_deliver_enqueue(conn, bstrcpy(buf));
+    tns_value_t *val=malloc(sizeof(tns_value_t));
+    check_mem(val);
+    val->type=tns_tag_string;
+    val->value.string=bstrcpy(buf);
+    check_debug(0== Connection_deliver_enqueue(conn, Connection_deliver_raw_internal,val),
+        "Failed to write raw message to con %d", IOBuf_fd(conn->iob));
+    return 0;
+error:
+    tns_value_destroy(val);
+    return -1;
 }
 
 int Connection_deliver(Connection *conn, bstring buf)
@@ -918,9 +941,11 @@ int Connection_deliver(Connection *conn, bstring buf)
     bstring b64_buf = bBase64Encode(buf);
     check(b64_buf != NULL, "Failed to base64 encode data.");
     check(conn->iob != NULL, "There's no IOBuffer to send to, Tell Zed.");
-    /* The deliver task will free the buffer */
-    rc = Connection_deliver_enqueue(conn,b64_buf);
+    /* Yep there's an extraneous copy, but the deliver raw function is better
+     * tested so for maintainability we will use it */
+    rc = Connection_deliver_raw(conn,b64_buf);
     check_debug(rc == 0, "Failed to write message to conn %d", IOBuf_fd(conn->iob));
+    bdestroy(b64_buf);
 
     return 0;
 
@@ -933,16 +958,16 @@ error:
 void Connection_deliver_task(void *v)
 {
     Connection *conn=v;
-    bstring msg=NULL;
+    Deliver_message msg={NULL,NULL};
     while(1) {
-        msg = Connection_deliver_dequeue(conn);
-        check_debug(msg,"Received NULL msg on FD %d, exiting deliver task",IOBuf_fd(conn->iob));
-        check(-1 != Connection_deliver_raw_internal(conn,msg),"Error delivering to MSG listener on FD %d, closing them.", IOBuf_fd(conn->iob));
-        bdestroy(msg);
-        msg=NULL;
+        Connection_deliver_dequeue(conn, &msg);
+        check_debug(msg.deliver,"Received NULL msg on FD %d, exiting deliver task",IOBuf_fd(conn->iob));
+        check(-1 != msg.deliver(conn,msg.data),"Error delivering to MSG listener on FD %d, closing them.", IOBuf_fd(conn->iob));
+        tns_value_destroy(msg.data);
+        msg.data=NULL;
     }
 error:
-    bdestroy(msg);
+    tns_value_destroy(msg.data);
     if (IOBuf_fd(conn->iob) >= 0)
         shutdown(IOBuf_fd(conn->iob), SHUT_RDWR);
     taskexit(0);
