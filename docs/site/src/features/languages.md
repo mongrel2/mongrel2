@@ -41,7 +41,7 @@ protocol features:
 * <a href="https://github.com/daogangtang/bamboo">Bamboo</a> is a Tir derivative with a bunch more features.
 * <a href="http://www.photon-project.com">Photon</a> is a PHP framework similar to Tir and *way* faster than PHP.
 
-<p>It is very easy to create a handler, you should read the <a href="http://mongrel2.org/static/mongrel2-manual.html">manual about handlers</a> for 
+<p>It is very easy to create a handler, you should read the <a href="http://mongrel2.org/manual/book-final.html">manual about handlers</a> for 
 information on writing one for your language.</p>
 
 

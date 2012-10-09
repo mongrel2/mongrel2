@@ -34,7 +34,7 @@ Download
 
 Mongrel2 is now 1.8.0 as of *Thu Jul 26 06:06 GMT 2012*: 
 
-* [mongrel2-1.8.0.tar.bz2](https://github.com/zedshaw/mongrel2/zipball/v1.8.0) MD5: dff70dfe67266397087fda9548314b25
+* [mongrel2-1.8.0.tar.bz2](https://github.com/zedshaw/mongrel2/tarball/v1.8.0) MD5: 4bca0d299e7e77efa4c674bc5877dfd0
 
 Documentation
 -------------

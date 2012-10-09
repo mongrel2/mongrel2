@@ -4,7 +4,7 @@ Getting Started With Mongrel2
 This is the fastest way to get started with Mongrel2.  Nothing is really
 explained, just all the stuff you need is setup and you get to run a few
 commands.  If you want very good explanations for all of this, go read [The
-Mongrel2 Manual](http://mongrel2.org/static/mongrel2-manual.html) a complete
+Mongrel2 Manual](http://mongrel2.org/manual/book-final.html) a complete
 manual covering everything from getting started, to writing your first
 handlers.
 
@@ -32,10 +32,10 @@ sudo pacman -S sqlite3
 Getting The Source
 ------------------
 
-Quickest way to do that is to grab the tar.bz2 file:
+Quickest way to do that is to grab the tarball
 
 <pre>
-wget http://mongrel2.org/static/downloads/mongrel2-1.7.5.tar.bz2
+wget https://github.com/zedshaw/mongrel2/tarball/v1.8.0
 </pre>
 
 
@@ -45,8 +45,8 @@ Building Mongrel2
 Now you need to build mongrel2:
 
 <pre>
-tar -xjvf mongrel2-1.7.5.tar.bz2
-cd mongrel2-1.7.5/
+tar -xzvf mongrel2-1.8.0.tar.gz
+cd mongrel2-1.8.0/
 make clean all && sudo make install
 </pre>
 
@@ -97,7 +97,7 @@ Learn More From The Manual
 -------------------------
 
 That is the fastest crash course you can get in running Mongrel2.  You
-should now go read <a href="http://mongrel2.org/static/mongrel2-manual.html">The Mongrel2 Manual
+should now go read <a href="http://mongrel2.org/manual/book-final.html">The Mongrel2 Manual
  (HTML)</a> which we took much more time writing and making very nice for
 you.
 
