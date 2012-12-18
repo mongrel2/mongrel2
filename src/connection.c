@@ -203,7 +203,7 @@ struct tagbstring PEER_CERT_SHA1_KEY = bsStatic("PEER_CERT_SHA1");
 
 void Connection_fingerprint_from_cert(Connection *conn) 
 {
-    x509_cert* _x509P  = conn->iob->ssl.peer_cert;
+    x509_cert* _x509P  = conn->iob->ssn.peer_cert;
     int i = 0;
 
     debug("Connection_send_to_handler: peer_cert: %016lX: tag=%d length=%ld",

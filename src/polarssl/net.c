@@ -59,10 +59,13 @@ static int wsa_init_done = 0;
 #include <netdb.h>
 #include <errno.h>
 
-#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
+#if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) ||  \
+    defined(__DragonflyBSD__)
 #include <sys/endian.h>
 #elif defined(__APPLE__)
 #include <machine/endian.h>
+#elif defined(sun)
+#include <sys/isa_defs.h>
 #else
 #include <endian.h>
 #endif
@@ -72,6 +75,13 @@ static int wsa_init_done = 0;
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
+
+#ifdef _MSC_VER
+#include <basetsd.h>
+typedef UINT32 uint32_t;
+#else
+#include <inttypes.h>
+#endif
 
 /*
  * htons() is not always available.
@@ -176,10 +186,10 @@ int net_bind( int *fd, const char *bind_ip, int port )
 
         if( n == 4 )
             server_addr.sin_addr.s_addr =
-                ( (unsigned long) c[0] << 24 ) |
-                ( (unsigned long) c[1] << 16 ) |
-                ( (unsigned long) c[2] <<  8 ) |
-                ( (unsigned long) c[3]       );
+                ( (uint32_t) c[0] << 24 ) |
+                ( (uint32_t) c[1] << 16 ) |
+                ( (uint32_t) c[2] <<  8 ) |
+                ( (uint32_t) c[3]       );
     }
 
     if( bind( *fd, (struct sockaddr *) &server_addr,

@@ -271,22 +271,18 @@ error:
 }
 
 
-static int simple_get_session( ssl_context *ssl )
+static int simple_get_cache( void *p_ssl, ssl_session *ssn )
 {
-    time_t t = THE_CURRENT_TIME_IS;
+    ssl_context *ssl = (ssl_context *) p_ssl;
     int i = 0;
 
     check(setup_ssl_session_cache() == 0, "Failed to initialize SSL session cache.");
 
-    if( ssl->resume == 0 ) return 1;
+    if( ssl->handshake->resume == 0 ) return 1;
     ssl_session *cur = NULL;
 
     for(i = 0; i < darray_end(SSL_SESSION_CACHE); i++) {
         cur = darray_get(SSL_SESSION_CACHE, i);
-
-        if( ssl->timeout != 0 && t - cur->start > ssl->timeout ) {
-            continue;
-        }
 
         if( ssl->session->ciphersuite != cur->ciphersuite ||
             ssl->session->length != cur->length ) 
@@ -307,9 +303,9 @@ error: // fallthrough
     return 1;
 }
 
-static int simple_set_session( ssl_context *ssl )
+static int simple_set_cache( void *p_ssl, const ssl_session *ssn )
 {
-    time_t t = THE_CURRENT_TIME_IS;
+    ssl_context *ssl = (ssl_context *) p_ssl;
     int i = 0;
     ssl_session *cur = NULL;
     int make_new = 1;
@@ -317,11 +313,6 @@ static int simple_set_session( ssl_context *ssl )
 
     for(i = 0; i < darray_end(SSL_SESSION_CACHE); i++) {
         cur = darray_get(SSL_SESSION_CACHE, i);
-
-        if( ssl->timeout != 0 && t - cur->start > ssl->timeout ) {
-            make_new = 0;
-            break; /* expired, reuse this slot */
-        }
 
         if( memcmp( ssl->session->id, cur->id, cur->length ) == 0 ) {
             make_new = 0;
@@ -366,9 +357,9 @@ static inline int iobuf_ssl_setup(IOBuf *buf)
 
     ssl_set_bio(&buf->ssl, ssl_fdrecv_wrapper, buf, 
                 ssl_fdsend_wrapper, buf);
-    ssl_set_session(&buf->ssl, 1, 0, &buf->ssn);
+    ssl_set_session(&buf->ssl, &buf->ssn);
 
-    ssl_set_scb(&buf->ssl, simple_get_session, simple_set_session);
+    ssl_set_session_cache(&buf->ssl, simple_get_cache, &buf->ssl, simple_set_cache, &buf->ssl);
 
     memset(&buf->ssn, 0, sizeof(buf->ssn));
 
