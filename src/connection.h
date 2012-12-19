@@ -64,6 +64,11 @@ typedef struct Connection {
     IOBuf *iob;
     IOBuf *proxy_iob;
 
+    // if SNI is used, then the connection has its own cert
+    int use_sni;
+    x509_cert own_cert;
+    rsa_context rsa_key;
+
     int rport;
     State state;
     struct httpclient_parser *client;
