@@ -284,18 +284,18 @@ static int simple_get_cache( void *p_ssl, ssl_session *ssn )
     for(i = 0; i < darray_end(SSL_SESSION_CACHE); i++) {
         cur = darray_get(SSL_SESSION_CACHE, i);
 
-        if( ssl->session->ciphersuite != cur->ciphersuite ||
-            ssl->session->length != cur->length ) 
+        if( ssn->ciphersuite != cur->ciphersuite ||
+            ssn->length != cur->length ) 
         {
             continue;
         }
 
-        if( memcmp( ssl->session->id, cur->id, cur->length ) != 0 ) {
+        if( memcmp( ssn->id, cur->id, cur->length ) != 0 ) {
             continue;
         }
 
         // TODO: odd, why 48? this is from polarssl
-        memcpy( ssl->session->master, cur->master, 48 );
+        memcpy( ssn->master, cur->master, 48 );
         return 0;
     }
 
@@ -314,7 +314,7 @@ static int simple_set_cache( void *p_ssl, const ssl_session *ssn )
     for(i = 0; i < darray_end(SSL_SESSION_CACHE); i++) {
         cur = darray_get(SSL_SESSION_CACHE, i);
 
-        if( memcmp( ssl->session->id, cur->id, cur->length ) == 0 ) {
+        if( memcmp( ssn->id, cur->id, cur->length ) == 0 ) {
             make_new = 0;
             break; /* client reconnected */
         }
@@ -326,7 +326,8 @@ static int simple_set_cache( void *p_ssl, const ssl_session *ssn )
         darray_push(SSL_SESSION_CACHE, cur);
     }
 
-    *cur = *ssl->session;
+    *cur = *ssn;
+    cur->peer_cert = NULL; // ssl.h says to unset or copy, so well unset
 
     return 0;
 error:
@@ -357,11 +358,11 @@ static inline int iobuf_ssl_setup(IOBuf *buf)
 
     ssl_set_bio(&buf->ssl, ssl_fdrecv_wrapper, buf, 
                 ssl_fdsend_wrapper, buf);
+
+    memset(&buf->ssn, 0, sizeof(buf->ssn));
     ssl_set_session(&buf->ssl, &buf->ssn);
 
     ssl_set_session_cache(&buf->ssl, simple_get_cache, &buf->ssl, simple_set_cache, &buf->ssl);
-
-    memset(&buf->ssn, 0, sizeof(buf->ssn));
 
     return 0;
 error:
