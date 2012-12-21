@@ -1,9 +1,9 @@
 /**
- * \file havege.h
+ * \file x509write.h
  *
- * \brief HAVEGE: HArdware Volatile Entropy Gathering and Expansion
+ * \brief X509 buffer writing functionality
  *
- *  Copyright (C) 2006-2010, Brainspark B.V.
+ *  Copyright (C) 2006-2012, Brainspark B.V.
  *
  *  This file is part of PolarSSL (http://www.polarssl.org)
  *  Lead Maintainer: Paul Bakker <polarssl_maintainer at polarssl.org>
@@ -24,48 +24,23 @@
  *  with this program; if not, write to the Free Software Foundation, Inc.,
  *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef POLARSSL_HAVEGE_H
-#define POLARSSL_HAVEGE_H
+#ifndef POLARSSL_X509_WRITE_H
+#define POLARSSL_X509_WRITE_H
 
-#include <string.h>
+#include "rsa.h"
 
-#define COLLECT_SIZE 1024
-
-/**
- * \brief          HAVEGE state structure
- */
-typedef struct
+typedef struct _x509_req_name
 {
-    int PT1, PT2, offset[2];
-    int pool[COLLECT_SIZE];
-    int WALK[8192];
+    char oid[128];
+    char name[128];
+
+    struct _x509_req_name *next;
 }
-havege_state;
+x509_req_name;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+int x509_write_pubkey_der( unsigned char *buf, size_t size, rsa_context *rsa );
+int x509_write_key_der( unsigned char *buf, size_t size, rsa_context *rsa );
+int x509_write_cert_req( unsigned char *buf, size_t size, rsa_context *rsa,
+                         x509_req_name *req_name, int hash_id );
 
-/**
- * \brief          HAVEGE initialization
- *
- * \param hs       HAVEGE state to be initialized
- */
-void havege_init( havege_state *hs );
-
-/**
- * \brief          HAVEGE rand function
- *
- * \param p_rng    A HAVEGE state
- * \param output   Buffer to fill
- * \param len      Length of buffer
- *
- * \return         0
- */
-int havege_random( void *p_rng, unsigned char *output, size_t len );
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* havege.h */
+#endif /* POLARSSL_X509_WRITE_H */
