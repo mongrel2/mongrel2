@@ -77,6 +77,7 @@
 #define BADCRL_EXPIRED              0x20  /**< CRL is expired. */
 #define BADCERT_MISSING             0x40  /**< Certificate was missing. */
 #define BADCERT_SKIP_VERIFY         0x80  /**< Certificate verification was skipped. */
+#define BADCERT_OTHER             0x0100  /**< Other reason (can be used by verify callback) */
 /* \} name */
 /* \} addtogroup x509_module */
 
@@ -99,9 +100,15 @@
 
 #define OID_X520                "\x55\x04"
 #define OID_CN                  OID_X520 "\x03"
+#define OID_COUNTRY             OID_X520 "\x06"
+#define OID_LOCALITY            OID_X520 "\x07"
+#define OID_STATE               OID_X520 "\x08"
+#define OID_ORGANIZATION        OID_X520 "\x0A"
+#define OID_ORG_UNIT            OID_X520 "\x0B"
 
 #define OID_PKCS1               "\x2A\x86\x48\x86\xF7\x0D\x01\x01"
 #define OID_PKCS1_RSA           OID_PKCS1 "\x01"
+#define OID_PKCS1_SHA1          OID_PKCS1 "\x05"
 
 #define OID_RSA_SHA_OBS         "\x2B\x0E\x03\x02\x1D"
 
@@ -300,10 +307,11 @@ typedef struct _x509_cert
     x509_buf issuer_id;         /**< Optional X.509 v2/v3 issuer unique identifier. */
     x509_buf subject_id;        /**< Optional X.509 v2/v3 subject unique identifier. */
     x509_buf v3_ext;            /**< Optional X.509 v3 extensions. Only Basic Contraints are supported at this time. */
+    x509_sequence subject_alt_names;    /**< Optional list of Subject Alternative Names (Only dNSName supported). */
 
     int ext_types;              /**< Bit string containing detected and parsed extensions */
     int ca_istrue;              /**< Optional Basic Constraint extension value: 1 if this certificate belongs to a CA, 0 otherwise. */
-    int max_pathlen;            /**< Optional Basic Constraint extension value: The maximum path length to the root certificate. */
+    int max_pathlen;            /**< Optional Basic Constraint extension value: The maximum path length to the root certificate. Path length is 1 higher than RFC 5280 'meaning', so 1+ */
 
     unsigned char key_usage;    /**< Optional key usage extension value: See the values below */
 
@@ -447,6 +455,22 @@ int x509parse_crt( x509_cert *chain, const unsigned char *buf, size_t buflen );
  *                 if partly successful or a specific X509 or PEM error code
  */
 int x509parse_crtfile( x509_cert *chain, const char *path );
+
+/** \ingroup x509_module */
+/**
+ * \brief          Load one or more certificate files from a path and add them
+ *                 to the chained list. Parses permissively. If some
+ *                 certificates can be parsed, the result is the number
+ *                 of failed certificates it encountered. If none complete
+ *                 correctly, the first error is returned.
+ *
+ * \param chain    points to the start of the chain
+ * \param path     directory / folder to read the certificate files from
+ *
+ * \return         0 if all certificates parsed successfully, a positive number
+ *                 if partly successful or a specific X509 or PEM error code
+ */
+int x509parse_crtpath( x509_cert *chain, const char *path );
 
 /** \ingroup x509_module */
 /**
@@ -617,7 +641,7 @@ int x509parse_crl_info( char *buf, size_t size, const char *prefix,
  */
 const char *x509_oid_get_description( x509_buf *oid );
 
-/*
+/**
  * \brief          Give an OID, return a string version of its OID number.
  *
  * \param buf      Buffer to write to
@@ -648,6 +672,20 @@ int x509parse_time_expired( const x509_time *time );
 /**
  * \brief          Verify the certificate signature
  *
+ *                 The verify callback is a user-supplied callback that
+ *                 can clear / modify / add flags for a certificate. If set,
+ *                 the verification callback is called for each
+ *                 certificate in the chain (from the trust-ca down to the
+ *                 presented crt). The parameters for the callback are:
+ *                 (void *parameter, x509_cert *crt, int certificate_depth,
+ *                 int *flags). With the flags representing current flags for
+ *                 that specific certificate and the certificate depth from
+ *                 the bottom (Peer cert depth = 0).
+ *
+ *                 All flags left after returning from the callback
+ *                 are also returned to the application. The function should
+ *                 return 0 for anything but a fatal error.
+ *
  * \param crt      a certificate to be verified
  * \param trust_ca the trusted CA chain
  * \param ca_crl   the CRL chain for trusted CA's
@@ -664,14 +702,14 @@ int x509parse_time_expired( const x509_time *time );
  *                      BADCERT_REVOKED --
  *                      BADCERT_CN_MISMATCH --
  *                      BADCERT_NOT_TRUSTED
- *
- * \note           TODO: add two arguments, depth and crl
+ *                 or another error in case of a fatal error encountered
+ *                 during the verification process.
  */
 int x509parse_verify( x509_cert *crt,
                       x509_cert *trust_ca,
                       x509_crl *ca_crl,
                       const char *cn, int *flags,
-                      int (*f_vrfy)(void *, x509_cert *, int, int),
+                      int (*f_vrfy)(void *, x509_cert *, int, int *),
                       void *p_vrfy );
 
 /**

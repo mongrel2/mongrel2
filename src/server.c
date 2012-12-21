@@ -62,6 +62,29 @@ static char *ssl_default_dhm_P =
 
 static char *ssl_default_dhm_G = "4";
 
+typedef struct CipherName
+{
+    char *name;
+    int id;
+} CipherName;
+
+static CipherName cipher_table[] =
+{
+    { "SSL_RSA_RC4_128_MD5",          TLS_RSA_WITH_RC4_128_MD5 },
+    { "SSL_RSA_RC4_128_SHA",          TLS_RSA_WITH_RC4_128_SHA },
+    { "SSL_RSA_DES_168_SHA",          TLS_RSA_WITH_3DES_EDE_CBC_SHA },
+    { "SSL_EDH_RSA_DES_168_SHA",      TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA },
+    { "SSL_RSA_AES_128_SHA",          TLS_RSA_WITH_AES_128_CBC_SHA },
+    { "SSL_EDH_RSA_AES_128_SHA",      TLS_DHE_RSA_WITH_AES_128_CBC_SHA },
+    { "SSL_RSA_AES_256_SHA",          TLS_RSA_WITH_AES_256_CBC_SHA },
+    { "SSL_EDH_RSA_AES_256_SHA",      TLS_DHE_RSA_WITH_AES_256_CBC_SHA },
+    { "SSL_RSA_CAMELLIA_128_SHA",     TLS_RSA_WITH_CAMELLIA_128_CBC_SHA },
+    { "SSL_EDH_RSA_CAMELLIA_128_SHA", TLS_DHE_RSA_WITH_CAMELLIA_128_CBC_SHA },
+    { "SSL_RSA_CAMELLIA_256_SHA",     TLS_RSA_WITH_CAMELLIA_256_CBC_SHA },
+    { "SSL_EDH_RSA_CAMELLIA_256_SHA", TLS_DHE_RSA_WITH_CAMELLIA_256_CBC_SHA },
+    { NULL, -1 }
+};
+
 void host_destroy_cb(Route *r, RouteMap *map)
 {
     (void)map;
@@ -75,7 +98,7 @@ void host_destroy_cb(Route *r, RouteMap *map)
 static int Server_load_ciphers(Server *srv, bstring ssl_ciphers_val)
 {
     struct bstrList *ssl_cipher_list = bsplit(ssl_ciphers_val, ' ');
-    int i = 0;
+    int i = 0, n = 0;
     int max_num_ciphers = 0;
     int *ciphers = NULL;
 
@@ -93,30 +116,18 @@ static int Server_load_ciphers(Server *srv, bstring ssl_ciphers_val)
     for(i = 0; i < ssl_cipher_list->qty; i++) {
         bstring cipher = ssl_cipher_list->entry[i];
 
-        if(biseqcstr(cipher, "SSL_RSA_RC4_128_MD5"))
-            ciphers[i] = SSL_RSA_RC4_128_MD5;
-        else if(biseqcstr(cipher, "SSL_RSA_RC4_128_SHA"))
-            ciphers[i] = SSL_RSA_RC4_128_SHA;
-        else if(biseqcstr(cipher, "SSL_RSA_DES_168_SHA"))
-            ciphers[i] = SSL_RSA_DES_168_SHA;
-        else if(biseqcstr(cipher, "SSL_EDH_RSA_DES_168_SHA"))
-            ciphers[i] = SSL_EDH_RSA_DES_168_SHA;
-        else if(biseqcstr(cipher, "SSL_RSA_AES_128_SHA"))
-            ciphers[i] = SSL_RSA_AES_128_SHA;
-        else if(biseqcstr(cipher, "SSL_EDH_RSA_AES_128_SHA"))
-            ciphers[i] = SSL_EDH_RSA_AES_128_SHA;
-        else if(biseqcstr(cipher, "SSL_RSA_AES_256_SHA"))
-            ciphers[i] = SSL_RSA_AES_256_SHA;
-        else if(biseqcstr(cipher, "SSL_EDH_RSA_AES_256_SHA"))
-            ciphers[i] = SSL_EDH_RSA_AES_256_SHA;
-        else if(biseqcstr(cipher, "SSL_RSA_CAMELLIA_128_SHA"))
-            ciphers[i] = SSL_RSA_CAMELLIA_128_SHA;
-        else if(biseqcstr(cipher, "SSL_EDH_RSA_CAMELLIA_128_SHA"))
-            ciphers[i] = SSL_EDH_RSA_CAMELLIA_128_SHA;
-        else if(biseqcstr(cipher, "SSL_RSA_CAMELLIA_256_SHA"))
-            ciphers[i] = SSL_RSA_CAMELLIA_256_SHA;
-        else if(biseqcstr(cipher, "SSL_EDH_RSA_CAMELLIA_256_SHA"))
-            ciphers[i] = SSL_EDH_RSA_CAMELLIA_256_SHA;
+        int id = -1;
+        for(n = 0; cipher_table[n].name != NULL; ++n)
+        {
+            if(biseqcstr(cipher, cipher_table[n].name))
+            {
+                id = cipher_table[n].id;
+                break;
+            }
+        }
+
+        if(id != -1)
+            ciphers[i] = id;
         else
             sentinel("Unrecognized cipher: %s", bdata(cipher));
     }
