@@ -62,6 +62,10 @@
         parser->targets[parser->target_count++] = strtoul(mark, NULL, 10); 
     }
 
+    action extended {
+        parser->extended = 1;
+    }
+
     action targets_begin {
         targets_start = fpc;
     }
@@ -75,7 +79,7 @@
     action done { fbreak; }
 
     Identifier = digit+ ' '?;
-    IdentList = (Identifier >mark %identifier)**;
+    IdentList = ('X ' %extended)? (Identifier >mark %identifier)**;
     Length = digit+;
     UUID = (alpha | digit | '-')+;
     Targets = Length >mark %length ':' IdentList >targets_begin %targets_end ",";
@@ -149,6 +153,7 @@ void HandlerParser_reset(HandlerParser *parser)
         bdestroy(parser->body);
         parser->body = NULL;
     }
+    parser->extended = 0;
 }
 
 void HandlerParser_destroy(HandlerParser *parser)

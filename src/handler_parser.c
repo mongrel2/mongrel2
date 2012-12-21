@@ -44,20 +44,20 @@
 #include "mem/halloc.h"
 
 
-#line 86 "src/handler_parser.rl"
+#line 90 "src/handler_parser.rl"
 
 
 /** Data **/
 
 #line 53 "src/handler_parser.c"
 static const int HandlerParser_start = 1;
-static const int HandlerParser_first_final = 9;
+static const int HandlerParser_first_final = 11;
 static const int HandlerParser_error = 0;
 
 static const int HandlerParser_en_main = 1;
 
 
-#line 90 "src/handler_parser.rl"
+#line 94 "src/handler_parser.rl"
 
 
 /** exec **/
@@ -78,7 +78,7 @@ int HandlerParser_execute(HandlerParser *parser, const char *buffer, size_t len)
 	cs = HandlerParser_start;
 	}
 
-#line 105 "src/handler_parser.rl"
+#line 109 "src/handler_parser.rl"
     
 #line 84 "src/handler_parser.c"
 	{
@@ -158,30 +158,44 @@ st5:
 	p += 1;
 case 5:
 #line 161 "src/handler_parser.c"
-	if ( (*p) == 44 )
-		goto tr7;
+	switch( (*p) ) {
+		case 44: goto tr7;
+		case 88: goto tr9;
+	}
 	if ( 48 <= (*p) && (*p) <= 57 )
 		goto tr8;
 	goto st0;
 tr7:
-#line 65 "src/handler_parser.rl"
+#line 69 "src/handler_parser.rl"
 	{
         targets_start = p;
     }
-#line 69 "src/handler_parser.rl"
+#line 73 "src/handler_parser.rl"
 	{
         check(p-targets_start == target_expected_len, 
                 "Target netstring length is wrong, actual %d expected %d",
                 (int)(p-targets_start), (int)target_expected_len);
     }
 	goto st6;
-tr11:
+tr12:
 #line 60 "src/handler_parser.rl"
 	{
         check(parser->target_count < parser->target_max, "Request contains too many target listeners: %d > %d", parser->target_count, parser->target_max);
         parser->targets[parser->target_count++] = strtoul(mark, NULL, 10); 
     }
-#line 69 "src/handler_parser.rl"
+#line 73 "src/handler_parser.rl"
+	{
+        check(p-targets_start == target_expected_len, 
+                "Target netstring length is wrong, actual %d expected %d",
+                (int)(p-targets_start), (int)target_expected_len);
+    }
+	goto st6;
+tr16:
+#line 65 "src/handler_parser.rl"
+	{
+        parser->extended = 1;
+    }
+#line 73 "src/handler_parser.rl"
 	{
         check(p-targets_start == target_expected_len, 
                 "Target netstring length is wrong, actual %d expected %d",
@@ -191,28 +205,28 @@ tr11:
 st6:
 	p += 1;
 case 6:
-#line 195 "src/handler_parser.c"
+#line 209 "src/handler_parser.c"
 	if ( (*p) == 32 )
-		goto tr9;
+		goto tr10;
 	goto st0;
-tr9:
-#line 75 "src/handler_parser.rl"
-	{ {p++; cs = 9; goto _out;} }
-	goto st9;
-st9:
+tr10:
+#line 79 "src/handler_parser.rl"
+	{ {p++; cs = 11; goto _out;} }
+	goto st11;
+st11:
 	p += 1;
-case 9:
-#line 206 "src/handler_parser.c"
+case 11:
+#line 220 "src/handler_parser.c"
 	goto st0;
 tr8:
-#line 65 "src/handler_parser.rl"
+#line 69 "src/handler_parser.rl"
 	{
         targets_start = p;
     }
 #line 48 "src/handler_parser.rl"
 	{ mark = p; }
 	goto st7;
-tr13:
+tr14:
 #line 60 "src/handler_parser.rl"
 	{
         check(parser->target_count < parser->target_max, "Request contains too many target listeners: %d > %d", parser->target_count, parser->target_max);
@@ -221,13 +235,21 @@ tr13:
 #line 48 "src/handler_parser.rl"
 	{ mark = p; }
 	goto st7;
+tr17:
+#line 65 "src/handler_parser.rl"
+	{
+        parser->extended = 1;
+    }
+#line 48 "src/handler_parser.rl"
+	{ mark = p; }
+	goto st7;
 st7:
 	p += 1;
 case 7:
-#line 228 "src/handler_parser.c"
+#line 250 "src/handler_parser.c"
 	switch( (*p) ) {
 		case 32: goto st8;
-		case 44: goto tr11;
+		case 44: goto tr12;
 	}
 	if ( 48 <= (*p) && (*p) <= 57 )
 		goto st7;
@@ -236,16 +258,37 @@ st8:
 	p += 1;
 case 8:
 	if ( (*p) == 44 )
-		goto tr11;
+		goto tr12;
 	if ( 48 <= (*p) && (*p) <= 57 )
-		goto tr13;
+		goto tr14;
+	goto st0;
+tr9:
+#line 69 "src/handler_parser.rl"
+	{
+        targets_start = p;
+    }
+	goto st9;
+st9:
+	p += 1;
+case 9:
+#line 275 "src/handler_parser.c"
+	if ( (*p) == 32 )
+		goto st10;
+	goto st0;
+st10:
+	p += 1;
+case 10:
+	if ( (*p) == 44 )
+		goto tr16;
+	if ( 48 <= (*p) && (*p) <= 57 )
+		goto tr17;
 	goto st0;
 	}
 
 	_out: {}
 	}
 
-#line 106 "src/handler_parser.rl"
+#line 110 "src/handler_parser.rl"
 
     check(p <= pe, "Buffer overflow after parsing.  Tell Zed that you sent something from a handler that went %ld past the end in the parser.", 
             (long int)(pe - p));
@@ -253,15 +296,15 @@ case 8:
     parser->body = blk2bstr(p, pe - p);
 
     if ( cs == 
-#line 257 "src/handler_parser.c"
+#line 300 "src/handler_parser.c"
 0
-#line 112 "src/handler_parser.rl"
+#line 116 "src/handler_parser.rl"
  ) {
         return -1;
     } else if ( cs >= 
-#line 263 "src/handler_parser.c"
-9
-#line 114 "src/handler_parser.rl"
+#line 306 "src/handler_parser.c"
+11
+#line 118 "src/handler_parser.rl"
  ) {
         return 1;
     } else {
@@ -300,6 +343,7 @@ void HandlerParser_reset(HandlerParser *parser)
         bdestroy(parser->body);
         parser->body = NULL;
     }
+    parser->extended = 0;
 }
 
 void HandlerParser_destroy(HandlerParser *parser)

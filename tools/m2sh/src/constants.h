@@ -6,6 +6,7 @@ extern struct tagbstring CONFIG_SCHEMA;
 extern struct tagbstring SERVER_SQL;
 extern struct tagbstring HOST_SQL;
 extern struct tagbstring FILTER_SQL;
+extern struct tagbstring XREQUEST_SQL;
 extern struct tagbstring SETTING_SQL;
 extern struct tagbstring MIMETYPE_SQL;
 extern struct tagbstring DIR_SQL;

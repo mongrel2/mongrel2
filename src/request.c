@@ -47,6 +47,7 @@
 #include "request.h"
 #include "tnetstrings.h"
 #include "websocket.h"
+#include "connection.h"
 
 int MAX_HEADER_COUNT=0;
 int MAX_DUPE_HEADERS=5;
@@ -247,6 +248,7 @@ static inline void Request_nuke_parts(Request *req)
     req->parser.json_sent = 0;
     req->parser.xml_sent = 0;
     req->ws_flags=0;
+    bdestroy(req->new_header); req->new_header=NULL;
 }
 
 void Request_destroy(Request *req)
@@ -373,7 +375,7 @@ static inline bstring request_determine_method(Request *req)
     }
 }
 
-bstring Request_to_tnetstring(Request *req, bstring uuid, int fd, const char *buf, size_t len)
+bstring Request_to_tnetstring(Request *req, bstring uuid, int fd, const char *buf, size_t len, Connection *conn)
 {
     tns_outbuf outbuf = {.buffer = NULL};
     bstring method = request_determine_method(req);
@@ -394,6 +396,12 @@ bstring Request_to_tnetstring(Request *req, bstring uuid, int fd, const char *bu
     if(req->query_string) tns_render_hash_pair(&outbuf, &HTTP_QUERY, req->query_string);
     if(req->fragment) tns_render_hash_pair(&outbuf, &HTTP_FRAGMENT, req->fragment);
     if(req->pattern) tns_render_hash_pair(&outbuf, &HTTP_PATTERN, req->pattern);
+    /* TODO distinguish websocket with ws and wss? */
+    if(conn->iob->use_ssl) {
+        tns_render_hash_pair(&outbuf, &HTTP_URL_SCHEME, &HTTP_HTTPS);
+    } else {
+        tns_render_hash_pair(&outbuf, &HTTP_URL_SCHEME, &HTTP_HTTP);
+    }
 
     tns_render_hash_pair(&outbuf, &HTTP_METHOD, method);
 
@@ -411,7 +419,7 @@ error:
     return NULL;
 }
 
-bstring Request_to_payload(Request *req, bstring uuid, int fd, const char *buf, size_t len)
+bstring Request_to_payload(Request *req, bstring uuid, int fd, const char *buf, size_t len, Connection *conn)
 {
     bstring headers = NULL;
     bstring result = NULL;
@@ -475,6 +483,13 @@ bstring Request_to_payload(Request *req, bstring uuid, int fd, const char *buf, 
     B(headers, &HTTP_QUERY, req->query_string);
     B(headers, &HTTP_FRAGMENT, req->fragment);
     B(headers, &HTTP_PATTERN, req->pattern);
+
+    /* TODO websocket "ws" and "wss"? */
+    if(conn->iob->use_ssl) {
+        B(headers, &HTTP_URL_SCHEME, &HTTP_HTTPS);
+    } else {
+        B(headers, &HTTP_URL_SCHEME, &HTTP_HTTP);
+    }
 
     bconchar(headers, '}');
 

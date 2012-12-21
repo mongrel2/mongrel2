@@ -5,7 +5,7 @@
  *
  * \author Adriaan de Jong <dejong@fox-it.com>
  *
- *  Copyright (C) 2006-2011, Brainspark B.V.
+ *  Copyright (C) 2006-2012, Brainspark B.V.
  *
  *  This file is part of PolarSSL (http://www.polarssl.org)
  *  Lead Maintainer: Paul Bakker <polarssl_maintainer at polarssl.org>
@@ -83,6 +83,22 @@ extern const cipher_info_t des_ede_cbc_info;
 extern const cipher_info_t des_ede3_cbc_info;
 
 #endif /* defined(POLARSSL_DES_C) */
+
+#if defined(POLARSSL_BLOWFISH_C)
+extern const cipher_info_t blowfish_cbc_info;
+
+#if defined(POLARSSL_CIPHER_MODE_CFB)
+extern const cipher_info_t blowfish_cfb64_info;
+#endif /* POLARSSL_CIPHER_MODE_CFB */
+
+#if defined(POLARSSL_CIPHER_MODE_CTR)
+extern const cipher_info_t blowfish_ctr_info;
+#endif /* POLARSSL_CIPHER_MODE_CTR */
+#endif /* defined(POLARSSL_BLOWFISH_C) */
+
+#if defined(POLARSSL_CIPHER_NULL_CIPHER)
+extern const cipher_info_t null_cipher_info;
+#endif /* defined(POLARSSL_CIPHER_NULL_CIPHER) */
 
 #ifdef __cplusplus
 }

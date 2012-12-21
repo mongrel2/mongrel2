@@ -1,15 +1,15 @@
 \chapter{Installing}
 
 Mongrel2 is designed to build on most modern Unix systems, specifically Linux
-and Mac OSX.  It is written in C (\emph{not Ruby}) and uses fairly vanilla
+and Mac~OSX\@.  It is written in C (\emph{not Ruby}) and uses fairly vanilla
 C and standard libraries, except for one piece that implements the internal
 coroutines.  Other than this, you should be able to compile and install Mongrel2
 with nothing more than \shell{make all install} after you've installed
 all the dependencies.
 
 Now, if when I said dependencies you started to groan at having to install
-software to use my software, well my friend, welcome to the future.  You
-said you don't want people reinventing the wheel, right?  Great, that means
+software to use my software. Well, my friend, welcome to the future.  You
+said you don't want people reinventing the wheel, right?  Great. That means
 you need to install software for my software to work.  It's either that or
 wait 10 years for me to build everything from scratch like some arrogant
 jackass.
@@ -40,22 +40,23 @@ Debian and SuSE systems, then you'll have to go and figure out
 how to install it.
 
 Some distributions (like Ubuntu) split ``dev'' and ``runtime'' packages.
-In order to build mongrel2 on these distros, you must install libsqlite3-dev:
-this package contains sqlite3.h, which Mongrel2 needs during compilation.
+In order to build mongrel2 on these distros, you must install both.
+The package libsqlite3-dev contains sqlite3.h, which Mongrel2 needs during
+compilation, the package sqlite3 is needed for the unit tests.
 
-For the lazy, the command is: \shell{sudo apt-get install libsqlite3-dev}
-
-Other pieces known to be missing on ubuntu-like systems: 
+Other pieces known to be missing on ubuntu-like systems:
 
 \begin{itemize}
 \item uuid-runtime: Needed by m2sh uuid command
-\item You may need to run: \shell{sudo ldconfig -v} 
+\item You may need to run: \shell{sudo ldconfig -v}
 \end{itemize}
 
+For the lazy, the command is: \shell{sudo apt-get install uuid-runtime sqlite3 libsqlite3-dev}
 
-\section{Building Mongrel2}
 
-If everything went well you should be able to grab the Mongrel2 source
+\section{Getting Mongrel2}
+
+If everything went well, you should be able to grab the Mongrel2 source
 and try building it.  There's two ways you can get the source code to
 Mongrel2:
 
@@ -63,6 +64,7 @@ Mongrel2:
 \item Install \href{http://git-scm.org}{Git} and check out the source.
 \item Grab the source .zip or tar.bz2 release and install it from there.
 \end{enumerate}
+
 
 \subsection{Using the .tar.bz2 File}
 
@@ -88,6 +90,10 @@ Once you have git you can then get the Mongrel2 source and open it up:
 Make sure you do this in order (just like with every set of instructions you follow)
 or else you'll get errors.
 
+In order to stay up-to-date with all the changes, remember to periodically
+update your checkout (make sure you're in the latest version before reporting
+a bug!). It's as simple as \shell{git pull}. And remember to rebuild and install
+afterwards!
 
 \section{Building And Installing}
 
@@ -97,7 +103,7 @@ one command:  \shell{make all install}
 There is no \shell{./configure} for Mongrel2 since we avoid too many OS specific
 differences or shield those away with good feature checks in the code.
 
-If you want to install to a different location than the default  ``/usr/local``,
+If you want to install to a different location than the default  \file{/usr/local},
 use \shell{PREFIX=/path/to/somewhere make all install} instead.
 
 The end result of this should be:
@@ -110,13 +116,13 @@ The end result of this should be:
 \end{enumerate}
 
 If any of these stages fail, then you can simply try to fix them and then
-run:  \shell{make clean all \&\& sudo make install} which will do everything all over again.
+run:  \shell{make clean all \&\& sudo make install}, which will do everything all over again.
 
 \subsection{Other platforms than Linux}
 
-If you aren't running Linux chances are good this standard procedure will not work for you.
+If you aren't running Linux, chances are good this standard procedure will not work for you.
 
-The ``Makefile`` lists several targets for various platforms, as of writing this there are:
+The \file{Makefile} lists several targets for various platforms. As of writing this, there are:
 
 \begin{itemize}
 \item freebsd
@@ -125,7 +131,7 @@ The ``Makefile`` lists several targets for various platforms, as of writing this
 \item macports
 \end{itemize}
 
-So for example you would probably install zeromq and sqlite3 as ports and then compile it like so:
+So, for example, you would probably install zeromq and sqlite3 as ports and then compile it like so:
 
 \begin{code}{Installing Mongrel2 on FreeBSD}
 << d['inputs/install_freebsd.sh|pyg|l'] >>
@@ -141,13 +147,8 @@ use to try it out:
 << d['inputs/first_mongrel2_run.sh|pyg|l'] >>
 \end{code}
 
-That's it.  Just hit CTRL-c for now and we'll get into playing with this
+That's it!  Just hit CTRL-c for now and we'll get into playing with this
 setup later.
-
-\section{Upgrading from trunk}
-\begin{code}{Update your checkout}
-<< d['inputs/updating_your_checkout.sh|pyg|l'] >>
-\end{code}
 
 
 

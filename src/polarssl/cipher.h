@@ -5,7 +5,7 @@
  *
  * \author Adriaan de Jong <dejong@fox-it.com>
  *
- *  Copyright (C) 2006-2011, Brainspark B.V.
+ *  Copyright (C) 2006-2012, Brainspark B.V.
  *
  *  This file is part of PolarSSL (http://www.polarssl.org)
  *  Lead Maintainer: Paul Bakker <polarssl_maintainer at polarssl.org>
@@ -48,14 +48,17 @@
 
 typedef enum {
     POLARSSL_CIPHER_ID_NONE = 0,
+    POLARSSL_CIPHER_ID_NULL,
     POLARSSL_CIPHER_ID_AES,
     POLARSSL_CIPHER_ID_DES,
     POLARSSL_CIPHER_ID_3DES,
     POLARSSL_CIPHER_ID_CAMELLIA,
+    POLARSSL_CIPHER_ID_BLOWFISH,
 } cipher_id_t;
 
 typedef enum {
     POLARSSL_CIPHER_NONE = 0,
+    POLARSSL_CIPHER_NULL,
     POLARSSL_CIPHER_AES_128_CBC,
     POLARSSL_CIPHER_AES_192_CBC,
     POLARSSL_CIPHER_AES_256_CBC,
@@ -76,13 +79,17 @@ typedef enum {
     POLARSSL_CIPHER_CAMELLIA_256_CTR,
     POLARSSL_CIPHER_DES_CBC,
     POLARSSL_CIPHER_DES_EDE_CBC,
-    POLARSSL_CIPHER_DES_EDE3_CBC
+    POLARSSL_CIPHER_DES_EDE3_CBC,
+    POLARSSL_CIPHER_BLOWFISH_CBC,
+    POLARSSL_CIPHER_BLOWFISH_CFB64,
+    POLARSSL_CIPHER_BLOWFISH_CTR,
 } cipher_type_t;
 
 typedef enum {
     POLARSSL_MODE_NONE = 0,
+    POLARSSL_MODE_NULL,
     POLARSSL_MODE_CBC,
-    POLARSSL_MODE_CFB128,
+    POLARSSL_MODE_CFB,
     POLARSSL_MODE_OFB,
     POLARSSL_MODE_CTR,
 } cipher_mode_t;
@@ -118,8 +125,8 @@ typedef struct {
     int (*cbc_func)( void *ctx, operation_t mode, size_t length, unsigned char *iv,
             const unsigned char *input, unsigned char *output );
 
-    /** Encrypt using CFB128 */
-    int (*cfb128_func)( void *ctx, operation_t mode, size_t length, size_t *iv_off,
+    /** Encrypt using CFB (Full length) */
+    int (*cfb_func)( void *ctx, operation_t mode, size_t length, size_t *iv_off,
             unsigned char *iv, const unsigned char *input, unsigned char *output );
 
     /** Encrypt using CTR */
@@ -313,7 +320,7 @@ static inline int cipher_get_iv_size( const cipher_context_t *ctx )
 static inline cipher_type_t cipher_get_type( const cipher_context_t *ctx )
 {
     if( NULL == ctx || NULL == ctx->cipher_info )
-        return 0;
+        return POLARSSL_CIPHER_NONE;
 
     return ctx->cipher_info->type;
 }

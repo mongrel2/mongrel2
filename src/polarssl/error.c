@@ -1,7 +1,7 @@
 /*
  *  Error message information
  *
- *  Copyright (C) 2006-2010, Brainspark B.V.
+ *  Copyright (C) 2006-2012, Brainspark B.V.
  *
  *  This file is part of PolarSSL (http://www.polarssl.org)
  *  Lead Maintainer: Paul Bakker <polarssl_maintainer at polarssl.org>
@@ -39,6 +39,10 @@
 #include "polarssl/bignum.h"
 #endif
 
+#if defined(POLARSSL_BLOWFISH_C)
+#include "polarssl/blowfish.h"
+#endif
+
 #if defined(POLARSSL_CAMELLIA_C)
 #include "polarssl/camellia.h"
 #endif
@@ -63,6 +67,10 @@
 #include "polarssl/entropy.h"
 #endif
 
+#if defined(POLARSSL_GCM_C)
+#include "polarssl/gcm.h"
+#endif
+
 #if defined(POLARSSL_MD_C)
 #include "polarssl/md.h"
 #endif
@@ -85,6 +93,10 @@
 
 #if defined(POLARSSL_PADLOCK_C)
 #include "polarssl/padlock.h"
+#endif
+
+#if defined(POLARSSL_PBKDF2_C)
+#include "polarssl/pbkdf2.h"
 #endif
 
 #if defined(POLARSSL_PEM_C)
@@ -165,7 +177,7 @@ void error_strerror( int ret, char *buf, size_t buflen )
         if( use_ret == -(POLARSSL_ERR_DHM_READ_PUBLIC_FAILED) )
             snprintf( buf, buflen, "DHM - Reading of the public values failed" );
         if( use_ret == -(POLARSSL_ERR_DHM_MAKE_PUBLIC_FAILED) )
-            snprintf( buf, buflen, "DHM - Makeing of the public value failed" );
+            snprintf( buf, buflen, "DHM - Making of the public value failed" );
         if( use_ret == -(POLARSSL_ERR_DHM_CALC_SECRET_FAILED) )
             snprintf( buf, buflen, "DHM - Calculation of the DHM secret failed" );
 #endif /* POLARSSL_DHM_C */
@@ -251,7 +263,10 @@ void error_strerror( int ret, char *buf, size_t buflen )
         if( use_ret == -(POLARSSL_ERR_SSL_UNEXPECTED_MESSAGE) )
             snprintf( buf, buflen, "SSL - An unexpected message was received from our peer" );
         if( use_ret == -(POLARSSL_ERR_SSL_FATAL_ALERT_MESSAGE) )
+        {
             snprintf( buf, buflen, "SSL - A fatal alert message was received from our peer" );
+            return;
+        }
         if( use_ret == -(POLARSSL_ERR_SSL_PEER_VERIFY_FAILED) )
             snprintf( buf, buflen, "SSL - Verification of our peer failed" );
         if( use_ret == -(POLARSSL_ERR_SSL_PEER_CLOSE_NOTIFY) )
@@ -282,6 +297,14 @@ void error_strerror( int ret, char *buf, size_t buflen )
             snprintf( buf, buflen, "SSL - Processing of the Finished handshake message failed" );
         if( use_ret == -(POLARSSL_ERR_SSL_MALLOC_FAILED) )
             snprintf( buf, buflen, "SSL - Memory allocation failed" );
+        if( use_ret == -(POLARSSL_ERR_SSL_HW_ACCEL_FAILED) )
+            snprintf( buf, buflen, "SSL - Hardware acceleration function returned with error" );
+        if( use_ret == -(POLARSSL_ERR_SSL_HW_ACCEL_FALLTHROUGH) )
+            snprintf( buf, buflen, "SSL - Hardware acceleration function skipped / left alone data" );
+        if( use_ret == -(POLARSSL_ERR_SSL_COMPRESSION_FAILED) )
+            snprintf( buf, buflen, "SSL - Processing of the compression / decompression failed" );
+        if( use_ret == -(POLARSSL_ERR_SSL_BAD_HS_PROTOCOL_VERSION) )
+            snprintf( buf, buflen, "SSL - Handshake protocol not within min/max boundaries" );
 #endif /* POLARSSL_SSL_TLS_C */
 
 #if defined(POLARSSL_X509_PARSE_C)
@@ -378,6 +401,8 @@ void error_strerror( int ret, char *buf, size_t buflen )
         snprintf( buf, buflen, "ASN1 - Data is invalid. (not used)" );
     if( use_ret == -(POLARSSL_ERR_ASN1_MALLOC_FAILED) )
         snprintf( buf, buflen, "ASN1 - Memory allocation failed" );
+    if( use_ret == -(POLARSSL_ERR_ASN1_BUF_TOO_SMALL) )
+        snprintf( buf, buflen, "ASN1 - Buffer too small when writing ASN.1 data structure" );
 #endif /* POLARSSL_ASN1_PARSE_C */
 
 #if defined(POLARSSL_BASE64_C)
@@ -405,6 +430,13 @@ void error_strerror( int ret, char *buf, size_t buflen )
     if( use_ret == -(POLARSSL_ERR_MPI_MALLOC_FAILED) )
         snprintf( buf, buflen, "BIGNUM - Memory allocation failed" );
 #endif /* POLARSSL_BIGNUM_C */
+
+#if defined(POLARSSL_BLOWFISH_C)
+    if( use_ret == -(POLARSSL_ERR_BLOWFISH_INVALID_KEY_LENGTH) )
+        snprintf( buf, buflen, "BLOWFISH - Invalid key length" );
+    if( use_ret == -(POLARSSL_ERR_BLOWFISH_INVALID_INPUT_LENGTH) )
+        snprintf( buf, buflen, "BLOWFISH - Invalid data input length" );
+#endif /* POLARSSL_BLOWFISH_C */
 
 #if defined(POLARSSL_CAMELLIA_C)
     if( use_ret == -(POLARSSL_ERR_CAMELLIA_INVALID_KEY_LENGTH) )
@@ -437,6 +469,13 @@ void error_strerror( int ret, char *buf, size_t buflen )
     if( use_ret == -(POLARSSL_ERR_ENTROPY_NO_SOURCES_DEFINED) )
         snprintf( buf, buflen, "ENTROPY - No sources have been added to poll" );
 #endif /* POLARSSL_ENTROPY_C */
+
+#if defined(POLARSSL_GCM_C)
+    if( use_ret == -(POLARSSL_ERR_GCM_AUTH_FAILED) )
+        snprintf( buf, buflen, "GCM - Authenticated decryption failed" );
+    if( use_ret == -(POLARSSL_ERR_GCM_BAD_INPUT) )
+        snprintf( buf, buflen, "GCM - Bad input parameters to function" );
+#endif /* POLARSSL_GCM_C */
 
 #if defined(POLARSSL_MD2_C)
     if( use_ret == -(POLARSSL_ERR_MD2_FILE_IO_ERROR) )
@@ -483,6 +522,11 @@ void error_strerror( int ret, char *buf, size_t buflen )
         snprintf( buf, buflen, "PADLOCK - Input data should be aligned" );
 #endif /* POLARSSL_PADLOCK_C */
 
+#if defined(POLARSSL_PBKDF2_C)
+    if( use_ret == -(POLARSSL_ERR_PBKDF2_BAD_INPUT_DATA) )
+        snprintf( buf, buflen, "PBKDF2 - Bad input parameters to function" );
+#endif /* POLARSSL_PBKDF2_C */
+
 #if defined(POLARSSL_SHA1_C)
     if( use_ret == -(POLARSSL_ERR_SHA1_FILE_IO_ERROR) )
         snprintf( buf, buflen, "SHA1 - Read/write error in file" );
@@ -509,4 +553,4 @@ void error_strerror( int ret, char *buf, size_t buflen )
     snprintf( buf, buflen, "UNKNOWN ERROR CODE (%04X)", use_ret );
 }
 
-#endif /* POLARSSL_VERBOSE_ERROR */
+#endif /* POLARSSL_ERROR_C */

@@ -140,10 +140,6 @@ static int netgetsocket(int istcp, char *server, int port,
                                 istcp, server, port, 
                                 is_active_open);
 
-    proto = istcp ? SOCK_STREAM : SOCK_DGRAM;
-
-    hints.ai_socktype = proto;
-
     /* BUG: the lookup is blocking. */
     snprintf(service, sizeof(service), "%d", port);
     service[sizeof(service) - 1] = '\0'; // make sure it is terminated

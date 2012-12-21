@@ -33,7 +33,6 @@
  */
 
 #define _XOPEN_SOURCE 500
-#define _FILE_OFFSET_BITS 64
 
 #include <stdlib.h>
 #include <assert.h>
@@ -95,7 +94,7 @@ static ssize_t file_recv(IOBuf *iob, char *buffer, int len)
 
 static ssize_t plain_stream_file(IOBuf *iob, int fd, off_t len)
 {
-    off_t sent = 0;
+    off_t sent;
     off_t total = 0;
     off_t offset = 0;
     off_t block_size = MAX_SEND_BUFFER;
@@ -155,7 +154,7 @@ error:
 
 static ssize_t ssl_send(IOBuf *iob, char *buffer, int len)
 {
-    int sent = 0;
+    int sent;
     int total = 0;
 
     check(iob->use_ssl, "IOBuf not set up to use ssl");
@@ -165,7 +164,7 @@ static ssize_t ssl_send(IOBuf *iob, char *buffer, int len)
         check(rcode == 0, "SSL handshake failed: %d", rcode);
     }
 
-    for(sent = 0; len > 0; buffer += sent, len -= sent, total += sent) {
+    for(; len > 0; buffer += sent, len -= sent, total += sent) {
         sent = ssl_write(&iob->ssl, (const unsigned char*) buffer, len);
 
         check(sent != -1, "Error sending SSL data.");
@@ -271,35 +270,31 @@ error:
 }
 
 
-static int simple_get_session( ssl_context *ssl )
+static int simple_get_cache( void *p_ssl, ssl_session *ssn )
 {
-    time_t t = THE_CURRENT_TIME_IS;
+    ssl_context *ssl = (ssl_context *) p_ssl;
     int i = 0;
 
     check(setup_ssl_session_cache() == 0, "Failed to initialize SSL session cache.");
 
-    if( ssl->resume == 0 ) return 1;
+    if( ssl->handshake->resume == 0 ) return 1;
     ssl_session *cur = NULL;
 
     for(i = 0; i < darray_end(SSL_SESSION_CACHE); i++) {
         cur = darray_get(SSL_SESSION_CACHE, i);
 
-        if( ssl->timeout != 0 && t - cur->start > ssl->timeout ) {
-            continue;
-        }
-
-        if( ssl->session->ciphersuite != cur->ciphersuite ||
-            ssl->session->length != cur->length ) 
+        if( ssn->ciphersuite != cur->ciphersuite ||
+            ssn->length != cur->length ) 
         {
             continue;
         }
 
-        if( memcmp( ssl->session->id, cur->id, cur->length ) != 0 ) {
+        if( memcmp( ssn->id, cur->id, cur->length ) != 0 ) {
             continue;
         }
 
         // TODO: odd, why 48? this is from polarssl
-        memcpy( ssl->session->master, cur->master, 48 );
+        memcpy( ssn->master, cur->master, 48 );
         return 0;
     }
 
@@ -307,9 +302,9 @@ error: // fallthrough
     return 1;
 }
 
-static int simple_set_session( ssl_context *ssl )
+static int simple_set_cache( void *p_ssl, const ssl_session *ssn )
 {
-    time_t t = THE_CURRENT_TIME_IS;
+    ssl_context *ssl = (ssl_context *) p_ssl;
     int i = 0;
     ssl_session *cur = NULL;
     int make_new = 1;
@@ -318,12 +313,7 @@ static int simple_set_session( ssl_context *ssl )
     for(i = 0; i < darray_end(SSL_SESSION_CACHE); i++) {
         cur = darray_get(SSL_SESSION_CACHE, i);
 
-        if( ssl->timeout != 0 && t - cur->start > ssl->timeout ) {
-            make_new = 0;
-            break; /* expired, reuse this slot */
-        }
-
-        if( memcmp( ssl->session->id, cur->id, cur->length ) == 0 ) {
+        if( memcmp( ssn->id, cur->id, cur->length ) == 0 ) {
             make_new = 0;
             break; /* client reconnected */
         }
@@ -335,7 +325,8 @@ static int simple_set_session( ssl_context *ssl )
         darray_push(SSL_SESSION_CACHE, cur);
     }
 
-    *cur = *ssl->session;
+    *cur = *ssn;
+    cur->peer_cert = NULL; // ssl.h says to unset or copy, so well unset
 
     return 0;
 error:
@@ -366,11 +357,11 @@ static inline int iobuf_ssl_setup(IOBuf *buf)
 
     ssl_set_bio(&buf->ssl, ssl_fdrecv_wrapper, buf, 
                 ssl_fdsend_wrapper, buf);
-    ssl_set_session(&buf->ssl, 1, 0, &buf->ssn);
-
-    ssl_set_scb(&buf->ssl, simple_get_session, simple_set_session);
 
     memset(&buf->ssn, 0, sizeof(buf->ssn));
+    ssl_set_session(&buf->ssl, &buf->ssn);
+
+    ssl_set_session_cache(&buf->ssl, simple_get_cache, &buf->ssl, simple_set_cache, &buf->ssl);
 
     return 0;
 error:
@@ -604,7 +595,7 @@ char *IOBuf_read_all(IOBuf *buf, int len, int retries)
         if(nread == len) {
             break;
         } else {
-            check(!IOBuf_closed(buf), "Socket closed during IOBuf_read_all.")
+            check(!IOBuf_closed(buf), "Socket closed during IOBuf_read_all.");
             fdwait(buf->fd, 'r');
         }
     }

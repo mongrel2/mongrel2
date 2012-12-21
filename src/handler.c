@@ -42,6 +42,8 @@
 #include <connection.h>
 #include <assert.h>
 #include <register.h>
+#include "tnetstrings.h"
+#include "xrequest.h"
 
 #include "setting.h"
 
@@ -134,6 +136,31 @@ static inline int deliver_payload(int raw, int fd, Connection *conn, bstring pay
     return 0;
 error:
     return -1;
+}
+
+static inline void handler_process_extended_request(int fd, Connection *conn, bstring payload)
+{
+    char *x;
+    tns_value_t *data = NULL;
+    darray_t *l = NULL;
+    
+    data = tns_parse(bdata(payload),blength(payload),&x);
+
+    check((x-bdata(payload))==blength(payload), "Invalid extended response: extra data after tnetstring.");
+    check(data->type==tns_tag_list, "Invalid extended response: not a list.");
+    l = data->value.list;
+    check(darray_end(l)==2, "Invalid extended response: odd number of elements in list.");
+    tns_value_t *key=darray_get(l,0);
+    check(key->type==tns_tag_string, "Invalid extended response: key is not a string");
+    check(key->value.string != NULL,, "Invalid extended response: key is NULL");
+    check (0 == dispatch_extended_request(conn, key->value.string, data),
+            "Extended request dispatch returned non-zero: %s",bdata(key->value.string));
+
+    return;
+error:
+    tns_value_destroy(data);
+    Register_disconnect(fd); // return ignored
+    return;
 }
 
 static inline void handler_process_request(Handler *handler, int id, int fd,
@@ -232,7 +259,11 @@ void Handler_task(void *v)
 
                 // don't bother calling process request if there's nothing to handle
                 if(conn && fd >= 0) {
-                    handler_process_request(handler, id, fd, conn, parser->body);
+                    if(parser->extended) {
+                        handler_process_extended_request(fd, conn, parser->body);
+                    } else {
+                        handler_process_request(handler, id, fd, conn, parser->body);
+                    }
                 } else {
                     // TODO: I believe we need to notify the connection that it is dead too
                     Handler_notify_leave(handler, id);

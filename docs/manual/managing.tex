@@ -4,7 +4,7 @@ Mongrel2 is designed to be easy to deploy and \emph{automate} the deployment.
 This is why it uses \href{http://www.sqlite.org/}{SQLite} to store the configuration,
 but m2sh as an interface to creating the configuration.  Doing this lets
 you access the configuration using any language that works for you, augment it,
-alter it, migrate it and automate it.
+alter it, migrate it, and automate it.
 
 In this chapter, I'm going to show you how to make a basic configuration using
 m2sh and all the commands that are available.  You'll learn how the configuration
@@ -19,12 +19,12 @@ but with SQL as their only way to access it.  They thought that they'd be stuck 
 configurations with SQL; that SQL couldn't possibly configure a web server.
 
 They were wrong on many levels.  Nobody was \emph{ever} going to make \emph{anyone} use
-SQL.  That was repeated over and over but, again, people don't read and love spreading
-FUD.  The SQLite config database is nothing like the Windows Registry.  No other web
+SQL\@.  That was repeated over and over but, again, people don't read and love spreading
+FUD\@.  The SQLite config database is nothing like the Windows Registry.  No other web
 server really uses a true hierarchy; they just cram a relational model into a weirdo
 configuration format.  The real goal was to make a web server that was easy to manage from
 \emph{any} language, and then give people a nice tool to get their job done without
-having to ever touch SQL.  \emph{EVER!}
+having to ever touch SQL\@.  \emph{EVER!}
 
 In the end, what we got despite all this fear mongering is a bad ass configuration
 tool and a design that is simple, elegant, and works fantastically.  If you read that
@@ -85,10 +85,14 @@ After you have that, do this:
 
 At this point, you should have seen lists of servers and hosts, seen that mongrel2 is
 not running, and then started it.  You can find out about all the commands and
-get help for them with \shell{m2sh help} or \shell{ms2h help command}.
+get help for them with \shell{m2sh help} or \shell{ms2h help --on command}.
 
-You can now try doing some simple starting, stopping and reloading Using
-sudo (make sure you CTRL-c to exit from the previous start command):
+You can now try doing some simple starting, stopping and reloading using
+sudo (make sure you CTRL-c to exit from the previous \shell{start} command):
+
+\begin{code}{Starting, Stopping, Reloading}
+<< d['inputs/starting_stopping_reloading.sh|pyg|l'] >>
+\end{code}
 
 \begin{aside}{Warning: contents may be broken}
 If \shell{m2sh start} runs fine, but \shell{m2sh start -sudo}
@@ -97,11 +101,6 @@ fails, you may need to link \file{/proc} in your chroot, using
 installing ZeroMQ from source, if you'd rather avoid putting your \file{/proc}
 where it might get seen.
 \end{aside}
-
-
-\begin{code}{Starting, Stopping, Reloading}
-<< d['inputs/starting_stopping_reloading.sh|pyg|l'] >>
-\end{code}
 
 Awesome, right?  Using just this one little management tool you
 are able to completely manage a Mongrel2 instance without having to hack
@@ -118,7 +117,7 @@ what's going on.  Here's an explanation of what's going on behind the scenes:
 \item When you did \shell{m2sh start} with the \shell{-sudo} option, it actually runs
     \shell{sudo mongrel2 tests/config.sqlite localhost} to start the server.
 \item Mongrel2 is now running in the background as a daemon process, just like a regular server.
-    However, what it did was chroot to the current directory and then drop privileges so that
+    However, what it did was \shell{chroot} to the current directory and then drop privileges so that
     they match the owner of that directory (you).  Use \shell{ps aux} to take a look.
 \item With Mongrel2 running, you can look in the \file{logs/error.log} file to see what it said.  It should
     be a bunch of debug logging, but check out the messages: nice and detailed.
@@ -142,7 +141,7 @@ files.  You can now try building your own configuration that matches this one or
 To configure a new config database you'll write a file that looks a lot like
 a configuration file.  It looks like a Python file, because it comes from the
 first m2sh we wrote in Python (living in \file{examples/python}), but now it's
-written in C.  Even though it was rewritten, we managed to keep the same format
+written in C\@.  Even though it was rewritten, we managed to keep the same format
 ---and even make it a little easier by making commas optional in most places.
 
 First you load your configuration into a fresh database using \shell{m2sh
@@ -156,7 +155,7 @@ load}.  For our example, we'll use the example configuration from
 \end{code}
 
 If you aren't familiar with Python, then this code might look freaky, but it's really
-simple.  We'll get into how its structured in a second, but to load this file
+simple.  We'll get into how it's structured in a second, but to load this file
 we would just do this:
 
 \begin{code}{Loading The Simple Config}
@@ -218,15 +217,15 @@ and general server specific deployment gear.
 
 \begin{description}
 \item[uuid] A UUID is used to make sure that each deployed server is unique in your infrastructure.
-    You could easily use any string that's letters, numbers, or - characters.
+    You could easily use any string that's letters, numbers, or \verb|-| characters.
 \item[chroot] This is the directory that Mongrel2 should chroot to and drop privileges.
 \item[access\_log] The access log file \emph{relative to the chroot}.  Usually starts with a `/'.  Make sure
     you configure your server so that this and other files aren't accessible, or make this owned by root.
-\item[error\_log] The error log file, just like access\_log.
+\item[error\_log] The error log file, just like \ident{access\_log}.
 \item[pid\_file] Like the access log, where within the chroot directory is the pid file stored.
 \item[default\_host] The server has a bunch of hosts listed, but it needs to know what the default host is.  This is also
     used as a convenient way to refer to this Server.
-\item[bind\_addr] The IP address to bind to, default is 0.0.0.0.
+\item[bind\_addr] The IP address to bind to. By default, it's ``0.0.0.0''.
 \item[port] The port the server should listen on for new connections.
 \end{description}
 
@@ -240,9 +239,9 @@ configurations the \ident{Server} contains.
 
 \begin{description}
 \item[name] The name that you use to talk about this Host in the server configuration.
-\item[matching] This is a pattern that's used to match incoming Host headers for routing purposes.
-\item[server] If you want to set the server separately you can use this attribute.
-\item[maintenance] This will a setting for the future that will let you have Mongrel2 throw up a maintenance page
+\item[matching] This is a pattern that's used to match incoming \ident{Host:} headers for routing purposes.
+\item[server] If you want to set the server separately, you can use this attribute.
+\item[maintenance] This will be a setting for the future that will let you have Mongrel2 throw up a maintenance page
     for this host.
 \item[routes] This is a dict (hashmap) of the URL patterns mapped to the targets that should be run.
 \end{description}
@@ -251,11 +250,11 @@ configurations the \ident{Server} contains.
 \subsection{Route}
 
 The \ident{Route} is the workhorse of the whole system.  It uses some very fancy but still simple
-code in Mongrel2 to translate \ident{Host:} headers to \ident{Hosts} and URL paths to \ident{Handlers},
-\ident{Dirs}, and \ident{Proxies}.
+code in Mongrel2 to translate \ident{Host:} headers to \ident{Hosts} and URL paths to
+\ident{Handlers}, \ident{Dirs}, and \ident{Proxies}.
 
 \begin{description}
-\item[path] This is the path \emph{pattern} that matches a route.  The pattern uses the Mongrel2 pattern langauge
+\item[path] This is the path \emph{pattern} that matches a route.  The pattern uses the Mongrel2 pattern language,
     which is a reduced version of the Lua pattern matching system.
 \item[reversed] Determines if this pattern is reversed, which is useful for matching file extensions, hostnames,
     and other naming systems where the ending is really the prefix.  Usually you don't set this.
@@ -282,7 +281,7 @@ as possible.  It also has default content-types and index files.
     be served outside of this base directory, even if they're in the chroot.
 \item[index\_file] This is the default index file to use if a request doesn't give one.  The \ident{Dir}
     also will do redirects if a request for a directory doesn't end in a slash.
-\item[default\_ctype] The default Content-Type to use if none matches the MIMEType table.
+\item[default\_ctype] The default \ident{Content-Type} to use if none matches the MIMEType table.
 \end{description}
 
 Currently, we don't offer more parameters for configuration, but eventually you'll be able to tweak more and
@@ -311,13 +310,13 @@ browser directly.
 
 \subsection{Handler}
 
-Now we get to the best part: the ZeroMQ \ident{Handlers} that will receive asynchronous requests
+Now we get to the best part: the ZeroMQ Handlers that will receive asynchronous requests
 from Mongrel2.  You need to use the ZeroMQ syntax for configuring them, but this means with one
 configuration format you can use handlers that are using UDP, TCP, Unix, or PGM transports.  Most
 testing has been done with TCP transports.
 
 \begin{description}
-\item[send\_spec]  This is the 0MQ sender specification, something like ``tcp://127.0.0.1:9999'' will
+\item[send\_spec]  This is the 0MQ sender specification. Something like \verb|tcp://127.0.0.1:9999| will
     use TCP to connect to a server on 127.0.0.1 at port 9999.  The type of socket used is a PUSH
     socket, so that handlers receive messages in round-robin style.
 \item[send\_ident] This is an identifier (usually a UUID) that will be used to register the send
@@ -415,7 +414,7 @@ Here's the list of characters you can use in your patterns:
 \item \verb|\u| Uppercase letters.
 \item \verb|\w| Alphanumeric characters.
 \item \verb|\x| Hexadecimal digits.
-\item \verb|\z| The 0 character (null terminator).
+\item \verb|\z| The \verb|\0| character (null terminator).
 \item \verb|[set]| Just like a regex's [] where \emph{set} is a set of chars, like [0-9] for all digits.
 \item \verb|[^set]| Inverse character set, so \verb|[^0-9]| is anything but digits.
 \item \verb|*| Longest match of 0 or more of the preceding character.
@@ -491,7 +490,7 @@ given it:
 \begin{enumerate}
 \item Your configuration has a route for \verb|"/images/(.*.jpg)"| and \verb|"/users"|.
 \item Mongrel2 loads these and converts them to PREFIX/PATTERN pairs.  For the first one
-    the PREFIX="images", PATTERN="(.*.jpg)".  For the second one it's PREFIX="/users" and
+    the PREFIX="images", PATTERN="(.*.jpg)".  For the second one, it's PREFIX="/users" and
     PATTERN=None.
 \item It stores these in the URL routes by their PREFIX, and there can be only one
     PREFIX at a time.  This means you can't put \verb|"/foo/(.*)"| and \verb|"/foo/"|
@@ -513,7 +512,7 @@ given it:
     route.  If you wanted this condition to fail, you'd need to be explicit and add on a
     pattern like, \verb|"/users()$"| to say you need an exact match. Another option is
     to give a \verb|"/"| route for a default location (which usually happens).
-\item Finally, a request comes in for /XRAY.  This will match no prefix at all, so it
+\item Finally, a request comes in for /XRAY\@.  This will match no prefix at all, so it
     gets a 404.
 \end{enumerate}
 
@@ -570,19 +569,19 @@ Let's look at two examples from the chat demo and from some test suites:
 \end{itemize}
 
 The first one will take any Flash (or just TCP connection) that sends lines like
-\verb|@chat {"msg": "hello"}\0| and route those to the \verb|chat_demo| handler.
+\verb|@chat {"msg": "hello"}\0| and route those to the \ident{chat\_demo} handler.
 You can connect, and then just stream these JSON messages all you want, and handlers
 can send back the same responses.  In fact, as long as you don't include a \verb|'\0'|
 character, you could probably send anything you want.
 
 The second route will take any XML that is wrapped in a \verb|<test>| tag and send
 that to your handlers.  That means you can send \verb|<test name="joe"><age>21</age></test>|
-and it will send it to \verb|xml_demo|.
+and it will send it to \ident{xml\_demo}.
 
 This is powerful because Mongrel2 now becomes a generic XML or JSON messaging
 server very easily.  For example, I wrote a simple little BBS demo with Mongrel2
 and wrote a very basic terminal client in Python for people to use instead
-of the browser.  Look at \verb|examples/bbs/client.py| to see how that works in
+of the browser.  Look at \file{examples/bbs/client.py} to see how that works in
 full, but the meat of it is:
 
 \begin{code}{BBS Client JSON Socket Handling}
@@ -606,8 +605,8 @@ and path parameters to your JSON socket handlers.  That's currently not
 used, but in the future we might.
 
 One caveat to this whole feature is these targets can only be routed to the
-\verb|Server.default\_host| of the server.  There's not enough information
-in these routes to determine a target host (like the \verb|Host:| header in
+\ident{Server.default\_host} of the server.  There's not enough information
+in these routes to determine a target host (like the \ident{Host:} header in
 HTTP) so you can only send it to the default target host.
 
 \section{Deployment Logs And Commits}
@@ -821,9 +820,9 @@ You can also update your \ident{mimetypes} in the same way, just set a variable 
 
 \section{SSL Configuration}
 
-Mongrel2 now support SSL, with preliminary support for SSL session caching.  As of 
+Mongrel2 now supports SSL, with preliminary support for SSL session caching.  As of
 v1.8.0 (actually earlier) you can enable SSL very easily for your Mongrel2 server.
-How Mongrel2 configures SSL certs is with two options in \verb|setttings| and then
+Mongrel2 configures SSL certs with two options in \ident{settings}, and then
 a directory of .crt and .key files named after the UUID of the servers that need them.
 
 To get started, you can make a simple self-signed certificate with some weak encryption
@@ -833,25 +832,25 @@ and setup your certs directory:
 << d['inputs/makecert.sh|pyg|l'] >>
 \end{code}
 
-I actually have a shell script kind of like this since I can never remember how 
+I actually have a shell script kind of like this, since I can never remember how
 to set this stuff up with openssl.  Also, you should really adjust the RSA key
 strength from 512 to something you're comfortable with.  I'm using a weak
-key here so you can do performance testing and thrashing and then compare with
+key here so you can do performance testing and thrashing, and then compare with
 your real key later.
 
 Once you have that done, you just have to add three little settings to your
 mongrel2 conf:
 
 \begin{enumerate}
-\item Add the settings "certsdir" pointed at "./certs/", make sure it has the trailing slash.
-\item Add the \verb|Server.use\_ssl = 1| value to the Server that has this UUID
+\item Add the setting \ident{certdir} pointed at \file{./certs/}. Make sure it has the trailing slash!
+\item Add the \ident{Server.use\_ssl = 1} value to the Server that has the UUID
     you just created a cert for.
-\item Optionally, set the settings "ssl\_ciphers" to "SSL\_RSA\_RC4\_128\_SHA" so you can
-    play with the performance of a weak cipher.  If you unset this then Mongrel2 will
-    use the best one a browser wants.
+\item Optionally, set the setting \ident{ssl\_ciphers} to \ident{SSL\_RSA\_RC4\_128\_SHA} so you can
+    play with the performance of a weak cipher.  If you unset this, Mongrel2 will
+    use the best one the browser asks for.
 \end{enumerate}
 
-After you have those changes your config should look something like this:
+After that, your config should look something like this:
 
 \begin{code}{Minimal SSL Configuration}
 \begin{lstlisting}
@@ -859,7 +858,7 @@ After you have those changes your config should look something like this:
 \end{lstlisting}
 \end{code}
 
-Get that written, rerun \verb|m2sh config| to make the new config, restart
+Get that written, rerun \shell{m2sh config} to make the new config, restart
 Mongrel2 (you can't reload to enable SSL), and it should be working.
 
 After you get this working you just have to get your own certificate, put it

@@ -41,6 +41,7 @@
 #include "proxy.h"
 #include "io.h"
 #include "adt/hash.h"
+#include "tnetstrings.h"
 /* This must be a power of 2  or else sending more than MAX_UINT msgs is a fail*/
 #define DELIVER_OUTSTANDING_MSGS 16
 
@@ -58,11 +59,25 @@ enum {
     CONN_TYPE_SOCKET
 };
 
+struct Connection;
+
+typedef int (*deliver_function)(struct Connection *c, tns_value_t *data);
+
+typedef struct Deliver_message {
+    deliver_function deliver;
+    tns_value_t *data;
+} Deliver_message;
+
 typedef struct Connection {
     Request *req;
 
     IOBuf *iob;
     IOBuf *proxy_iob;
+
+    // if SNI is used, then the connection has its own cert
+    int use_sni;
+    x509_cert own_cert;
+    rsa_context rsa_key;
 
     int rport;
     State state;
@@ -72,13 +87,12 @@ typedef struct Connection {
     hash_t *filter_state;
     char remote[IPADDR_SIZE+1];
     Handler *handler;
-    volatile bstring deliverRing[DELIVER_OUTSTANDING_MSGS];
+    volatile Deliver_message deliverRing[DELIVER_OUTSTANDING_MSGS];
     volatile unsigned deliverPost,deliverAck;
     Rendez deliverRendez;
 } Connection;
 
 void Connection_destroy(Connection *conn);
-
 Connection *Connection_create(Server *srv, int fd, int rport,
                               const char *remote);
 
@@ -98,5 +112,7 @@ int Connection_read_header(Connection *conn, Request *req);
 void Connection_init();
 
 void Connection_deliver_task(void *v);
+int Connection_deliver_enqueue(Connection *conn, deliver_function f,
+                                             tns_value_t *d);
 
 #endif

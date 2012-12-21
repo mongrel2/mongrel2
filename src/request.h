@@ -41,6 +41,7 @@
 #include <handler.h>
 #include <headers.h>
 #include <host.h>
+struct Connection;
 
 enum {
     REQUEST_EXTRA_HEADERS = 6
@@ -63,6 +64,7 @@ typedef struct Request {
     int status_code;
     int response_size;
     unsigned ws_flags;
+    bstring new_header;
     http_parser parser;
 } Request;
 
@@ -98,9 +100,9 @@ int Request_get_date(Request *req, bstring field, const char *format);
 
 #define Request_header_length(R) ((R)->parser.body_start)
 
-bstring Request_to_tnetstring(Request *req, bstring uuid, int fd, const char *buf, size_t len);
+bstring Request_to_tnetstring(Request *req, bstring uuid, int fd, const char *buf, size_t len, struct Connection *);
 
-bstring Request_to_payload(Request *req, bstring uuid, int fd, const char *buf, size_t len);
+bstring Request_to_payload(Request *req, bstring uuid, int fd, const char *buf, size_t len, struct Connection *);
 
 void Request_init();
 

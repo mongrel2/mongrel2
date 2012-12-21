@@ -7,12 +7,14 @@
 #include "connection.h"
 
 static const char *RFC_822_TIME = "%a, %d %b %y %T";
+Connection *conn=NULL;
 
 char *test_Request_payloads()
 {
     glob_t test_files;
     bstring fake_sender = bfromcstr("FAKESENDER");
     Request *req = Request_create();
+    //Connection *conn=Connection_create(NULL,0,1,"");
     size_t nparsed = 0;
     unsigned int i = 0;
     int rc = glob("tests/and_suite/*", 0, NULL, &test_files);
@@ -38,12 +40,12 @@ char *test_Request_payloads()
             // TODO: fix this up so that we never get a null for path
             if(req->path == NULL) req->path = bfromcstr("/");
 
-            bstring payload = Request_to_payload(req, fake_sender, 0, "", 0);
+            bstring payload = Request_to_payload(req, fake_sender, 0, "", 0,conn);
             bconchar(payload, '\n');
             fwrite(payload->data, blength(payload), 1, test_cases);
             bdestroy(payload);
 
-            payload = Request_to_tnetstring(req, fake_sender, 0, "", 0);
+            payload = Request_to_tnetstring(req, fake_sender, 0, "", 0,conn);
             debug("TNETSTRING PAYLOAD: '%.*s'", blength(payload), bdata(payload));
             bconchar(payload, '\n');
             fwrite(payload->data, blength(payload), 1, test_cases);
@@ -132,11 +134,11 @@ char *test_Request_create()
     mu_assert(rc == 1, "It should parse.");
     mu_assert(nparsed > 0, "Should have parsed something.");
 
-    bstring payload = Request_to_payload(req, fake_sender, 0, "", 0);
+    bstring payload = Request_to_payload(req, fake_sender, 0, "", 0,conn);
     debug("PAYLOAD IS: %s", bdata(payload));
     bdestroy(payload);
 
-    payload = Request_to_tnetstring(req, fake_sender, 0, "", 0);
+    payload = Request_to_tnetstring(req, fake_sender, 0, "", 0,conn);
     debug("TNETSTRING PAYLOAD: '%.*s'", blength(payload), bdata(payload));
 
     mu_assert(Request_get(req, &HTTP_IF_MODIFIED_SINCE) != NULL,
@@ -165,7 +167,7 @@ char *test_Request_create()
 }
 
 struct tagbstring COOKIE_HEADER = bsStatic("cookie");
-struct tagbstring EXPECTED_COOKIE_HEADER = bsStatic("JSON 1 / 97:{\"PATH\":\"/\",\"cookie\":[\"foo=bar\",\"test=yes; go=no\"],\"METHOD\":\"GET\",\"VERSION\":\"HTTP/1.0\",\"URI\":\"/\"},0:,");
+struct tagbstring EXPECTED_COOKIE_HEADER = bsStatic("JSON 1 / 117:{\"PATH\":\"/\",\"cookie\":[\"foo=bar\",\"test=yes; go=no\"],\"METHOD\":\"GET\",\"VERSION\":\"HTTP/1.0\",\"URI\":\"/\",\"URL_SCHEME\":\"http\"},0:,");
 
 char *test_Multiple_Header_Request() 
 {
@@ -195,7 +197,7 @@ char *test_Multiple_Header_Request()
     mu_assert(Request_get(req, &COOKIE_HEADER) != NULL,
             "Should have an cookie header.");
 
-    bstring payload = Request_to_payload(req, &JSON_METHOD, 0, "", 0);
+    bstring payload = Request_to_payload(req, &JSON_METHOD, 0, "", 0,conn);
     debug("PAYLOAD IS: %s", bdata(payload));
 
     mu_assert(bstrcmp(payload, &EXPECTED_COOKIE_HEADER) == 0,
@@ -214,9 +216,10 @@ char * all_tests() {
     Register_init();
 
     // some evil hackery to mock out a registration so that the payload functions work
-    Connection *conn = calloc(sizeof(Connection), 1);
+    conn = Connection_create(NULL,0,1,"");
+    /*Connection *conn = calloc(sizeof(Connection), 1);
     conn->iob = NULL;
-    conn->type = CONN_TYPE_HTTP;
+    conn->type = CONN_TYPE_HTTP;*/
     Register_connect(0, conn);
 
     mu_run_test(test_Request_create);
