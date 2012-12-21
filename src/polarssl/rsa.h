@@ -114,6 +114,13 @@
         ASN1_STR_NULL "\x00"                    \
       ASN1_STR_OCTET_STRING "\x14"
 
+#define ASN1_HASH_SHA1_ALT                      \
+    ASN1_STR_CONSTRUCTED_SEQUENCE "\x1F"        \
+      ASN1_STR_CONSTRUCTED_SEQUENCE "\x07"      \
+        ASN1_STR_OID "\x05"                     \
+      OID_HASH_ALG_SHA1                         \
+      ASN1_STR_OCTET_STRING "\x14"
+
 #define ASN1_HASH_SHA2X                         \
     ASN1_STR_CONSTRUCTED_SEQUENCE "\x11"        \
       ASN1_STR_CONSTRUCTED_SEQUENCE "\x0d"      \
@@ -159,6 +166,9 @@ extern "C" {
 
 /**
  * \brief          Initialize an RSA context
+ *
+ *                 Note: Set padding to RSA_PKCS_V21 for the RSAES-OAEP
+ *                 encryption scheme and the RSASSA-PSS signature scheme.
  *
  * \param ctx      RSA context to be initialized
  * \param padding  RSA_PKCS_V15 or RSA_PKCS_V21

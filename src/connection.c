@@ -35,6 +35,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <limits.h>
+#include <ctype.h>
 
 #include "connection.h"
 #include "http11/httpclient_parser.h"
@@ -207,7 +208,7 @@ struct tagbstring PEER_CERT_SHA1_KEY = bsStatic("PEER_CERT_SHA1");
 
 void Connection_fingerprint_from_cert(Connection *conn) 
 {
-    x509_cert* _x509P  = conn->iob->ssl.peer_cert;
+    x509_cert* _x509P  = conn->iob->ssn.peer_cert;
     int i = 0;
 
     debug("Connection_send_to_handler: peer_cert: %016lX: tag=%d length=%ld",
@@ -798,6 +799,12 @@ void Connection_destroy(Connection *conn)
     if(conn) {
         Request_destroy(conn->req);
         conn->req = NULL;
+
+        if(conn->use_sni) {
+            x509_free(&conn->own_cert);
+            rsa_free(&conn->rsa_key);
+        }
+
         if(conn->client) free(conn->client);
         while(conn->deliverAck!=conn->deliverPost)
         {
@@ -814,6 +821,73 @@ void Connection_destroy(Connection *conn)
 }
 
 
+static int connection_sni_cb(void *p_conn, ssl_context *ssl, const unsigned char *chostname, size_t chostname_len)
+{
+    Connection *conn = (Connection *) p_conn;
+    int i;
+    int rc = 0;
+    bstring hostname = NULL;
+    bstring certpath = NULL;
+    bstring keypath = NULL;
+
+    hostname = blk2bstr((const char *)chostname, chostname_len);
+    check(hostname != NULL, "Allocation failed");
+
+    // input is utf-8. we'll forbid ascii-control chars and '/', for safe
+    //   filesystem usage. multibyte characters always have the high bit set
+    //   on each byte, so there's no worry of them getting caught.
+    for(i = 0; i < blength(hostname); ++i) {
+        unsigned char c = bdata(hostname)[i];
+        if(c < 0x20 || c == '/')
+        {
+            log_warn("SNI: invalid hostname provided");
+            return -1;
+        }
+        else if(c <= 0x7f)
+        {
+            // FIXME: it's wrong to use tolower() on a utf8 string, but it
+            //   will probably work well enough for most people
+            bdata(hostname)[i] = (unsigned char)tolower(c);
+        }
+    }
+
+    bstring certdir = Setting_get_str("certdir", NULL);
+    check(certdir != NULL, "to use ssl, you must specify a certdir");
+
+    certpath = bformat("%s%s.crt", bdata(certdir), bdata(hostname));
+    check_mem(certpath);
+
+    keypath = bformat("%s%s.key", bdata(certdir), bdata(hostname));
+    check_mem(keypath);
+
+    rc = x509parse_crtfile(&conn->own_cert, bdata(certpath));
+    check(rc == 0, "Failed to load cert from %s", bdata(certpath));
+
+    rc = x509parse_keyfile(&conn->rsa_key, bdata(keypath), NULL);
+    check(rc == 0, "Failed to load key from %s", bdata(keypath));
+
+    bdestroy(hostname);
+    bdestroy(certpath);
+    bdestroy(keypath);
+
+    conn->use_sni = 1;
+
+    ssl_set_own_cert(ssl, &conn->own_cert, &conn->rsa_key);
+
+    return 0;
+
+error:
+    // it should be safe to call these on zeroed-out objects
+    x509_free(&conn->own_cert);
+    rsa_free(&conn->rsa_key);
+
+    bdestroy(hostname);
+    if(certpath != NULL) bdestroy(certpath);
+    if(keypath != NULL) bdestroy(keypath);
+    return -1;
+}
+
+
 Connection *Connection_create(Server *srv, int fd, int rport,
                               const char *remote)
 {
@@ -822,6 +896,7 @@ Connection *Connection_create(Server *srv, int fd, int rport,
 
     conn->req = Request_create();
     conn->proxy_iob = NULL;
+    conn->use_sni = 0;
     conn->rport = rport;
     conn->client = NULL;
     conn->close = 0;
@@ -839,7 +914,14 @@ Connection *Connection_create(Server *srv, int fd, int rport,
         conn->iob = IOBuf_create(BUFFER_SIZE, fd, IOBUF_SSL);
         check(conn->iob != NULL, "Failed to create the SSL IOBuf.");
 
+        // set default cert
         ssl_set_own_cert(&conn->iob->ssl, &srv->own_cert, &srv->rsa_key);
+
+        // setup callback for SNI. if the client does not use this feature,
+        //   then this callback is never invoked and the above default cert
+        //   will be used
+        ssl_set_sni(&conn->iob->ssl, connection_sni_cb, conn);
+
         ssl_set_dh_param(&conn->iob->ssl, srv->dhm_P, srv->dhm_G);
         ssl_set_ciphersuites(&conn->iob->ssl, srv->ciphers);
     } else {
