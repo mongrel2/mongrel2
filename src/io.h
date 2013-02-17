@@ -55,7 +55,6 @@ typedef struct IOBuf {
     int use_ssl;
     int handshake_performed;
     ssl_context ssl;
-    ssl_session ssn;
     havege_state hs;
 } IOBuf;
 

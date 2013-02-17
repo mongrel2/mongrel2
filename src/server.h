@@ -67,7 +67,7 @@ typedef struct Server {
     int use_ssl;
     x509_cert own_cert;
     rsa_context rsa_key;
-    int *ciphers;
+    const int *ciphers;
     char *dhm_P;
     char *dhm_G;
 } Server;
