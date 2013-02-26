@@ -167,6 +167,19 @@ static int Server_init_ssl(Server *srv)
     check(rc == 0, "Failed to load key from %s", bdata(keypath));
 
     bstring ssl_ciphers_val = Setting_get_str("ssl_ciphers", NULL);
+    
+    bstring ca_chain = Setting_get_str("ssl.ca_chain", NULL);
+
+    if ( ca_chain != NULL ) {
+
+        rc = x509parse_crtfile(&srv->ca_chain, bdata(ca_chain));
+        check(rc == 0, "Failed to load cert from %s", bdata(ca_chain));
+
+    } else {
+        
+        //to indicate no ca_chain was loaded
+        srv->ca_chain.version=-1;
+    }
 
     if(ssl_ciphers_val != NULL) {
         rc = Server_load_ciphers(srv, ssl_ciphers_val);
