@@ -2,7 +2,7 @@ PREFIX?=/usr/local
 CFLAGS=-I../../src $(OPTFLAGS) -g -fPIC -shared -nostartfiles -L../../build
 LDFLAGS=$(OPTLIBS)
 
-all: null.so rewrite.so profile.so sendfile.so
+all: null.so rewrite.so sendfile.so
 
 
 %.so : %.c
