@@ -309,7 +309,7 @@
  *      TLS_RSA_WITH_RC4_128_MD5
  *      TLS_RSA_WITH_RC4_128_SHA
  */
-#define POLARSSL_ARC4_C
+/*#define POLARSSL_ARC4_C*/
 
 /**
  * \def POLARSSL_ASN1_PARSE_C
