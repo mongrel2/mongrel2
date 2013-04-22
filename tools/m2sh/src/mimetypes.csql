@@ -851,5 +851,8 @@ struct tagbstring MIMETYPES_DEFAULT_SQL = bsStatic(
 "insert into mimetype (extension, mimetype) values ('.java', 'text/x-java');\n"
 "insert into mimetype (extension, mimetype) values ('.apk', 'application/vnd.android.package-archive');\n"
 "insert into mimetype (extension, mimetype) values ('.vms', 'chemical/x-vamas-iso14976');\n"
-"insert into mimetype (extension, mimetype) values ('.asx', 'video/x-ms-asf');\n");
+"insert into mimetype (extension, mimetype) values ('.asx', 'video/x-ms-asf');\n"
+"insert into mimetype (extension, mimetype) values ('.ogv', 'video/ogg');\n"
+"insert into mimetype (extension, mimetype) values ('.oga', 'audio/ogg');\n"
+"insert into mimetype (extension, mimetype) values ('.webm', 'video/webm');\n");
 
