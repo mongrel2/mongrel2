@@ -194,7 +194,7 @@ The base structure of a Mongrel2 configuration is:
       \item[Route] Hosts have Routes in them, which tells Mongrel2 what to do with URL paths and patterns
         that match them.  Routes then have \ident{Dir}, \ident{Handler} or \ident{Proxy} items in them.
       \begin{description}
-        \item[Dir] A Dir serves files out of a directory, full with 304 and ETag support, default content types,
+        \item[Dir] A Dir serves files out of a directory, complete with 304 and ETag support, default content types,
           and most of the things you need to serve them.
         \item[Proxy] A Proxy takes requests matching the Route they're attached to and sends them to another
           HTTP server somewhere else.  Mongrel2 will then act as a full proxy and also try to keep connections
@@ -273,7 +273,7 @@ request goes through.  If not, 404.
 \subsection{Dir}
 
 A \ident{Dir} is a simple directory-serving route target that serves files out of a directory.  It has caching
-built-in, handles if-modified-since, ETags, and all the various bizarre HTTP caching mechanisms as RFC-accurate
+built-in, handles if-modified-since, ETags, and all the various bizarre HTTP caching mechanisms as RFC-accurately
 as possible.  It also has default content-types and index files.
 
 \begin{description}
@@ -303,7 +303,7 @@ carve out pieces that will work as handlers.
 \end{description}
 
 Requests that match a Proxy route are still parsed by Mongrel2's incredibly accurate
-HTTP parser, so that your backend servers should not be receiving badly formatted
+HTTP parser, so that your backend servers should not receive badly formatted
 HTTP requests.  Responses from a Proxy server, however, are sent unaltered to the
 browser directly.
 
