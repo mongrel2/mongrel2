@@ -97,7 +97,7 @@ INSERT INTO route (path, host_id, target_id, target_type)
 
 INSERT INTO route (path, host_id, target_id, target_type)
     VALUES (
-        "/testsmulti/(.*.json)",
+        "/testsmulti/(.*\.json)",
         (select id from host where name="localhost"),
         (select id from directory where base="tests/"),
         "dir"
