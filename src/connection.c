@@ -88,6 +88,7 @@ int Connection_deliver_enqueue(Connection *conn, deliver_function f,
                                              tns_value_t *d)
 {
     check_debug(conn->deliverPost-conn->deliverAck < DELIVER_OUTSTANDING_MSGS, "Too many outstanding messages") ;
+    check_debug(conn->deliverTaskStatus==DT_RUNNING, "Cannot enqueue, deliver task not running");
     conn->deliverRing[conn->deliverPost%DELIVER_OUTSTANDING_MSGS].deliver=f;
     conn->deliverRing[conn->deliverPost%DELIVER_OUTSTANDING_MSGS].data=d;
     conn->deliverPost++;
@@ -793,10 +794,35 @@ StateActions CONN_ACTIONS = {
 };
 
 
+void Connection_deliver_task_kill(Connection *conn)
+{
+    if(conn && conn->deliverTaskStatus==DT_RUNNING) {
+        debug("Killing task for connection %p",conn);
+        int sleeptime=10;
+        while(conn->deliverAck!=conn->deliverPost)
+        {
+            bdestroy(Connection_deliver_dequeue(conn));
+        }
+        Connection_deliver_enqueue(conn,NULL);
+        conn->deliverTaskStatus=DT_DYING;
+        while(conn->deliverTaskStatus != DT_DEAD) {
+            taskdelay(sleeptime);
+            if(sleeptime<10000) {
+                sleeptime<<=1;
+            }
+            else {
+                log_warn("Connection %p is not dying, contact jasom\n",conn);
+                //*((int *)0)=1;
+            }
+        }
+        debug("Deliver Task Killed %p",conn);
+    }
+}
 
 void Connection_destroy(Connection *conn)
 {
     if(conn) {
+        Connection_deliver_task_kill(conn);
         Request_destroy(conn->req);
         conn->req = NULL;
 
@@ -806,14 +832,6 @@ void Connection_destroy(Connection *conn)
         }
 
         if(conn->client) free(conn->client);
-        while(conn->deliverAck!=conn->deliverPost)
-        {
-            Deliver_message msg;
-            Connection_deliver_dequeue(conn,&msg);
-            tns_value_destroy(msg.data);
-        }
-        Connection_deliver_enqueue(conn,NULL,NULL);
-        taskyield();
         IOBuf_destroy(conn->iob);
         IOBuf_destroy(conn->proxy_iob);
         free(conn);
@@ -946,6 +964,7 @@ int Connection_accept(Connection *conn)
     
     check(taskcreate(Connection_deliver_task, conn, CONNECTION_STACK) != -1,
             "Failed to create connection task.");
+    conn->deliverTaskStatus=DT_RUNNING;
     return 0;
 error:
     IOBuf_register_disconnect(conn->iob);
@@ -1049,9 +1068,17 @@ void Connection_deliver_task(void *v)
         msg.data=NULL;
     }
 error:
+    conn->deliverTaskStatus=DT_DYING;
     tns_value_destroy(msg.data);
+    while(conn->deliverPost > conn->deliverAck) {
+        Connection_deliver_dequeue(conn, &msg);
+        tns_value_destroy(msg.data);
+    }
+
     if (IOBuf_fd(conn->iob) >= 0)
         shutdown(IOBuf_fd(conn->iob), SHUT_RDWR);
+    debug("Deliver Task Shut Down\n");
+    conn->deliverTaskStatus=DT_DEAD;
     taskexit(0);
 }
 
