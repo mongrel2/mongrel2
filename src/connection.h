@@ -58,6 +58,14 @@ enum {
     CONN_TYPE_SOCKET
 };
 
+enum deliverTaskState {
+    DT_NOT_CREATED = 0,
+    DT_RUNNING,
+    DT_DYING,
+    DT_DEAD
+};
+
+
 typedef struct Connection {
     Request *req;
 
@@ -72,6 +80,7 @@ typedef struct Connection {
     hash_t *filter_state;
     char remote[IPADDR_SIZE+1];
     Handler *handler;
+    volatile enum deliverTaskState deliverTaskStatus;
     volatile bstring deliverRing[DELIVER_OUTSTANDING_MSGS];
     volatile unsigned deliverPost,deliverAck;
     Rendez deliverRendez;
