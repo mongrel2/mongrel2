@@ -801,9 +801,11 @@ void Connection_deliver_task_kill(Connection *conn)
         int sleeptime=10;
         while(conn->deliverAck!=conn->deliverPost)
         {
-            bdestroy(Connection_deliver_dequeue(conn));
+            Deliver_message msg={NULL,NULL};
+            Connection_deliver_dequeue(conn,&msg);
+            tns_value_destroy(msg.data);
         }
-        Connection_deliver_enqueue(conn,NULL);
+        Connection_deliver_enqueue(conn,NULL,NULL);
         conn->deliverTaskStatus=DT_DYING;
         while(conn->deliverTaskStatus != DT_DEAD) {
             taskdelay(sleeptime);
