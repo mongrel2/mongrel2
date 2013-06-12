@@ -530,6 +530,9 @@ int connection_proxy_req_parse(Connection *conn)
     error_unless(Request_is_http(conn->req), conn, 400,
             "Someone tried to change the protocol on us from HTTP.");
 
+    // add the x-forwarded-for header
+    Request_set(conn->req, &HTTP_X_FORWARDED_FOR, bfromcstr(conn->remote), 1);
+
     Backend *found = Host_match_backend(target_host, Request_path(conn->req), &route);
     error_unless(found, conn, 404, 
             "Handler not found: %s", bdata(Request_path(conn->req)));
@@ -641,6 +644,10 @@ error:
 int connection_parse(Connection *conn)
 {
     if(Connection_read_header(conn, conn->req) > 0) {
+        if(!Setting_get_int("no_clobber_xff", 0)) {
+            // add the x-forwarded-for header
+            Request_set(conn->req, &HTTP_X_FORWARDED_FOR, bfromcstr(conn->remote), 1);
+        }
         return REQ_RECV;
     } else {
         return CLOSE;
@@ -1125,9 +1132,6 @@ int Connection_read_header(Connection *conn, Request *req)
     error_unless(tries < CLIENT_READ_RETRIES, conn, 
             400, "Too many small packet read attempts.");
     error_unless(rc == 1, conn, 400, "Error parsing request.");
-
-    // add the x-forwarded-for header
-    Request_set(conn->req, &HTTP_X_FORWARDED_FOR, bfromcstr(conn->remote), 1);
 
     check_should_close(conn, conn->req);
 
