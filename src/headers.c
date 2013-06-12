@@ -55,6 +55,7 @@ struct tagbstring HTTP_PATTERN = bsStatic("PATTERN");
 struct tagbstring HTTP_URL_SCHEME = bsStatic("URL_SCHEME");
 struct tagbstring HTTP_HTTP = bsStatic("http");
 struct tagbstring HTTP_HTTPS = bsStatic("https");
+struct tagbstring HTTP_REMOTE_ADDR = bsStatic("REMOTE_ADDR");
 
 
 struct tagbstring HTTP_CONTENT_LENGTH = bsStatic("content-length");
