@@ -331,7 +331,13 @@ tns_value_t *info_cb(bstring name, hash_t *args)
         tns_add_to_list(cols, tns_new_integer(srv->port));
         tns_list_addstr(cols, srv->bind_addr);
         tns_list_addstr(cols, srv->uuid);
-        tns_list_addstr(cols, srv->chroot);
+        if(srv->chroot != NULL) {
+            tns_list_addstr(cols, srv->chroot);
+        } else {
+            bstring empty = bfromcstr("");
+            tns_list_addstr(cols, empty);
+            bdestroy(empty);
+        }
         tns_list_addstr(cols, srv->access_log);
         tns_list_addstr(cols, srv->error_log);
         tns_list_addstr(cols, srv->pid_file);
