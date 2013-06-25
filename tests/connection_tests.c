@@ -65,7 +65,9 @@ char * all_tests() {
             bfromcstr("chroot"),
             bfromcstr("access_log"),
             bfromcstr("error_log"),
-            bfromcstr("pid_file"), 0);
+            bfromcstr("pid_file"),
+            NULL,
+            0);
 
     Host *zedshaw_com = Host_create(bfromcstr("zedshaw.com"), bfromcstr("zedshaw.com"));
 

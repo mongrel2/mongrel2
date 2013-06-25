@@ -22,7 +22,9 @@ char *test_Server_create_destroy()
             bfromcstr("chroot"),
             bfromcstr("access_log"),
             bfromcstr("error_log"),
-            bfromcstr("pid_file"), 0);
+            bfromcstr("pid_file"),
+            NULL,
+            0);
     mu_assert(server != NULL, "Failed to make the server, something on 8090?");
 
     Server_destroy(server);
@@ -43,7 +45,9 @@ char *test_Server_adds()
             bfromcstr("chroot"),
             bfromcstr("access_log"),
             bfromcstr("error_log"),
-            bfromcstr("pid_file"), 0);
+            bfromcstr("pid_file"),
+            NULL,
+            0);
     mu_assert(srv != NULL, "Failed to make the server, something on 8090?");
 
     Host *host = Host_create(bfromcstr("zedshaw.com"), bfromcstr("zedshaw.com"));
