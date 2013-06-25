@@ -417,7 +417,15 @@ void Control_task(void *v)
     int rc = 0;
     tns_value_t *req = NULL;
     tns_value_t *rep = NULL;
-    bstring spec = Setting_get_str("control_port", &DEFAULT_CONTROL_SPEC);
+
+    bstring spec;
+    Server *srv = Server_queue_latest();
+    if(srv->control_port != NULL) {
+        spec = srv->control_port;
+    } else {
+        spec = Setting_get_str("control_port", &DEFAULT_CONTROL_SPEC);
+    }
+
     taskname("control");
 
     log_info("Setting up control socket in at %s", bdata(spec));

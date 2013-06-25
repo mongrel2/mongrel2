@@ -76,6 +76,16 @@ error:
     return -1;
 }
 
+static inline int tns_insert_to_list(void *list, int i, void *item)
+{
+    check(tns_get_type(list) == tns_tag_list, "Can't add to that, it's not a list.");
+    darray_t *L = ((tns_value_t *)list)->value.list;
+    darray_insert(L, i, item);
+    return 0;
+error:
+    return -1;
+}
+
 
 static inline void *tns_parse_string(const char *data, size_t len)
 {
