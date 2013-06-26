@@ -1032,12 +1032,18 @@ error:
 
 int Connection_deliver_raw(Connection *conn, bstring buf)
 {
-    tns_value_t *val=malloc(sizeof(tns_value_t));
-    check_mem(val);
-    val->type=tns_tag_string;
-    val->value.string=bstrcpy(buf);
-    check_debug(0== Connection_deliver_enqueue(conn, Connection_deliver_raw_internal,val),
-        "Failed to write raw message to con %d", IOBuf_fd(conn->iob));
+    tns_value_t *val=NULL;
+    if(buf != NULL) {
+        val=malloc(sizeof(tns_value_t));
+        check_mem(val);
+        val->type=tns_tag_string;
+        val->value.string=bstrcpy(buf);
+        check_debug(0== Connection_deliver_enqueue(conn, Connection_deliver_raw_internal,val),
+            "Failed to write raw message to con %d", IOBuf_fd(conn->iob));
+    } else {
+        Connection_deliver_enqueue(conn, NULL, NULL);
+    }
+
     return 0;
 error:
     tns_value_destroy(val);
