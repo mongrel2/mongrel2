@@ -258,7 +258,7 @@ void taskmain(int argc, char *argv[])
     rc = Unixy_remove_dead_pidfile(pid_file);
     check(rc == 0, "Failed to remove %s, %s is probably already running.", bdata(pid_file), m2program);
 
-    rc = Unixy_daemonize();
+    rc = Unixy_daemonize(1);
     check(rc == 0, "Couldn't daemonize, that's not good.");
 
     rc = chdir(argv[1]);
