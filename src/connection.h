@@ -97,6 +97,8 @@ typedef struct Connection {
     volatile Deliver_message deliverRing[DELIVER_OUTSTANDING_MSGS];
     volatile unsigned deliverPost,deliverAck;
     Rendez deliverRendez;
+    Rendez uploadRendez;
+    int sendCredits;
 } Connection;
 
 void Connection_destroy(Connection *conn);
@@ -108,7 +110,7 @@ int Connection_accept(Connection *conn);
 void Connection_task(void *v);
 
 struct Handler;
-int Connection_send_to_handler(Connection *conn, Handler *handler, char *body, int content_len);
+int Connection_send_to_handler(Connection *conn, Handler *handler, char *body, int content_len, hash_t *altheaders);
 
 int Connection_deliver_raw(Connection *conn, bstring buf);
 

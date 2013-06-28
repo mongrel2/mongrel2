@@ -52,6 +52,8 @@ struct tagbstring LEAVE_HEADER_TNET = bsStatic("16:6:METHOD,4:JSON,}");
 struct tagbstring LEAVE_MSG = bsStatic("{\"type\":\"disconnect\"}");
 struct tagbstring XREQ_CTL = bsStatic("ctl");
 struct tagbstring KEEP_ALIVE = bsStatic("keep-alive");
+struct tagbstring CREDITS = bsStatic("credits");
+struct tagbstring CANCEL = bsStatic("cancel");
 
 int HANDLER_STACK;
 
@@ -147,6 +149,19 @@ static int handler_process_control_request(Connection *conn, tns_value_t *data)
     hnode_t *n = hash_lookup(args->value.dict, &KEEP_ALIVE);
     if(n != NULL) {
         Register_ping(IOBuf_fd(conn->iob));
+    }
+
+    n = hash_lookup(args->value.dict, &CREDITS);
+    if(n != NULL) {
+        tns_value_t *credits = (tns_value_t *)hnode_get(n);
+        conn->sendCredits += credits->value.number;
+        taskwakeup(&conn->uploadRendez);
+    }
+
+    n = hash_lookup(args->value.dict, &CANCEL);
+    if(n != NULL) {
+        Register_disconnect(IOBuf_fd(conn->iob));
+        taskwakeup(&conn->uploadRendez);
     }
 
     tns_value_destroy(data);
