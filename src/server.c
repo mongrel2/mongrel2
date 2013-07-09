@@ -148,11 +148,18 @@ error:
 static int Server_init_ssl(Server *srv)
 {
     int rc = 0;
+    bstring certdir = NULL;
     bstring certpath = NULL;
     bstring keypath = NULL;
-    
-    bstring certdir = Setting_get_str("certdir", NULL);
-    check(certdir != NULL, "to use ssl, you must specify a certdir");
+
+    bstring certdir_setting = Setting_get_str("certdir", NULL);
+    check(certdir_setting != NULL, "to use ssl, you must specify a certdir");
+
+    if(srv->chroot != NULL) {
+        certdir = bformat("%s%s", bdata(srv->chroot), bdata(certdir_setting));
+    } else {
+        certdir = bstrcpy(certdir_setting);
+    }
 
     certpath = bformat("%s%s.crt", bdata(certdir), bdata(srv->uuid)); 
     check_mem(certpath);
@@ -178,13 +185,15 @@ static int Server_init_ssl(Server *srv)
     srv->dhm_P = ssl_default_dhm_P;
     srv->dhm_G = ssl_default_dhm_G;
 
+    bdestroy(certdir);
     bdestroy(certpath);
     bdestroy(keypath);
 
     return 0;
 
 error:
-    // Do not free certfile, as we're pulling it from Settings
+    // Do not free certdir_setting, as we're pulling it from Settings
+    if(certdir != NULL) bdestroy(certdir);
     if(certpath != NULL) bdestroy(certpath);
     if(keypath != NULL) bdestroy(keypath);
     return -1;
