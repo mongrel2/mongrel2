@@ -52,10 +52,13 @@
 #include "websocket.h"
 #include "adt/darray.h"
 #include "headers.h"
+#include "stats.h"
 
 struct tagbstring PING_PATTERN = bsStatic("@[a-z/]- {\"type\":\\s*\"ping\"}");
 
 struct tagbstring POLICY_XML_REQUEST = bsStatic("<policy-file-request");
+
+extern Statistics collector_stats;
 
 int MAX_CONTENT_LENGTH = 20 * 1024;
 int BUFFER_SIZE = 4 * 1024;
@@ -254,6 +257,7 @@ int Connection_send_to_handler(Connection *conn, Handler *handler, char *body, i
     debug("HTTP TO HANDLER: %.*s", blength(payload) - content_len, bdata(payload));
 
     rc = Handler_deliver(handler->send_socket, bdata(payload), blength(payload));
+    collector_stats.event_counter++;
     free(payload); payload = NULL;
 
     error_unless(rc != -1, conn, 502, "Failed to deliver to handler: %s", 
