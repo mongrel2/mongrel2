@@ -45,6 +45,7 @@
 #include "setting.h"
 #include "pattern.h"
 #include "config/config.h"
+#include "unixy.h"
 #include <signal.h>
 
 darray_t *SERVER_QUEUE = NULL;
@@ -155,7 +156,7 @@ static int Server_init_ssl(Server *srv)
     bstring certdir_setting = Setting_get_str("certdir", NULL);
     check(certdir_setting != NULL, "to use ssl, you must specify a certdir");
 
-    if(srv->chroot != NULL) {
+    if(srv->chroot != NULL && !Unixy_in_chroot()) {
         certdir = bformat("%s%s", bdata(srv->chroot), bdata(certdir_setting));
     } else {
         certdir = bstrcpy(certdir_setting);
