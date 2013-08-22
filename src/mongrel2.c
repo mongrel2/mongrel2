@@ -262,15 +262,6 @@ int attempt_chroot_drop(Server *srv)
         }
     }
 
-    if(!testmode) {
-        FILE *log = fopen(bdata(srv->error_log), "a+");
-        check(log, "Couldn't open %s log file.", bdata(srv->error_log));
-        setbuf(log, NULL);
-        check(0==add_log_to_rotate_list(srv->error_log,log),"Unable to add error log to list of files to rotate.");
-
-        dbg_set_log(log);
-    }
-
     rc = Unixy_pid_file(srv->pid_file);
     check(rc == 0, "Failed to make the PID file %s", bdata(srv->pid_file));
 
@@ -280,6 +271,15 @@ int attempt_chroot_drop(Server *srv)
     } else {
         rc = Unixy_drop_priv(NULL);
         check(rc == 0, "Failed to drop priv");
+    }
+
+    if(!testmode) {
+        FILE *log = fopen(bdata(srv->error_log), "a+");
+        check(log, "Couldn't open %s log file.", bdata(srv->error_log));
+        setbuf(log, NULL);
+        check(0==add_log_to_rotate_list(srv->error_log,log),"Unable to add error log to list of files to rotate.");
+
+        dbg_set_log(log);
     }
 
     return 0;
