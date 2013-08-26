@@ -72,7 +72,7 @@ int add_log_to_rotate_list(const bstring fname, FILE *f)
 {
     check(nlogs<LOG_MAX,"Too many logs added to rotate list.");
     check(fname!=NULL,"Tried to add NULL log filename to rotate list.");
-    logs[nlogs].name=fname;
+    logs[nlogs].name=bstrcpy(fname);
     logs[nlogs].f=f;
     nlogs++;
     return 0;
