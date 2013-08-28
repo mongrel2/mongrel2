@@ -62,6 +62,7 @@ typedef struct Server {
     bstring access_log;
     bstring error_log;
     bstring pid_file;
+    bstring control_port;
     bstring default_hostname;
     uint32_t created_on;
     int use_ssl;
@@ -74,7 +75,8 @@ typedef struct Server {
 
 Server *Server_create(bstring uuid, bstring default_host,
         bstring bind_addr, int port, bstring chroot,
-        bstring access_log, bstring error_log, bstring pid_file, int use_ssl);
+        bstring access_log, bstring error_log, bstring pid_file,
+        bstring control_port, int use_ssl);
 
 void Server_destroy(Server *srv);
 

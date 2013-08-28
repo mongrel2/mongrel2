@@ -337,9 +337,10 @@ Server *Config_load_server(const char *uuid)
     tns_value_t *res = CONFIG_MODULE.load_server(uuid);
     int rc = 0;
 
-    DB_check(res, 0, 10,
+    DB_check(res, 0, 11,
             tns_tag_number, tns_tag_string, tns_tag_string, tns_tag_string, tns_tag_number,
-            tns_tag_string, tns_tag_string, tns_tag_string, tns_tag_string, tns_tag_number);
+            tns_tag_string, tns_tag_string, tns_tag_string, tns_tag_string, tns_tag_string,
+            tns_tag_number);
 
     int server_id = DB_get_as(res, 0, 0, number); // id
 
@@ -352,7 +353,8 @@ Server *Config_load_server(const char *uuid)
             DB_get_as(res, 0, 6, string), // access_log
             DB_get_as(res, 0, 7, string), // error_log
             DB_get_as(res, 0, 8, string), // pid_file
-            DB_get_as(res, 0, 9, number) // use_ssl
+            DB_get_as(res, 0, 9, string), // control_port
+            DB_get_as(res, 0, 10, number) // use_ssl
             );
     check(srv != NULL, "Failed to create server %s", uuid);
 

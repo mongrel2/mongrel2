@@ -34,6 +34,7 @@
 
 #include "config/module.h"
 #include "config/db.h"
+#include "tnetstrings_impl.h"
 
 int default_init(const char *path)
 {
@@ -82,7 +83,24 @@ tns_value_t *default_load_server(const char *uuid)
 {
     const char *SERVER_QUERY = "SELECT id, uuid, default_host, bind_addr, port, chroot, access_log, error_log, pid_file, use_ssl FROM server WHERE uuid=%Q";
 
-    return DB_exec(SERVER_QUERY, uuid);
+    tns_value_t *ret = DB_exec(SERVER_QUERY, uuid);
+    if(ret == NULL || tns_get_type(ret) != tns_tag_list || ret->value.list->end < 1)
+        return ret;
+
+    tns_value_t *control_port;
+    tns_value_t *ret2 = DB_exec("SELECT control_port FROM server WHERE uuid=%Q", uuid);
+    if(ret2 != NULL && tns_get_type(ret2) == tns_tag_list && ret2->value.list->end > 0) {
+        tns_value_t *row = (tns_value_t *)darray_first(ret2->value.list);
+        control_port = (tns_value_t *)darray_first(row->value.list);
+        darray_remove(row->value.list, 0);
+        tns_value_destroy(ret2);
+    } else {
+        control_port = tns_parse_string("", 0);
+    }
+
+    tns_insert_to_list((tns_value_t *)darray_first(ret->value.list), 9, control_port);
+
+    return ret;
 }
 
 
