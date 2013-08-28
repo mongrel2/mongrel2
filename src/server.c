@@ -94,29 +94,29 @@ static int Server_load_ciphers(Server *srv, bstring ssl_ciphers_val)
         bstring cipher = ssl_cipher_list->entry[i];
 
         if(biseqcstr(cipher, "SSL_RSA_RC4_128_MD5"))
-            ciphers[i] = SSL_RSA_RC4_128_MD5;
+            ciphers[i] = TLS_RSA_WITH_RC4_128_MD5;
         else if(biseqcstr(cipher, "SSL_RSA_RC4_128_SHA"))
-            ciphers[i] = SSL_RSA_RC4_128_SHA;
+            ciphers[i] = TLS_RSA_WITH_RC4_128_SHA;
         else if(biseqcstr(cipher, "SSL_RSA_DES_168_SHA"))
-            ciphers[i] = SSL_RSA_DES_168_SHA;
+            ciphers[i] = TLS_RSA_WITH_3DES_EDE_CBC_SHA;
         else if(biseqcstr(cipher, "SSL_EDH_RSA_DES_168_SHA"))
-            ciphers[i] = SSL_EDH_RSA_DES_168_SHA;
+            ciphers[i] = TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA;
         else if(biseqcstr(cipher, "SSL_RSA_AES_128_SHA"))
-            ciphers[i] = SSL_RSA_AES_128_SHA;
+            ciphers[i] = TLS_RSA_WITH_AES_128_CBC_SHA;
         else if(biseqcstr(cipher, "SSL_EDH_RSA_AES_128_SHA"))
-            ciphers[i] = SSL_EDH_RSA_AES_128_SHA;
+            ciphers[i] = TLS_DHE_RSA_WITH_AES_128_CBC_SHA;
         else if(biseqcstr(cipher, "SSL_RSA_AES_256_SHA"))
-            ciphers[i] = SSL_RSA_AES_256_SHA;
+            ciphers[i] = TLS_RSA_WITH_AES_256_CBC_SHA;
         else if(biseqcstr(cipher, "SSL_EDH_RSA_AES_256_SHA"))
-            ciphers[i] = SSL_EDH_RSA_AES_256_SHA;
+            ciphers[i] = TLS_DHE_RSA_WITH_AES_256_CBC_SHA;
         else if(biseqcstr(cipher, "SSL_RSA_CAMELLIA_128_SHA"))
-            ciphers[i] = SSL_RSA_CAMELLIA_128_SHA;
+            ciphers[i] = TLS_RSA_WITH_CAMELLIA_128_CBC_SHA;
         else if(biseqcstr(cipher, "SSL_EDH_RSA_CAMELLIA_128_SHA"))
-            ciphers[i] = SSL_EDH_RSA_CAMELLIA_128_SHA;
+            ciphers[i] = TLS_DHE_RSA_WITH_CAMELLIA_128_CBC_SHA;
         else if(biseqcstr(cipher, "SSL_RSA_CAMELLIA_256_SHA"))
-            ciphers[i] = SSL_RSA_CAMELLIA_256_SHA;
+            ciphers[i] = TLS_RSA_WITH_CAMELLIA_256_CBC_SHA;
         else if(biseqcstr(cipher, "SSL_EDH_RSA_CAMELLIA_256_SHA"))
-            ciphers[i] = SSL_EDH_RSA_CAMELLIA_256_SHA;
+            ciphers[i] = TLS_DHE_RSA_WITH_CAMELLIA_256_CBC_SHA;
         else
             sentinel("Unrecognized cipher: %s", bdata(cipher));
     }

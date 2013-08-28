@@ -258,6 +258,8 @@ void ssl_debug(void *p, int level, const char *msg)
  */
 static darray_t *SSL_SESSION_CACHE = NULL;
 const int SSL_INITIAL_CACHE_SIZE = 300;
+const time_t SESSION_TIMEOUT = 20*60;
+
 
 static inline int setup_ssl_session_cache()
 {
@@ -271,35 +273,34 @@ error:
 }
 
 
-static int simple_get_session( ssl_context *ssl )
+static int simple_get_session( void *param, ssl_session *sess )
 {
     time_t t = THE_CURRENT_TIME_IS;
     int i = 0;
 
     check(setup_ssl_session_cache() == 0, "Failed to initialize SSL session cache.");
 
-    if( ssl->resume == 0 ) return 1;
     ssl_session *cur = NULL;
 
     for(i = 0; i < darray_end(SSL_SESSION_CACHE); i++) {
         cur = darray_get(SSL_SESSION_CACHE, i);
 
-        if( ssl->timeout != 0 && t - cur->start > ssl->timeout ) {
+        if( SESSION_TIMEOUT != 0 && t - cur->start > SESSION_TIMEOUT ) {
             continue;
         }
 
-        if( ssl->session->ciphersuite != cur->ciphersuite ||
-            ssl->session->length != cur->length ) 
+        if( sess->ciphersuite != cur->ciphersuite ||
+            sess->length != cur->length )
         {
             continue;
         }
 
-        if( memcmp( ssl->session->id, cur->id, cur->length ) != 0 ) {
+        if( memcmp( sess->id, cur->id, cur->length ) != 0 ) {
             continue;
         }
 
         // TODO: odd, why 48? this is from polarssl
-        memcpy( ssl->session->master, cur->master, 48 );
+        memcpy( sess->master, cur->master, 48 );
         return 0;
     }
 
@@ -307,23 +308,24 @@ error: // fallthrough
     return 1;
 }
 
-static int simple_set_session( ssl_context *ssl )
+static int simple_set_session( void *param, const ssl_session *sess )
 {
     time_t t = THE_CURRENT_TIME_IS;
     int i = 0;
     ssl_session *cur = NULL;
     int make_new = 1;
+
     check(setup_ssl_session_cache() == 0, "Failed to initialize SSL session cache.");
 
     for(i = 0; i < darray_end(SSL_SESSION_CACHE); i++) {
         cur = darray_get(SSL_SESSION_CACHE, i);
 
-        if( ssl->timeout != 0 && t - cur->start > ssl->timeout ) {
+        if( SESSION_TIMEOUT != 0 && t - cur->start > SESSION_TIMEOUT ) {
             make_new = 0;
             break; /* expired, reuse this slot */
         }
 
-        if( memcmp( ssl->session->id, cur->id, cur->length ) == 0 ) {
+        if( memcmp( sess->id, cur->id, cur->length ) == 0 ) {
             make_new = 0;
             break; /* client reconnected */
         }
@@ -335,7 +337,11 @@ static int simple_set_session( ssl_context *ssl )
         darray_push(SSL_SESSION_CACHE, cur);
     }
 
-    *cur = *ssl->session;
+    /* copy struct */
+    *cur = *sess;
+
+    /* reset peer_cert, its complex struct */
+    cur->peer_cert = NULL;
 
     return 0;
 error:
@@ -366,11 +372,7 @@ static inline int iobuf_ssl_setup(IOBuf *buf)
 
     ssl_set_bio(&buf->ssl, ssl_fdrecv_wrapper, buf, 
                 ssl_fdsend_wrapper, buf);
-    ssl_set_session(&buf->ssl, 1, 0, &buf->ssn);
-
-    ssl_set_scb(&buf->ssl, simple_get_session, simple_set_session);
-
-    memset(&buf->ssn, 0, sizeof(buf->ssn));
+    ssl_set_session_cache(&buf->ssl, simple_get_session, NULL, simple_set_session, NULL);
 
     return 0;
 error:
