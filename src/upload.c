@@ -41,6 +41,8 @@
 bstring UPLOAD_STORE = NULL;
 mode_t UPLOAD_MODE = 0;
 struct tagbstring UPLOAD_MODE_DEFAULT = bsStatic("0600");
+struct tagbstring UPLOAD_STREAM = bsStatic("UPLOAD_STREAM");
+struct tagbstring UPLOAD_STREAM_DONE = bsStatic("UPLOAD_STREAM_DONE");
 
 static inline int stream_to_disk(IOBuf *iob, int content_len, int tmpfd)
 {
@@ -74,7 +76,7 @@ int Upload_notify(Connection *conn, Handler *handler, const char *stage, bstring
     bstring key = bformat("x-mongrel2-upload-%s", stage);
     Request_set(conn->req, key, bstrcpy(tmp_name), 1);
 
-    return Connection_send_to_handler(conn, handler, "", 0);
+    return Connection_send_to_handler(conn, handler, "", 0, NULL);
 }
 
 int Upload_file(Connection *conn, Handler *handler, int content_len)
@@ -133,5 +135,94 @@ error:
         bdestroy(tmp_name);
     }
 
+    return -1;
+}
+
+static int add_to_hash(hash_t *hash, bstring key, bstring val)
+{
+    struct bstrList *val_list = NULL;
+    int rc = 0;
+
+    // make a new bstring list to use as our storage
+    val_list = bstrListCreate();
+    rc = bstrListAlloc(val_list, 1);
+    check(rc == BSTR_OK, "Couldn't allocate space in hash.");
+
+    val_list->entry[0] = val;
+    val_list->qty = 1;
+    hash_alloc_insert(hash, bstrcpy(key), val_list);
+
+    return 0;
+
+error:
+    return -1;
+}
+
+int Upload_stream(Connection *conn, Handler *handler, int content_len)
+{
+    char *data = NULL;
+    int avail = 0;
+    int offset = 0;
+    int first_chunk = 1;
+    int rc;
+    hash_t *altheaders = NULL;
+    bstring offsetstr;
+
+    debug("max content length: %d, content_len: %d", MAX_CONTENT_LENGTH, content_len);
+
+    IOBuf_resize(conn->iob, MAX_CONTENT_LENGTH); // give us a good buffer size
+
+    while(content_len > 0) {
+        if(first_chunk) {
+            // read whatever's there
+            data = IOBuf_read_some(conn->iob, &avail);
+        } else if(conn->sendCredits > 0) {
+            // read up to credits
+            data = IOBuf_read(conn->iob, conn->sendCredits < content_len ? conn->sendCredits : content_len, &avail);
+            conn->sendCredits -= avail;
+        } else {
+            // sleep until we have credits
+            tasksleep(&conn->uploadRendez);
+            continue;
+        }
+
+        check(!IOBuf_closed(conn->iob), "Closed while reading from IOBuf.");
+        content_len -= avail;
+
+        offsetstr = bformat("%d", offset);
+
+        if(first_chunk) {
+            Request_set(conn->req, &UPLOAD_STREAM, offsetstr, 1);
+            if(content_len == 0) {
+                Request_set(conn->req, &UPLOAD_STREAM_DONE, bfromcstr("1"), 1);
+            }
+        } else {
+            altheaders = hash_create(2, (hash_comp_t)bstrcmp, bstr_hash_fun);
+            add_to_hash(altheaders, &UPLOAD_STREAM, offsetstr);
+            if(content_len == 0) {
+                add_to_hash(altheaders, &UPLOAD_STREAM_DONE, bfromcstr("1"));
+            }
+        }
+
+        rc = Connection_send_to_handler(conn, handler, data, avail, altheaders);
+        check_debug(rc == 0, "Failed to deliver to the handler.");
+
+        if(altheaders != NULL) {
+            hash_free_nodes(altheaders);
+            hash_destroy(altheaders);
+            altheaders = NULL;
+        }
+
+        check(IOBuf_read_commit(conn->iob, avail) != -1, "Commit failed while streaming.");
+
+        first_chunk = 0;
+        offset += avail;
+    }
+
+    check(content_len == 0, "Failed to write everything to the large upload tmpfile.");
+
+    return 0;
+
+error:
     return -1;
 }
