@@ -197,7 +197,6 @@ Dir *Dir_create(bstring base, bstring index_file, bstring default_ctype, int cac
 
     dir->base = bstrcpy(base);
     check(blength(dir->base) < MAX_DIR_PATH, "Base directory is too long, must be less than %d", MAX_DIR_PATH);
-    check(bchar(dir->base, 0) != '/', "Don't start the base with / in %s, that will fail when not in chroot.", bdata(base));
     check(bchar(dir->base, blength(dir->base) - 1) == '/', "End directory base with / in %s or it won't work right.", bdata(base));
 
     dir->index_file = bstrcpy(index_file);

@@ -212,7 +212,11 @@ Server *Server_create(bstring uuid, bstring default_host,
 
     srv->bind_addr = bstrcpy(bind_addr); check_mem(srv->bind_addr);
     srv->uuid = bstrcpy(uuid); check_mem(srv->uuid);
-    srv->chroot = bstrcpy(chroot); check_mem(srv->chroot);
+    if(blength(chroot) > 0) {
+        srv->chroot = bstrcpy(chroot); check_mem(srv->chroot);
+    } else {
+        srv->chroot = NULL;
+    }
     srv->access_log = bstrcpy(access_log); check_mem(srv->access_log);
     srv->error_log = bstrcpy(error_log); check_mem(srv->error_log);
     srv->pid_file = bstrcpy(pid_file); check_mem(srv->pid_file);

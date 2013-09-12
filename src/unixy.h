@@ -48,7 +48,7 @@ bstring Unixy_getcwd();
 
 int Unixy_pid_file(bstring path);
 
-int Unixy_daemonize();
+int Unixy_daemonize(int dochdir);
 
 int Unixy_still_running(bstring pid_path, pid_t *pid);
 
