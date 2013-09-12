@@ -67,6 +67,7 @@ typedef struct Server {
     uint32_t created_on;
     int use_ssl;
     x509_cert own_cert;
+    x509_cert ca_chain;
     rsa_context rsa_key;
     int *ciphers;
     char *dhm_P;

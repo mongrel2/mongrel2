@@ -209,10 +209,10 @@ struct tagbstring PEER_CERT_SHA1_KEY = bsStatic("PEER_CERT_SHA1");
 
 void Connection_fingerprint_from_cert(Connection *conn) 
 {
-    x509_cert* _x509P  = conn->iob->ssn.peer_cert;
+    x509_cert* _x509P  = conn->iob->ssl.session_in->peer_cert;
     int i = 0;
 
-    debug("Connection_send_to_handler: peer_cert: %016lX: tag=%d length=%ld",
+    debug("Connection_fingerprint_from_cert: peer_cert: %016lX: tag=%d length=%ld",
             (unsigned long) _x509P,
             _x509P ? _x509P->raw.tag : -1,
             _x509P ? _x509P->raw.len : -1);
@@ -944,6 +944,11 @@ Connection *Connection_create(Server *srv, int fd, int rport,
         // set default cert
         ssl_set_own_cert(&conn->iob->ssl, &srv->own_cert, &srv->rsa_key);
 
+        // set the ca_chain if it was specified in settings
+        if ( srv->ca_chain.version != -1 ) {
+            ssl_set_ca_chain(&conn->iob->ssl, &srv->ca_chain, NULL, NULL );
+        }
+
         // setup callback for SNI. if the client does not use this feature,
         //   then this callback is never invoked and the above default cert
         //   will be used
@@ -1168,6 +1173,7 @@ void Connection_init()
             PROXY_READ_RETRIES, PROXY_READ_RETRY_WARN);
 
     IO_SSL_VERIFY_METHOD = Setting_get_int("ssl.verify_optional", 0) ? SSL_VERIFY_OPTIONAL : SSL_VERIFY_NONE;
+    IO_SSL_VERIFY_METHOD = Setting_get_int("ssl.verify_required", 0) ? SSL_VERIFY_REQUIRED : IO_SSL_VERIFY_METHOD;
 
 }
 
