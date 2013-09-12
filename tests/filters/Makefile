@@ -5,7 +5,7 @@ LDFLAGS=$(OPTLIBS)
 all: test_filter.so test_filter_a.so test_filter_b.so test_filter_c.so
 
 
-%.so : %.c
+%.so : %.c ../../build/libm2.a
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $< ../../build/libm2.a
 
 clean:
