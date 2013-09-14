@@ -175,11 +175,11 @@ int connection_msg_to_handler(Connection *conn)
         if(handler->protocol == HANDLER_PROTO_TNET) {
             payload = Request_to_tnetstring(conn->req, handler->send_ident,
                     IOBuf_fd(conn->iob), IOBuf_start(conn->iob) + header_len,
-                    body_len - 1,conn);  // drop \0 on payloads
+                    body_len - 1,conn, NULL);  // drop \0 on payloads
         } else if(handler->protocol == HANDLER_PROTO_JSON) {
             payload = Request_to_payload(conn->req, handler->send_ident,
                     IOBuf_fd(conn->iob), IOBuf_start(conn->iob) + header_len,
-                    body_len - 1,conn);  // drop \0 on payloads
+                    body_len - 1,conn, NULL);  // drop \0 on payloads
         } else {
             sentinel("Invalid protocol type: %d", handler->protocol);
         }
@@ -234,7 +234,7 @@ void Connection_fingerprint_from_cert(Connection *conn)
     }
 }
 
-int Connection_send_to_handler(Connection *conn, Handler *handler, char *body, int content_len)
+int Connection_send_to_handler(Connection *conn, Handler *handler, char *body, int content_len, hash_t *altheaders)
 {
     int rc = 0;
     bstring payload = NULL;
@@ -247,10 +247,10 @@ int Connection_send_to_handler(Connection *conn, Handler *handler, char *body, i
 
     if(handler->protocol == HANDLER_PROTO_TNET) {
         payload = Request_to_tnetstring(conn->req, handler->send_ident, 
-                IOBuf_fd(conn->iob), body, content_len, conn);
+                IOBuf_fd(conn->iob), body, content_len, conn, altheaders);
     } else if(handler->protocol == HANDLER_PROTO_JSON) {
         payload = Request_to_payload(conn->req, handler->send_ident, 
-                IOBuf_fd(conn->iob), body, content_len, conn);
+                IOBuf_fd(conn->iob), body, content_len, conn, altheaders);
     } else {
         sentinel("Invalid protocol type: %d", handler->protocol);
     }
@@ -335,7 +335,7 @@ int connection_http_to_handler(Connection *conn)
         //Response_send_status(conn,response);
         bdestroy(conn->req->request_method);
         conn->req->request_method=bfromcstr("WEBSOCKET_HANDSHAKE");
-        Connection_send_to_handler(conn, handler, bdata(response), blength(response));
+        Connection_send_to_handler(conn, handler, bdata(response), blength(response), NULL);
         bdestroy(response);
 
         bdestroy(conn->req->request_method);
@@ -345,10 +345,14 @@ int connection_http_to_handler(Connection *conn)
 
     if(content_len == 0) {
         body = "";
-        rc = Connection_send_to_handler(conn, handler, body, content_len);
+        rc = Connection_send_to_handler(conn, handler, body, content_len, NULL);
         check_debug(rc == 0, "Failed to deliver to the handler.");
     } else if(content_len > MAX_CONTENT_LENGTH) {
-        rc = Upload_file(conn, handler, content_len);
+        if(Setting_get_int("upload.stream", 0)) {
+            rc = Upload_stream(conn, handler, content_len);
+        } else {
+            rc = Upload_file(conn, handler, content_len);
+        }
         check(rc == 0, "Failed to upload file.");
     } else {
         debug("READ ALL CALLED with content_len: %d, and MAX_CONTENT_LENGTH: %d", content_len, MAX_CONTENT_LENGTH);
@@ -356,7 +360,7 @@ int connection_http_to_handler(Connection *conn)
         body = IOBuf_read_all(conn->iob, content_len, CLIENT_READ_RETRIES);
         check(body != NULL, "Client closed the connection during upload.");
 
-        rc = Connection_send_to_handler(conn, handler, body, content_len);
+        rc = Connection_send_to_handler(conn, handler, body, content_len, NULL);
         check_debug(rc == 0, "Failed to deliver to the handler.");
     }
 
@@ -729,7 +733,7 @@ again:
     if(isControl) /* Control frames get sent right-away */
     {
         Request_set(conn->req,bfromcstr("FLAGS"),bformat("0x%X",flags|0x80),1);
-        rc = Connection_send_to_handler(conn, conn->handler, (void *)dataU,data_length);
+        rc = Connection_send_to_handler(conn, conn->handler, (void *)dataU,data_length, NULL);
         check_debug(rc == 0, "Failed to deliver to the handler.");
     }
     else {
@@ -738,7 +742,7 @@ again:
         }
         if (payload == NULL) {
             if (fin) {
-                rc = Connection_send_to_handler(conn, conn->handler, (void *)dataU,data_length);
+                rc = Connection_send_to_handler(conn, conn->handler, (void *)dataU,data_length, NULL);
                 check_debug(rc == 0, "Failed to deliver to the handler.");
             }
             else {
@@ -748,7 +752,7 @@ again:
         } else {
             check(BSTR_OK == bcatblk(payload,dataU,data_length), "Concatenation failed");
             if (fin) {
-                rc = Connection_send_to_handler(conn, conn->handler, bdata(payload),blength(payload));
+                rc = Connection_send_to_handler(conn, conn->handler, bdata(payload),blength(payload), NULL);
                 check_debug(rc == 0, "Failed to deliver to the handler.");
                 bdestroy(payload);
                 payload=NULL;
@@ -934,6 +938,7 @@ Connection *Connection_create(Server *srv, int fd, int rport,
     conn->remote[IPADDR_SIZE] = '\0';
 
     conn->handler = NULL;
+    conn->sendCredits = 0;
 
     check_mem(conn->req);
 
