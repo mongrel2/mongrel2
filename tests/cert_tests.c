@@ -33,9 +33,7 @@ char *test_SSL_verify_cert()
     mu_assert(ret == 0, "failed to parse cert crl.pem");
 
     int flags = 0;
-    ret =x509parse_verify( &crt, &ca_crt, &crl, NULL, &flags, NULL, NULL);
-    //it can be called with a NULL crl
-    //ret =x509parse_verify( &crt, &ca_crt, NULL, NULL, &flags, NULL, NULL);
+    ret =x509parse_verify( &crt, &ca_crt, NULL, NULL, &flags, NULL, NULL);
 
     mu_assert(ret == 0, "failed to verify cert m2-cert.pem");
 
