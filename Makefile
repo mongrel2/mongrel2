@@ -176,6 +176,6 @@ solaris: all
 
 
 macports: OPTFLAGS += -I/opt/local/include
-macports: OPTLIBS += -L/opt/local/lib
+macports: OPTLIBS += -L/opt/local/lib -undefined dynamic_lookup
 macports: all
 
