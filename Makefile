@@ -1,4 +1,4 @@
-CFLAGS=-g -O2 -Wall -Wextra -Isrc -pthread -rdynamic -DNDEBUG $(OPTFLAGS) -D_FILE_OFFSET_BITS=64
+CFLAGS=-g -O2 -Wall -Wextra -Isrc -Isrc/polarssl/include -pthread -rdynamic -DNDEBUG $(OPTFLAGS) -D_FILE_OFFSET_BITS=64
 LIBS=-lzmq -ldl -lsqlite3 $(OPTLIBS)
 PREFIX?=/usr/local
 
@@ -6,9 +6,9 @@ get_objs = $(addsuffix .o,$(basename $(wildcard $(1))))
 
 ASM=$(wildcard src/**/*.S src/*.S)
 RAGEL_TARGETS=src/state.c src/http11/http11_parser.c
-SOURCES=$(wildcard src/**/*.c src/*.c) $(RAGEL_TARGETS)
+SOURCES=$(wildcard src/polarssl/library/*.c src/**/*.c src/*.c) $(RAGEL_TARGETS)
 OBJECTS=$(patsubst %.c,%.o,${SOURCES}) $(patsubst %.S,%.o,${ASM})
-OBJECTS_EXTERNAL+=$(call get_objs,src/polarssl/*.c)
+OBJECTS_EXTERNAL+=$(call get_objs,src/polarssl/library/*.c)
 OBJECTS_NOEXT=$(filter-out ${OBJECTS_EXTERNAL},${OBJECTS})
 LIB_SRC=$(filter-out src/mongrel2.c,${SOURCES})
 LIB_OBJ=$(filter-out src/mongrel2.o,${OBJECTS})
@@ -36,6 +36,7 @@ build/libm2.a: build ${LIB_OBJ}
 build:
 	@mkdir -p build
 	@mkdir -p bin
+	cp src/polarssl_config.h src/polarssl/include/polarssl/config.h
 
 clean:
 	rm -rf build bin lib ${OBJECTS} ${TESTS} tests/config.sqlite

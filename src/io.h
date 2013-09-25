@@ -7,7 +7,6 @@
 
 #include <stdlib.h>
 #include <polarssl/x509.h>
-#include <polarssl/rsa.h>
 #include <polarssl/ssl.h>
 #include <polarssl/havege.h>
 

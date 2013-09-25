@@ -1,0 +1,3 @@
+[submodule "src/polarssl"]
+	path = src/polarssl
+	url = git://github.com/polarssl/polarssl.git
