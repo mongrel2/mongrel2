@@ -209,7 +209,7 @@ struct tagbstring PEER_CERT_SHA1_KEY = bsStatic("PEER_CERT_SHA1");
 
 void Connection_fingerprint_from_cert(Connection *conn) 
 {
-    x509_cert* _x509P  = conn->iob->ssl.session_in->peer_cert;
+    const x509_crt* _x509P  = ssl_get_peer_cert(&conn->iob->ssl);
     int i = 0;
 
     debug("Connection_fingerprint_from_cert: peer_cert: %016lX: tag=%d length=%ld",
@@ -840,8 +840,8 @@ void Connection_destroy(Connection *conn)
         conn->req = NULL;
 
         if(conn->use_sni) {
-            x509_free(&conn->own_cert);
-            rsa_free(&conn->rsa_key);
+            x509_crt_free(&conn->own_cert);
+            pk_free(&conn->pk_key);
         }
 
         if(conn->client) free(conn->client);
@@ -891,10 +891,10 @@ static int connection_sni_cb(void *p_conn, ssl_context *ssl, const unsigned char
     keypath = bformat("%s%s.key", bdata(certdir), bdata(hostname));
     check_mem(keypath);
 
-    rc = x509parse_crtfile(&conn->own_cert, bdata(certpath));
+    rc = x509_crt_parse_file(&conn->own_cert, bdata(certpath));
     check(rc == 0, "Failed to load cert from %s", bdata(certpath));
 
-    rc = x509parse_keyfile(&conn->rsa_key, bdata(keypath), NULL);
+    rc = pk_parse_keyfile(&conn->pk_key, bdata(keypath), NULL);
     check(rc == 0, "Failed to load key from %s", bdata(keypath));
 
     bdestroy(hostname);
@@ -903,14 +903,14 @@ static int connection_sni_cb(void *p_conn, ssl_context *ssl, const unsigned char
 
     conn->use_sni = 1;
 
-    ssl_set_own_cert(ssl, &conn->own_cert, &conn->rsa_key);
+    ssl_set_own_cert(ssl, &conn->own_cert, &conn->pk_key);
 
     return 0;
 
 error:
     // it should be safe to call these on zeroed-out objects
-    x509_free(&conn->own_cert);
-    rsa_free(&conn->rsa_key);
+    x509_crt_free(&conn->own_cert);
+    pk_free(&conn->pk_key);
 
     bdestroy(hostname);
     if(certpath != NULL) bdestroy(certpath);
@@ -947,7 +947,7 @@ Connection *Connection_create(Server *srv, int fd, int rport,
         check(conn->iob != NULL, "Failed to create the SSL IOBuf.");
 
         // set default cert
-        ssl_set_own_cert(&conn->iob->ssl, &srv->own_cert, &srv->rsa_key);
+        ssl_set_own_cert(&conn->iob->ssl, &srv->own_cert, &srv->pk_key);
 
         // set the ca_chain if it was specified in settings
         if ( srv->ca_chain.version != -1 ) {
