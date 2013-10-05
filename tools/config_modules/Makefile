@@ -1,5 +1,5 @@
 PREFIX?=/usr/local
-CFLAGS=-I../../src $(OPTFLAGS) -fPIC -shared -nostartfiles -L../../build
+CFLAGS=-I../../src -I../../src/polarssl/include $(OPTFLAGS) -fPIC -shared -nostartfiles -L../../build
 LDFLAGS=$(OPTLIBS)
 
 MONGO_SRC = mongo-c-driver/src/bson.c \

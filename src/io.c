@@ -296,7 +296,7 @@ static int simple_get_cache( void *p_ssl, ssl_session *ssn )
         // TODO: odd, why 48? this is from polarssl
         memcpy( ssn->master, cur->master, 48 );
 
-        x509_cert* _x509P  = cur->peer_cert;
+        x509_crt* _x509P  = cur->peer_cert;
         if (_x509P == NULL) {
             debug("failed to find peer_cert in handshake during get");
             return 0;
@@ -335,14 +335,14 @@ static int simple_set_cache( void *p_ssl, const ssl_session *ssn )
 
     *cur = *ssn;
 
-    x509_cert* _x509P  = ssl_get_peer_cert( ssl );
+    const x509_crt* _x509P  = ssl_get_peer_cert( ssl );
     if (_x509P == NULL) {
         debug("failed to find peer_cert in handshake");
         return 0;
     }
 
     int rc = 0;
-    if ((rc = x509parse_crt( cur->peer_cert,  _x509P->raw.p, _x509P->raw.len)) != 0) {
+    if ((rc = x509_crt_parse( cur->peer_cert,  _x509P->raw.p, _x509P->raw.len)) != 0) {
         debug("failed to set peer_cert during handshake:rc:%d:", rc);
     }
 

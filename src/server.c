@@ -101,12 +101,14 @@ static int Server_load_ciphers(Server *srv, bstring ssl_ciphers_val)
     int i = 0, n = 0;
     int max_num_ciphers = 0;
     int *ciphers = NULL;
+    const int *default_ciphersuites;
 
     check(ssl_cipher_list != NULL && ssl_cipher_list->qty > 0,
             "Invalid cipher list, it must be separated by space ' ' characters "
             "and you need at least one.  Or, just leave it out for defaults.");
 
-    while(ssl_default_ciphersuites[max_num_ciphers] != 0) {
+    default_ciphersuites = ssl_list_ciphersuites();
+    while(default_ciphersuites[max_num_ciphers] != 0) {
         max_num_ciphers++;
     }
 
@@ -160,10 +162,10 @@ static int Server_init_ssl(Server *srv)
     keypath = bformat("%s%s.key", bdata(certdir), bdata(srv->uuid));
     check_mem(keypath);
 
-    rc = x509parse_crtfile(&srv->own_cert, bdata(certpath));
+    rc = x509_crt_parse_file(&srv->own_cert, bdata(certpath));
     check(rc == 0, "Failed to load cert from %s", bdata(certpath));
 
-    rc = x509parse_keyfile(&srv->rsa_key, bdata(keypath), NULL);
+    rc = pk_parse_keyfile(&srv->pk_key, bdata(keypath), NULL);
     check(rc == 0, "Failed to load key from %s", bdata(keypath));
 
     bstring ssl_ciphers_val = Setting_get_str("ssl_ciphers", NULL);
@@ -172,7 +174,7 @@ static int Server_init_ssl(Server *srv)
 
     if ( ca_chain != NULL ) {
 
-        rc = x509parse_crtfile(&srv->ca_chain, bdata(ca_chain));
+        rc = x509_crt_parse_file(&srv->ca_chain, bdata(ca_chain));
         check(rc == 0, "Failed to load cert from %s", bdata(ca_chain));
 
     } else {
@@ -185,7 +187,7 @@ static int Server_init_ssl(Server *srv)
         rc = Server_load_ciphers(srv, ssl_ciphers_val);
         check(rc == 0, "Failed to load requested SSL ciphers.");
     } else {
-        srv->ciphers = ssl_default_ciphersuites;
+        srv->ciphers = ssl_list_ciphersuites();
     }
 
     srv->dhm_P = ssl_default_dhm_P;
@@ -271,8 +273,8 @@ void Server_destroy(Server *srv)
 {
     if(srv) {
         if(srv->use_ssl) {
-            x509_free(&srv->own_cert);
-            rsa_free(&srv->rsa_key);
+            x509_crt_free(&srv->own_cert);
+            pk_free(&srv->pk_key);
             // srv->ciphers freed (if non-default) by h_free
         }
 
