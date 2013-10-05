@@ -15,6 +15,8 @@ LIB_OBJ=$(filter-out src/mongrel2.o,${OBJECTS})
 TEST_SRC=$(wildcard tests/*_tests.c)
 TESTS=$(patsubst %.c,%,${TEST_SRC})
 MAKEOPTS=OPTFLAGS="${NOEXTCFLAGS} ${OPTFLAGS}" OPTLIBS="${OPTLIBS}" LIBS="${LIBS}" DESTDIR="${DESTDIR}" PREFIX="${PREFIX}"
+ifdef $($(shell sh init.sh))
+endif
 
 all: bin/mongrel2 tests m2sh procer
 
@@ -23,7 +25,8 @@ dev: all
 
 ${OBJECTS_NOEXT}: CFLAGS += ${NOEXTCFLAGS}
 
-
+src/polarssl/include/polarssl/config.h: src/polarssl_config.h
+	cp src/polarssl_config.h src/polarssl/include/polarssl/config.h
 
 bin/mongrel2: build/libm2.a src/mongrel2.o
 	$(CC) $(CFLAGS) src/mongrel2.o -o $@ $< $(LIBS)
@@ -33,10 +36,9 @@ build/libm2.a: build ${LIB_OBJ}
 	ar rcs $@ ${LIB_OBJ}
 	ranlib $@
 
-build:
+build: src/polarssl/include/polarssl/config.h
 	@mkdir -p build
 	@mkdir -p bin
-	cp src/polarssl_config.h src/polarssl/include/polarssl/config.h
 
 clean:
 	rm -rf build bin lib ${OBJECTS} ${TESTS} tests/config.sqlite
