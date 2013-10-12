@@ -43,6 +43,7 @@
 #include <stdlib.h>
 
 char *m2program = "mongrel2";
+static int in_chroot = 0;
 
 int Unixy_chroot(bstring path)
 {
@@ -54,6 +55,8 @@ int Unixy_chroot(bstring path)
     rc = chroot(to_dir);
     check(rc == 0, "Can't chroot to %s, rerun as root if this is what you want.", bdata(path));
 
+    in_chroot = 1;
+
     rc = chdir("/");
     check(rc == 0, "Can't chdir to / directory inside chroot.");
 
@@ -61,6 +64,12 @@ int Unixy_chroot(bstring path)
 
 error:
     return -1;
+}
+
+
+int Unixy_in_chroot()
+{
+    return in_chroot;
 }
 
 
