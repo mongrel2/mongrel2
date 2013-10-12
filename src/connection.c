@@ -915,7 +915,10 @@ error:
     bdestroy(hostname);
     if(certpath != NULL) bdestroy(certpath);
     if(keypath != NULL) bdestroy(keypath);
-    return -1;
+
+    // don't return error here. this way the ssl handshake continues and the
+    //   the default cert will get used instead
+    return 0;
 }
 
 

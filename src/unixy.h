@@ -42,6 +42,8 @@ char *m2program;
 
 int Unixy_chroot(bstring path);
 
+int Unixy_in_chroot();
+
 int Unixy_drop_priv(bstring path);
 
 bstring Unixy_getcwd();
