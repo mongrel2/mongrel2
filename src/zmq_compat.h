@@ -59,12 +59,14 @@
 #  define zmq_msg_send(msg, sock, opt) zmq_send(sock, msg, opt)
 #  define zmq_msg_recv(msg, sock, opt) zmq_recv(sock, msg, opt)
 #  define ZMQ_POLL_MSEC    1000        //  zmq_poll is usec
-#elif ZMQ_VERSION_MAJOR == 3
-#  if ZMQ_VERSION_MINOR < 1
+#elif ZMQ_VERSION_MAJOR > 2
+#  if ZMQ_VERSION_MAJOR == 3 && ZMQ_VERSION_MINOR < 1
 #    error "0MQ 3.0 not supported"
-#  elif ZMQ_VERSION_MINOR == 1 && ZMQ_VERSION_PATCH == 0
-#     define zmq_msg_send(msg, sock, opt) zmq_sendmsg(sock, msg, opt)
-#     define zmq_msg_recv(msg, sock, opt) zmq_recvmsg(sock, msg, opt)
+#  elif ZMQ_VERSION_MAJOR == 3 && ZMQ_VERSION_MINOR == 1 
+#    if ZMQ_VERSION_PATCH == 0
+#      define zmq_msg_send(msg, sock, opt) zmq_sendmsg(sock, msg, opt)
+#      define zmq_msg_recv(msg, sock, opt) zmq_recvmsg(sock, msg, opt)
+#    endif
 #  endif
 #  define ZMQ_POLL_MSEC    1           //  zmq_poll is msec
 #endif
