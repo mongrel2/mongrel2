@@ -18,7 +18,7 @@ Features
 * N:M Messaging Patterns means you can have any N handlers answer to any M
   browsers arbitrarily, but still easy to do plain request/response.
 * Automation Loving Configs that are easily accessible via any programming
-  language with an Model-View-Controller design.
+  language with a Model-View-Controller design.
 * Modern Internal Design using the Mongrel 1 HTTP parser powering many big
   companies with a proven security track record, event based I/O, fast
   coroutines to handle that I/O, and smart reasonable defaults with zero
