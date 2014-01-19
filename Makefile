@@ -39,12 +39,12 @@ build:
 
 clean:
 	rm -rf build bin lib ${OBJECTS} ${TESTS} tests/config.sqlite
-	rm -f tests/perf.log 
-	rm -f tests/test.pid 
-	rm -f tests/tests.log 
-	rm -f tests/empty.sqlite 
+	rm -f tests/perf.log
+	rm -f tests/test.pid
+	rm -f tests/tests.log
+	rm -f tests/empty.sqlite
 	rm -f tools/lemon/lemon
-	rm -f tools/m2sh/tests/tests.log 
+	rm -f tools/m2sh/tests/tests.log
 	find . -name "*.gc*" -exec rm {} \;
 	${MAKE} -C tools/m2sh OPTLIB=${OPTLIB} clean
 	${MAKE} -C tools/filters OPTLIB=${OPTLIB} clean
@@ -178,4 +178,7 @@ solaris: all
 macports: OPTFLAGS += -I/opt/local/include
 macports: OPTLIBS += -L/opt/local/lib
 macports: all
+
+osx: OPTLIBS += -lstdc++
+osx: all
 
