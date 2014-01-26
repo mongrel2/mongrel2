@@ -201,6 +201,14 @@ finished'' message.  If, at any time, you want to kill the upload, you just
 send a 0-length reply (the official KILL MESSAGE) and the whole thing is
 aborted and cleaned up.
 
+\subsection{Experimental large-upload streaming}
+
+Mongrel2 1.9.0 adds experimental support for streaming large files directly to
+handlers.  However there are several limitations -- most notably, you need to
+ensure that the same handler process gets each request, or that the handler
+processess can all communicate, as unlike raw HTTP the protocol used to
+communicate with the handlers is stateful.
+
 
 \section{Introduction to ZeroMQ}
 
@@ -624,6 +632,38 @@ to look:
 \end{description}
 
 Hopefully, you can figure it out from the code, but if not, let me know.
+
+\section{Extended Reply Format}
+
+Sending a raw response is fine for basic uses, but sometimes you want to
+communicate something back to mongrel2.  For example, many servers have
+a way to send a file in a response.  They typically do so by setting a HTTP
+header.  This is a bad-fit for Mongrel2 since we do not parse any of the raw
+response data.
+
+What we need is a simple-to-parse format for structured data.  Something like
+tnetstrings, for example.  We also need a way to tell mongrel2 that we have
+structured data, rather than raw data.  (Note that had we used a netstring for
+the body that would be moot, but hindsight is ever 20-20).  Recall that the
+response format is:
+
+\begin{Verbatim}
+UUID SIZE:ID ID ID, BODY
+\end{Verbatim}
+
+Note that each ID will always be an integer in the basic response format.  For
+an extended response, we adopt the convention that the first ID is an upper
+case X, so an extended response becomes:
+
+\begin{Verbatim}
+UUID SIZE:X ID ID ID, BODY
+\end{Verbatim}
+
+With the added requirement that BODY be a tnetstring list.  The first item in
+that list should be a string which keys which extension to use.  Plugins (see
+"Writing a Filter" below) can register to dispatch on any string.  See
+\file{/tools/filters/sendfile.c} for the sendfile plugin and
+\file{/examples/http\_0mq/sendfile.py} for a python handler example.
 
 
 \section{Writing A Filter (BETA)}

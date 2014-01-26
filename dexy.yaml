@@ -1,0 +1,7 @@
+.tex|jinja:
+    - allinputs : True 
+    - .py|pyg|l
+    - .sh|pyg|l
+    - .conf|dexy
+    - .cfg
+    - .c|pyg|l

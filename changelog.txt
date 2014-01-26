@@ -1,0 +1,98 @@
+Changes from 1.8.0 to 1.9.0:
+commit 19df4cbd1
+
+	Upgrade to PolarSSL 1.3.0 
+
+commit 21d4cc95b
+
+    Change flags for building .so on macports (A new sample filter broke the
+	old options)
+
+commit e61fee3e7
+
+	Add an option to stream large uploads to a handler using a token credit
+	system to prevent over-buffering.
+
+commit 3a58aa0da
+
+	Add an option ssl.verify_required to mandate client certificate
+	verification
+
+commit 9024156ad
+
+    Add a control XREQ type; only supported option is a keep-alive which acts
+	as a "ping" for the mongrel2 idle connection killer
+
+commit 854cff6e9
+
+	Add mongrel2 header field "REMOTE_ADDR" with the actual remote from
+	mongrel2.
+	Add option "no_clobber_xff" which will preserve the x-forwarded-for field
+	from the client/upstream proxy.
+
+	Old behavior was to replace the x-forwarded-for header with the remote
+	address to mongrel2.  This new way is better since it still allows a
+	trusted field (REMOTE_ADDR) while also preserving x-forwarded-for for
+	setups that include (for instance) a load-balancer or external
+	ssl-terminator.
+
+	We don't replace the old behavior for x-forwarded-for unless requested,
+	since older handlers may trust that header.
+
+commit b82451f343
+
+    Add ability to have a separate control port for each server
+
+
+commit ea6a9cd729
+
+    This was hotfixed-into 1.8.1 and fixed some bugs in how the deliver task
+	gets killed.
+
+commit ef1c601777
+    
+    Add a few MIME type mappings
+
+commit 89ed061396
+
+	Adds TLS SNI identification
+
+    In the certdir, place e.g. example.com.key and example.com.crt to have SNI
+	work.  1.9.0 should fall back on the old key/crt files if these aren't
+	found
+
+commit 81bf4ac84ba
+
+	Adds a new "Extended" handler reply format, and a plugin system to hook
+	into them.  A sample plugin was created that will do x-sendfile like
+	responses (The handler sends the proper headers, then an extended reply
+	keyed to the plugin, which causes mongrel2 to dump a file to the
+	connection)
+
+commit 82b3ab000dc
+
+    Docs fixes for ubuntu installation instructions
+
+commit 24b2ed3936a
+
+    A number of either completely or nearly non-functional changes to make
+	a static analyzer happy.
+
+commit 89e1f43f545
+
+	Add ability for filters to rewrite headers going to proxy connections
+
+	This allows, for example mod_rewrite like ability in filters
+
+commit 5150a0583c1
+
+    Modification to Python zmq library to allow forwarding of raw 0mq message
+    
+commit 82a26a67c04
+
+    Bugfix for when a connection first goes to proxy and then a zmq handler
+    
+commit 861cdf36f585
+
+    Add configuration option to prevent forking
+	Makes a lot of process management tools happier
