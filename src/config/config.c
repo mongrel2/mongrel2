@@ -53,6 +53,7 @@
 #include "filter.h"
 #include <dlfcn.h>
 
+#include "xrequest.h"
 
 Handler *Config_load_handler(int handler_id)
 {
@@ -236,9 +237,8 @@ error:
 }
 
 
-int Config_load_filters(Server *srv, int server_id)
+int Config_load_plugins(Server *srv, tns_value_t *res, int (*load_func)(Server *, bstring, tns_value_t *))
 {
-    tns_value_t *res = CONFIG_MODULE.load_filters(server_id);
     int cols = 0;
     int rows = DB_counts(res, &cols);
     int row_i = 0;
@@ -260,8 +260,8 @@ int Config_load_filters(Server *srv, int server_id)
         check(tns_get_type(config) == tns_tag_dict,
                 "Settings for a filter must be a dict.");
 
-        rc = Filter_load(srv, filter_name, config);
-        check(rc == 0, "Failed to load filter '%s' id='%d'", bdata(filter_name), id);
+        rc = load_func(srv, filter_name, config);
+        check(rc == 0, "Failed to load plugin '%s' id='%d'", bdata(filter_name), id);
     }
 
     tns_value_destroy(res);
@@ -270,6 +270,18 @@ int Config_load_filters(Server *srv, int server_id)
 error:
     if(res) tns_value_destroy(res);
     return 1;
+}
+
+int Config_load_filters(Server *srv, int server_id)
+{
+    tns_value_t *res = CONFIG_MODULE.load_filters(server_id);
+    return Config_load_plugins(srv,res,Filter_load);
+}
+
+int Config_load_xrequests(Server *srv, int server_id)
+{
+    tns_value_t *res = CONFIG_MODULE.load_xrequests(server_id);
+    return Config_load_plugins(srv,res,Xrequest_load);
 }
 
 int Config_load_hosts(Server *srv, int server_id)
@@ -325,9 +337,10 @@ Server *Config_load_server(const char *uuid)
     tns_value_t *res = CONFIG_MODULE.load_server(uuid);
     int rc = 0;
 
-    DB_check(res, 0, 10,
+    DB_check(res, 0, 11,
             tns_tag_number, tns_tag_string, tns_tag_string, tns_tag_string, tns_tag_number,
-            tns_tag_string, tns_tag_string, tns_tag_string, tns_tag_string, tns_tag_number);
+            tns_tag_string, tns_tag_string, tns_tag_string, tns_tag_string, tns_tag_string,
+            tns_tag_number);
 
     int server_id = DB_get_as(res, 0, 0, number); // id
 
@@ -340,7 +353,8 @@ Server *Config_load_server(const char *uuid)
             DB_get_as(res, 0, 6, string), // access_log
             DB_get_as(res, 0, 7, string), // error_log
             DB_get_as(res, 0, 8, string), // pid_file
-            DB_get_as(res, 0, 9, number) // use_ssl
+            DB_get_as(res, 0, 9, string), // control_port
+            DB_get_as(res, 0, 10, number) // use_ssl
             );
     check(srv != NULL, "Failed to create server %s", uuid);
 
@@ -349,6 +363,9 @@ Server *Config_load_server(const char *uuid)
     check(rc == 0, "Failed to load the hosts for server: %s", bdata(srv->uuid));
 
     rc = Config_load_filters(srv, server_id);
+    check(rc == 0, "Failed to load the filters for server: %s", bdata(srv->uuid));
+
+    rc = Config_load_xrequests(srv, server_id);
     check(rc == 0, "Failed to load the filters for server: %s", bdata(srv->uuid));
 
     tns_value_destroy(res);

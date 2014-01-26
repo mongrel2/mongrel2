@@ -33,6 +33,7 @@
  */
 
 #include "log.h"
+#include "logrotate.h"
 #include "dbg.h"
 #include "request.h"
 #include "headers.h"
@@ -126,6 +127,7 @@ LogConfig *LogConfig_create(bstring access_log, bstring log_spec)
     config->log_file = fopen((char *)config->file_name->data, "a+");
     check(config->log_file, "Failed to open log file: %s for access logging.", bdata(config->file_name));
     setbuf(config->log_file, NULL);
+    check(0==add_log_to_rotate_list(config->file_name,config->log_file), "Failed to add access log to list of logs to rotate.");
 
     return config;
 

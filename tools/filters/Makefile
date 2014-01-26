@@ -1,8 +1,8 @@
 PREFIX?=/usr/local
-CFLAGS=-I../../src $(OPTFLAGS) -fPIC -shared -nostartfiles -L../../build
+CFLAGS=-I../../src -I../../src/polarssl/include $(OPTFLAGS) -g -fPIC -shared -nostartfiles -L../../build
 LDFLAGS=$(OPTLIBS)
 
-all: null.so
+all: null.so rewrite.so sendfile.so
 
 
 %.so : %.c

@@ -1,4 +1,4 @@
-CFLAGS=-g -O2 -Wall -Wextra -Isrc -pthread -rdynamic -DNDEBUG $(OPTFLAGS) -D_FILE_OFFSET_BITS=64
+CFLAGS=-g -O2 -Wall -Wextra -Isrc -Isrc/polarssl/include -pthread -rdynamic -DNDEBUG $(OPTFLAGS) -D_FILE_OFFSET_BITS=64
 LIBS=-lzmq -ldl -lsqlite3 $(OPTLIBS)
 PREFIX?=/usr/local
 
@@ -6,15 +6,17 @@ get_objs = $(addsuffix .o,$(basename $(wildcard $(1))))
 
 ASM=$(wildcard src/**/*.S src/*.S)
 RAGEL_TARGETS=src/state.c src/http11/http11_parser.c
-SOURCES=$(wildcard src/**/*.c src/*.c) $(RAGEL_TARGETS)
+SOURCES=$(wildcard src/polarssl/library/*.c src/**/*.c src/*.c) $(RAGEL_TARGETS)
 OBJECTS=$(patsubst %.c,%.o,${SOURCES}) $(patsubst %.S,%.o,${ASM})
-OBJECTS_EXTERNAL+=$(call get_objs,src/polarssl/*.c)
+OBJECTS_EXTERNAL+=$(call get_objs,src/polarssl/library/*.c)
 OBJECTS_NOEXT=$(filter-out ${OBJECTS_EXTERNAL},${OBJECTS})
 LIB_SRC=$(filter-out src/mongrel2.c,${SOURCES})
 LIB_OBJ=$(filter-out src/mongrel2.o,${OBJECTS})
 TEST_SRC=$(wildcard tests/*_tests.c)
 TESTS=$(patsubst %.c,%,${TEST_SRC})
 MAKEOPTS=OPTFLAGS="${NOEXTCFLAGS} ${OPTFLAGS}" OPTLIBS="${OPTLIBS}" LIBS="${LIBS}" DESTDIR="${DESTDIR}" PREFIX="${PREFIX}"
+ifdef $($(shell sh init.sh))
+endif
 
 all: bin/mongrel2 tests m2sh procer
 
@@ -23,7 +25,8 @@ dev: all
 
 ${OBJECTS_NOEXT}: CFLAGS += ${NOEXTCFLAGS}
 
-
+src/polarssl/include/polarssl/config.h: src/polarssl_config.h
+	cp src/polarssl_config.h src/polarssl/include/polarssl/config.h
 
 bin/mongrel2: build/libm2.a src/mongrel2.o
 	$(CC) $(CFLAGS) src/mongrel2.o -o $@ $< $(LIBS)
@@ -33,7 +36,7 @@ build/libm2.a: build ${LIB_OBJ}
 	ar rcs $@ ${LIB_OBJ}
 	ranlib $@
 
-build:
+build: src/polarssl/include/polarssl/config.h
 	@mkdir -p build
 	@mkdir -p bin
 
@@ -176,6 +179,6 @@ solaris: all
 
 
 macports: OPTFLAGS += -I/opt/local/include
-macports: OPTLIBS += -L/opt/local/lib
+macports: OPTLIBS += -L/opt/local/lib -undefined dynamic_lookup
 macports: all
 

@@ -93,7 +93,8 @@ static inline int exec_server_operations(Command *cmd,
     bstring every = option(cmd, "every", NULL);
     run.murder = option(cmd, "murder", NULL) != NULL;
 
-    check(!(name && uuid && host), "Just one please, not all of the options.");
+    int option_count = (every != NULL) + (name != NULL) + (host != NULL) + (uuid != NULL);
+    check(option_count == 1, "Just one please, not all of the options.");
 
     if(sudo) {
         run.sudo = biseqcstr(sudo, "") ? "sudo" : bdata(sudo);
@@ -101,9 +102,7 @@ static inline int exec_server_operations(Command *cmd,
         run.sudo = "";
     }
 
-    if(uuid == NULL) {
-        check(db_file != NULL, "There is no uuid, and no database given, need a uuid.");
-
+    if(db_file != NULL) {
         rc = DB_init(bdata(db_file));
         check(rc == 0, "Failed to open db: %s", bdata(db_file));
 
@@ -114,7 +113,6 @@ static inline int exec_server_operations(Command *cmd,
         } else if(host) {
             res = DB_exec("SELECT %s FROM server where default_host = %Q", select, bdata(host));
         } else if(uuid) {
-            // yes, this is necessary, so that the callback runs
             res = DB_exec("SELECT %s FROM server where uuid = %Q", select, bdata(uuid));
         } else {
             sentinel("You must give either -name, -uuid, or -host to start a server.");
@@ -122,6 +120,7 @@ static inline int exec_server_operations(Command *cmd,
 
         check(tns_get_type(res) == tns_tag_list,
                 "Wrong return type from query, should be list.");
+        check(darray_end(res->value.list) > 0, "No servers matched the description.");
     }
 
     check(callback(&run, res) != -1, "Failed to run internal operation.");

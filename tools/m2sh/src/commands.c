@@ -131,19 +131,17 @@ static int Command_help(Command *cmd)
 {
     CommandHandler *handler;
 
-    lnode_t *ex = list_first(cmd->extra);
+    bstring command_name = option(cmd, "on", NULL);
 
-    if(ex) {
-        bstring arg = lnode_get(ex);
-
-        for(handler = COMMAND_MAPPING; handler->name != NULL; handler++) {
-            if(biseqcstr(arg, handler->name)) {
+    if (command_name) {
+        for (handler = COMMAND_MAPPING; handler->name != NULL; handler++) {
+            if (biseqcstr(command_name, handler->name)) {
                 printf("%s\t%s\n", handler->name, handler->help);
                 return 0;
             }
         }
 
-        printf("No help for %s. Use m2sh help to see a list.", bdata(arg));
+        printf("No help for %s. Use m2sh help to see a list.", command_name);
     } else {
         printf("Mongrel2 m2sh has these commands available:\n\n");
 

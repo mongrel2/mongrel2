@@ -35,6 +35,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <limits.h>
+#include <ctype.h>
 
 #include "connection.h"
 #include "http11/httpclient_parser.h"
@@ -83,11 +84,14 @@ error:
 }
 
 
-static inline int Connection_deliver_enqueue(Connection *conn, bstring b)
+int Connection_deliver_enqueue(Connection *conn, deliver_function f,
+                                             tns_value_t *d)
 {
     check_debug(conn->deliverPost-conn->deliverAck < DELIVER_OUTSTANDING_MSGS, "Too many outstanding messages") ;
     check_debug(conn->deliverTaskStatus==DT_RUNNING, "Cannot enqueue, deliver task not running");
-    conn->deliverRing[conn->deliverPost++%DELIVER_OUTSTANDING_MSGS]=b;
+    conn->deliverRing[conn->deliverPost%DELIVER_OUTSTANDING_MSGS].deliver=f;
+    conn->deliverRing[conn->deliverPost%DELIVER_OUTSTANDING_MSGS].data=d;
+    conn->deliverPost++;
     taskwakeup(&conn->deliverRendez);
     return 0;
 
@@ -95,11 +99,12 @@ error:
     return -1;
 }
 
-static inline bstring Connection_deliver_dequeue(Connection *conn)
+static inline void Connection_deliver_dequeue(Connection *conn, Deliver_message *m)
 {
     while(1) {
         if(conn->deliverPost-conn->deliverAck) {
-            return conn->deliverRing[conn->deliverAck++%DELIVER_OUTSTANDING_MSGS];
+            *m = conn->deliverRing[conn->deliverAck++%DELIVER_OUTSTANDING_MSGS];
+            return;
         }
         tasksleep(&conn->deliverRendez);
     }
@@ -170,11 +175,11 @@ int connection_msg_to_handler(Connection *conn)
         if(handler->protocol == HANDLER_PROTO_TNET) {
             payload = Request_to_tnetstring(conn->req, handler->send_ident,
                     IOBuf_fd(conn->iob), IOBuf_start(conn->iob) + header_len,
-                    body_len - 1);  // drop \0 on payloads
+                    body_len - 1,conn, NULL);  // drop \0 on payloads
         } else if(handler->protocol == HANDLER_PROTO_JSON) {
             payload = Request_to_payload(conn->req, handler->send_ident,
                     IOBuf_fd(conn->iob), IOBuf_start(conn->iob) + header_len,
-                    body_len - 1);  // drop \0 on payloads
+                    body_len - 1,conn, NULL);  // drop \0 on payloads
         } else {
             sentinel("Invalid protocol type: %d", handler->protocol);
         }
@@ -204,10 +209,10 @@ struct tagbstring PEER_CERT_SHA1_KEY = bsStatic("PEER_CERT_SHA1");
 
 void Connection_fingerprint_from_cert(Connection *conn) 
 {
-    x509_cert* _x509P  = conn->iob->ssl.peer_cert;
+    const x509_crt* _x509P  = ssl_get_peer_cert(&conn->iob->ssl);
     int i = 0;
 
-    debug("Connection_send_to_handler: peer_cert: %016lX: tag=%d length=%ld",
+    debug("Connection_fingerprint_from_cert: peer_cert: %016lX: tag=%d length=%ld",
             (unsigned long) _x509P,
             _x509P ? _x509P->raw.tag : -1,
             _x509P ? _x509P->raw.len : -1);
@@ -229,7 +234,7 @@ void Connection_fingerprint_from_cert(Connection *conn)
     }
 }
 
-int Connection_send_to_handler(Connection *conn, Handler *handler, char *body, int content_len)
+int Connection_send_to_handler(Connection *conn, Handler *handler, char *body, int content_len, hash_t *altheaders)
 {
     int rc = 0;
     bstring payload = NULL;
@@ -242,10 +247,10 @@ int Connection_send_to_handler(Connection *conn, Handler *handler, char *body, i
 
     if(handler->protocol == HANDLER_PROTO_TNET) {
         payload = Request_to_tnetstring(conn->req, handler->send_ident, 
-                IOBuf_fd(conn->iob), body, content_len);
+                IOBuf_fd(conn->iob), body, content_len, conn, altheaders);
     } else if(handler->protocol == HANDLER_PROTO_JSON) {
         payload = Request_to_payload(conn->req, handler->send_ident, 
-                IOBuf_fd(conn->iob), body, content_len);
+                IOBuf_fd(conn->iob), body, content_len, conn, altheaders);
     } else {
         sentinel("Invalid protocol type: %d", handler->protocol);
     }
@@ -330,7 +335,7 @@ int connection_http_to_handler(Connection *conn)
         //Response_send_status(conn,response);
         bdestroy(conn->req->request_method);
         conn->req->request_method=bfromcstr("WEBSOCKET_HANDSHAKE");
-        Connection_send_to_handler(conn, handler, bdata(response), blength(response));
+        Connection_send_to_handler(conn, handler, bdata(response), blength(response), NULL);
         bdestroy(response);
 
         bdestroy(conn->req->request_method);
@@ -340,10 +345,14 @@ int connection_http_to_handler(Connection *conn)
 
     if(content_len == 0) {
         body = "";
-        rc = Connection_send_to_handler(conn, handler, body, content_len);
+        rc = Connection_send_to_handler(conn, handler, body, content_len, NULL);
         check_debug(rc == 0, "Failed to deliver to the handler.");
     } else if(content_len > MAX_CONTENT_LENGTH) {
-        rc = Upload_file(conn, handler, content_len);
+        if(Setting_get_int("upload.stream", 0)) {
+            rc = Upload_stream(conn, handler, content_len);
+        } else {
+            rc = Upload_file(conn, handler, content_len);
+        }
         check(rc == 0, "Failed to upload file.");
     } else {
         debug("READ ALL CALLED with content_len: %d, and MAX_CONTENT_LENGTH: %d", content_len, MAX_CONTENT_LENGTH);
@@ -351,7 +360,7 @@ int connection_http_to_handler(Connection *conn)
         body = IOBuf_read_all(conn->iob, content_len, CLIENT_READ_RETRIES);
         check(body != NULL, "Client closed the connection during upload.");
 
-        rc = Connection_send_to_handler(conn, handler, body, content_len);
+        rc = Connection_send_to_handler(conn, handler, body, content_len, NULL);
         check_debug(rc == 0, "Failed to deliver to the handler.");
     }
 
@@ -417,26 +426,45 @@ error:
     return FAILED;
 }
 
-
-
 int connection_proxy_deliver(Connection *conn)
 {
     int rc = 0;
     int total_len = Request_header_length(conn->req) + Request_content_length(conn->req);
 
-    char *buf = IOBuf_read_all(conn->iob, total_len, CLIENT_READ_RETRIES);
-    check(buf != NULL, "Failed to read from the client socket to proxy.");
+    char *buf =NULL;
 
-    rc = IOBuf_send(conn->proxy_iob, IOBuf_start(conn->iob), total_len);
-    check(rc > 0, "Failed to send to proxy.");
+
+    if (conn->req->new_header) {
+        log_info("In Proxy.");
+        IOBuf_read_all(conn->iob,Request_header_length(conn->req),CLIENT_READ_RETRIES);
+
+        buf = IOBuf_read_all(conn->iob, Request_content_length(conn->req),
+                CLIENT_READ_RETRIES);
+        check(buf != NULL, "Failed to read from the client socket to proxy.");
+
+        rc = IOBuf_send(conn->proxy_iob, bdata(conn->req->new_header),
+                blength(conn->req->new_header));
+        check(rc > 0, "Failed to send to proxy.");
+
+        if(Request_content_length(conn->req) > 0) {
+            rc = IOBuf_send(conn->proxy_iob, IOBuf_start(conn->iob),
+                    Request_content_length(conn->req));
+            check(rc > 0, "Failed to send to proxy.");
+        }
+    } else {
+
+        buf = IOBuf_read_all(conn->iob, total_len, CLIENT_READ_RETRIES);
+        check(buf != NULL, "Failed to read from the client socket to proxy.");
+
+        rc = IOBuf_send(conn->proxy_iob, IOBuf_start(conn->iob), total_len);
+        check(rc > 0, "Failed to send to proxy.");
+    }
 
     return REQ_SENT;
 
 error:
     return REMOTE_CLOSE;
 }
-
-
 
 int connection_proxy_reply_parse(Connection *conn)
 {
@@ -492,6 +520,8 @@ error:
 
 int connection_proxy_req_parse(Connection *conn)
 {
+    Route *route = NULL;
+
     int rc = 0;
     Host *target_host = conn->req->target_host;
     Backend *req_action = conn->req->action;
@@ -504,13 +534,18 @@ int connection_proxy_req_parse(Connection *conn)
     error_unless(Request_is_http(conn->req), conn, 400,
             "Someone tried to change the protocol on us from HTTP.");
 
-    Backend *found = Host_match_backend(target_host, Request_path(conn->req), NULL);
+    // add the x-forwarded-for header
+    Request_set(conn->req, &HTTP_X_FORWARDED_FOR, bfromcstr(conn->remote), 1);
+
+    Backend *found = Host_match_backend(target_host, Request_path(conn->req), &route);
     error_unless(found, conn, 404, 
             "Handler not found: %s", bdata(Request_path(conn->req)));
 
     // break out of PROXY if the actions don't match
     if(found != req_action) {
         Request_set_action(conn->req, found);
+        conn->req->pattern = route->pattern;
+        conn->req->prefix = route->prefix;
         return Connection_backend_event(found, conn);
     } else {
         return HTTP_REQ;
@@ -613,6 +648,10 @@ error:
 int connection_parse(Connection *conn)
 {
     if(Connection_read_header(conn, conn->req) > 0) {
+        if(!Setting_get_int("no_clobber_xff", 0)) {
+            // add the x-forwarded-for header
+            Request_set(conn->req, &HTTP_X_FORWARDED_FOR, bfromcstr(conn->remote), 1);
+        }
         return REQ_RECV;
     } else {
         return CLOSE;
@@ -623,36 +662,28 @@ int connection_parse(Connection *conn)
 
 int Connection_read_wspacket(Connection *conn)
 {
-    bstring payload=NULL;
-
-    uint8_t *dataU=NULL;
-    char *data = IOBuf_start(conn->iob);
-    int avail = IOBuf_avail(conn->iob);
-    int64_t packet_length=-1;
-    int smaller_packet_length;
-    int header_length;
+    bstring payload = NULL;
+    int inprogFlags = 0;
     char key[4];
-    int i;
-    int data_length;
-    int tries = 0;
-    int rc=0;
-    int fin;
-    int inprogFlags=0;
     int isControl;
     int flags;
+    uint8_t *dataU;
+    char *data;
+    int avail;
+    int64_t packet_length;
+    int smaller_packet_length;
+    int header_length;
+    int i;
+    int data_length;
+    int tries;
+    int rc;
+    int fin;
 
 again:
-    dataU=NULL;
+    dataU = NULL;
     data = IOBuf_start(conn->iob);
     avail = IOBuf_avail(conn->iob);
-    packet_length=-1;
-    smaller_packet_length=0;
-    header_length=0;
-    i=0;
-    data_length=0;
-    tries = 0;
-    rc=0;
-    fin=0;
+    packet_length = -1;
 
     for(tries = 0; packet_length == -1 && tries < 8*CLIENT_READ_RETRIES; tries++) {
         if(avail > 0) {
@@ -664,13 +695,13 @@ again:
             check_debug(!IOBuf_closed(conn->iob), "Client closed during read.");
         }
     }
-    check(packet_length > 0,"Error receiving websocket packet header.")
+    check(packet_length > 0,"Error receiving websocket packet header.");
 
     check_debug(packet_length <= INT_MAX,"Websocket packet longer than MAXINT.");
     /* TODO properly terminate WS connection */
 
     smaller_packet_length = (int)packet_length;
-    
+
     /* TODO check for maximum length */
 
     header_length=Websocket_header_length((uint8_t *) data, avail);
@@ -682,15 +713,15 @@ again:
     if (payload==NULL) {
         inprogFlags=flags;
     }
-    
 
-    fin=(WS_fin(dataU));
+
+    fin = (WS_fin(dataU));
     isControl=(WS_is_control(dataU));
 
-{
-    const char *error=WS_validate_packet(dataU,payload!=NULL);
-    check(error==NULL,"%s",error);
-}
+    {
+        const char *error=WS_validate_packet(dataU,payload!=NULL);
+        check(error==NULL,"%s",error);
+    }
 
     dataU = (uint8_t *)IOBuf_read_all(conn->iob,data_length, 8*CLIENT_READ_RETRIES);
     check(dataU != NULL, "Client closed the connection during websocket packet.");
@@ -701,9 +732,9 @@ again:
 
     if(isControl) /* Control frames get sent right-away */
     {
-            Request_set(conn->req,bfromcstr("FLAGS"),bformat("0x%X",flags|0x80),1);
-            rc = Connection_send_to_handler(conn, conn->handler, (void *)dataU,data_length);
-            check_debug(rc == 0, "Failed to deliver to the handler.");
+        Request_set(conn->req,bfromcstr("FLAGS"),bformat("0x%X",flags|0x80),1);
+        rc = Connection_send_to_handler(conn, conn->handler, (void *)dataU,data_length, NULL);
+        check_debug(rc == 0, "Failed to deliver to the handler.");
     }
     else {
         if(fin) {
@@ -711,7 +742,7 @@ again:
         }
         if (payload == NULL) {
             if (fin) {
-                rc = Connection_send_to_handler(conn, conn->handler, (void *)dataU,data_length);
+                rc = Connection_send_to_handler(conn, conn->handler, (void *)dataU,data_length, NULL);
                 check_debug(rc == 0, "Failed to deliver to the handler.");
             }
             else {
@@ -721,7 +752,7 @@ again:
         } else {
             check(BSTR_OK == bcatblk(payload,dataU,data_length), "Concatenation failed");
             if (fin) {
-                rc = Connection_send_to_handler(conn, conn->handler, bdata(payload),blength(payload));
+                rc = Connection_send_to_handler(conn, conn->handler, bdata(payload),blength(payload), NULL);
                 check_debug(rc == 0, "Failed to deliver to the handler.");
                 bdestroy(payload);
                 payload=NULL;
@@ -781,9 +812,11 @@ void Connection_deliver_task_kill(Connection *conn)
         int sleeptime=10;
         while(conn->deliverAck!=conn->deliverPost)
         {
-            bdestroy(Connection_deliver_dequeue(conn));
+            Deliver_message msg={NULL,NULL};
+            Connection_deliver_dequeue(conn,&msg);
+            tns_value_destroy(msg.data);
         }
-        Connection_deliver_enqueue(conn,NULL);
+        Connection_deliver_enqueue(conn,NULL,NULL);
         conn->deliverTaskStatus=DT_DYING;
         while(conn->deliverTaskStatus != DT_DEAD) {
             taskdelay(sleeptime);
@@ -805,11 +838,87 @@ void Connection_destroy(Connection *conn)
         Connection_deliver_task_kill(conn);
         Request_destroy(conn->req);
         conn->req = NULL;
+
+        if(conn->use_sni) {
+            x509_crt_free(&conn->own_cert);
+            pk_free(&conn->pk_key);
+        }
+
         if(conn->client) free(conn->client);
         IOBuf_destroy(conn->iob);
         IOBuf_destroy(conn->proxy_iob);
         free(conn);
     }
+}
+
+
+static int connection_sni_cb(void *p_conn, ssl_context *ssl, const unsigned char *chostname, size_t chostname_len)
+{
+    Connection *conn = (Connection *) p_conn;
+    int i;
+    int rc = 0;
+    bstring hostname = NULL;
+    bstring certpath = NULL;
+    bstring keypath = NULL;
+
+    hostname = blk2bstr((const char *)chostname, chostname_len);
+    check(hostname != NULL, "Allocation failed");
+
+    // input is utf-8. we'll forbid ascii-control chars and '/', for safe
+    //   filesystem usage. multibyte characters always have the high bit set
+    //   on each byte, so there's no worry of them getting caught.
+    for(i = 0; i < blength(hostname); ++i) {
+        unsigned char c = bdata(hostname)[i];
+        if(c < 0x20 || c == '/')
+        {
+            log_warn("SNI: invalid hostname provided");
+            return -1;
+        }
+        else if(c <= 0x7f)
+        {
+            // FIXME: it's wrong to use tolower() on a utf8 string, but it
+            //   will probably work well enough for most people
+            bdata(hostname)[i] = (unsigned char)tolower(c);
+        }
+    }
+
+    bstring certdir = Setting_get_str("certdir", NULL);
+    check(certdir != NULL, "to use ssl, you must specify a certdir");
+
+    certpath = bformat("%s%s.crt", bdata(certdir), bdata(hostname));
+    check_mem(certpath);
+
+    keypath = bformat("%s%s.key", bdata(certdir), bdata(hostname));
+    check_mem(keypath);
+
+    rc = x509_crt_parse_file(&conn->own_cert, bdata(certpath));
+    check(rc == 0, "Failed to load cert from %s", bdata(certpath));
+
+    rc = pk_parse_keyfile(&conn->pk_key, bdata(keypath), NULL);
+    check(rc == 0, "Failed to load key from %s", bdata(keypath));
+
+    bdestroy(hostname);
+    bdestroy(certpath);
+    bdestroy(keypath);
+
+    conn->use_sni = 1;
+
+    ssl_set_own_cert(ssl, &conn->own_cert, &conn->pk_key);
+
+    return 0;
+
+error:
+    // it should be safe to call these on zeroed-out objects
+    x509_crt_free(&conn->own_cert);
+    pk_free(&conn->pk_key);
+
+    bdestroy(hostname);
+    if(certpath != NULL) bdestroy(certpath);
+    if(keypath != NULL) bdestroy(keypath);
+
+    // don't return error here. this way the ssl handshake continues and the
+    //   the default cert will get used instead
+    return 0;
 }
 
 
@@ -821,6 +930,7 @@ Connection *Connection_create(Server *srv, int fd, int rport,
 
     conn->req = Request_create();
     conn->proxy_iob = NULL;
+    conn->use_sni = 0;
     conn->rport = rport;
     conn->client = NULL;
     conn->close = 0;
@@ -831,6 +941,7 @@ Connection *Connection_create(Server *srv, int fd, int rport,
     conn->remote[IPADDR_SIZE] = '\0';
 
     conn->handler = NULL;
+    conn->sendCredits = 0;
 
     check_mem(conn->req);
 
@@ -838,7 +949,19 @@ Connection *Connection_create(Server *srv, int fd, int rport,
         conn->iob = IOBuf_create(BUFFER_SIZE, fd, IOBUF_SSL);
         check(conn->iob != NULL, "Failed to create the SSL IOBuf.");
 
-        ssl_set_own_cert(&conn->iob->ssl, &srv->own_cert, &srv->rsa_key);
+        // set default cert
+        ssl_set_own_cert(&conn->iob->ssl, &srv->own_cert, &srv->pk_key);
+
+        // set the ca_chain if it was specified in settings
+        if ( srv->ca_chain.version != -1 ) {
+            ssl_set_ca_chain(&conn->iob->ssl, &srv->ca_chain, NULL, NULL );
+        }
+
+        // setup callback for SNI. if the client does not use this feature,
+        //   then this callback is never invoked and the above default cert
+        //   will be used
+        ssl_set_sni(&conn->iob->ssl, connection_sni_cb, conn);
+
         ssl_set_dh_param(&conn->iob->ssl, srv->dhm_P, srv->dhm_G);
         ssl_set_ciphersuites(&conn->iob->ssl, srv->ciphers);
     } else {
@@ -907,14 +1030,37 @@ error: // fallthrough
     taskexit(0);
 }
 
-int Connection_deliver_raw_internal(Connection *conn, bstring buf)
+int Connection_deliver_raw_internal(Connection *conn, tns_value_t *data)
 {
-    return IOBuf_send_all(conn->iob, bdata(buf), blength(buf));
+    int ret=0;
+    bstring buf;
+    check(data->type==tns_tag_string, "deliver_raw_internal expected a string.");
+    buf=data->value.string;
+    ret= IOBuf_send_all(conn->iob, bdata(buf), blength(buf));
+    return 0;
+
+error:
+    return -1;
 }
 
 int Connection_deliver_raw(Connection *conn, bstring buf)
 {
-    return Connection_deliver_enqueue(conn, bstrcpy(buf));
+    tns_value_t *val=NULL;
+    if(buf != NULL) {
+        val=malloc(sizeof(tns_value_t));
+        check_mem(val);
+        val->type=tns_tag_string;
+        val->value.string=bstrcpy(buf);
+        check_debug(0== Connection_deliver_enqueue(conn, Connection_deliver_raw_internal,val),
+            "Failed to write raw message to con %d", IOBuf_fd(conn->iob));
+    } else {
+        Connection_deliver_enqueue(conn, NULL, NULL);
+    }
+
+    return 0;
+error:
+    tns_value_destroy(val);
+    return -1;
 }
 
 int Connection_deliver(Connection *conn, bstring buf)
@@ -924,9 +1070,11 @@ int Connection_deliver(Connection *conn, bstring buf)
     bstring b64_buf = bBase64Encode(buf);
     check(b64_buf != NULL, "Failed to base64 encode data.");
     check(conn->iob != NULL, "There's no IOBuffer to send to, Tell Zed.");
-    /* The deliver task will free the buffer */
-    rc = Connection_deliver_enqueue(conn,b64_buf);
+    /* Yep there's an extraneous copy, but the deliver raw function is better
+     * tested so for maintainability we will use it */
+    rc = Connection_deliver_raw(conn,b64_buf);
     check_debug(rc == 0, "Failed to write message to conn %d", IOBuf_fd(conn->iob));
+    bdestroy(b64_buf);
 
     return 0;
 
@@ -939,21 +1087,22 @@ error:
 void Connection_deliver_task(void *v)
 {
     Connection *conn=v;
-    bstring msg=NULL;
+    Deliver_message msg={NULL,NULL};
     while(1) {
-        msg = Connection_deliver_dequeue(conn);
-        check_debug(msg,"Received NULL msg on FD %d, exiting deliver task",IOBuf_fd(conn->iob));
-        check(-1 != Connection_deliver_raw_internal(conn,msg),"Error delivering to MSG listener on FD %d, closing them.", IOBuf_fd(conn->iob));
-        bdestroy(msg);
-        msg=NULL;
+        Connection_deliver_dequeue(conn, &msg);
+        check_debug(msg.deliver,"Received NULL msg on FD %d, exiting deliver task",IOBuf_fd(conn->iob));
+        check(-1 != msg.deliver(conn,msg.data),"Error delivering to MSG listener on FD %d, closing them.", IOBuf_fd(conn->iob));
+        tns_value_destroy(msg.data);
+        msg.data=NULL;
     }
 error:
     conn->deliverTaskStatus=DT_DYING;
+    tns_value_destroy(msg.data);
     while(conn->deliverPost > conn->deliverAck) {
-        bdestroy(Connection_deliver_dequeue(conn));
+        Connection_deliver_dequeue(conn, &msg);
+        tns_value_destroy(msg.data);
     }
 
-    bdestroy(msg);
     if (IOBuf_fd(conn->iob) >= 0)
         shutdown(IOBuf_fd(conn->iob), SHUT_RDWR);
     debug("Deliver Task Shut Down\n");
@@ -1003,9 +1152,6 @@ int Connection_read_header(Connection *conn, Request *req)
             400, "Too many small packet read attempts.");
     error_unless(rc == 1, conn, 400, "Error parsing request.");
 
-    // add the x-forwarded-for header
-    Request_set(conn->req, &HTTP_X_FORWARDED_FOR, bfromcstr(conn->remote), 1);
-
     check_should_close(conn, conn->req);
 
     return nparsed;
@@ -1035,6 +1181,7 @@ void Connection_init()
             PROXY_READ_RETRIES, PROXY_READ_RETRY_WARN);
 
     IO_SSL_VERIFY_METHOD = Setting_get_int("ssl.verify_optional", 0) ? SSL_VERIFY_OPTIONAL : SSL_VERIFY_NONE;
+    IO_SSL_VERIFY_METHOD = Setting_get_int("ssl.verify_required", 0) ? SSL_VERIFY_REQUIRED : IO_SSL_VERIFY_METHOD;
 
 }
 

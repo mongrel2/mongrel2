@@ -42,13 +42,18 @@
 #include <connection.h>
 #include <assert.h>
 #include <register.h>
+#include "tnetstrings.h"
+#include "xrequest.h"
 
 #include "setting.h"
 
 struct tagbstring LEAVE_HEADER_JSON = bsStatic("{\"METHOD\":\"JSON\"}");
 struct tagbstring LEAVE_HEADER_TNET = bsStatic("16:6:METHOD,4:JSON,}");
 struct tagbstring LEAVE_MSG = bsStatic("{\"type\":\"disconnect\"}");
-
+struct tagbstring XREQ_CTL = bsStatic("ctl");
+struct tagbstring KEEP_ALIVE = bsStatic("keep-alive");
+struct tagbstring CREDITS = bsStatic("credits");
+struct tagbstring CANCEL = bsStatic("cancel");
 
 int HANDLER_STACK;
 
@@ -134,6 +139,67 @@ static inline int deliver_payload(int raw, int fd, Connection *conn, bstring pay
     return 0;
 error:
     return -1;
+}
+
+static int handler_process_control_request(Connection *conn, tns_value_t *data)
+{
+    tns_value_t *args = darray_get(data->value.list, 1);
+    check(args->type==tns_tag_dict, "Invalid control response: not a dict.");
+
+    hnode_t *n = hash_lookup(args->value.dict, &KEEP_ALIVE);
+    if(n != NULL) {
+        Register_ping(IOBuf_fd(conn->iob));
+    }
+
+    n = hash_lookup(args->value.dict, &CREDITS);
+    if(n != NULL) {
+        tns_value_t *credits = (tns_value_t *)hnode_get(n);
+        conn->sendCredits += credits->value.number;
+        taskwakeup(&conn->uploadRendez);
+    }
+
+    n = hash_lookup(args->value.dict, &CANCEL);
+    if(n != NULL) {
+        Register_disconnect(IOBuf_fd(conn->iob));
+        taskwakeup(&conn->uploadRendez);
+    }
+
+    tns_value_destroy(data);
+    return 0;
+
+error:
+    return -1;
+}
+
+static inline void handler_process_extended_request(int fd, Connection *conn, bstring payload)
+{
+    char *x;
+    tns_value_t *data = NULL;
+    darray_t *l = NULL;
+    
+    data = tns_parse(bdata(payload),blength(payload),&x);
+
+    check((x-bdata(payload))==blength(payload), "Invalid extended response: extra data after tnetstring.");
+    check(data->type==tns_tag_list, "Invalid extended response: not a list.");
+    l = data->value.list;
+    check(darray_end(l)==2, "Invalid extended response: odd number of elements in list.");
+    tns_value_t *key=darray_get(l,0);
+    check(key->type==tns_tag_string, "Invalid extended response: key is not a string");
+    check(key->value.string != NULL,, "Invalid extended response: key is NULL");
+
+    if(!bstrcmp(key->value.string, &XREQ_CTL)) {
+        check (0 == handler_process_control_request(conn, data),
+                "Control request processing returned non-zero: %s", bdata(key->value.string));
+    } else {
+        check (0 == dispatch_extended_request(conn, key->value.string, data),
+                "Extended request dispatch returned non-zero: %s",bdata(key->value.string));
+    }
+
+    return;
+error:
+    tns_value_destroy(data);
+    Register_disconnect(fd); // return ignored
+    return;
 }
 
 static inline void handler_process_request(Handler *handler, int id, int fd,
@@ -232,7 +298,11 @@ void Handler_task(void *v)
 
                 // don't bother calling process request if there's nothing to handle
                 if(conn && fd >= 0) {
-                    handler_process_request(handler, id, fd, conn, parser->body);
+                    if(parser->extended) {
+                        handler_process_extended_request(fd, conn, parser->body);
+                    } else {
+                        handler_process_request(handler, id, fd, conn, parser->body);
+                    }
                 } else {
                     // TODO: I believe we need to notify the connection that it is dead too
                     Handler_notify_leave(handler, id);

@@ -54,7 +54,6 @@ int Dir_load(tst_t *settings, tst_t *params)
     const char *base = AST_str(settings, params, "base", VAL_QSTRING);
     tns_value_t *res = NULL;
 
-    check(base[0] != '/', "Don't start the base with / in %s; it will fail when not in chroot.", base);
     check(base[strlen(base) - 1] == '/', "End directory base with / in %s or it won't work right.'", base);
 
     res = DB_exec(bdata(&DIR_SQL), base,
@@ -155,11 +154,10 @@ error:
 int Mimetypes_load(tst_t *settings, Pair *pair)
 {
     const char *ext = bdata(Pair_key(pair));
+    tns_value_t *res = NULL;
     Value *val = Pair_value(pair);
     check(val, "Error loading Mimetype %s", bdata(Pair_key(pair)));
 
-    tns_value_t *res = NULL;
-    
     res = DB_exec(bdata(&MIMETYPE_SQL),
             ext, ext, bdata(val->as.string->data));
 
@@ -177,11 +175,10 @@ error:
 int Settings_load(tst_t *settings, Pair *pair)
 {
     const char *name = bdata(Pair_key(pair));
+    tns_value_t *res = NULL;
     Value *val = Pair_value(pair);
     check(val, "Error loading Setting %s", bdata(Pair_key(pair)));
 
-    tns_value_t *res = NULL;
-    
     res = DB_exec(bdata(&SETTING_SQL), name, bdata(val->as.string->data));
 
     check(res != NULL, "Failed to add setting: %s=%s",
@@ -241,14 +238,15 @@ error:
 
 struct tagbstring MATCHING_PARAM = bsStatic("matching");
 
-int Filter_load(tst_t *settings, Value *val)
+int Plugin_load(tst_t *settings, Value *val, bstring sql, const char *type)
 {
-    CONFIRM_TYPE("Filter");
     Class *cls = val->as.cls;
     tns_value_t *res = NULL;
     struct tagbstring SETTINGS_VAR = bsStatic("settings");
     char *converted_settings = NULL;
     tns_value_t *filter_tns = NULL;
+
+    CONFIRM_TYPE(type);
 
     const char *name = AST_str(settings, cls->params, "name", VAL_QSTRING);
     check(name != NULL, "You must set a name for the filter.");
@@ -269,7 +267,7 @@ int Filter_load(tst_t *settings, Value *val)
             "Failed to convert final Filter settings to tnetstring for Filter '%s'",
             name);
 
-    res = DB_exec(bdata(&FILTER_SQL), SERVER_ID, name, converted_settings);
+    res = DB_exec(bdata(sql), SERVER_ID, name, converted_settings);
     check(res != NULL, "Failed to store Filter: '%s'", name);
 
     tns_value_destroy(res);
@@ -281,12 +279,23 @@ error:
     if(filter_tns) tns_value_destroy(filter_tns);
     return -1;
 }
+int Filter_load(tst_t *settings, Value *val)
+{
+    return Plugin_load(settings,val,&FILTER_SQL,"Filter");
+}
+int Xrequest_load(tst_t *settings, Value *val)
+{
+    return Plugin_load(settings,val,&XREQUEST_SQL,"Xrequest");
+}
+
 
 int Host_load(tst_t *settings, Value *val)
 {
-    CONFIRM_TYPE("Host");
-    Class *cls = val->as.cls;
     tns_value_t *res = NULL;
+
+    CONFIRM_TYPE("Host");
+
+    Class *cls = val->as.cls;
     struct tagbstring ROUTES_VAR = bsStatic("routes");
 
     const char *name = AST_str(settings, cls->params, "name", VAL_QSTRING);
@@ -318,16 +327,22 @@ error:
 
 struct tagbstring BIND_ADDR = bsStatic("bind_addr");
 struct tagbstring USE_SSL = bsStatic("use_ssl");
+struct tagbstring CONTROL_PORT = bsStatic("control_port");
+struct tagbstring OPT_CHROOT = bsStatic("chroot");
 
 int Server_load(tst_t *settings, Value *val)
 {
+    tns_value_t *res = NULL;
+
     CONFIRM_TYPE("Server");
     Class *cls = val->as.cls;
-    tns_value_t *res = NULL;
     struct tagbstring HOSTS_VAR = bsStatic("hosts");
     struct tagbstring FILTERS_VAR = bsStatic("filters");
+    struct tagbstring XREQUESTS_VAR = bsStatic("xrequests");
     const char *bind_addr = NULL;
     const char *use_ssl = NULL;
+    const char *control_port = NULL;
+    const char *opt_chroot = NULL;
 
     if(tst_search(cls->params, bdata(&BIND_ADDR), blength(&BIND_ADDR))) {
         bind_addr = AST_str(settings, cls->params, bdata(&BIND_ADDR), VAL_QSTRING);
@@ -341,12 +356,25 @@ int Server_load(tst_t *settings, Value *val)
         use_ssl = "0";
     }
 
+    if(tst_search(cls->params, bdata(&CONTROL_PORT), blength(&CONTROL_PORT))) {
+        control_port = AST_str(settings, cls->params, bdata(&CONTROL_PORT), VAL_QSTRING);
+    } else {
+        control_port = "";
+    }
+
+    if(tst_search(cls->params, bdata(&OPT_CHROOT), blength(&OPT_CHROOT))) {
+        opt_chroot = AST_str(settings, cls->params, bdata(&OPT_CHROOT), VAL_QSTRING);
+    } else {
+        opt_chroot = "";
+    }
+
     res = DB_exec(bdata(&SERVER_SQL),
             AST_str(settings, cls->params, "uuid", VAL_QSTRING),
             AST_str(settings, cls->params, "access_log", VAL_QSTRING),
             AST_str(settings, cls->params, "error_log", VAL_QSTRING),
             AST_str(settings, cls->params, "pid_file", VAL_QSTRING),
-            AST_str(settings, cls->params, "chroot", VAL_QSTRING),
+            control_port,
+            opt_chroot,
             AST_str(settings, cls->params, "default_host", VAL_QSTRING),
             AST_str(settings, cls->params, "name", VAL_QSTRING),
             bind_addr,
@@ -370,6 +398,12 @@ int Server_load(tst_t *settings, Value *val)
 
     if(filters != NULL) {
         AST_walk_list(settings, filters->as.list, Filter_load);
+    }
+
+    Value *xrequests = AST_get(settings, cls->params, &XREQUESTS_VAR, VAL_LIST);
+
+    if(xrequests != NULL) {
+        AST_walk_list(settings, xrequests->as.list, Xrequest_load);
     }
 
     tns_value_destroy(res);

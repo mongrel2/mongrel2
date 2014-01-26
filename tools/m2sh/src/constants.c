@@ -45,6 +45,7 @@ struct tagbstring CONFIG_SCHEMA = bsStatic(
 "DROP TABLE IF EXISTS setting;\n"
 "DROP TABLE IF EXISTS directory;\n"
 "DROP TABLE IF EXISTS filter;\n"
+"DROP TABLE IF EXISTS xrequest;\n"
 "\n"
 "CREATE TABLE server (id INTEGER PRIMARY KEY,\n"
 "    uuid TEXT,\n"
@@ -52,6 +53,7 @@ struct tagbstring CONFIG_SCHEMA = bsStatic(
 "    error_log TEXT,\n"
 "    chroot TEXT DEFAULT '/var/www',\n"
 "    pid_file TEXT,\n"
+"    control_port TEXT DEFAULT '',\n"
 "    default_host TEXT,\n"
 "    name TEXT DEFAULT '',\n"
 "    bind_addr TEXT DEFAULT \"0.0.0.0\",\n"
@@ -111,6 +113,11 @@ struct tagbstring CONFIG_SCHEMA = bsStatic(
 "    name TEXT, \n"
 "    settings TEXT);\n"
 "\n"
+"CREATE TABLE xrequest (id INTEGER PRIMARY KEY, \n"
+"    server_id INTEGER, \n"
+"    name TEXT, \n"
+"    settings TEXT);\n"
+"\n"
 "CREATE TABLE IF NOT EXISTS log(id INTEGER PRIMARY KEY,\n"
 "    who TEXT,\n"
 "    what TEXT,\n"
@@ -121,11 +128,13 @@ struct tagbstring CONFIG_SCHEMA = bsStatic(
 
 
 
-struct tagbstring SERVER_SQL = bsStatic("INSERT INTO server (uuid, access_log, error_log, pid_file, chroot, default_host, name, bind_addr, port, use_ssl) VALUES (%Q, %Q, %Q, %Q, %Q, %Q, %Q, %Q, %s, %s);");
+struct tagbstring SERVER_SQL = bsStatic("INSERT INTO server (uuid, access_log, error_log, pid_file, control_port, chroot, default_host, name, bind_addr, port, use_ssl) VALUES (%Q, %Q, %Q, %Q, %Q, %Q, %Q, %Q, %Q, %s, %s);");
 
 struct tagbstring HOST_SQL = bsStatic("INSERT INTO host (server_id, name, matching) VALUES (%d, %Q, %Q);");
 
 struct tagbstring FILTER_SQL = bsStatic("INSERT INTO filter (server_id, name, settings) VALUES (%d, %Q, %Q);");
+
+struct tagbstring XREQUEST_SQL = bsStatic("INSERT INTO xrequest (server_id, name, settings) VALUES (%d, %Q, %Q);");
 
 struct tagbstring SETTING_SQL = bsStatic("INSERT INTO setting (key, value) VALUES (%Q, %Q);");
 struct tagbstring MIMETYPE_SQL = bsStatic("DELETE from mimetype where extension=%Q; INSERT INTO mimetype (extension, mimetype) VALUES (%Q, %Q);");

@@ -12,6 +12,7 @@ typedef struct ConfigModule {
     tns_value_t *(*load_routes)(int host_id, int server_id);
     tns_value_t *(*load_hosts)(int server_id);
     tns_value_t *(*load_filters)(int server_id);
+    tns_value_t *(*load_xrequests)(int server_id);
     tns_value_t *(*load_server)(const char *uuid);
     tns_value_t *(*load_mimetypes)();
     tns_value_t *(*load_settings)();

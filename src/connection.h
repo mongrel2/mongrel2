@@ -41,6 +41,7 @@
 #include "proxy.h"
 #include "io.h"
 #include "adt/hash.h"
+#include "tnetstrings.h"
 /* This must be a power of 2  or else sending more than MAX_UINT msgs is a fail*/
 #define DELIVER_OUTSTANDING_MSGS 16
 
@@ -64,13 +65,25 @@ enum deliverTaskState {
     DT_DYING,
     DT_DEAD
 };
+struct Connection;
 
+typedef int (*deliver_function)(struct Connection *c, tns_value_t *data);
+
+typedef struct Deliver_message {
+    deliver_function deliver;
+    tns_value_t *data;
+} Deliver_message;
 
 typedef struct Connection {
     Request *req;
 
     IOBuf *iob;
     IOBuf *proxy_iob;
+
+    // if SNI is used, then the connection has its own cert
+    int use_sni;
+    x509_crt own_cert;
+    pk_context pk_key;
 
     int rport;
     State state;
@@ -81,13 +94,14 @@ typedef struct Connection {
     char remote[IPADDR_SIZE+1];
     Handler *handler;
     volatile enum deliverTaskState deliverTaskStatus;
-    volatile bstring deliverRing[DELIVER_OUTSTANDING_MSGS];
+    volatile Deliver_message deliverRing[DELIVER_OUTSTANDING_MSGS];
     volatile unsigned deliverPost,deliverAck;
     Rendez deliverRendez;
+    Rendez uploadRendez;
+    int sendCredits;
 } Connection;
 
 void Connection_destroy(Connection *conn);
-
 Connection *Connection_create(Server *srv, int fd, int rport,
                               const char *remote);
 
@@ -96,7 +110,7 @@ int Connection_accept(Connection *conn);
 void Connection_task(void *v);
 
 struct Handler;
-int Connection_send_to_handler(Connection *conn, Handler *handler, char *body, int content_len);
+int Connection_send_to_handler(Connection *conn, Handler *handler, char *body, int content_len, hash_t *altheaders);
 
 int Connection_deliver_raw(Connection *conn, bstring buf);
 
@@ -107,5 +121,7 @@ int Connection_read_header(Connection *conn, Request *req);
 void Connection_init();
 
 void Connection_deliver_task(void *v);
+int Connection_deliver_enqueue(Connection *conn, deliver_function f,
+                                             tns_value_t *d);
 
 #endif

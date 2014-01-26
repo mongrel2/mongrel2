@@ -11,6 +11,7 @@ typedef struct HandlerParser {
     size_t target_count;
     size_t target_max;
     unsigned long *targets;
+    int extended;
 } HandlerParser;
 
 HandlerParser *HandlerParser_create(size_t max_targets);

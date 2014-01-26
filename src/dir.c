@@ -32,7 +32,6 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#define _FILE_OFFSET_BITS 64
 #include <dir.h>
 #include <cache.h>
 #include <fcntl.h>
@@ -171,6 +170,7 @@ long long int Dir_stream_file(FileRecord *file, Connection *conn)
     check(fd >= 0, "Failed to open file: %s", bdata(file->full_path));
 
     sent = IOBuf_stream_file(conn->iob, fd, file->file_size);
+    check(sent == file->file_size, "Error streaming file. Sent %d of %d bytes.", sent, file->file_size);
 
     fdclose(fd);
     return file->file_size;
@@ -197,7 +197,6 @@ Dir *Dir_create(bstring base, bstring index_file, bstring default_ctype, int cac
 
     dir->base = bstrcpy(base);
     check(blength(dir->base) < MAX_DIR_PATH, "Base directory is too long, must be less than %d", MAX_DIR_PATH);
-    check(bchar(dir->base, 0) != '/', "Don't start the base with / in %s, that will fail when not in chroot.", bdata(base));
     check(bchar(dir->base, blength(dir->base) - 1) == '/', "End directory base with / in %s or it won't work right.", bdata(base));
 
     dir->index_file = bstrcpy(index_file);

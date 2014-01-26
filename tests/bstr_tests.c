@@ -314,10 +314,10 @@ int testaux12 (void) {
 
     debug ("TEST: bsFromBstr.");
 
-    ret = bsread (b = bfromcstr (""), s = bsFromBstr (&t), 6);
+    ret += BSTR_OK != bsread (b = bfromcstr (""), s = bsFromBstr (&t), 6);
     ret += 1 != biseqcstr (b, "Hello ");
     if (b) b->slen = 0;
-    ret = bsread (b, s, 6);
+    ret += BSTR_OK != bsread (b, s, 6);
     ret += 1 != biseqcstr (b, "world");
 
     bdestroy (b);
