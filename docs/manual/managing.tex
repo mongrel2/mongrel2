@@ -864,6 +864,13 @@ Mongrel2 (you can't reload to enable SSL), and it should be working.
 After you get this working you just have to get your own certificate, put it
 in the certs directory with the right filename, and you should be good to go.
 
+\subsection{SNI Support}
+
+Starting with 1.9.0, mongrel2 adds SNI support.  On any request, mongrel2 will
+first search for files named \emph{hostname}.crt and \emph{hostname}.key -- if
+found, those will be used, otherwise it will fallback to the UUID key and
+certificate files.
+
 \subsection{Experimental SSL Caching}
 
 We've got experimental SSL caching working, which will try to reuse the 
@@ -872,7 +879,6 @@ memory and performance, so it can chew a bunch of RAM if you have a lot of
 SSL traffic over a short period of time.  We'll be making the caching more
 configurable, but for now, it's working and does speed up SSL clients that
 do it properly.
-
 
 \section{Configuring Filters (BETA)}
 

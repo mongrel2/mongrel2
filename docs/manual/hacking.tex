@@ -201,6 +201,14 @@ finished'' message.  If, at any time, you want to kill the upload, you just
 send a 0-length reply (the official KILL MESSAGE) and the whole thing is
 aborted and cleaned up.
 
+\subsection{Experimental large-upload streaming}
+
+Mongrel2 1.9.0 adds experimental support for streaming large files direct to
+handlers.  However there are several limitations -- most notably, you need to
+ensure that the same handler process gets each request, or that the handler
+processess can all communicate, as unlike raw HTTP the protocol used to
+communicate with the handlers is stateful.
+
 
 \section{Introduction to ZeroMQ}
 
