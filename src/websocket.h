@@ -62,21 +62,12 @@ static inline int Websocket_header_length(const unsigned char *data, int avail)
     }
     else if (len == 126) {
        if (avail < 4) return -1;
-       len = (data[2] << 8) | data[3];
        header_size=4;
     }
     else {
         if (avail < 10) return -1;
         if (data[2]&0x80) return -2;
-        len  = ((uint64_t) data[2]) << 56 |
-            ((uint64_t) data[3]) << 48 |
-            ((uint64_t) data[4]) << 40 |
-            ((uint64_t) data[5]) << 32 |
-            ((uint64_t) data[6]) << 24 |
-            ((uint64_t) data[7]) << 16 |
-            ((uint64_t) data[8]) << 8  |
-            ((uint64_t) data[9]);
-            header_size=10;
+        header_size=10;
     }
     if(mask) header_size+=4;
     return header_size;

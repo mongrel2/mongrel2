@@ -166,7 +166,9 @@ RMElement *RadixMap_find(RadixMap *map, uint32_t to_find)
 
 RadixMap *RadixMap_create(size_t max)
 {
-    RadixMap *map = calloc(sizeof(RadixMap), 1);
+    RadixMap *map = NULL;
+    map = calloc(sizeof(RadixMap), 1);
+
     check_mem(map);
 
     map->contents = calloc(sizeof(RMElement), max + 1);
@@ -180,6 +182,15 @@ RadixMap *RadixMap_create(size_t max)
 
     return map;
 error:
+    if(map) {
+        if(map->contents) {
+            free(map->contents);
+        }
+        if(map->temp) {
+            free(map->temp);
+        }
+        free(map);
+    }
     return NULL;
 }
 

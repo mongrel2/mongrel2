@@ -471,6 +471,7 @@ int connection_proxy_reply_parse(Connection *conn)
     int rc = 0;
     int total = 0;
     Proxy *proxy = Request_get_action(conn->req, proxy);
+    check(proxy != NULL, "Proxy is NULL in reply_parse?")
     httpclient_parser *client = conn->client;
 
     rc = Proxy_read_and_parse(conn);
@@ -1032,11 +1033,11 @@ error: // fallthrough
 
 int Connection_deliver_raw_internal(Connection *conn, tns_value_t *data)
 {
-    int ret=0;
     bstring buf;
     check(data->type==tns_tag_string, "deliver_raw_internal expected a string.");
     buf=data->value.string;
-    ret= IOBuf_send_all(conn->iob, bdata(buf), blength(buf));
+    int ret= IOBuf_send_all(conn->iob, bdata(buf), blength(buf));
+    check_debug(ret==blength(buf), "Failed to send all of the data: %d of %d", rc, avail)
     return 0;
 
 error:

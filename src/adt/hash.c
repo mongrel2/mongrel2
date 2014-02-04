@@ -236,7 +236,10 @@ static void shrink_table(hash_t *hash)
     hash_val_t chain, nchains;
     hnode_t **newtable, *low_tail, *low_chain, *high_chain;
 
-    assert (hash->nchains >= 2);			/* 1 */
+    if(hash->nchains  < 4) {        /* 1 */
+        return;			
+    }
+
     nchains = hash->nchains / 2;
 
     for (chain = 0; chain < nchains; chain++) {
@@ -485,13 +488,13 @@ void hash_scan_begin(hscan_t *scan, hash_t *hash)
 hnode_t *hash_scan_next(hscan_t *scan)
 {
     hnode_t *next = scan->next;		/* 1 */
-    hash_t *hash = scan->table;
-    hash_val_t chain = scan->chain + 1;
-    hash_val_t nchains = hash->nchains;
 
     assert (hash_val_t_bit != 0);	/* 2 */
 
     if (next) {			/* 3 */
+        hash_t *hash = scan->table;
+        hash_val_t chain = scan->chain + 1;
+        hash_val_t nchains = hash->nchains;
         if (next->next) {	/* 4 */
             scan->next = next->next;
         } else {

@@ -82,7 +82,7 @@ static void filerecord_cache_evict(void *data) {
 static inline int get_file_real_size(FileRecord *fr)
 {
     // TODO: this is the total suck we'll redesign this away
-    int fd = open(bdata(fr->full_path), O_RDONLY);
+    int fd = open(bdatae(fr->full_path,""), O_RDONLY);
     check(fd >= 0, "Failed to open file but stat worked: %s", bdata(fr->full_path));
 
     fr->file_size = lseek(fd, 0L, SEEK_END);
@@ -93,8 +93,9 @@ static inline int get_file_real_size(FileRecord *fr)
 
     return 0;
 error:
-
-    fdclose(fd);
+    if (fd>=0) {
+        fdclose(fd);
+    }
     return -1;
 }
 
@@ -110,7 +111,7 @@ FileRecord *Dir_find_file(bstring path, bstring default_type)
     fr->users = 1;
     fr->full_path = path;
 
-    int rc = stat(bdata(fr->full_path), &fr->sb);
+    int rc = stat(bdatae(fr->full_path,""), &fr->sb);
     check(rc == 0, "File stat failed: %s", bdata(fr->full_path));
 
     if(S_ISDIR(fr->sb.st_mode)) {
@@ -166,7 +167,7 @@ long long int Dir_stream_file(FileRecord *file, Connection *conn)
     int rc = Dir_send_header(file, conn);
     check_debug(rc, "Failed to write header to socket.");
 
-    fd = open(bdata(file->full_path), O_RDONLY);
+    fd = open(bdatae(file->full_path,""), O_RDONLY);
     check(fd >= 0, "Failed to open file: %s", bdata(file->full_path));
 
     sent = IOBuf_stream_file(conn->iob, fd, file->file_size);
@@ -373,17 +374,16 @@ FileRecord *FileRecord_cache_check(Dir *dir, bstring path)
         struct stat sb;
 
         if(difftime(now, file->loaded) > dir->cache_ttl) {
-            int rcstat = stat(p, &sb);
-
-            if(rcstat != 0 ||
-                    file->sb.st_mtime != sb.st_mtime ||
-                    file->sb.st_ctime != sb.st_ctime ||
-                    file->sb.st_uid != sb.st_uid ||
-                    file->sb.st_gid != sb.st_gid ||
-                    file->sb.st_mode != sb.st_mode ||
-                    file->sb.st_size != sb.st_size ||
-                    file->sb.st_ino != sb.st_ino ||
-                    file->sb.st_dev != sb.st_dev 
+            if( p == NULL ||
+                0 != stat(p, &sb) ||
+                file->sb.st_mtime != sb.st_mtime ||
+                file->sb.st_ctime != sb.st_ctime ||
+                file->sb.st_uid != sb.st_uid ||
+                file->sb.st_gid != sb.st_gid ||
+                file->sb.st_mode != sb.st_mode ||
+                file->sb.st_size != sb.st_size ||
+                file->sb.st_ino != sb.st_ino ||
+                file->sb.st_dev != sb.st_dev 
             ) {
                 Cache_evict_object(dir->fr_cache, file);
                 file = NULL;

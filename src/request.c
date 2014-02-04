@@ -323,16 +323,17 @@ static inline bstring json_escape(bstring in)
 
     // Slightly better than the old solution.
     bstring vstr = bstrcpy(in);
+    check_mem(vstr)
     
     int i;
     for(i = 0; i < blength(vstr); i++)
     {
-        if(bdata(vstr)[i] == '\\')
+        if(bchar(vstr,i) == '\\')
         {
             binsertch(vstr, i, 1, '\\');
             i++;
         }
-        else if(bdata(vstr)[i] == '"')
+        else if(bchar(vstr,i) == '"')
         {
             binsertch(vstr, i, 1, '\\');
             i++;
@@ -340,6 +341,8 @@ static inline bstring json_escape(bstring in)
     }
 
     return vstr;
+error:
+    return NULL;
 }
 
 struct tagbstring JSON_LISTSEP = bsStatic("\",\"");
