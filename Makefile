@@ -16,6 +16,19 @@ TEST_SRC=$(wildcard tests/*_tests.c)
 TESTS=$(patsubst %.c,%,${TEST_SRC})
 MAKEOPTS=OPTFLAGS="${NOEXTCFLAGS} ${OPTFLAGS}" OPTLIBS="${OPTLIBS}" LIBS="${LIBS}" DESTDIR="${DESTDIR}" PREFIX="${PREFIX}"
 
+# Prepare PolarSSL git submodule
+# 
+# - Perform src/polarssl submodule init and update, if necessary.  This is executed
+#   upon every make invocation, and must be done before the SOURCES variable, above
+#   is lazily evaluated, or none of the src/polarssl source files will be found
+
+ifdef $($(shell									\
+	if git submodule status | grep '^-'; then				\
+	    echo "PolarSSL; init and update git submodule" 1>&2;		\
+	    git submodule init && git submodule update;				\
+	fi ))
+endif
+
 all: bin/mongrel2 tests m2sh procer
 
 dev: CFLAGS=-g -Wall -Isrc -Wall -Wextra $(OPTFLAGS) -D_FILE_OFFSET_BITS=64
@@ -23,9 +36,24 @@ dev: all
 
 ${OBJECTS_NOEXT}: CFLAGS += ${NOEXTCFLAGS}
 
-# Prepare PolarSSL git submodule
 # 
-# - Perform src/polarssl submodule init and update, if necessary
+# CFLAGS_DEFS: The $(CC) flags required to obtain C pre-processor #defines, per:
+# 
+#   http://nadeausoftware.com/articles/2011/12/c_c_tip_how_list_compiler_predefined_macros
+# 
+# It may be appropriate to copy some of these platform-specific CFLAGS_DEFS assignments into the
+# appropriate platform target at the end of this file, eg:
+# 
+#   solaris: CFLAGS_DEF=...
+#   solaris: all
+
+#CFLAGS_DEFS=-dM -E		# Portland Group PGCC
+#CFLAGS_DEFS=-xdumpmacros -E	# Oracle Solaris Studio
+#CFLAGS_DEFS=-qshowmacros -E	# IBM XL C
+CFLAGS_DEFS=-dM -E -x c 	# clang, gcc, HP C, Intel icc
+
+# Configure PolarSSL
+# 
 # - check for required src/polarssl/include/polarssl/config.h definitions
 #   and patch using version-appropriate src/polarssl_config.patch.#.#.# file:
 #   - If desired PolarSSL version is not yet supported, git checkout the
@@ -33,25 +61,7 @@ ${OBJECTS_NOEXT}: CFLAGS += ${NOEXTCFLAGS}
 #     required, and generate a new src/polarssl_config.patch.X.Y.Z using:
 # 
 #         git diff -- include/polarssl/config.h > ../polarssl_config.patch.X.Y.Z
-# 
-# CFLAGS_DEFS: The $(CC) flags required to obtain C pre-processor #defines
-#   http://nadeausoftware.com/articles/2011/12/c_c_tip_how_list_compiler_predefined_macros
-#
-#CFLAGS_DEFS=-dM -E		# Portland Group PGCC
-#CFLAGS_DEFS=-xdumpmacros -E	# Oracle Solaris Studio
-#CFLAGS_DEFS=-qshowmacros -E	# IBM XL C
-CFLAGS_DEFS=-dM -E -x c 	# clang, gcc, HP C, Intel icc
-
 FORCE:
-
-src/polarssl: FORCE
-	@if git submodule status | grep '^-'; then				\
-	    echo "PolarSSL; init and update git submodule";			\
-	    git submodule init && git submodule update;				\
-	fi
-
-src/polarssl/include/polarssl/version.h: src/polarssl
-
 src/polarssl/include/polarssl/config.h: src/polarssl/include/polarssl/version.h FORCE
 	@POLARSSL_VERSION=$$( $(CC) $(CFLAGS_DEFS) $<				\
 	    | sed -n -e 's/^.*\sPOLARSSL_VERSION_STRING\s"\([^"]*\)"/\1/p' );	\
@@ -104,6 +114,7 @@ pristine: clean
 	rm -f run/*
 	${MAKE} -C tools/m2sh pristine
 	${MAKE} -C tools/procer pristine
+	git submodule deinit -f src/polarssl
 
 .PHONY: tests
 tests: tests/config.sqlite ${TESTS} test_filters filters config_modules
