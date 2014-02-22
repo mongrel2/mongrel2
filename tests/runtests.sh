@@ -1,10 +1,12 @@
 echo "Running unit tests:"
 
+# Run all unit tests, collecting stdout to a file, but letting stderr pass, to
+# allow tests to send important messages to the maintainer.
 for i in tests/*_tests
 do
     if test -f $i
     then
-        if $VALGRIND ./$i 2>&1 > /tmp/mongrel2-test.log
+        if $VALGRIND ./$i > /tmp/mongrel2-test.log
         then
             echo $i PASS
         else

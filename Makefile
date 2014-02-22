@@ -15,8 +15,6 @@ LIB_OBJ=$(filter-out src/mongrel2.o,${OBJECTS})
 TEST_SRC=$(wildcard tests/*_tests.c)
 TESTS=$(patsubst %.c,%,${TEST_SRC})
 MAKEOPTS=OPTFLAGS="${NOEXTCFLAGS} ${OPTFLAGS}" OPTLIBS="${OPTLIBS}" LIBS="${LIBS}" DESTDIR="${DESTDIR}" PREFIX="${PREFIX}"
-ifdef $($(shell sh init.sh))
-endif
 
 all: bin/mongrel2 tests m2sh procer
 
@@ -25,8 +23,49 @@ dev: all
 
 ${OBJECTS_NOEXT}: CFLAGS += ${NOEXTCFLAGS}
 
-src/polarssl/include/polarssl/config.h: src/polarssl_config.h
-	cp src/polarssl_config.h src/polarssl/include/polarssl/config.h
+# Prepare PolarSSL git submodule
+# 
+# - Perform src/polarssl submodule init and update, if necessary
+# - check for required src/polarssl/include/polarssl/config.h definitions
+#   and patch using version-appropriate src/polarssl_config.patch.#.#.# file:
+#   - If desired PolarSSL version is not yet supported, git checkout the
+#     new src/polarssl/ version X.Y.Z, edit its include/polarssl/config.h as
+#     required, and generate a new src/polarssl_config.patch.X.Y.Z using:
+# 
+#         git diff -- include/polarssl/config.h > ../polarssl_config.patch.X.Y.Z
+# 
+# CFLAGS_DEFS: The $(CC) flags required to obtain C pre-processor #defines
+#   http://nadeausoftware.com/articles/2011/12/c_c_tip_how_list_compiler_predefined_macros
+#
+#CFLAGS_DEFS=-dM -E		# Portland Group PGCC
+#CFLAGS_DEFS=-xdumpmacros -E	# Oracle Solaris Studio
+#CFLAGS_DEFS=-qshowmacros -E	# IBM XL C
+CFLAGS_DEFS=-dM -E -x c 	# clang, gcc, HP C, Intel icc
+
+FORCE:
+
+src/polarssl: FORCE
+	@if git submodule status | grep '^-'; then				\
+	    echo "PolarSSL; init and update git submodule";			\
+	    git submodule init && git submodule update;				\
+	fi
+
+src/polarssl/include/polarssl/version.h: src/polarssl
+
+src/polarssl/include/polarssl/config.h: src/polarssl/include/polarssl/version.h FORCE
+	@POLARSSL_VERSION=$$( $(CC) $(CFLAGS_DEFS) $<				\
+	    | sed -n -e 's/^.*\sPOLARSSL_VERSION_STRING\s"\([^"]*\)"/\1/p' );	\
+	if $(CC) $(CFLAGS_DEFS) $@ | grep -q POLARSSL_HAVEGE_C; then		\
+	    echo "PolarSSL $${POLARSSL_VERSION}; already configured";		\
+	else									\
+	    echo "PolarSSL $${POLARSSL_VERSION}; defining POLARSSL_HAVEGE_C...";\
+	    POLARSSL_PATCH=src/polarssl_config.patch.$${POLARSSL_VERSION};	\
+	    if ! patch -d src/polarssl -p 1 < $${POLARSSL_PATCH}; then		\
+		echo "*** Failed to apply $${POLARSSL_PATCH}";			\
+		exit 1;								\
+	    fi;									\
+	fi
+
 
 bin/mongrel2: build/libm2.a src/mongrel2.o
 	$(CC) $(CFLAGS) src/mongrel2.o -o $@ $< $(LIBS)
@@ -122,6 +161,8 @@ ragel:
 
 valgrind:
 	VALGRIND="valgrind --log-file=/tmp/valgrind-%p.log" ${MAKE}
+strace:
+	VALGRIND="strace" ${MAKE}
 
 %.o: %.S
 	$(CC) $(CFLAGS) -c $< -o $@
