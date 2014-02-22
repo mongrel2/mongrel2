@@ -64,7 +64,7 @@ CFLAGS_DEFS=-dM -E -x c 	# clang, gcc, HP C, Intel icc
 FORCE:
 src/polarssl/include/polarssl/config.h: src/polarssl/include/polarssl/version.h FORCE
 	@POLARSSL_VERSION=$$( $(CC) $(CFLAGS_DEFS) $<				\
-	    | sed -n -e 's/^.*\sPOLARSSL_VERSION_STRING\s"\([^"]*\)"/\1/p' );	\
+	    | sed -n -e 's/^.*POLARSSL_VERSION_STRING[\t ]*"\([^"]*\)".*/\1/p' ); \
 	if $(CC) $(CFLAGS_DEFS) $@ | grep -q POLARSSL_HAVEGE_C; then		\
 	    echo "PolarSSL $${POLARSSL_VERSION}; already configured";		\
 	else									\
