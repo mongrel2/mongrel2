@@ -180,21 +180,23 @@ error:
     return -1;
 }
 
-
-Dir *Dir_create(bstring base, bstring index_file, bstring default_ctype, int cache_ttl)
+void Dir_init(void)
 {
-    Dir *dir = calloc(sizeof(Dir), 1);
-    check_mem(dir);
-
-    dir->running = 1;
-
     if(!MAX_SEND_BUFFER || !MAX_DIR_PATH) {
         MAX_SEND_BUFFER = Setting_get_int("limits.dir_send_buffer", 16 * 1024);
         MAX_DIR_PATH = Setting_get_int("limits.dir_max_path", 256);
         log_info("MAX limits.dir_send_buffer=%d, limits.dir_max_path=%d",
                 MAX_SEND_BUFFER, MAX_DIR_PATH);
     }
+}
 
+Dir *Dir_create(bstring base, bstring index_file, bstring default_ctype, int cache_ttl)
+{
+    Dir_init();
+    Dir *dir = calloc(sizeof(Dir), 1);
+    check_mem(dir);
+
+    dir->running = 1;
     dir->base = bstrcpy(base);
     check(blength(dir->base) < MAX_DIR_PATH, "Base directory is too long, must be less than %d", MAX_DIR_PATH);
     check(bchar(dir->base, blength(dir->base) - 1) == '/', "End directory base with / in %s or it won't work right.", bdata(base));

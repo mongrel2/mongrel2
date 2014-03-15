@@ -5,6 +5,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <connection.h>
+#include <dir.h>
 
 static int mydispatch(Connection *conn, tns_value_t *data)
 {
@@ -43,6 +44,7 @@ struct tagbstring SENDFILE = bsStatic("sendfile");
 deliver_function xrequest_init(Server *srv, bstring load_path, tns_value_t *config, bstring **keys, int *nkeys)
 {
     static bstring sendfile=&SENDFILE;
+    Dir_init();
     *keys=&sendfile;
     *nkeys=1;
     return mydispatch;

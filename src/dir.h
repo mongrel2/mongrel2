@@ -80,6 +80,8 @@ typedef struct Dir {
     int cache_ttl;
 } Dir;
 
+void Dir_init(void);
+
 Dir *Dir_create(bstring base, bstring index_file,
                 bstring default_ctype, int cache_ttl);
 
