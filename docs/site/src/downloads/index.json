@@ -4,6 +4,18 @@
 
     "releases": [
         { 
+            "version": "1.9.0",
+            "md5": "f5de1c6b40c90e411689bef884208776",
+            "link": "https://github.com/zedshaw/mongrel2/releases/download/v1.9.0/mongrel2-v1.9.0.tar.gz",
+            "date": "Jan 26 2014"
+        },
+        { 
+            "version": "1.8.1",
+            "md5": "e7890c77f494b6d15ebcd871be3d58d0",
+            "link": "https://github.com/zedshaw/mongrel2/tarball/v1.8.1",
+            "date": "May 25 2013"
+        },
+        { 
             "version": "1.8.0",
             "md5": "4bca0d299e7e77efa4c674bc5877dfd0",
             "link": "https://github.com/zedshaw/mongrel2/tarball/v1.8.0",

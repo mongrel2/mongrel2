@@ -265,7 +265,7 @@ int attempt_chroot_drop(Server *srv)
     rc = Unixy_pid_file(srv->pid_file);
     check(rc == 0, "Failed to make the PID file %s", bdata(srv->pid_file));
 
-    if(srv->chroot != NULL) {
+    if(srv->chroot != NULL && ! testmode) {
         rc = Unixy_drop_priv(&PRIV_DIR);
         check(rc == 0, "Failed to drop priv to the owner of %s", bdata(&PRIV_DIR));
     } else {
