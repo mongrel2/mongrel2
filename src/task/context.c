@@ -30,11 +30,6 @@
 #endif
 #endif
 
-#if defined(__linux__) && defined(__arm__)
-#define NEEDSWAPCONTEXT
-#define NEEDARMMAKECONTEXT
-#endif
-
 #ifdef NEEDPOWERMAKECONTEXT
 void makecontext(ucontext_t *ucp, void (*func)(void), int argc, ...)
 {
@@ -86,26 +81,6 @@ void makecontext(ucontext_t *ucp, void (*func)(void), int argc, ...)
     *--sp = 0;    /* return address */
     ucp->uc_mcontext.mc_rip = (long)func;
     ucp->uc_mcontext.mc_rsp = (long)sp;
-}
-#endif
-
-#ifdef NEEDARMMAKECONTEXT
-void makecontext(ucontext_t *uc, void (*fn)(void), int argc, ...)
-{
-    int i, *sp;
-    va_list arg;
-    
-    sp = (int*)uc->uc_stack.ss_sp+uc->uc_stack.ss_size/4;
-    va_start(arg, argc);
-    
-    if(argc-- > 0) uc->uc_mcontext.arm_r0 = va_arg(arg, uint);
-    if(argc-- > 0) uc->uc_mcontext.arm_r1 = va_arg(arg, uint);
-    if(argc-- > 0) uc->uc_mcontext.arm_r2 = va_arg(arg, uint);
-    if(argc-- > 0) uc->uc_mcontext.arm_r3 = va_arg(arg, uint);
-
-    va_end(arg);
-    uc->uc_mcontext.arm_sp = (uint)sp;
-    uc->uc_mcontext.arm_lr = (uint)fn;
 }
 #endif
 
