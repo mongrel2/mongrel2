@@ -130,7 +130,7 @@ Dir *Config_load_dir(int dir_id)
             DB_get_as(res, 0, 2, string), // index_file
             DB_get_as(res, 0, 3, string), // default_ctype
             DB_get_as(res, 0, 4, number), // cache_ttl
-            DB_get_as(res, 0, 5, list)  // whitelist
+            DB_get_as(res, 0, 5, string)  // whitelist
             );
     check(dir != NULL, "Failed to create directory id %d.", dir_id);
 

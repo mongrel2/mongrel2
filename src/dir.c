@@ -380,7 +380,16 @@ static inline int normalize_path(bstring target)
     char *normalized = realpath((const char *)(bdata(target)), path_buf);
     check_debug(normalized, "Failed to normalize path: %s", bdata(target));
 
-    bassigncstr(target, normalized);
+
+    if(bchar(target,blength(target)-1) == '/' && 
+            normalized[strlen(normalized)-1] != '/')
+    {
+        bassignformat(target,"%s/",normalized);
+    }
+    else
+    {
+        bassigncstr(target,normalized);
+    }
 
     return 0;
 

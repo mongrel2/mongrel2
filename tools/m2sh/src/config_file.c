@@ -73,7 +73,8 @@ int Dir_load(tst_t *settings, tst_t *params)
 
 
     {
-        const Value *whitelist = AST_list(settings,params,"whitelist",VAL_LIST);
+        static struct tagbstring WHITELIST = bsStatic("whitelist");
+        Value *whitelist = AST_get(settings,params,&WHITELIST,VAL_LIST);
         tns_value_t *whitelist_tns;
         const char *converted_settings;
         size_t len = 0;
@@ -87,7 +88,7 @@ int Dir_load(tst_t *settings, tst_t *params)
                     "Failed to convert final Whitelist settings to tnetstring for Whitelist '%s'",
                     base);
             tns_value_destroy(res);
-            res = DB_exec(bdata(&DIR_WHITELIST_SQL), whitelist_tns);
+            res = DB_exec(bdata(&DIR_WHITELIST_SQL), converted_settings);
             check(res != NULL, "Failed to store Dir: '%s'", base);
         }
     }
