@@ -68,6 +68,8 @@ const char *DIR_REDIRECT_FORMAT = "HTTP/1.1 301 Moved Permanently\r\n"
 // TODO: confirm that we are actually doing the GMT time right
 static const char *RFC_822_TIME = "%a, %d %b %Y %H:%M:%S GMT";
 
+static inline int normalize_path(bstring target);
+
 static int filerecord_cache_lookup(void *data, void *key) {
     bstring request_path = (bstring) key;
     FileRecord *fr = (FileRecord *) data;
@@ -193,8 +195,10 @@ int setup_dir_whitelist(Dir *d, bstring whitelist)
     for (tns_value_t *item = darray_pop(wl_tns->value.list); item != NULL;
             item=darray_pop(wl_tns->value.list)) {
         check(item->type == tns_tag_string, "Non-string item in whitelist");
-        d->whitelist=tst_insert(d->whitelist,bdata(item->value.string),
-                blength(item->value.string),bstrcpy(item->value.string));
+        bstring entry = bstrcpy(item->value.string);
+        normalize_path(entry);
+        d->whitelist=tst_insert(d->whitelist,bdata(entry),
+                blength(entry),entry);
     }
 
     tns_value_destroy(wl_tns);
@@ -241,7 +245,9 @@ Dir *Dir_create(bstring base, bstring index_file, bstring default_ctype, int cac
     check(cache_ttl >= 0, "Invalid cache ttl, must be a positive integer");
     dir->cache_ttl = cache_ttl;
 
-    setup_dir_whitelist(dir, whitelist);
+    dir->raw_whitelist=bstrcpy(whitelist);
+
+    /* setup_dir_whitelist(dir, whitelist); */
 
     return dir;
 
@@ -390,12 +396,30 @@ static inline int Dir_lazy_normalize_base(Dir *dir)
             "Failed to normalize base path: %s", bdata(dir->normalized_base));
 
         debug("Lazy normalized base path %s into %s", bdata(dir->base), bdata(dir->normalized_base));
+        /*
+        dir->whitelist = tst_insert(dir->whitelist,
+                bdata(dir->normalized_base), blength(dir->normalized_base),
+                dir->normalized_base);
+                */
+        setup_dir_whitelist(dir,dir->raw_whitelist);
     }
     return 0;
 
 error:
     return -1;
 }
+
+static inline int Dir_valid_path(Dir *dir, bstring target)
+{
+    if(!bstrncmp(target,dir->normalized_base,blength(dir->normalized_base))) {
+        return 0;
+    }
+    bstring best_match = tst_search_prefix(dir->whitelist,
+            bdata(target),blength(target));
+    return bstrncmp(target,best_match,blength(best_match));
+}
+
+
 
 FileRecord *FileRecord_cache_check(Dir *dir, bstring path)
 {
@@ -475,8 +499,8 @@ FileRecord *Dir_resolve_file(Dir *dir, bstring prefix, bstring path)
     check_debug(normalize_path(target) == 0,
             "Failed to normalize target path: %s", bdata(target));
 
-    check_debug(bstrncmp(target, dir->normalized_base, blength(dir->normalized_base)) == 0,
-            "Request for path %s does not start with %s base after normalizing.",
+    check(0 == Dir_valid_path(dir,target),
+            "Request for path %s does not start with %s base, nor match whitelist after normalizing",
             bdata(target), bdata(dir->base));
 
     // the FileRecord now owns the target

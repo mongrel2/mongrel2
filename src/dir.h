@@ -78,6 +78,7 @@ typedef struct Dir {
     bstring index_file;
     bstring default_ctype;
     tst_t *whitelist;
+    bstring raw_whitelist;
     int cache_ttl;
 } Dir;
 
