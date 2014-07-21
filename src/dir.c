@@ -182,7 +182,38 @@ error:
 }
 
 
-Dir *Dir_create(bstring base, bstring index_file, bstring default_ctype, int cache_ttl)
+int setup_dir_whitelist(Dir *d, bstring whitelist)
+{
+    tns_value_t *wl_tns = tns_parse(bdata(whitelist),blength(whitelist),NULL);
+
+    d->whitelist=NULL;
+
+    check(wl_tns!=NULL, "Unable to parse tnetstring for whitelist");
+
+    for (tns_value_t *item = darray_pop(wl_tns->value.list); item != NULL;
+            item=darray_pop(wl_tns->value.list)) {
+        check(item->type == tns_tag_string, "Non-string item in whitelist");
+        d->whitelist=tst_insert(d->whitelist,bdata(item->value.string),
+                blength(item->value.string),bstrcpy(item->value.string));
+    }
+
+    tns_value_destroy(wl_tns);
+    return 0;
+error:
+    if(wl_tns) {
+        tns_value_destroy(wl_tns);
+    }
+    return -1;
+}
+
+
+
+
+
+
+
+Dir *Dir_create(bstring base, bstring index_file, bstring default_ctype, int cache_ttl,
+        bstring whitelist)
 {
     Dir *dir = calloc(sizeof(Dir), 1);
     check_mem(dir);
@@ -209,6 +240,8 @@ Dir *Dir_create(bstring base, bstring index_file, bstring default_ctype, int cac
 
     check(cache_ttl >= 0, "Invalid cache ttl, must be a positive integer");
     dir->cache_ttl = cache_ttl;
+
+    setup_dir_whitelist(dir, whitelist);
 
     return dir;
 

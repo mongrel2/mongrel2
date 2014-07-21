@@ -71,6 +71,28 @@ int Dir_load(tst_t *settings, tst_t *params)
         }
     }
 
+
+    {
+        const Value *whitelist = AST_list(settings,params,"whitelist",VAL_LIST);
+        tns_value_t *whitelist_tns;
+        const char *converted_settings;
+        size_t len = 0;
+        /* This is not an error, since whitelist is optional */
+        if (NULL != whitelist) {
+            whitelist_tns = AST_tns_convert_value(settings, whitelist);
+            check(whitelist_tns != NULL, "Failed to convert whitelist value for Dir '%s'",base);
+            converted_settings = tns_render(whitelist_tns, &len);
+            tns_value_destroy(whitelist_tns);
+            check(converted_settings != NULL && len > 0,
+                    "Failed to convert final Whitelist settings to tnetstring for Whitelist '%s'",
+                    base);
+            tns_value_destroy(res);
+            res = DB_exec(bdata(&DIR_WHITELIST_SQL), whitelist_tns);
+            check(res != NULL, "Failed to store Dir: '%s'", base);
+        }
+    }
+
+
     tns_value_destroy(res);
     return DB_lastid();
 
