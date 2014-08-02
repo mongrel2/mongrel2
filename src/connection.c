@@ -1037,7 +1037,7 @@ int Connection_deliver_raw_internal(Connection *conn, tns_value_t *data)
     check(data->type==tns_tag_string, "deliver_raw_internal expected a string.");
     buf=data->value.string;
     int ret= IOBuf_send_all(conn->iob, bdata(buf), blength(buf));
-    check_debug(ret==blength(buf), "Failed to send all of the data: %d of %d", rc, avail)
+    check_debug(ret==blength(buf), "Failed to send all of the data: %d of %d", ret, blength(buf))
     return 0;
 
 error:
