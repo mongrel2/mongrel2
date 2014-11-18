@@ -119,12 +119,14 @@ int Upload_file(Connection *conn, Handler *handler, int content_len)
     rc = stream_to_disk(conn->iob, content_len, tmpfd);
     check(rc == 0, "Failed to stream to disk.");
 
+    // close the file before notifying on upload completion
+    fdclose(tmpfd);
+ 
     rc = Upload_notify(conn, handler, "done", tmp_name);
     check(rc == 0, "Failed to notify the end of the upload.");
 
     bdestroy(result);
     bdestroy(tmp_name);
-    fdclose(tmpfd);
     return 0;
 
 error:
