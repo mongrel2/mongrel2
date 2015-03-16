@@ -48,7 +48,7 @@ clean:
 	rm -f tests/empty.sqlite 
 	rm -f tools/lemon/lemon
 	rm -f tools/m2sh/tests/tests.log 
-	find . -name "*.gc*" -exec rm {} \;
+	find . \( -name "*.gcno" -o -name "*.gcda" \) -exec rm {} \;
 	${MAKE} -C tools/m2sh OPTLIB=${OPTLIB} clean
 	${MAKE} -C tools/filters OPTLIB=${OPTLIB} clean
 	${MAKE} -C tests/filters OPTLIB=${OPTLIB} clean

@@ -288,7 +288,7 @@ static int Request_is_websocket(Request *req)
         (connection = Request_get(req, &WS_CONNECTION)) != NULL)
     {
         if (BSTR_ERR != binstrcaseless(connection,0,&WS_UPGRADE) &&
-                !bstrcmp(upgrade,&WS_WEBSOCKET))
+                biseqcaseless(upgrade,&WS_WEBSOCKET))
         {
             req->ws_flags =1;
             return 1;
