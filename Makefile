@@ -98,6 +98,7 @@ clean:
 	rm -f tools/lemon/lemon
 	rm -f tools/m2sh/tests/tests.log 
 	find . \( -name "*.gcno" -o -name "*.gcda" \) -exec rm {} \;
+	git -C src/polarssl checkout include/polarssl/config.h
 	${MAKE} -C tools/m2sh OPTLIB=${OPTLIB} clean
 	${MAKE} -C tools/filters OPTLIB=${OPTLIB} clean
 	${MAKE} -C tests/filters OPTLIB=${OPTLIB} clean
