@@ -123,7 +123,7 @@ static CipherName cipher_table[] =
     _CIPHER(TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA),            // TLSv1.0 + RFC4492 (Elliptic Curve ciphersuites)
     _CIPHER(TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA),            // TLSv1.0 + RFC4492 (Elliptic Curve ciphersuites)
     // TLS_ECDHE_RSA_WITH_RC4_128_SHA is weak do not use it
-    _CIPHER(TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA),           // Elliptic curve
+    _CIPHER(TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA),           // TLSv1.0 + RFC4492 (Elliptic Curve ciphersuites)
     _CIPHER(TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256),         // TLSv1.2
     _CIPHER(TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384),         // TLSv1.2
     _CIPHER(TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256),         // TLSv1.2
@@ -133,7 +133,7 @@ static CipherName cipher_table[] =
 #endif
 #ifdef POLARSSL_KEY_EXCHANGE_ECDHE_ECDSA_ENABLED
     // TLS_ECDHE_ECDSA_WITH_RC4_128_SHA is weak do not use it
-    _CIPHER(TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA),         // Elliptic curve
+    _CIPHER(TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA),         // TLSv1.0 + RFC4492 (Elliptic Curve ciphersuites)
     _CIPHER(TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA),          // TLSv1.2
     _CIPHER(TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA),          // TLSv1.2
     _CIPHER(TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256),       // TLSv1.2
