@@ -47,6 +47,7 @@
 #include "config/config.h"
 #include "unixy.h"
 #include <signal.h>
+#include "polarssl/config.h"
 
 darray_t *SERVER_QUEUE = NULL;
 int RUNNING=1;
@@ -69,22 +70,154 @@ typedef struct CipherName
     int id;
 } CipherName;
 
+#define _CIPHER(x) {#x, x}
 static CipherName cipher_table[] =
 {
-    { "SSL_RSA_RC4_128_MD5",          TLS_RSA_WITH_RC4_128_MD5 },
-    { "SSL_RSA_RC4_128_SHA",          TLS_RSA_WITH_RC4_128_SHA },
+#ifdef POLARSSL_KEY_EXCHANGE_PSK_ENABLED
+    // TLS_PSK_WITH_RC4_128_SHA is weak do not use it
+    _CIPHER(TLS_PSK_WITH_3DES_EDE_CBC_SHA),                 // TLSv1.0 + RFC4279 (PSK ciphersuites)
+    _CIPHER(TLS_PSK_WITH_AES_128_CBC_SHA),                  // TLSv1.0 + RFC4279 (PSK ciphersuites)
+    _CIPHER(TLS_PSK_WITH_AES_256_CBC_SHA),                  // TLSv1.0 + RFC4279 (PSK ciphersuites)
+    _CIPHER(TLS_PSK_WITH_AES_128_CBC_SHA256),               // TLSv1.2 + RFC5487 (PSK with SHA-256/384 and AES GCM)
+    _CIPHER(TLS_PSK_WITH_AES_256_CBC_SHA384),               // TLSv1.2 + RFC5487 (PSK with SHA-256/384 and AES GCM)
+    _CIPHER(TLS_PSK_WITH_AES_128_GCM_SHA256),               // TLSv1.2 + RFC5487 (PSK with SHA-256/384 and AES GCM)
+    _CIPHER(TLS_PSK_WITH_AES_256_GCM_SHA384),               // TLSv1.2 + RFC5487 (PSK with SHA-256/384 and AES GCM)
+#endif
+#ifdef POLARSSL_KEY_EXCHANGE_DHE_PSK_ENABLED
+    // TLS_DHE_PSK_WITH_RC4_128_SHA is weak do not use it
+    _CIPHER(TLS_DHE_PSK_WITH_3DES_EDE_CBC_SHA),             // TLSv1.0 + RFC4279 (PSK ciphersuites)
+    _CIPHER(TLS_DHE_PSK_WITH_AES_128_CBC_SHA),              // TLSv1.0 + RFC4279 (PSK ciphersuites)
+    _CIPHER(TLS_DHE_PSK_WITH_AES_256_CBC_SHA),              // TLSv1.0 + RFC4279 (PSK ciphersuites)
+    _CIPHER(TLS_DHE_PSK_WITH_AES_128_CBC_SHA256),           // TLSv1.2 + RFC5487 (PSK with SHA-256/384 and AES GCM)
+    _CIPHER(TLS_DHE_PSK_WITH_AES_256_CBC_SHA384),           // TLSv1.2 + RFC5487 (PSK with SHA-256/384 and AES GCM)
+    _CIPHER(TLS_DHE_PSK_WITH_AES_128_GCM_SHA256),           // TLSv1.2 + RFC5487 (PSK with SHA-256/384 and AES GCM)
+    _CIPHER(TLS_DHE_PSK_WITH_AES_256_GCM_SHA384),           // TLSv1.2 + RFC5487 (PSK with SHA-256/384 and AES GCM)
+#endif
+#ifdef POLARSSL_KEY_EXCHANGE_RSA_ENABLED
+    _CIPHER(TLS_RSA_WITH_AES_128_CBC_SHA),                  // TLSv1.0 + RFC3268 (AES ciphersuites)
+    _CIPHER(TLS_RSA_WITH_AES_256_CBC_SHA),                  // TLSv1.0 + RFC3268 (AES ciphersuites)
+    _CIPHER(TLS_RSA_WITH_AES_128_CBC_SHA256),               // TLSv1.2
+    _CIPHER(TLS_RSA_WITH_AES_256_CBC_SHA256),               // TLSv1.2
+    _CIPHER(TLS_RSA_WITH_AES_128_GCM_SHA256),               // TLSv1.2
+    _CIPHER(TLS_RSA_WITH_AES_256_GCM_SHA384),               // TLSv1.2
+    // TLS_RSA_WITH_RC4_128_MD5 is weak do not use it
+    // TLS_RSA_WITH_RC4_128_SHA is weak do not use it
+    _CIPHER(TLS_RSA_WITH_CAMELLIA_128_CBC_SHA),             // TLSv1.0 + RFC4132 (Camellia ciphersuites)
+    _CIPHER(TLS_RSA_WITH_CAMELLIA_256_CBC_SHA),             // TLSv1.0 + RFC4132 (Camellia ciphersuites)
+    _CIPHER(TLS_RSA_WITH_CAMELLIA_128_CBC_SHA256),          // TLSv1.2 + RFC5932 (Camellia ciphersuites)
+    _CIPHER(TLS_RSA_WITH_CAMELLIA_256_CBC_SHA256),          // TLSv1.2 + RFC5932 (Camellia ciphersuites)
+    _CIPHER(TLS_RSA_WITH_3DES_EDE_CBC_SHA),                 // TLSv1.0
+#endif
+#ifdef POLARSSL_KEY_EXCHANGE_DHE_RSA_ENABLED
+    // TLS_DHE_RSA_WITH_AES_128_CBC_SHA is weak do not use it
+    // TLS_DHE_RSA_WITH_AES_256_CBC_SHA is weak do not use it
+    // TLS_DHE_RSA_WITH_AES_128_CBC_SHA256 is weak do not use it
+    // TLS_DHE_RSA_WITH_AES_256_CBC_SHA256 is weak do not use it
+    // TLS_DHE_RSA_WITH_CAMELLIA_128_CBC_SHA is weak do not use it
+    // TLS_DHE_RSA_WITH_CAMELLIA_256_CBC_SHA is weak do not use it
+    // TLS_DHE_RSA_WITH_CAMELLIA_128_CBC_SHA256 is weak do not use it
+    // TLS_DHE_RSA_WITH_CAMELLIA_256_CBC_SHA256 is weak do not use it
+    // TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA is weak do not use it
+#endif
+#ifdef POLARSSL_KEY_EXCHANGE_ECDHE_RSA_ENABLED
+    _CIPHER(TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA),            // TLSv1.0 + RFC4492 (Elliptic Curve ciphersuites)
+    _CIPHER(TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA),            // TLSv1.0 + RFC4492 (Elliptic Curve ciphersuites)
+    // TLS_ECDHE_RSA_WITH_RC4_128_SHA is weak do not use it
+    _CIPHER(TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA),           // TLSv1.0 + RFC4492 (Elliptic Curve ciphersuites)
+    _CIPHER(TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256),         // TLSv1.2
+    _CIPHER(TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384),         // TLSv1.2
+    _CIPHER(TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256),         // TLSv1.2
+    _CIPHER(TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384),         // TLSv1.2
+    _CIPHER(TLS_ECDHE_RSA_WITH_CAMELLIA_128_CBC_SHA256),    // TLSv1.2 + RFC6367 (Camellia HMAC ciphersuites)
+    _CIPHER(TLS_ECDHE_RSA_WITH_CAMELLIA_256_CBC_SHA384),    // TLSv1.2 + RFC6367 (Camellia HMAC ciphersuites)
+#endif
+#ifdef POLARSSL_KEY_EXCHANGE_ECDHE_ECDSA_ENABLED
+    // TLS_ECDHE_ECDSA_WITH_RC4_128_SHA is weak do not use it
+    _CIPHER(TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA),         // TLSv1.0 + RFC4492 (Elliptic Curve ciphersuites)
+    _CIPHER(TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA),          // TLSv1.2
+    _CIPHER(TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA),          // TLSv1.2
+    _CIPHER(TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256),       // TLSv1.2
+    _CIPHER(TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384),       // TLSv1.2
+    _CIPHER(TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256),       // TLSv1.2
+    _CIPHER(TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384),       // TLSv1.2
+    _CIPHER(TLS_ECDHE_ECDSA_WITH_CAMELLIA_128_CBC_SHA256),  // TLSv1.2 + RFC6367 (Camellia HMAC ciphersuites)
+    _CIPHER(TLS_ECDHE_ECDSA_WITH_CAMELLIA_256_CBC_SHA384),  // TLSv1.2 + RFC6367 (Camellia HMAC ciphersuites)
+#endif
+#ifdef POLARSSL_AES_C
+    _CIPHER(TLS_RSA_WITH_AES_128_CBC_SHA),                  // TLSv1.0 + RFC3268 (AES ciphersuites)
+    _CIPHER(TLS_RSA_WITH_AES_256_CBC_SHA),                  // TLSv1.0 + RFC3268 (AES ciphersuites)
+    // TLS_DHE_RSA_WITH_AES_128_CBC_SHA is weak do not use it
+    // TLS_DHE_RSA_WITH_AES_256_CBC_SHA is weak do not use it
+    _CIPHER(TLS_RSA_WITH_AES_128_CBC_SHA256),               // TLSv1.2
+    _CIPHER(TLS_RSA_WITH_AES_256_CBC_SHA256),               // TLSv1.2
+    // TLS_DHE_RSA_WITH_AES_128_CBC_SHA256 is weak do not use it
+    // TLS_DHE_RSA_WITH_AES_256_CBC_SHA256 is weak do not use it
+    _CIPHER(TLS_RSA_WITH_AES_128_GCM_SHA256),               // TLSv1.2
+    _CIPHER(TLS_RSA_WITH_AES_256_GCM_SHA384),               // TLSv1.2
+    _CIPHER(TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA),            // TLSv1.2
+    _CIPHER(TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA),            // TLSv1.2
+    _CIPHER(TLS_PSK_WITH_AES_128_CBC_SHA),                  // TLSv1.0 + RFC4279 (PSK ciphersuites)
+    _CIPHER(TLS_PSK_WITH_AES_256_CBC_SHA),                  // TLSv1.0 + RFC4279 (PSK ciphersuites)
+#endif
+#ifdef POLARSSL_ARC4_C
+    // TLS_RSA_WITH_RC4_128_MD5 is weak do not use it
+    // TLS_RSA_WITH_RC4_128_SHA is weak do not use it
+    // TLS_ECDHE_RSA_WITH_RC4_128_SHA is weak do not use it
+    // TLS_PSK_WITH_RC4_128_SHA is weak do not use it
+#endif
+#ifdef POLARSSL_CAMELLIA_C
+    _CIPHER(TLS_RSA_WITH_CAMELLIA_128_CBC_SHA),             // TLSv1.0 + RFC4132 (Camellia ciphersuites)
+    _CIPHER(TLS_RSA_WITH_CAMELLIA_256_CBC_SHA),             // TLSv1.0 + RFC4132 (Camellia ciphersuites)
+    // TLS_DHE_RSA_WITH_CAMELLIA_128_CBC_SHA is weak do not use it
+    // TLS_DHE_RSA_WITH_CAMELLIA_256_CBC_SHA is weak do not use it
+    _CIPHER(TLS_RSA_WITH_CAMELLIA_128_CBC_SHA256),          // TLSv1.2 + RFC5932 (Camellia ciphersuites)
+    _CIPHER(TLS_RSA_WITH_CAMELLIA_256_CBC_SHA256),          // TLSv1.2 + RFC5932 (Camellia ciphersuites)
+    // TLS_DHE_RSA_WITH_CAMELLIA_128_CBC_SHA is weak do not use it
+    // TLS_DHE_RSA_WITH_CAMELLIA_256_CBC_SHA256 is weak do not use it
+#endif
+#ifdef POLARSSL_DES_C
+    _CIPHER(TLS_RSA_WITH_3DES_EDE_CBC_SHA),                 // TLSv1.0
+    // TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA is weak do not use it
+    _CIPHER(TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA),           // SSLv3
+    _CIPHER(TLS_PSK_WITH_3DES_EDE_CBC_SHA),                 // TLSv1.0 + RFC4279 (PSK ciphersuites)
+#endif
+#ifdef POLARSSL_DHM_C
+    // TLS_DHE_RSA_WITH_DES_CBC_SHA is weak do not use it
+    // TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA is weak do not use it
+    // TLS_DHE_RSA_WITH_AES_128_CBC_SHA is weak do not use it
+    // TLS_DHE_RSA_WITH_AES_256_CBC_SHA is weak do not use it
+    // TLS_DHE_RSA_WITH_AES_128_CBC_SHA256 is weak do not use it
+    // TLS_DHE_RSA_WITH_AES_256_CBC_SHA256 is weak do not use it
+    // TLS_DHE_RSA_WITH_CAMELLIA_128_CBC_SHA is weak do not use it
+    // TLS_DHE_RSA_WITH_CAMELLIA_256_CBC_SHA is weak do not use it
+    // TLS_DHE_RSA_WITH_CAMELLIA_128_CBC_SHA is weak do not use it
+    // TLS_DHE_RSA_WITH_CAMELLIA_256_CBC_SHA256 is weak do not use it
+    // TLS_DHE_RSA_WITH_AES_128_GCM_SHA256 is weak do not use it
+    // TLS_DHE_RSA_WITH_AES_256_GCM_SHA384 is weak do not use it
+#endif
+#ifdef POLARSSL_ECDH_C
+    // TLS_ECDHE_RSA_WITH_NULL_SHA is weak do not use it
+    _CIPHER(TLS_ECDHE_RSA_WITH_RC4_128_SHA),                // TLSv1.0 + RFC4492 (Elliptic Curve ciphersuites)
+    _CIPHER(TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA),           // TLSv1.0 + RFC4492 (Elliptic Curve ciphersuites)
+    _CIPHER(TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA),            // TLSv1.0 + RFC4492 (Elliptic Curve ciphersuites)
+    _CIPHER(TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA),            // TLSv1.0 + RFC4492 (Elliptic Curve ciphersuites)
+#endif
+#ifdef POLARSSL_GCM_C
+    _CIPHER(TLS_RSA_WITH_AES_128_GCM_SHA256),               // TLSv1.2 + RFC5288 (AES GCM)
+    _CIPHER(TLS_RSA_WITH_AES_256_GCM_SHA384),               // TLSv1.2 + RFC5288 (AES GCM)
+#endif
+
+    // Legacy alias, less weaks
     { "SSL_RSA_DES_168_SHA",          TLS_RSA_WITH_3DES_EDE_CBC_SHA },
-    { "SSL_EDH_RSA_DES_168_SHA",      TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA },
     { "SSL_RSA_AES_128_SHA",          TLS_RSA_WITH_AES_128_CBC_SHA },
-    { "SSL_EDH_RSA_AES_128_SHA",      TLS_DHE_RSA_WITH_AES_128_CBC_SHA },
     { "SSL_RSA_AES_256_SHA",          TLS_RSA_WITH_AES_256_CBC_SHA },
-    { "SSL_EDH_RSA_AES_256_SHA",      TLS_DHE_RSA_WITH_AES_256_CBC_SHA },
     { "SSL_RSA_CAMELLIA_128_SHA",     TLS_RSA_WITH_CAMELLIA_128_CBC_SHA },
-    { "SSL_EDH_RSA_CAMELLIA_128_SHA", TLS_DHE_RSA_WITH_CAMELLIA_128_CBC_SHA },
     { "SSL_RSA_CAMELLIA_256_SHA",     TLS_RSA_WITH_CAMELLIA_256_CBC_SHA },
-    { "SSL_EDH_RSA_CAMELLIA_256_SHA", TLS_DHE_RSA_WITH_CAMELLIA_256_CBC_SHA },
+
+    // End of the cipher list
     { NULL, -1 }
 };
+#undef _CIPHER
 
 void host_destroy_cb(Route *r, RouteMap *map)
 {
