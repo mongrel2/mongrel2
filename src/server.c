@@ -47,7 +47,7 @@
 #include "config/config.h"
 #include "unixy.h"
 #include <signal.h>
-#include "polarssl_config.h"
+#include "polarssl/config.h"
 
 darray_t *SERVER_QUEUE = NULL;
 int RUNNING=1;
