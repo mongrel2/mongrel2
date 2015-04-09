@@ -1,0 +1,24 @@
+diff --git a/include/polarssl/config.h b/include/polarssl/config.h
+index bd12343..4c99c41 100644
+--- a/include/polarssl/config.h
++++ b/include/polarssl/config.h
+@@ -589,8 +589,8 @@
+  *           POLARSSL_SHA1_C
+  *
+  * Comment this macro to disable support for SSL 3.0
+- */
+ #define POLARSSL_SSL_PROTO_SSL3
++ */
+ 
+ /**
+  * \def POLARSSL_SSL_PROTO_TLS1
+@@ -1079,8 +1079,8 @@
+  * Requires: POLARSSL_TIMING_C
+  *
+  * Uncomment to enable the HAVEGE random generator.
+-#define POLARSSL_HAVEGE_C
+  */
++#define POLARSSL_HAVEGE_C
+ 
+ /**
+  * \def POLARSSL_MD_C
