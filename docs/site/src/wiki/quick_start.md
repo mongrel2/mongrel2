@@ -17,7 +17,7 @@ Here's how I might do it on ArchLinux:
 
 <pre>
 # install ZeroMQ 
-wget http://download.zeromq.org/historic/zeromq-2.1.7.tar.gz 
+wget http://download.zeromq.org/zeromq-2.1.7.tar.gz 
 tar -xzvf zeromq-2.1.7.tar.gz 
 cd zeromq-2.1.7/ 
 ./configure 
@@ -35,7 +35,7 @@ Getting The Source
 Quickest way to do that is to grab the tarball
 
 <pre>
-wget https://github.com/zedshaw/mongrel2/tarball/v1.8.0
+wget https://github.com/zedshaw/mongrel2/releases/download/v1.9.0/mongrel2-v1.9.0.tar.gz
 </pre>
 
 
@@ -45,8 +45,8 @@ Building Mongrel2
 Now you need to build mongrel2:
 
 <pre>
-tar -xzvf mongrel2-1.8.0.tar.gz
-cd mongrel2-1.8.0/
+tar -xzvf mongrel2-v1.9.0.tar.gz
+cd mongrel2-v1.9.0/
 make clean all && sudo make install
 </pre>
 

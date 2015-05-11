@@ -54,7 +54,6 @@ int Dir_load(tst_t *settings, tst_t *params)
     const char *base = AST_str(settings, params, "base", VAL_QSTRING);
     tns_value_t *res = NULL;
 
-    check(base[0] != '/', "Don't start the base with / in %s; it will fail when not in chroot.", base);
     check(base[strlen(base) - 1] == '/', "End directory base with / in %s or it won't work right.'", base);
 
     res = DB_exec(bdata(&DIR_SQL), base,
@@ -328,6 +327,8 @@ error:
 
 struct tagbstring BIND_ADDR = bsStatic("bind_addr");
 struct tagbstring USE_SSL = bsStatic("use_ssl");
+struct tagbstring CONTROL_PORT = bsStatic("control_port");
+struct tagbstring OPT_CHROOT = bsStatic("chroot");
 
 int Server_load(tst_t *settings, Value *val)
 {
@@ -340,6 +341,8 @@ int Server_load(tst_t *settings, Value *val)
     struct tagbstring XREQUESTS_VAR = bsStatic("xrequests");
     const char *bind_addr = NULL;
     const char *use_ssl = NULL;
+    const char *control_port = NULL;
+    const char *opt_chroot = NULL;
 
     if(tst_search(cls->params, bdata(&BIND_ADDR), blength(&BIND_ADDR))) {
         bind_addr = AST_str(settings, cls->params, bdata(&BIND_ADDR), VAL_QSTRING);
@@ -353,12 +356,25 @@ int Server_load(tst_t *settings, Value *val)
         use_ssl = "0";
     }
 
+    if(tst_search(cls->params, bdata(&CONTROL_PORT), blength(&CONTROL_PORT))) {
+        control_port = AST_str(settings, cls->params, bdata(&CONTROL_PORT), VAL_QSTRING);
+    } else {
+        control_port = "";
+    }
+
+    if(tst_search(cls->params, bdata(&OPT_CHROOT), blength(&OPT_CHROOT))) {
+        opt_chroot = AST_str(settings, cls->params, bdata(&OPT_CHROOT), VAL_QSTRING);
+    } else {
+        opt_chroot = "";
+    }
+
     res = DB_exec(bdata(&SERVER_SQL),
             AST_str(settings, cls->params, "uuid", VAL_QSTRING),
             AST_str(settings, cls->params, "access_log", VAL_QSTRING),
             AST_str(settings, cls->params, "error_log", VAL_QSTRING),
             AST_str(settings, cls->params, "pid_file", VAL_QSTRING),
-            AST_str(settings, cls->params, "chroot", VAL_QSTRING),
+            control_port,
+            opt_chroot,
             AST_str(settings, cls->params, "default_host", VAL_QSTRING),
             AST_str(settings, cls->params, "name", VAL_QSTRING),
             bind_addr,

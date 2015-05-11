@@ -1,4 +1,4 @@
-CFLAGS=-g -O2 -Wall -Wextra -Isrc -pthread -rdynamic -DNDEBUG $(OPTFLAGS) -D_FILE_OFFSET_BITS=64
+CFLAGS=-g -O2 -Wall -Wextra -Isrc -Isrc/polarssl/include -pthread -rdynamic -DNDEBUG $(OPTFLAGS) -D_FILE_OFFSET_BITS=64
 LIBS=-lzmq -ldl -lsqlite3 $(OPTLIBS)
 PREFIX?=/usr/local
 
@@ -6,15 +6,28 @@ get_objs = $(addsuffix .o,$(basename $(wildcard $(1))))
 
 ASM=$(wildcard src/**/*.S src/*.S)
 RAGEL_TARGETS=src/state.c src/http11/http11_parser.c
-SOURCES=$(wildcard src/**/*.c src/*.c) $(RAGEL_TARGETS)
+SOURCES=$(wildcard src/polarssl/library/*.c src/**/*.c src/*.c) $(RAGEL_TARGETS)
 OBJECTS=$(patsubst %.c,%.o,${SOURCES}) $(patsubst %.S,%.o,${ASM})
-OBJECTS_EXTERNAL+=$(call get_objs,src/polarssl/*.c)
+OBJECTS_EXTERNAL+=$(call get_objs,src/polarssl/library/*.c)
 OBJECTS_NOEXT=$(filter-out ${OBJECTS_EXTERNAL},${OBJECTS})
 LIB_SRC=$(filter-out src/mongrel2.c,${SOURCES})
 LIB_OBJ=$(filter-out src/mongrel2.o,${OBJECTS})
 TEST_SRC=$(wildcard tests/*_tests.c)
 TESTS=$(patsubst %.c,%,${TEST_SRC})
 MAKEOPTS=OPTFLAGS="${NOEXTCFLAGS} ${OPTFLAGS}" OPTLIBS="${OPTLIBS}" LIBS="${LIBS}" DESTDIR="${DESTDIR}" PREFIX="${PREFIX}"
+
+# Prepare PolarSSL git submodule
+# 
+# - Perform src/polarssl submodule init and update, if necessary.  This is executed
+#   upon every make invocation, and must be done before the SOURCES variable, above
+#   is lazily evaluated, or none of the src/polarssl source files will be found
+
+ifdef $($(shell									\
+	if git submodule status | grep '^-'; then				\
+	    echo "PolarSSL; init and update git submodule" 1>&2;		\
+	    git submodule init && git submodule update;				\
+	fi ))
+endif
 
 all: bin/mongrel2 tests m2sh procer
 
@@ -23,6 +36,45 @@ dev: all
 
 ${OBJECTS_NOEXT}: CFLAGS += ${NOEXTCFLAGS}
 
+# 
+# CFLAGS_DEFS: The $(CC) flags required to obtain C pre-processor #defines, per:
+# 
+#   http://nadeausoftware.com/articles/2011/12/c_c_tip_how_list_compiler_predefined_macros
+# 
+# It may be appropriate to copy some of these platform-specific CFLAGS_DEFS assignments into the
+# appropriate platform target at the end of this file, eg:
+# 
+#   solaris: CFLAGS_DEF=...
+#   solaris: all
+
+#CFLAGS_DEFS=-dM -E		# Portland Group PGCC
+#CFLAGS_DEFS=-xdumpmacros -E	# Oracle Solaris Studio
+#CFLAGS_DEFS=-qshowmacros -E	# IBM XL C
+CFLAGS_DEFS=-dM -E -x c 	# clang, gcc, HP C, Intel icc
+
+# Configure PolarSSL
+# 
+# - check for required src/polarssl/include/polarssl/config.h definitions
+#   and patch using version-appropriate src/polarssl_config.patch.#.#.# file:
+#   - If desired PolarSSL version is not yet supported, git checkout the
+#     new src/polarssl/ version X.Y.Z, edit its include/polarssl/config.h as
+#     required, and generate a new src/polarssl_config.patch.X.Y.Z using:
+# 
+#         git diff -- include/polarssl/config.h > ../polarssl_config.patch.X.Y.Z
+FORCE:
+src/polarssl/include/polarssl/config.h: src/polarssl/include/polarssl/version.h FORCE
+	@POLARSSL_VERSION=$$( $(CC) $(CFLAGS_DEFS) $<				\
+	    | sed -n -e 's/^.*POLARSSL_VERSION_STRING[\t ]*"\([^"]*\)".*/\1/p' ); \
+	if $(CC) $(CFLAGS_DEFS) $@ | grep -q POLARSSL_HAVEGE_C; then		\
+	    echo "PolarSSL $${POLARSSL_VERSION}; already configured";		\
+	else									\
+	    echo "PolarSSL $${POLARSSL_VERSION}; defining POLARSSL_HAVEGE_C...";\
+	    POLARSSL_PATCH=src/polarssl_config.patch.$${POLARSSL_VERSION};	\
+	    if ! patch -d src/polarssl -p 1 < $${POLARSSL_PATCH}; then		\
+		echo "*** Failed to apply $${POLARSSL_PATCH}";			\
+		exit 1;								\
+	    fi;									\
+	fi
 
 
 bin/mongrel2: build/libm2.a src/mongrel2.o
@@ -33,7 +85,7 @@ build/libm2.a: build ${LIB_OBJ}
 	ar rcs $@ ${LIB_OBJ}
 	ranlib $@
 
-build:
+build: src/polarssl/include/polarssl/config.h
 	@mkdir -p build
 	@mkdir -p bin
 
@@ -45,7 +97,8 @@ clean:
 	rm -f tests/empty.sqlite 
 	rm -f tools/lemon/lemon
 	rm -f tools/m2sh/tests/tests.log 
-	find . -name "*.gc*" -exec rm {} \;
+	find . \( -name "*.gcno" -o -name "*.gcda" \) -exec rm {} \;
+	git -C src/polarssl checkout include/polarssl/config.h
 	${MAKE} -C tools/m2sh OPTLIB=${OPTLIB} clean
 	${MAKE} -C tools/filters OPTLIB=${OPTLIB} clean
 	${MAKE} -C tests/filters OPTLIB=${OPTLIB} clean
@@ -62,6 +115,7 @@ pristine: clean
 	rm -f run/*
 	${MAKE} -C tools/m2sh pristine
 	${MAKE} -C tools/procer pristine
+	git submodule deinit -f src/polarssl
 
 .PHONY: tests
 tests: tests/config.sqlite ${TESTS} test_filters filters config_modules
@@ -119,6 +173,8 @@ ragel:
 
 valgrind:
 	VALGRIND="valgrind --log-file=/tmp/valgrind-%p.log" ${MAKE}
+strace:
+	VALGRIND="strace" ${MAKE}
 
 %.o: %.S
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -147,8 +203,11 @@ manual:
 	${MAKE} -C output/docs/manual book-final.pdf
 	${MAKE} -C output/docs/manual draft
 
-release:
-	git archive --format=tar --prefix=mongrel2-${VERSION}/ v${VERSION} | bzip2 -9 > mongrel2-${VERSION}.tar.bz2
+tarball:
+	sh maketar.sh mongrel2-${VERSION}
+
+release: tarball
+	#git archive --format=tar --prefix=mongrel2-${VERSION}/ v${VERSION} | bzip2 -9 > mongrel2-${VERSION}.tar.bz2
 	scp mongrel2-${VERSION}.tar.bz2 ${USER}@mongrel2.org:/var/www/mongrel2.org/static/downloads/
 	md5sum mongrel2-${VERSION}.tar.bz2
 	curl http://mongrel2.org/static/downloads/mongrel2-${VERSION}.tar.bz2 | md5sum
@@ -176,6 +235,6 @@ solaris: all
 
 
 macports: OPTFLAGS += -I/opt/local/include
-macports: OPTLIBS += -L/opt/local/lib
+macports: OPTLIBS += -L/opt/local/lib -undefined dynamic_lookup
 macports: all
 

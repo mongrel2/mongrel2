@@ -323,16 +323,17 @@ static inline bstring json_escape(bstring in)
 
     // Slightly better than the old solution.
     bstring vstr = bstrcpy(in);
+    check_mem(vstr)
     
     int i;
     for(i = 0; i < blength(vstr); i++)
     {
-        if(bdata(vstr)[i] == '\\')
+        if(bchar(vstr,i) == '\\')
         {
             binsertch(vstr, i, 1, '\\');
             i++;
         }
-        else if(bdata(vstr)[i] == '"')
+        else if(bchar(vstr,i) == '"')
         {
             binsertch(vstr, i, 1, '\\');
             i++;
@@ -340,6 +341,8 @@ static inline bstring json_escape(bstring in)
     }
 
     return vstr;
+error:
+    return NULL;
 }
 
 struct tagbstring JSON_LISTSEP = bsStatic("\",\"");
@@ -348,11 +351,16 @@ struct tagbstring JSON_OBJSEP = bsStatic("\":\"");
 // This chosen extremely arbitrarily. Certainly needs work.
 static const int PAYLOAD_GUESS = 256;
 
-static inline void B(bstring headers, const bstring k, const bstring v)
+static inline void B(bstring headers, const bstring k, const bstring v, int *first)
 {
     if(v)
     {
-        bcatcstr(headers, ",\"");
+        if(*first) {
+            bcatcstr(headers, "\"");
+            *first = 0;
+        } else {
+            bcatcstr(headers, ",\"");
+        }
         bconcat(headers, k);
         bconcat(headers, &JSON_OBJSEP);
 
@@ -375,7 +383,7 @@ static inline bstring request_determine_method(Request *req)
     }
 }
 
-bstring Request_to_tnetstring(Request *req, bstring uuid, int fd, const char *buf, size_t len, Connection *conn)
+bstring Request_to_tnetstring(Request *req, bstring uuid, int fd, const char *buf, size_t len, Connection *conn, hash_t *altheaders)
 {
     tns_outbuf outbuf = {.buffer = NULL};
     bstring method = request_determine_method(req);
@@ -387,23 +395,29 @@ bstring Request_to_tnetstring(Request *req, bstring uuid, int fd, const char *bu
     int header_start = tns_render_request_start(&outbuf);
     check(header_start != -1, "Failed to initialize outbuf.");
 
-    check(tns_render_request_headers(&outbuf, req->headers) == 0,
-            "Failed to render headers to a tnetstring.");
-
-    if(req->path) tns_render_hash_pair(&outbuf, &HTTP_PATH, req->path);
-    if(req->version) tns_render_hash_pair(&outbuf, &HTTP_VERSION, req->version);
-    if(req->uri) tns_render_hash_pair(&outbuf, &HTTP_URI, req->uri);
-    if(req->query_string) tns_render_hash_pair(&outbuf, &HTTP_QUERY, req->query_string);
-    if(req->fragment) tns_render_hash_pair(&outbuf, &HTTP_FRAGMENT, req->fragment);
-    if(req->pattern) tns_render_hash_pair(&outbuf, &HTTP_PATTERN, req->pattern);
-    /* TODO distinguish websocket with ws and wss? */
-    if(conn->iob->use_ssl) {
-        tns_render_hash_pair(&outbuf, &HTTP_URL_SCHEME, &HTTP_HTTPS);
+    if(altheaders != NULL) {
+        check(tns_render_request_headers(&outbuf, altheaders) == 0,
+                "Failed to render headers to a tnetstring.");
     } else {
-        tns_render_hash_pair(&outbuf, &HTTP_URL_SCHEME, &HTTP_HTTP);
-    }
+        check(tns_render_request_headers(&outbuf, req->headers) == 0,
+                "Failed to render headers to a tnetstring.");
 
-    tns_render_hash_pair(&outbuf, &HTTP_METHOD, method);
+        if(req->path) tns_render_hash_pair(&outbuf, &HTTP_PATH, req->path);
+        if(req->version) tns_render_hash_pair(&outbuf, &HTTP_VERSION, req->version);
+        if(req->uri) tns_render_hash_pair(&outbuf, &HTTP_URI, req->uri);
+        if(req->query_string) tns_render_hash_pair(&outbuf, &HTTP_QUERY, req->query_string);
+        if(req->fragment) tns_render_hash_pair(&outbuf, &HTTP_FRAGMENT, req->fragment);
+        if(req->pattern) tns_render_hash_pair(&outbuf, &HTTP_PATTERN, req->pattern);
+        /* TODO distinguish websocket with ws and wss? */
+        if(conn->iob->use_ssl) {
+            tns_render_hash_pair(&outbuf, &HTTP_URL_SCHEME, &HTTP_HTTPS);
+        } else {
+            tns_render_hash_pair(&outbuf, &HTTP_URL_SCHEME, &HTTP_HTTP);
+        }
+
+        tns_render_hash_pair(&outbuf, &HTTP_METHOD, method);
+        tns_render_hash_pair(&outbuf, &HTTP_REMOTE_ADDR, bfromcstr(conn->remote));
+    }
 
     check(tns_render_request_end(&outbuf, header_start, uuid, id, Request_path(req)) != -1, "Failed to finalize request.");
 
@@ -419,23 +433,34 @@ error:
     return NULL;
 }
 
-bstring Request_to_payload(Request *req, bstring uuid, int fd, const char *buf, size_t len, Connection *conn)
+bstring Request_to_payload(Request *req, bstring uuid, int fd, const char *buf, size_t len, Connection *conn, hash_t *altheaders)
 {
     bstring headers = NULL;
     bstring result = NULL;
+    int f = 1; // first header flag
 
     uint32_t id = Register_id_for_fd(fd);
     check_debug(id != UINT32_MAX, "Asked to generate a payload for a fd that doesn't exist: %d", fd);
 
-    headers = bfromcstralloc(PAYLOAD_GUESS, "{\"");
-    bconcat(headers, &HTTP_PATH);
-    bconcat(headers, &JSON_OBJSEP);
-    bconcat(headers, req->path);
-    bconchar(headers, '"');
+    headers = bfromcstralloc(PAYLOAD_GUESS, "{");
+
+    if(altheaders == NULL) {
+        bcatcstr(headers, "\"");
+        bconcat(headers, &HTTP_PATH);
+        bconcat(headers, &JSON_OBJSEP);
+        bconcat(headers, req->path);
+        bconchar(headers, '"');
+        f = 0;
+    }
 
     hscan_t scan;
     hnode_t *i;
-    hash_scan_begin(&scan, req->headers);
+    if(altheaders != NULL) {
+        hash_scan_begin(&scan, altheaders);
+    } else {
+        hash_scan_begin(&scan, req->headers);
+    }
+
     for(i = hash_scan_next(&scan); i != NULL; i = hash_scan_next(&scan))
     {
         struct bstrList *val_list = hnode_get(i);
@@ -453,7 +478,12 @@ bstring Request_to_payload(Request *req, bstring uuid, int fd, const char *buf, 
             }
 
             bstring list = bjoin(escaped, &JSON_LISTSEP);
-            bcatcstr(headers, ",\"");
+            if(f) {
+                bcatcstr(headers, "\"");
+                f = 0;
+            } else {
+                bcatcstr(headers, ",\"");
+            }
             bconcat(headers, key);
             bcatcstr(headers, "\":[\"");
             bconcat(headers, list);
@@ -463,32 +493,36 @@ bstring Request_to_payload(Request *req, bstring uuid, int fd, const char *buf, 
         }
         else
         {
-            B(headers, key, val_list->entry[0]);
+            B(headers, key, val_list->entry[0], &f);
         }
     }
 
-    // these come after so that if anyone attempts to hijack these somehow, most
-    // hash algorithms languages have will replace the browser ones with ours
+    if(altheaders == NULL) {
+        // these come after so that if anyone attempts to hijack these somehow, most
+        // hash algorithms languages have will replace the browser ones with ours
 
-    if(Request_is_json(req)) {
-        B(headers, &HTTP_METHOD, &JSON_METHOD);
-    } else if(Request_is_xml(req)) {
-        B(headers, &HTTP_METHOD, &XML_METHOD);
-    } else {
-        B(headers, &HTTP_METHOD, req->request_method);
-    }
+        if(Request_is_json(req)) {
+            B(headers, &HTTP_METHOD, &JSON_METHOD, &f);
+        } else if(Request_is_xml(req)) {
+            B(headers, &HTTP_METHOD, &XML_METHOD, &f);
+        } else {
+            B(headers, &HTTP_METHOD, req->request_method, &f);
+        }
 
-    B(headers, &HTTP_VERSION, req->version);
-    B(headers, &HTTP_URI, req->uri);
-    B(headers, &HTTP_QUERY, req->query_string);
-    B(headers, &HTTP_FRAGMENT, req->fragment);
-    B(headers, &HTTP_PATTERN, req->pattern);
+        B(headers, &HTTP_VERSION, req->version, &f);
+        B(headers, &HTTP_URI, req->uri, &f);
+        B(headers, &HTTP_QUERY, req->query_string, &f);
+        B(headers, &HTTP_FRAGMENT, req->fragment, &f);
+        B(headers, &HTTP_PATTERN, req->pattern, &f);
 
-    /* TODO websocket "ws" and "wss"? */
-    if(conn->iob->use_ssl) {
-        B(headers, &HTTP_URL_SCHEME, &HTTP_HTTPS);
-    } else {
-        B(headers, &HTTP_URL_SCHEME, &HTTP_HTTP);
+        /* TODO websocket "ws" and "wss"? */
+        if(conn->iob->use_ssl) {
+            B(headers, &HTTP_URL_SCHEME, &HTTP_HTTPS, &f);
+        } else {
+            B(headers, &HTTP_URL_SCHEME, &HTTP_HTTP, &f);
+        }
+
+        B(headers, &HTTP_REMOTE_ADDR, bfromcstr(conn->remote), &f);
     }
 
     bconchar(headers, '}');

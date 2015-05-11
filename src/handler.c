@@ -50,7 +50,10 @@
 struct tagbstring LEAVE_HEADER_JSON = bsStatic("{\"METHOD\":\"JSON\"}");
 struct tagbstring LEAVE_HEADER_TNET = bsStatic("16:6:METHOD,4:JSON,}");
 struct tagbstring LEAVE_MSG = bsStatic("{\"type\":\"disconnect\"}");
-
+struct tagbstring XREQ_CTL = bsStatic("ctl");
+struct tagbstring KEEP_ALIVE = bsStatic("keep-alive");
+struct tagbstring CREDITS = bsStatic("credits");
+struct tagbstring CANCEL = bsStatic("cancel");
 
 int HANDLER_STACK;
 
@@ -138,6 +141,36 @@ error:
     return -1;
 }
 
+static int handler_process_control_request(Connection *conn, tns_value_t *data)
+{
+    tns_value_t *args = darray_get(data->value.list, 1);
+    check(args->type==tns_tag_dict, "Invalid control response: not a dict.");
+
+    hnode_t *n = hash_lookup(args->value.dict, &KEEP_ALIVE);
+    if(n != NULL) {
+        Register_ping(IOBuf_fd(conn->iob));
+    }
+
+    n = hash_lookup(args->value.dict, &CREDITS);
+    if(n != NULL) {
+        tns_value_t *credits = (tns_value_t *)hnode_get(n);
+        conn->sendCredits += credits->value.number;
+        taskwakeup(&conn->uploadRendez);
+    }
+
+    n = hash_lookup(args->value.dict, &CANCEL);
+    if(n != NULL) {
+        Register_disconnect(IOBuf_fd(conn->iob));
+        taskwakeup(&conn->uploadRendez);
+    }
+
+    tns_value_destroy(data);
+    return 0;
+
+error:
+    return -1;
+}
+
 static inline void handler_process_extended_request(int fd, Connection *conn, bstring payload)
 {
     char *x;
@@ -153,8 +186,14 @@ static inline void handler_process_extended_request(int fd, Connection *conn, bs
     tns_value_t *key=darray_get(l,0);
     check(key->type==tns_tag_string, "Invalid extended response: key is not a string");
     check(key->value.string != NULL,, "Invalid extended response: key is NULL");
-    check (0 == dispatch_extended_request(conn, key->value.string, data),
-            "Extended request dispatch returned non-zero: %s",bdata(key->value.string));
+
+    if(!bstrcmp(key->value.string, &XREQ_CTL)) {
+        check (0 == handler_process_control_request(conn, data),
+                "Control request processing returned non-zero: %s", bdata(key->value.string));
+    } else {
+        check (0 == dispatch_extended_request(conn, key->value.string, data),
+                "Extended request dispatch returned non-zero: %s",bdata(key->value.string));
+    }
 
     return;
 error:

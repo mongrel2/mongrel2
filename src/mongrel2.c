@@ -169,7 +169,12 @@ error:
 
 int clear_pid_file(Server *srv)
 {
-    bstring pid_file = bformat("%s%s", bdata(srv->chroot), bdata(srv->pid_file));
+    bstring pid_file;
+    if(srv->chroot != NULL) {
+        pid_file = bformat("%s%s", bdata(srv->chroot), bdata(srv->pid_file));
+    } else {
+        pid_file = bstrcpy(srv->pid_file);
+    }
 
     int rc = Unixy_remove_dead_pidfile(pid_file);
     check(rc == 0, "Failed to remove the dead PID file: %s", bdata(pid_file));
@@ -220,47 +225,61 @@ int attempt_chroot_drop(Server *srv)
 {
     int rc = 0;
 
-    if(Unixy_chroot(srv->chroot) == 0) {
-        log_info("All loaded up, time to turn into a server.");
-        log_info("-- Starting " VERSION ". Copyright (C) Zed A. Shaw. Licensed BSD.\n");
-        log_info("-- Look in %s for startup messages and errors.", bdata(srv->error_log));
+    log_info("All loaded up, time to turn into a server.");
+    log_info("-- Starting " VERSION ". Copyright (C) Zed A. Shaw. Licensed BSD.\n");
+    log_info("-- Look in %s for startup messages and errors.", bdata(srv->error_log));
 
+    int testmode = 0;
+
+    if(srv->chroot != NULL) {
+        if(Unixy_chroot(srv->chroot) == 0) {
+            if(Setting_get_int("server.daemonize", 1)) {
+                rc = Unixy_daemonize(1); // 1 == chdir /
+                check(rc == 0, "Failed to daemonize, looks like you're hosed.");
+            }
+            else {
+                rc = chdir("/");
+                check(rc == 0, "Failed to change working directory to '/'.");
+            }
+        } else {
+            log_warn("Couldn't chroot to %s, assuming running in test mode.", bdata(srv->chroot));
+
+            // rewrite the access log to be in the right location
+            bstring temp = bformat("%s%s", bdata(srv->chroot), bdata(srv->access_log));
+            bassign(srv->access_log, temp);
+            bdestroy(temp);
+
+            temp = bformat(".%s", bdata(srv->pid_file));
+            bassign(srv->pid_file, temp);
+            bdestroy(temp);
+
+            testmode = 1;
+        }
+    } else {
         if(Setting_get_int("server.daemonize", 1)) {
-            rc = Unixy_daemonize();
+            rc = Unixy_daemonize(0); // 0 == don't chdir
             check(rc == 0, "Failed to daemonize, looks like you're hosed.");
         }
-        else {
-            rc = chdir("/");
-            check(rc == 0, "Failed to change working directory to '/'.");
-        }
+    }
 
+    rc = Unixy_pid_file(srv->pid_file);
+    check(rc == 0, "Failed to make the PID file %s", bdata(srv->pid_file));
+
+    if(srv->chroot != NULL && ! testmode) {
+        rc = Unixy_drop_priv(&PRIV_DIR);
+        check(rc == 0, "Failed to drop priv to the owner of %s", bdata(&PRIV_DIR));
+    } else {
+        rc = Unixy_drop_priv(NULL);
+        check(rc == 0, "Failed to drop priv");
+    }
+
+    if(!testmode) {
         FILE *log = fopen(bdata(srv->error_log), "a+");
         check(log, "Couldn't open %s log file.", bdata(srv->error_log));
         setbuf(log, NULL);
         check(0==add_log_to_rotate_list(srv->error_log,log),"Unable to add error log to list of files to rotate.");
 
         dbg_set_log(log);
-
-        rc = Unixy_pid_file(srv->pid_file);
-        check(rc == 0, "Failed to make the PID file %s", bdata(srv->pid_file));
-
-        rc = Unixy_drop_priv(&PRIV_DIR);
-        check(rc == 0, "Failed to drop priv to the owner of %s", bdata(&PRIV_DIR));
-
-    } else {
-        log_warn("Couldn't chroot too %s, assuming running in test mode.", bdata(srv->chroot));
-
-        // rewrite the access log to be in the right location
-        bstring temp = bformat("%s%s", bdata(srv->chroot), bdata(srv->access_log));
-        bassign(srv->access_log, temp);
-        bdestroy(temp);
-
-        temp = bformat(".%s", bdata(srv->pid_file));
-        bassign(srv->pid_file, temp);
-        bdestroy(temp);
-
-        rc = Unixy_pid_file(srv->pid_file);
-        check(rc == 0, "Failed to make the PID file %s", bdata(srv->pid_file));
     }
 
     return 0;

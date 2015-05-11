@@ -77,12 +77,12 @@ you'll find that about 80\% of them are exploiting ambiguous parts of the HTTP
 grammar to pass through malicious content or overflow buffers.  In Mongrel2 we
 use a parser that rejects invalid requests from first basic principles using
 technology that's 30 years old and backed by solid mathematics.  Not only does
-Mongrel2 reject bad requests, but it can tell you \emph{why} the request was
+Mongrel2 reject bad requests, it can tell you \emph{why} the request was
 bad, just like a compiler.  This doesn't mean Mongrel2 is ruthless, but it
 definitely doesn't tolerate ambiguity or stupidity.
 
 Mongrel2 completey supports keep-alives because now, since it's not using Ruby
-\emph{at all} it can scale up beyond 1024 file descriptors.  Ruby was limited
+\emph{at all}, it can scale up beyond 1024 file descriptors.  Ruby was limited
 in the number of open files a process could have, so the original Mongrel had
 to break keep-alive and kill connections in order to save itself from greedy
 browsers that never close them.  Mongrel2 doesn't have this limitation, so it
@@ -92,7 +92,7 @@ Where problems come in is with pipe-lined requests, meaning a browser sends a bu
 of requests in a big blast, then hangs out for all the responses.  This was such a
 horrible stupid idea that pretty much everone gets it wrong and doesn't support it
 fully, if at all.  The reason is it's much too easy to blast a server with a ton
-of request, wait a bit so they hit proxied backends, and then close the socket.  The
+of requests, wait a bit so they hit proxied backends, and then close the socket.  The
 web server and the backends are now screwed having to handle these requests which will
 go nowhere.
 
@@ -112,7 +112,7 @@ be easy to understand what's going on.  You just create routes to backends that 
 HTTP servers and Mongrel2 shuttles requests to them, then proxies responses back.
 
 The Proxying support in Mongrel2 is accurate, but it's not very capable right now.  For
-example, there's not round-robin backend selection, or page caching, or other things you
+example, there's no round-robin backend selection, page caching, or other things you
 might need for more serious deployments.  Those features will come eventually, though.
 
 What you do get with Mongrel2's proxying, though, is a dead accurate way of slicing up
@@ -179,7 +179,7 @@ MP3 streaming protocol.
 
 What makes streaming, async messaging, and long poll designs so efficient in Mongrel2 is that you can send
 \emph{one} message and target up to 128 clients with that one message.  This means sending large scale replies
-to many browsers requires less copying of the message and less transports.
+to many browsers requires less copying of the message and fewer transports.
 
 In addition to this, you can setup Mongrel2 with the help of some 0MQ to send
 one request from a browser to as many target handlers as you like.  You can
@@ -200,6 +200,14 @@ large requests to temporary files, but it sends your handlers an initial
 finished'' message.  If, at any time, you want to kill the upload, you just
 send a 0-length reply (the official KILL MESSAGE) and the whole thing is
 aborted and cleaned up.
+
+\subsection{Experimental large-upload streaming}
+
+Mongrel2 1.9.0 adds experimental support for streaming large files directly to
+handlers.  However there are several limitations -- most notably, you need to
+ensure that the same handler process gets each request, or that the handler
+processess can all communicate, as unlike raw HTTP the protocol used to
+communicate with the handlers is stateful.
 
 
 \section{Introduction to ZeroMQ}
@@ -624,6 +632,38 @@ to look:
 \end{description}
 
 Hopefully, you can figure it out from the code, but if not, let me know.
+
+\section{Extended Reply Format}
+
+Sending a raw response is fine for basic uses, but sometimes you want to
+communicate something back to mongrel2.  For example, many servers have
+a way to send a file in a response.  They typically do so by setting a HTTP
+header.  This is a bad-fit for Mongrel2 since we do not parse any of the raw
+response data.
+
+What we need is a simple-to-parse format for structured data.  Something like
+tnetstrings, for example.  We also need a way to tell mongrel2 that we have
+structured data, rather than raw data.  (Note that had we used a netstring for
+the body that would be moot, but hindsight is ever 20-20).  Recall that the
+response format is:
+
+\begin{Verbatim}
+UUID SIZE:ID ID ID, BODY
+\end{Verbatim}
+
+Note that each ID will always be an integer in the basic response format.  For
+an extended response, we adopt the convention that the first ID is an upper
+case X, so an extended response becomes:
+
+\begin{Verbatim}
+UUID SIZE:X ID ID ID, BODY
+\end{Verbatim}
+
+With the added requirement that BODY be a tnetstring list.  The first item in
+that list should be a string which keys which extension to use.  Plugins (see
+"Writing a Filter" below) can register to dispatch on any string.  See
+\file{/tools/filters/sendfile.c} for the sendfile plugin and
+\file{/examples/http\_0mq/sendfile.py} for a python handler example.
 
 
 \section{Writing A Filter (BETA)}

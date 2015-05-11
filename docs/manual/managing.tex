@@ -170,7 +170,7 @@ parameters again.
 With this sequence of commands you:
 
 \begin{enumerate}
-\item Create a raw fresh config database name \file{config.sqlite} and load the \file{mongrel2.conf} into it.
+\item Create a raw fresh config database name \file{config.sqlite} and load the \file{sample.conf} into it.
 \item List the servers it has configured.
 \item List the hosts that server has, with what routes it has.
 \item Start this server to try it out.
@@ -194,7 +194,7 @@ The base structure of a Mongrel2 configuration is:
       \item[Route] Hosts have Routes in them, which tells Mongrel2 what to do with URL paths and patterns
         that match them.  Routes then have \ident{Dir}, \ident{Handler} or \ident{Proxy} items in them.
       \begin{description}
-        \item[Dir] A Dir serves files out of a directory, full with 304 and ETag support, default content types,
+        \item[Dir] A Dir serves files out of a directory, complete with 304 and ETag support, default content types,
           and most of the things you need to serve them.
         \item[Proxy] A Proxy takes requests matching the Route they're attached to and sends them to another
           HTTP server somewhere else.  Mongrel2 will then act as a full proxy and also try to keep connections
@@ -273,7 +273,7 @@ request goes through.  If not, 404.
 \subsection{Dir}
 
 A \ident{Dir} is a simple directory-serving route target that serves files out of a directory.  It has caching
-built-in, handles if-modified-since, ETags, and all the various bizarre HTTP caching mechanisms as RFC-accurate
+built-in, handles if-modified-since, ETags, and all the various bizarre HTTP caching mechanisms as RFC-accurately
 as possible.  It also has default content-types and index files.
 
 \begin{description}
@@ -303,7 +303,7 @@ carve out pieces that will work as handlers.
 \end{description}
 
 Requests that match a Proxy route are still parsed by Mongrel2's incredibly accurate
-HTTP parser, so that your backend servers should not be receiving badly formatted
+HTTP parser, so that your backend servers should not receive badly formatted
 HTTP requests.  Responses from a Proxy server, however, are sent unaltered to the
 browser directly.
 
@@ -864,6 +864,13 @@ Mongrel2 (you can't reload to enable SSL), and it should be working.
 After you get this working you just have to get your own certificate, put it
 in the certs directory with the right filename, and you should be good to go.
 
+\subsection{SNI Support}
+
+Starting with 1.9.0, mongrel2 adds SNI support.  On any request, mongrel2 will
+first search for files named \emph{hostname}.crt and \emph{hostname}.key -- if
+found, those will be used, otherwise it will fallback to the UUID key and
+certificate files.
+
 \subsection{Experimental SSL Caching}
 
 We've got experimental SSL caching working, which will try to reuse the 
@@ -872,7 +879,6 @@ memory and performance, so it can chew a bunch of RAM if you have a lot of
 SSL traffic over a short period of time.  We'll be making the caching more
 configurable, but for now, it's working and does speed up SSL clients that
 do it properly.
-
 
 \section{Configuring Filters (BETA)}
 

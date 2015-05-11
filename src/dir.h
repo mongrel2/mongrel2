@@ -85,7 +85,7 @@ Dir *Dir_create(bstring base, bstring index_file,
 
 void Dir_destroy(Dir *dir);
 
-FileRecord *Dir_find_file(bstring path, bstring default_type);
+FileRecord *Dir_find_file(bstring path, bstring default_type) __attribute__((nonnull(1)));;
 
 long long int Dir_stream_file(FileRecord *file, Connection *conn);
 

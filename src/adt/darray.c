@@ -143,4 +143,20 @@ error:
     return NULL;
 }
 
+int darray_insert(darray_t *array, int i, void *el)
+{
+    array->end++;
 
+    if(darray_end(array) >= darray_max(array)) {
+        if(darray_expand(array) != 0) {
+            return -1;
+        }
+    }
+
+    int n;
+    for(n = array->end - 1; n > i; n--) {
+        array->contents[n] = array->contents[n - 1];
+    }
+
+    array->contents[i] = el;
+}

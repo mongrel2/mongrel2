@@ -40,12 +40,12 @@ char *test_Request_payloads()
             // TODO: fix this up so that we never get a null for path
             if(req->path == NULL) req->path = bfromcstr("/");
 
-            bstring payload = Request_to_payload(req, fake_sender, 0, "", 0,conn);
+            bstring payload = Request_to_payload(req, fake_sender, 0, "", 0,conn, NULL);
             bconchar(payload, '\n');
             fwrite(payload->data, blength(payload), 1, test_cases);
             bdestroy(payload);
 
-            payload = Request_to_tnetstring(req, fake_sender, 0, "", 0,conn);
+            payload = Request_to_tnetstring(req, fake_sender, 0, "", 0,conn, NULL);
             debug("TNETSTRING PAYLOAD: '%.*s'", blength(payload), bdata(payload));
             bconchar(payload, '\n');
             fwrite(payload->data, blength(payload), 1, test_cases);
@@ -134,11 +134,11 @@ char *test_Request_create()
     mu_assert(rc == 1, "It should parse.");
     mu_assert(nparsed > 0, "Should have parsed something.");
 
-    bstring payload = Request_to_payload(req, fake_sender, 0, "", 0,conn);
+    bstring payload = Request_to_payload(req, fake_sender, 0, "", 0,conn, NULL);
     debug("PAYLOAD IS: %s", bdata(payload));
     bdestroy(payload);
 
-    payload = Request_to_tnetstring(req, fake_sender, 0, "", 0,conn);
+    payload = Request_to_tnetstring(req, fake_sender, 0, "", 0,conn, NULL);
     debug("TNETSTRING PAYLOAD: '%.*s'", blength(payload), bdata(payload));
 
     mu_assert(Request_get(req, &HTTP_IF_MODIFIED_SINCE) != NULL,
@@ -167,7 +167,7 @@ char *test_Request_create()
 }
 
 struct tagbstring COOKIE_HEADER = bsStatic("cookie");
-struct tagbstring EXPECTED_COOKIE_HEADER = bsStatic("JSON 1 / 117:{\"PATH\":\"/\",\"cookie\":[\"foo=bar\",\"test=yes; go=no\"],\"METHOD\":\"GET\",\"VERSION\":\"HTTP/1.0\",\"URI\":\"/\",\"URL_SCHEME\":\"http\"},0:,");
+struct tagbstring EXPECTED_COOKIE_HEADER = bsStatic("JSON 1 / 134:{\"PATH\":\"/\",\"cookie\":[\"foo=bar\",\"test=yes; go=no\"],\"METHOD\":\"GET\",\"VERSION\":\"HTTP/1.0\",\"URI\":\"/\",\"URL_SCHEME\":\"http\",\"REMOTE_ADDR\":\"\"},0:,");
 
 char *test_Multiple_Header_Request() 
 {
@@ -197,7 +197,7 @@ char *test_Multiple_Header_Request()
     mu_assert(Request_get(req, &COOKIE_HEADER) != NULL,
             "Should have an cookie header.");
 
-    bstring payload = Request_to_payload(req, &JSON_METHOD, 0, "", 0,conn);
+    bstring payload = Request_to_payload(req, &JSON_METHOD, 0, "", 0,conn, NULL);
     debug("PAYLOAD IS: %s", bdata(payload));
 
     mu_assert(bstrcmp(payload, &EXPECTED_COOKIE_HEADER) == 0,

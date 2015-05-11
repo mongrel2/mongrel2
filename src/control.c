@@ -331,7 +331,13 @@ tns_value_t *info_cb(bstring name, hash_t *args)
         tns_add_to_list(cols, tns_new_integer(srv->port));
         tns_list_addstr(cols, srv->bind_addr);
         tns_list_addstr(cols, srv->uuid);
-        tns_list_addstr(cols, srv->chroot);
+        if(srv->chroot != NULL) {
+            tns_list_addstr(cols, srv->chroot);
+        } else {
+            bstring empty = bfromcstr("");
+            tns_list_addstr(cols, empty);
+            bdestroy(empty);
+        }
         tns_list_addstr(cols, srv->access_log);
         tns_list_addstr(cols, srv->error_log);
         tns_list_addstr(cols, srv->pid_file);
@@ -417,7 +423,15 @@ void Control_task(void *v)
     int rc = 0;
     tns_value_t *req = NULL;
     tns_value_t *rep = NULL;
-    bstring spec = Setting_get_str("control_port", &DEFAULT_CONTROL_SPEC);
+
+    bstring spec;
+    Server *srv = Server_queue_latest();
+    if(srv->control_port != NULL) {
+        spec = srv->control_port;
+    } else {
+        spec = Setting_get_str("control_port", &DEFAULT_CONTROL_SPEC);
+    }
+
     taskname("control");
 
     log_info("Setting up control socket in at %s", bdata(spec));

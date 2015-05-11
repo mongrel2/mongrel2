@@ -1,0 +1,10 @@
+#the top dir is where i put a ca to make test certs
+
+#I made a cert like this:
+
+cd certs
+openssl req -out CSR.csr -new -newkey rsa:2048 -nodes -keyout privateKey.key
+openssl ca -config ../openssl.cnf -in CSR.csr -out m2-cert.pem -keyfile ../private/cakey.pem -cert ../cacert.pem 
+
+#this command verifies it
+openssl verify -CAfile ./cacert.pem certs/m2-cert.pem

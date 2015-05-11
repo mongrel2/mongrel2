@@ -59,6 +59,12 @@ enum {
     CONN_TYPE_SOCKET
 };
 
+enum deliverTaskState {
+    DT_NOT_CREATED = 0,
+    DT_RUNNING,
+    DT_DYING,
+    DT_DEAD
+};
 struct Connection;
 
 typedef int (*deliver_function)(struct Connection *c, tns_value_t *data);
@@ -76,8 +82,8 @@ typedef struct Connection {
 
     // if SNI is used, then the connection has its own cert
     int use_sni;
-    x509_cert own_cert;
-    rsa_context rsa_key;
+    x509_crt own_cert;
+    pk_context pk_key;
 
     int rport;
     State state;
@@ -87,9 +93,12 @@ typedef struct Connection {
     hash_t *filter_state;
     char remote[IPADDR_SIZE+1];
     Handler *handler;
+    volatile enum deliverTaskState deliverTaskStatus;
     volatile Deliver_message deliverRing[DELIVER_OUTSTANDING_MSGS];
     volatile unsigned deliverPost,deliverAck;
     Rendez deliverRendez;
+    Rendez uploadRendez;
+    int sendCredits;
 } Connection;
 
 void Connection_destroy(Connection *conn);
@@ -101,7 +110,7 @@ int Connection_accept(Connection *conn);
 void Connection_task(void *v);
 
 struct Handler;
-int Connection_send_to_handler(Connection *conn, Handler *handler, char *body, int content_len);
+int Connection_send_to_handler(Connection *conn, Handler *handler, char *body, int content_len, hash_t *altheaders);
 
 int Connection_deliver_raw(Connection *conn, bstring buf);
 

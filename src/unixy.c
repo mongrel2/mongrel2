@@ -43,6 +43,7 @@
 #include <stdlib.h>
 
 char *m2program = "mongrel2";
+static int in_chroot = 0;
 
 int Unixy_chroot(bstring path)
 {
@@ -54,6 +55,8 @@ int Unixy_chroot(bstring path)
     rc = chroot(to_dir);
     check(rc == 0, "Can't chroot to %s, rerun as root if this is what you want.", bdata(path));
 
+    in_chroot = 1;
+
     rc = chdir("/");
     check(rc == 0, "Can't chdir to / directory inside chroot.");
 
@@ -64,23 +67,44 @@ error:
 }
 
 
+int Unixy_in_chroot()
+{
+    return in_chroot;
+}
+
+
 int Unixy_drop_priv(bstring path)
 {
-    const char *from_dir = bdata(path);
-    struct stat sb;
+    if(path != NULL) {
+        // if using a chroot, set privileges based on that of the dir
 
-    check(from_dir && blength(path), "Chroot path can't be empty.");
+        const char *from_dir = bdata(path);
+        struct stat sb;
 
-    int rc = stat(from_dir, &sb);
-    check(rc == 0, "Failed to stat target chroot directory: %s", bdata(path));
+        check(from_dir && blength(path), "Chroot path can't be empty.");
 
-    rc = setregid(sb.st_gid, sb.st_gid);
-    check(rc == 0 && getgid() == sb.st_gid && getegid() == sb.st_gid, "Failed to change to GID: %d", sb.st_gid);
+        int rc = stat(from_dir, &sb);
+        check(rc == 0, "Failed to stat target chroot directory: %s", bdata(path));
 
-    rc = setreuid(sb.st_uid, sb.st_uid);
-    check(rc == 0 && getuid() == sb.st_uid && geteuid() == sb.st_uid, "Failed to change to UID: %d", sb.st_uid);
+        rc = setregid(sb.st_gid, sb.st_gid);
+        check(rc == 0 && getgid() == sb.st_gid && getegid() == sb.st_gid, "Failed to change to GID: %d", sb.st_gid);
 
-    log_info("Now running as UID:%d, GID:%d", sb.st_uid, sb.st_gid);
+        rc = setreuid(sb.st_uid, sb.st_uid);
+        check(rc == 0 && getuid() == sb.st_uid && geteuid() == sb.st_uid, "Failed to change to UID: %d", sb.st_uid);
+
+        log_info("Now running as UID:%d, GID:%d", sb.st_uid, sb.st_gid);
+    } else {
+        // if not using a chroot, do a basic privilege drop
+
+        int rc = setgid(getgid());
+        check(rc == 0, "Failed to drop privileges with setgid");
+
+        rc = setuid(getuid());
+        check(rc == 0, "Failed to drop privileges with setuid");
+
+        log_info("Now running as UID:%d, GID:%d", getuid(), getgid());
+    }
+
     return 0;
 
 error:
@@ -179,10 +203,10 @@ error:
 }
 
 
-int Unixy_daemonize()
+int Unixy_daemonize(int dochdir)
 {
     // daemonize is just too damn eager on closing stuff
-    int rc = daemon(0, 1);
+    int rc = daemon(!dochdir, 1);
     check(rc == 0, "Failed to daemonize.");
 
     return 0;
