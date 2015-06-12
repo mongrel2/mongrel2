@@ -252,6 +252,9 @@ int netaccept(int fd, char *server, int *port)
         }
     }
 
+    int keepalive = 1;
+	  setsockopt(cfd, SOL_SOCKET, SO_KEEPALIVE, &keepalive, sizeof(keepalive));
+	
     fdnoblock(cfd);
 
     if(SET_NODELAY) {
