@@ -52,6 +52,8 @@
 int MAX_HEADER_COUNT=0;
 int MAX_DUPE_HEADERS=5;
 
+static struct tagbstring CHUNKED = bsStatic("chunked");
+
 void Request_init()
 {
     MAX_HEADER_COUNT = Setting_get_int("limits.header_count", 128 * 10);
@@ -102,9 +104,27 @@ static void header_done_cb(void *data, const char *at, size_t length)
 
     Request *req = (Request *)data;
 
+    // extract chunked
+    int chunked = 0;
+    bstring te = Request_get(req, &HTTP_TRANSFER_ENCODING);
+    if(te && !bstrcmp(te, &CHUNKED)) {
+        chunked = 1;
+    }
+
     // extract content_len
     const char *clen = bdata(Request_get(req, &HTTP_CONTENT_LENGTH));
-    if(clen) req->parser.content_len = atoi(clen);
+    if(clen) {
+        req->parser.content_len = atoi(clen);
+    } else {
+        if(chunked) {
+            // if content-length missing, only assume indefinite length if
+            //   chunked encoding is present
+            req->parser.content_len = -1;
+        } else {
+            // otherwise 0 length
+            req->parser.content_len = 0;
+        }
+    }
 
     // extract host header
     req->host = Request_get(req, &HTTP_HOST);

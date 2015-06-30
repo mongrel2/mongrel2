@@ -52,6 +52,7 @@
 extern int CONNECTION_STACK;
 extern int BUFFER_SIZE;
 extern int MAX_CONTENT_LENGTH;
+extern int MAX_CHUNK_SIZE;
 
 enum {
     CONN_TYPE_HTTP=1,

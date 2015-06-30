@@ -59,6 +59,7 @@ struct tagbstring HTTP_REMOTE_ADDR = bsStatic("REMOTE_ADDR");
 
 
 struct tagbstring HTTP_CONTENT_LENGTH = bsStatic("content-length");
+struct tagbstring HTTP_TRANSFER_ENCODING = bsStatic("transfer-encoding");
 struct tagbstring HTTP_HOST = bsStatic("host");
 struct tagbstring HTTP_IF_MATCH = bsStatic("if-match");
 struct tagbstring HTTP_IF_NONE_MATCH = bsStatic("if-none-match");
