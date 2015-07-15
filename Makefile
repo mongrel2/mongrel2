@@ -246,3 +246,7 @@ macports: OPTFLAGS += -I/opt/local/include
 macports: OPTLIBS += -L/opt/local/lib -undefined dynamic_lookup
 macports: all
 
+brew: OPTFLAGS += -I/usr/local/include
+brew: OPTLIBS += -L/usr/local/lib -undefined dynamic_lookup
+brew: all
+
