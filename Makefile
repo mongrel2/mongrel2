@@ -5,7 +5,7 @@ PREFIX?=/usr/local
 get_objs = $(addsuffix .o,$(basename $(wildcard $(1))))
 
 ASM=$(wildcard src/**/*.S src/*.S)
-RAGEL_TARGETS=src/state.c src/http11/http11_parser.c
+#RAGEL_TARGETS=src/state.c src/http11/http11_parser.c
 SOURCES=$(wildcard src/polarssl/library/*.c src/**/*.c src/*.c) $(RAGEL_TARGETS)
 OBJECTS=$(patsubst %.c,%.o,${SOURCES}) $(patsubst %.S,%.o,${ASM})
 OBJECTS_EXTERNAL+=$(call get_objs,src/polarssl/library/*.c)
@@ -84,6 +84,14 @@ build/libm2.a: CFLAGS += -fPIC
 build/libm2.a: build ${LIB_OBJ}
 	ar rcs $@ ${LIB_OBJ}
 	ranlib $@
+
+build/libm2.dylib: CFLAGS += -fPIC
+build/libm2.dylib: build ${LIB_OBJ}
+	libtool -dynamic -o $@ -undefined dynamic_lookup -lsqlite3 -lzmq -lc ${LIB_OBJ}
+
+build/libm2.so: CFLAGS += -fPIC
+build/libm2.so: build ${LIB_OBJ}
+	libtool -dynamic -o $@ -undefined dynamic_lookup -lsqlite3 -lzmq -lc ${LIB_OBJ}
 
 build: src/polarssl/include/polarssl/config.h
 	@mkdir -p build
