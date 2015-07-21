@@ -127,7 +127,7 @@
   # URI description as per RFC 3986.
 
   sub_delims    = ( "!" | "$" | "&" | "'" | "(" | ")" | "*"
-                  | "+" | "," | ";" | "=" ) ;
+                  | "+" | "," | ";" | "=" | "{" | "}" | "^") ;
   gen_delims    = ( ":" | "/" | "?" | "#" | "[" | "]" | "@" ) ;
   reserved      = ( gen_delims | sub_delims ) ;
   unreserved    = ( alpha | digit | "-" | "." | "_" | "~" ) ;
