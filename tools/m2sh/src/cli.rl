@@ -44,8 +44,12 @@
 #include "ast.h"
 #include <stdlib.h>
 
-#define TKBASE(N, S, E) temp = Token_create(TK##N, S, (int)(E - S));\
-    fsm->tokens[fsm->token_count++] = temp;
+#define TKBASE(N, S, E)\
+    if ( fsm->token_count < MAX_TOKENS ) {\
+        temp = Token_create(TK##N, S, (int)(E - S));\
+        fsm->tokens[fsm->token_count] = temp;\
+    }\
+    fsm->token_count++;
 
 #define TK(N) TKBASE(N, fsm->ts, fsm->te)
 #define TKSTR(N) TKBASE(N, fsm->ts+1, fsm->te-3)
@@ -97,6 +101,8 @@ void cli_params_execute( struct params *fsm, bstring data)
 
 int cli_params_finish( struct params *fsm )
 {
+	if ( fsm->token_count > MAX_TOKENS )
+		return -2;
 	if ( fsm->cs == params_error )
 		return -1;
 	if ( fsm->cs >= params_first_final )

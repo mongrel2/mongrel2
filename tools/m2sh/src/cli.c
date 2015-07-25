@@ -46,19 +46,23 @@
 #include "ast.h"
 #include <stdlib.h>
 
-#define TKBASE(N, S, E) temp = Token_create(TK##N, S, (int)(E - S));\
-    fsm->tokens[fsm->token_count++] = temp;
+#define TKBASE(N, S, E)\
+    if ( fsm->token_count < MAX_TOKENS ) {\
+        temp = Token_create(TK##N, S, (int)(E - S));\
+        fsm->tokens[fsm->token_count] = temp;\
+    }\
+    fsm->token_count++;
 
 #define TK(N) TKBASE(N, fsm->ts, fsm->te)
 #define TKSTR(N) TKBASE(N, fsm->ts+1, fsm->te-3)
 #define TKOPT(C) TKBASE(OPTION, fsm->ts+(C), fsm->te-(C*2))
 
 
-#line 76 "src/cli.rl"
+#line 80 "src/cli.rl"
 
 
 
-#line 62 "src/cli.c"
+#line 66 "src/cli.c"
 static const int params_start = 4;
 static const int params_first_final = 4;
 static const int params_error = -1;
@@ -66,7 +70,7 @@ static const int params_error = -1;
 static const int params_en_main = 4;
 
 
-#line 79 "src/cli.rl"
+#line 83 "src/cli.rl"
 
 void cli_params_init( struct params *fsm )
 {
@@ -74,7 +78,7 @@ void cli_params_init( struct params *fsm )
     fsm->token_count = 0;
     fsm->curtk = 0;
 	
-#line 78 "src/cli.c"
+#line 82 "src/cli.c"
 	{
 	 fsm->cs = params_start;
 	 fsm->ts = 0;
@@ -82,7 +86,7 @@ void cli_params_init( struct params *fsm )
 	 fsm->act = 0;
 	}
 
-#line 86 "src/cli.rl"
+#line 90 "src/cli.rl"
 }
 
 void cli_params_execute( struct params *fsm, bstring data)
@@ -93,22 +97,22 @@ void cli_params_execute( struct params *fsm, bstring data)
     Token *temp = NULL;
 
 	
-#line 97 "src/cli.c"
+#line 101 "src/cli.c"
 	{
 	if ( p == pe )
 		goto _test_eof;
 	switch (  fsm->cs )
 	{
 tr0:
-#line 73 "src/cli.rl"
+#line 77 "src/cli.rl"
 	{{p = (( fsm->te))-1;}{ TK(BLOB); }}
 	goto st4;
 tr2:
-#line 67 "src/cli.rl"
+#line 71 "src/cli.rl"
 	{ fsm->te = p+1;{ TKSTR(QSTRING); }}
 	goto st4;
 tr7:
-#line 70 "src/cli.rl"
+#line 74 "src/cli.rl"
 	{ fsm->te = p+1;}
 	goto st4;
 tr13:
@@ -124,23 +128,23 @@ tr13:
 	}
 	goto st4;
 tr14:
-#line 73 "src/cli.rl"
+#line 77 "src/cli.rl"
 	{ fsm->te = p;p--;{ TK(BLOB); }}
 	goto st4;
 tr21:
-#line 66 "src/cli.rl"
+#line 70 "src/cli.rl"
 	{ fsm->te = p;p--;{  TKOPT(2); }}
 	goto st4;
 tr22:
-#line 65 "src/cli.rl"
+#line 69 "src/cli.rl"
 	{ fsm->te = p;p--;{  TKOPT(1); }}
 	goto st4;
 tr23:
-#line 69 "src/cli.rl"
+#line 73 "src/cli.rl"
 	{ fsm->te = p;p--;{ TK(IDENT); }}
 	goto st4;
 tr24:
-#line 68 "src/cli.rl"
+#line 72 "src/cli.rl"
 	{ fsm->te = p;p--;{ TK(NUMBER); }}
 	goto st4;
 st4:
@@ -151,7 +155,7 @@ st4:
 case 4:
 #line 1 "NONE"
 	{ fsm->ts = p;}
-#line 155 "src/cli.c"
+#line 159 "src/cli.c"
 	switch( (*p) ) {
 		case 32: goto tr7;
 		case 34: goto tr8;
@@ -175,20 +179,20 @@ case 4:
 tr6:
 #line 1 "NONE"
 	{ fsm->te = p+1;}
-#line 73 "src/cli.rl"
+#line 77 "src/cli.rl"
 	{ fsm->act = 7;}
 	goto st5;
 tr15:
 #line 1 "NONE"
 	{ fsm->te = p+1;}
-#line 67 "src/cli.rl"
+#line 71 "src/cli.rl"
 	{ fsm->act = 3;}
 	goto st5;
 st5:
 	if ( ++p == pe )
 		goto _test_eof5;
 case 5:
-#line 192 "src/cli.c"
+#line 196 "src/cli.c"
 	if ( (*p) == 32 )
 		goto tr13;
 	if ( 9 <= (*p) && (*p) <= 13 )
@@ -202,7 +206,7 @@ st6:
 	if ( ++p == pe )
 		goto _test_eof6;
 case 6:
-#line 206 "src/cli.c"
+#line 210 "src/cli.c"
 	switch( (*p) ) {
 		case 32: goto st0;
 		case 34: goto tr15;
@@ -233,7 +237,7 @@ st7:
 	if ( ++p == pe )
 		goto _test_eof7;
 case 7:
-#line 237 "src/cli.c"
+#line 241 "src/cli.c"
 	if ( (*p) == 32 )
 		goto st0;
 	if ( 9 <= (*p) && (*p) <= 13 )
@@ -247,7 +251,7 @@ st8:
 	if ( ++p == pe )
 		goto _test_eof8;
 case 8:
-#line 251 "src/cli.c"
+#line 255 "src/cli.c"
 	switch( (*p) ) {
 		case 32: goto st2;
 		case 39: goto tr15;
@@ -278,7 +282,7 @@ st9:
 	if ( ++p == pe )
 		goto _test_eof9;
 case 9:
-#line 282 "src/cli.c"
+#line 286 "src/cli.c"
 	if ( (*p) == 32 )
 		goto st2;
 	if ( 9 <= (*p) && (*p) <= 13 )
@@ -438,11 +442,13 @@ case 15:
 
 	}
 
-#line 96 "src/cli.rl"
+#line 100 "src/cli.rl"
 }
 
 int cli_params_finish( struct params *fsm )
 {
+	if ( fsm->token_count > MAX_TOKENS )
+		return -2;
 	if ( fsm->cs == params_error )
 		return -1;
 	if ( fsm->cs >= params_first_final )
