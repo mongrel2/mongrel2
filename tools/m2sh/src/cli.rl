@@ -190,7 +190,7 @@ static inline int Command_parse(struct params *p, Command *cmd)
     int next = 0;
 
     // TODO: refactor this, but for now command takes over the tokens until it's done
-    memcpy(cmd->tokens, p->tokens, MAX_TOKENS);
+    memcpy(cmd->tokens, p->tokens, sizeof(cmd->tokens));
     cmd->token_count = p->token_count;
 
     cmd->options = hash_create(HASHCOUNT_T_MAX, 0, 0);
