@@ -42,6 +42,7 @@ char *test_parser()
 {
     Command cmd;
     bstring args;
+    int i;
 
     args = bfromcstr("m2sh stop -db 'config.sqlite' -name 'main'");
     mu_assert(cli_params_parse_args(args, &cmd) != -1, "Parse returned -1.");
@@ -58,6 +59,20 @@ char *test_parser()
     args = bfromcstr("m2sh start -db config#sqlite -name main");
     mu_assert(cli_params_parse_args(args, &cmd) != -1, "Parse returned -1.");
     mu_assert(!cmd.error, "Parsing failed.");
+
+    args = bfromcstr("");
+    for(i = 0; i < MAX_TOKENS; i++) {
+        bcatcstr(args, "a ");
+    }
+    mu_assert(cli_params_parse_args(args, &cmd) != -1, "Parse returned -1.");
+    mu_assert(!cmd.error, "Parsing failed.");
+
+    args = bfromcstr("");
+    for(i = 0; i <= MAX_TOKENS; i++) {
+        bcatcstr(args, "a ");
+    }
+    mu_assert(cli_params_parse_args(args, &cmd) == -1, "Parse failed to return -1.");
+    mu_assert(cmd.error, "Parsing succeeded erroneously.");
 
     return NULL;
 }
