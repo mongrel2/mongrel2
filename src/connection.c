@@ -59,6 +59,7 @@ struct tagbstring PING_PATTERN = bsStatic("@[a-z/]- {\"type\":\\s*\"ping\"}");
 struct tagbstring POLICY_XML_REQUEST = bsStatic("<policy-file-request");
 
 int MAX_CONTENT_LENGTH = 20 * 1024;
+int MAX_CHUNK_SIZE = 100 * 1024;
 int BUFFER_SIZE = 4 * 1024;
 int CONNECTION_STACK = 32 * 1024;
 int CLIENT_READ_RETRIES = 5;
@@ -347,7 +348,7 @@ int connection_http_to_handler(Connection *conn)
         body = "";
         rc = Connection_send_to_handler(conn, handler, body, content_len, NULL);
         check_debug(rc == 0, "Failed to deliver to the handler.");
-    } else if(content_len > MAX_CONTENT_LENGTH) {
+    } else if(content_len > MAX_CONTENT_LENGTH || content_len == -1) {
         if(Setting_get_int("upload.stream", 0)) {
             rc = Upload_stream(conn, handler, content_len);
         } else {

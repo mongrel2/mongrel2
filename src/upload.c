@@ -37,6 +37,7 @@
 #include "dbg.h"
 #include "setting.h"
 #include "response.h"
+#include "chunked.h"
 
 bstring UPLOAD_STORE = NULL;
 mode_t UPLOAD_MODE = 0;
@@ -48,21 +49,46 @@ static inline int stream_to_disk(IOBuf *iob, int content_len, int tmpfd)
 {
     char *data = NULL;
     int avail = 0;
+    int read_size = 0;
+    int eof = 0;
+    int chunked;
 
     debug("max content length: %d, content_len: %d", MAX_CONTENT_LENGTH, content_len);
 
-    IOBuf_resize(iob, MAX_CONTENT_LENGTH); // give us a good buffer size
-
-    while(content_len > 0) {
-        data = IOBuf_read_some(iob, &avail);
-        check(!IOBuf_closed(iob), "Closed while reading from IOBuf.");
-        content_len -= avail;
-        check(write(tmpfd, data, avail) == avail, "Failed to write requested amount to tempfile: %d", avail);
-
-        check(IOBuf_read_commit(iob, avail) != -1, "Final commit failed streaming to disk.");
+    if(content_len == -1) {
+        IOBuf_resize(iob, MAX_CHUNK_SIZE + 1024); // give us a good buffer size
+        chunked = 1;
+    } else {
+        IOBuf_resize(iob, MAX_CONTENT_LENGTH); // give us a good buffer size
+        chunked = 0;
+        if(content_len == 0)
+            eof = 1;
     }
 
-    check(content_len == 0, "Failed to write everything to the large upload tmpfile.");
+    while(!eof) {
+        if(chunked) {
+            // block and read a whole chunk
+            data = chunked_read(iob, &avail, &read_size);
+            check(data != NULL, "Chunk too large.");
+            if(avail == 0)
+                eof = 1;
+        } else {
+            data = IOBuf_read_some(iob, &avail);
+            read_size = avail;
+
+            content_len -= avail;
+            if(content_len <= 0)
+                eof = 1;
+        }
+
+        check(!IOBuf_closed(iob), "Closed while reading from IOBuf.");
+
+        check(write(tmpfd, data, avail) == avail, "Failed to write requested amount to tempfile: %d", avail);
+
+        check(IOBuf_read_commit(iob, read_size) != -1, "Final commit failed streaming to disk.");
+    }
+
+    check(eof, "Failed to write everything to the large upload tmpfile.");
 
     return 0;
 
@@ -165,44 +191,86 @@ int Upload_stream(Connection *conn, Handler *handler, int content_len)
 {
     char *data = NULL;
     int avail = 0;
+    int read_size = 0;
     int offset = 0;
-    int first_chunk = 1;
+    int first_read = 1;
+    int eof = 0;
+    int chunked;
     int rc;
     hash_t *altheaders = NULL;
     bstring offsetstr;
 
     debug("max content length: %d, content_len: %d", MAX_CONTENT_LENGTH, content_len);
 
-    IOBuf_resize(conn->iob, MAX_CONTENT_LENGTH); // give us a good buffer size
+    // in case the connection was reused, it should start from 0 credits
+    conn->sendCredits = 0;
 
-    while(content_len > 0) {
-        if(first_chunk) {
-            // read whatever's there
-            data = IOBuf_read_some(conn->iob, &avail);
-        } else if(conn->sendCredits > 0) {
-            // read up to credits
-            data = IOBuf_read(conn->iob, conn->sendCredits < content_len ? conn->sendCredits : content_len, &avail);
-            conn->sendCredits -= avail;
+    if(content_len == -1) {
+        IOBuf_resize(conn->iob, MAX_CHUNK_SIZE + 1024); // give us a good buffer size
+        chunked = 1;
+    } else {
+        IOBuf_resize(conn->iob, MAX_CONTENT_LENGTH); // give us a good buffer size
+        chunked = 0;
+        if(content_len == 0)
+            eof = 1;
+    }
+
+    while(!eof) {
+        if(chunked) {
+            if(first_read) {
+                // send the headers without waiting on the first chunk
+                data = "";
+                avail = 0;
+                read_size = -1;
+            } else {
+                if(conn->sendCredits > 0) {
+                    // block and read a whole chunk
+                    data = chunked_read(conn->iob, &avail, &read_size);
+                    check(data != NULL, "Chunk too large.");
+                    // note this may put us in negative credits
+                    conn->sendCredits -= avail;
+                } else {
+                    // sleep until we have credits
+                    tasksleep(&conn->uploadRendez);
+                    continue;
+                }
+                if(avail == 0)
+                    eof = 1;
+            }
         } else {
-            // sleep until we have credits
-            tasksleep(&conn->uploadRendez);
-            continue;
+            if(first_read) {
+                // at first, read whatever's there
+                data = IOBuf_read(conn->iob, IOBuf_avail(conn->iob), &avail);
+            } else if(conn->sendCredits > 0) {
+                // read up to credits
+                data = IOBuf_read(conn->iob, conn->sendCredits < content_len ? conn->sendCredits : content_len, &avail);
+                conn->sendCredits -= avail;
+            } else {
+                // sleep until we have credits
+                tasksleep(&conn->uploadRendez);
+                continue;
+            }
+
+            read_size = avail;
+
+            content_len -= avail;
+            if(content_len <= 0)
+                eof = 1;
         }
 
         check(!IOBuf_closed(conn->iob), "Closed while reading from IOBuf.");
-        content_len -= avail;
 
         offsetstr = bformat("%d", offset);
 
-        if(first_chunk) {
+        if(first_read) {
             Request_set(conn->req, &UPLOAD_STREAM, offsetstr, 1);
-            if(content_len == 0) {
+            if(eof) {
                 Request_set(conn->req, &UPLOAD_STREAM_DONE, bfromcstr("1"), 1);
             }
         } else {
             altheaders = hash_create(2, (hash_comp_t)bstrcmp, bstr_hash_fun);
             add_to_hash(altheaders, &UPLOAD_STREAM, offsetstr);
-            if(content_len == 0) {
+            if(eof) {
                 add_to_hash(altheaders, &UPLOAD_STREAM_DONE, bfromcstr("1"));
             }
         }
@@ -216,13 +284,15 @@ int Upload_stream(Connection *conn, Handler *handler, int content_len)
             altheaders = NULL;
         }
 
-        check(IOBuf_read_commit(conn->iob, avail) != -1, "Commit failed while streaming.");
+        if(read_size != -1) {
+            check(IOBuf_read_commit(conn->iob, read_size) != -1, "Commit failed while streaming.");
+        }
 
-        first_chunk = 0;
+        first_read = 0;
         offset += avail;
     }
 
-    check(content_len == 0, "Failed to write everything to the large upload tmpfile.");
+    check(eof, "Failed to write everything to the handler.");
 
     return 0;
 
