@@ -94,7 +94,7 @@ static inline int exec_server_operations(Command *cmd,
     run.murder = option(cmd, "murder", NULL) != NULL;
 
     int option_count = (every != NULL) + (name != NULL) + (host != NULL) + (uuid != NULL);
-    check(option_count == 1, "Just one please, not all of the options.");
+    check(option_count == 1, "You must give either --every, --name, --host, or --uuid");
 
     if(sudo) {
         run.sudo = biseqcstr(sudo, "") ? "sudo" : bdata(sudo);
@@ -115,7 +115,7 @@ static inline int exec_server_operations(Command *cmd,
         } else if(uuid) {
             res = DB_exec("SELECT %s FROM server where uuid = %Q", select, bdata(uuid));
         } else {
-            sentinel("You must give either -name, -uuid, or -host to start a server.");
+            sentinel("Well looks like you broke something, please report what you did to mongrel2.org.");
         }
 
         check(tns_get_type(res) == tns_tag_list,
