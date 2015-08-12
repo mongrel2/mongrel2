@@ -63,6 +63,7 @@ int MAX_CHUNK_SIZE = 100 * 1024;
 int BUFFER_SIZE = 4 * 1024;
 int CONNECTION_STACK = 32 * 1024;
 int CLIENT_READ_RETRIES = 5;
+int RELAXED_PARSING = 0;
 
 int MAX_WS_LENGTH = 256 * 1024;
 
@@ -947,6 +948,8 @@ Connection *Connection_create(Server *srv, int fd, int rport,
 
     check_mem(conn->req);
 
+    Request_set_relaxed(conn->req, RELAXED_PARSING);
+
     if(srv != NULL && srv->use_ssl) {
         conn->iob = IOBuf_create(BUFFER_SIZE, fd, IOBUF_SSL);
         check(conn->iob != NULL, "Failed to create the SSL IOBuf.");
@@ -1186,6 +1189,7 @@ void Connection_init()
     IO_SSL_VERIFY_METHOD = Setting_get_int("ssl.verify_optional", 0) ? SSL_VERIFY_OPTIONAL : SSL_VERIFY_NONE;
     IO_SSL_VERIFY_METHOD = Setting_get_int("ssl.verify_required", 0) ? SSL_VERIFY_REQUIRED : IO_SSL_VERIFY_METHOD;
 
+    RELAXED_PARSING = Setting_get_int("request.relaxed", 0);
 }
 
 
