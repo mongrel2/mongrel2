@@ -257,6 +257,8 @@ void ssl_debug(void *p, int level, const char *msg)
  */
 static darray_t *SSL_SESSION_CACHE = NULL;
 const int SSL_INITIAL_CACHE_SIZE = 300;
+const int SSL_CACHE_SIZE_LIMIT = 1000;
+const int SSL_CACHE_LIMIT_REMOVE_COUNT = 100;
 
 static inline int setup_ssl_session_cache()
 {
@@ -293,6 +295,8 @@ static int simple_get_cache( void *p_ssl, ssl_session *ssn )
             continue;
         }
 
+        darray_move_to_end(SSL_SESSION_CACHE, i);
+
         // TODO: odd, why 48? this is from polarssl
         memcpy( ssn->master, cur->master, 48 );
 
@@ -328,9 +332,16 @@ static int simple_set_cache( void *p_ssl, const ssl_session *ssn )
     }
 
     if(make_new) {
+        if (darray_end(SSL_SESSION_CACHE) >= SSL_CACHE_SIZE_LIMIT) {
+            darray_remove_and_resize(SSL_SESSION_CACHE, 0, SSL_CACHE_LIMIT_REMOVE_COUNT);
+        }
+
         cur = (ssl_session *) darray_new(SSL_SESSION_CACHE);
         check_mem(cur);
         darray_push(SSL_SESSION_CACHE, cur);
+    }
+    else {
+        darray_move_to_end(SSL_SESSION_CACHE, i);
     }
 
     *cur = *ssn;
