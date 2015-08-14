@@ -160,3 +160,39 @@ int darray_insert(darray_t *array, int i, void *el)
 
     array->contents[i] = el;
 }
+
+void darray_move_to_end(darray_t *array, int i)
+{
+    void *el = array->contents[i];
+
+    int n;
+    for(n = i + 1; n < array->end; n++) {
+        array->contents[n - 1] = array->contents[n];
+    }
+
+    array->contents[array->end - 1] = el;
+}
+
+void darray_remove_and_resize(darray_t *array, int start, int count)
+{
+    int n;
+    if(array->element_size > 0) {
+        for(n = start; n < (start + count); n++) {
+            if(array->contents[n] != NULL) {
+                h_free(array->contents[n]);
+            }
+        }
+    }
+
+    for(n = start + count; n < array->end; n++) {
+        int i = n - (start + count);
+        array->contents[start + i] = array->contents[n];
+        array->contents[n] = NULL;
+    }
+
+    array->end = array->end - count;
+
+    if(darray_end(array) > (int)array->expand_rate && darray_end(array) % array->expand_rate) {
+        darray_contract(array);
+    }
+}

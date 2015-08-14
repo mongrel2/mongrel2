@@ -54,7 +54,7 @@ char *test_darray_operations()
 
     mu_assert(array->max == 1201, "Wrong max size.");
 
-    for(i = 999; i > 0; i--) {
+    for(i = 999; i >= 0; i--) {
         int *val = darray_pop(array);
         mu_assert(val != NULL, "Shouldn't get a NULL.");
         mu_assert(*val == i * 333, "Wrong value.");
@@ -63,6 +63,33 @@ char *test_darray_operations()
 
     darray_destroy(array);
  
+    darray_t *array2 = darray_create(sizeof(int), 5);
+
+    for(i = 0; i < 10; i++) {
+        int *val = darray_new(array2);
+        darray_attach(array2, val);
+        *val = i;
+        darray_push(array2, val);
+    }
+
+    for(i = 0; i < 2; i++) {
+        darray_move_to_end(array2, 0);
+    }
+
+    darray_remove_and_resize(array2, 3, 3);
+
+    mu_assert(array2->end == 7, "Wrong end after calling darray_remove_and_resize.");
+    int expectedValues[7] = { 2, 3, 4, 8, 9, 0, 1 };
+
+    for(i = 6; i >= 0; i--) {
+        int *val = darray_pop(array);
+        mu_assert(val != NULL, "Shouldn't get a NULL.");
+        mu_assert(*val == expectedValues[i], "Wrong value.");
+        darray_free(val);
+    }
+
+    darray_destroy(array2);
+
     return NULL;
 }
 
