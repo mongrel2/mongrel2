@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <polarssl/x509.h>
 #include <polarssl/ssl.h>
-#include <polarssl/havege.h>
+#include "server.h"
 
 #if defined(__APPLE__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
 #include "bsd_specific.h"
@@ -58,6 +58,7 @@ typedef struct IOBuf {
     havege_state hs;
 } IOBuf;
 
+IOBuf *IOBuf_create_ssl(size_t len, int fd, ctr_drbg_context *rng_ctx);
 IOBuf *IOBuf_create(size_t len, int fd, IOBufType type);
 
 void IOBuf_resize(IOBuf *buf, size_t new_size);

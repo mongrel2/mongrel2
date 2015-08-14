@@ -947,7 +947,7 @@ Connection *Connection_create(Server *srv, int fd, int rport,
     check_mem(conn->req);
 
     if(srv != NULL && srv->use_ssl) {
-        conn->iob = IOBuf_create(BUFFER_SIZE, fd, IOBUF_SSL);
+        conn->iob = IOBuf_create_ssl(BUFFER_SIZE, fd, &srv->ctr_drbg);
         check(conn->iob != NULL, "Failed to create the SSL IOBuf.");
 
         // set default cert
