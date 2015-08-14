@@ -568,3 +568,8 @@ error:
 
     return NULL;
 }
+
+void Request_set_relaxed(Request *req, int enabled)
+{
+    req->parser.uri_relaxed = (enabled ? 1 : 0);
+}

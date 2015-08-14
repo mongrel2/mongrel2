@@ -126,8 +126,9 @@
 
   # URI description as per RFC 3986.
 
+  more_delims   = ( "{" | "}" | "^" ) when { parser->uri_relaxed } ;
   sub_delims    = ( "!" | "$" | "&" | "'" | "(" | ")" | "*"
-                  | "+" | "," | ";" | "=" ) ;
+                  | "+" | "," | ";" | "=" | more_delims ) ;
   gen_delims    = ( ":" | "/" | "?" | "#" | "[" | "]" | "@" ) ;
   reserved      = ( gen_delims | sub_delims ) ;
   unreserved    = ( alpha | digit | "-" | "." | "_" | "~" ) ;

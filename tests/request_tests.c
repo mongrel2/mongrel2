@@ -18,7 +18,7 @@ char *test_Request_payloads()
     size_t nparsed = 0;
     unsigned int i = 0;
     int rc = glob("tests/and_suite/*", 0, NULL, &test_files);
-    mu_assert(rc == 0, "Failed to glob file sin tests/and_suite/*");
+    mu_assert(rc == 0, "Failed to glob files in tests/and_suite/*");
     FILE *test_cases = fopen("tests/request_payloads.txt", "w");
     mu_assert(test_cases != NULL, "Failed to create the tests/request_payloads.txt file.");
 
@@ -166,6 +166,59 @@ char *test_Request_create()
     return NULL;
 }
 
+char *test_Request_relaxed()
+{
+    Request *req;
+    int rc = 0;
+    size_t nparsed;
+    bstring fake_sender = bfromcstr("FAKESENDER");
+
+    Request_init();
+
+    FILE *infile = fopen("tests/requests/relaxed_test", "r");
+    mu_assert(infile != NULL, "Failed to open test file.");
+
+    bstring data = bread((bNread)fread, infile);
+    fclose(infile);
+    mu_assert(data != NULL, "Failed to read test file.");
+    mu_assert(blength(data) > 0, "Nothing in that file.");
+
+    // first, test with non-relaxed parsing and fail
+
+    nparsed = 0;
+    req = Request_create();
+    mu_assert(req != NULL, "Failed to create parser for request.");
+
+    Request_start(req);
+
+    rc = Request_parse(req, bdata(data), blength(data), &nparsed);
+
+    mu_assert(rc == -1, "It should fail to parse.");
+
+    Request_destroy(req);
+
+    // next, test with relaxed parsing and succeed
+
+    nparsed = 0;
+    req = Request_create();
+    mu_assert(req != NULL, "Failed to create parser for request.");
+
+    Request_set_relaxed(req, 1);
+    Request_start(req);
+
+    rc = Request_parse(req, bdata(data), blength(data), &nparsed);
+
+    mu_assert(rc == 1, "It should parse.");
+    mu_assert(nparsed > 0, "Should have parsed something.");
+
+    Request_destroy(req);
+
+    bdestroy(fake_sender);
+    bdestroy(data);
+
+    return NULL;
+}
+
 struct tagbstring COOKIE_HEADER = bsStatic("cookie");
 struct tagbstring EXPECTED_COOKIE_HEADER = bsStatic("JSON 1 / 134:{\"PATH\":\"/\",\"cookie\":[\"foo=bar\",\"test=yes; go=no\"],\"METHOD\":\"GET\",\"VERSION\":\"HTTP/1.0\",\"URI\":\"/\",\"URL_SCHEME\":\"http\",\"REMOTE_ADDR\":\"\"},0:,");
 
@@ -223,6 +276,7 @@ char * all_tests() {
     Register_connect(0, conn);
 
     mu_run_test(test_Request_create);
+    mu_run_test(test_Request_relaxed);
     mu_run_test(test_Multiple_Header_Request);
     mu_run_test(test_Request_payloads);
     mu_run_test(test_Request_speeds);

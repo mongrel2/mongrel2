@@ -104,6 +104,8 @@ bstring Request_to_tnetstring(Request *req, bstring uuid, int fd, const char *bu
 
 bstring Request_to_payload(Request *req, bstring uuid, int fd, const char *buf, size_t len, struct Connection *, hash_t *altheaders);
 
+void Request_set_relaxed(Request *req, int enabled);
+
 void Request_init();
 
 #endif
