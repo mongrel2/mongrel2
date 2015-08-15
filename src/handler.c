@@ -50,12 +50,15 @@
 struct tagbstring LEAVE_HEADER_JSON = bsStatic("{\"METHOD\":\"JSON\"}");
 struct tagbstring LEAVE_HEADER_TNET = bsStatic("16:6:METHOD,4:JSON,}");
 struct tagbstring LEAVE_MSG = bsStatic("{\"type\":\"disconnect\"}");
+struct tagbstring CREDITS_MSG = bsStatic("{\"type\":\"credits\"}");
 struct tagbstring XREQ_CTL = bsStatic("ctl");
 struct tagbstring KEEP_ALIVE = bsStatic("keep-alive");
 struct tagbstring CREDITS = bsStatic("credits");
 struct tagbstring CANCEL = bsStatic("cancel");
 
 int HANDLER_STACK;
+
+static const int PAYLOAD_GUESS = 256;
 
 static void cstr_free(void *data, void *hint)
 {
@@ -92,6 +95,52 @@ error: //fallthrough
     if(payload) free(payload);
 }
 
+void Handler_notify_credits(Handler *handler, int id, int credits)
+{
+    void *socket = handler->send_socket;
+    assert(socket && "Socket can't be NULL");
+    tns_outbuf outbuf = {.buffer = NULL};
+    bstring payload = NULL;
+
+    if(handler->protocol == HANDLER_PROTO_TNET) {
+        int header_start = tns_render_request_start(&outbuf);
+        bstring creditsstr = bformat("%d", credits);
+        tns_render_hash_pair(&outbuf, &HTTP_METHOD, &JSON_METHOD);
+        tns_render_hash_pair(&outbuf, &DOWNLOAD_CREDITS, creditsstr);
+        bdestroy(creditsstr);
+        tns_outbuf_clamp(&outbuf, header_start);
+
+        payload = bformat("%s %d @* %s%d:%s,",
+                bdata(handler->send_ident), id,
+                bdata(tns_outbuf_to_bstring(&outbuf)),
+                blength(&CREDITS_MSG), bdata(&CREDITS_MSG));
+    } else {
+        bstring headers = bfromcstralloc(PAYLOAD_GUESS, "{");
+
+        bcatcstr(headers, "\"METHOD\":\"JSON\",\"");
+        bconcat(headers, &DOWNLOAD_CREDITS);
+        bcatcstr(headers, "\":\"");
+        bformata(headers, "%d", credits);
+        bcatcstr(headers, "\"}");
+
+        payload = bformat("%s %d @* %d:%s,%d:%s,",
+                bdata(handler->send_ident), id,
+                blength(headers), bdata(headers),
+                blength(&CREDITS_MSG), bdata(&CREDITS_MSG));
+
+        bdestroy(headers);
+    }
+
+    check(payload != NULL, "Failed to make the payload for credits.");
+
+    if(Handler_deliver(socket, bdata(payload), blength(payload)) == -1) {
+        log_err("Can't tell handler %d giving credits.", id);
+    }
+
+error: //fallthrough
+    if(payload) free(payload);
+    if(outbuf.buffer) free(outbuf.buffer);
+}
 
 int Handler_setup(Handler *handler)
 {

@@ -68,5 +68,6 @@ extern struct tagbstring HTTP_URL_SCHEME;
 extern struct tagbstring HTTP_HTTP;
 extern struct tagbstring HTTP_HTTPS;
 extern struct tagbstring HTTP_REMOTE_ADDR;
+extern struct tagbstring DOWNLOAD_CREDITS;
 
 #endif
