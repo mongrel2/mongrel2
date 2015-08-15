@@ -280,6 +280,17 @@ error:
     return -1;
 }
 
+static int Server_init_rng(Server *srv)
+{
+    int rc;
+
+    entropy_init( &srv->entropy );
+    rc = ctr_drbg_init( &srv->ctr_drbg, entropy_func, &srv->entropy, NULL, 0 );
+    check(rc == 0, "Init rng failed: ctr_drbg_init returned %d\n", rc);
+    return 0;
+error:
+    return -1;
+}
 
 static int Server_init_ssl(Server *srv)
 {
@@ -370,6 +381,12 @@ Server *Server_create(bstring uuid, bstring default_host,
 
     srv->bind_addr = bstrcpy(bind_addr); check_mem(srv->bind_addr);
     srv->uuid = bstrcpy(uuid); check_mem(srv->uuid);
+
+    if(use_ssl) {
+        rc = Server_init_rng(srv);
+        check(rc == 0, "Failed to initialize rng for server %s", bdata(uuid));
+    }
+
     if(blength(chroot) > 0) {
         srv->chroot = bstrcpy(chroot); check_mem(srv->chroot);
     } else {
