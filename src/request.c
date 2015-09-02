@@ -436,7 +436,11 @@ bstring Request_to_tnetstring(Request *req, bstring uuid, int fd, const char *bu
         }
 
         tns_render_hash_pair(&outbuf, &HTTP_METHOD, method);
-        tns_render_hash_pair(&outbuf, &HTTP_REMOTE_ADDR, bfromcstr(conn->remote));
+        bstring bremote = bfromcstr(conn->remote);
+        tns_render_hash_pair(&outbuf, &HTTP_REMOTE_ADDR, bremote);
+        if (bremote) {
+            bdestroy(bremote);
+        }
     }
 
     check(tns_render_request_end(&outbuf, header_start, uuid, id, Request_path(req)) != -1, "Failed to finalize request.");
@@ -542,7 +546,11 @@ bstring Request_to_payload(Request *req, bstring uuid, int fd, const char *buf, 
             B(headers, &HTTP_URL_SCHEME, &HTTP_HTTP, &f);
         }
 
-        B(headers, &HTTP_REMOTE_ADDR, bfromcstr(conn->remote), &f);
+        bstring bremote = bfromcstr(conn->remote);
+        B(headers, &HTTP_REMOTE_ADDR, bremote, &f);
+        if (bremote) {
+            bdestroy(bremote);
+        }
     }
 
     bconchar(headers, '}');
