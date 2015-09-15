@@ -43,6 +43,7 @@ struct tagbstring HTTP_FRAGMENT = bsStatic("FRAGMENT");
 struct tagbstring HTTP_BODY = bsStatic("BODY");
 struct tagbstring JSON_METHOD = bsStatic("JSON");
 struct tagbstring XML_METHOD = bsStatic("XML");
+struct tagbstring DOWNLOAD_CREDITS = bsStatic("DOWNLOAD_CREDITS");
 
 
 struct tagbstring HTTP_POST = bsStatic("POST");

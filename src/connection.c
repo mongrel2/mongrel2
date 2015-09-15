@@ -61,11 +61,21 @@ struct tagbstring POLICY_XML_REQUEST = bsStatic("<policy-file-request");
 int MAX_CONTENT_LENGTH = 20 * 1024;
 int MAX_CHUNK_SIZE = 100 * 1024;
 int BUFFER_SIZE = 4 * 1024;
+int MAX_CREDITS = 100 * 1024;
 int CONNECTION_STACK = 32 * 1024;
 int CLIENT_READ_RETRIES = 5;
 int RELAXED_PARSING = 0;
+int DOWNLOAD_FLOW_CONTROL = 0;
 
 int MAX_WS_LENGTH = 256 * 1024;
+
+
+static void free_lnode(list_t *l, lnode_t *i, void *data)
+{
+    (void)l;
+    (void)data;
+    free(lnode_get(i));
+}
 
 
 static inline int Connection_backend_event(Backend *found, Connection *conn)
@@ -89,23 +99,58 @@ error:
 int Connection_deliver_enqueue(Connection *conn, deliver_function f,
                                              tns_value_t *d)
 {
-    check_debug(conn->deliverPost-conn->deliverAck < DELIVER_OUTSTANDING_MSGS, "Too many outstanding messages") ;
+    int dataSize = (d ? blength(d->value.string) : 0);
+    Deliver_message *m = NULL;
+    lnode_t *i = NULL;
+
+    if(DOWNLOAD_FLOW_CONTROL) {
+        check_debug(conn->deliverBytesPending + dataSize <= MAX_CREDITS, "Too many outstanding bytes");
+    } else {
+        check_debug(list_count(conn->deliverQueue) < DELIVER_OUTSTANDING_MSGS, "Too many outstanding messages");
+    }
+
     check_debug(conn->deliverTaskStatus==DT_RUNNING, "Cannot enqueue, deliver task not running");
-    conn->deliverRing[conn->deliverPost%DELIVER_OUTSTANDING_MSGS].deliver=f;
-    conn->deliverRing[conn->deliverPost%DELIVER_OUTSTANDING_MSGS].data=d;
-    conn->deliverPost++;
+
+    m = (Deliver_message *)calloc(sizeof(Deliver_message), 1);
+    check_mem(m);
+
+    m->deliver = f;
+    m->data = d;
+
+    i = lnode_create(m);
+    check_mem(i);
+
+    list_append(conn->deliverQueue, i);
+
+    conn->deliverBytesPending += dataSize;
     taskwakeup(&conn->deliverRendez);
     return 0;
 
 error:
+    if(m != NULL) {
+        free(m);
+    }
+    if(i != NULL) {
+        lnode_destroy(i);
+    }
     return -1;
 }
 
 static inline void Connection_deliver_dequeue(Connection *conn, Deliver_message *m)
 {
+    lnode_t *i;
+    Deliver_message *idata;
+    int dataSize;
+
     while(1) {
-        if(conn->deliverPost-conn->deliverAck) {
-            *m = conn->deliverRing[conn->deliverAck++%DELIVER_OUTSTANDING_MSGS];
+        if(!list_isempty(conn->deliverQueue)) {
+            i = list_del_first(conn->deliverQueue);
+            idata = (Deliver_message *)lnode_get(i);
+            *m = *idata;
+            lnode_destroy(i);
+            free(idata);
+            dataSize = (m->data ? blength(m->data->value.string) : 0);
+            conn->deliverBytesPending -= dataSize;
             return;
         }
         tasksleep(&conn->deliverRendez);
@@ -248,10 +293,10 @@ int Connection_send_to_handler(Connection *conn, Handler *handler, char *body, i
             "Handler shutdown while trying to deliver: %s", bdata(Request_path(conn->req)));
 
     if(handler->protocol == HANDLER_PROTO_TNET) {
-        payload = Request_to_tnetstring(conn->req, handler->send_ident, 
+        payload = Request_to_tnetstring(conn->req, handler->send_ident,
                 IOBuf_fd(conn->iob), body, content_len, conn, altheaders);
     } else if(handler->protocol == HANDLER_PROTO_JSON) {
-        payload = Request_to_payload(conn->req, handler->send_ident, 
+        payload = Request_to_payload(conn->req, handler->send_ident,
                 IOBuf_fd(conn->iob), body, content_len, conn, altheaders);
     } else {
         sentinel("Invalid protocol type: %d", handler->protocol);
@@ -272,7 +317,6 @@ error:
     if(payload) free(payload);
     return -1;
 }
-
 
 static int Request_is_websocket(Request *req)
 {
@@ -328,6 +372,9 @@ int connection_http_to_handler(Connection *conn)
 
     // we don't need the header anymore, so commit the buffer and deal with the body
     check(IOBuf_read_commit(conn->iob, Request_header_length(conn->req)) != -1, "Finaly commit failed streaming the connection to http handlers.");
+
+    if(DOWNLOAD_FLOW_CONTROL)
+        Request_set(conn->req, &DOWNLOAD_CREDITS, bformat("%d", MAX_CREDITS), 1);
 
     if(is_websocket(conn)) {
         bstring wsKey = Request_get(conn->req, &WS_SEC_WS_KEY);
@@ -813,7 +860,7 @@ void Connection_deliver_task_kill(Connection *conn)
     if(conn && conn->deliverTaskStatus==DT_RUNNING) {
         debug("Killing task for connection %p",conn);
         int sleeptime=10;
-        while(conn->deliverAck!=conn->deliverPost)
+        while(!list_isempty(conn->deliverQueue))
         {
             Deliver_message msg={NULL,NULL};
             Connection_deliver_dequeue(conn,&msg);
@@ -839,6 +886,14 @@ void Connection_destroy(Connection *conn)
 {
     if(conn) {
         Connection_deliver_task_kill(conn);
+
+        if(conn->deliverQueue != NULL) {
+            list_process(conn->deliverQueue, NULL, free_lnode);
+            list_destroy_nodes(conn->deliverQueue);
+            list_destroy(conn->deliverQueue);
+            conn->deliverQueue = NULL;
+        }
+
         Request_destroy(conn->req);
         conn->req = NULL;
 
@@ -966,6 +1021,10 @@ Connection *Connection_create(Server *srv, int fd, int rport,
     conn->remote[IPADDR_SIZE] = '\0';
 
     conn->handler = NULL;
+
+    conn->deliverQueue = list_create(LISTCOUNT_T_MAX);
+    check_mem(conn->deliverQueue);
+
     conn->sendCredits = 0;
 
     check_mem(conn->req);
@@ -1061,10 +1120,26 @@ int Connection_deliver_raw_internal(Connection *conn, tns_value_t *data)
 {
     bstring buf;
     int rc;
+    int fd;
+    uint32_t id;
+    Handler *handler;
+
+    fd = IOBuf_fd(conn->iob);
+    id = Register_id_for_fd(fd);
+    check_debug(id != UINT32_MAX, "Asked to write to an fd that doesn't exist: %d", fd);
+
+    handler = Request_get_action(conn->req, handler);
+
     check(data->type==tns_tag_string, "deliver_raw_internal expected a string.");
     buf=data->value.string;
+
     rc = IOBuf_send_all(conn->iob, bdata(buf), blength(buf));
     check_debug(rc==blength(buf), "Failed to send all of the data: %d of %d", rc, blength(buf));
+
+    if(DOWNLOAD_FLOW_CONTROL) {
+        Handler_notify_credits(handler, id, rc);
+    }
+
     return 0;
 
 error:
@@ -1126,7 +1201,7 @@ void Connection_deliver_task(void *v)
 error:
     conn->deliverTaskStatus=DT_DYING;
     tns_value_destroy(msg.data);
-    while(conn->deliverPost > conn->deliverAck) {
+    while(!list_isempty(conn->deliverQueue)) {
         Connection_deliver_dequeue(conn, &msg);
         tns_value_destroy(msg.data);
     }
@@ -1212,6 +1287,7 @@ void Connection_init()
     IO_SSL_VERIFY_METHOD = Setting_get_int("ssl.verify_required", 0) ? SSL_VERIFY_REQUIRED : IO_SSL_VERIFY_METHOD;
 
     RELAXED_PARSING = Setting_get_int("request.relaxed", 0);
+    DOWNLOAD_FLOW_CONTROL = Setting_get_int("download.flow_control", 0);
 }
 
 
