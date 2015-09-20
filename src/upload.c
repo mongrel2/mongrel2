@@ -124,7 +124,7 @@ int Upload_file(Connection *conn, Handler *handler, int content_len)
         log_info("Will set mode for upload temp store to: %s", bdata(mode));
 
         check(bdata(mode) != NULL, "Mode data is NULL")
-        UPLOAD_MODE = strtoul((const char *)bdata(mode), NULL, 0);
+        UPLOAD_MODE = strtoul(bdata(mode), NULL, 0);
         check(UPLOAD_MODE > 0, "Failed to convert upload.temp_store_mode to a number.");
         check(UPLOAD_MODE < 066666, "Invalid mode that's way too big: %s.", bdata(mode));
     }

@@ -36,13 +36,13 @@ char *test_darray_operations()
 
     signed int old_max = array->max;
     darray_expand(array);
-    mu_assert(array->max == old_max + array->expand_rate, "Wrong size after expand.");
+    mu_assert(array->max == old_max + (int)array->expand_rate, "Wrong size after expand.");
 
     darray_contract(array);
-    mu_assert(array->max == array->expand_rate + 1, "Should stay at the expand_rate at least.");
+    mu_assert(array->max == (int)array->expand_rate + 1, "Should stay at the expand_rate at least.");
 
     darray_contract(array);
-    mu_assert(array->max == array->expand_rate + 1, "Should stay at the expand_rate at least.");
+    mu_assert(array->max == (int)array->expand_rate + 1, "Should stay at the expand_rate at least.");
 
     int i = 0;
     for(i = 0; i < 1000; i++) {
