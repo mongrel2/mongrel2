@@ -96,6 +96,26 @@ error:
 }
 
 
+static int Connection_handler_notify_leave(Connection *conn)
+{
+    int fd;
+    uint32_t id;
+    Handler *handler;
+
+    fd = IOBuf_fd(conn->iob);
+    id = Register_id_for_fd(fd);
+    check_debug(id != UINT32_MAX, "Asked to write to an fd that doesn't exist: %d", fd);
+
+    handler = Request_get_action(conn->req, handler);
+    Handler_notify_leave(handler, id);
+
+    return 0;
+
+error:
+    return -1;
+}
+
+
 int Connection_deliver_enqueue(Connection *conn, deliver_function f,
                                              tns_value_t *d)
 {
@@ -239,6 +259,8 @@ int connection_msg_to_handler(Connection *conn)
         free(payload);
     
         check(rc == 0, "Failed to deliver to handler: %s", bdata(Request_path(conn->req)));
+
+        conn->sentToHandler = 1;
     }
 
     // consumes \0 from body_len
@@ -311,6 +333,7 @@ int Connection_send_to_handler(Connection *conn, Handler *handler, char *body, i
     error_unless(rc != -1, conn, 502, "Failed to deliver to handler: %s", 
             bdata(Request_path(conn->req)));
 
+    conn->sentToHandler = 1;
     return 0;
 
 error:
@@ -1111,6 +1134,10 @@ void Connection_task(void *v)
     }
 
 error: // fallthrough
+    if(conn->sentToHandler) {
+        Connection_handler_notify_leave(conn);
+    }
+
     State_exec(&conn->state, CLOSE, (void *)conn);
     Connection_destroy(conn);
     taskexit(0);
