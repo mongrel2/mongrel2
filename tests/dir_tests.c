@@ -98,7 +98,7 @@ Request *fake_req(const char *method, const char *prefix, const char *path)
     req->pattern = bfromcstr(prefix);
 
     check(rc != 0, "Failed to parse request.");
-    check(nparsed == blength(rp), "Failed to parse all of request.");
+    check((int)nparsed == blength(rp), "Failed to parse all of request.");
 
     return req;
 

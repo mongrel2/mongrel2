@@ -10,7 +10,7 @@ int check_routing(list_t *found, Route *route, int expected_count, const char *r
         route = lnode_get(list_first(found));
     }
 
-    check(list_count(found) == expected_count, "Didn't find right number of routes: got %d, expected %d.", 
+    check((int)list_count(found) == expected_count, "Didn't find right number of routes: got %d, expected %d.", 
             (int)list_count(found), expected_count);
 
     if(route_data == NULL) {

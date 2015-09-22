@@ -12,7 +12,7 @@ int test_parse(const char *test, int target_count)
 
     bdestroy(T1);
 
-    return rc == 1 && target_count == parser->target_count;
+    return rc == 1 && target_count == (int)parser->target_count;
 }
 
 #define TEST(T, C, M) mu_assert(test_parse(T, C) == 1, "Failed to parse: " #M);

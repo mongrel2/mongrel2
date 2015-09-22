@@ -159,6 +159,8 @@ int darray_insert(darray_t *array, int i, void *el)
     }
 
     array->contents[i] = el;
+
+    return 0;
 }
 
 void darray_move_to_end(darray_t *array, int i)
