@@ -100,14 +100,16 @@ static int Connection_handler_notify_leave(Connection *conn)
 {
     int fd;
     uint32_t id;
-    Handler *handler;
+    Backend *backend;
 
     fd = IOBuf_fd(conn->iob);
     id = Register_id_for_fd(fd);
     check_debug(id != UINT32_MAX, "Asked to write to an fd that doesn't exist: %d", fd);
 
-    handler = Request_get_action(conn->req, handler);
-    Handler_notify_leave(handler, id);
+    backend = conn->req->action;
+    if (backend != NULL && backend->type == BACKEND_HANDLER) {
+        Handler_notify_leave(backend->target.handler, id);
+    }
 
     return 0;
 
