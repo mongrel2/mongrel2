@@ -100,16 +100,14 @@ static int Connection_handler_notify_leave(Connection *conn)
 {
     int fd;
     uint32_t id;
-    Backend *backend;
 
     fd = IOBuf_fd(conn->iob);
     id = Register_id_for_fd(fd);
     check_debug(id != UINT32_MAX, "Asked to write to an fd that doesn't exist: %d", fd);
 
-    backend = conn->req->action;
-    if (backend != NULL && backend->type == BACKEND_HANDLER) {
-        Handler_notify_leave(backend->target.handler, id);
-    }
+    check(conn->handler != NULL, "No handler to notify");
+
+    Handler_notify_leave(conn->handler, id);
 
     return 0;
 
@@ -262,7 +260,7 @@ int connection_msg_to_handler(Connection *conn)
     
         check(rc == 0, "Failed to deliver to handler: %s", bdata(Request_path(conn->req)));
 
-        conn->sentToHandler = 1;
+        conn->handler = handler;
     }
 
     // consumes \0 from body_len
@@ -335,7 +333,7 @@ int Connection_send_to_handler(Connection *conn, Handler *handler, char *body, i
     error_unless(rc != -1, conn, 502, "Failed to deliver to handler: %s", 
             bdata(Request_path(conn->req)));
 
-    conn->sentToHandler = 1;
+    conn->handler = handler;
     return 0;
 
 error:
@@ -404,7 +402,6 @@ int connection_http_to_handler(Connection *conn)
     if(is_websocket(conn)) {
         bstring wsKey = Request_get(conn->req, &WS_SEC_WS_KEY);
         bstring response= websocket_challenge(wsKey);
-        conn->handler = handler;
 
         //Response_send_status(conn,response);
         bdestroy(conn->req->request_method);
@@ -1136,7 +1133,7 @@ void Connection_task(void *v)
     }
 
 error: // fallthrough
-    if(conn->sentToHandler) {
+    if(conn->handler) {
         Connection_handler_notify_leave(conn);
     }
 
@@ -1151,13 +1148,12 @@ int Connection_deliver_raw_internal(Connection *conn, tns_value_t *data)
     int rc;
     int fd;
     uint32_t id;
-    Handler *handler;
 
     fd = IOBuf_fd(conn->iob);
     id = Register_id_for_fd(fd);
     check_debug(id != UINT32_MAX, "Asked to write to an fd that doesn't exist: %d", fd);
 
-    handler = Request_get_action(conn->req, handler);
+    check(conn->handler != NULL, "handler not set when delivering");
 
     check(data->type==tns_tag_string, "deliver_raw_internal expected a string.");
     buf=data->value.string;
@@ -1166,7 +1162,7 @@ int Connection_deliver_raw_internal(Connection *conn, tns_value_t *data)
     check_debug(rc==blength(buf), "Failed to send all of the data: %d of %d", rc, blength(buf));
 
     if(DOWNLOAD_FLOW_CONTROL) {
-        Handler_notify_credits(handler, id, rc);
+        Handler_notify_credits(conn->handler, id, rc);
     }
 
     return 0;
@@ -1228,6 +1224,7 @@ void Connection_deliver_task(void *v)
         msg.data=NULL;
     }
 error:
+    conn->handler = NULL; // we're shutting down, don't notify anything else
     conn->deliverTaskStatus=DT_DYING;
     tns_value_destroy(msg.data);
     while(!list_isempty(conn->deliverQueue)) {
