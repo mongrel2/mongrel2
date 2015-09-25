@@ -167,7 +167,7 @@ static ssize_t ssl_send(IOBuf *iob, char *buffer, int len)
     for(; len > 0; buffer += sent, len -= sent, total += sent) {
         sent = ssl_write(&iob->ssl, (const unsigned char*) buffer, len);
 
-        check(sent != -1, "Error sending SSL data.");
+        check(sent > 0, "Error sending SSL data.");
         check(sent <= len, "Buffer overflow. Too much data sent by ssl_write");
 
         // make sure we don't hog the process trying to stream out
