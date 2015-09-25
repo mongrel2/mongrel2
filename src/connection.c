@@ -782,6 +782,7 @@ again:
     header_length=Websocket_header_length((uint8_t *) data, avail);
     data_length=smaller_packet_length-header_length;
     dataU = (uint8_t *)IOBuf_read_all(conn->iob,header_length,8*CLIENT_READ_RETRIES);
+    check(dataU != NULL, "Client closed the connection during websocket packet.");
     memcpy(key,dataU+header_length-4,4);
 
     flags=dataU[0];
