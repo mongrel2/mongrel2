@@ -378,13 +378,10 @@ void reload_task(void *data)
         task_clear_signal();
 
         if(RELOAD) {
-            log_info("Reload requested, will load %s from %s", bdata(srv->db_file), bdata(srv->server_id));
-            Server *old_srv = Server_queue_latest();
-            Server *new_srv = reload_server(old_srv, bdata(srv->db_file), bdata(srv->server_id));
-            check(new_srv, "Failed to load the new configuration, exiting.");
-
-            // for this to work handlers need to die more gracefully
-            Server_queue_push(new_srv);
+            log_info("Rotating logs");
+            if(rotate_logs()) {
+                log_err("Error rotating logs!");
+            }
         } else {
             log_info("Shutdown requested, goodbye.");
             break;
