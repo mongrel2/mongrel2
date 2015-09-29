@@ -54,6 +54,7 @@
 #include "log.h"
 #include "logrotate.h"
 #include "register.h"
+#include "polarssl/entropy_poll.h"
 
 extern int RUNNING;
 extern uint32_t THE_CURRENT_TIME_IS;
@@ -408,6 +409,9 @@ void taskmain(int argc, char **argv)
         rc = Config_module_load(argv[3]);
         check(rc != -1, "Failed to load the config module: %s", argv[3]);
     }
+
+    rc = platform_entropy_init();
+    check(rc == 0, "Failed to initialize platform entropy. Aborting.");
 
     Server_queue_init();
 
