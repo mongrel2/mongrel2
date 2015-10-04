@@ -371,7 +371,7 @@ error:
 void reload_task(void *data)
 {
     RELOAD_TASK = taskself();
-    struct ServerTask *srv = data;
+    (void)data; //struct ServerTask *srv = data;
 
     while(1) {
         taskswitch();
@@ -389,8 +389,8 @@ void reload_task(void *data)
     }
 
     taskexit(0);
-error:
-    taskexit(1);
+//error:
+//    taskexit(1);
 }
 
 void taskmain(int argc, char **argv)
