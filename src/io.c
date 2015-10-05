@@ -37,6 +37,8 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/socket.h>
 #include "io.h"
 #include "register.h"
 #include "mem/halloc.h"
@@ -184,6 +186,7 @@ error:
 
 static ssize_t ssl_recv(IOBuf *iob, char *buffer, int len)
 {
+    int rc;
     check(iob->use_ssl, "IOBuf not set up to use ssl");
 
     if(!iob->handshake_performed) {
@@ -191,7 +194,20 @@ static ssize_t ssl_recv(IOBuf *iob, char *buffer, int len)
         check(rcode == 0, "SSL handshake failed: %d", rcode);
     }
 
-    return ssl_read(&iob->ssl, (unsigned char*) buffer, len);
+    rc = ssl_read(&iob->ssl, (unsigned char*) buffer, len);
+
+    // we count EOF as error (but this may be too common to log a message)
+    if(rc == 0) {
+        goto error;
+    }
+
+    // we count close notify as EOF
+    if(rc == POLARSSL_ERR_SSL_PEER_CLOSE_NOTIFY) {
+        return 0;
+    }
+
+    // we either return non-zero length or an error here
+    return rc;
 error:
     return -1;
 }
@@ -408,11 +424,13 @@ static IOBuf *IOBuf_create_internal(size_t len, int fd, IOBufType type,
     buf->avail = 0;
     buf->cur = 0;
     buf->closed = 0;
+    buf->did_shutdown = 0;
     buf->buf = malloc(len + 1);
     check_mem(buf->buf);
     buf->type = type;
     buf->fd = fd;
     buf->use_ssl = 0;
+    buf->ssl_sent_close = 0;
 
     if(type == IOBUF_SSL) {
         check(rng_ctx != NULL, "IOBUF_SSL requires non-null server");
@@ -461,10 +479,10 @@ int IOBuf_close(IOBuf *buf)
     int rc = 0;
 
     if(buf) {
-        if(buf->use_ssl) {
-            rc = ssl_close_notify(&buf->ssl);
+        if(!buf->did_shutdown) {
+            rc = IOBuf_shutdown(buf);
         }
-        
+
         fdclose(buf->fd);
         buf->fd=-1;
     }
@@ -472,10 +490,36 @@ int IOBuf_close(IOBuf *buf)
     return rc;
 }
 
+int IOBuf_shutdown(IOBuf *buf)
+{
+    int rc = -1;
+
+    if(!buf || buf->fd < 0) {
+        goto error;
+    }
+
+    if(buf->use_ssl && buf->handshake_performed && !buf->ssl_sent_close) {
+        rc = ssl_close_notify(&buf->ssl);
+        check(rc == 0, "ssl_close_notify failed with error code: %d", rc);
+
+        buf->ssl_sent_close = 1;
+    }
+
+    // ignore return value, since peer may have closed
+    shutdown(buf->fd, SHUT_RDWR);
+
+    buf->did_shutdown = 1;
+
+error:
+    return rc;
+}
+
 void IOBuf_destroy(IOBuf *buf)
 {
     if(buf) {
-        IOBuf_close(buf); // ignore return
+        if(buf->fd >= 0) {
+            IOBuf_close(buf); // ignore return
+        }
 
         if(buf->use_ssl) {
             ssl_free(&buf->ssl);

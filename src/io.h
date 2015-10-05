@@ -43,6 +43,7 @@ typedef struct IOBuf {
     int mark;
 
     int closed;
+    int did_shutdown;
     io_cb recv;
     io_cb send;
     io_stream_file_cb stream_file;
@@ -53,6 +54,7 @@ typedef struct IOBuf {
     int fd;
     int use_ssl;
     int handshake_performed;
+    int ssl_sent_close;
     ssl_context ssl;
     ssl_session ssn;
     havege_state hs;
@@ -65,6 +67,7 @@ void IOBuf_resize(IOBuf *buf, size_t new_size);
 
 void IOBuf_destroy(IOBuf *buf);
 int IOBuf_close(IOBuf *buf);
+int IOBuf_shutdown(IOBuf *buf);
 int IOBuf_register_disconnect(IOBuf *buf);
 
 char *IOBuf_read(IOBuf *buf, int need, int *out_len);
