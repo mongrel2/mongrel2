@@ -99,6 +99,7 @@ typedef struct Connection {
     Rendez deliverRendez;
     Rendez uploadRendez;
     int sendCredits;
+    int closing;
 } Connection;
 
 void Connection_destroy(Connection *conn);

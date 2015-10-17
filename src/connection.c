@@ -1183,6 +1183,7 @@ int Connection_deliver_raw(Connection *conn, bstring buf)
         check_debug(0== Connection_deliver_enqueue(conn, Connection_deliver_raw_internal,val),
             "Failed to write raw message to con %d", IOBuf_fd(conn->iob));
     } else {
+        conn->closing = 1;
         Connection_deliver_enqueue(conn, NULL, NULL);
     }
 
@@ -1233,8 +1234,8 @@ error:
         tns_value_destroy(msg.data);
     }
 
-    if (IOBuf_fd(conn->iob) >= 0)
-        shutdown(IOBuf_fd(conn->iob), SHUT_RDWR);
+    IOBuf_shutdown(conn->iob);
+
     debug("Deliver Task Shut Down\n");
     conn->deliverTaskStatus=DT_DEAD;
     taskexit(0);

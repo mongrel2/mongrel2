@@ -208,7 +208,7 @@ static int handler_process_control_request(Connection *conn, tns_value_t *data)
     }
 
     n = hash_lookup(args->value.dict, &CANCEL);
-    if(n != NULL) {
+    if(n != NULL && !conn->closing) {
         Register_disconnect(IOBuf_fd(conn->iob));
         taskwakeup(&conn->uploadRendez);
     }
