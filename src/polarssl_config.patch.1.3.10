@@ -1,8 +1,8 @@
 diff --git a/include/polarssl/config.h b/include/polarssl/config.h
-index 50b4e33..adb4e74 100644
+index 02e8985..4370bce 100644
 --- a/include/polarssl/config.h
 +++ b/include/polarssl/config.h
-@@ -519,7 +519,7 @@
+@@ -516,7 +516,7 @@
   *      TLS_DHE_RSA_WITH_CAMELLIA_128_CBC_SHA
   *      TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA
   */
@@ -11,7 +11,7 @@ index 50b4e33..adb4e74 100644
  
  /**
   * \def POLARSSL_KEY_EXCHANGE_ECDHE_RSA_ENABLED
-@@ -860,7 +860,7 @@
+@@ -952,7 +952,7 @@
   *
   * Comment this macro to disable support for SSL 3.0
   */
@@ -20,7 +20,7 @@ index 50b4e33..adb4e74 100644
  
  /**
   * \def POLARSSL_SSL_PROTO_TLS1
-@@ -1183,7 +1183,7 @@
+@@ -1276,7 +1276,7 @@
   *      TLS_RSA_PSK_WITH_RC4_128_SHA
   *      TLS_PSK_WITH_RC4_128_SHA
   */
@@ -29,7 +29,7 @@ index 50b4e33..adb4e74 100644
  
  /**
   * \def POLARSSL_ASN1_PARSE_C
-@@ -1411,6 +1411,7 @@
+@@ -1504,6 +1504,7 @@
   * This module is used by the following key exchanges:
   *      DHE-RSA, DHE-PSK
   */
@@ -37,7 +37,7 @@ index 50b4e33..adb4e74 100644
  #define POLARSSL_DHM_C
  
  /**
-@@ -1518,7 +1519,7 @@
+@@ -1611,7 +1612,7 @@
   *
   * Uncomment to enable the HAVEGE random generator.
   */
@@ -46,3 +46,71 @@ index 50b4e33..adb4e74 100644
  
  /**
   * \def POLARSSL_HMAC_DRBG_C
+diff --git a/include/polarssl/entropy_poll.h b/include/polarssl/entropy_poll.h
+index 9c349da..6c365b4 100644
+--- a/include/polarssl/entropy_poll.h
++++ b/include/polarssl/entropy_poll.h
+@@ -44,6 +44,9 @@ extern "C" {
+ #define ENTROPY_MIN_HARDCLOCK    32     /**< Minimum for hardclock()        */
+ 
+ #if !defined(POLARSSL_NO_PLATFORM_ENTROPY)
++/* Call before chroot */
++int platform_entropy_init(void);
++
+ /**
+  * \brief           Platform-specific entropy poll callback
+  */
+diff --git a/library/entropy_poll.c b/library/entropy_poll.c
+index 467268c..fe77134 100644
+--- a/library/entropy_poll.c
++++ b/library/entropy_poll.c
+@@ -92,6 +92,7 @@ static int getrandom_wrapper( void *buf, size_t buflen, unsigned int flags )
+ 
+ #include <errno.h>
+ 
++int platform_entropy_init() { return 0; }
+ int platform_entropy_poll( void *data,
+                            unsigned char *output, size_t len, size_t *olen )
+ {
+@@ -109,27 +110,34 @@ int platform_entropy_poll( void *data,
+ 
+ #include <stdio.h>
+ 
++static FILE * urandom_file;
++
++int platform_entropy_init()
++{
++    urandom_file = fopen("/dev/urandom", "rb");
++    if ( file == NULL ) {
++        return -1;
++    }
++
++    return 0;
++}
++
++
+ int platform_entropy_poll( void *data,
+                            unsigned char *output, size_t len, size_t *olen )
+ {
+-    FILE *file;
+     size_t ret;
+     ((void) data);
+ 
+     *olen = 0;
+ 
+-    file = fopen( "/dev/urandom", "rb" );
+-    if( file == NULL )
+-        return( POLARSSL_ERR_ENTROPY_SOURCE_FAILED );
+-
+-    ret = fread( output, 1, len, file );
++    ret = fread( output, 1, len, urandom_file );
+     if( ret != len )
+     {
+         fclose( file );
+         return( POLARSSL_ERR_ENTROPY_SOURCE_FAILED );
+     }
+ 
+-    fclose( file );
+     *olen = len;
+ 
+     return( 0 );
