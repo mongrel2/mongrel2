@@ -420,6 +420,13 @@ void taskmain(int argc, char **argv)
     rc = attempt_chroot_drop(srv);
     check(rc == 0, "Major failure in chroot/droppriv, aborting."); 
 
+    // set up rng after chroot
+    // TODO: once mbedtls is updated, we can move this back into Server_create
+    if(srv->use_ssl) {
+        rc = Server_init_rng(srv);
+        check(rc == 0, "Failed to initialize rng for server %s", bdata(srv->uuid));
+    }
+
     final_setup();
 
     taskcreate(tickertask, NULL, TICKER_TASK_STACK);

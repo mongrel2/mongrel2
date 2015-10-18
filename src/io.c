@@ -46,7 +46,6 @@
 #include "polarssl/ssl.h"
 #include "task/task.h"
 #include "adt/darray.h"
-#include "polarssl/ctr_drbg.h"
 
 int IO_SSL_VERIFY_METHOD = SSL_VERIFY_NONE;
 
@@ -380,7 +379,7 @@ error:
 
 
 
-static inline int iobuf_ssl_setup(ctr_drbg_context *rng_ctx, IOBuf *buf)
+static inline int iobuf_ssl_setup(int (*rng_func)(void *, unsigned char *, size_t), void *rng_ctx, IOBuf *buf)
 {
     int rc = 0;
 
@@ -395,7 +394,7 @@ static inline int iobuf_ssl_setup(ctr_drbg_context *rng_ctx, IOBuf *buf)
     ssl_set_endpoint(&buf->ssl, SSL_IS_SERVER);
     ssl_set_authmode(&buf->ssl, IO_SSL_VERIFY_METHOD);
 
-    ssl_set_rng(&buf->ssl, ctr_drbg_random, rng_ctx);
+    ssl_set_rng(&buf->ssl, rng_func, rng_ctx);
 
 #ifndef DEBUG
     ssl_set_dbg(&buf->ssl, ssl_debug, NULL);
@@ -415,7 +414,7 @@ error:
 }
 
 static IOBuf *IOBuf_create_internal(size_t len, int fd, IOBufType type,
-        ctr_drbg_context *rng_ctx)
+        int (*rng_func)(void *, unsigned char *, size_t), void *rng_ctx)
 {
     IOBuf *buf = malloc(sizeof(IOBuf));
     check_mem(buf);
@@ -433,8 +432,8 @@ static IOBuf *IOBuf_create_internal(size_t len, int fd, IOBufType type,
     buf->ssl_sent_close = 0;
 
     if(type == IOBUF_SSL) {
-        check(rng_ctx != NULL, "IOBUF_SSL requires non-null server");
-        check(iobuf_ssl_setup(rng_ctx, buf) != -1, "Failed to setup SSL.");
+        check(rng_func != NULL, "IOBUF_SSL requires non-null server");
+        check(iobuf_ssl_setup(rng_func, rng_ctx, buf) != -1, "Failed to setup SSL.");
         buf->send = ssl_send;
         buf->recv = ssl_recv;
         buf->stream_file = ssl_stream_file;
@@ -464,14 +463,14 @@ error:
 IOBuf *IOBuf_create(size_t len, int fd, IOBufType type)
 {
     check(type != IOBUF_SSL, "Use IOBuf_create_ssl for ssl IOBuffers")
-    return IOBuf_create_internal(len, fd, type, NULL);
+    return IOBuf_create_internal(len, fd, type, NULL, NULL);
 error:
     return NULL;
 }
 
-IOBuf *IOBuf_create_ssl(size_t len, int fd, ctr_drbg_context *rng_ctx)
+IOBuf *IOBuf_create_ssl(size_t len, int fd, int (*rng_func)(void *, unsigned char *, size_t), void *rng_ctx)
 {
-    return IOBuf_create_internal(len,fd,IOBUF_SSL,rng_ctx);
+    return IOBuf_create_internal(len,fd,IOBUF_SSL,rng_func,rng_ctx);
 }
 
 int IOBuf_close(IOBuf *buf)
