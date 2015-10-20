@@ -48,6 +48,7 @@
 #include "unixy.h"
 #include <signal.h>
 #include "polarssl/config.h"
+#include <polarssl/ctr_drbg.h>
 
 darray_t *SERVER_QUEUE = NULL;
 int RUNNING=1;
@@ -280,15 +281,38 @@ error:
     return -1;
 }
 
-static int Server_init_rng(Server *srv)
+int Server_init_rng(Server *srv)
 {
     int rc;
+    unsigned char buf[ENTROPY_BLOCK_SIZE];
+    void *ctx = NULL;
 
     entropy_init( &srv->entropy );
-    rc = ctr_drbg_init( &srv->ctr_drbg, entropy_func, &srv->entropy, NULL, 0 );
-    check(rc == 0, "Init rng failed: ctr_drbg_init returned %d\n", rc);
+
+    // test the entropy source
+    rc = entropy_func(&srv->entropy, buf, ENTROPY_BLOCK_SIZE);
+
+    if(rc == 0) {
+        ctx = calloc(sizeof(ctr_drbg_context), 1);
+
+        rc = ctr_drbg_init((ctr_drbg_context *)ctx, entropy_func, &srv->entropy, NULL, 0);
+        check(rc == 0, "Init rng failed: ctr_drbg_init returned %d\n", rc);
+
+        srv->rng_func = ctr_drbg_random;
+        srv->rng_ctx = ctx;
+    } else {
+        log_warn("entropy source unavailable. falling back to havege rng");
+
+        ctx = calloc(sizeof(havege_state), 1);
+        havege_init((havege_state *)ctx);
+
+        srv->rng_func = havege_random;
+        srv->rng_ctx = ctx;
+    }
+
     return 0;
 error:
+    if(ctx != NULL) free(ctx);
     return -1;
 }
 
@@ -382,10 +406,12 @@ Server *Server_create(bstring uuid, bstring default_host,
     srv->bind_addr = bstrcpy(bind_addr); check_mem(srv->bind_addr);
     srv->uuid = bstrcpy(uuid); check_mem(srv->uuid);
 
-    if(use_ssl) {
-        rc = Server_init_rng(srv);
-        check(rc == 0, "Failed to initialize rng for server %s", bdata(uuid));
-    }
+    // TODO: once mbedtls supports opening urandom early and keeping it open,
+    //   put the rng initialization back here (before chroot)
+    //if(use_ssl) {
+    //    rc = Server_init_rng(srv);
+    //    check(rc == 0, "Failed to initialize rng for server %s", bdata(uuid));
+    //}
 
     if(blength(chroot) > 0) {
         srv->chroot = bstrcpy(chroot); check_mem(srv->chroot);
@@ -433,6 +459,8 @@ void Server_destroy(Server *srv)
 {
     if(srv) {
         if(srv->use_ssl) {
+            free(srv->rng_ctx);
+
             x509_crt_free(&srv->own_cert);
             pk_free(&srv->pk_key);
             // srv->ciphers freed (if non-default) by h_free

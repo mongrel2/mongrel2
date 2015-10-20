@@ -57,10 +57,9 @@ typedef struct IOBuf {
     int ssl_sent_close;
     ssl_context ssl;
     ssl_session ssn;
-    havege_state hs;
 } IOBuf;
 
-IOBuf *IOBuf_create_ssl(size_t len, int fd, ctr_drbg_context *rng_ctx);
+IOBuf *IOBuf_create_ssl(size_t len, int fd, int (*rng_func)(void *, unsigned char *, size_t), void *rng_ctx);
 IOBuf *IOBuf_create(size_t len, int fd, IOBufType type);
 
 void IOBuf_resize(IOBuf *buf, size_t new_size);
