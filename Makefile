@@ -35,6 +35,7 @@ dev: CFLAGS=-g -Wall -Isrc -Wall -Wextra $(OPTFLAGS) -D_FILE_OFFSET_BITS=64
 dev: all
 
 ${OBJECTS_NOEXT}: CFLAGS += ${NOEXTCFLAGS}
+${OBJECTS}: src/mbedtls/include/polarssl/config.h
 
 # 
 # CFLAGS_DEFS: The $(CC) flags required to obtain C pre-processor #defines, per:
