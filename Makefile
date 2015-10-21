@@ -24,12 +24,12 @@ MAKEOPTS=OPTFLAGS="${NOEXTCFLAGS} ${OPTFLAGS}" OPTLIBS="${OPTLIBS}" LIBS="${LIBS
 
 ifdef $($(shell									\
 	if git submodule status | grep '^-'; then				\
-	    echo "PolarSSL; init and update git submodule" 1>&2;		\
+	    echo "mbedtls; init and update git submodule" 1>&2;		\
 	    git submodule init && git submodule update;				\
 	fi ))
 endif
 
-all: bin/mongrel2 tests m2sh procer
+all: builddirs bin/mongrel2 tests m2sh procer
 
 dev: CFLAGS=-g -Wall -Isrc -Wall -Wextra $(OPTFLAGS) -D_FILE_OFFSET_BITS=64
 dev: all
@@ -53,11 +53,11 @@ ${OBJECTS}: src/mbedtls/include/polarssl/config.h
 #CFLAGS_DEFS=-qshowmacros -E	# IBM XL C
 CFLAGS_DEFS=-dM -E -x c 	# clang, gcc, HP C, Intel icc
 
-# Configure PolarSSL
+# Configure mbedtls
 # 
 # - check for required src/mbedtls/include/polarssl/config.h definitions
 #   and patch using version-appropriate src/polarssl_config.patch.#.#.# file:
-#   - If desired PolarSSL version is not yet supported, git checkout the
+#   - If desired mbedtls version is not yet supported, git checkout the
 #     new src/mbedtls/ version X.Y.Z, edit its include/polarssl/config.h as
 #     required, and generate a new src/polarssl_config.patch.X.Y.Z using:
 # 
@@ -67,9 +67,9 @@ src/mbedtls/include/polarssl/config.h: src/mbedtls/include/polarssl/version.h FO
 	@POLARSSL_VERSION=$$( $(CC) $(CFLAGS_DEFS) $<				\
 	    | sed -n -e 's/^.*POLARSSL_VERSION_STRING[\t ]*"\([^"]*\)".*/\1/p' ); \
 	if $(CC) $(CFLAGS_DEFS) $@ | grep -q POLARSSL_HAVEGE_C; then		\
-	    echo "PolarSSL $${POLARSSL_VERSION}; already configured";		\
+	    echo "mbedtls $${POLARSSL_VERSION}; already configured";		\
 	else									\
-	    echo "PolarSSL $${POLARSSL_VERSION}; defining POLARSSL_HAVEGE_C...";\
+	    echo "mbedtls $${POLARSSL_VERSION}; defining POLARSSL_HAVEGE_C...";\
 	    POLARSSL_PATCH=src/polarssl_config.patch.$${POLARSSL_VERSION};	\
 	    if ! patch -d src/mbedtls -p 1 < $${POLARSSL_PATCH}; then		\
 		echo "*** Failed to apply $${POLARSSL_PATCH}";			\
@@ -77,18 +77,18 @@ src/mbedtls/include/polarssl/config.h: src/mbedtls/include/polarssl/version.h FO
 	    fi;									\
 	fi
 
+.PHONY: builddirs
+builddirs:
+	@mkdir -p build
+	@mkdir -p bin
 
 bin/mongrel2: build/libm2.a src/mongrel2.o
 	$(CC) $(CFLAGS) src/mongrel2.o -o $@ $< $(LIBS)
 
 build/libm2.a: CFLAGS += -fPIC
-build/libm2.a: build ${LIB_OBJ}
+build/libm2.a: ${LIB_OBJ}
 	ar rcs $@ ${LIB_OBJ}
 	ranlib $@
-
-build: src/mbedtls/include/polarssl/config.h
-	@mkdir -p build
-	@mkdir -p bin
 
 clean:
 	rm -rf build bin lib ${OBJECTS} ${TESTS} tests/config.sqlite
