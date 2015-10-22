@@ -371,20 +371,17 @@ error:
 void reload_task(void *data)
 {
     RELOAD_TASK = taskself();
-    struct ServerTask *srv = data;
+    (void)data; //struct ServerTask *srv = data;
 
     while(1) {
         taskswitch();
         task_clear_signal();
 
         if(RELOAD) {
-            log_info("Reload requested, will load %s from %s", bdata(srv->db_file), bdata(srv->server_id));
-            Server *old_srv = Server_queue_latest();
-            Server *new_srv = reload_server(old_srv, bdata(srv->db_file), bdata(srv->server_id));
-            check(new_srv, "Failed to load the new configuration, exiting.");
-
-            // for this to work handlers need to die more gracefully
-            Server_queue_push(new_srv);
+            log_info("Rotating logs");
+            if(rotate_logs()) {
+                log_err("Error rotating logs!");
+            }
         } else {
             log_info("Shutdown requested, goodbye.");
             break;
@@ -392,8 +389,8 @@ void reload_task(void *data)
     }
 
     taskexit(0);
-error:
-    taskexit(1);
+//error:
+//    taskexit(1);
 }
 
 void taskmain(int argc, char **argv)
@@ -422,6 +419,13 @@ void taskmain(int argc, char **argv)
 
     rc = attempt_chroot_drop(srv);
     check(rc == 0, "Major failure in chroot/droppriv, aborting."); 
+
+    // set up rng after chroot
+    // TODO: once mbedtls is updated, we can move this back into Server_create
+    if(srv->use_ssl) {
+        rc = Server_init_rng(srv);
+        check(rc == 0, "Failed to initialize rng for server %s", bdata(srv->uuid));
+    }
 
     final_setup();
 

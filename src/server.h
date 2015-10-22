@@ -40,6 +40,7 @@
 #include "host.h"
 #include "routing.h"
 #include <polarssl/ssl.h>
+#include <polarssl/entropy.h>
 #include <polarssl/x509.h>
 #include <polarssl/pk.h>
 
@@ -66,6 +67,9 @@ typedef struct Server {
     bstring default_hostname;
     uint32_t created_on;
     int use_ssl;
+    entropy_context entropy;
+    int (*rng_func)(void *, unsigned char *, size_t);
+    void *rng_ctx;
     x509_crt own_cert;
     x509_crt ca_chain;
     pk_context pk_key;
@@ -104,5 +108,7 @@ void Server_queue_push(Server *srv);
 #define Server_queue_latest() darray_last(SERVER_QUEUE)
 
 int Server_queue_destroy();
+
+int Server_init_rng(Server *srv);
 
 #endif

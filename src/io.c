@@ -37,11 +37,12 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/socket.h>
 #include "io.h"
 #include "register.h"
 #include "mem/halloc.h"
 #include "dbg.h"
-#include "polarssl/havege.h"
 #include "polarssl/ssl.h"
 #include "task/task.h"
 #include "adt/darray.h"
@@ -167,7 +168,7 @@ static ssize_t ssl_send(IOBuf *iob, char *buffer, int len)
     for(; len > 0; buffer += sent, len -= sent, total += sent) {
         sent = ssl_write(&iob->ssl, (const unsigned char*) buffer, len);
 
-        check(sent != -1, "Error sending SSL data.");
+        check(sent > 0, "Error sending SSL data.");
         check(sent <= len, "Buffer overflow. Too much data sent by ssl_write");
 
         // make sure we don't hog the process trying to stream out
@@ -184,6 +185,7 @@ error:
 
 static ssize_t ssl_recv(IOBuf *iob, char *buffer, int len)
 {
+    int rc;
     check(iob->use_ssl, "IOBuf not set up to use ssl");
 
     if(!iob->handshake_performed) {
@@ -191,7 +193,20 @@ static ssize_t ssl_recv(IOBuf *iob, char *buffer, int len)
         check(rcode == 0, "SSL handshake failed: %d", rcode);
     }
 
-    return ssl_read(&iob->ssl, (unsigned char*) buffer, len);
+    rc = ssl_read(&iob->ssl, (unsigned char*) buffer, len);
+
+    // we count EOF as error (but this may be too common to log a message)
+    if(rc == 0) {
+        goto error;
+    }
+
+    // we count close notify as EOF
+    if(rc == POLARSSL_ERR_SSL_PEER_CLOSE_NOTIFY) {
+        return 0;
+    }
+
+    // we either return non-zero length or an error here
+    return rc;
 error:
     return -1;
 }
@@ -257,6 +272,8 @@ void ssl_debug(void *p, int level, const char *msg)
  */
 static darray_t *SSL_SESSION_CACHE = NULL;
 const int SSL_INITIAL_CACHE_SIZE = 300;
+const int SSL_CACHE_SIZE_LIMIT = 1000;
+const int SSL_CACHE_LIMIT_REMOVE_COUNT = 100;
 
 static inline int setup_ssl_session_cache()
 {
@@ -293,6 +310,8 @@ static int simple_get_cache( void *p_ssl, ssl_session *ssn )
             continue;
         }
 
+        darray_move_to_end(SSL_SESSION_CACHE, i);
+
         // TODO: odd, why 48? this is from polarssl
         memcpy( ssn->master, cur->master, 48 );
 
@@ -328,9 +347,16 @@ static int simple_set_cache( void *p_ssl, const ssl_session *ssn )
     }
 
     if(make_new) {
+        if (darray_end(SSL_SESSION_CACHE) >= SSL_CACHE_SIZE_LIMIT) {
+            darray_remove_and_resize(SSL_SESSION_CACHE, 0, SSL_CACHE_LIMIT_REMOVE_COUNT);
+        }
+
         cur = (ssl_session *) darray_new(SSL_SESSION_CACHE);
         check_mem(cur);
         darray_push(SSL_SESSION_CACHE, cur);
+    }
+    else {
+        darray_move_to_end(SSL_SESSION_CACHE, i);
     }
 
     *cur = *ssn;
@@ -353,12 +379,14 @@ error:
 
 
 
-static inline int iobuf_ssl_setup(IOBuf *buf)
+static inline int iobuf_ssl_setup(int (*rng_func)(void *, unsigned char *, size_t), void *rng_ctx, IOBuf *buf)
 {
     int rc = 0;
 
     buf->use_ssl = 1;
     buf->handshake_performed = 0;
+
+    memset(&buf->ssl, 0, sizeof(ssl_context));
 
     rc = ssl_init(&buf->ssl);
     check(rc == 0, "Failed to initialize SSL structure.");
@@ -366,8 +394,7 @@ static inline int iobuf_ssl_setup(IOBuf *buf)
     ssl_set_endpoint(&buf->ssl, SSL_IS_SERVER);
     ssl_set_authmode(&buf->ssl, IO_SSL_VERIFY_METHOD);
 
-    havege_init(&buf->hs);
-    ssl_set_rng(&buf->ssl, havege_random, &buf->hs);
+    ssl_set_rng(&buf->ssl, rng_func, rng_ctx);
 
 #ifndef DEBUG
     ssl_set_dbg(&buf->ssl, ssl_debug, NULL);
@@ -386,7 +413,8 @@ error:
     return -1;
 }
 
-IOBuf *IOBuf_create(size_t len, int fd, IOBufType type)
+static IOBuf *IOBuf_create_internal(size_t len, int fd, IOBufType type,
+        int (*rng_func)(void *, unsigned char *, size_t), void *rng_ctx)
 {
     IOBuf *buf = malloc(sizeof(IOBuf));
     check_mem(buf);
@@ -395,14 +423,17 @@ IOBuf *IOBuf_create(size_t len, int fd, IOBufType type)
     buf->avail = 0;
     buf->cur = 0;
     buf->closed = 0;
+    buf->did_shutdown = 0;
     buf->buf = malloc(len + 1);
     check_mem(buf->buf);
     buf->type = type;
     buf->fd = fd;
     buf->use_ssl = 0;
+    buf->ssl_sent_close = 0;
 
     if(type == IOBUF_SSL) {
-        check(iobuf_ssl_setup(buf) != -1, "Failed to setup SSL.");
+        check(rng_func != NULL, "IOBUF_SSL requires non-null server");
+        check(iobuf_ssl_setup(rng_func, rng_ctx, buf) != -1, "Failed to setup SSL.");
         buf->send = ssl_send;
         buf->recv = ssl_recv;
         buf->stream_file = ssl_stream_file;
@@ -429,15 +460,28 @@ error:
     return NULL;
 }
 
+IOBuf *IOBuf_create(size_t len, int fd, IOBufType type)
+{
+    check(type != IOBUF_SSL, "Use IOBuf_create_ssl for ssl IOBuffers")
+    return IOBuf_create_internal(len, fd, type, NULL, NULL);
+error:
+    return NULL;
+}
+
+IOBuf *IOBuf_create_ssl(size_t len, int fd, int (*rng_func)(void *, unsigned char *, size_t), void *rng_ctx)
+{
+    return IOBuf_create_internal(len,fd,IOBUF_SSL,rng_func,rng_ctx);
+}
+
 int IOBuf_close(IOBuf *buf)
 {
     int rc = 0;
 
     if(buf) {
-        if(buf->use_ssl) {
-            rc = ssl_close_notify(&buf->ssl);
+        if(!buf->did_shutdown) {
+            rc = IOBuf_shutdown(buf);
         }
-        
+
         fdclose(buf->fd);
         buf->fd=-1;
     }
@@ -445,10 +489,36 @@ int IOBuf_close(IOBuf *buf)
     return rc;
 }
 
+int IOBuf_shutdown(IOBuf *buf)
+{
+    int rc = -1;
+
+    if(!buf || buf->fd < 0) {
+        goto error;
+    }
+
+    if(buf->use_ssl && buf->handshake_performed && !buf->ssl_sent_close) {
+        rc = ssl_close_notify(&buf->ssl);
+        check(rc == 0, "ssl_close_notify failed with error code: %d", rc);
+
+        buf->ssl_sent_close = 1;
+    }
+
+    // ignore return value, since peer may have closed
+    shutdown(buf->fd, SHUT_RDWR);
+
+    buf->did_shutdown = 1;
+
+error:
+    return rc;
+}
+
 void IOBuf_destroy(IOBuf *buf)
 {
     if(buf) {
-        IOBuf_close(buf); // ignore return
+        if(buf->fd >= 0) {
+            IOBuf_close(buf); // ignore return
+        }
 
         if(buf->use_ssl) {
             ssl_free(&buf->ssl);

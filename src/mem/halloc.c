@@ -34,7 +34,7 @@ typedef struct hblock
 #endif
 	hlist_item_t  siblings; /* 2 pointers */
 	hlist_head_t  children; /* 1 pointer  */
-	max_align_t   data[1];  /* not allocated, see below */
+	h_max_align_t   data[1];  /* not allocated, see below */
 	
 } hblock_t;
 

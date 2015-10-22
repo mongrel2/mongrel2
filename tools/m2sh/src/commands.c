@@ -141,7 +141,7 @@ static int Command_help(Command *cmd)
             }
         }
 
-        printf("No help for %s. Use m2sh help to see a list.", command_name);
+        printf("No help for %s. Use m2sh help to see a list.", bdata(command_name));
     } else {
         printf("Mongrel2 m2sh has these commands available:\n\n");
 

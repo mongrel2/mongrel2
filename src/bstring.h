@@ -38,4 +38,9 @@
 #include <bstr/bstrlib.h>
 #include <bstr/bstraux.h>
 
+#undef blength
+#undef bdata
+static inline int blength(bstring b) { return blengthe(b,0); }
+static inline char *bdata(bstring b) { return bdataofs(b,0); }
+
 #endif

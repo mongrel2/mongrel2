@@ -18,6 +18,7 @@ typedef struct http_parser {
 
   void *data;
 
+  int uri_relaxed;
   field_cb http_field;
   element_cb request_method;
   element_cb request_uri;

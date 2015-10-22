@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <polarssl/x509.h>
 #include <polarssl/ssl.h>
-#include <polarssl/havege.h>
+#include "server.h"
 
 #if defined(__APPLE__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
 #include "bsd_specific.h"
@@ -43,6 +43,7 @@ typedef struct IOBuf {
     int mark;
 
     int closed;
+    int did_shutdown;
     io_cb recv;
     io_cb send;
     io_stream_file_cb stream_file;
@@ -53,17 +54,19 @@ typedef struct IOBuf {
     int fd;
     int use_ssl;
     int handshake_performed;
+    int ssl_sent_close;
     ssl_context ssl;
     ssl_session ssn;
-    havege_state hs;
 } IOBuf;
 
+IOBuf *IOBuf_create_ssl(size_t len, int fd, int (*rng_func)(void *, unsigned char *, size_t), void *rng_ctx);
 IOBuf *IOBuf_create(size_t len, int fd, IOBufType type);
 
 void IOBuf_resize(IOBuf *buf, size_t new_size);
 
 void IOBuf_destroy(IOBuf *buf);
 int IOBuf_close(IOBuf *buf);
+int IOBuf_shutdown(IOBuf *buf);
 int IOBuf_register_disconnect(IOBuf *buf);
 
 char *IOBuf_read(IOBuf *buf, int need, int *out_len);
@@ -92,6 +95,7 @@ int IOBuf_stream_file(IOBuf *buf, int fd, off_t len);
 #define IOBuf_set_mark(I, N) ((I)->mark = (N))
 #define IOBuf_mark(I) ((I)->mark)
 
+#define IOBuf_size(I) ((I)->len)
 #define IOBuf_avail(I) ((I)->avail)
 
 #define IOBuf_fd(I) ((I)->fd)

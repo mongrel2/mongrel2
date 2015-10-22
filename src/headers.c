@@ -43,6 +43,7 @@ struct tagbstring HTTP_FRAGMENT = bsStatic("FRAGMENT");
 struct tagbstring HTTP_BODY = bsStatic("BODY");
 struct tagbstring JSON_METHOD = bsStatic("JSON");
 struct tagbstring XML_METHOD = bsStatic("XML");
+struct tagbstring DOWNLOAD_CREDITS = bsStatic("DOWNLOAD_CREDITS");
 
 
 struct tagbstring HTTP_POST = bsStatic("POST");
@@ -59,6 +60,7 @@ struct tagbstring HTTP_REMOTE_ADDR = bsStatic("REMOTE_ADDR");
 
 
 struct tagbstring HTTP_CONTENT_LENGTH = bsStatic("content-length");
+struct tagbstring HTTP_TRANSFER_ENCODING = bsStatic("transfer-encoding");
 struct tagbstring HTTP_HOST = bsStatic("host");
 struct tagbstring HTTP_IF_MATCH = bsStatic("if-match");
 struct tagbstring HTTP_IF_NONE_MATCH = bsStatic("if-none-match");

@@ -59,11 +59,23 @@ struct tagbstring PING_PATTERN = bsStatic("@[a-z/]- {\"type\":\\s*\"ping\"}");
 struct tagbstring POLICY_XML_REQUEST = bsStatic("<policy-file-request");
 
 int MAX_CONTENT_LENGTH = 20 * 1024;
+int MAX_CHUNK_SIZE = 100 * 1024;
 int BUFFER_SIZE = 4 * 1024;
+int MAX_CREDITS = 100 * 1024;
 int CONNECTION_STACK = 32 * 1024;
 int CLIENT_READ_RETRIES = 5;
+int RELAXED_PARSING = 0;
+int DOWNLOAD_FLOW_CONTROL = 0;
 
 int MAX_WS_LENGTH = 256 * 1024;
+
+
+static void free_lnode(list_t *l, lnode_t *i, void *data)
+{
+    (void)l;
+    (void)data;
+    free(lnode_get(i));
+}
 
 
 static inline int Connection_backend_event(Backend *found, Connection *conn)
@@ -84,26 +96,81 @@ error:
 }
 
 
-int Connection_deliver_enqueue(Connection *conn, deliver_function f,
-                                             tns_value_t *d)
+static int Connection_handler_notify_leave(Connection *conn)
 {
-    check_debug(conn->deliverPost-conn->deliverAck < DELIVER_OUTSTANDING_MSGS, "Too many outstanding messages") ;
-    check_debug(conn->deliverTaskStatus==DT_RUNNING, "Cannot enqueue, deliver task not running");
-    conn->deliverRing[conn->deliverPost%DELIVER_OUTSTANDING_MSGS].deliver=f;
-    conn->deliverRing[conn->deliverPost%DELIVER_OUTSTANDING_MSGS].data=d;
-    conn->deliverPost++;
-    taskwakeup(&conn->deliverRendez);
+    int fd;
+    uint32_t id;
+
+    fd = IOBuf_fd(conn->iob);
+    id = Register_id_for_fd(fd);
+    check_debug(id != UINT32_MAX, "Asked to write to an fd that doesn't exist: %d", fd);
+
+    check(conn->handler != NULL, "No handler to notify");
+
+    Handler_notify_leave(conn->handler, id);
+
     return 0;
 
 error:
     return -1;
 }
 
+
+int Connection_deliver_enqueue(Connection *conn, deliver_function f,
+                                             tns_value_t *d)
+{
+    int dataSize = (d ? blength(d->value.string) : 0);
+    Deliver_message *m = NULL;
+    lnode_t *i = NULL;
+
+    if(DOWNLOAD_FLOW_CONTROL) {
+        check_debug(conn->deliverBytesPending + dataSize <= MAX_CREDITS, "Too many outstanding bytes");
+    } else {
+        check_debug(list_count(conn->deliverQueue) < DELIVER_OUTSTANDING_MSGS, "Too many outstanding messages");
+    }
+
+    check_debug(conn->deliverTaskStatus==DT_RUNNING, "Cannot enqueue, deliver task not running");
+
+    m = (Deliver_message *)calloc(sizeof(Deliver_message), 1);
+    check_mem(m);
+
+    m->deliver = f;
+    m->data = d;
+
+    i = lnode_create(m);
+    check_mem(i);
+
+    list_append(conn->deliverQueue, i);
+
+    conn->deliverBytesPending += dataSize;
+    taskwakeup(&conn->deliverRendez);
+    return 0;
+
+error:
+    if(m != NULL) {
+        free(m);
+    }
+    if(i != NULL) {
+        lnode_destroy(i);
+    }
+    return -1;
+}
+
 static inline void Connection_deliver_dequeue(Connection *conn, Deliver_message *m)
 {
+    lnode_t *i;
+    Deliver_message *idata;
+    int dataSize;
+
     while(1) {
-        if(conn->deliverPost-conn->deliverAck) {
-            *m = conn->deliverRing[conn->deliverAck++%DELIVER_OUTSTANDING_MSGS];
+        if(!list_isempty(conn->deliverQueue)) {
+            i = list_del_first(conn->deliverQueue);
+            idata = (Deliver_message *)lnode_get(i);
+            *m = *idata;
+            lnode_destroy(i);
+            free(idata);
+            dataSize = (m->data ? blength(m->data->value.string) : 0);
+            conn->deliverBytesPending -= dataSize;
             return;
         }
         tasksleep(&conn->deliverRendez);
@@ -192,6 +259,8 @@ int connection_msg_to_handler(Connection *conn)
         free(payload);
     
         check(rc == 0, "Failed to deliver to handler: %s", bdata(Request_path(conn->req)));
+
+        conn->handler = handler;
     }
 
     // consumes \0 from body_len
@@ -246,10 +315,10 @@ int Connection_send_to_handler(Connection *conn, Handler *handler, char *body, i
             "Handler shutdown while trying to deliver: %s", bdata(Request_path(conn->req)));
 
     if(handler->protocol == HANDLER_PROTO_TNET) {
-        payload = Request_to_tnetstring(conn->req, handler->send_ident, 
+        payload = Request_to_tnetstring(conn->req, handler->send_ident,
                 IOBuf_fd(conn->iob), body, content_len, conn, altheaders);
     } else if(handler->protocol == HANDLER_PROTO_JSON) {
-        payload = Request_to_payload(conn->req, handler->send_ident, 
+        payload = Request_to_payload(conn->req, handler->send_ident,
                 IOBuf_fd(conn->iob), body, content_len, conn, altheaders);
     } else {
         sentinel("Invalid protocol type: %d", handler->protocol);
@@ -264,13 +333,13 @@ int Connection_send_to_handler(Connection *conn, Handler *handler, char *body, i
     error_unless(rc != -1, conn, 502, "Failed to deliver to handler: %s", 
             bdata(Request_path(conn->req)));
 
+    conn->handler = handler;
     return 0;
 
 error:
     if(payload) free(payload);
     return -1;
 }
-
 
 static int Request_is_websocket(Request *req)
 {
@@ -327,10 +396,12 @@ int connection_http_to_handler(Connection *conn)
     // we don't need the header anymore, so commit the buffer and deal with the body
     check(IOBuf_read_commit(conn->iob, Request_header_length(conn->req)) != -1, "Finaly commit failed streaming the connection to http handlers.");
 
+    if(DOWNLOAD_FLOW_CONTROL)
+        Request_set(conn->req, &DOWNLOAD_CREDITS, bformat("%d", MAX_CREDITS), 1);
+
     if(is_websocket(conn)) {
         bstring wsKey = Request_get(conn->req, &WS_SEC_WS_KEY);
         bstring response= websocket_challenge(wsKey);
-        conn->handler = handler;
 
         //Response_send_status(conn,response);
         bdestroy(conn->req->request_method);
@@ -347,7 +418,7 @@ int connection_http_to_handler(Connection *conn)
         body = "";
         rc = Connection_send_to_handler(conn, handler, body, content_len, NULL);
         check_debug(rc == 0, "Failed to deliver to the handler.");
-    } else if(content_len > MAX_CONTENT_LENGTH) {
+    } else if(content_len > MAX_CONTENT_LENGTH || content_len == -1) {
         if(Setting_get_int("upload.stream", 0)) {
             rc = Upload_stream(conn, handler, content_len);
         } else {
@@ -708,6 +779,7 @@ again:
     header_length=Websocket_header_length((uint8_t *) data, avail);
     data_length=smaller_packet_length-header_length;
     dataU = (uint8_t *)IOBuf_read_all(conn->iob,header_length,8*CLIENT_READ_RETRIES);
+    check(dataU != NULL, "Client closed the connection during websocket packet.");
     memcpy(key,dataU+header_length-4,4);
 
     flags=dataU[0];
@@ -811,7 +883,7 @@ void Connection_deliver_task_kill(Connection *conn)
     if(conn && conn->deliverTaskStatus==DT_RUNNING) {
         debug("Killing task for connection %p",conn);
         int sleeptime=10;
-        while(conn->deliverAck!=conn->deliverPost)
+        while(!list_isempty(conn->deliverQueue))
         {
             Deliver_message msg={NULL,NULL};
             Connection_deliver_dequeue(conn,&msg);
@@ -837,6 +909,14 @@ void Connection_destroy(Connection *conn)
 {
     if(conn) {
         Connection_deliver_task_kill(conn);
+
+        if(conn->deliverQueue != NULL) {
+            list_process(conn->deliverQueue, NULL, free_lnode);
+            list_destroy_nodes(conn->deliverQueue);
+            list_destroy(conn->deliverQueue);
+            conn->deliverQueue = NULL;
+        }
+
         Request_destroy(conn->req);
         conn->req = NULL;
 
@@ -861,6 +941,8 @@ static int connection_sni_cb(void *p_conn, ssl_context *ssl, const unsigned char
     bstring hostname = NULL;
     bstring certpath = NULL;
     bstring keypath = NULL;
+    bstring tryhostpattern = NULL;
+    bstring tmpstr;
 
     hostname = blk2bstr((const char *)chostname, chostname_len);
     check(hostname != NULL, "Allocation failed");
@@ -870,13 +952,10 @@ static int connection_sni_cb(void *p_conn, ssl_context *ssl, const unsigned char
     //   on each byte, so there's no worry of them getting caught.
     for(i = 0; i < blength(hostname); ++i) {
         unsigned char c = bdata(hostname)[i];
-        if(c < 0x20 || c == '/')
-        {
+        if(c < 0x20 || c == '/') {
             log_warn("SNI: invalid hostname provided");
             return -1;
-        }
-        else if(c <= 0x7f)
-        {
+        } else if(c <= 0x7f) {
             // FIXME: it's wrong to use tolower() on a utf8 string, but it
             //   will probably work well enough for most people
             bdata(hostname)[i] = (unsigned char)tolower(c);
@@ -886,19 +965,41 @@ static int connection_sni_cb(void *p_conn, ssl_context *ssl, const unsigned char
     bstring certdir = Setting_get_str("certdir", NULL);
     check(certdir != NULL, "to use ssl, you must specify a certdir");
 
-    certpath = bformat("%s%s.crt", bdata(certdir), bdata(hostname));
+    // try to find a file named after the exact host, then try with a wildcard pattern at the
+    //   same subdomain level. the file format uses underscores instead of asterisks. so, a
+    //   domain of www.example.com will attempt to be matched against a file named
+    //   www.example.com.crt and _.example.com.crt. wildcards at other levels are not supported.
+
+    tryhostpattern = bstrcpy(hostname);
+    certpath = bformat("%s%s.crt", bdata(certdir), bdata(tryhostpattern));
     check_mem(certpath);
 
-    keypath = bformat("%s%s.key", bdata(certdir), bdata(hostname));
-    check_mem(keypath);
-
     rc = x509_crt_parse_file(&conn->own_cert, bdata(certpath));
-    check(rc == 0, "Failed to load cert from %s", bdata(certpath));
+    if(rc != 0) {
+        i = bstrchr(tryhostpattern, '.');
+        check(i != BSTR_ERR, "Failed to find cert for %s", bdata(hostname));
+
+        tmpstr = bmidstr(tryhostpattern, i, blength(tryhostpattern) - i);
+        bdestroy(tryhostpattern);
+        tryhostpattern = bfromcstr("_");
+        bconcat(tryhostpattern, tmpstr);
+        bdestroy(tmpstr);
+
+        certpath = bformat("%s%s.crt", bdata(certdir), bdata(tryhostpattern));
+        check_mem(certpath);
+
+        rc = x509_crt_parse_file(&conn->own_cert, bdata(certpath));
+        check(rc == 0, "Failed to find cert for %s", bdata(hostname));
+    }
+
+    keypath = bformat("%s%s.key", bdata(certdir), bdata(tryhostpattern));
+    check_mem(keypath);
 
     rc = pk_parse_keyfile(&conn->pk_key, bdata(keypath), NULL);
     check(rc == 0, "Failed to load key from %s", bdata(keypath));
 
     bdestroy(hostname);
+    bdestroy(tryhostpattern);
     bdestroy(certpath);
     bdestroy(keypath);
 
@@ -914,6 +1015,7 @@ error:
     pk_free(&conn->pk_key);
 
     bdestroy(hostname);
+    if(tryhostpattern != NULL) bdestroy(tryhostpattern);
     if(certpath != NULL) bdestroy(certpath);
     if(keypath != NULL) bdestroy(keypath);
 
@@ -942,12 +1044,18 @@ Connection *Connection_create(Server *srv, int fd, int rport,
     conn->remote[IPADDR_SIZE] = '\0';
 
     conn->handler = NULL;
+
+    conn->deliverQueue = list_create(LISTCOUNT_T_MAX);
+    check_mem(conn->deliverQueue);
+
     conn->sendCredits = 0;
 
     check_mem(conn->req);
 
+    Request_set_relaxed(conn->req, RELAXED_PARSING);
+
     if(srv != NULL && srv->use_ssl) {
-        conn->iob = IOBuf_create(BUFFER_SIZE, fd, IOBUF_SSL);
+        conn->iob = IOBuf_create_ssl(BUFFER_SIZE, fd, srv->rng_func, srv->rng_ctx);
         check(conn->iob != NULL, "Failed to create the SSL IOBuf.");
 
         // set default cert
@@ -1026,6 +1134,10 @@ void Connection_task(void *v)
     }
 
 error: // fallthrough
+    if(conn->handler) {
+        Connection_handler_notify_leave(conn);
+    }
+
     State_exec(&conn->state, CLOSE, (void *)conn);
     Connection_destroy(conn);
     taskexit(0);
@@ -1034,10 +1146,26 @@ error: // fallthrough
 int Connection_deliver_raw_internal(Connection *conn, tns_value_t *data)
 {
     bstring buf;
+    int rc;
+    int fd;
+    uint32_t id;
+
+    fd = IOBuf_fd(conn->iob);
+    id = Register_id_for_fd(fd);
+    check_debug(id != UINT32_MAX, "Asked to write to an fd that doesn't exist: %d", fd);
+
+    check(conn->handler != NULL, "handler not set when delivering");
+
     check(data->type==tns_tag_string, "deliver_raw_internal expected a string.");
     buf=data->value.string;
-    int ret= IOBuf_send_all(conn->iob, bdata(buf), blength(buf));
-    check_debug(ret==blength(buf), "Failed to send all of the data: %d of %d", rc, avail)
+
+    rc = IOBuf_send_all(conn->iob, bdata(buf), blength(buf));
+    check_debug(rc==blength(buf), "Failed to send all of the data: %d of %d", rc, blength(buf));
+
+    if(DOWNLOAD_FLOW_CONTROL) {
+        Handler_notify_credits(conn->handler, id, rc);
+    }
+
     return 0;
 
 error:
@@ -1055,6 +1183,7 @@ int Connection_deliver_raw(Connection *conn, bstring buf)
         check_debug(0== Connection_deliver_enqueue(conn, Connection_deliver_raw_internal,val),
             "Failed to write raw message to con %d", IOBuf_fd(conn->iob));
     } else {
+        conn->closing = 1;
         Connection_deliver_enqueue(conn, NULL, NULL);
     }
 
@@ -1097,15 +1226,16 @@ void Connection_deliver_task(void *v)
         msg.data=NULL;
     }
 error:
+    conn->handler = NULL; // we're shutting down, don't notify anything else
     conn->deliverTaskStatus=DT_DYING;
     tns_value_destroy(msg.data);
-    while(conn->deliverPost > conn->deliverAck) {
+    while(!list_isempty(conn->deliverQueue)) {
         Connection_deliver_dequeue(conn, &msg);
         tns_value_destroy(msg.data);
     }
 
-    if (IOBuf_fd(conn->iob) >= 0)
-        shutdown(IOBuf_fd(conn->iob), SHUT_RDWR);
+    IOBuf_shutdown(conn->iob);
+
     debug("Deliver Task Shut Down\n");
     conn->deliverTaskStatus=DT_DEAD;
     taskexit(0);
@@ -1184,6 +1314,8 @@ void Connection_init()
     IO_SSL_VERIFY_METHOD = Setting_get_int("ssl.verify_optional", 0) ? SSL_VERIFY_OPTIONAL : SSL_VERIFY_NONE;
     IO_SSL_VERIFY_METHOD = Setting_get_int("ssl.verify_required", 0) ? SSL_VERIFY_REQUIRED : IO_SSL_VERIFY_METHOD;
 
+    RELAXED_PARSING = Setting_get_int("request.relaxed", 0);
+    DOWNLOAD_FLOW_CONTROL = Setting_get_int("download.flow_control", 0);
 }
 
 

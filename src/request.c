@@ -52,6 +52,8 @@
 int MAX_HEADER_COUNT=0;
 int MAX_DUPE_HEADERS=5;
 
+static struct tagbstring CHUNKED = bsStatic("chunked");
+
 void Request_init()
 {
     MAX_HEADER_COUNT = Setting_get_int("limits.header_count", 128 * 10);
@@ -102,9 +104,27 @@ static void header_done_cb(void *data, const char *at, size_t length)
 
     Request *req = (Request *)data;
 
+    // extract chunked
+    int chunked = 0;
+    bstring te = Request_get(req, &HTTP_TRANSFER_ENCODING);
+    if(te && !bstrcmp(te, &CHUNKED)) {
+        chunked = 1;
+    }
+
     // extract content_len
     const char *clen = bdata(Request_get(req, &HTTP_CONTENT_LENGTH));
-    if(clen) req->parser.content_len = atoi(clen);
+    if(clen) {
+        req->parser.content_len = atoi(clen);
+    } else {
+        if(chunked) {
+            // if content-length missing, only assume indefinite length if
+            //   chunked encoding is present
+            req->parser.content_len = -1;
+        } else {
+            // otherwise 0 length
+            req->parser.content_len = 0;
+        }
+    }
 
     // extract host header
     req->host = Request_get(req, &HTTP_HOST);
@@ -416,7 +436,11 @@ bstring Request_to_tnetstring(Request *req, bstring uuid, int fd, const char *bu
         }
 
         tns_render_hash_pair(&outbuf, &HTTP_METHOD, method);
-        tns_render_hash_pair(&outbuf, &HTTP_REMOTE_ADDR, bfromcstr(conn->remote));
+        bstring bremote = bfromcstr(conn->remote);
+        tns_render_hash_pair(&outbuf, &HTTP_REMOTE_ADDR, bremote);
+        if (bremote) {
+            bdestroy(bremote);
+        }
     }
 
     check(tns_render_request_end(&outbuf, header_start, uuid, id, Request_path(req)) != -1, "Failed to finalize request.");
@@ -522,7 +546,11 @@ bstring Request_to_payload(Request *req, bstring uuid, int fd, const char *buf, 
             B(headers, &HTTP_URL_SCHEME, &HTTP_HTTP, &f);
         }
 
-        B(headers, &HTTP_REMOTE_ADDR, bfromcstr(conn->remote), &f);
+        bstring bremote = bfromcstr(conn->remote);
+        B(headers, &HTTP_REMOTE_ADDR, bremote, &f);
+        if (bremote) {
+            bdestroy(bremote);
+        }
     }
 
     bconchar(headers, '}');
@@ -547,4 +575,9 @@ error:
     bdestroy(result);
 
     return NULL;
+}
+
+void Request_set_relaxed(Request *req, int enabled)
+{
+    req->parser.uri_relaxed = (enabled ? 1 : 0);
 }
