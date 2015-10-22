@@ -1,3 +1,149 @@
+
+Changes from 1.9.3 to 1.10.0
+----------------------------
+
+* Several minor Makefile fixes:
+    7560af00
+    6bb17785
+    0410fa6d
+    fb04b232
+
+* Try getrandom, /dev/urandom (if available in chroot) and havege (old behavior)
+  In that order:
+    650031cc
+    856b4600
+    71328bd6
+    0214841a
+
+* Fix closing and error-handling on SSL sockets:
+    eb75e842
+    ea09dd5e
+    ed2f5406
+    89333c60
+
+* Fix warnings:
+    4fa1cf88
+    8c075ed3
+    4609a9e2
+
+* Rename PolarSSL to mbedTLS and switch GH repository we pull from to match:
+    fbe71d3c
+    817ffb62
+
+* The reloading new configurations on SIGHUP was broken, and is now removed
+  We now just rotate logs on SIGHUP:
+    f09c80ce
+    a5d302ac
+
+* Get submodule via https rather than insecure git protocol:
+    3033f7b6
+    546dc888
+
+* Be more aggressive about notifying handlers of disconnect events:
+    14af9346
+    ac6a7220
+    8f849586
+    293f93ee
+    90e9ef73
+    801580c3
+
+* Fix NULL referrence that could occur if client disconnects in the middle
+  of a websocket packet:
+    b721274e
+    8766da74
+
+* Allow flow-control for large client downloads from handlers; handlers must
+  request this behavior; old behavior is default:
+    dab97e92
+    6b98e7bb
+
+* Fix memory leak:
+    3a407e51
+
+* Fix symbol-name conflict in system headers on some newer systems:
+    81a0cd9f
+    563bac8c
+
+* Add optional more-relaxed URI parsing:
+    b023666e
+    aace2e86
+    ea943d29
+
+* Expire SSL session cache entries:
+    de9d44cf
+    53036f43
+
+* Add support for wildcard certs with SNI:
+    ee5bab17
+    26652403
+
+* Add support for chunked uploads
+    955bae8a
+    26b2dd71
+
+* Fix build failure when debug is enabled on connection.c
+    c855c714
+
+Changes from 1.9.2 to 1.9.3
+---------------------------
+
+* Fix "make clean" when not in a git checkout
+    c59d3931
+
+* Bump polarSSL version
+    053e0d53
+    cad261ca
+
+Changes from 1.9.1 to 1.9.2
+---------------------------
+
+* Make improvements to default ciphers
+    679b9529
+    1784b562
+    d1963dc5
+    fd551b2d
+    ea03afc4
+    53c27d6b
+    f91a5915
+    7a057fc9
+
+* Cleanup polarssl git submodule integration
+    1edb6ab4
+    854bc486
+
+* Remove non-working ARM code
+    605d7972
+    1a81de53
+
+* Disable SSLv3 in PolarSSL configuration
+    3d9d91c6
+    f95d8ce1
+
+* When handling large uploads via tempfile, close tempfile before notifying handler:
+    423bcd47
+    fba57ddb
+
+* Makefile fixes:
+    c40e8b2b
+    de30bef1
+    61cf4217
+    eafe3cf3
+
+* Improve portability of websocket upgrade handling
+    9bc56c50
+
+Changes from 1.9.0 to 1.9.1
+---------------------------
+
+* Fix broken test-mode
+    b734059e
+
+* Update expired certificate for failing test
+    7762c93f
+
+* Tidy up a few minor issues found by scan-build:
+    b3f547e5
+
 Changes from 1.8.0 to 1.9.0:
 commit 19df4cbd1
 
