@@ -34,7 +34,7 @@ Download
 
 Mongrel2 is now 1.10.0 as of *Thu Oct 22 2015*: 
 
-* [mongrel2-v1.10.0.tar.bz2](https://github.com/mongrel2/mongrel2/releases/download/v1.10.0/mongrel2-v1.10.0.tar.bz2)
+* [mongrel2-v1.10.0.tar.bz2](https://github.com/mongrel2/mongrel2/releases/download/v1.10.0/mongrel2-v1.10.0.tar.bz2) (SHA-1: 41f5886fbb58ef070484696e47ae71f6f6e47979)
 
 Documentation
 -------------
