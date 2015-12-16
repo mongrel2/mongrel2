@@ -49,21 +49,10 @@
 #include <signal.h>
 #include "mbedtls/config.h"
 #include <mbedtls/ctr_drbg.h>
+#include <mbedtls/dhm.h>
 
 darray_t *SERVER_QUEUE = NULL;
 int RUNNING=1;
-
-static char *ssl_default_dhm_P = 
-    "E4004C1F94182000103D883A448B3F80" \
-    "2CE4B44A83301270002C20D0321CFD00" \
-    "11CCEF784C26A400F43DFB901BCA7538" \
-    "F2C6B176001CF5A0FD16D2C48B1D0C1C" \
-    "F6AC8E1DA6BCC3B4E1F96B0564965300" \
-    "FFA1D0B601EB2800F489AA512C4B248C" \
-    "01F76949A60BB7F00A40B1EAB64BDD48" \
-    "E8A700D60B7F1200FA8E77B0A979DABF";
-
-static char *ssl_default_dhm_G = "4";
 
 typedef struct CipherName
 {
@@ -368,8 +357,8 @@ static int Server_init_ssl(Server *srv)
         srv->ciphers = mbedtls_ssl_list_ciphersuites();
     }
 
-    srv->dhm_P = ssl_default_dhm_P;
-    srv->dhm_G = ssl_default_dhm_G;
+    srv->dhm_P = MBEDTLS_DHM_RFC5114_MODP_2048_P;
+    srv->dhm_G = MBEDTLS_DHM_RFC5114_MODP_2048_G;
 
     bdestroy(certdir);
     bdestroy(certpath);
