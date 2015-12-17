@@ -35,7 +35,7 @@ dev: CFLAGS=-g -Wall -Isrc -Wall -Wextra $(OPTFLAGS) -D_FILE_OFFSET_BITS=64
 dev: all
 
 ${OBJECTS_NOEXT}: CFLAGS += ${NOEXTCFLAGS}
-${OBJECTS}: src/mbedtls/include/polarssl/config.h
+${OBJECTS}: src/mbedtls/include/mbedtls/config.h
 
 # 
 # CFLAGS_DEFS: The $(CC) flags required to obtain C pre-processor #defines, per:
@@ -55,24 +55,24 @@ CFLAGS_DEFS=-dM -E -x c 	# clang, gcc, HP C, Intel icc
 
 # Configure mbedtls
 # 
-# - check for required src/mbedtls/include/polarssl/config.h definitions
-#   and patch using version-appropriate src/polarssl_config.patch.#.#.# file:
+# - check for required src/mbedtls/include/mbedtls/config.h definitions
+#   and patch using version-appropriate src/mbedtls_config.patch.#.#.# file:
 #   - If desired mbedtls version is not yet supported, git checkout the
-#     new src/mbedtls/ version X.Y.Z, edit its include/polarssl/config.h as
-#     required, and generate a new src/polarssl_config.patch.X.Y.Z using:
+#     new src/mbedtls/ version X.Y.Z, edit its include/mbedtls/config.h as
+#     required, and generate a new src/mbedtls_config.patch.X.Y.Z using:
 # 
-#         git diff -- include/polarssl/config.h > ../polarssl_config.patch.X.Y.Z
+#         git diff -- include/mbedtls/config.h > ../mbedtls_config.patch.X.Y.Z
 FORCE:
-src/mbedtls/include/polarssl/config.h: src/mbedtls/include/polarssl/version.h FORCE
-	@POLARSSL_VERSION=$$( $(CC) $(CFLAGS_DEFS) $<				\
-	    | sed -n -e 's/^.*POLARSSL_VERSION_STRING[\t ]*"\([^"]*\)".*/\1/p' ); \
-	if $(CC) $(CFLAGS_DEFS) $@ | grep -q POLARSSL_HAVEGE_C; then		\
-	    echo "mbedtls $${POLARSSL_VERSION}; already configured";		\
+src/mbedtls/include/mbedtls/config.h: src/mbedtls/include/mbedtls/version.h FORCE
+	@MBEDTLS_VERSION=$$( $(CC) $(CFLAGS_DEFS) $<				\
+	    | sed -n -e 's/^.*MBEDTLS_VERSION_STRING[\t ]*"\([^"]*\)".*/\1/p' ); \
+	if $(CC) $(CFLAGS_DEFS) $@ | grep -q MBEDTLS_HAVEGE_C; then		\
+	    echo "mbedtls $${MBEDTLS_VERSION}; already configured";		\
 	else									\
-	    echo "mbedtls $${POLARSSL_VERSION}; defining POLARSSL_HAVEGE_C...";\
-	    POLARSSL_PATCH=src/polarssl_config.patch.$${POLARSSL_VERSION};	\
-	    if ! patch -d src/mbedtls -p 1 < $${POLARSSL_PATCH}; then		\
-		echo "*** Failed to apply $${POLARSSL_PATCH}";			\
+	    echo "mbedtls $${MBEDTLS_VERSION}; defining MBEDTLS_HAVEGE_C...";\
+	    MBEDTLS_PATCH=src/mbedtls_config.patch.$${MBEDTLS_VERSION};	\
+	    if ! patch -d src/mbedtls -p 1 < $${MBEDTLS_PATCH}; then		\
+		echo "*** Failed to apply $${MBEDTLS_PATCH}";			\
 		exit 1;								\
 	    fi;									\
 	fi
@@ -99,7 +99,7 @@ clean:
 	rm -f tools/lemon/lemon
 	rm -f tools/m2sh/tests/tests.log 
 	find . \( -name "*.gcno" -o -name "*.gcda" \) -exec rm {} \;
-	if test -e .git; then git -C src/mbedtls checkout include/polarssl/config.h; fi
+	if test -e .git; then git -C src/mbedtls checkout include/mbedtls/config.h; fi
 	${MAKE} -C tools/m2sh OPTLIB=${OPTLIB} clean
 	${MAKE} -C tools/filters OPTLIB=${OPTLIB} clean
 	${MAKE} -C tests/filters OPTLIB=${OPTLIB} clean
