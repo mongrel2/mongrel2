@@ -1,16 +1,7 @@
 diff --git a/include/mbedtls/config.h b/include/mbedtls/config.h
-index 3e39998..b0bd575 100644
+index 3e39998..e48c35a 100644
 --- a/include/mbedtls/config.h
 +++ b/include/mbedtls/config.h
-@@ -595,7 +595,7 @@
-  *      MBEDTLS_TLS_DHE_RSA_WITH_CAMELLIA_128_CBC_SHA
-  *      MBEDTLS_TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA
-  */
--#define MBEDTLS_KEY_EXCHANGE_DHE_RSA_ENABLED
-+// #define MBEDTLS_KEY_EXCHANGE_DHE_RSA_ENABLED
- 
- /**
-  * \def MBEDTLS_KEY_EXCHANGE_ECDHE_RSA_ENABLED
 @@ -1058,7 +1058,7 @@
   *
   * Comment this macro to disable support for SSL 3.0
