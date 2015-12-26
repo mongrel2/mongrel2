@@ -47,8 +47,8 @@
 #include "config/config.h"
 #include "unixy.h"
 #include <signal.h>
-#include "polarssl/config.h"
-#include <polarssl/ctr_drbg.h>
+#include "mbedtls/config.h"
+#include <mbedtls/ctr_drbg.h>
 
 darray_t *SERVER_QUEUE = NULL;
 int RUNNING=1;
@@ -209,11 +209,11 @@ static CipherName cipher_table[] =
 #endif
 
     // Legacy alias, less weaks
-    { "SSL_RSA_DES_168_SHA",          TLS_RSA_WITH_3DES_EDE_CBC_SHA },
-    { "SSL_RSA_AES_128_SHA",          TLS_RSA_WITH_AES_128_CBC_SHA },
-    { "SSL_RSA_AES_256_SHA",          TLS_RSA_WITH_AES_256_CBC_SHA },
-    { "SSL_RSA_CAMELLIA_128_SHA",     TLS_RSA_WITH_CAMELLIA_128_CBC_SHA },
-    { "SSL_RSA_CAMELLIA_256_SHA",     TLS_RSA_WITH_CAMELLIA_256_CBC_SHA },
+    { "SSL_RSA_DES_168_SHA",          MBEDTLS_TLS_RSA_WITH_3DES_EDE_CBC_SHA },
+    { "SSL_RSA_AES_128_SHA",          MBEDTLS_TLS_RSA_WITH_AES_128_CBC_SHA },
+    { "SSL_RSA_AES_256_SHA",          MBEDTLS_TLS_RSA_WITH_AES_256_CBC_SHA },
+    { "SSL_RSA_CAMELLIA_128_SHA",     MBEDTLS_TLS_RSA_WITH_CAMELLIA_128_CBC_SHA },
+    { "SSL_RSA_CAMELLIA_256_SHA",     MBEDTLS_TLS_RSA_WITH_CAMELLIA_256_CBC_SHA },
 
     // End of the cipher list
     { NULL, -1 }
@@ -242,7 +242,7 @@ static int Server_load_ciphers(Server *srv, bstring ssl_ciphers_val)
             "Invalid cipher list, it must be separated by space ' ' characters "
             "and you need at least one.  Or, just leave it out for defaults.");
 
-    default_ciphersuites = ssl_list_ciphersuites();
+    default_ciphersuites = mbedtls_ssl_list_ciphersuites();
     while(default_ciphersuites[max_num_ciphers] != 0) {
         max_num_ciphers++;
     }
@@ -284,29 +284,31 @@ error:
 int Server_init_rng(Server *srv)
 {
     int rc;
-    unsigned char buf[ENTROPY_BLOCK_SIZE];
+    unsigned char buf[MBEDTLS_ENTROPY_BLOCK_SIZE];
     void *ctx = NULL;
 
-    entropy_init( &srv->entropy );
+    mbedtls_entropy_init( &srv->entropy );
 
     // test the entropy source
-    rc = entropy_func(&srv->entropy, buf, ENTROPY_BLOCK_SIZE);
+    rc = mbedtls_entropy_func(&srv->entropy, buf, MBEDTLS_ENTROPY_BLOCK_SIZE);
 
     if(rc == 0) {
-        ctx = calloc(sizeof(ctr_drbg_context), 1);
+        ctx = calloc(sizeof(mbedtls_ctr_drbg_context), 1);
 
-        rc = ctr_drbg_init((ctr_drbg_context *)ctx, entropy_func, &srv->entropy, NULL, 0);
+        mbedtls_ctr_drbg_init((mbedtls_ctr_drbg_context *)ctx);
+        rc = mbedtls_ctr_drbg_seed((mbedtls_ctr_drbg_context *)ctx,
+            mbedtls_entropy_func, &srv->entropy, NULL, 0);
         check(rc == 0, "Init rng failed: ctr_drbg_init returned %d\n", rc);
 
-        srv->rng_func = ctr_drbg_random;
+        srv->rng_func = mbedtls_ctr_drbg_random;
         srv->rng_ctx = ctx;
     } else {
         log_warn("entropy source unavailable. falling back to havege rng");
 
-        ctx = calloc(sizeof(havege_state), 1);
-        havege_init((havege_state *)ctx);
+        ctx = calloc(sizeof(mbedtls_havege_state), 1);
+        mbedtls_havege_init((mbedtls_havege_state *)ctx);
 
-        srv->rng_func = havege_random;
+        srv->rng_func = mbedtls_havege_random;
         srv->rng_ctx = ctx;
     }
 
@@ -338,10 +340,10 @@ static int Server_init_ssl(Server *srv)
     keypath = bformat("%s%s.key", bdata(certdir), bdata(srv->uuid));
     check_mem(keypath);
 
-    rc = x509_crt_parse_file(&srv->own_cert, bdata(certpath));
+    rc = mbedtls_x509_crt_parse_file(&srv->own_cert, bdata(certpath));
     check(rc == 0, "Failed to load cert from %s", bdata(certpath));
 
-    rc = pk_parse_keyfile(&srv->pk_key, bdata(keypath), NULL);
+    rc = mbedtls_pk_parse_keyfile(&srv->pk_key, bdata(keypath), NULL);
     check(rc == 0, "Failed to load key from %s", bdata(keypath));
 
     bstring ssl_ciphers_val = Setting_get_str("ssl_ciphers", NULL);
@@ -350,7 +352,7 @@ static int Server_init_ssl(Server *srv)
 
     if ( ca_chain != NULL ) {
 
-        rc = x509_crt_parse_file(&srv->ca_chain, bdata(ca_chain));
+        rc = mbedtls_x509_crt_parse_file(&srv->ca_chain, bdata(ca_chain));
         check(rc == 0, "Failed to load cert from %s", bdata(ca_chain));
 
     } else {
@@ -363,7 +365,7 @@ static int Server_init_ssl(Server *srv)
         rc = Server_load_ciphers(srv, ssl_ciphers_val);
         check(rc == 0, "Failed to load requested SSL ciphers.");
     } else {
-        srv->ciphers = ssl_list_ciphersuites();
+        srv->ciphers = mbedtls_ssl_list_ciphersuites();
     }
 
     srv->dhm_P = ssl_default_dhm_P;
@@ -461,8 +463,8 @@ void Server_destroy(Server *srv)
         if(srv->use_ssl) {
             free(srv->rng_ctx);
 
-            x509_crt_free(&srv->own_cert);
-            pk_free(&srv->pk_key);
+            mbedtls_x509_crt_free(&srv->own_cert);
+            mbedtls_pk_free(&srv->pk_key);
             // srv->ciphers freed (if non-default) by h_free
         }
 

@@ -43,11 +43,11 @@
 #include "register.h"
 #include "mem/halloc.h"
 #include "dbg.h"
-#include "polarssl/ssl.h"
+#include "mbedtls/ssl.h"
 #include "task/task.h"
 #include "adt/darray.h"
 
-int IO_SSL_VERIFY_METHOD = SSL_VERIFY_NONE;
+int IO_SSL_VERIFY_METHOD = MBEDTLS_SSL_VERIFY_NONE;
 
 static ssize_t null_send(IOBuf *iob, char *buffer, int len)
 {
@@ -132,8 +132,10 @@ static int ssl_fdsend_wrapper(void *p_iob, const unsigned char *ubuffer, size_t 
     return fdsend(iob->fd, (char *) ubuffer, len);
 }
 
-static int ssl_fdrecv_wrapper(void *p_iob, unsigned char *ubuffer, size_t len)
+static int ssl_fdrecv_wrapper(void *p_iob, unsigned char *ubuffer, size_t len, uint32_t timeout)
 {
+    (void)timeout; // ignore timeout
+
     IOBuf *iob = (IOBuf *) p_iob;
     return fdrecv1(iob->fd, (char *) ubuffer, len);
 }
@@ -142,10 +144,10 @@ static int ssl_do_handshake(IOBuf *iob)
 {
     int rcode;
     check(!iob->handshake_performed, "ssl_do_handshake called unnecessarily");
-    while((rcode = ssl_handshake(&iob->ssl)) != 0) {
+    while((rcode = mbedtls_ssl_handshake(&iob->ssl)) != 0) {
 
-        check(rcode == POLARSSL_ERR_NET_WANT_READ
-                || rcode == POLARSSL_ERR_NET_WANT_WRITE, "Handshake failed with error code: %d", rcode);
+        check(rcode == MBEDTLS_ERR_SSL_WANT_READ
+                || rcode == MBEDTLS_ERR_SSL_WANT_WRITE, "Handshake failed with error code: %d", rcode);
     }
     iob->handshake_performed = 1;
     return 0;
@@ -166,7 +168,7 @@ static ssize_t ssl_send(IOBuf *iob, char *buffer, int len)
     }
 
     for(; len > 0; buffer += sent, len -= sent, total += sent) {
-        sent = ssl_write(&iob->ssl, (const unsigned char*) buffer, len);
+        sent = mbedtls_ssl_write(&iob->ssl, (const unsigned char*) buffer, len);
 
         check(sent > 0, "Error sending SSL data.");
         check(sent <= len, "Buffer overflow. Too much data sent by ssl_write");
@@ -193,7 +195,7 @@ static ssize_t ssl_recv(IOBuf *iob, char *buffer, int len)
         check(rcode == 0, "SSL handshake failed: %d", rcode);
     }
 
-    rc = ssl_read(&iob->ssl, (unsigned char*) buffer, len);
+    rc = mbedtls_ssl_read(&iob->ssl, (unsigned char*) buffer, len);
 
     // we count EOF as error (but this may be too common to log a message)
     if(rc == 0) {
@@ -201,7 +203,7 @@ static ssize_t ssl_recv(IOBuf *iob, char *buffer, int len)
     }
 
     // we count close notify as EOF
-    if(rc == POLARSSL_ERR_SSL_PEER_CLOSE_NOTIFY) {
+    if(rc == MBEDTLS_ERR_SSL_PEER_CLOSE_NOTIFY) {
         return 0;
     }
 
@@ -254,13 +256,15 @@ error:
     return -1;
 }
 
-void ssl_debug(void *p, int level, const char *msg)
+void ssl_debug(void *p, int level, const char *fname, int line, const char *msg)
 {
     (void)p;
+    (void)fname;
+    (void)line;
     if (msg) {}
 
     if(level < 2) {
-        debug("polarssl: %s", msg);
+        debug("mbedtls: %s", msg);
     }
 }
 
@@ -278,7 +282,7 @@ const int SSL_CACHE_LIMIT_REMOVE_COUNT = 100;
 static inline int setup_ssl_session_cache()
 {
     if(SSL_SESSION_CACHE == NULL) {
-        SSL_SESSION_CACHE = darray_create(SSL_INITIAL_CACHE_SIZE, sizeof(ssl_session));
+        SSL_SESSION_CACHE = darray_create(SSL_INITIAL_CACHE_SIZE, sizeof(mbedtls_ssl_session));
         check_mem(SSL_SESSION_CACHE);
     }
     return 0;
@@ -287,26 +291,25 @@ error:
 }
 
 
-static int simple_get_cache( void *p_ssl, ssl_session *ssn )
+static int simple_get_cache( void *p, mbedtls_ssl_session *ssn )
 {
-    ssl_context *ssl = (ssl_context *) p_ssl;
+    (void)p;
     int i = 0;
 
     check(setup_ssl_session_cache() == 0, "Failed to initialize SSL session cache.");
 
-    if( ssl->handshake->resume == 0 ) return 1;
-    ssl_session *cur = NULL;
+    mbedtls_ssl_session *cur = NULL;
 
     for(i = 0; i < darray_end(SSL_SESSION_CACHE); i++) {
         cur = darray_get(SSL_SESSION_CACHE, i);
 
         if( ssn->ciphersuite != cur->ciphersuite ||
-            ssn->length != cur->length ) 
+            ssn->id_len != cur->id_len )
         {
             continue;
         }
 
-        if( memcmp( ssn->id, cur->id, cur->length ) != 0 ) {
+        if( memcmp( ssn->id, cur->id, cur->id_len ) != 0 ) {
             continue;
         }
 
@@ -315,7 +318,7 @@ static int simple_get_cache( void *p_ssl, ssl_session *ssn )
         // TODO: odd, why 48? this is from polarssl
         memcpy( ssn->master, cur->master, 48 );
 
-        x509_crt* _x509P  = cur->peer_cert;
+        mbedtls_x509_crt* _x509P  = cur->peer_cert;
         if (_x509P == NULL) {
             debug("failed to find peer_cert in handshake during get");
             return 0;
@@ -329,18 +332,18 @@ error: // fallthrough
     return 1;
 }
 
-static int simple_set_cache( void *p_ssl, const ssl_session *ssn )
+static int simple_set_cache( void *p_ssl, const mbedtls_ssl_session *ssn )
 {
-    ssl_context *ssl = (ssl_context *) p_ssl;
+    mbedtls_ssl_context *ssl = (mbedtls_ssl_context *) p_ssl;
     int i = 0;
-    ssl_session *cur = NULL;
+    mbedtls_ssl_session *cur = NULL;
     int make_new = 1;
     check(setup_ssl_session_cache() == 0, "Failed to initialize SSL session cache.");
 
     for(i = 0; i < darray_end(SSL_SESSION_CACHE); i++) {
         cur = darray_get(SSL_SESSION_CACHE, i);
 
-        if( memcmp( ssn->id, cur->id, cur->length ) == 0 ) {
+        if( memcmp( ssn->id, cur->id, cur->id_len ) == 0 ) {
             make_new = 0;
             break; /* client reconnected */
         }
@@ -351,7 +354,7 @@ static int simple_set_cache( void *p_ssl, const ssl_session *ssn )
             darray_remove_and_resize(SSL_SESSION_CACHE, 0, SSL_CACHE_LIMIT_REMOVE_COUNT);
         }
 
-        cur = (ssl_session *) darray_new(SSL_SESSION_CACHE);
+        cur = (mbedtls_ssl_session *) darray_new(SSL_SESSION_CACHE);
         check_mem(cur);
         darray_push(SSL_SESSION_CACHE, cur);
     }
@@ -361,14 +364,14 @@ static int simple_set_cache( void *p_ssl, const ssl_session *ssn )
 
     *cur = *ssn;
 
-    const x509_crt* _x509P  = ssl_get_peer_cert( ssl );
+    const mbedtls_x509_crt* _x509P  = mbedtls_ssl_get_peer_cert( ssl );
     if (_x509P == NULL) {
         debug("failed to find peer_cert in handshake");
         return 0;
     }
 
     int rc = 0;
-    if ((rc = x509_crt_parse( cur->peer_cert,  _x509P->raw.p, _x509P->raw.len)) != 0) {
+    if ((rc = mbedtls_x509_crt_parse( cur->peer_cert,  _x509P->raw.p, _x509P->raw.len)) != 0) {
         debug("failed to set peer_cert during handshake:rc:%d:", rc);
     }
 
@@ -386,27 +389,25 @@ static inline int iobuf_ssl_setup(int (*rng_func)(void *, unsigned char *, size_
     buf->use_ssl = 1;
     buf->handshake_performed = 0;
 
-    memset(&buf->ssl, 0, sizeof(ssl_context));
+    memset(&buf->sslconf, 0, sizeof(mbedtls_ssl_config));
+    mbedtls_ssl_config_init(&buf->sslconf);
 
-    rc = ssl_init(&buf->ssl);
-    check(rc == 0, "Failed to initialize SSL structure.");
+    rc = mbedtls_ssl_config_defaults(&buf->sslconf, MBEDTLS_SSL_IS_SERVER, MBEDTLS_SSL_TRANSPORT_STREAM, 0);
+    check(rc == 0, "Failed to initialize SSL config structure.");
 
-    ssl_set_endpoint(&buf->ssl, SSL_IS_SERVER);
-    ssl_set_authmode(&buf->ssl, IO_SSL_VERIFY_METHOD);
+    mbedtls_ssl_conf_authmode(&buf->sslconf, IO_SSL_VERIFY_METHOD);
 
-    ssl_set_rng(&buf->ssl, rng_func, rng_ctx);
+    mbedtls_ssl_conf_rng(&buf->sslconf, rng_func, rng_ctx);
 
 #ifndef DEBUG
-    ssl_set_dbg(&buf->ssl, ssl_debug, NULL);
+    mbedtls_ssl_conf_dbg(&buf->sslconf, ssl_debug, NULL);
 #endif
 
-    ssl_set_bio(&buf->ssl, ssl_fdrecv_wrapper, buf, 
-                ssl_fdsend_wrapper, buf);
+    mbedtls_ssl_conf_session_cache(&buf->sslconf, &buf->ssl, simple_get_cache, simple_set_cache);
 
-    memset(&buf->ssn, 0, sizeof(buf->ssn));
-    ssl_set_session(&buf->ssl, &buf->ssn);
-
-    ssl_set_session_cache(&buf->ssl, simple_get_cache, &buf->ssl, simple_set_cache, &buf->ssl);
+    // zero out the ssl struct here just to be safe, even though
+    //   initialization happens in IOBuf_ssl_init
+    memset(&buf->ssl, 0, sizeof(mbedtls_ssl_context));
 
     return 0;
 error:
@@ -473,6 +474,27 @@ IOBuf *IOBuf_create_ssl(size_t len, int fd, int (*rng_func)(void *, unsigned cha
     return IOBuf_create_internal(len,fd,IOBUF_SSL,rng_func,rng_ctx);
 }
 
+int IOBuf_ssl_init(IOBuf *buf)
+{
+    int rc = 0;
+
+    mbedtls_ssl_init(&buf->ssl);
+
+    rc = mbedtls_ssl_setup(&buf->ssl, &buf->sslconf);
+    check(rc == 0, "Failed to initialize SSL structure.");
+
+    mbedtls_ssl_set_bio(&buf->ssl, buf, ssl_fdsend_wrapper,
+                NULL, ssl_fdrecv_wrapper);
+
+    memset(&buf->ssn, 0, sizeof(buf->ssn));
+    mbedtls_ssl_set_session(&buf->ssl, &buf->ssn);
+
+    buf->ssl_initialized = 1;
+    return 0;
+error:
+    return -1;
+}
+
 int IOBuf_close(IOBuf *buf)
 {
     int rc = 0;
@@ -498,7 +520,7 @@ int IOBuf_shutdown(IOBuf *buf)
     }
 
     if(buf->use_ssl && buf->handshake_performed && !buf->ssl_sent_close) {
-        rc = ssl_close_notify(&buf->ssl);
+        rc = mbedtls_ssl_close_notify(&buf->ssl);
         check(rc == 0, "ssl_close_notify failed with error code: %d", rc);
 
         buf->ssl_sent_close = 1;
@@ -521,9 +543,12 @@ void IOBuf_destroy(IOBuf *buf)
         }
 
         if(buf->use_ssl) {
-            ssl_free(&buf->ssl);
+            if(buf->ssl_initialized) {
+                mbedtls_ssl_free(&buf->ssl);
+            }
+            mbedtls_ssl_config_free(&buf->sslconf);
         }
-        
+
         if(buf->buf) free(buf->buf);
         free(buf);
     }

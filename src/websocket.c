@@ -1,6 +1,6 @@
 #include <websocket.h>
 #include <dbg.h>
-#include <polarssl/sha1.h>
+#include <mbedtls/sha1.h>
 
 struct tagbstring WS_REQ_METHOD = bsStatic("HYBI");
 struct tagbstring WS_CONNECTION = bsStatic("connection");
@@ -61,7 +61,7 @@ bstring websocket_challenge(bstring input)
 
     check(BSTR_OK == bcatcstr(tmpstring, WS_GUID),"Failed to allocate memory");
 
-    sha1((unsigned char *)bdata(tmpstring),blength(tmpstring),(unsigned char *)bdata(buf));
+    mbedtls_sha1((unsigned char *)bdata(tmpstring),blength(tmpstring),(unsigned char *)bdata(buf));
     buf->slen=20;
     encodedSha1=bBase64Encode(buf);
 

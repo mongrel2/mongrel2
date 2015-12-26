@@ -39,10 +39,10 @@
 #include "adt/darray.h"
 #include "host.h"
 #include "routing.h"
-#include <polarssl/ssl.h>
-#include <polarssl/entropy.h>
-#include <polarssl/x509.h>
-#include <polarssl/pk.h>
+#include <mbedtls/ssl.h>
+#include <mbedtls/entropy.h>
+#include <mbedtls/x509.h>
+#include <mbedtls/pk.h>
 
 enum {
      /* IPv6 addr can be up to 40 chars long */
@@ -67,12 +67,12 @@ typedef struct Server {
     bstring default_hostname;
     uint32_t created_on;
     int use_ssl;
-    entropy_context entropy;
+    mbedtls_entropy_context entropy;
     int (*rng_func)(void *, unsigned char *, size_t);
     void *rng_ctx;
-    x509_crt own_cert;
-    x509_crt ca_chain;
-    pk_context pk_key;
+    mbedtls_x509_crt own_cert;
+    mbedtls_x509_crt ca_chain;
+    mbedtls_pk_context pk_key;
     const int *ciphers;
     char *dhm_P;
     char *dhm_G;

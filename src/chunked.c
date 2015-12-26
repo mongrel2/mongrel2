@@ -1,8 +1,6 @@
 #include "chunked.h"
 
 #include <string.h>
-#include <polarssl/sha1.h>
-#include "dbg.h"
 #include "connection.h"
 
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))

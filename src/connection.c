@@ -36,6 +36,7 @@
 #include <sys/socket.h>
 #include <limits.h>
 #include <ctype.h>
+#include <mbedtls/sha1.h>
 
 #include "connection.h"
 #include "http11/httpclient_parser.h"
@@ -278,7 +279,7 @@ struct tagbstring PEER_CERT_SHA1_KEY = bsStatic("PEER_CERT_SHA1");
 
 void Connection_fingerprint_from_cert(Connection *conn) 
 {
-    const x509_crt* _x509P  = ssl_get_peer_cert(&conn->iob->ssl);
+    const mbedtls_x509_crt* _x509P  = mbedtls_ssl_get_peer_cert(&conn->iob->ssl);
     int i = 0;
 
     debug("Connection_fingerprint_from_cert: peer_cert: %016lX: tag=%d length=%ld",
@@ -287,12 +288,12 @@ void Connection_fingerprint_from_cert(Connection *conn)
             _x509P ? _x509P->raw.len : -1);
 
     if (_x509P != NULL && _x509P->raw.len > 0) {
-        sha1_context	ctx;
+        mbedtls_sha1_context	ctx;
         unsigned char sha1sum[CERT_FINGERPRINT_SIZE + 1] = {0};
 
-        sha1_starts(&ctx);
-        sha1_update(&ctx, _x509P->raw.p, _x509P->raw.len);
-        sha1_finish(&ctx, sha1sum);
+        mbedtls_sha1_starts(&ctx);
+        mbedtls_sha1_update(&ctx, _x509P->raw.p, _x509P->raw.len);
+        mbedtls_sha1_finish(&ctx, sha1sum);
 
         bstring hex = bfromcstr("");
         for (i = 0; i < (int)sizeof(sha1sum); i++) {
@@ -921,8 +922,8 @@ void Connection_destroy(Connection *conn)
         conn->req = NULL;
 
         if(conn->use_sni) {
-            x509_crt_free(&conn->own_cert);
-            pk_free(&conn->pk_key);
+            mbedtls_x509_crt_free(&conn->own_cert);
+            mbedtls_pk_free(&conn->pk_key);
         }
 
         if(conn->client) free(conn->client);
@@ -933,7 +934,7 @@ void Connection_destroy(Connection *conn)
 }
 
 
-static int connection_sni_cb(void *p_conn, ssl_context *ssl, const unsigned char *chostname, size_t chostname_len)
+static int connection_sni_cb(void *p_conn, mbedtls_ssl_context *ssl, const unsigned char *chostname, size_t chostname_len)
 {
     Connection *conn = (Connection *) p_conn;
     int i;
@@ -974,7 +975,7 @@ static int connection_sni_cb(void *p_conn, ssl_context *ssl, const unsigned char
     certpath = bformat("%s%s.crt", bdata(certdir), bdata(tryhostpattern));
     check_mem(certpath);
 
-    rc = x509_crt_parse_file(&conn->own_cert, bdata(certpath));
+    rc = mbedtls_x509_crt_parse_file(&conn->own_cert, bdata(certpath));
     if(rc != 0) {
         i = bstrchr(tryhostpattern, '.');
         check(i != BSTR_ERR, "Failed to find cert for %s", bdata(hostname));
@@ -988,14 +989,14 @@ static int connection_sni_cb(void *p_conn, ssl_context *ssl, const unsigned char
         certpath = bformat("%s%s.crt", bdata(certdir), bdata(tryhostpattern));
         check_mem(certpath);
 
-        rc = x509_crt_parse_file(&conn->own_cert, bdata(certpath));
+        rc = mbedtls_x509_crt_parse_file(&conn->own_cert, bdata(certpath));
         check(rc == 0, "Failed to find cert for %s", bdata(hostname));
     }
 
     keypath = bformat("%s%s.key", bdata(certdir), bdata(tryhostpattern));
     check_mem(keypath);
 
-    rc = pk_parse_keyfile(&conn->pk_key, bdata(keypath), NULL);
+    rc = mbedtls_pk_parse_keyfile(&conn->pk_key, bdata(keypath), NULL);
     check(rc == 0, "Failed to load key from %s", bdata(keypath));
 
     bdestroy(hostname);
@@ -1005,14 +1006,14 @@ static int connection_sni_cb(void *p_conn, ssl_context *ssl, const unsigned char
 
     conn->use_sni = 1;
 
-    ssl_set_own_cert(ssl, &conn->own_cert, &conn->pk_key);
+    mbedtls_ssl_set_hs_own_cert(ssl, &conn->own_cert, &conn->pk_key);
 
     return 0;
 
 error:
     // it should be safe to call these on zeroed-out objects
-    x509_crt_free(&conn->own_cert);
-    pk_free(&conn->pk_key);
+    mbedtls_x509_crt_free(&conn->own_cert);
+    mbedtls_pk_free(&conn->pk_key);
 
     bdestroy(hostname);
     if(tryhostpattern != NULL) bdestroy(tryhostpattern);
@@ -1028,6 +1029,7 @@ error:
 Connection *Connection_create(Server *srv, int fd, int rport,
                               const char *remote)
 {
+    int rc = 0;
     Connection *conn = calloc(sizeof(Connection),1);
     check_mem(conn);
 
@@ -1059,20 +1061,24 @@ Connection *Connection_create(Server *srv, int fd, int rport,
         check(conn->iob != NULL, "Failed to create the SSL IOBuf.");
 
         // set default cert
-        ssl_set_own_cert(&conn->iob->ssl, &srv->own_cert, &srv->pk_key);
+        mbedtls_ssl_conf_own_cert(&conn->iob->sslconf, &srv->own_cert, &srv->pk_key);
 
         // set the ca_chain if it was specified in settings
         if ( srv->ca_chain.version != -1 ) {
-            ssl_set_ca_chain(&conn->iob->ssl, &srv->ca_chain, NULL, NULL );
+            mbedtls_ssl_conf_ca_chain(&conn->iob->sslconf, &srv->ca_chain, NULL );
         }
 
         // setup callback for SNI. if the client does not use this feature,
         //   then this callback is never invoked and the above default cert
         //   will be used
-        ssl_set_sni(&conn->iob->ssl, connection_sni_cb, conn);
+        mbedtls_ssl_conf_sni(&conn->iob->sslconf, connection_sni_cb, conn);
 
-        ssl_set_dh_param(&conn->iob->ssl, srv->dhm_P, srv->dhm_G);
-        ssl_set_ciphersuites(&conn->iob->ssl, srv->ciphers);
+        mbedtls_ssl_conf_dh_param(&conn->iob->sslconf, srv->dhm_P, srv->dhm_G);
+        mbedtls_ssl_conf_ciphersuites(&conn->iob->sslconf, srv->ciphers);
+
+        // now that the ssl configuration is set, we can init
+        rc = IOBuf_ssl_init(conn->iob);
+        check(rc == 0, "Failed to init SSL.");
     } else {
         conn->iob = IOBuf_create(BUFFER_SIZE, fd, IOBUF_SOCKET);
     }
@@ -1311,8 +1317,8 @@ void Connection_init()
     log_info("MAX limits.proxy_read_retries=%d, limits.proxy_read_retry_warn=%d",
             PROXY_READ_RETRIES, PROXY_READ_RETRY_WARN);
 
-    IO_SSL_VERIFY_METHOD = Setting_get_int("ssl.verify_optional", 0) ? SSL_VERIFY_OPTIONAL : SSL_VERIFY_NONE;
-    IO_SSL_VERIFY_METHOD = Setting_get_int("ssl.verify_required", 0) ? SSL_VERIFY_REQUIRED : IO_SSL_VERIFY_METHOD;
+    IO_SSL_VERIFY_METHOD = Setting_get_int("ssl.verify_optional", 0) ? MBEDTLS_SSL_VERIFY_OPTIONAL : MBEDTLS_SSL_VERIFY_NONE;
+    IO_SSL_VERIFY_METHOD = Setting_get_int("ssl.verify_required", 0) ? MBEDTLS_SSL_VERIFY_REQUIRED : IO_SSL_VERIFY_METHOD;
 
     RELAXED_PARSING = Setting_get_int("request.relaxed", 0);
     DOWNLOAD_FLOW_CONTROL = Setting_get_int("download.flow_control", 0);
