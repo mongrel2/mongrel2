@@ -1,3 +1,21 @@
+Changes from 1.10.0 to 1.11.0
+-----------------------------
+
+* Created a new release script (does not affect code)
+	de355a4bf
+	14d4e6b00
+
+* Upgrade to newer mbedTLS version
+	bdad09cad
+	c9436cc38
+
+* Add back in DHE with a 2048 bit parameter
+	c2f61c63a
+	c7d318f52
+	6a7426aac
+	c8b33e168
+	7949693b2
+	07dd1347f
 
 Changes from 1.9.3 to 1.10.0
 ----------------------------

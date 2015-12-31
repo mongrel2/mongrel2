@@ -5,7 +5,7 @@ BEGIN {
     tar_name = repo "-" release_name ".tar.bz2";
 }
 /tar.bz2/ {
-    printf("* [%s](https://github.com/%s/%s/releases/download/%s)\n",tar_name,owner,repo,tar_name);
+    printf("* [%s](https://github.com/%s/%s/releases/%s/download/%s)\n",tar_name,owner,repo,release_name,tar_name);
     next;
 }
 

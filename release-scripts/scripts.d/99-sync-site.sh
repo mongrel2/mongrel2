@@ -9,10 +9,10 @@ git commit -m "Update site for $RELEASE_NAME"
 if test -z ${REALLY_RELEASE+x}; then
     cat <<EOF
 If REALLY_RELEASE were set then I would run the following:
-    git push origin develop
+    git push origin master
 EOF
 else
-    git push origin develop
+    git push origin gh-pages
 fi
 popd >/dev/null
 rm -rf $NEW_DIR

@@ -3,6 +3,8 @@ set -e
 cd "$(dirname "$0")"
 rm -rf output
 mkdir output
+git rev-parse develop > output/develop.commit
+git rev-parse master > output/master.commit
 
 if test -z ${REALLY_RELEASE+x}; then
     echo 'AUTH_INFO' > output/dummy_auth
