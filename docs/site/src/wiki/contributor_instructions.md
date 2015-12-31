@@ -34,7 +34,7 @@ How do I get the source code?
 --------
 
 The source code is currently maintained using git and the code itself is hosted
-on github. The project is at [https://github.com/zedshaw/mongrel2](https://github.com/zedshaw/mongrel2).
+on github. The project is at [https://github.com/mongrel2/mongrel2](https://github.com/mongrel2/mongrel2).
 
 The two branches available are:
 

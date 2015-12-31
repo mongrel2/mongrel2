@@ -4,45 +4,57 @@
 
     "releases": [
         { 
+            "version": "1.10.0",
+            "md5": "8c2f15d203c8a052276e1bacfe13ccb6",
+            "link": "https://github.com/mongrel2/mongrel2/releases/download/v1.10.0/mongrel2-v1.10.0.tar.gz",
+            "date": "Ort 26 2015"
+        },
+        { 
+            "version": "1.9.3",
+            "md5": "c3a2e9c5c878cc055a09e50cfcc95a05",
+            "link": "https://github.com/mongrel2/mongrel2/releases/download/v1.9.3/mongrel2-v1.9.3.tar.gz",
+            "date": "Aug 21 2015"
+        },
+        { 
             "version": "1.9.0",
             "md5": "f5de1c6b40c90e411689bef884208776",
-            "link": "https://github.com/zedshaw/mongrel2/releases/download/v1.9.0/mongrel2-v1.9.0.tar.gz",
+            "link": "https://github.com/mongrel2/mongrel2/releases/download/v1.9.0/mongrel2-v1.9.0.tar.gz",
             "date": "Jan 26 2014"
         },
         { 
             "version": "1.8.1",
             "md5": "e7890c77f494b6d15ebcd871be3d58d0",
-            "link": "https://github.com/zedshaw/mongrel2/tarball/v1.8.1",
+            "link": "https://github.com/mongrel2/mongrel2/tarball/v1.8.1",
             "date": "May 25 2013"
         },
         { 
             "version": "1.8.0",
             "md5": "4bca0d299e7e77efa4c674bc5877dfd0",
-            "link": "https://github.com/zedshaw/mongrel2/tarball/v1.8.0",
+            "link": "https://github.com/mongrel2/mongrel2/tarball/v1.8.0",
             "date": "Jun 22 2011"
         },
         {
             "version": "1.7.5",
             "md5": "923c6403d037dc7d0a016df1b3d14be6",
-            "link": "https://github.com/zedshaw/mongrel2/tarball/v1.7.5",
+            "link": "https://github.com/mongrel2/mongrel2/tarball/v1.7.5",
             "date": "Jun 22 2011"
         },
         { 
             "version": "1.7.4",
             "md5": "c9fbb0ee71b3a7ac69907536b991aa31",
-            "link": "https://github.com/zedshaw/mongrel2/tarball/v1.7.4",
+            "link": "https://github.com/mongrel2/mongrel2/tarball/v1.7.4",
             "date": "Jun 14 2011"
         },
         { 
             "version": "1.7.3",
             "md5": "2e31b1457c67191608d2f1caceeb0a3d",
-            "link": "https://github.com/zedshaw/mongrel2/tarball/v1.7.3",
+            "link": "https://github.com/mongrel2/mongrel2/tarball/v1.7.3",
             "date": "Jun 01 2011"
         },
         { 
             "version": "1.6",
             "md5": "ecdeae16046853bf57fd5aab82bf2d23",
-            "link": "https://github.com/zedshaw/mongrel2/tarball/v1.6",
+            "link": "https://github.com/mongrel2/mongrel2/tarball/v1.6",
             "date": "May 01 2011"
         },
     ]

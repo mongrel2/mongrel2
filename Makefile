@@ -98,6 +98,7 @@ clean:
 	rm -f tests/empty.sqlite 
 	rm -f tools/lemon/lemon
 	rm -f tools/m2sh/tests/tests.log 
+	rm -rf release-scripts/output
 	find . \( -name "*.gcno" -o -name "*.gcda" \) -exec rm {} \;
 	if test -e .git; then git -C src/mbedtls checkout include/mbedtls/config.h; fi
 	${MAKE} -C tools/m2sh OPTLIB=${OPTLIB} clean

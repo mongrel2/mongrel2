@@ -35,7 +35,7 @@ Getting The Source
 Quickest way to do that is to grab the tarball
 
 <pre>
-wget https://github.com/zedshaw/mongrel2/releases/download/v1.9.0/mongrel2-v1.9.0.tar.gz
+wget https://github.com/mongrel2/mongrel2/releases/download/v1.9.0/mongrel2-v1.9.0.tar.gz
 </pre>
 
 

@@ -11,6 +11,7 @@ local DATE_MATCH = "(%a+)_(%d+)_(%d+)"
 Generator = {
     output = 'output/',
     source = 'src/',
+    global_data = "global.json"
 }
 
 function Generator:extract_target_name(template, in_name)
@@ -23,6 +24,8 @@ function Generator:extract_target_name(template, in_name)
 end
 
 function Generator:load_template(data, in_name)
+    local newData = assert(json.decode(assert(Tir.load_file('./',self.global_data))))
+    for k,v in pairs(newData) do data[k] = v end
     local template = Tir.view(data.template)
     return template, self:extract_target_name(data.template, in_name)
 end
