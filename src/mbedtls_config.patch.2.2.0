@@ -1,0 +1,39 @@
+diff --git a/include/mbedtls/config.h b/include/mbedtls/config.h
+index 3e39998..e48c35a 100644
+--- a/include/mbedtls/config.h
++++ b/include/mbedtls/config.h
+@@ -1058,7 +1058,7 @@
+  *
+  * Comment this macro to disable support for SSL 3.0
+  */
+-#define MBEDTLS_SSL_PROTO_SSL3
++// #define MBEDTLS_SSL_PROTO_SSL3
+ 
+ /**
+  * \def MBEDTLS_SSL_PROTO_TLS1
+@@ -1458,7 +1458,7 @@
+  *      MBEDTLS_TLS_RSA_PSK_WITH_RC4_128_SHA
+  *      MBEDTLS_TLS_PSK_WITH_RC4_128_SHA
+  */
+-#define MBEDTLS_ARC4_C
++// #define MBEDTLS_ARC4_C
+ 
+ /**
+  * \def MBEDTLS_ASN1_PARSE_C
+@@ -1684,6 +1684,7 @@
+  * This module is used by the following key exchanges:
+  *      DHE-RSA, DHE-PSK
+  */
++// Only weak ciphers !
+ #define MBEDTLS_DHM_C
+ 
+ /**
+@@ -1811,7 +1812,7 @@
+  *
+  * Uncomment to enable the HAVEGE random generator.
+  */
+-//#define MBEDTLS_HAVEGE_C
++#define MBEDTLS_HAVEGE_C
+ 
+ /**
+  * \def MBEDTLS_HMAC_DRBG_C

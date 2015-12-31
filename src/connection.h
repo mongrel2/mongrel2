@@ -82,8 +82,8 @@ typedef struct Connection {
 
     // if SNI is used, then the connection has its own cert
     int use_sni;
-    x509_crt own_cert;
-    pk_context pk_key;
+    mbedtls_x509_crt own_cert;
+    mbedtls_pk_context pk_key;
 
     int rport;
     State state;

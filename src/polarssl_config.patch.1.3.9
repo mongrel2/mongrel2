@@ -2,15 +2,6 @@ diff --git a/include/polarssl/config.h b/include/polarssl/config.h
 index 50b4e33..62d9c0f 100644
 --- a/include/polarssl/config.h
 +++ b/include/polarssl/config.h
-@@ -519,7 +519,7 @@
-  *      TLS_DHE_RSA_WITH_CAMELLIA_128_CBC_SHA
-  *      TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA
-  */
--#define POLARSSL_KEY_EXCHANGE_DHE_RSA_ENABLED
-+// #define POLARSSL_KEY_EXCHANGE_DHE_RSA_ENABLED (Only weak ciphers)
- 
- /**
-  * \def POLARSSL_KEY_EXCHANGE_ECDHE_RSA_ENABLED
 @@ -860,7 +860,7 @@
   *
   * Comment this macro to disable support for SSL 3.0
@@ -29,14 +20,6 @@ index 50b4e33..62d9c0f 100644
  
  /**
   * \def POLARSSL_ASN1_PARSE_C
-@@ -1411,6 +1411,7 @@
-  * This module is used by the following key exchanges:
-  *      DHE-RSA, DHE-PSK
-  */
-+// Only weak ciphers !
- #define POLARSSL_DHM_C
- 
- /**
 @@ -1518,7 +1519,7 @@
   *
   * Uncomment to enable the HAVEGE random generator.

@@ -1,2 +1,2 @@
-git clone https://github.com/zedshaw/mongrel2.git
+git clone https://github.com/mongrel2/mongrel2.git
 cd mongrel2

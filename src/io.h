@@ -6,8 +6,8 @@
 #endif
 
 #include <stdlib.h>
-#include <polarssl/x509.h>
-#include <polarssl/ssl.h>
+#include <mbedtls/x509.h>
+#include <mbedtls/ssl.h>
 #include "server.h"
 
 #if defined(__APPLE__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
@@ -53,14 +53,18 @@ typedef struct IOBuf {
 
     int fd;
     int use_ssl;
+    int ssl_initialized;
     int handshake_performed;
     int ssl_sent_close;
-    ssl_context ssl;
-    ssl_session ssn;
+    mbedtls_ssl_config sslconf;
+    mbedtls_ssl_context ssl;
+    mbedtls_ssl_session ssn;
 } IOBuf;
 
 IOBuf *IOBuf_create_ssl(size_t len, int fd, int (*rng_func)(void *, unsigned char *, size_t), void *rng_ctx);
 IOBuf *IOBuf_create(size_t len, int fd, IOBufType type);
+
+int IOBuf_ssl_init(IOBuf *buf);
 
 void IOBuf_resize(IOBuf *buf, size_t new_size);
 
