@@ -48,6 +48,14 @@ static int cb_bind(int fd, int istcp, struct sockaddr *psa, size_t sz)
     socklen_t sn = sizeof(n);
     char str[IPADDR_SIZE+1];
     int rc = 0;
+#ifdef AUTHBIND_HELPER
+    unsigned int port;
+    char addrstr[33];
+    char portstr[5];
+    pid_t child;
+    pid_t wp;
+    int status;
+#endif
 
     addr_ntop(psa, str, IPADDR_SIZE);
     debug("Binding to %s:%d!", str, ntohs(((struct sockaddr_in6*)psa)->sin6_port));
@@ -60,7 +68,58 @@ static int cb_bind(int fd, int istcp, struct sockaddr *psa, size_t sz)
     }
 
     rc = bind(fd, psa, sz);
+
+#ifdef AUTHBIND_HELPER
+    if(rc == -1) {
+        // if error was EACCES then fall back to the helper
+
+        check(errno == EACCES, "bind failed with error other than EACCESS.");
+
+        if(psa->sa_family == AF_INET6) {
+            // the last sprintf call will ensure null-termination
+            for(n = 0; n < 16; ++n) {
+                sprintf(addrstr + (n * 2), "%02x", (((struct sockaddr_in6 *)psa)->sin6_addr.s6_addr[n]) & 0xff);
+            }
+            port = ((struct sockaddr_in6 *)psa)->sin6_port;
+        } else if(psa->sa_family == AF_INET) {
+            sprintf(addrstr, "%08x", (((struct sockaddr_in *)psa)->sin_addr.s_addr) & 0xffffffff);
+            port = ((struct sockaddr_in *)psa)->sin_port;
+        }
+        sprintf(portstr, "%04x", port & 0xffff);
+
+        child = fork();
+        check(child != -1, "Failed to fork for authbind-helper.");
+
+        if(child == 0) {
+            // child process
+            if(dup2(fd, 0) == -1) {
+                _exit(errno);
+            }
+            execl(AUTHBIND_HELPER, AUTHBIND_HELPER, addrstr, portstr, psa->sa_family == AF_INET6 ? "6": (char *)NULL, (char *)NULL);
+            _exit(errno);
+        }
+
+        wp = waitpid(child, &status, 0);
+        check(wp != -1, "waitpid failed while waiting for %s", AUTHBIND_HELPER);
+
+        // we assume no other child process could change status right now
+        // note: libauthbind makes the same assumption
+        check(wp == child, "wrong child changed status while waiting for %s", AUTHBIND_HELPER);
+
+        check(WIFEXITED(status), "unexpected status from %s", AUTHBIND_HELPER);
+
+        if(WEXITSTATUS(status) == 0) {
+            rc = 0;
+        } else {
+            rc = -1;
+            errno = WEXITSTATUS(status);
+        }
+
+        check(rc != -1, "Failed to bind to address with %s", AUTHBIND_HELPER);
+    }
+#else
     check(rc != -1, "Failed to bind to address.");
+#endif
 
     if(istcp) {
         rc = listen(fd, MAX_LISTEN_BACKLOG);
