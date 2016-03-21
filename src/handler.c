@@ -220,12 +220,12 @@ error:
     return -1;
 }
 
-static inline void handler_process_extended_request(int fd, Connection *conn, bstring payload)
+static tns_value_t *parse_extended_request(bstring payload)
 {
     char *x;
     tns_value_t *data = NULL;
     darray_t *l = NULL;
-    
+
     data = tns_parse(bdata(payload),blength(payload),&x);
 
     check((x-bdata(payload))==blength(payload), "Invalid extended response: extra data after tnetstring.");
@@ -234,7 +234,41 @@ static inline void handler_process_extended_request(int fd, Connection *conn, bs
     check(darray_end(l)==2, "Invalid extended response: odd number of elements in list.");
     tns_value_t *key=darray_get(l,0);
     check(key->type==tns_tag_string, "Invalid extended response: key is not a string");
-    check(key->value.string != NULL,, "Invalid extended response: key is NULL");
+    check(key->value.string != NULL, "Invalid extended response: key is NULL");
+
+    return data;
+
+error:
+    tns_value_destroy(data);
+    return NULL;
+}
+
+static int is_cancel_request(tns_value_t *data)
+{
+    tns_value_t *key = darray_get(data->value.list, 0);
+    check(key->type == tns_tag_string, "Invalid extended response: key is not a string");
+    check(key->value.string != NULL, "Invalid extended response: key is NULL");
+
+    if(!bstrcmp(key->value.string, &XREQ_CTL)) {
+        tns_value_t *args = darray_get(data->value.list, 1);
+        check(args->type==tns_tag_dict, "Invalid control response: not a dict.");
+
+        hnode_t *n = hash_lookup(args->value.dict, &CANCEL);
+        if(n != NULL) {
+            return 1;
+        }
+    }
+
+error:
+    return 0;
+}
+
+// takes ownership of data on success
+static int handler_process_extended_request(int fd, Connection *conn, tns_value_t *data)
+{
+    tns_value_t *key=darray_get(data->value.list, 0);
+    check(key->type == tns_tag_string, "Invalid extended response: key is not a string");
+    check(key->value.string != NULL, "Invalid extended response: key is NULL");
 
     if(!bstrcmp(key->value.string, &XREQ_CTL)) {
         check (0 == handler_process_control_request(conn, data),
@@ -244,11 +278,12 @@ static inline void handler_process_extended_request(int fd, Connection *conn, bs
                 "Extended request dispatch returned non-zero: %s",bdata(key->value.string));
     }
 
-    return;
+    return 0;
+
 error:
     tns_value_destroy(data);
     Register_disconnect(fd); // return ignored
-    return;
+    return 1;
 }
 
 static inline void handler_process_request(Handler *handler, int id, int fd,
@@ -345,16 +380,32 @@ void Handler_task(void *v)
                 int fd = Register_fd_for_id(id);
                 Connection *conn = fd == -1 ? NULL : Register_fd_exists(fd);
 
+                tns_value_t *ext_req = NULL;
+                if(parser->extended) {
+                    ext_req = parse_extended_request(parser->body);
+                }
+
                 // don't bother calling process request if there's nothing to handle
                 if(conn && fd >= 0) {
                     if(parser->extended) {
-                        handler_process_extended_request(fd, conn, parser->body);
+                        // can be null if failed to parse earlier
+                        if(ext_req != NULL) {
+                            handler_process_extended_request(fd, conn, ext_req);
+                            ext_req = NULL; // took ownership
+                        }
                     } else {
                         handler_process_request(handler, id, fd, conn, parser->body);
                     }
                 } else {
                     // TODO: I believe we need to notify the connection that it is dead too
-                    Handler_notify_leave(handler, id);
+                    if(ext_req == NULL || !is_cancel_request(ext_req)) {
+                        Handler_notify_leave(handler, id);
+                    }
+                }
+
+                if(ext_req != NULL) {
+                    tns_value_destroy(ext_req);
+                    ext_req = NULL;
                 }
             }
         }
