@@ -43,7 +43,8 @@ char *test_Dir_resolve_file()
             bfromcstr("tests/"),
             bfromcstr("sample.html"),
             bfromcstr("test/plain"),
-            0);
+            0,
+            bfromcstr("0:]"));
     mu_assert(test != NULL, "Failed to make test dir.");
 
     FileRecord *rec = Dir_resolve_file(test, bfromcstr("/"), bfromcstr("/sample.json"));
@@ -70,7 +71,8 @@ char *test_Dir_resolve_file()
             bfromcstr("foobar/"),
             bfromcstr("sample.html"),
             bfromcstr("test/plan"),
-            0);
+            0,
+            bfromcstr("0:]"));
     mu_assert(test != NULL, "Failed to make the failed dir.");
 
     rec = Dir_resolve_file(test, bfromcstr("/"), bfromcstr("/sample.json"));
@@ -116,7 +118,8 @@ char *test_Dir_serve_file()
             bfromcstr("tests/"),
             bfromcstr("sample.html"),
             bfromcstr("test/plain"),
-            0);
+            0,
+            bfromcstr("0:]"));
 
     Connection conn = {.iob = NULL};
     int zero_fd = open("/dev/null", O_WRONLY);

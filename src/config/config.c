@@ -121,15 +121,16 @@ Dir *Config_load_dir(int dir_id)
 {
     tns_value_t *res = CONFIG_MODULE.load_dir(dir_id);
 
-    DB_check(res, 0, 5,
+    DB_check(res, 0, 6,
             tns_tag_number, tns_tag_string, tns_tag_string,
-            tns_tag_string, tns_tag_number);
+            tns_tag_string, tns_tag_number, tns_tag_string);
 
     Dir *dir = Dir_create(
             DB_get_as(res, 0, 1, string), // base
             DB_get_as(res, 0, 2, string), // index_file
             DB_get_as(res, 0, 3, string), // default_ctype
-            DB_get_as(res, 0, 4, number) // cache_ttl
+            DB_get_as(res, 0, 4, number), // cache_ttl
+            DB_get_as(res, 0, 5, string)  // whitelist
             );
     check(dir != NULL, "Failed to create directory id %d.", dir_id);
 

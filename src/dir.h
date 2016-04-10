@@ -77,11 +77,14 @@ typedef struct Dir {
     bstring normalized_base;
     bstring index_file;
     bstring default_ctype;
+    tst_t *whitelist;
+    bstring raw_whitelist;
     int cache_ttl;
 } Dir;
 
 Dir *Dir_create(bstring base, bstring index_file,
-                bstring default_ctype, int cache_ttl);
+                bstring default_ctype, int cache_ttl,
+                bstring whitelist);
 
 void Dir_destroy(Dir *dir);
 
