@@ -806,13 +806,13 @@ again:
 
     if(isControl) /* Control frames get sent right-away */
     {
-        Request_set(conn->req,bfromcstr("FLAGS"),bformat("0x%X",flags|0x80),1);
+        Request_set(conn->req,&WS_FLAGS,bformat("0x%X",flags|0x80),1);
         rc = Connection_send_to_handler(conn, conn->handler, (void *)dataU,data_length, NULL);
         check_debug(rc == 0, "Failed to deliver to the handler.");
     }
     else {
         if(fin) {
-            Request_set(conn->req,bfromcstr("FLAGS"),bformat("0x%X",inprogFlags|0x80),1);
+            Request_set(conn->req,&WS_FLAGS,bformat("0x%X",inprogFlags|0x80),1);
         }
         if (payload == NULL) {
             if (fin) {
