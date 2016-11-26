@@ -18,6 +18,8 @@ setup(
     license = 'BSD',
 
     description = "A Code Coverage Reporting Tool for C/C++",
+    include_package_data=True,
+    package_data={'': ['style.css'], 'js': ['js/*.js']},
     keywords = 'code coverage C++ testing',
     long_description = """\
 *zcov*
