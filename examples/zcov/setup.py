@@ -1,28 +1,42 @@
+import zcov
+import os
 
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
+from setuptools import setup, find_packages
 
-config = {
-    'description': 'zcov',
-    'author': 'Daniel Dunbar',
-    'url': 'http://minormatter.com/zcov/',
-    'download_url': 'http://minormatter.com/zcov/',
-    'author_email': '',
-    'version': '0.2',
-    'scripts': ['bin/zcov-genhtml', 
-                'bin/zcov-merge', 'bin/zcov-scan',
-                'bin/zcov-summarize'],
-    'install_requires': [],
-    'packages': ['zcov'],
-    'package_data': {'zcov': [
-        'data/js/sorttable.js',
-        'data/js/sourceview.js',
-        'data/style.css'
-    ]},
-    'name': 'zcov'
-}
+# setuptools expects to be invoked from within the directory of setup.py, but it
+# is nice to allow:
+#   python path/to/setup.py install
+# to work (for scripts, etc.)
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-setup(**config)
+setup(
+    name = "zcov",
+    version = zcov.__version__,
 
+    author = zcov.__author__,
+    author_email = zcov.__email__,
+    license = 'BSD',
+
+    description = "A Code Coverage Reporting Tool for C/C++",
+    keywords = 'code coverage C++ testing',
+    long_description = """\
+*zcov*
+++++++
+
+zcov is wrapper around the basic facilities of gcov for generating pretty
+summaries for entire code bases. It is similar to lcov with an emphasis on nicer
+HTML output (including, for example, branch coverage), and a greatly simplified
+command line interface which tries to work around deficiencies in the metadata
+provided by gcov.
+""",
+
+    packages = find_packages(),
+
+    entry_points = {
+        'console_scripts': [
+            'zcov = zcov.main:main',
+            ],
+        },
+
+    install_requires=[],
+)
