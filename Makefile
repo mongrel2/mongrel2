@@ -188,9 +188,9 @@ coverage: clean all coverage_report
 
 coverage_report:
 	rm -rf tests/m2.zcov tests/coverage
-	zcov-scan tests/m2.zcov
-	zcov-genhtml --root $(CURDIR) tests/m2.zcov tests/coverage
-	zcov-summarize tests/m2.zcov
+	zcov scan tests/m2.zcov
+	zcov genhtml --root $(CURDIR) tests/m2.zcov tests/coverage
+	zcov summarize tests/m2.zcov
 
 system_tests:
 	./tests/system_tests/curl_tests
