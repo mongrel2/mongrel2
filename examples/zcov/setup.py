@@ -19,7 +19,7 @@ setup(
 
     description = "A Code Coverage Reporting Tool for C/C++",
     include_package_data=True,
-    package_data={'': ['style.css'], 'js': ['js/*.js']},
+    package_data={'': ['style.css']},
     keywords = 'code coverage C++ testing',
     long_description = """\
 *zcov*
