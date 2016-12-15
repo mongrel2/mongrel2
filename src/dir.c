@@ -31,6 +31,7 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+#undef NDEBUG
 
 #include <dir.h>
 #include <cache.h>
@@ -261,87 +262,118 @@ void FileRecord_destroy(FileRecord *file)
     }
 }
 
-static inline char *url_decode(const char *in, char *out)
+static inline void burl_decode(bstring b)
 {
-  const char *cur; /* will seek % in input */
-  char d1; /* will contain candidate for 1st digit */
-  char d2; /* will contain candidate for 2nd digit */
-  char *res = out; /* just for convienience */
+    char d1; /* will contain candidate for 1st digit */
+    char d2; /* will contain candidate for 2nd digit */
+    char *cur = bdata(b);
+    char *out = bdata(b);
+    char *end = cur+blength(b);
 
-  if(!in) {
-    *out = '\0';
-    return res;
-  }
-
-  cur = in;
-
-  while(*cur) {
-    d1 = *(cur+1);
-    d2 = *(cur+2);
-
-    /* One character left in input */
-    if(!d1) {
-      *out = *cur;
-      *(out+1) = '\0';
-      return res;
+    if(blength(b) == 0) {
+        return;
     }
 
-    /* Two characters left in input */
-    if(!d2) {
-      *out = *cur;
-      *(out+1) = *(cur+1);
-      *(out+2) = '\0';
-      return res;
+    while(cur < end) {
+        /* One character left in input */
+        if (cur + 1 == end) {
+            *out = *cur;
+            *(out+1) = '\0';
+            btrunc(b,out + 1 - bdata(b));
+            return;
+        }
+        d1 = *(cur+1);
+
+        /* Two characters left in input */
+        if (cur + 2 == end) {
+            *out = *cur;
+            *(out+1) = *(cur+1);
+            *(out+2) = '\0';
+            btrunc(b,out + 2 - bdata(b));
+            return;
+        }
+
+        d2 = *(cur+2);
+
+        /* Legal escape sequence */
+        if(*cur=='%' && isxdigit(d1) && isxdigit(d2)) {
+            d1 = tolower(d1);
+            d2 = tolower(d2);
+
+            if( d1 <= '9' )
+                d1 = d1 - '0';
+            else
+                d1 = d1 - 'a' + 10;
+            if( d2 <= '9' )
+                d2 = d2 - '0';
+            else
+                d2 = d2 - 'a' + 10;
+
+            *out = 16 * d1 + d2;
+
+            out += 1;
+            cur += 3;
+        }
+        else {
+            *out = *cur;
+            out += 1;
+            cur += 1;
+        }
     }
 
-    /* Legal escape sequence */
-    if(*cur=='%' && isxdigit(d1) && isxdigit(d2)) {
-      d1 = tolower(d1);
-      d2 = tolower(d2);
-
-      if( d1 <= '9' )
-        d1 = d1 - '0';
-      else
-        d1 = d1 - 'a' + 10;
-      if( d2 <= '9' )
-        d2 = d2 - '0';
-      else
-        d2 = d2 - 'a' + 10;
-
-      *out = 16 * d1 + d2;
-
-      out += 1;
-      cur += 3;
-    }
-    else {
-      *out = *cur;
-      out += 1;
-      cur += 1;
-    }
-  }
-
-  *out = '\0';
-  return res;
+    check(0, "Bug in burl_decode: unreachable line reached");
+error:
+    btrunc(b,out - bdata(b));
+    return;
 }
+
+/* realpath() in older versions of POSIX was ill-specified if PATH_MAX is not
+ * defined.  Newer versions of POSIX allow passing NULL as the second argument
+ * so the most portable thing to do is to use a buffer if PATH_MAX is defined
+ * and NULL if it is not defined. */
+static bstring brealpath(bstring target)
+{
+#ifdef PATH_MAX
+    bstring returnme = bfromcstralloc(PATH_MAX+1,"X");
+    bpattern(returnme,PATH_MAX);
+    char *normalized = realpath((const char *)(bdata(target)),bdata(returnme));
+    check_debug(normalized, "Failed to normalize path: %s %d %s", bdata(target), errno, strerror(errno));
+    //btrunc(returnme,strlen(normalized));
+    btrunc(returnme,strlen(bdata(returnme)));
+#else
+    bstring returnme = NULL;
+    char *normalized = realpath((const char *)(bdata(target)),NULL);
+    check_debug(normalized, "Failed to normalize path: %s %d %s", bdata(target), errno, strerror(errno));
+
+    returnme = bfromcstr(normalized);
+
+    free(normalized);
+#endif
+    return returnme;
+
+error:
+    bdestroy(returnme);
+    return NULL;
+}
+
 
 static inline int normalize_path(bstring target)
 {
-    ballocmin(target, PATH_MAX);
-    static char *path_buf = NULL;
 
-    // Some platforms (OSX!) don't allocate for you, so we have to
-    if(path_buf == NULL) {
-        path_buf = calloc(PATH_MAX+1, 1);
-        check_mem(path_buf);
-    }
 
-    url_decode((const char *)(bdata(target)), path_buf);
-    bassigncstr(target, path_buf);
+    burl_decode(target);
 
-    char *normalized = realpath((const char *)(bdata(target)), path_buf);
+
+
+    bstring normalized = brealpath(target);
+
+
     check_debug(normalized, "Failed to normalize path: %s", bdata(target));
 
-    bassigncstr(target, normalized);
+    check(BSTR_OK == bassign(target, normalized), "Failed to assign target");
+
+    bdestroy(normalized);
+
 
     return 0;
 

@@ -214,21 +214,3 @@ int Unixy_daemonize(int dochdir)
 error:
     return -1;
 }
-
-
-bstring Unixy_getcwd()
-{
-    char *wd = calloc(PATH_MAX + 1, 1);
-    bstring dir = NULL;
-
-    check(getcwd(wd, PATH_MAX-1), "Could not get current working directory.");
-    wd[PATH_MAX] = '\0';
-
-    dir = bfromcstr(wd);
-
-error:
-    // fall through
-    free(wd);
-    return dir;
-}
-
