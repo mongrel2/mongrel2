@@ -1,3 +1,25 @@
+/* Shared header table */
+#headertable {
+  background-color: #C0C0C0;
+  border: 5px solid #C0C0C0;
+  border-radius: 5px;
+}
+
+/* Per-file header table */
+#fileheadertable {
+  background-color: #C0C0C0;
+  border: 5px solid #C0C0C0;
+  border-radius: 5px;
+}
+
+/* Coverage summary table */
+#summarytable {
+  width: 80%;
+  background-color: #C0C0C0;
+  border: 5px solid #C0C0C0;
+  border-radius: 5px;
+}
+
 /* Source code view: line number format */
 span.lineNum {
   background-color: #EFE383;

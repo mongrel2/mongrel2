@@ -29,7 +29,7 @@ class GCDAData:
 ###
         
 kGCovFileRE = re.compile('^File \'([^\n]*)\'$', re.DOTALL|re.MULTILINE)
-kGCovFileAndOutputRE = re.compile('File \'([^\n]*)\'.*?:creating \'([^\n]*)\'',
+kGCovFileAndOutputRE = re.compile('File \'([^\n]*)\'.*?:?([cC]reating|Removing) \'([^\n]*)\'',
                                   re.DOTALL|re.MULTILINE)
 
 def parseGCovFile(gcovPath, baseDir):
@@ -42,7 +42,7 @@ def parseGCovFile(gcovPath, baseDir):
     functionData = []
     for ln in file:
         ln = ln[:-1]
-        if ':' in ln:
+        if ':' in ln and not ln.startswith('function'):
             count,line,data = ln.split(':',2)
             line = int(line)
             count = count.strip()
@@ -112,22 +112,24 @@ def parseGCovFile(gcovPath, baseDir):
                 branchData.append((len(lineData)-1,num,code,count))
             elif ln.startswith('function '):
                 ln = ln[9:].strip()
-                name,data = ln.split(' ',1)
-                if data.startswith('called '):
-                    _,count,data = data.split(' ',2)
-                    count = int(count)
-                    # ignore other data
-                else:
-                    raise ValueError,'Unexpected function data: "%s"'%(data,)
+                called_idx = ln.find(' called ')
+                if called_idx == -1:
+                    raise ValueError,'Unexpected function data: "%s"'%(ln,)
+                name,data = ln[:called_idx],ln[called_idx+1:]
+                _,count,data = data.split(' ', 2)
+                # ignore other data
                 functionData.append((name,count))
             else:
                 raise ValueError,'Unexpected stray line: "%s"'%(ln.strip())
     return GCovFileData(keys,lineData,callData,branchData,functionData)
 
 def captureGCov(args):
+    env = os.environ.copy()
+    env['LANG'] = 'C'
     p = subprocess.Popen(args,
                          stdout=subprocess.PIPE,
-                         stderr=subprocess.PIPE)
+                         stderr=subprocess.PIPE,
+                         env=env)
     data,errdata = p.communicate()
     res = p.wait()
     if res:
@@ -160,7 +162,9 @@ def parseGCDA(gcdaPath,basePath=None):
 
     entries = []
     for res in kGCovFileAndOutputRE.finditer(data):
-        path,output = res.groups()
+        path,createRemove,output = res.groups()
+        if createRemove == "Removing":
+           continue
         path = os.path.realpath(path)
         entries.append((path, parseGCovFile(output, basePath)))
         os.remove(output)

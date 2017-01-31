@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 from __future__ import division
 
 from pprint import pprint
@@ -9,25 +7,18 @@ import time
 import subprocess
 import sys
 
-from zcov import GCovGroup
-from zcov.GCovParser import GCovFileData
-import Image
-from pkg_resources import resource_stream
+import GCovGroup
+from GCovParser import GCovFileData
 
 ###
 
 kBarWidth = 100
-kRoundRectSize = 5
 
 kCoverageClasses = [
     (40,  'low',  (255,  0,  0), '#FF9999'),
     (80,  'mid',  (255,255,  0), '#FFFF60'),
     (None,'high', (0,  255,  0), '#80FF99'),
     ]
-kCovErrorClasses = [
-    (1, '#EEEEFF'),
-    (6, '#FFFF60'),
-    (None,'#FF9999')]
 
 kSummaryHeader = """\
 <html>
@@ -43,14 +34,7 @@ kSummaryHeader = """\
 
 
 <center>
-<table cellpadding=0 cellspacing=0 bgcolor=%(overviewTableBGColor)s>
-<tr>
-  <td><img width=%(roundRectSize)d height=%(roundRectSize)d src="round-corner-tl-%(roundRectSize)d.png"></td>
-  <td height=%(roundRectSize)d></td>
-  <td><img width=%(roundRectSize)d height=%(roundRectSize)d src="round-corner-tr-%(roundRectSize)d.png"></td>
-</tr>
-<tr><td width=%(roundRectSize)d></td><td>
-<table border="0" width="100%%" cellpadding=2>
+<table id="headertable" cellpadding=2>
   <tr>
     <td bgcolor=%(overviewKeyBGColor)s> <b>Files:</b> </td>
     <td bgcolor=%(overviewValueBGColor)s> %(numEntries)d </td>
@@ -75,27 +59,13 @@ kSummaryHeader = """\
     <td bgcolor=%(overviewValueBGColor)s align=right> %(totalCoveredLines)d&nbsp;/&nbsp;%(totalCoverableLines)d </td>
   </tr>
 </table>
-</td><td width=%(roundRectSize)d></td></tr>
-<tr>
-  <td><img width=%(roundRectSize)d height=%(roundRectSize)d src="round-corner-bl-%(roundRectSize)d.png"></td>
-  <td height=%(roundRectSize)d></td>
-  <td><img width=%(roundRectSize)d height=%(roundRectSize)d src="round-corner-br-%(roundRectSize)d.png"></td>
-</tr>
-</table>
 </center>
 <p>
 <hr>
 """
 kFileHeader = """\
 <center>
-<table cellpadding=0 cellspacing=0 bgcolor=%(overviewTableBGColor)s>
-<tr>
-  <td><img width=%(roundRectSize)d height=%(roundRectSize)d src="round-corner-tl-%(roundRectSize)d.png"></td>
-  <td height=%(roundRectSize)d></td>
-  <td><img width=%(roundRectSize)d height=%(roundRectSize)d src="round-corner-tr-%(roundRectSize)d.png"></td>
-</tr>
-<tr><td width=%(roundRectSize)d></td><td>
-<table border="0" width="100%%" cellpadding=2>
+<table id="fileheadertable" cellpadding=2>
   <tr>
     <td bgcolor=%(overviewKeyBGColor)s> <b>Programs:</b> </td>
     <td bgcolor=%(overviewValueBGColor)s> %(numPrograms)s </td>
@@ -103,42 +73,6 @@ kFileHeader = """\
     <td bgcolor=%(overviewKeyBGColor)s> <b>Runs</b> </td>
     <td bgcolor=%(overviewValueBGColor)s align=right> %(numRuns)s </td>
   </tr>
-</table>
-</td><td width=%(roundRectSize)d></td></tr>
-<tr>
-  <td><img width=%(roundRectSize)d height=%(roundRectSize)d src="round-corner-bl-%(roundRectSize)d.png"></td>
-  <td height=%(roundRectSize)d></td>
-  <td><img width=%(roundRectSize)d height=%(roundRectSize)d src="round-corner-br-%(roundRectSize)d.png"></td>
-</tr>
-</table>
-</center>
-<p>
-<hr>
-"""
-kCovErrorFileHeader = """\
-<center>
-<table cellpadding=0 cellspacing=0 bgcolor=%(overviewTableBGColor)s>
-<tr>
-  <td><img width=%(roundRectSize)d height=%(roundRectSize)d src="round-corner-tl-%(roundRectSize)d.png"></td>
-  <td height=%(roundRectSize)d></td>
-  <td><img width=%(roundRectSize)d height=%(roundRectSize)d src="round-corner-tr-%(roundRectSize)d.png"></td>
-</tr>
-<tr><td width=%(roundRectSize)d></td><td>
-<table border="0" width="100%%" cellpadding=2>
-  <tr>
-    <td bgcolor=%(overviewKeyBGColor)s> <b>Coverage Errors:</b> </td>
-    <td bgcolor=%(overviewValueBGColor)s> %(numCovErrors)s </td>
-    <td width="30"></td>
-    <td bgcolor=%(overviewKeyBGColor)s> <b>Uncoverable Lines</b> </td>
-    <td bgcolor=%(overviewValueBGColor)s align=right> %(numUncoverable)d </td>
-  </tr>
-</table>
-</td><td width=%(roundRectSize)d></td></tr>
-<tr>
-  <td><img width=%(roundRectSize)d height=%(roundRectSize)d src="round-corner-bl-%(roundRectSize)d.png"></td>
-  <td height=%(roundRectSize)d></td>
-  <td><img width=%(roundRectSize)d height=%(roundRectSize)d src="round-corner-br-%(roundRectSize)d.png"></td>
-</tr>
 </table>
 </center>
 <p>
@@ -151,68 +85,40 @@ Generated: %(generationTimestamp)s by <a href="http://minormatter.com/zcov">zcov
 </body>
 </html>"""
 
-kUseCovTableHeader = """\
-    <th width=1 bgcolor=%(headerBGColor)s sorttable_index=6 class="sorttable_numeric"> 
-      <font size=+2 color="#FFFFFF"><u>Errors</u></font> </th>"""
-kNoUseCovTableHeader = ""
-kUseCovTableHeader2 = """<th bgcolor=%(header2BGColor)s class="sorttable_nosort"> </th>"""
-kNoUseCovTableHeader2 = ""
-kUseCovTableRow = """<td width=1 align=right bgcolor=%(errorsBGColor)s>&nbsp;%(numCovErrors)d</td>"""
-kNoUseCovTableRow = ""
-
 kSummaryTableHeader = """\
 <center>
-<table width="80%%" cellpadding=0 cellspacing=0 bgcolor=%(summaryTableBGColor)s>
-<tr>
-  <td><img width=%(roundRectSize)d height=%(roundRectSize)d src="round-corner-tl-%(roundRectSize)d.png"></td>
-  <td height=%(roundRectSize)d></td>
-  <td><img width=%(roundRectSize)d height=%(roundRectSize)d src="round-corner-tr-%(roundRectSize)d.png"></td>
-</tr>
-<tr><td width=%(roundRectSize)d></td><td>
-<table class="sortable" border="0" width="100%%">
+<table id="summarytable" class="sortable" border="0" width="100%%">
   <thead>
   <tr>
     <th colspan=2 bgcolor=%(headerBGColor)s>
       <font size=+2 color="#FFFFFF"><u>Name</u></font> </th>
     <th colspan=4 bgcolor=%(headerBGColor)s sorttable_index=4 class="sorttable_numeric"> 
       <font size=+2 color="#FFFFFF"><u>Coverage</u></font> </th>
-    %(useCovTableHeader)s
-
+  </tr>
   <tr>
     <th colspan=2 bgcolor=%(header2BGColor)s class="sorttable_nosort"> </th>
     <th colspan=2 bgcolor=%(header2BGColor)s sorttable_index=2 class="sorttable_numeric">
       <font color="#FFFFFF"><u>Line</u></font> </th>
     <th colspan=2 bgcolor=%(header2BGColor)s sorttable_index=4 class="sorttable_numeric">
       <font color="#FFFFFF"><u>Branches Taken</u></font> </th>
-    %(useCovTableHeader2)s
   </tr>
   </thead>"""
 kSummaryTableRow = """\
   <tr>
     <td bgcolor=%(rowBGColor)s>%(itemName)s</td>
     <td width=120 align=center bgcolor=%(rowBGColor)s>
-      <table border=0 cellspacing=0 cellpadding=1><tr>
-      <td bgcolor="#000000"><img src="%(className)s-dot.png" width=%(barWidthLeft)d height=10><img src="white-dot.png" width=%(barWidthRight)d height=10></td>
-      </tr></table>
+      <div style="border:1px solid #000; background-color:#FFF; width:%(barTotalWidth)dpx;">
+        <div style="background-color:%(classBGColor)s; width:%(barWidthLeft)dpx; height:10px;" width="3px"></div>
+      </div>
     </td>
     <td width=90 align=right sorttable_customkey=%(lineKey)d bgcolor=%(classBGColor)s><b>%(percentLines).1f%%</b></td>
     <td width=1 align=right bgcolor=%(classBGColor)s>&nbsp;%(coveredLines)d&nbsp;/&nbsp;%(coverableLines)d&nbsp;lines</td>
     <td width=90 align=right sorttable_customkey=%(branchKey)d bgcolor=%(classBGColor)s><b>%(percentBranchesStr)s</b></td>
     <td width=1 align=right bgcolor=%(classBGColor)s>&nbsp;%(takenBranches)d&nbsp;/&nbsp;%(takeableBranches)d&nbsp;branches</td>
-    %(useCovTableRow)s
   </tr>"""
 kSummaryTableFooter = """\
 </table>
-</td><td width=%(roundRectSize)d></td></tr>
-<tr>
-  <td><img width=%(roundRectSize)d height=%(roundRectSize)d src="round-corner-bl-%(roundRectSize)d.png"></td>
-  <td height=%(roundRectSize)d></td>
-  <td><img width=%(roundRectSize)d height=%(roundRectSize)d src="round-corner-br-%(roundRectSize)d.png"></td>
-</tr>
-</table>
 </center>"""
-
-a = "#" # Silly emacs hack
 
 def safediv(a,b,default=None):
     try:
@@ -221,53 +127,15 @@ def safediv(a,b,default=None):
         return default
 
 def writeResources(directory):
-    for _,name,color,_ in kCoverageClasses:
-        a = Image.new('RGB',(1,1))
-        a.putpixel((0,0),color)
-        a.save(os.path.join(directory,'%s-dot.png'%(name,)))
-
-    a = Image.new('RGB',(1,1))
-    a.putpixel((0,0),(255,255,255))
-    a.save(os.path.join(directory,'white-dot.png'))
-    
-    'round-corner-tr-10.png'
-    def sample(x,y,w,h):
-        # Supersample because I am lazy
-        hits = 0
-        N = 4
-        sw,sh = w/N,h/N
-        for i in range(N):
-            for j in range(N):
-                sx,sy = x+sw*(i+.5),y+sh*(j+.5)
-                hits += (sx**2 + sy**2)**.5 <= 1.
-        return hits/(N*N)
-
-    N = kRoundRectSize
-    a = Image.new('RGBA',(N,N))
-    for x in range(N):
-        for y in range(N):
-            weight = sample(x/N,y/N,1/N,1/N)
-            p = int(255*(1.-weight))
-            a.putpixel((x,y),(255,255,255,p))
-        
-    a.save(os.path.join(directory,'round-corner-br-%d.png'%(kRoundRectSize,)))
-    a = a.transpose(Image.ROTATE_270)
-    a.save(os.path.join(directory,'round-corner-bl-%d.png'%(kRoundRectSize,)))
-    a = a.transpose(Image.ROTATE_270)
-    a.save(os.path.join(directory,'round-corner-tl-%d.png'%(kRoundRectSize,)))
-    a = a.transpose(Image.ROTATE_270)
-    a.save(os.path.join(directory,'round-corner-tr-%d.png'%(kRoundRectSize,)))
-
+    base = os.path.dirname(os.path.realpath(__file__))
     f = open(os.path.join(directory,'sorttable.js'),'w')
-    f.write(resource_stream('zcov', 'data/js/sorttable.js').read())
+    f.write(open(os.path.join(base, 'js/sorttable.js')).read())
     f.close()
-
     f = open(os.path.join(directory,'sourceview.js'),'w')
-    f.write(resource_stream('zcov', 'data/js/sourceview.js').read())
+    f.write(open(os.path.join(base, 'js/sourceview.js')).read())
     f.close()
-
     f = open(os.path.join(directory,'style.css'),'w')
-    f.write(resource_stream('zcov', 'data/style.css').read())
+    f.write(open(os.path.join(base, 'style.css')).read())
     f.close()
 
 class GcovSummary:
@@ -326,8 +194,6 @@ class PathNode:
         self.summary = None
         self.covErrors = None
         self.itemsSummary = None
-        self.uncovered = None
-        self.uncoverable = None
         
     def preorder(self):
         yield self
@@ -386,7 +252,7 @@ class PathNode:
         else:
             return self.parent.getStack() + [self]
         
-def writeSummary(node, directory, useCovInfo):
+def writeSummary(node, directory):
     path = os.path.join(directory, node.file)
     title = node.getPathString()
 
@@ -422,21 +288,12 @@ def writeSummary(node, directory, useCovInfo):
         elt[2] = i
     items.sort(key=lambda (e,_,__): e.elt)
     
-    roundRectSize = kRoundRectSize
-    overviewTableBGColor = '#C0C0C0'
-    summaryTableBGColor = '#C0C0C0'
-
     headerBGColor = '#5C5CEF'
     header2BGColor = '#ACACFF'
     rowBGColor = '#EEEEFF'
 
     overviewKeyBGColor = '#ACACFF'
     overviewValueBGColor = '#F0F0FF'
-
-    useCovTableHeader = [kNoUseCovTableHeader,
-                         kUseCovTableHeader][useCovInfo]%locals()
-    useCovTableHeader2 = [kNoUseCovTableHeader2,
-                          kUseCovTableHeader2][useCovInfo]%locals()
 
     f = open(path,'w')
     print >>f,kSummaryHeader%locals()
@@ -450,11 +307,6 @@ def writeSummary(node, directory, useCovInfo):
         numPrograms = entry.keys.get('Programs')
 
         print >>f,kFileHeader%locals()
-        if useCovInfo:
-            numCovErrors = node.uncovered and len(node.uncovered) or 0
-            numUncoverable = node.uncovered and len(node.uncoverable) or 0
-            print >>f,kCovErrorFileHeader%locals()
-            
         if not os.path.exists(path):
             print >>sys.stderr,'WARNING: Unable to find source for "%s"'%(path,)
             print >>f,'Unable to find source'
@@ -490,17 +342,6 @@ def writeSummary(node, directory, useCovInfo):
                 branchData[lnIdx] = branchData.get(lnIdx,[]) + [(num,code,count)]
             
             for i,ln in enumerate(lines[start:end]):
-                if useCovInfo and node.uncovered:
-                    data = node.uncovered.get(i+1)
-                    if data:
-                        pfx = '<a name="error%d">'%(i,)
-                        pfx += '<span class="lineNum">         </span>\n'
-                        for tc in data:
-                            pfx += '<span class="lineNum">         </span>'
-                            pfx += ' '*18
-                            pfx += '<span style="outline: #0f0 solid 2px;">KLEE expected: %s</span>\n'%(tc,)
-                        pfx += '<span class="lineNum">         </span>\n'
-                        f.write(pfx)
                 if i in branchData:
                     f.write('<span class="branchGroup">')
                 for (num,code,count) in branchData.get(i,()):
@@ -528,19 +369,9 @@ def writeSummary(node, directory, useCovInfo):
                 else:
                     print >>f
             print >>f,'</pre>'
-#        for i,ln in enumerate(lines[start:end]):
-#        print >>f,'\n'.join()
-#        print data
     else:
         print >>f,kSummaryTableHeader%locals()
         for i,(item,branchKey,lineKey) in enumerate(items):
-            numCovErrors = item.covErrors
-            for cclass in kCovErrorClasses:
-                if cclass[0] is None or numCovErrors < cclass[0]:
-                    break            
-            errorsBGColor = cclass[1]
-            useCovTableRow = [kNoUseCovTableRow,
-                              kUseCovTableRow][useCovInfo]%locals()
             itemName = '<a href="%s"> %s </a>'%(item.file,
                                                 item.getNodeString())
             coverageBar = ''
@@ -559,43 +390,25 @@ def writeSummary(node, directory, useCovInfo):
                 if cclass[0] is None or percentLines < cclass[0]:
                     break
             className = cclass[1]
-            barWidthLeft = kBarWidth*percentLines/100.
-            barWidthRight = kBarWidth - barWidthLeft
+            barTotalWidth = kBarWidth
+            barWidthLeft = int(barTotalWidth * percentLines / 100.0)
+            barWidthRight = barTotalWidth - barWidthLeft
             classBGColor = cclass[3]
             print >>f,kSummaryTableRow%locals()
         print >>f,kSummaryTableFooter%locals()
     
     print >>f,kSummaryFooter%locals()
     f.close()
-
-class CovData:
-    @staticmethod
-    def fromfile(path):
-        data = {}
-        f = open(path)
-        for ln in f:
-            if ln.strip():
-                cpath,cln = ln.split(':')
-                cln = int(cln)
-                data[cpath] = data.get(cpath,set())
-                data[cpath].add(cln)
-        f.close()
-        return data
     
-def main():
+def action_genhtml(name, args):
+    """generate HTML report from coverage data files"""
+
     global opts
     from optparse import OptionParser
-    op = OptionParser("usage: %prog [options] input output")
-    op.add_option("", "--annotate-klee-cov",
-                  action="append", dest="annotateKleeCov", default=[],
-                  help="don't print status messages to stdout")
-    op.add_option("", "--strip-cov-path",
-                  action="store", dest="stripKleeCovPath", default=None,
-                  help="don't print status messages to stdout")
-    op.add_option("", "--root",
-                  action="store", dest="root", default=None,
+    op = OptionParser("usage: %%prog %s [options] input output" % (name,))
+    op.add_option("", "--root", action="store", dest="root", default=None,
                   help="root directory to view files from")
-    opts,args = op.parse_args()
+    opts,args = op.parse_args(args)
 
     if len(args) != 2:
         op.error('invalid number of arguments')
@@ -606,40 +419,8 @@ def main():
     except ValueError,e:
         op.error(e)
 
-    allCovData = {}
-    for f in opts.annotateKleeCov:
-        for path,dirnames,filenames in os.walk(f):
-            for wf in filenames:
-                if wf.endswith('.cov'):
-                    wp = os.path.join(path,wf)
-                    try:                    
-                        covData = CovData.fromfile(wp)
-                    except:
-                        print >>sys.stderr, 'WARNING: Unable to load .cov file: "%s"'%(wf,)
-                        continue
-                    
-                    for cpath,lines in covData.items():
-                        if opts.stripKleeCovPath:
-                            elts = cpath.split('/')
-                            if opts.stripKleeCovPath in elts:
-                                elts = elts[elts.index(opts.stripKleeCovPath):]
-                                cpath = '/'.join(elts)
-                        cpath = os.path.normpath(cpath)
-                        allCovData[cpath] = allCovData.get(cpath,[])
-                        allCovData[cpath].append( (wp,lines) )
-
-    # Invert allCovData into a form for easy processing by output
-    # files. path -> line -> [lines]
-    def remap((path,data)):
-        lineData = {}
-        for wf,lines in data:
-            for ln in lines:
-                lineData[ln] = lineData.get(ln,set())
-                lineData[ln].add(wf)
-        return (path,lineData)
-    covMap = dict(map(remap, allCovData.items()))
-
-    os.mkdir(output)
+    if not os.path.isdir(output):
+        os.mkdir(output)
 
     outputItems = []
 
@@ -688,46 +469,16 @@ def main():
             else:
                 raise ValueError,'path key generation failed'                
             c.file = key+'.html'
-
-    # Add .cov info
-    for node in root.preorder():
-        # Look for .cov info:
-        elts = node.getPath()
-        if opts.stripKleeCovPath in elts:
-            elts = elts[elts.index(opts.stripKleeCovPath):]
-        cpath = '/'.join(elts)
-        covData = covMap.get(cpath)
-        if covData is not None:
-            uncovered = {}
-            if node.item is None:
-                raise ValueError,'.cov data for a non-item node!'
-            covered = dict([(i+1,count) for i,count in enumerate(node.item[1].lines)
-                            if count is not None])
-            uncoverable = dict([(ln,d) for ln,d in covData.items()
-                                if ln not in covered])
-            uncovered = dict([(ln,d) for ln,d in covData.items()
-                              if (not ln in uncoverable and
-                                  not covered.get(ln))])
-            node.uncovered = uncovered
-            node.uncoverable = uncoverable
             
     # Compute summary stats
     for c in root.postorder():
         if c.item:
             s = GcovSummary.fromfiledata(c.item[1])
-            t = c.uncovered and len(c.uncovered) or 0
         else:
             s = GcovSummary()
-            t = 0
-        c.summary = sum([kid.summary for kid in c.children],s)
-        c.covErrors = sum([kid.covErrors for kid in c.children],t)
+        c.summary = sum([kid.summary for kid in c.children], s)
         
     for node in root.preorder():
-        writeSummary(node, output, not not covMap)
+        writeSummary(node, output)
         
     writeResources(output)
-    
-if __name__=='__main__':
-    main()
-
-#rm -rf cu-html && ./zcov-genhtml cu.zcov cu-html && rsync -ar cu-html/ keeda:public_html/zcov-test

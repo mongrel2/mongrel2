@@ -1,0 +1,44 @@
+#!/bin/bash
+
+# Build a base box for building Mongrel2
+set -x
+set -e
+
+NAME=${1:-test.horse/test}
+ACI_FILE=${2:-output.aci}
+FLAGS=${FLAGS:-'--debug'}
+
+if [ ! -z "$FULL_REBUILD" ]; then
+    rm -rf basic_rootfs
+fi
+
+if [ ! -e basic_rootfs ]; then
+    out=$(mktemp -d)
+    debootstrap --verbose --components=main,restricted,universe,multiverse --variant=minbase --include=build-essential,git,ca-certificates,libzmq-dev,sqlite3,libsqlite3-dev,ragel,enscript,python,python-setuptools --arch=amd64 xenial $out
+    mv $out basic_rootfs
+fi
+
+rm -rf rootfs
+cp -r basic_rootfs rootfs
+
+function cleanup() {
+    export EXIT=$?;
+    acbuild $FLAGS end && exit $EXIT;
+}
+
+acbuild $FLAGS begin ./rootfs
+
+trap cleanup EXIT
+
+acbuild $FLAGS environment add OS_VERSION xenial
+acbuild $FLAGS set-name $NAME
+acbuild $FLAGS mount export /var/local/
+acbuild $FLAGS mount add src /usr/local/src/mongrel2
+
+acbuild $FLAGS run -- apt-get clean
+
+acbuild $FLAGS run -- mkdir /usr/local/src/mongrel2
+acbuild $FLAGS run -- git clone --recursive https://github.com/krakensden/mongrel2.git /usr/local/src/mongrel2
+
+acbuild $FLAGS set-exec -- /bin/bash -c 'cd /usr/local/src/mongrel2; make && cp -r bin/mongrel2 tools/m2sh/build/m2sh tools/procer/procer /var/local/ && pushd examples/zcov && python setup.py install && popd && make coverage && cp -R tests/coverage /var/local/'
+acbuild $FLAGS write --overwrite $ACI_FILE

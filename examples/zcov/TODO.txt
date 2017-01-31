@@ -1,0 +1,10 @@
+ A Wishlist
+===========
+
+ * Use setuptools for distribution and installation.
+
+ * Merge zcov tools into single 'zcov' executable, i.e. 'zcov scan', 'zcov
+   genhtml', etc.
+
+ * Switch to pygments for pretty printing code? Optional support for clang would
+   be nice, ideally by contributing optional support for clang to pygments.

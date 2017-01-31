@@ -1,0 +1,47 @@
+#!/bin/bash
+
+# Build a base box for building Mongrel2
+set -x
+set -e
+
+NAME=${1:-test.horse/test}
+ACI_FILE=${2:-output.aci}
+FLAGS=${FLAGS:-'--debug'}
+
+if [ ! -z "$FULL_REBUILD" ]; then
+    rm -rf basic_rootfs
+fi
+
+if [ ! -e basic_rootfs ]; then
+    out=$(mktemp -d)
+    mkdir basic_rootfs
+    wget https://dl.fedoraproject.org/pub/fedora/linux/releases/25/Docker/x86_64/images/Fedora-Docker-Base-25-1.3.x86_64.tar.xz -O f.tar.xz
+    tar xf f.tar.xz -C $out
+    find $out -name layer.tar -exec tar xf {} -C basic_rootfs \;
+fi
+
+rm -rf rootfs
+cp -r basic_rootfs rootfs
+
+function cleanup() {
+    export EXIT=$?;
+    acbuild $FLAGS end && exit $EXIT;
+}
+
+acbuild $FLAGS begin ./rootfs
+
+trap cleanup EXIT
+
+acbuild $FLAGS environment add OS_VERSION fedora25
+acbuild $FLAGS set-name $NAME
+acbuild $FLAGS mount add export /var/local/
+acbuild $FLAGS mount add src /usr/local/src/mongrel2
+
+acbuild $FLAGS run -- /usr/bin/dnf install -y -q python2 make gcc git czmq-devel enscript sqlite-devel sqlite ragel patch findutils
+acbuild $FLAGS run -- /usr/bin/dnf clean all
+
+acbuild $FLAGS run -- mkdir /usr/local/src/mongrel2
+acbuild $FLAGS run -- git clone --recursive https://github.com/krakensden/mongrel2.git /usr/local/src/mongrel2
+
+acbuild $FLAGS set-exec -- /bin/bash -c 'cd /usr/local/src/mongrel2; make && cp -r bin/mongrel2 tools/m2sh/build/m2sh tools/procer/procer /var/local/ && pushd examples/zcov && python setup.py install && popd && make coverage && cp -R tests/coverage /var/local/'
+acbuild $FLAGS write --overwrite $ACI_FILE

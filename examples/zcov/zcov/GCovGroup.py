@@ -8,7 +8,7 @@ import cPickle
 import os
 import warnings
 
-from zcov import GCovParser
+import GCovParser
 
 class GCovGroup:
     @staticmethod

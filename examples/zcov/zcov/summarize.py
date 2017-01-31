@@ -1,12 +1,10 @@
-#!/usr/bin/python
-
 from __future__ import division
 
 from pprint import pprint
 
 import os
 
-from zcov import GCovGroup
+import GCovGroup
 
 ###
 
@@ -42,13 +40,15 @@ def summarizeEntries(header, entries):
                                          digits,execBranches,
                                          100.*safediv(covBranches,execBranches))
 
-def main():
+def action_summarize(name, args):
+    """print a command line summary for coverage data"""
+
     from optparse import OptionParser
-    op = OptionParser("usage: %prog [options] input")
+    op = OptionParser("usage: %%prog %s [options] input" % (name,))
     op.add_option("", "--root",
                   action="store", dest="root", default=None,
                   help="root directory to view files from")
-    opts,args = op.parse_args()
+    opts,args = op.parse_args(args)
 
     if len(args) != 1:
         op.error('invalid number of arguments')
@@ -72,7 +72,3 @@ def main():
     summarizeEntries('Total', allEntries)
     for path,entries in sorted(byDir.items()):
         summarizeEntries(path,entries)
-
-
-if __name__=='__main__':
-    main()

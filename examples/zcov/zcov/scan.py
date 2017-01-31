@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 from __future__ import division
 
 from pprint import pprint
@@ -9,7 +7,7 @@ import re
 import os
 import sys
 
-from zcov import GCovParser, GCovGroup
+import GCovParser, GCovGroup
 
 
 ###
@@ -138,14 +136,16 @@ def findGCDABasePath(gf, sourcedirs):
 
     print >>sys.stderr,'WARNING: Unable to find a base path for files: "%s"'%(', '.join(missing),)
 
-def main():
+def action_scan(name, args):
+    """create a coverage data file from gcov data"""
+
     from optparse import OptionParser
     global opts
-    op = OptionParser("usage: %prog [options] output {directories}")
+    op = OptionParser("usage: %%prog %s [options] output {directories}" % (name,))
     op.add_option("", "--look-up-dirs",
                   action="store", dest="lookUpDirs", default=0, type=int,
                   metavar="N", help="when finding base paths, look up N directories")
-    opts,args = op.parse_args()
+    opts,args = op.parse_args(args)
 
     if not args:
         op.error('invalid number of arguments')
@@ -187,6 +187,3 @@ def main():
         group.addGCDA(res)
 
     group.tofile(output)
-
-if __name__=='__main__':
-    main()
