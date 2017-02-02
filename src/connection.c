@@ -285,7 +285,7 @@ void Connection_fingerprint_from_cert(Connection *conn)
     debug("Connection_fingerprint_from_cert: peer_cert: %016lX: tag=%d length=%ld",
             (unsigned long) _x509P,
             _x509P ? _x509P->raw.tag : -1,
-            _x509P ? _x509P->raw.len : -1);
+            _x509P ? _x509P->raw.len : (unsigned)-1);
 
     if (_x509P != NULL && _x509P->raw.len > 0) {
         mbedtls_sha1_context	ctx;
