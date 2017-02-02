@@ -361,6 +361,8 @@ void reload_task(void *data)
             if(rotate_logs()) {
                 log_err("Error rotating logs!");
             }
+            log_info("Flushing SNI cache");
+            Connection_flush_sni_cache();
             RELOAD = 0;
         } else {
             log_info("Shutdown requested, goodbye.");

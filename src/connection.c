@@ -53,7 +53,9 @@
 #include "filter.h"
 #include "websocket.h"
 #include "adt/darray.h"
+#include "adt/dict.h"
 #include "headers.h"
+
 
 struct tagbstring PING_PATTERN = bsStatic("@[a-z/]- {\"type\":\\s*\"ping\"}");
 
@@ -67,6 +69,9 @@ int CONNECTION_STACK = 32 * 1024;
 int CLIENT_READ_RETRIES = 5;
 int RELAXED_PARSING = 0;
 int DOWNLOAD_FLOW_CONTROL = 0;
+
+
+static dict_t* sni_cache;
 
 int MAX_WS_LENGTH = 256 * 1024;
 
@@ -921,15 +926,95 @@ void Connection_destroy(Connection *conn)
         Request_destroy(conn->req);
         conn->req = NULL;
 
-        if(conn->use_sni) {
-            mbedtls_x509_crt_free(&conn->own_cert);
-            mbedtls_pk_free(&conn->pk_key);
-        }
-
         if(conn->client) free(conn->client);
         IOBuf_destroy(conn->iob);
         IOBuf_destroy(conn->proxy_iob);
         free(conn);
+    }
+}
+
+/* Comparision function for storing in tree when we don't care about lexicographic ordering
+ * O(1) when lengths are different
+ */
+static int blkcmp(const void *x, const void *y)
+{
+    const_bstring a = x;
+    const_bstring b = y;
+    if(blengthe(a,0) < blengthe(b,0)) {
+        return -1;
+    }
+    if(blengthe(a,0) > blengthe(b,0)) {
+        return 1;
+    }
+
+    return memcmp(a->data, b->data, blengthe(b,0));
+}
+
+typedef struct sni_information {
+    mbedtls_x509_crt own_cert;
+    mbedtls_pk_context pk_key;
+} sni_information;
+
+static int sni_cache_lookup(Connection *conn, bstring hostname)
+{
+    dnode_t *match = NULL;
+    sni_information *matchi = NULL;
+    if (NULL == sni_cache) {
+        debug("Creating sni cache");
+        sni_cache = malloc(sizeof(*sni_cache));
+        check(sni_cache != NULL, "Allocation failed");
+        dict_init(sni_cache, (unsigned long)-1, blkcmp);
+        return 1;
+    }
+
+    match = dict_lookup(sni_cache, hostname);
+
+    check_debug(match != NULL, "Unable to find match in cache");
+
+    matchi = match->dict_data;
+
+    conn->own_cert = matchi->own_cert;
+    conn->pk_key = matchi->pk_key;
+
+    return 0;
+
+error:
+    return 1;
+}
+
+static int sni_cache_add(Connection *conn, bstring hostname)
+{
+    bstring newkey = bstrcpy(hostname);
+    sni_information* newval = malloc(sizeof(sni_information));
+
+    check(newkey != NULL && newval != NULL, "Allocation failed");
+
+    newval->own_cert = conn->own_cert;
+    newval->pk_key = conn->pk_key;
+
+    check(dict_alloc_insert(sni_cache, newkey, newval), "Allocation failed");
+
+    return 0;
+
+error:
+    bdestroy(newkey);
+    if(newval != NULL) free(newval);
+    return 1;
+}
+
+static void free_sni_info(dict_t *dict, dnode_t * node, void *context)
+{
+    (void)(dict);    /* Unused */
+    (void)(context); /* Unused */
+    bdestroy((bstring)node->dict_key);
+    free(node->dict_data);
+}
+
+void Connection_flush_sni_cache()
+{
+    if(sni_cache != NULL) {
+        dict_process(sni_cache, NULL, free_sni_info);
+        dict_free_nodes(sni_cache);
     }
 }
 
@@ -948,6 +1033,8 @@ static int connection_sni_cb(void *p_conn, mbedtls_ssl_context *ssl, const unsig
     hostname = blk2bstr((const char *)chostname, chostname_len);
     check(hostname != NULL, "Allocation failed");
 
+    if (!sni_cache_lookup(conn,  hostname)) goto success;
+        
     // input is utf-8. we'll forbid ascii-control chars and '/', for safe
     //   filesystem usage. multibyte characters always have the high bit set
     //   on each byte, so there's no worry of them getting caught.
@@ -998,6 +1085,10 @@ static int connection_sni_cb(void *p_conn, mbedtls_ssl_context *ssl, const unsig
 
     rc = mbedtls_pk_parse_keyfile(&conn->pk_key, bdata(keypath), NULL);
     check(rc == 0, "Failed to load key from %s", bdata(keypath));
+
+    check(0 == sni_cache_add(conn, hostname), "Error adding entry to SNI cache");
+
+success:
 
     bdestroy(hostname);
     bdestroy(tryhostpattern);
