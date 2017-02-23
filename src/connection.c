@@ -397,8 +397,10 @@ int connection_http_to_handler(Connection *conn)
     // we don't need the header anymore, so commit the buffer and deal with the body
     check(IOBuf_read_commit(conn->iob, Request_header_length(conn->req)) != -1, "Finaly commit failed streaming the connection to http handlers.");
 
-    if(DOWNLOAD_FLOW_CONTROL)
+    if(DOWNLOAD_FLOW_CONTROL && !conn->downloadCreditsInitialized) {
+        conn->downloadCreditsInitialized = 1;
         Request_set(conn->req, &DOWNLOAD_CREDITS, bformat("%d", MAX_CREDITS), 1);
+    }
 
     if(is_websocket(conn)) {
         bstring wsKey = Request_get(conn->req, &WS_SEC_WS_KEY);
@@ -1050,6 +1052,7 @@ Connection *Connection_create(Server *srv, int fd, int rport,
     conn->deliverQueue = list_create(LISTCOUNT_T_MAX);
     check_mem(conn->deliverQueue);
 
+    conn->downloadCreditsInitialized = 0;
     conn->sendCredits = 0;
 
     check_mem(conn->req);
