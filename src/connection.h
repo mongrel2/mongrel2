@@ -98,6 +98,7 @@ typedef struct Connection {
     int deliverBytesPending;
     Rendez deliverRendez;
     Rendez uploadRendez;
+    int downloadCreditsInitialized;
     int sendCredits;
     int closing;
 } Connection;
