@@ -265,7 +265,7 @@ int netannounce(int istcp, char *server, int port)
     return netgetsocket(istcp, server, port, CB_BIND);
 }
 
-int netaccept(int fd, char *server, int *port)
+int netaccept(int fd, char *server, int *port, int enable_keepalive)
 {
     int cfd = 0;
     int opt = 0;
@@ -316,6 +316,11 @@ int netaccept(int fd, char *server, int *port)
     if(SET_NODELAY) {
         opt = 1;
         setsockopt(cfd, IPPROTO_TCP, TCP_NODELAY, (char*)&opt, sizeof opt);
+    }
+
+    if(enable_keepalive) {
+        opt = 1;
+        setsockopt(cfd, SOL_SOCKET, SO_KEEPALIVE, (char*)&opt, sizeof opt);
     }
 
     taskstate("netaccept succeeded");
