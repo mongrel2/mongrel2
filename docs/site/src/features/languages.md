@@ -23,8 +23,9 @@ list of currently supported languages and platforms, in alphabetical order:
 * PHP: <a href="http://github.com/winks/m2php">m2php</a>
 * Perl: <a href="http://github.com/lestrrat/Plack-Handler-Mongrel2">Plack-Handler-Mongrel2</a> and <a href="https://github.com/jrockway/anyevent-mongrel2/">AnyEvent-Mongrel2</a>
 * Python: <a href="http://wsgid.com">wsgid</a> and <a href="http://github.com/berry/Mongrel2-WSGI-Handler">Mongrel2-WSGI-Handler (old?)</a>
-* Ruby: <a href="http://github.com/perplexes/m2r">m2r</a> and <a href="http://github.com/darkhelmet/rack-mongrel2">rack-mongrel2</a>
+* Ruby:  <a href="http://github.com/perplexes/m2r">m2r</a> and <a href="http://github.com/darkhelmet/rack-mongrel2">rack-mongrel2</a>
 * Node.js: <a href="https://github.com/dan-manges/m2node">m2node</a>.
+* Nim: <a href="nim-mongrel2">nim-mongrel2</a>
 
 
 Frameworks
@@ -37,10 +38,10 @@ don't require any middleware and take advantage of Mongrel2 new
 protocol features:
 
 * <a href="http://tir.mongrel2.org/">Tir</a> is a Lua framework written to show how to do direct frameworks with Mongrel2.
+* <a href="https://rubygems.org/gems/strelka/">Strelka</a> is a full-featured Ruby framework.
 * <a href="http://github.com/j2labs/brubeck">Brubeck</a> is an asynchronous, non-blocking web framework written in Python.
 * <a href="https://github.com/daogangtang/bamboo">Bamboo</a> is a Tir derivative with a bunch more features.
 * <a href="http://www.photon-project.com">Photon</a> is a PHP framework similar to Tir and *way* faster than PHP.
-
 <p>It is very easy to create a handler, you should read the <a href="http://mongrel2.org/manual/book-final.html">manual about handlers</a> for 
 information on writing one for your language.</p>
 
