@@ -161,31 +161,31 @@ release: tarball
 	curl http://mongrel2.org/static/downloads/mongrel2-${VERSION}.tar.bz2 | md5sum
 
 netbsd: OPTFLAGS += -I/usr/local/include -I/usr/pkg/include
-netbsd: OPTLIBS += -L/usr/local/lib -L/usr/pkg/lib
-netbsd: LIBS=-lzmq -lsqlite3 $(OPTLIBS)
+netbsd: LDFLAGS += -L/usr/local/lib -L/usr/pkg/lib
+netbsd: LIBS=-lzmq -lsqlite3 $(LDFLAGS)
 netbsd: dev
 
 
 freebsd: OPTFLAGS += -I/usr/local/include
-freebsd: OPTLIBS += -L/usr/local/lib -pthread
-freebsd: LIBS=-lzmq -lsqlite3 $(OPTLIBS)
+freebsd: LDFLAGS += -L/usr/local/lib -pthread
+freebsd: LIBS=-lzmq -lsqlite3 $(LDFLAGS)
 freebsd: all
 
 openbsd: OPTFLAGS += -I/usr/local/include
-openbsd: OPTLIBS += -L/usr/local/lib -pthread
-openbsd: LIBS=-lzmq -lsqlite3 $(OPTLIBS)
+openbsd: LDFLAGS += -L/usr/local/lib -pthread
+openbsd: LIBS=-lzmq -lsqlite3 $(LDFLAGS)
 openbsd: all
 
 solaris: OPTFLAGS += -I/usr/local/include
-solaris: OPTLIBS += -L/usr/local/lib -R/usr/local/lib -lsocket -lnsl -lsendfile
-solaris: OPTLIBS += -L/lib -R/lib
+solaris: LDFLAGS += -L/usr/local/lib -R/usr/local/lib -lsocket -lnsl -lsendfile
+solaris: LDFLAGS += -L/lib -R/lib
 solaris: all
 
 
 macports: OPTFLAGS += -I/opt/local/include
-macports: OPTLIBS += -L/opt/local/lib -undefined dynamic_lookup
+macports: LDFLAGS += -L/opt/local/lib -undefined dynamic_lookup
 macports: all
 
 brew: OPTFLAGS += -I/usr/local/include
-brew: OPTLIBS += -L/usr/local/lib -undefined dynamic_lookup
+brew: LDFLAGS += -L/usr/local/lib -undefined dynamic_lookup
 brew: all
