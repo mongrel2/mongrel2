@@ -303,27 +303,6 @@ void final_setup()
 
 
 
-Server *reload_server(Server *old_srv, const char *db_file, const char *server_uuid)
-{
-    log_info("------------------------ RELOAD %s -----------------------------------", server_uuid);
-    MIME_destroy();
-    Setting_destroy();
-
-    Server *srv = load_server(db_file, server_uuid, old_srv);
-    check(srv != NULL, "Failed to load new server config.");
-
-    Server_stop_handlers(old_srv);
-
-    rotate_logs();
-
-    RELOAD = 0;
-    return srv;
-
-error:
-    return NULL;
-}
-
-
 void complete_shutdown(Server *srv)
 {
     fdclose(srv->listen_fd);
@@ -382,6 +361,8 @@ void reload_task(void *data)
             if(rotate_logs()) {
                 log_err("Error rotating logs!");
             }
+            log_info("Flushing SNI cache");
+            Connection_flush_sni_cache();
             RELOAD = 0;
         } else {
             log_info("Shutdown requested, goodbye.");

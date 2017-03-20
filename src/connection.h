@@ -122,6 +122,8 @@ int Connection_read_header(Connection *conn, Request *req);
 
 void Connection_init();
 
+void Connection_flush_sni_cache();
+
 void Connection_deliver_task(void *v);
 int Connection_deliver_enqueue(Connection *conn, deliver_function f,
                                              tns_value_t *d);
