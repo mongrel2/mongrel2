@@ -69,6 +69,8 @@
 #    endif
 #  endif
 #  define ZMQ_POLL_MSEC    1           //  zmq_poll is msec
+#elif ZMQ_VERSION_MAJOR >= 4
+#  define ZMQ_POLL_MSEC    1           //  zmq_poll is msec
 #endif
 
 #endif /* ! defined( _ZMQ_COMPAT_H ) */
