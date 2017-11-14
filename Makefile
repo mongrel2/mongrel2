@@ -15,12 +15,12 @@ LIB_SRC=$(filter-out src/mongrel2.c,${SOURCES})
 LIB_OBJ=$(filter-out src/mongrel2.o,${OBJECTS})
 TEST_SRC=$(wildcard tests/*_tests.c)
 TESTS=$(patsubst %.c,%,${TEST_SRC})
-MAKEOPTS=OPTFLAGS="${NOEXTCFLAGS} ${OPTFLAGS}" LIBS="${LIBS}" DESTDIR="${DESTDIR}" PREFIX="${PREFIX}"
+MAKEOPTS=OPTFLAGS="${CFLAGS} ${NOEXTCFLAGS} ${OPTFLAGS}" LIBS="${LIBS}" DESTDIR="${DESTDIR}" PREFIX="${PREFIX}"
 
 all: bin/mongrel2 tests m2sh procer
 
 ${OBJECTS_NOEXT}: CFLAGS += ${NOEXTCFLAGS}
-${OBJECTS}: builddirs
+${OBJECTS}: | builddirs
 
 .PHONY: builddirs
 builddirs:
