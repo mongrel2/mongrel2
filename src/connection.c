@@ -1135,7 +1135,7 @@ Connection *Connection_create(Server *srv, int fd, int rport,
     conn->type = 0;
     conn->filter_state = NULL;
 
-    memcpy(conn->remote, remote, IPADDR_SIZE);
+    strncpy(conn->remote, remote, IPADDR_SIZE);
     conn->remote[IPADDR_SIZE] = '\0';
 
     conn->handler = NULL;
