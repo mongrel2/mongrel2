@@ -1,0 +1,30 @@
+diff --git a/include/mbedtls/config.h b/include/mbedtls/config.h
+index 9585e692..47291e79 100644
+--- a/include/mbedtls/config.h
++++ b/include/mbedtls/config.h
+@@ -1712,7 +1712,7 @@
+  *            it, and considering stronger ciphers instead.
+  *
+  */
+-#define MBEDTLS_ARC4_C
++// #define MBEDTLS_ARC4_C
+ 
+ /**
+  * \def MBEDTLS_ASN1_PARSE_C
+@@ -1962,6 +1962,7 @@
+  *             See dhm.h for more details.
+  *
+  */
++// Only weak ciphers !
+ #define MBEDTLS_DHM_C
+ 
+ /**
+@@ -2089,7 +2090,7 @@
+  *
+  * Uncomment to enable the HAVEGE random generator.
+  */
+-//#define MBEDTLS_HAVEGE_C
++#define MBEDTLS_HAVEGE_C
+ 
+ /**
+  * \def MBEDTLS_HMAC_DRBG_C
