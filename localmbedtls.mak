@@ -1,26 +1,81 @@
-CFLAGS?=-g -O2
-CFLAGS += -Wall -Wextra -I./src -DNDEBUG -D_FILE_OFFSET_BITS=64 -pthread
-CFLAGS += ${OPTFLAGS}
-LIBS+=-lzmq -ldl -lsqlite3 -lmbedtls -lmbedx509 -lmbedcrypto
+CFLAGS=-g -O2 -Wall -Wextra -Isrc -Isrc/mbedtls/include -pthread -rdynamic -DNDEBUG $(OPTFLAGS) -D_FILE_OFFSET_BITS=64 -DAUTHBIND_HELPER=\"/usr/lib/authbind/helper\"
+LIBS=-lzmq -ldl -lsqlite3 $(OPTLIBS)
 PREFIX?=/usr/local
 
 get_objs = $(addsuffix .o,$(basename $(wildcard $(1))))
 
 ASM=$(wildcard src/**/*.S src/*.S)
 RAGEL_TARGETS=src/state.c src/http11/http11_parser.c
-SOURCES=$(wildcard src/**/*.c src/*.c) $(RAGEL_TARGETS)
+SOURCES=$(wildcard src/mbedtls/library/*.c src/**/*.c src/*.c) $(RAGEL_TARGETS)
 OBJECTS=$(patsubst %.c,%.o,${SOURCES}) $(patsubst %.S,%.o,${ASM})
+OBJECTS_EXTERNAL+=$(call get_objs,src/mbedtls/library/*.c)
 OBJECTS_NOEXT=$(filter-out ${OBJECTS_EXTERNAL},${OBJECTS})
 LIB_SRC=$(filter-out src/mongrel2.c,${SOURCES})
 LIB_OBJ=$(filter-out src/mongrel2.o,${OBJECTS})
 TEST_SRC=$(wildcard tests/*_tests.c)
 TESTS=$(patsubst %.c,%,${TEST_SRC})
-MAKEOPTS=OPTFLAGS="${CFLAGS} ${NOEXTCFLAGS} ${OPTFLAGS}" LIBS="${LIBS}" DESTDIR="${DESTDIR}" PREFIX="${PREFIX}"
+MAKEOPTS=OPTFLAGS="${NOEXTCFLAGS} ${OPTFLAGS}" OPTLIBS="${OPTLIBS}" LIBS="${LIBS}" DESTDIR="${DESTDIR}" PREFIX="${PREFIX}"
 
-all: bin/mongrel2 tests m2sh procer
+# Prepare mbedtls git submodule
+# 
+# - Perform src/mbedtls submodule init and update, if necessary.  This is executed
+#   upon every make invocation, and must be done before the SOURCES variable, above
+#   is lazily evaluated, or none of the src/mbedtls source files will be found
+
+ifdef $($(shell									\
+	if git submodule status | grep '^-'; then				\
+	    echo "mbedtls; init and update git submodule" 1>&2;		\
+	    git submodule init && git submodule update;				\
+	fi ))
+endif
+
+all: builddirs bin/mongrel2 tests m2sh procer
+
+dev: CFLAGS=-g -Wall -Isrc -Wall -Wextra $(OPTFLAGS) -D_FILE_OFFSET_BITS=64
+dev: all
 
 ${OBJECTS_NOEXT}: CFLAGS += ${NOEXTCFLAGS}
-${OBJECTS}: | builddirs
+${OBJECTS}: src/mbedtls/include/mbedtls/config.h
+
+# 
+# CFLAGS_DEFS: The $(CC) flags required to obtain C pre-processor #defines, per:
+# 
+#   http://nadeausoftware.com/articles/2011/12/c_c_tip_how_list_compiler_predefined_macros
+# 
+# It may be appropriate to copy some of these platform-specific CFLAGS_DEFS assignments into the
+# appropriate platform target at the end of this file, eg:
+# 
+#   solaris: CFLAGS_DEF=...
+#   solaris: all
+
+#CFLAGS_DEFS=-dM -E		# Portland Group PGCC
+#CFLAGS_DEFS=-xdumpmacros -E	# Oracle Solaris Studio
+#CFLAGS_DEFS=-qshowmacros -E	# IBM XL C
+CFLAGS_DEFS=-dM -E -x c 	# clang, gcc, HP C, Intel icc
+
+# Configure mbedtls
+# 
+# - check for required src/mbedtls/include/mbedtls/config.h definitions
+#   and patch using version-appropriate src/mbedtls_config.patch.#.#.# file:
+#   - If desired mbedtls version is not yet supported, git checkout the
+#     new src/mbedtls/ version X.Y.Z, edit its include/mbedtls/config.h as
+#     required, and generate a new src/mbedtls_config.patch.X.Y.Z using:
+# 
+#         git diff -- include/mbedtls/config.h > ../mbedtls_config.patch.X.Y.Z
+FORCE:
+src/mbedtls/include/mbedtls/config.h: src/mbedtls/include/mbedtls/version.h FORCE
+	@MBEDTLS_VERSION=$$( $(CC) $(CFLAGS_DEFS) $<				\
+	    | sed -n -e 's/^.*MBEDTLS_VERSION_STRING[\t ]*"\([^"]*\)".*/\1/p' ); \
+	if $(CC) $(CFLAGS_DEFS) $@ | grep -q MBEDTLS_HAVEGE_C; then		\
+	    echo "mbedtls $${MBEDTLS_VERSION}; already configured";		\
+	else									\
+	    echo "mbedtls $${MBEDTLS_VERSION}; defining MBEDTLS_HAVEGE_C...";\
+	    MBEDTLS_PATCH=src/mbedtls_config.patch.$${MBEDTLS_VERSION};	\
+	    if ! patch -d src/mbedtls -p 1 < $${MBEDTLS_PATCH}; then		\
+		echo "*** Failed to apply $${MBEDTLS_PATCH}";			\
+		exit 1;								\
+	    fi;									\
+	fi
 
 .PHONY: builddirs
 builddirs:
@@ -28,7 +83,7 @@ builddirs:
 	@mkdir -p bin
 
 bin/mongrel2: build/libm2.a src/mongrel2.o
-	$(CC) $(CFLAGS) $(LDFLAGS) src/mongrel2.o -o $@ $< $(LIBS)
+	$(CC) $(CFLAGS) src/mongrel2.o -o $@ $< $(LIBS)
 
 build/libm2.a: CFLAGS += -fPIC
 build/libm2.a: ${LIB_OBJ}
@@ -45,6 +100,7 @@ clean:
 	rm -f tools/m2sh/tests/tests.log 
 	rm -rf release-scripts/output
 	find . \( -name "*.gcno" -o -name "*.gcda" \) -exec rm {} \;
+	if test -e .git; then git -C src/mbedtls checkout include/mbedtls/config.h; fi
 	${MAKE} -C tools/m2sh OPTLIB=${OPTLIB} clean
 	${MAKE} -C tools/filters OPTLIB=${OPTLIB} clean
 	${MAKE} -C tests/filters OPTLIB=${OPTLIB} clean
@@ -61,6 +117,7 @@ pristine: clean
 	rm -f run/*
 	${MAKE} -C tools/m2sh pristine
 	${MAKE} -C tools/procer pristine
+	git submodule deinit -f src/mbedtls
 
 .PHONY: tests
 tests: tests/config.sqlite ${TESTS} test_filters filters config_modules
@@ -116,9 +173,6 @@ ragel:
 	ragel -G2 src/handler_parser.rl
 	ragel -G2 src/http11/httpclient_parser.rl
 
-%.o: %.S
-	$(CC) $(CFLAGS) -c $< -o $@
-
 valgrind:
 	VALGRIND="valgrind --log-file=/tmp/valgrind-%p.log" ${MAKE}
 strace:
@@ -161,31 +215,31 @@ release: tarball
 	curl http://mongrel2.org/static/downloads/mongrel2-${VERSION}.tar.bz2 | md5sum
 
 netbsd: OPTFLAGS += -I/usr/local/include -I/usr/pkg/include
-netbsd: LDFLAGS += -L/usr/local/lib -L/usr/pkg/lib
-netbsd: LIBS=-lzmq -lsqlite3 $(LDFLAGS)
+netbsd: OPTLIBS += -L/usr/local/lib -L/usr/pkg/lib
+netbsd: LIBS=-lzmq -lsqlite3 $(OPTLIBS)
 netbsd: dev
 
 
 freebsd: OPTFLAGS += -I/usr/local/include
-freebsd: LDFLAGS += -L/usr/local/lib -pthread
-freebsd: LIBS=-lzmq -lsqlite3 $(LDFLAGS)
+freebsd: OPTLIBS += -L/usr/local/lib -pthread
+freebsd: LIBS=-lzmq -lsqlite3 $(OPTLIBS)
 freebsd: all
 
 openbsd: OPTFLAGS += -I/usr/local/include
-openbsd: LDFLAGS += -L/usr/local/lib -pthread
-openbsd: LIBS=-lzmq -lsqlite3 $(LDFLAGS)
+openbsd: OPTLIBS += -L/usr/local/lib -pthread
+openbsd: LIBS=-lzmq -lsqlite3 $(OPTLIBS)
 openbsd: all
 
 solaris: OPTFLAGS += -I/usr/local/include
-solaris: LDFLAGS += -L/usr/local/lib -R/usr/local/lib -lsocket -lnsl -lsendfile
-solaris: LDFLAGS += -L/lib -R/lib
+solaris: OPTLIBS += -L/usr/local/lib -R/usr/local/lib -lsocket -lnsl -lsendfile
+solaris: OPTLIBS += -L/lib -R/lib
 solaris: all
 
 
 macports: OPTFLAGS += -I/opt/local/include
-macports: LDFLAGS += -L/opt/local/lib -undefined dynamic_lookup
+macports: OPTLIBS += -L/opt/local/lib -undefined dynamic_lookup
 macports: all
 
 brew: OPTFLAGS += -I/usr/local/include
-brew: LDFLAGS += -L/usr/local/lib -undefined dynamic_lookup
+brew: OPTLIBS += -L/usr/local/lib -undefined dynamic_lookup
 brew: all

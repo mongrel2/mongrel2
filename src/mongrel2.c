@@ -37,6 +37,7 @@
 #include <signal.h>
 #include <time.h>
 #include <assert.h>
+#include <sys/socket.h>
 
 #include "server.h"
 #include "dbg.h"
@@ -58,7 +59,6 @@
 extern int RUNNING;
 extern uint32_t THE_CURRENT_TIME_IS;
 int RELOAD = 0;
-int MURDER = 0;
 
 const int TICKER_TASK_STACK = 16 * 1024;
 const int RELOAD_TASK_STACK = 100 * 1024;
@@ -75,7 +75,7 @@ Task *RELOAD_TASK = NULL;
 
 void terminate(int s)
 {
-    MURDER = s == SIGTERM;
+    int murder = 0;
 
     switch(s)
     {
@@ -90,15 +90,17 @@ void terminate(int s)
         default:
             if(!RUNNING) {
                 log_info("SIGINT CAUGHT AGAIN, ASSUMING MURDER.");
-                MURDER = 1;
-            } else {
-                RUNNING = 0;
-                log_info("SHUTDOWN REQUESTED: %s", MURDER ? "MURDER" : "GRACEFUL (SIGINT again to EXIT NOW)");
-                Server *srv = Server_queue_latest();
+                murder = 1;
+            }
+            RUNNING = 0;
+            log_info("SHUTDOWN REQUESTED: %s", murder ? "MURDER" : "GRACEFUL (SIGINT again to EXIT NOW)");
+            if(murder) {
+                exit(s);
+            }
+            Server *srv = Server_queue_latest();
 
-                if(srv != NULL) {
-                    fdclose(srv->listen_fd);
-                }
+            if(srv != NULL) {
+                shutdown(srv->listen_fd,SHUT_RDWR);
             }
             break;
     }
@@ -303,27 +305,6 @@ void final_setup()
 
 
 
-Server *reload_server(Server *old_srv, const char *db_file, const char *server_uuid)
-{
-    log_info("------------------------ RELOAD %s -----------------------------------", server_uuid);
-    MIME_destroy();
-    Setting_destroy();
-
-    Server *srv = load_server(db_file, server_uuid, old_srv);
-    check(srv != NULL, "Failed to load new server config.");
-
-    Server_stop_handlers(old_srv);
-
-    rotate_logs();
-
-    RELOAD = 0;
-    return srv;
-
-error:
-    return NULL;
-}
-
-
 void complete_shutdown(Server *srv)
 {
     fdclose(srv->listen_fd);
@@ -382,6 +363,9 @@ void reload_task(void *data)
             if(rotate_logs()) {
                 log_err("Error rotating logs!");
             }
+            log_info("Flushing SNI cache");
+            Connection_flush_sni_cache();
+            RELOAD = 0;
         } else {
             log_info("Shutdown requested, goodbye.");
             break;

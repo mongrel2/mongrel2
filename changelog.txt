@@ -1,3 +1,55 @@
+Changes from 1.11.0 to 1.12.0
+-----------------------------
+
+* Add more MIME types
+    5e643551
+
+* Update mbedTLS to v2.9.0
+    f121648d
+
+* Fix memory bug in SuperPoll
+    eff30f3a
+
+* Fix uninitialized memory error in darray ADT
+    911ee207
+
+* Fix shutdown signal handler
+    232c517d
+    1b788752
+
+* Makefile cleanup; default to using system mbedTLS, add homebrew target
+    NB: The oldfile is available with `make -f localmbedtls.mak`
+    4d67a3a1
+    5be7fc9c
+    a922d7b7
+
+* Fix memory bug in Connection_create
+    c54579d5
+
+* Add SNI cache to improve SSL connection performance
+    27f68ba5
+    e27f68ba
+
+* Stop sending disconnect message in response to a cancel control request
+    65bc71bc
+* Fixes to download credits
+    599bd7ed
+    54653ef2
+    cef57c38
+
+* Fix memory leak in websocket code
+    76906b99
+
+* Misc code cleanup
+    b1724168
+    7cb8532e
+
+* Fix path normalization on systems that do not define PATH_MAX
+    7c1a57e8
+
+* authbind support for listening as non root
+    0778ec65
+
 Changes from 1.10.0 to 1.11.0
 -----------------------------
 

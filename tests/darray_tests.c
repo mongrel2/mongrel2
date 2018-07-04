@@ -82,7 +82,7 @@ char *test_darray_operations()
     int expectedValues[7] = { 2, 3, 4, 8, 9, 0, 1 };
 
     for(i = 6; i >= 0; i--) {
-        int *val = darray_pop(array);
+        int *val = darray_pop(array2);
         mu_assert(val != NULL, "Shouldn't get a NULL.");
         mu_assert(*val == expectedValues[i], "Wrong value.");
         darray_free(val);

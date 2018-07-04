@@ -53,7 +53,9 @@
 #include "filter.h"
 #include "websocket.h"
 #include "adt/darray.h"
+#include "adt/dict.h"
 #include "headers.h"
+
 
 struct tagbstring PING_PATTERN = bsStatic("@[a-z/]- {\"type\":\\s*\"ping\"}");
 
@@ -67,6 +69,9 @@ int CONNECTION_STACK = 32 * 1024;
 int CLIENT_READ_RETRIES = 5;
 int RELAXED_PARSING = 0;
 int DOWNLOAD_FLOW_CONTROL = 0;
+
+
+static dict_t* sni_cache;
 
 int MAX_WS_LENGTH = 256 * 1024;
 
@@ -285,7 +290,7 @@ void Connection_fingerprint_from_cert(Connection *conn)
     debug("Connection_fingerprint_from_cert: peer_cert: %016lX: tag=%d length=%ld",
             (unsigned long) _x509P,
             _x509P ? _x509P->raw.tag : -1,
-            _x509P ? _x509P->raw.len : -1);
+            _x509P ? _x509P->raw.len : (unsigned)-1);
 
     if (_x509P != NULL && _x509P->raw.len > 0) {
         mbedtls_sha1_context	ctx;
@@ -397,8 +402,10 @@ int connection_http_to_handler(Connection *conn)
     // we don't need the header anymore, so commit the buffer and deal with the body
     check(IOBuf_read_commit(conn->iob, Request_header_length(conn->req)) != -1, "Finaly commit failed streaming the connection to http handlers.");
 
-    if(DOWNLOAD_FLOW_CONTROL)
+    if(DOWNLOAD_FLOW_CONTROL && !conn->downloadCreditsInitialized) {
+        conn->downloadCreditsInitialized = 1;
         Request_set(conn->req, &DOWNLOAD_CREDITS, bformat("%d", MAX_CREDITS), 1);
+    }
 
     if(is_websocket(conn)) {
         bstring wsKey = Request_get(conn->req, &WS_SEC_WS_KEY);
@@ -806,13 +813,13 @@ again:
 
     if(isControl) /* Control frames get sent right-away */
     {
-        Request_set(conn->req,bfromcstr("FLAGS"),bformat("0x%X",flags|0x80),1);
+        Request_set(conn->req,&WS_FLAGS,bformat("0x%X",flags|0x80),1);
         rc = Connection_send_to_handler(conn, conn->handler, (void *)dataU,data_length, NULL);
         check_debug(rc == 0, "Failed to deliver to the handler.");
     }
     else {
         if(fin) {
-            Request_set(conn->req,bfromcstr("FLAGS"),bformat("0x%X",inprogFlags|0x80),1);
+            Request_set(conn->req,&WS_FLAGS,bformat("0x%X",inprogFlags|0x80),1);
         }
         if (payload == NULL) {
             if (fin) {
@@ -921,15 +928,95 @@ void Connection_destroy(Connection *conn)
         Request_destroy(conn->req);
         conn->req = NULL;
 
-        if(conn->use_sni) {
-            mbedtls_x509_crt_free(&conn->own_cert);
-            mbedtls_pk_free(&conn->pk_key);
-        }
-
         if(conn->client) free(conn->client);
         IOBuf_destroy(conn->iob);
         IOBuf_destroy(conn->proxy_iob);
         free(conn);
+    }
+}
+
+/* Comparision function for storing in tree when we don't care about lexicographic ordering
+ * O(1) when lengths are different
+ */
+static int blkcmp(const void *x, const void *y)
+{
+    const_bstring a = x;
+    const_bstring b = y;
+    if(blengthe(a,0) < blengthe(b,0)) {
+        return -1;
+    }
+    if(blengthe(a,0) > blengthe(b,0)) {
+        return 1;
+    }
+
+    return memcmp(a->data, b->data, blengthe(b,0));
+}
+
+typedef struct sni_information {
+    mbedtls_x509_crt own_cert;
+    mbedtls_pk_context pk_key;
+} sni_information;
+
+static int sni_cache_lookup(Connection *conn, bstring hostname)
+{
+    dnode_t *match = NULL;
+    sni_information *matchi = NULL;
+    if (NULL == sni_cache) {
+        debug("Creating sni cache");
+        sni_cache = malloc(sizeof(*sni_cache));
+        check(sni_cache != NULL, "Allocation failed");
+        dict_init(sni_cache, (unsigned long)-1, blkcmp);
+        return 1;
+    }
+
+    match = dict_lookup(sni_cache, hostname);
+
+    check_debug(match != NULL, "Unable to find match in cache");
+
+    matchi = match->dict_data;
+
+    conn->own_cert = matchi->own_cert;
+    conn->pk_key = matchi->pk_key;
+
+    return 0;
+
+error:
+    return 1;
+}
+
+static int sni_cache_add(Connection *conn, bstring hostname)
+{
+    bstring newkey = bstrcpy(hostname);
+    sni_information* newval = malloc(sizeof(sni_information));
+
+    check(newkey != NULL && newval != NULL, "Allocation failed");
+
+    newval->own_cert = conn->own_cert;
+    newval->pk_key = conn->pk_key;
+
+    check(dict_alloc_insert(sni_cache, newkey, newval), "Allocation failed");
+
+    return 0;
+
+error:
+    bdestroy(newkey);
+    if(newval != NULL) free(newval);
+    return 1;
+}
+
+static void free_sni_info(dict_t *dict, dnode_t * node, void *context)
+{
+    (void)(dict);    /* Unused */
+    (void)(context); /* Unused */
+    bdestroy((bstring)node->dict_key);
+    free(node->dict_data);
+}
+
+void Connection_flush_sni_cache()
+{
+    if(sni_cache != NULL) {
+        dict_process(sni_cache, NULL, free_sni_info);
+        dict_free_nodes(sni_cache);
     }
 }
 
@@ -948,6 +1035,8 @@ static int connection_sni_cb(void *p_conn, mbedtls_ssl_context *ssl, const unsig
     hostname = blk2bstr((const char *)chostname, chostname_len);
     check(hostname != NULL, "Allocation failed");
 
+    if (!sni_cache_lookup(conn,  hostname)) goto success;
+        
     // input is utf-8. we'll forbid ascii-control chars and '/', for safe
     //   filesystem usage. multibyte characters always have the high bit set
     //   on each byte, so there's no worry of them getting caught.
@@ -999,6 +1088,10 @@ static int connection_sni_cb(void *p_conn, mbedtls_ssl_context *ssl, const unsig
     rc = mbedtls_pk_parse_keyfile(&conn->pk_key, bdata(keypath), NULL);
     check(rc == 0, "Failed to load key from %s", bdata(keypath));
 
+    check(0 == sni_cache_add(conn, hostname), "Error adding entry to SNI cache");
+
+success:
+
     bdestroy(hostname);
     bdestroy(tryhostpattern);
     bdestroy(certpath);
@@ -1042,7 +1135,7 @@ Connection *Connection_create(Server *srv, int fd, int rport,
     conn->type = 0;
     conn->filter_state = NULL;
 
-    memcpy(conn->remote, remote, IPADDR_SIZE);
+    strncpy(conn->remote, remote, IPADDR_SIZE);
     conn->remote[IPADDR_SIZE] = '\0';
 
     conn->handler = NULL;
@@ -1050,6 +1143,7 @@ Connection *Connection_create(Server *srv, int fd, int rport,
     conn->deliverQueue = list_create(LISTCOUNT_T_MAX);
     check_mem(conn->deliverQueue);
 
+    conn->downloadCreditsInitialized = 0;
     conn->sendCredits = 0;
 
     check_mem(conn->req);

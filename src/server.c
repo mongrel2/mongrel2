@@ -377,8 +377,9 @@ static inline int Server_accept(int listen_fd)
     char remote[IPADDR_SIZE];
     int rc = 0;
     Connection *conn = NULL;
+    int enable_keepalive = Setting_get_int("net.tcp_keepalive", 0);
 
-    cfd = netaccept(listen_fd, remote, &rport);
+    cfd = netaccept(listen_fd, remote, &rport, enable_keepalive);
     check(cfd >= 0, "Failed to accept on listening socket.");
 
     Server *srv = Server_queue_latest();

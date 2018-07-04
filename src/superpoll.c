@@ -141,9 +141,9 @@ static inline int SuperPoll_add_poll(SuperPoll *sp, void *data, void *socket, in
 
 
     if(rw == 'r') {
-        bits |= ZMQ_POLLIN;
+        bits |= ZMQ_POLLIN|ZMQ_POLLERR;
     } else if(rw == 'w') {
-        bits |= ZMQ_POLLOUT;
+        bits |= ZMQ_POLLOUT|ZMQ_POLLERR;
     } else {
         sentinel("Invalid event %c handed to superpoll.  r/w only.", rw);
     }
@@ -235,6 +235,8 @@ int SuperPoll_poll(SuperPoll *sp, PollResult *result, int ms)
         while(cur_i < sp->nfd_hot && !sp->pollfd[cur_i].revents) {
             cur_i++;
         }
+
+        check(cur_i<sp->nfd_hot, "Some events not found from zmq_poll")
 
         if(HAS_EPOLL && sp->pollfd[cur_i].fd == sp->idle_fd) {
             hit_idle = 1;
