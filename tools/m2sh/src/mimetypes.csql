@@ -854,5 +854,7 @@ struct tagbstring MIMETYPES_DEFAULT_SQL = bsStatic(
 "insert into mimetype (extension, mimetype) values ('.asx', 'video/x-ms-asf');\n"
 "insert into mimetype (extension, mimetype) values ('.ogv', 'video/ogg');\n"
 "insert into mimetype (extension, mimetype) values ('.oga', 'audio/ogg');\n"
-"insert into mimetype (extension, mimetype) values ('.webm', 'video/webm');\n");
+"insert into mimetype (extension, mimetype) values ('.webm', 'video/webm');\n"
+"insert into mimetype (extension, mimetype) values ('.rst', 'text/prs.fallenstein.rst');\n"
+"insert into mimetype (extension, mimetype) values ('.sub', 'text/vnd.dvb.subtitle');\n");
 
