@@ -149,35 +149,45 @@ error:
     return -1;
 }
 
+static int urandom_entropy_func(void *data, unsigned char *output, size_t len)
+{
+    FILE* urandom = (FILE *)data;
+    size_t rc = fread(output, 1, len, urandom);
+
+    if (rc != len) return MBEDTLS_ERR_ENTROPY_SOURCE_FAILED;
+
+    return 0;
+}
+
 int Server_init_rng(Server *srv)
 {
     int rc;
-    unsigned char buf[MBEDTLS_ENTROPY_BLOCK_SIZE];
     void *ctx = NULL;
 
-    mbedtls_entropy_init( &srv->entropy );
+    FILE *urandom = fopen("/dev/urandom","r");
 
-    // test the entropy source
-    rc = mbedtls_entropy_func(&srv->entropy, buf, MBEDTLS_ENTROPY_BLOCK_SIZE);
-
-    if(rc == 0) {
+    if(urandom != NULL) {
         ctx = calloc(sizeof(mbedtls_ctr_drbg_context), 1);
 
         mbedtls_ctr_drbg_init((mbedtls_ctr_drbg_context *)ctx);
         rc = mbedtls_ctr_drbg_seed((mbedtls_ctr_drbg_context *)ctx,
-            mbedtls_entropy_func, &srv->entropy, NULL, 0);
+            urandom_entropy_func, urandom, NULL, 0);
         check(rc == 0, "Init rng failed: ctr_drbg_init returned %d\n", rc);
 
         srv->rng_func = mbedtls_ctr_drbg_random;
         srv->rng_ctx = ctx;
     } else {
-        log_warn("entropy source unavailable. falling back to havege rng");
 
+#if defined(MBEDTLS_HAVEGE_C)
+        log_warn("entropy source unavailable. falling back to havege rng");
         ctx = calloc(sizeof(mbedtls_havege_state), 1);
         mbedtls_havege_init((mbedtls_havege_state *)ctx);
-
         srv->rng_func = mbedtls_havege_random;
         srv->rng_ctx = ctx;
+#else
+        log_err("Unable to initialize urandom entropy source, and mbedTLS compiled without HAVEGE");
+        goto error;
+#endif
     }
 
     return 0;
@@ -278,10 +288,10 @@ Server *Server_create(bstring uuid, bstring default_host,
 
     // TODO: once mbedtls supports opening urandom early and keeping it open,
     //   put the rng initialization back here (before chroot)
-    //if(use_ssl) {
-    //    rc = Server_init_rng(srv);
-    //    check(rc == 0, "Failed to initialize rng for server %s", bdata(uuid));
-    //}
+    if(use_ssl) {
+        rc = Server_init_rng(srv);
+        check(rc == 0, "Failed to initialize rng for server %s", bdata(uuid));
+    }
 
     if(blength(chroot) > 0) {
         srv->chroot = bstrcpy(chroot); check_mem(srv->chroot);
