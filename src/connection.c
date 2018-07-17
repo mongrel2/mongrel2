@@ -1114,7 +1114,7 @@ error:
     if(keypath != NULL) bdestroy(keypath);
 
     // don't return error here. this way the ssl handshake continues and the
-    //   the default cert will get used instead
+    //   default cert will get used instead
     return 0;
 }
 
