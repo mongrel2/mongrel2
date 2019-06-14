@@ -171,6 +171,7 @@ int Server_init_rng(Server *srv)
         srv->rng_func = mbedtls_ctr_drbg_random;
         srv->rng_ctx = ctx;
     } else {
+#ifdef MBEDTLS_HAVEGE_C
         log_warn("entropy source unavailable. falling back to havege rng");
 
         ctx = calloc(sizeof(mbedtls_havege_state), 1);
@@ -178,6 +179,9 @@ int Server_init_rng(Server *srv)
 
         srv->rng_func = mbedtls_havege_random;
         srv->rng_ctx = ctx;
+#else
+	sentinel("No entropy source available, SSL is not possible (disable chroot?)\n");
+#endif
     }
 
     return 0;
