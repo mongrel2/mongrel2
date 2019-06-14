@@ -34,7 +34,7 @@ Download
 
 mongrel2 is now v1.12.2 as of *Fri Jun 14 2019*:
 
-* [mongrel2-v1.12.2.tar.bz2](https://github.com/mongrel2/mongrel2/releases/download/v1.12.2/mongrel2-v1.12.2.tar.bz2)
+* [mongrel2-v1.12.2.tar.bz2](https://github.com/mongrel2/mongrel2/releases/v1.12.2/download/mongrel2-v1.12.2.tar.bz2)
 
 Documentation
 -------------
