@@ -114,7 +114,24 @@ static void header_done_cb(void *data, const char *at, size_t length)
     // extract content_len
     const char *clen = bdata(Request_get(req, &HTTP_CONTENT_LENGTH));
     if(clen) {
-        req->parser.content_len = atoi(clen);
+        long clenp=0;
+        errno=0;
+        clenp=strtol(clen,NULL,10);
+        if (errno == ERANGE) {
+            log_err("Content length field out of range: %s.", clen);
+            req->parser.content_len = 0;
+        }
+        else if (errno == EINVAL) {
+            log_err("Content length invalid: %s.", clen);
+            req->parser.content_len = 0;
+        }
+        else if (clen < 0 || clen > INT_MAX) {
+            log_err("Content length field out of (int) range: %s.", clen);
+            req->parser.content_len = 0;
+        }
+        else {
+            req->parser.content_len = clenp;
+        }
     } else {
         if(chunked) {
             // if content-length missing, only assume indefinite length if
