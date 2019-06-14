@@ -1,6 +1,6 @@
 #!/bin/sh
 export REPO=mongrel2
-export NUMERIC_VERSION=1.12.1
+export NUMERIC_VERSION=1.12.2
 export OWNER=mongrel2
 export REPO=mongrel2
 export SITE_REPO=website
