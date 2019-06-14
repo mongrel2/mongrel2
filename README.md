@@ -32,9 +32,9 @@ Features
 Download
 --------
 
-mongrel2 is now v1.12.0 as of *Wed Jul 04 2018*:
+mongrel2 is now v1.12.1 as of *Fri Jun 14 2019*:
 
-* [mongrel2-v1.12.0.tar.bz2](https://github.com/mongrel2/mongrel2/releases/v1.12.0/download/mongrel2-v1.12.0.tar.bz2)
+* [mongrel2-v1.12.1.tar.bz2](https://github.com/mongrel2/mongrel2/releases/v1.12.1/download/mongrel2-v1.12.1.tar.bz2)
 
 Documentation
 -------------
