@@ -1,8 +1,8 @@
 {
-    "NumericVersion" : "1.12.1",
-    "VersionName" : "v1.12.1",
+    "NumericVersion" : "1.12.2",
+    "VersionName" : "v1.12.2",
     "Owner" : "mongrel2",
     "Repo" : "mongrel2",
-    "TarName" : "mongrel2-v1.12.1.tar.bz2",
-    "Sha" : "388b38cf0bf574fe82fcf5af6f700fef9a48861d"
+    "TarName" : "mongrel2-v1.12.2.tar.bz2",
+    "Sha" : "a05fe0e0d910041341aeb22a3e33e5c00ba4fc4e"
 }
