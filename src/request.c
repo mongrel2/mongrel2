@@ -125,7 +125,7 @@ static void header_done_cb(void *data, const char *at, size_t length)
             log_err("Content length invalid: %s.", clen);
             req->parser.content_len = 0;
         }
-        else if (clen < 0 || clen > INT_MAX) {
+        else if (clenp < 0 || clenp > INT_MAX) {
             log_err("Content length field out of (int) range: %s.", clen);
             req->parser.content_len = 0;
         }
