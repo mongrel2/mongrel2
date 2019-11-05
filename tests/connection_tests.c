@@ -65,6 +65,7 @@ char * all_tests() {
             bfromcstr("chroot"),
             bfromcstr("access_log"),
             bfromcstr("error_log"),
+            2,
             bfromcstr("pid_file"),
             NULL,
             0);

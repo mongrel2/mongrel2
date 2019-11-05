@@ -51,6 +51,7 @@ struct tagbstring CONFIG_SCHEMA = bsStatic(
 "    uuid TEXT,\n"
 "    access_log TEXT,\n"
 "    error_log TEXT,\n"
+"    error_log_level INTEGER,\n"
 "    chroot TEXT DEFAULT '/var/www',\n"
 "    pid_file TEXT,\n"
 "    control_port TEXT DEFAULT '',\n"
@@ -128,7 +129,7 @@ struct tagbstring CONFIG_SCHEMA = bsStatic(
 
 
 
-struct tagbstring SERVER_SQL = bsStatic("INSERT INTO server (uuid, access_log, error_log, pid_file, control_port, chroot, default_host, name, bind_addr, port, use_ssl) VALUES (%Q, %Q, %Q, %Q, %Q, %Q, %Q, %Q, %Q, %s, %s);");
+struct tagbstring SERVER_SQL = bsStatic("INSERT INTO server (uuid, access_log, error_log, error_log_level, pid_file, control_port, chroot, default_host, name, bind_addr, port, use_ssl) VALUES (%Q, %Q, %Q, %s, %Q, %Q, %Q, %Q, %Q, %Q, %s, %s);");
 
 struct tagbstring HOST_SQL = bsStatic("INSERT INTO host (server_id, name, matching) VALUES (%d, %Q, %Q);");
 

@@ -42,12 +42,18 @@
 
 void dbg_set_log(FILE *log_file);
 FILE *dbg_get_log();
-void fprintf_with_timestamp(FILE *log_file, const char *format, ...);
+void dbg_set_log_level(int log_level);
+void fprintf_with_timestamp(FILE *log_file, int level, const char *format, ...);
+
+#define LOG_LEVEL_ERROR   0
+#define LOG_LEVEL_WARNING 1
+#define LOG_LEVEL_INFO    2
+#define LOG_LEVEL_DEBUG   3
 
 #ifdef NDEBUG
 #define debug(M, ...)
 #else
-#define debug(M, ...) fprintf_with_timestamp(dbg_get_log(), "[DEBUG] %s:%d: " M "\n", __FILE__, __LINE__, ##__VA_ARGS__)
+#define debug(M, ...) fprintf_with_timestamp(dbg_get_log(), LOG_LEVEL_DEBUG, "[DEBUG] %s:%d: " M "\n", __FILE__, __LINE__, ##__VA_ARGS__)
 #endif
 
 
@@ -60,13 +66,13 @@ void fprintf_with_timestamp(FILE *log_file, const char *format, ...);
 
 #ifdef NO_LINENOS
 // versions that don't feature line numbers
-#define log_err(M, ...) fprintf_with_timestamp(dbg_get_log(), "[ERROR] (errno: %s) " M "\n", clean_errno(), ##__VA_ARGS__)
-#define log_warn(M, ...) fprintf_with_timestamp(dbg_get_log(), "[WARN] (errno: %s) " M "\n", clean_errno(), ##__VA_ARGS__)
-#define log_info(M, ...) fprintf_with_timestamp(dbg_get_log(), "[INFO] " M "\n", ##__VA_ARGS__)
+#define log_err(M, ...) fprintf_with_timestamp(dbg_get_log(), LOG_LEVEL_ERROR, "[ERROR] (errno: %s) " M "\n", clean_errno(), ##__VA_ARGS__)
+#define log_warn(M, ...) fprintf_with_timestamp(dbg_get_log(), LOG_LEVEL_WARNING, "[WARN] (errno: %s) " M "\n", clean_errno(), ##__VA_ARGS__)
+#define log_info(M, ...) fprintf_with_timestamp(dbg_get_log(), LOG_LEVEL_INFO, "[INFO] " M "\n", ##__VA_ARGS__)
 #else
-#define log_err(M, ...) fprintf_with_timestamp(dbg_get_log(), "[ERROR] (%s:%d: errno: %s) " M "\n", __FILE__, __LINE__, clean_errno(), ##__VA_ARGS__)
-#define log_warn(M, ...) fprintf_with_timestamp(dbg_get_log(), "[WARN] (%s:%d: errno: %s) " M "\n", __FILE__, __LINE__, clean_errno(), ##__VA_ARGS__)
-#define log_info(M, ...) fprintf_with_timestamp(dbg_get_log(), "[INFO] (%s:%d) " M "\n", __FILE__, __LINE__, ##__VA_ARGS__)
+#define log_err(M, ...) fprintf_with_timestamp(dbg_get_log(), LOG_LEVEL_ERROR, "[ERROR] (%s:%d: errno: %s) " M "\n", __FILE__, __LINE__, clean_errno(), ##__VA_ARGS__)
+#define log_warn(M, ...) fprintf_with_timestamp(dbg_get_log(), LOG_LEVEL_WARNING, "[WARN] (%s:%d: errno: %s) " M "\n", __FILE__, __LINE__, clean_errno(), ##__VA_ARGS__)
+#define log_info(M, ...) fprintf_with_timestamp(dbg_get_log(), LOG_LEVEL_INFO, "[INFO] (%s:%d) " M "\n", __FILE__, __LINE__, ##__VA_ARGS__)
 #endif
 
 #define check(A, M, ...) if(!(A)) { log_err(M, ##__VA_ARGS__); errno=0; goto error; }

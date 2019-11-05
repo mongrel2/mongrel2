@@ -275,6 +275,8 @@ int attempt_chroot_drop(Server *srv)
         check(rc == 0, "Failed to drop priv");
     }
 
+    dbg_set_log_level(srv->error_log_level);
+
     if(!testmode) {
         FILE *log = fopen(bdata(srv->error_log), "a+");
         check(log, "Couldn't open %s log file.", bdata(srv->error_log));
