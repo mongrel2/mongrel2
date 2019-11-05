@@ -47,7 +47,7 @@ void fprintf_with_timestamp(FILE *log_file, const char *format, ...);
 #ifdef NDEBUG
 #define debug(M, ...)
 #else
-#define debug(M, ...) fprintf_with_timestamp(dbg_get_log(), "DEBUG %s:%d: " M "\n", __FILE__, __LINE__, ##__VA_ARGS__)
+#define debug(M, ...) fprintf_with_timestamp(dbg_get_log(), "[DEBUG] %s:%d: " M "\n", __FILE__, __LINE__, ##__VA_ARGS__)
 #endif
 
 
