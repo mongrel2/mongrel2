@@ -50,12 +50,7 @@ void fprintf_with_timestamp(FILE *log_file, int level, const char *format, ...);
 #define LOG_LEVEL_INFO    2
 #define LOG_LEVEL_DEBUG   3
 
-#ifdef NDEBUG
-#define debug(M, ...)
-#else
 #define debug(M, ...) fprintf_with_timestamp(dbg_get_log(), LOG_LEVEL_DEBUG, "[DEBUG] %s:%d: " M "\n", __FILE__, __LINE__, ##__VA_ARGS__)
-#endif
-
 
 // do not try to be smart and make this go away on NDEBUG, the _debug
 // here means that it just doesn't print a message, it still does the
