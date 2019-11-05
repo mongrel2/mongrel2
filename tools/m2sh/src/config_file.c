@@ -329,6 +329,7 @@ struct tagbstring BIND_ADDR = bsStatic("bind_addr");
 struct tagbstring USE_SSL = bsStatic("use_ssl");
 struct tagbstring CONTROL_PORT = bsStatic("control_port");
 struct tagbstring OPT_CHROOT = bsStatic("chroot");
+struct tagbstring ERROR_LOG_LEVEL = bsStatic("error_log_level");
 
 int Server_load(tst_t *settings, Value *val)
 {
@@ -343,6 +344,7 @@ int Server_load(tst_t *settings, Value *val)
     const char *use_ssl = NULL;
     const char *control_port = NULL;
     const char *opt_chroot = NULL;
+    const char *error_log_level = NULL;
 
     if(tst_search(cls->params, bdata(&BIND_ADDR), blength(&BIND_ADDR))) {
         bind_addr = AST_str(settings, cls->params, bdata(&BIND_ADDR), VAL_QSTRING);
@@ -368,10 +370,17 @@ int Server_load(tst_t *settings, Value *val)
         opt_chroot = "";
     }
 
+    if(tst_search(cls->params, bdata(&ERROR_LOG_LEVEL), blength(&ERROR_LOG_LEVEL))) {
+        error_log_level = AST_str(settings, cls->params, bdata(&ERROR_LOG_LEVEL), VAL_NUMBER);
+    } else {
+        error_log_level = "2";
+    }
+
     res = DB_exec(bdata(&SERVER_SQL),
             AST_str(settings, cls->params, "uuid", VAL_QSTRING),
             AST_str(settings, cls->params, "access_log", VAL_QSTRING),
             AST_str(settings, cls->params, "error_log", VAL_QSTRING),
+            error_log_level,
             AST_str(settings, cls->params, "pid_file", VAL_QSTRING),
             control_port,
             opt_chroot,

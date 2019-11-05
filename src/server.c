@@ -259,7 +259,8 @@ error:
 
 Server *Server_create(bstring uuid, bstring default_host,
         bstring bind_addr, int port, bstring chroot, bstring access_log,
-        bstring error_log, bstring pid_file, bstring control_port, int use_ssl)
+        bstring error_log, int error_log_level, bstring pid_file,
+        bstring control_port, int use_ssl)
 {
     Server *srv = NULL;
     int rc = 0;
@@ -294,6 +295,7 @@ Server *Server_create(bstring uuid, bstring default_host,
     }
     srv->access_log = bstrcpy(access_log); check_mem(srv->access_log);
     srv->error_log = bstrcpy(error_log); check_mem(srv->error_log);
+    srv->error_log_level = error_log_level;
     srv->pid_file = bstrcpy(pid_file); check_mem(srv->pid_file);
     if(blength(control_port) > 0) {
         srv->control_port = bstrcpy(control_port); check_mem(srv->control_port);

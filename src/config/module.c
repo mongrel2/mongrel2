@@ -87,8 +87,21 @@ tns_value_t *default_load_server(const char *uuid)
     if(ret == NULL || tns_get_type(ret) != tns_tag_list || ret->value.list->end < 1)
         return ret;
 
+    tns_value_t *error_log_level;
+    tns_value_t *ret2 = DB_exec("SELECT error_log_level FROM server WHERE uuid=%Q", uuid);
+    if(ret2 != NULL && tns_get_type(ret2) == tns_tag_list && ret2->value.list->end > 0) {
+        tns_value_t *row = (tns_value_t *)darray_first(ret2->value.list);
+        error_log_level = (tns_value_t *)darray_first(row->value.list);
+        darray_remove(row->value.list, 0);
+        tns_value_destroy(ret2);
+    } else {
+        error_log_level = tns_parse_integer("2", 1);
+    }
+
+    tns_insert_to_list((tns_value_t *)darray_first(ret->value.list), 8, error_log_level);
+
     tns_value_t *control_port;
-    tns_value_t *ret2 = DB_exec("SELECT control_port FROM server WHERE uuid=%Q", uuid);
+    ret2 = DB_exec("SELECT control_port FROM server WHERE uuid=%Q", uuid);
     if(ret2 != NULL && tns_get_type(ret2) == tns_tag_list && ret2->value.list->end > 0) {
         tns_value_t *row = (tns_value_t *)darray_first(ret2->value.list);
         control_port = (tns_value_t *)darray_first(row->value.list);
@@ -98,7 +111,7 @@ tns_value_t *default_load_server(const char *uuid)
         control_port = tns_parse_string("", 0);
     }
 
-    tns_insert_to_list((tns_value_t *)darray_first(ret->value.list), 9, control_port);
+    tns_insert_to_list((tns_value_t *)darray_first(ret->value.list), 10, control_port);
 
     return ret;
 }
