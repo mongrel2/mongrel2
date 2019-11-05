@@ -61,7 +61,7 @@ int dbg_get_log_level()
     return LOG_LEVEL;
 }
 
-void fprintf_with_timestamp(FILE *log_file, int level, const char *format, ...)
+void write_log_message(FILE *log_file, int level, const char *format, ...)
 {
   va_list args;
   if( level > LOG_LEVEL ) {
