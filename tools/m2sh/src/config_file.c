@@ -39,6 +39,7 @@
 #include "ast.h"
 #include <dbg.h>
 #include <stdlib.h>
+#include <unused.h>
 
 
 #define CONFIRM_TYPE(N) check(Value_is(val, CLASS), "Not a class.");\
@@ -151,7 +152,7 @@ error:
     return -1;
 }
 
-int Mimetypes_load(tst_t *settings, Pair *pair)
+int Mimetypes_load(UNUSED tst_t *settings, Pair *pair)
 {
     const char *ext = bdata(Pair_key(pair));
     tns_value_t *res = NULL;
@@ -172,7 +173,7 @@ error:
     return -1;
 }
 
-int Settings_load(tst_t *settings, Pair *pair)
+int Settings_load(UNUSED tst_t *settings, Pair *pair)
 {
     const char *name = bdata(Pair_key(pair));
     tns_value_t *res = NULL;

@@ -36,13 +36,14 @@
 #include "../commands.h"
 #include <routing.h>
 #include <dbg.h>
+#include <unused.h>
 
-int Command_uuid(Command *cmd)
+int Command_uuid(UNUSED Command *cmd)
 {
     return system("uuidgen");
 }
 
-static void null_destroy(Route *route, struct RouteMap *map)
+static void null_destroy(UNUSED Route *route, UNUSED struct RouteMap *map)
 {
 
 }

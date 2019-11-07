@@ -34,6 +34,7 @@
 
 #include <stdio.h>
 #include <dbg.h>
+#include <unused.h>
 #include "cli.h"
 
 #include "commands.h"
@@ -53,7 +54,6 @@ typedef struct CommandHandler {
 } CommandHandler;
 
 #define check_no_extra(C) check(list_count((C)->extra) == 0, "Commands only take --option style arguments, you have %d extra.", (int)list_count((C)->extra))
-
 
 bstring option(Command *cmd, const char *name, const char *def)
 {
@@ -75,7 +75,7 @@ bstring option(Command *cmd, const char *name, const char *def)
     }
 }
 
-static int Command_version(Command *cmd)
+static int Command_version(UNUSED Command *cmd)
 {
 #include <version.h>
     printf("%s\n", VERSION);

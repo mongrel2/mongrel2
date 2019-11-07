@@ -36,6 +36,7 @@
 #include <dbg.h>
 #include <config/module.h>
 #include <config/db.h>
+#include <unused.h>
 
 struct tagbstring GOODPATH = bsStatic("goodpath");
 
@@ -54,32 +55,32 @@ void config_close()
 {
 }
 
-tns_value_t *config_load_handler(int handler_id)
+tns_value_t *config_load_handler(UNUSED int handler_id)
 {
     return NULL;
 }
 
-tns_value_t *config_load_proxy(int proxy_id)
+tns_value_t *config_load_proxy(UNUSED int proxy_id)
 {
     return NULL;
 }
 
-tns_value_t *config_load_dir(int dir_id)
+tns_value_t *config_load_dir(UNUSED int dir_id)
 {
     return NULL;
 }
 
-tns_value_t *config_load_routes(int host_id, int server_id)
+tns_value_t *config_load_routes(UNUSED int host_id, UNUSED int server_id)
 {
     return NULL;
 }
 
-tns_value_t *config_load_hosts(int server_id)
+tns_value_t *config_load_hosts(UNUSED int server_id)
 {
     return NULL;
 }
 
-tns_value_t *config_load_server(const char *uuid)
+tns_value_t *config_load_server(UNUSED const char *uuid)
 {
     return NULL;
 }
@@ -95,7 +96,7 @@ tns_value_t *config_load_settings()
     return NULL;
 }
 
-tns_value_t *config_load_filters(int server_id)
+tns_value_t *config_load_filters(UNUSED int server_id)
 {
     return NULL;
 }

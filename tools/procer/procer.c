@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <sys/stat.h>
+#include <unused.h>
 
 extern char **environ;
 
@@ -217,7 +218,7 @@ void Action_dependency_assign(void *value, void *data)
     }
 }
 
-void Action_start_all(void *value, void *data)
+void Action_start_all(void *value, UNUSED void *data)
 {
     Action *action = (Action *)value;
     Action_start(action);
