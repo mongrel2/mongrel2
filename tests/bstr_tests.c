@@ -1254,7 +1254,8 @@ static int test15_0 (bstring b0, int pos, const_bstring b1, unsigned char fill, 
 
         rv = bsetstr (b2, pos, b1, fill);
         ret += (rv == 0); if (ret && 0 == linenum) linenum = __LINE__;
-        if (!biseq (b0, b2)) ret++; if (ret && 0 == linenum) linenum = __LINE__;
+        if (!biseq (b0, b2)) ret++;
+        if (ret && 0 == linenum) linenum = __LINE__;
 
         debug ("%d, %s, %02X) = %s", pos, dumpBstring (b1), fill, dumpBstring (b2));
 
