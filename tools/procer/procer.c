@@ -243,7 +243,7 @@ void taskmain(int argc, char *argv[])
     dbg_set_log(stderr);
     glob_t profile_glob;
     int rc = 0;
-    int i = 0;
+    size_t i = 0;
     Action *action = NULL;
     tst_t *targets = NULL;
     bstring pid_file = NULL;
