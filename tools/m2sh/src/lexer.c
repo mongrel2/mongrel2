@@ -98,6 +98,7 @@ tst_t *Parse_config_string(bstring content)
 {
     Token *temp = NULL;
     void *parser = ParseAlloc(malloc);
+    char *ts = NULL;
     check_mem(parser);
     ParserState state = {.settings = NULL, .error = 0, .line_number = 1};
 
@@ -106,7 +107,6 @@ tst_t *Parse_config_string(bstring content)
     char *eof = pe;
     int cs = -1;
     int act = -1;
-    char *ts = NULL;
     char *te = NULL;
 
     
@@ -354,18 +354,10 @@ case 9:
     if(state.error) {
         Parse_print_error("SYNTAX ERROR", content, 
                 (int)(ts - bdata(content)), ++state.line_number);
-    } else if( cs == 
-#line 359 "src/lexer.c"
-0
-#line 141 "src/lexer.rl"
- ) {
+    } else if( cs == 0 ) {
         Parse_print_error("INVALID CHARACTER", content,
                 (int)(ts - bdata(content)), ++state.line_number);
-    } else if( cs >= 
-#line 366 "src/lexer.c"
-6
-#line 144 "src/lexer.rl"
- ) {
+    } else if( cs >= 6 ) {
         Parse(parser, TKEOF, NULL, &state);
     } else {
         log_err("INCOMPLETE CONFIG FILE. There needs to be more to this.");
