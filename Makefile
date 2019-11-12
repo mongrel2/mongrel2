@@ -7,7 +7,8 @@ PREFIX?=/usr/local
 get_objs = $(addsuffix .o,$(basename $(wildcard $(1))))
 
 ASM=$(wildcard src/**/*.S src/*.S)
-RAGEL_TARGETS=src/state.c src/http11/http11_parser.c
+RAGEL_TARGETS=src/state.c src/http11/http11_parser.c src/handler_parser.c src/http11/httpclient_parser.c
+RAGEL_OBJECTS=$(patsubst %.c,%.o,${RAGEL_TARGETS})
 SOURCES=$(wildcard src/**/*.c src/*.c) $(RAGEL_TARGETS)
 OBJECTS=$(patsubst %.c,%.o,${SOURCES}) $(patsubst %.S,%.o,${ASM})
 OBJECTS_NOEXT=$(filter-out ${OBJECTS_EXTERNAL},${OBJECTS})
@@ -21,6 +22,7 @@ all: bin/mongrel2 tests m2sh procer
 
 ${OBJECTS_NOEXT}: CFLAGS += ${NOEXTCFLAGS}
 ${OBJECTS}: | builddirs
+$(RAGEL_OBJECTS): CFLAGS += -Wno-unused-const-variable -Wimplicit-fallthrough=0
 
 .PHONY: builddirs
 builddirs:

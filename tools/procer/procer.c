@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <sys/stat.h>
+#include <unused.h>
 
 extern char **environ;
 
@@ -217,7 +218,7 @@ void Action_dependency_assign(void *value, void *data)
     }
 }
 
-void Action_start_all(void *value, void *data)
+void Action_start_all(void *value, UNUSED void *data)
 {
     Action *action = (Action *)value;
     Action_start(action);
@@ -242,7 +243,7 @@ void taskmain(int argc, char *argv[])
     dbg_set_log(stderr);
     glob_t profile_glob;
     int rc = 0;
-    int i = 0;
+    size_t i = 0;
     Action *action = NULL;
     tst_t *targets = NULL;
     bstring pid_file = NULL;

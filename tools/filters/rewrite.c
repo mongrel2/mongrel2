@@ -1,11 +1,12 @@
 #include <filter.h>
 #include <dbg.h>
 #include <tnetstrings.h>
+#include <unused.h>
 
 static struct tagbstring rewritePath=bsStatic("/proxy/");
 static struct tagbstring newPath=bsStatic("/");
 
-StateEvent filter_transition(StateEvent state, Connection *conn, tns_value_t *config)
+StateEvent filter_transition(StateEvent state, Connection *conn, UNUSED tns_value_t *config)
 {
 
     log_info("REWRITE: %s", bdata(conn->req->path));
@@ -52,7 +53,7 @@ StateEvent filter_transition(StateEvent state, Connection *conn, tns_value_t *co
 }
 
 
-StateEvent *filter_init(Server *srv, bstring load_path, int *out_nstates)
+StateEvent *filter_init(UNUSED Server *srv, UNUSED bstring load_path, int *out_nstates)
 {
     StateEvent states[] = {PROXY};
     *out_nstates = Filter_states_length(states);

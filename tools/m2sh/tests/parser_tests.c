@@ -39,10 +39,11 @@
 #include <stdio.h>
 #include <bstring.h>
 #include <assert.h>
+#include <unused.h>
 
 int CB_FIRED = 0;
 
-int check_callback(tst_t *parent, Value *val)
+int check_callback(UNUSED tst_t *parent, UNUSED Value *val)
 {
     assert(parent && "Should get a parent.");
     assert(val && "Should get a val.");

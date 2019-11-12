@@ -75,8 +75,8 @@ typedef struct Server {
     mbedtls_x509_crt ca_chain;
     mbedtls_pk_context pk_key;
     const int *ciphers;
-    char *dhm_P;
-    char *dhm_G;
+    const char *dhm_P;
+    const char *dhm_G;
 } Server;
 
 Server *Server_create(bstring uuid, bstring default_host,

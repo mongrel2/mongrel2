@@ -1,5 +1,6 @@
 #include <filter.h>
 #include <dbg.h>
+#include <unused.h>
 
 StateEvent filter_transition(StateEvent state, Connection *conn)
 {
@@ -8,7 +9,7 @@ StateEvent filter_transition(StateEvent state, Connection *conn)
 }
 
 
-StateEvent *filter_init(Server *srv, bstring load_path, int *out_nstates)
+StateEvent *filter_init(UNUSED Server *srv, UNUSED bstring load_path, int *out_nstates)
 {
     StateEvent states[] = {CONNECT};
     *out_nstates = Filter_states_length(states);

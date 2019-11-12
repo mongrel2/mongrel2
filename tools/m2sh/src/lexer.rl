@@ -120,6 +120,7 @@ tst_t *Parse_config_string(bstring content)
 {
     Token *temp = NULL;
     void *parser = ParseAlloc(malloc);
+    char *ts = NULL;
     check_mem(parser);
     ParserState state = {.settings = NULL, .error = 0, .line_number = 1};
 
@@ -128,7 +129,6 @@ tst_t *Parse_config_string(bstring content)
     char *eof = pe;
     int cs = -1;
     int act = -1;
-    char *ts = NULL;
     char *te = NULL;
 
     %% write init;
