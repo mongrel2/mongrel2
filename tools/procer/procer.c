@@ -40,11 +40,17 @@ static inline void Action_sleep(int sec)
 
 static inline void redirect_output(const char *run_log)
 {
-    freopen(run_log, "a+", stdout);
+    if(freopen(run_log, "a+", stdout) == NULL) {
+        log_err("Not fatal, but we couldn't redirect stdout to %s", run_log);
+    }
     setbuf(stdout, NULL);
-    freopen(run_log, "a+", stderr);
+    if(freopen(run_log, "a+", stderr) == NULL) {
+        log_err("Not fatal, but we couldn't redirect stderr to %s", run_log);
+    }
     setbuf(stdout, NULL);
-    freopen("/dev/null", "r", stdin);
+    if(freopen("/dev/null", "r", stdin) == NULL) {
+        log_err("Not fatal, but we couldn't redirect stdin to /dev/null");
+    }
 }
 
 
