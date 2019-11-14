@@ -177,11 +177,15 @@ static int run_server(struct ServerRun *r, tns_value_t *res)
     bstring command = bformat("%s mongrel2 %s %s %s",
             r->sudo, bdata(config), bdata(uuid), bdata(module));
 
-    system(bdata(command));
+    int ret = system(bdata(command));
 
     bdestroy(command);
     bdestroy(config);
     bdestroy(module);
+
+    check(ret != -1, "Failed to run mongrel2");
+    // return an error if the process exited and returned an exit status != 0
+    check(!WIFEXITED(ret) || WEXITSTATUS(ret) == 0, "Mongrel2 returned exit code %i", WEXITSTATUS(ret));
 
     r->ran = 1;
     return 0;
