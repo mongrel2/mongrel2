@@ -1234,7 +1234,7 @@ void Connection_task(void *v)
     }
 
 error: // fallthrough
-    if(conn->deliverTaskStatus == DT_RUNNING) {
+    if(conn->handler && conn->deliverTaskStatus == DT_RUNNING) {
         Connection_handler_notify_leave(conn);
     }
 
