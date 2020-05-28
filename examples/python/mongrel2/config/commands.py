@@ -16,7 +16,7 @@ def try_reading(reader):
         return cmd.split(' ')
 
     except UnicodeDecodeError:
-        print "\nERROR: Sorry, PyRepl and Python hate printing to your screen: UnicodeDecodeError."
+        print("\nERROR: Sorry, PyRepl and Python hate printing to your screen: UnicodeDecodeError.")
 
     return []
 
@@ -30,7 +30,7 @@ def shell_command():
         from pyrepl.unix_console import UnixConsole
         from pyrepl.historical_reader import HistoricalReader
     except:
-        print "You don't have PyRepl installed, shell not available."
+        print("You don't have PyRepl installed, shell not available.")
 
     reader = HistoricalReader(UnixConsole())
     reader.ps1 = "m2> "
@@ -45,13 +45,13 @@ def shell_command():
             if cmd:
                 try:
                     args.parse_and_run_command(cmd, mongrel2.config.commands)
-                except Exception, e:
-                    print "ERROR:", e
+                except Exception as e:
+                    print("ERROR:", e)
 
     except EOFError:
-        print "Bye."
+        print("Bye.")
     except KeyboardInterrupt:
-        print "BYE!"
+        print("BYE!")
 
 
 def help_command(**options):
@@ -68,13 +68,13 @@ def help_command(**options):
         help_text = args.help_for_command(config.commands, options['for'])
 
         if help_text:
-            print help_text
+            print(help_text)
         else:
             args.invalid_command_message(config.commands)
     else:
-        print "Available commands:\n"
-        print "\n".join(args.available_commands(config.commands))
-        print "\nUse config help -for <command> to find out more."
+        print("Available commands:\n")
+        print("\n".join(args.available_commands(config.commands)))
+        print("\nUse config help -for <command> to find out more.")
 
 
 def dump_command(db=None):
@@ -84,7 +84,7 @@ def dump_command(db=None):
         m2sh dump -db config.sqlite
     """
 
-    print "LOADING DB: ", db
+    print("LOADING DB: ", db)
 
     try:
         if not (os.path.isfile(db) and os.access(db, os.R_OK)):
@@ -94,17 +94,17 @@ def dump_command(db=None):
         servers = store.find(model.Server)
 
         for server in servers:
-            print server
+            print(server)
 
             for host in server.hosts:
-                print "\t", host
+                print("\t", host)
 
                 for route in host.routes:
-                    print "\t\t", route
+                    print("\t\t", route)
     except IOError:
-        print "%s not readable" % db
-    except OperationalError, exc:
-        print "SQLite error: %s" % exc
+        print("%s not readable" % db)
+    except OperationalError as exc:
+        print("SQLite error: %s" % exc)
 
 
 def uuid_command(hex=False):
@@ -118,9 +118,9 @@ def uuid_command(hex=False):
     more efficient but harder to read.
     """
     if hex:
-        print uuid4().hex
+        print(uuid4().hex)
     else:
-        print str(uuid4())
+        print(str(uuid4()))
 
 
 def servers_command(db=None):
@@ -130,21 +130,21 @@ def servers_command(db=None):
         m2sh servers -db config.sqlite
     """
     if not os.path.isfile(db):
-        print "ERROR: Cannot access database file %s" % db
+        print("ERROR: Cannot access database file %s" % db)
         return
 
     try:
         store = model.begin(db)
         servers = store.find(model.Server)
         for server in servers:
-            print "-------"
-            print server.name, server.default_host, server.uuid
+            print("-------")
+            print(server.name, server.default_host, server.uuid)
 
             for host in server.hosts:
-                print "\t", host.id, ':', host.name
+                print("\t", host.id, ':', host.name)
 
-    except OperationalError, exc:
-        print "SQLite error: %s" % exc
+    except OperationalError as exc:
+        print("SQLite error: %s" % exc)
 
 
 def hosts_command(db=None, uuid="", host="", name=""):
@@ -160,7 +160,7 @@ def hosts_command(db=None, uuid="", host="", name=""):
 
 
     if not (os.path.isfile(db) and os.access(db, os.R_OK)):
-        print "Cannot read database file %s" % db
+        print("Cannot read database file %s" % db)
         return
 
     try:
@@ -168,28 +168,28 @@ def hosts_command(db=None, uuid="", host="", name=""):
         results = None
 
         if uuid:
-            results = store.find(model.Server, model.Server.uuid == unicode(uuid))
+            results = store.find(model.Server, model.Server.uuid == str(uuid))
         elif host:
-            results = store.find(model.Server, model.Server.default_host == unicode(host))
+            results = store.find(model.Server, model.Server.default_host == str(host))
         elif name:
-            results = store.find(model.Server, model.Server.name == unicode(name))
+            results = store.find(model.Server, model.Server.name == str(name))
         else:
-            print "ERROR: Must give a -host or -uuid or -name."
+            print("ERROR: Must give a -host or -uuid or -name.")
             return
 
         if results.count():
             server = results[0]
             hosts = store.find(model.Host, model.Host.server_id == server.id)
             for host in hosts:
-                print "--------"
-                print host, ":"
+                print("--------")
+                print(host, ":")
                 for route in host.routes:
-                    print "\t", route.path, ':', route.target
+                    print("\t", route.path, ':', route.target)
             
         else:
-            print "No servers found."
-    except OperationalError, exc:
-        print "SQLite error: %s" % exc
+            print("No servers found.")
+    except OperationalError as exc:
+        print("SQLite error: %s" % exc)
 
 
 def init_command(db=None):
@@ -210,16 +210,16 @@ def init_command(db=None):
         model.store = None
 
     if os.path.isfile(db) and not os.access(db, os.W_OK):
-        print "Cannot access database file %s" % db
+        print("Cannot access database file %s" % db)
         return
 
     try:
         conn = sqlite3.connect(db)
-        conn.executescript(sql)
+        conn.executescript(sql.decode())
    
         commit_command(db=db, what="init_command", why=" ".join(sys.argv))
-    except OperationalError, exc:
-        print "Error: %s" % exc
+    except OperationalError as exc:
+        print("Error: %s" % exc)
 
 
 def load_command(db=None, config=None, clear=True):
@@ -234,7 +234,7 @@ def load_command(db=None, config=None, clear=True):
     import imp
 
     if not (os.path.isfile(db) and os.access(db, os.R_OK)):
-        print "Cannot access database file %s" % db
+        print("Cannot access database file %s" % db)
         return
 
     try:
@@ -243,10 +243,10 @@ def load_command(db=None, config=None, clear=True):
         imp.load_source('mongrel2_config_main', config)
 
         commit_command(db=db, what="load_command", why=" ".join(sys.argv))
-    except OperationalError, exc:
-        print "SQLite error: %s" % exc
-    except SyntaxError,exc:
-        print "Syntax error: %s" % exc
+    except OperationalError as exc:
+        print("SQLite error: %s" % exc)
+    except SyntaxError as exc:
+        print("Syntax error: %s" % exc)
 
 
 def config_command(db=None, config=None, clear=True):
@@ -282,17 +282,17 @@ def commit_command(db=None, what=None, why=None):
     import socket
 
     store = model.load_db("sqlite:" + db)
-    who = unicode(getpass.getuser())
+    who = str(getpass.getuser())
 
-    if who == u'root':
-        print "Commit from root eh?  Man, you're kind of a tool."
+    if who == 'root':
+        print("Commit from root eh?  Man, you're kind of a tool.")
 
     log = model.Log()
     log.who = who
-    log.what = unicode(what)
-    log.why = unicode(why)
-    log.location = unicode(socket.gethostname())
-    log.how = u'm2sh'
+    log.what = str(what)
+    log.why = str(why)
+    log.location = str(socket.gethostname())
+    log.how = 'm2sh'
 
     store.add(log)
     store.commit()
@@ -312,7 +312,7 @@ def log_command(db=None, count=20):
     logs = store.find(model.Log)
 
     for log in logs.order_by(model.Log.happened_at)[0:count]:
-        print log
+        print(log)
 
 
 def find_servers(db=None, uuid="", host="", name="", every=False):
@@ -326,19 +326,19 @@ def find_servers(db=None, uuid="", host="", name="", every=False):
     if every:
         servers = store.find(model.Server)
     elif uuid:
-        servers = store.find(model.Server, model.Server.uuid == unicode(uuid))
+        servers = store.find(model.Server, model.Server.uuid == str(uuid))
     elif host:
-        servers = store.find(model.Server, model.Server.default_host == unicode(host))
+        servers = store.find(model.Server, model.Server.default_host == str(host))
     elif name:
-        servers = store.find(model.Server, model.Server.name == unicode(name))
+        servers = store.find(model.Server, model.Server.name == str(name))
 
     if servers.count() > 1 and not every:
-        print "Not sure which server to run, what I found:"
-        print "NAME HOST UUID"
-        print "--------------"
+        print("Not sure which server to run, what I found:")
+        print("NAME HOST UUID")
+        print("--------------")
         for server in servers:
-            print server.name, server.default_host, server.uuid
-        print "* Use -every to run them all."
+            print(server.name, server.default_host, server.uuid)
+        print("* Use -every to run them all.")
         return []
     else:
         return servers
@@ -370,10 +370,10 @@ def start_command(db=None, uuid= "", host="", name="", sudo=False, every=False):
     servers = find_servers(db, uuid, host, name, every)
 
     if not servers or servers.count() == 0:
-        print 'No matching servers found, nothing launched'
+        print('No matching servers found, nothing launched')
     else:
         for server in servers:
-            print 'Launching server %s %s on port %d' % (server.name, server.uuid, server.port)
+            print('Launching server %s %s on port %d' % (server.name, server.uuid, server.port))
             os.system('%s mongrel2 %s %s' % (root_enabler, db, server.uuid))
 
 
@@ -439,13 +439,13 @@ def running_command(db=None, uuid="", host="", name="", every=False):
         if pid:
             try:
                 os.kill(pid, 0)
-                print "Found server %s %s RUNNING at PID %i" % (server.name,
+                print("Found server %s %s RUNNING at PID %i" % (server.name,
                                                                 server.uuid,
-                                                                pid)
+                                                                pid))
             except OSError:
-                print "Server %s %s NOT RUNNING at PID %i" % (server.name,
+                print("Server %s %s NOT RUNNING at PID %i" % (server.name,
                                                               server.uuid,
-                                                              pid)
+                                                              pid))
 
 
 def control_command(db=None, host="", name="", uuid=""):
@@ -466,20 +466,20 @@ def control_command(db=None, host="", name="", uuid=""):
         server = servers[0]
         CTX = zmq.Context()
 
-        results = store.find(model.Setting, model.Setting.key == unicode("control_port"))
+        results = store.find(model.Setting, model.Setting.key == str("control_port"))
         addr = results[0].value if results.count() > 1 else "ipc://run/control"
 
         ctl = CTX.socket(zmq.REQ)
 
-        print "CONNECTING to: %s in %s" % (addr, server.chroot)
+        print("CONNECTING to: %s in %s" % (addr, server.chroot))
         os.chdir(server.chroot)
         ctl.connect(addr)
 
         try:
             while True:
-                cmd = raw_input("> ")
-                ctl.send(cmd)
-                print ctl.recv()
+                cmd = input("> ")
+                ctl.send(cmd.encode())
+                print(ctl.recv())
 
         except EOFError:
             ctl.close()
@@ -489,9 +489,9 @@ def control_command(db=None, host="", name="", uuid=""):
 def get_server_pid(server):
     pid_file = os.path.realpath(server.chroot + server.pid_file)
     if not os.path.isfile(pid_file):
-        print "PID file %s not found for server %s %s" % (pid_file,
+        print("PID file %s not found for server %s %s" % (pid_file,
                                                           server.name,
-                                                          server.uuid)
+                                                          server.uuid))
         return None
     else:
         return int(open(pid_file, 'r').read())
@@ -502,7 +502,7 @@ def version_command():
     Prints out the version of your mongrel2 binary."
     """
 
-    print "Mongrel2/1.7.5"
+    print("Mongrel2/1.7.5")
 
 
 

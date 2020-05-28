@@ -1,5 +1,5 @@
 import os
-import ConfigParser
+import configparser
 
 def read_rc():
     rcbasename = '.m2shrc'
@@ -9,7 +9,7 @@ def read_rc():
     if not (os.path.isfile(rcfile) and os.access(rcfile, os.R_OK)):
         return {}
 
-    config = ConfigParser.SafeConfigParser()
+    config = configparser.SafeConfigParser()
     config.read(rcfile)
     args = config.items('m2sh')
 

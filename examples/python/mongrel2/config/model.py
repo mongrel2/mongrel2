@@ -48,11 +48,11 @@ def commit(servers, settings=None):
     if store.mongrel2_clear:
         store.commit()
     else:
-        print "Results won't be committed unless you begin(clear=True)."
+        print("Results won't be committed unless you begin(clear=True).")
 
     if settings:
-        for k,v in settings.items():
-            store.add(Setting(unicode(k), unicode(v)))
+        for k,v in list(settings.items()):
+            store.add(Setting(str(k), str(v)))
 
         store.commit()
 
@@ -68,22 +68,22 @@ class Server(object):
     name = Unicode()
     pid_file = Unicode()
     port = Int()
-    bind_addr = Unicode(default=unicode('0.0.0.0'))
+    bind_addr = Unicode(default=str('0.0.0.0'))
     use_ssl = Bool(default = 0)
 
     def __init__(self, uuid=None, access_log=None, error_log=None,
                  chroot=None, default_host=None, name=None, pid_file=None,
                  port=None, hosts=None, bind_addr='0.0.0.0', use_ssl=False):
         super(Server, self).__init__()
-        self.uuid = unicode(uuid)
-        self.access_log = unicode(access_log)
-        self.error_log = unicode(error_log)
-        self.chroot = unicode(chroot)
-        self.default_host = unicode(default_host)
-        self.name = unicode(name) if name else self.default_host
-        self.pid_file = unicode(pid_file)
+        self.uuid = str(uuid)
+        self.access_log = str(access_log)
+        self.error_log = str(error_log)
+        self.chroot = str(chroot)
+        self.default_host = str(default_host)
+        self.name = str(name) if name else self.default_host
+        self.pid_file = str(pid_file)
         self.port = port
-        self.bind_addr = unicode(bind_addr)
+        self.bind_addr = str(bind_addr)
         self.use_ssl = use_ssl
 
         for h in hosts or []:
@@ -108,12 +108,12 @@ class Host(object):
                  maintenance=False, routes=None):
         super(Host, self).__init__()
         self.server = server
-        self.name = unicode(name)
+        self.name = str(name)
         self.matching = matching or self.name
         self.maintenance = maintenance
 
         if routes:
-            for p,t in routes.items():
+            for p,t in list(routes.items()):
                 self.routes.add(Route(path=p, target=t))
 
 
@@ -134,17 +134,17 @@ class Handler(object):
     recv_spec = Unicode()
     recv_ident = Unicode()
     raw_payload = Bool(default = 0)
-    protocol = Unicode(default = unicode('json'))
+    protocol = Unicode(default = str('json'))
 
     def __init__(self, send_spec, send_ident, recv_spec, recv_ident,
                  raw_payload=False, protocol='json'):
         super(Handler, self).__init__()
-        self.send_spec = unicode(send_spec)
-        self.send_ident = unicode(send_ident)
-        self.recv_spec = unicode(recv_spec)
-        self.recv_ident = unicode(recv_ident)
+        self.send_spec = str(send_spec)
+        self.send_ident = str(send_ident)
+        self.recv_spec = str(recv_spec)
+        self.recv_ident = str(recv_ident)
         self.raw_payload = raw_payload
-        self.protocol = unicode(protocol)
+        self.protocol = str(protocol)
 
     def __repr__(self):
         return "Handler(send_spec=%r, send_ident=%r, recv_spec=%r, recv_ident=%r)" % (
@@ -161,7 +161,7 @@ class Proxy(object):
 
     def __init__(self, addr, port):
         super(Proxy, self).__init__()
-        self.addr = unicode(addr)
+        self.addr = str(addr)
         self.port = port
         
 
@@ -181,9 +181,9 @@ class Dir(object):
 
     def __init__(self, base, index_file, default_ctype="text/plain", cache_ttl=0):
         super(Dir, self).__init__()
-        self.base = unicode(base)
-        self.index_file = unicode(index_file)
-        self.default_ctype = unicode(default_ctype)
+        self.base = str(base)
+        self.index_file = str(index_file)
+        self.default_ctype = str(default_ctype)
         self.cache_ttl = cache_ttl
 
     def __repr__(self):
@@ -208,7 +208,7 @@ class Route(object):
 
     def __init__(self, path=None, reversed=False, host=None, target=None):
         super(Route, self).__init__()
-        self.path = unicode(path)
+        self.path = str(path)
         self.reversed = reversed
         self.host = host
 
@@ -216,7 +216,7 @@ class Route(object):
             store.add(target)
             store.commit()
             self.target_id = target.id
-            self.target_type = unicode(target.__class__.__name__.lower())
+            self.target_type = str(target.__class__.__name__.lower())
 
     def target_class(self):
         return self._targets[self.target_type]

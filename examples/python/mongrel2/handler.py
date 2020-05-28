@@ -15,7 +15,7 @@ def http_response(body, code, status, headers):
     payload = {'code': code, 'status': status, 'body': body}
     headers['Content-Length'] = len(body)
     payload['headers'] = "\r\n".join('%s: %s' % (k,v) for k,v in
-                                     headers.items())
+                                     list(headers.items()))
 
     return HTTP_FORMAT % payload
 
@@ -107,7 +107,7 @@ class Connection(object):
         internally.
         """
         header = "%s %d:%s," % (uuid, len(str(conn_id)), str(conn_id))
-        self.resp.send(header + ' ' + msg)
+        self.resp.send((header + ' ' + msg).encode())
 
 
     def reply(self, req, msg):
