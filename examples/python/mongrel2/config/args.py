@@ -216,8 +216,8 @@ def available_commands(mod, ending="_command"):
 
 def invalid_command_message(mod):
     """Called when you give an invalid command to print what you can use."""
-    print "You must specify a valid command.  Try these: "
-    print "\n".join(available_commands(mod))
+    print("You must specify a valid command.  Try these: ")
+    print("\n".join(available_commands(mod)))
 
 
 def parse_and_run_command(argv, mod, default_command=None):
@@ -229,8 +229,8 @@ def parse_and_run_command(argv, mod, default_command=None):
     """
     try:
         command, options = parse(argv)
-    except ArgumentError, e:
-        print "Parsing Error:", e
+    except ArgumentError as e:
+        print("Parsing Error:", e)
         return
 
     if not command and default_command:

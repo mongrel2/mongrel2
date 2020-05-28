@@ -23,6 +23,7 @@ class Request(object):
 
     @staticmethod
     def parse(msg):
+        msg = msg.decode()
         sender, conn_id, path, rest = msg.split(' ', 3)
         headers, rest = tnetstrings.parse(rest)
         body, _ = tnetstrings.parse(rest)
