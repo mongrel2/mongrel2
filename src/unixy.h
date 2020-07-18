@@ -38,7 +38,7 @@
 #include <bstring.h>
 #include <unistd.h>
 
-char *m2program;
+extern char *m2program;
 
 int Unixy_chroot(bstring path);
 
