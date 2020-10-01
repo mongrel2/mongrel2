@@ -8,7 +8,8 @@ Features
 --------
 
 * Language Agnostic with a simple backend protocol supporting 17 languages and
-  platforms all written by Mongrel2 fans.
+  platforms all written by Mongrel2 fans.  
+* Operations Friendly -You can control nearly every aspect of a Mongrel2 from any of the supported languages.
 * Modern Browser Friendly designed to handle HTTP, Flash XMLSockets, or
   WebSockets, Long Polling on the same socket transparently.
 * ZeroMQ Enabled as well as HTTP proxy support so it works with what you have
