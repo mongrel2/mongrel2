@@ -149,6 +149,14 @@ error:
     return -1;
 }
 
+#ifdef HAS_ARC4RANDOM
+static int arc4random_entropy_func(void *data, unsigned char * output, size_t len)
+{
+    arc4random_buf(output, len);
+    return 0;
+}
+#endif
+
 int Server_init_rng(Server *srv)
 {
     int rc;
@@ -171,7 +179,10 @@ int Server_init_rng(Server *srv)
         srv->rng_func = mbedtls_ctr_drbg_random;
         srv->rng_ctx = ctx;
     } else {
-#ifdef MBEDTLS_HAVEGE_C
+#ifdef HAS_ARC4RANDOM
+        srv->rng_func=arc4random_entropy_func;
+        srv->rng_ctx = NULL;
+#elif MBEDTLS_HAVEGE_C
         log_warn("entropy source unavailable. falling back to havege rng");
 
         ctx = calloc(sizeof(mbedtls_havege_state), 1);
@@ -180,7 +191,7 @@ int Server_init_rng(Server *srv)
         srv->rng_func = mbedtls_havege_random;
         srv->rng_ctx = ctx;
 #else
-	sentinel("No entropy source available, SSL is not possible (disable chroot?)\n");
+        sentinel("No entropy source available, SSL is not possible (disable chroot?)\n");
 #endif
     }
 

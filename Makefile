@@ -165,16 +165,19 @@ release: tarball
 netbsd: OPTFLAGS += -I/usr/local/include -I/usr/pkg/include
 netbsd: LDFLAGS += -L/usr/local/lib -L/usr/pkg/lib
 netbsd: LIBS=-lzmq -lsqlite3 $(LDFLAGS)
+netbsd: CFLAGS += -DHAS_ARC4RANDOM
 netbsd: dev
 
 
 freebsd: OPTFLAGS += -I/usr/local/include
 freebsd: LDFLAGS += -L/usr/local/lib -pthread
+freebsd: CFLAGS += -DHAS_ARC4RANDOM
 freebsd: all
 
 openbsd: OPTFLAGS += -I/usr/local/include
 openbsd: LDFLAGS += -L/usr/local/lib -pthread
 openbsd: LIBS=-lzmq -lsqlite3 $(LDFLAGS)
+openbsd: CFLAGS += -DHAS_ARC4RANDOM
 openbsd: all
 
 solaris: OPTFLAGS += -I/usr/local/include
@@ -185,8 +188,10 @@ solaris: all
 
 macports: OPTFLAGS += -I/opt/local/include
 macports: LDFLAGS += -L/opt/local/lib -undefined dynamic_lookup
+macports: CFLAGS += -DHAS_ARC4RANDOM
 macports: all
 
 brew: OPTFLAGS += -I/usr/local/include
 brew: LDFLAGS += -L/usr/local/lib -undefined dynamic_lookup
+brew: CFLAGS += -DHAS_ARC4RANDOM
 brew: all
