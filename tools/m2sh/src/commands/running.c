@@ -43,6 +43,8 @@
 #include <pattern.h>
 #include <register.h>
 
+#include <sys/wait.h>
+
 #include "../linenoise.h"
 #include "../commands.h"
 #include "../query_print.h"
