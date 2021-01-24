@@ -29,7 +29,7 @@ build/libm2sh.a: ${LIB_OBJ}
 
 build/m2sh: ../lemon/lemon ../../build/libm2.a ${OBJECTS}
 	mkdir -p build
-	$(CC) $(CFLAGS) -o build/m2sh ${OBJECTS} ../../build/libm2.a $(LIBS)
+	$(CC) $(CFLAGS) -o build/m2sh ${OBJECTS} ../../build/libm2.a $(LDFLAGS) $(LIBS)
 
 ../lemon/lemon: ../lemon/lemon.c
 	$(CC) -O2 ../lemon/lemon.c -o ../lemon/lemon
@@ -44,7 +44,7 @@ tests: build/libm2sh.a ${TESTS}
 	ragel -G2 $<
 
 $(TESTS): %: %.c build/libm2sh.a
-	$(CC) $(CFLAGS) -o $@ $< build/libm2sh.a ../../build/libm2.a $(LIBS)
+	$(CC) $(CFLAGS) -o $@ $< build/libm2sh.a ../../build/libm2.a $(LDFLAGS) $(LIBS)
 
 ../../build/libm2.a:
 	cd ../.. && make clean all
@@ -54,12 +54,3 @@ clean:
 
 pristine: clean
 	rm -f ../lemon/lemon
-
-netbsd: OPTFLAGS=-I/usr/local/include -I/usr/pkg/include
-netbsd: OPTLIBS=-L/usr/local/lib -L/usr/pkg/lib
-netbsd: dev
-
-freebsd: OPTFLAGS=-I/usr/local/include
-freebsd: OPTLIBS=-L/usr/local/lib
-freebsd: dev
-
