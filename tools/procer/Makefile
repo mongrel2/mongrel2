@@ -8,7 +8,7 @@ all: procer
 
 
 procer: ../../build/libm2.a ${OBJECTS}
-	$(CC) $(OPTFLAGS) $(OPTLIBS) -o $@ ${OBJECTS} ../../build/libm2.a ${LIBS}
+	$(CC) $(OPTFLAGS) $(OPTLIBS) -o $@ ${OBJECTS} ../../build/libm2.a $(LDFLAGS) ${LIBS}
 
 clean:
 	rm -f *.o procer
