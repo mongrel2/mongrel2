@@ -264,7 +264,7 @@ code in Mongrel2 to translate \ident{Host:} headers to \ident{Hosts} and URL pat
 
 Later on, you'll learn about the pattern matching that's used, but it's basically a stripped down version of your
 normal regular expressions, but with a few convenient syntaxes for doing simple string matching.  When you configure
-a route, you write something like \file{/images/(.*.jpg)} and the part before the `(' is used as a fast matched
+a route, you write something like \file{/images/(.*\char`\\.jpg)} and the part before the `(' is used as a fast matched
 prefix, while the part after it is considered a pattern to match.  When a request comes in, Mongrel2 quickly finds the
 longest prefix that matches the URL, and then tests its pattern if there is one.  If the pattern is valid, the
 request goes through.  If not, 404.
@@ -398,7 +398,7 @@ pattern.  If the pattern matches, then the route works.  If the route doesn't
 have a pattern, then it's assumed to match, and you're done.
 
 The only caveat is that you have to wrap your pattern parts in parenthesis, but these don't mean anything
-other than to delimit where a pattern starts.  So instead of \shell{/images/.*.jpg}, write \shell{/images/(.*.jpg)}
+other than to delimit where a pattern starts.  So instead of \shell{/images/.*\char`\\.jpg}, write \shell{/images/(.*\char`\\.jpg)}
 for it to work.
 
 Here's the list of characters you can use in your patterns:
@@ -465,10 +465,10 @@ Here are some example routes you can try to get a feel for the system:
 \begin{itemize}
 \item \verb|"/images/"|  This will just match any path that has /images/ in it without any patterns.
 \item \verb|"/"| The fastest possible route you can have.
-\item \verb|"/images/(.*.jpg)"| Match only requests for jpg images in the images directory.  Keep in mind that this
-    isn't actually looking in the directory, it's just matching the \ident{(.*.jpg)} pattern.
+\item \verb|"/images/(.*\.jpg)"| Match only requests for jpg images in the images directory.  Keep in mind that this
+    isn't actually looking in the directory, it's just matching the \ident{(.*\char`\\.jpg)} pattern.
 \item \verb|"/images/(\a-\-\d+\.jpg)"| A more complex example that matches a short sequence of 0 or more letters (remember -), then a dash
-    (\verb|\-| escapes the -), then 1 or long sequence of digits and finally a .jpg) with the \verb|\|. escaping the period.
+    (\verb|\-| escapes the -), then 1 or long sequence of digits and finally a .jpg) with the \verb|\.| escaping the period.
 \end{itemize}
 
 That should give the idea of how you can use them.  Notice also that I'm using the Python \verb|"blah"| string syntax which is
@@ -488,10 +488,10 @@ implemented.  Here's how Mongrel2 matches an incoming URL against routes you've
 given it:
 
 \begin{enumerate}
-\item Your configuration has a route for \verb|"/images/(.*.jpg)"| and \verb|"/users"|.
+\item Your configuration has a route for \verb|"/images/(.*\.jpg)"| and \verb|"/users"|.
 \item Mongrel2 loads these and converts them to PREFIX/PATTERN pairs.  For the first one
-    the PREFIX="images", PATTERN="(.*.jpg)".  For the second one, it's PREFIX="/users" and
-    PATTERN=None.
+    the \verb|PREFIX="images"|, \verb|PATTERN="(.*\.jpg)"|.  For the second one, it's
+    \verb|PREFIX="/users"| and \verb|PATTERN=None|.
 \item It stores these in the URL routes by their PREFIX, and there can be only one
     PREFIX at a time.  This means you can't put \verb|"/foo/(.*)"| and \verb|"/foo/"|
     in at the same time (that's always redundant anyway).

@@ -37,7 +37,7 @@ mongrel2 = Host(name="mongrel2.org", routes={
     r'/chat/': web_app_proxy,
     r'/': web_app_proxy,
     r'/tests/': test_directory,
-    r'/testsmulti/(.*.json)': test_directory,
+    r'/testsmulti/(.*\.json)': test_directory,
     r'/chatdemo/': chat_demo_dir,
     r'/static/': chat_demo_dir,
     r'/mp3stream': Handler(
