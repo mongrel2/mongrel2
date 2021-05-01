@@ -233,7 +233,11 @@ static inline bstring make_log_message(Request *req, const char *remote_addr,
     tns_render_string_prepend(&outbuf, b_temp);
     bdestroy(b_temp);
 
-    tns_render_string_prepend(&outbuf, req->target_host->name);
+    if (req->host_name != NULL) {
+        tns_render_string_prepend(&outbuf, req->host_name);
+    } else {
+        tns_render_string_prepend(&outbuf, req->target_host->name);
+    }
 
     tns_render_log_end(&outbuf);
 
