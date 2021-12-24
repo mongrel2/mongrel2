@@ -1,5 +1,5 @@
 { 
-    'template': 'features.html',
+    "template": "features.html",
     "contents": {
         "root": { "link": "/features/", "name": "Features" },
         "template": "features-post.html",

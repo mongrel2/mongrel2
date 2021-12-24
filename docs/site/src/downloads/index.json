@@ -1,5 +1,5 @@
 { 
-    'template': 'downloads.html',
+    "template": "downloads.html",
     "top": { "prev": "Home", "cur": "Downloads" },
 
     "releases": [
