@@ -1,5 +1,5 @@
 CFLAGS?=-g -O2
-CFLAGS += -Wall -Wextra -I./src -DNDEBUG -D_FILE_OFFSET_BITS=64 -pthread
+CFLAGS += -Wall -Wextra -Wno-implicit-fallthrough -Wno-unused-const-variable -I./src -DNDEBUG -D_FILE_OFFSET_BITS=64 -pthread
 CFLAGS += ${OPTFLAGS}
 LIBS+=-lzmq -ldl -lsqlite3 -lmbedtls -lmbedx509 -lmbedcrypto
 PREFIX?=/usr/local
