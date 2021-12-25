@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <sys/stat.h>
+#include <unused.h>
 
 extern char **environ;
 
@@ -39,11 +40,17 @@ static inline void Action_sleep(int sec)
 
 static inline void redirect_output(const char *run_log)
 {
-    freopen(run_log, "a+", stdout);
+    if(freopen(run_log, "a+", stdout) == NULL) {
+        log_err("Not fatal, but we couldn't redirect stdout to %s", run_log);
+    }
     setbuf(stdout, NULL);
-    freopen(run_log, "a+", stderr);
+    if(freopen(run_log, "a+", stderr) == NULL) {
+        log_err("Not fatal, but we couldn't redirect stderr to %s", run_log);
+    }
     setbuf(stdout, NULL);
-    freopen("/dev/null", "r", stdin);
+    if(freopen("/dev/null", "r", stdin) == NULL) {
+        log_err("Not fatal, but we couldn't redirect stdin to /dev/null");
+    }
 }
 
 
@@ -217,7 +224,7 @@ void Action_dependency_assign(void *value, void *data)
     }
 }
 
-void Action_start_all(void *value, void *data)
+void Action_start_all(void *value, UNUSED void *data)
 {
     Action *action = (Action *)value;
     Action_start(action);
@@ -242,7 +249,7 @@ void taskmain(int argc, char *argv[])
     dbg_set_log(stderr);
     glob_t profile_glob;
     int rc = 0;
-    int i = 0;
+    size_t i = 0;
     Action *action = NULL;
     tst_t *targets = NULL;
     bstring pid_file = NULL;

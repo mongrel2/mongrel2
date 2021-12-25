@@ -43,11 +43,14 @@
 #include <pattern.h>
 #include <register.h>
 
+#include <sys/wait.h>
+
 #include "../linenoise.h"
 #include "../commands.h"
 #include "../query_print.h"
 #include "logging.h"
 #include "running.h"
+#include <unused.h>
 
 struct ServerRun {
     int ran;
@@ -94,7 +97,7 @@ static inline int exec_server_operations(Command *cmd,
     run.murder = option(cmd, "murder", NULL) != NULL;
 
     int option_count = (every != NULL) + (name != NULL) + (host != NULL) + (uuid != NULL);
-    check(option_count == 1, "Just one please, not all of the options.");
+    check(option_count == 1, "You must give either --every, --name, --host, or --uuid");
 
     if(sudo) {
         run.sudo = biseqcstr(sudo, "") ? "sudo" : bdata(sudo);
@@ -115,7 +118,7 @@ static inline int exec_server_operations(Command *cmd,
         } else if(uuid) {
             res = DB_exec("SELECT %s FROM server where uuid = %Q", select, bdata(uuid));
         } else {
-            sentinel("You must give either -name, -uuid, or -host to start a server.");
+            sentinel("Well looks like you broke something, please report what you did to mongrel2.org.");
         }
 
         check(tns_get_type(res) == tns_tag_list,
@@ -176,11 +179,15 @@ static int run_server(struct ServerRun *r, tns_value_t *res)
     bstring command = bformat("%s mongrel2 %s %s %s",
             r->sudo, bdata(config), bdata(uuid), bdata(module));
 
-    system(bdata(command));
+    int ret = system(bdata(command));
 
     bdestroy(command);
     bdestroy(config);
     bdestroy(module);
+
+    check(ret != -1, "Failed to run mongrel2");
+    // return an error if the process exited and returned an exit status != 0
+    check(!WIFEXITED(ret) || WEXITSTATUS(ret) == 0, "Mongrel2 returned exit code %i", WEXITSTATUS(ret));
 
     r->ran = 1;
     return 0;
@@ -405,7 +412,7 @@ error:
     return NULL;
 }
 
-static void bstring_free(void *data, void *hint)
+static void bstring_free(UNUSED void *data, void *hint)
 {
     bdestroy((bstring)hint);
 }
@@ -610,7 +617,7 @@ int Command_control(Command *cmd)
     return exec_server_operations(cmd, control_server, "name, chroot");
 }
 
-static int run_command(bstring line, void *ignored)
+static int run_command(bstring line, UNUSED void *ignored)
 {
     bstring args = bformat("m2sh %s", bdata(line));
     int rc = Command_run(args);
@@ -619,7 +626,7 @@ static int run_command(bstring line, void *ignored)
     return rc;
 }
 
-int Command_shell(Command *cmd)
+int Command_shell(UNUSED Command *cmd)
 {
     return linenoise_runner("mongrel2> ", run_command, NULL);
 }

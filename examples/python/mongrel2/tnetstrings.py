@@ -2,7 +2,7 @@
 # minimum restrictions on types allowed in dictionaries.
 
 def dump(data):
-    if type(data) is long or type(data) is int:
+    if type(data) is int:
         out = str(data)
         return '%d:%s#' % (len(out), out)
     elif type(data) is float:
@@ -96,7 +96,7 @@ def parse_dict(data):
 
 def dump_dict(data):
     result = []
-    for k,v in data.items():
+    for k,v in list(data.items()):
         result.append(dump(str(k)))
         result.append(dump(v))
 

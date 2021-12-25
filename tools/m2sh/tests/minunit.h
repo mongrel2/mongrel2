@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <dbg.h>
 #include <stdlib.h>
+#include <unused.h>
 
 #define mu_suite_start() char *message = NULL
 
@@ -11,7 +12,7 @@
 #define mu_assert(test, message) if (!(test)) { log_err(message); return message; }
 #define mu_run_test(test) debug("\n-----%s", " " #test); message = test(); tests_run++; if (message) return message;
 
-#define RUN_TESTS(name) void taskmain(int argc, char *argv[]) {\
+#define RUN_TESTS(name) void taskmain(UNUSED int argc, char *argv[]) {\
      FILE *log_file = fopen("tests/tests.log", "a+");\
      if(!log_file) { printf("CAN'T OPEN TEST LOG\n"); exit(1); } \
      setbuf(log_file, NULL);\

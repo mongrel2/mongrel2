@@ -1,3 +1,73 @@
+Changes from 1.12.2 to 1.13.0
+-----------------------------
+
+* Fix helptext messages
+4be4a861
+
+* Changes to compile with gcc10
+    ebee2d99
+
+* Changes to fix builds on BSDs
+    c8af3538
+    c8ba8cf0
+
+* Make HAVEGE dependency optional
+    8a6db3be
+    00af3d3c
+
+* Website updates
+    786ac316
+
+* Python 3 support
+    df257a04
+
+* Prevent spurious leave notifications
+    677ffcf2
+
+* Fix crash in websocket support
+    945434ca
+    6c458d53
+
+* Address some warnings
+    eb95f7c4
+    72520957
+    71845ced
+    0a4e763a
+    1cb046a7
+    d68fb292
+    6943899e
+    f11270e1
+    8860740e
+    a1876145
+
+* M2SH: check for proper exit when running system() commands
+    7cc5b15e
+
+* Fix possible use of uninitialized variable
+    6c57fb63
+
+* Logging improvements (better consistency, runtime filtering)
+    300b7fa8
+    5c5fd46a
+    cd8bce0a
+    c28a0f08
+    274b1dd9
+
+Changes from 1.12.1 to 1.12.2
+-----------------------------
+
+* Disable some warnings that were spurious for ragel-generated files
+    fd3c6e6b
+
+* Fix bug in previous bugfix for incorrect content-length
+    67db18df
+
+Changes from 1.12.0 to 1.12.1
+-----------------------------
+
+* Fix to prevent crashing on large files
+    66caedbb
+
 Changes from 1.11.0 to 1.12.0
 -----------------------------
 

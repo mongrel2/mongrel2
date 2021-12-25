@@ -22,6 +22,7 @@ char *test_Server_create_destroy()
             bfromcstr("chroot"),
             bfromcstr("access_log"),
             bfromcstr("error_log"),
+            2,
             bfromcstr("pid_file"),
             NULL,
             0);
@@ -45,6 +46,7 @@ char *test_Server_adds()
             bfromcstr("chroot"),
             bfromcstr("access_log"),
             bfromcstr("error_log"),
+            2,
             bfromcstr("pid_file"),
             NULL,
             0);

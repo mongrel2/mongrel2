@@ -36,6 +36,7 @@
 #include "bstring.h"
 
 FILE *LOG_FILE = NULL;
+int LOG_LEVEL = LOG_LEVEL_INFO;
 
 void dbg_set_log(FILE *log_file)
 {
@@ -48,9 +49,24 @@ FILE *dbg_get_log()
     return LOG_FILE != NULL ? LOG_FILE : stderr;
 }
 
-void fprintf_with_timestamp(FILE *log_file, const char *format, ...)
+
+void dbg_set_log_level(int log_level)
+{
+    LOG_LEVEL = log_level;
+}
+
+
+int dbg_get_log_level()
+{
+    return LOG_LEVEL;
+}
+
+void write_log_message(FILE *log_file, int level, const char *format, ...)
 {
   va_list args;
+  if( level > LOG_LEVEL ) {
+    return;
+  }
   time_t now = time(NULL);
   bstring time_stamp = bStrfTime("%a, %d %b %Y %H:%M:%S GMT", gmtime(&now));
   va_start(args, format);

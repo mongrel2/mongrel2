@@ -1,7 +1,7 @@
 local tir = require 'tir.view'
 local markdown = require 'markdown'
 local posix = require 'posix'
-local json = require 'json'
+local json = require 'dkjson'
 local util = require 'tir.util'
 
 local RFC_822 = "%a, %d %b %Y %H:%M:%S %z"
@@ -24,15 +24,23 @@ function Generator:extract_target_name(template, in_name)
 end
 
 function Generator:load_template(data, in_name)
-    local newData = assert(json.decode(assert(Tir.load_file('./',self.global_data))))
+    local newData = assert(json.decode(assert(load_file('./',self.global_data))))
     for k,v in pairs(newData) do data[k] = v end
-    local template = Tir.view(data.template)
+    local template = view(data.template)
     return template, self:extract_target_name(data.template, in_name)
 end
 
 
 function Generator:load_data(in_name)
-    local input = assert(Tir.load_file(self.source, in_name))
+    local input = assert(load_file(self.source, in_name))
+    --[[
+    print("INPUT")
+    print(input)
+    print("----")
+    print("OUTPUT")
+    print(json.decode(input))
+    print("----")
+    ]]--
     local data = assert(json.decode(input))
     return data
 end
@@ -119,7 +127,7 @@ function Generator:render_contents(data, source, output)
 
         for _, path in ipairs(mdfiles) do
             local target = path:gsub(base_strip, "")
-            local content = Tir.load_file(self.source, target)
+            local content = load_file(self.source, target)
             data.contents = markdown(content)
             local out_name = nil
 

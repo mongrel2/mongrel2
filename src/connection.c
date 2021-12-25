@@ -1114,7 +1114,7 @@ error:
     if(keypath != NULL) bdestroy(keypath);
 
     // don't return error here. this way the ssl handshake continues and the
-    //   the default cert will get used instead
+    //   default cert will get used instead
     return 0;
 }
 
@@ -1234,7 +1234,7 @@ void Connection_task(void *v)
     }
 
 error: // fallthrough
-    if(conn->handler) {
+    if(conn->handler && conn->deliverTaskStatus == DT_RUNNING) {
         Connection_handler_notify_leave(conn);
     }
 
@@ -1326,7 +1326,6 @@ void Connection_deliver_task(void *v)
         msg.data=NULL;
     }
 error:
-    conn->handler = NULL; // we're shutting down, don't notify anything else
     conn->deliverTaskStatus=DT_DYING;
     tns_value_destroy(msg.data);
     while(!list_isempty(conn->deliverQueue)) {

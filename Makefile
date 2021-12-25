@@ -7,7 +7,8 @@ PREFIX?=/usr/local
 get_objs = $(addsuffix .o,$(basename $(wildcard $(1))))
 
 ASM=$(wildcard src/**/*.S src/*.S)
-RAGEL_TARGETS=src/state.c src/http11/http11_parser.c
+RAGEL_TARGETS=src/state.c src/http11/http11_parser.c src/handler_parser.c src/http11/httpclient_parser.c
+RAGEL_OBJECTS=$(patsubst %.c,%.o,${RAGEL_TARGETS})
 SOURCES=$(wildcard src/**/*.c src/*.c) $(RAGEL_TARGETS)
 OBJECTS=$(patsubst %.c,%.o,${SOURCES}) $(patsubst %.S,%.o,${ASM})
 OBJECTS_NOEXT=$(filter-out ${OBJECTS_EXTERNAL},${OBJECTS})
@@ -15,12 +16,13 @@ LIB_SRC=$(filter-out src/mongrel2.c,${SOURCES})
 LIB_OBJ=$(filter-out src/mongrel2.o,${OBJECTS})
 TEST_SRC=$(wildcard tests/*_tests.c)
 TESTS=$(patsubst %.c,%,${TEST_SRC})
-MAKEOPTS=OPTFLAGS="${CFLAGS} ${NOEXTCFLAGS} ${OPTFLAGS}" LIBS="${LIBS}" DESTDIR="${DESTDIR}" PREFIX="${PREFIX}"
+MAKEOPTS=OPTFLAGS="${CFLAGS} ${NOEXTCFLAGS} ${OPTFLAGS}" LDFLAGS="${LDFLAGS}" LIBS="${LIBS}" DESTDIR="${DESTDIR}" PREFIX="${PREFIX}"
 
 all: bin/mongrel2 tests m2sh procer
 
 ${OBJECTS_NOEXT}: CFLAGS += ${NOEXTCFLAGS}
 ${OBJECTS}: | builddirs
+$(RAGEL_OBJECTS): CFLAGS += -Wno-unused-const-variable -Wimplicit-fallthrough=0
 
 .PHONY: builddirs
 builddirs:
@@ -72,7 +74,7 @@ tests/config.sqlite: src/config/config.sql src/config/example.sql src/config/mim
 	sqlite3 $@ < src/config/mimetypes.sql
 
 $(TESTS): %: %.c build/libm2.a
-	$(CC) $(CFLAGS) -o $@ $< build/libm2.a $(LIBS)
+	$(CC) $(CFLAGS) -o $@ $< build/libm2.a $(LDFLAGS) $(LIBS)
 
 src/state.c: src/state.rl src/state_machine.rl
 src/http11/http11_parser.c: src/http11/http11_parser.rl
@@ -163,17 +165,19 @@ release: tarball
 netbsd: OPTFLAGS += -I/usr/local/include -I/usr/pkg/include
 netbsd: LDFLAGS += -L/usr/local/lib -L/usr/pkg/lib
 netbsd: LIBS=-lzmq -lsqlite3 $(LDFLAGS)
+netbsd: CFLAGS += -DHAS_ARC4RANDOM
 netbsd: dev
 
 
 freebsd: OPTFLAGS += -I/usr/local/include
 freebsd: LDFLAGS += -L/usr/local/lib -pthread
-freebsd: LIBS=-lzmq -lsqlite3 $(LDFLAGS)
+freebsd: CFLAGS += -DHAS_ARC4RANDOM
 freebsd: all
 
 openbsd: OPTFLAGS += -I/usr/local/include
 openbsd: LDFLAGS += -L/usr/local/lib -pthread
 openbsd: LIBS=-lzmq -lsqlite3 $(LDFLAGS)
+openbsd: CFLAGS += -DHAS_ARC4RANDOM
 openbsd: all
 
 solaris: OPTFLAGS += -I/usr/local/include
@@ -184,8 +188,10 @@ solaris: all
 
 macports: OPTFLAGS += -I/opt/local/include
 macports: LDFLAGS += -L/opt/local/lib -undefined dynamic_lookup
+macports: CFLAGS += -DHAS_ARC4RANDOM
 macports: all
 
 brew: OPTFLAGS += -I/usr/local/include
 brew: LDFLAGS += -L/usr/local/lib -undefined dynamic_lookup
+brew: CFLAGS += -DHAS_ARC4RANDOM
 brew: all

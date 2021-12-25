@@ -37,6 +37,7 @@
 #include <dbg.h>
 #include <assert.h>
 #include <tnetstrings_impl.h>
+#include <unused.h>
 
 Value *Value_create(ValueType type, void *data) {
     Value *val = malloc(sizeof(Value));
@@ -249,7 +250,7 @@ static void AST_destroy_value(Value *val)
     free(val);
 }
 
-static void AST_destroy_cb(void *value, void *data)
+static void AST_destroy_cb(void *value, UNUSED void *data)
 {
     Pair *pair = (Pair *)value;
 

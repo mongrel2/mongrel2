@@ -1,8 +1,9 @@
 #include <filter.h>
 #include <dbg.h>
 #include <tnetstrings.h>
+#include <unused.h>
 
-StateEvent filter_transition(StateEvent state, Connection *conn, tns_value_t *config)
+StateEvent filter_transition(UNUSED StateEvent state, UNUSED Connection *conn, tns_value_t *config)
 {
     size_t len = 0;
     char *data = tns_render(config, &len);
@@ -17,7 +18,7 @@ StateEvent filter_transition(StateEvent state, Connection *conn, tns_value_t *co
 }
 
 
-StateEvent *filter_init(Server *srv, bstring load_path, int *out_nstates)
+StateEvent *filter_init(UNUSED Server *srv, UNUSED bstring load_path, int *out_nstates)
 {
     StateEvent states[] = {HANDLER, PROXY};
     *out_nstates = Filter_states_length(states);
