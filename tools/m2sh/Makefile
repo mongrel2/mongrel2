@@ -10,7 +10,7 @@ LIB_SRC=$(filter-out src/m2sh.c,${SOURCES})
 LIB_OBJ=$(filter-out src/m2sh.o,${OBJECTS})
 RAGEL_OBJECTS=src/lexer.o src/cli.o
 
-$(RAGEL_OBJECTS): CFLAGS += -Wno-unused-const-variable -Wimplicit-fallthrough=0 -Wno-unused-parameter
+$(RAGEL_OBJECTS): CFLAGS += -Wno-unused-parameter
 
 all: ../lemon/lemon tests build/m2sh
 
@@ -20,7 +20,7 @@ dev: all
 install: build/m2sh
 	install build/m2sh ${DESTDIR}${PREFIX}/bin
 
-src/parser.o: CFLAGS += -Wno-unused-const-variable -Wno-unused-parameter
+src/parser.o: CFLAGS += -Wno-unused-parameter
 
 build/libm2sh.a: ${LIB_OBJ}
 	mkdir -p build
