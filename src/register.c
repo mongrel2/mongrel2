@@ -48,12 +48,15 @@
 #include "adt/darray.h"
 #include "setting.h"
 #include "adt/radixmap.h"
+#include "stats.h"
 
 uint32_t THE_CURRENT_TIME_IS = 0;
 
 static darray_t *REGISTRATIONS = NULL;
 static RadixMap *REG_ID_TO_FD = NULL;
 static int NUM_REG_FD = 0;
+
+extern Statistics collector_stats;
 
 void Register_init()
 {
@@ -279,6 +282,18 @@ tns_value_t *Register_info()
     }
 
     return tns_standard_table(&REGISTER_HEADERS, rows);
+}
+
+struct tagbstring COLLECT_HEADERS = bsStatic("18:14:events_written,]");
+
+tns_value_t *Register_collect()
+{
+    tns_value_t *rows = tns_new_list();
+    tns_value_t *data = tns_new_list();
+    tns_add_to_list(data, tns_new_integer(collector_stats.event_counter));
+    tns_add_to_list(rows, data);
+
+    return tns_standard_table(&COLLECT_HEADERS, rows);
 }
 
 int Register_cleanout()

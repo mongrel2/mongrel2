@@ -303,8 +303,11 @@ tns_value_t *status_cb(bstring name, hash_t *args)
     } else if(biseqcstr(what, "net")) {
         tns_value_destroy(result);
         return Register_info();
+    } else if(biseqcstr(what, "collector")) {
+        tns_value_destroy(result);
+        return Register_collect();
     } else {
-        bstring err = bfromcstr("Expected argument what=['net'|'tasks'].");
+        bstring err = bfromcstr("Expected argument what=['net'|'tasks'|'collector'].");
         tns_dict_setcstr(result, "error", tns_parse_string(bdata(err), blength(err)));
         bdestroy(err);
     }
