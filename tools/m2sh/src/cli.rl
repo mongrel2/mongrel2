@@ -44,8 +44,12 @@
 #include "ast.h"
 #include <stdlib.h>
 
-#define TKBASE(N, S, E) temp = Token_create(TK##N, S, (int)(E - S));\
-    fsm->tokens[fsm->token_count++] = temp;
+#define TKBASE(N, S, E)\
+    if ( fsm->token_count < MAX_TOKENS ) {\
+        temp = Token_create(TK##N, S, (int)(E - S));\
+        fsm->tokens[fsm->token_count] = temp;\
+    }\
+    fsm->token_count++;
 
 #define TK(N) TKBASE(N, fsm->ts, fsm->te)
 #define TKSTR(N) TKBASE(N, fsm->ts+1, fsm->te-3)
@@ -97,6 +101,8 @@ void cli_params_execute( struct params *fsm, bstring data)
 
 int cli_params_finish( struct params *fsm )
 {
+	if ( fsm->token_count > MAX_TOKENS )
+		return -2;
 	if ( fsm->cs == params_error )
 		return -1;
 	if ( fsm->cs >= params_first_final )
@@ -184,7 +190,7 @@ static inline int Command_parse(struct params *p, Command *cmd)
     int next = 0;
 
     // TODO: refactor this, but for now command takes over the tokens until it's done
-    memcpy(cmd->tokens, p->tokens, MAX_TOKENS);
+    memcpy(cmd->tokens, p->tokens, sizeof(cmd->tokens));
     cmd->token_count = p->token_count;
 
     cmd->options = hash_create(HASHCOUNT_T_MAX, 0, 0);
