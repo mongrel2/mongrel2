@@ -182,7 +182,7 @@ int Server_init_rng(Server *srv)
 #ifdef HAS_ARC4RANDOM
         srv->rng_func=arc4random_entropy_func;
         srv->rng_ctx = NULL;
-#elif MBEDTLS_HAVEGE_C
+#elif defined(MBEDTLS_HAVEGE_C)
         log_warn("entropy source unavailable. falling back to havege rng");
 
         ctx = calloc(sizeof(mbedtls_havege_state), 1);
